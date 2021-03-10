@@ -266,8 +266,8 @@ struct Sparam_defer
 
 struct AIR_Traits_clear_stack
   {
-    // `Uparam` is unused.
-    // `Sparam` is unused.
+    // `up` is unused.
+    // `sp` is unused.
 
     static
     AIR_Status
@@ -280,8 +280,8 @@ struct AIR_Traits_clear_stack
 
 struct AIR_Traits_execute_block
   {
-    // `Uparam` is unused.
-    // `Sparam` is the solidified body.
+    // `up` is unused.
+    // `sp` is the solidified body.
 
     static
     AVMC_Queue
@@ -302,8 +302,8 @@ struct AIR_Traits_execute_block
 
 struct AIR_Traits_declare_variable
   {
-    // `Uparam` is unused.
-    // `Sparam` is the source location and name;
+    // `up` is unused.
+    // `sp` is the source location and name;
 
     static
     const Source_Location&
@@ -345,8 +345,8 @@ struct AIR_Traits_declare_variable
 
 struct AIR_Traits_initialize_variable
   {
-    // `Uparam` is `immutable`.
-    // `Sparam` is unused.
+    // `up` is `immutable`.
+    // `sp` is unused.
 
     static
     const Source_Location&
@@ -386,8 +386,8 @@ struct AIR_Traits_initialize_variable
 
 struct AIR_Traits_if_statement
   {
-    // `Uparam` is `negative`.
-    // `Sparam` is the two branches.
+    // `up` is `negative`.
+    // `sp` is the two branches.
 
     static
     AVMC_Queue::Uparam
@@ -425,8 +425,8 @@ struct AIR_Traits_if_statement
 
 struct AIR_Traits_switch_statement
   {
-    // `Uparam` is unused.
-    // `Sparam` is ... everything.
+    // `up` is unused.
+    // `sp` is ... everything.
 
     static
     Sparam_switch
@@ -512,8 +512,8 @@ struct AIR_Traits_switch_statement
 
 struct AIR_Traits_do_while_statement
   {
-    // `Uparam` is `negative`.
-    // `Sparam` is the loop body and condition.
+    // `up` is `negative`.
+    // `sp` is the loop body and condition.
 
     static
     AVMC_Queue::Uparam
@@ -561,8 +561,8 @@ struct AIR_Traits_do_while_statement
 
 struct AIR_Traits_while_statement
   {
-    // `Uparam` is `negative`.
-    // `Sparam` is the condition and loop body.
+    // `up` is `negative`.
+    // `sp` is the condition and loop body.
 
     static
     AVMC_Queue::Uparam
@@ -610,8 +610,8 @@ struct AIR_Traits_while_statement
 
 struct AIR_Traits_for_each_statement
   {
-    // `Uparam` is unused.
-    // `Sparam` is ... everything.
+    // `up` is unused.
+    // `sp` is ... everything.
 
     static
     Sparam_for_each
@@ -716,8 +716,8 @@ struct AIR_Traits_for_each_statement
 
 struct AIR_Traits_for_statement
   {
-    // `Uparam` is unused.
-    // `Sparam` is ... everything.
+    // `up` is unused.
+    // `sp` is ... everything.
 
     static
     Sparam_queues_4
@@ -773,8 +773,8 @@ struct AIR_Traits_for_statement
 
 struct AIR_Traits_try_statement
   {
-    // `Uparam` is unused.
-    // `Sparam` is ... everything.
+    // `up` is unused.
+    // `sp` is ... everything.
 
     static
     Sparam_try_catch
@@ -856,8 +856,8 @@ struct AIR_Traits_try_statement
 
 struct AIR_Traits_throw_statement
   {
-    // `Uparam` is unused.
-    // `Sparam` is the source location.
+    // `up` is unused.
+    // `sp` is the source location.
 
     static
     Source_Location
@@ -880,8 +880,8 @@ struct AIR_Traits_throw_statement
 
 struct AIR_Traits_assert_statement
   {
-    // `Uparam` is `negative`.
-    // `Sparam` is the source location.
+    // `up` is `negative`.
+    // `sp` is the source location.
 
     static
     AVMC_Queue::Uparam
@@ -919,8 +919,8 @@ struct AIR_Traits_assert_statement
 
 struct AIR_Traits_return_statement
   {
-    // `Uparam` is `status`.
-    // `Sparam` is unused.
+    // `up` is `status`.
+    // `sp` is unused.
 
     static
     AVMC_Queue::Uparam
@@ -945,8 +945,8 @@ struct AIR_Traits_return_statement
 
 struct AIR_Traits_glvalue_to_prvalue
   {
-    // `Uparam` is unused.
-    // `Sparam` is unused.
+    // `up` is unused.
+    // `sp` is unused.
 
     static
     const Source_Location&
@@ -969,8 +969,8 @@ struct AIR_Traits_glvalue_to_prvalue
 
 struct AIR_Traits_push_immediate_null
   {
-    // `Uparam` is unused.
-    // `Sparam` is unused.
+    // `up` is unused.
+    // `sp` is unused.
 
     static
     AIR_Status
@@ -985,8 +985,8 @@ struct AIR_Traits_push_immediate_null
 
 struct AIR_Traits_push_immediate_boolean
   {
-    // `Uparam` is the value to push.
-    // `Sparam` is unused.
+    // `up` is the value to push.
+    // `sp` is unused.
 
     static
     AVMC_Queue::Uparam
@@ -1018,8 +1018,8 @@ do_is_int48(int64_t value)
 
 struct AIR_Traits_push_immediate_int48
   {
-    // `Uparam` is the value to push.
-    // `Sparam` is unused.
+    // `up` is the value to push.
+    // `sp` is unused.
 
     static
     AVMC_Queue::Uparam
@@ -1052,8 +1052,8 @@ struct AIR_Traits_push_immediate_int48
 
 struct AIR_Traits_push_immediate_generic
   {
-    // `Uparam` is unused.
-    // `Sparam` is the value to push.
+    // `up` is unused.
+    // `sp` is the value to push.
 
     static
     Value
@@ -1075,8 +1075,8 @@ struct AIR_Traits_push_immediate_generic
 
 struct AIR_Traits_push_global_reference
   {
-    // `Uparam` is unused.
-    // `Sparam` is the source location and name;
+    // `up` is unused.
+    // `sp` is the source location and name;
 
     static
     const Source_Location&
@@ -1112,8 +1112,8 @@ struct AIR_Traits_push_global_reference
 
 struct AIR_Traits_push_local_reference
   {
-    // `Uparam` is the depth.
-    // `Sparam` is the source location and name;
+    // `up` is the depth.
+    // `sp` is the source location and name;
 
     static
     const Source_Location&
@@ -1168,8 +1168,8 @@ struct AIR_Traits_push_local_reference
 
 struct AIR_Traits_push_bound_reference
   {
-    // `Uparam` is unused.
-    // `Sparam` is the reference to push.
+    // `up` is unused.
+    // `sp` is the reference to push.
 
     static
     Reference
@@ -1190,8 +1190,8 @@ struct AIR_Traits_push_bound_reference
 
 struct AIR_Traits_define_function
   {
-    // `Uparam` is unused.
-    // `Sparam` is ... everything.
+    // `up` is unused.
+    // `sp` is ... everything.
 
     static
     Sparam_func
@@ -1224,8 +1224,8 @@ struct AIR_Traits_define_function
 
 struct AIR_Traits_branch_expression
   {
-    // `Uparam` is `assign`.
-    // `Sparam` is the branches.
+    // `up` is `assign`.
+    // `sp` is the branches.
 
     static
     const Source_Location&
@@ -1270,8 +1270,8 @@ struct AIR_Traits_branch_expression
 
 struct AIR_Traits_coalescence
   {
-    // `Uparam` is `assign`.
-    // `Sparam` is the null branch.
+    // `up` is `assign`.
+    // `sp` is the null branch.
 
     static
     const Source_Location&
@@ -1383,8 +1383,8 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
 
 struct AIR_Traits_function_call
   {
-    // `Uparam` is `nargs` and `ptc`.
-    // `Sparam` is the source location.
+    // `up` is `nargs` and `ptc`.
+    // `sp` is the source location.
 
     static
     const Source_Location&
@@ -1438,8 +1438,8 @@ struct AIR_Traits_function_call
 
 struct AIR_Traits_member_access
   {
-    // `Uparam` is unused.
-    // `Sparam` is the name.
+    // `up` is unused.
+    // `sp` is the name.
 
     static
     const Source_Location&
@@ -1468,8 +1468,8 @@ struct AIR_Traits_member_access
 
 struct AIR_Traits_push_unnamed_array
   {
-    // `Uparam` is `nelems`.
-    // `Sparam` is unused.
+    // `up` is `nelems`.
+    // `sp` is unused.
 
     static
     const Source_Location&
@@ -1509,8 +1509,8 @@ struct AIR_Traits_push_unnamed_array
 
 struct AIR_Traits_push_unnamed_object
   {
-    // `Uparam` is unused.
-    // `Sparam` is the list of keys.
+    // `up` is unused.
+    // `sp` is the list of keys.
 
     static
     const Source_Location&
@@ -1547,28 +1547,6 @@ struct AIR_Traits_push_unnamed_object
       }
   };
 
-struct AIR_Traits_apply_operator_common
-  {
-    // `Uparam` is `assign`.
-    // `Sparam` is unused.
-
-    static
-    const Source_Location&
-    get_symbols(const AIR_Node::S_apply_operator& altr)
-      {
-        return altr.sloc;
-      }
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.p8[0] = altr.assign;
-        return up;
-      }
-  };
-
 enum : uint32_t
   {
     tmask_null      = UINT32_C(1) << type_null,
@@ -1601,11 +1579,21 @@ do_icast(double value)
     return static_cast<int64_t>(value);
   }
 
-struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_inc_post
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
@@ -1641,11 +1629,21 @@ struct AIR_Traits_apply_operator_inc_post : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_dec_post
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
@@ -1681,11 +1679,21 @@ struct AIR_Traits_apply_operator_dec_post : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_subscr
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is binary.
         const auto& rhs = ctx.stack().back().dereference_readonly();
@@ -1713,22 +1721,59 @@ struct AIR_Traits_apply_operator_subscr : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_pos : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_pos
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        // This operator is unary. `assign` is ignored.
-        // Copy the operand to create a temporary value.
+        // This operator is unary.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().mut_back().mutate_into_temporary();
+        do_get_first_operand(ctx.stack(), up.p8[0]);  // assign
         return air_status_next;
       }
   };
 
-struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_neg
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -1764,8 +1809,27 @@ struct AIR_Traits_apply_operator_neg : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_notb
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -1804,8 +1868,27 @@ struct AIR_Traits_apply_operator_notb : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_notl
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -1820,11 +1903,21 @@ struct AIR_Traits_apply_operator_notl : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_inc_pre
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
         auto& rhs = ctx.stack().back().dereference_mutable();
@@ -1857,11 +1950,21 @@ struct AIR_Traits_apply_operator_inc_pre : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_dec_pre
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
         auto& rhs = ctx.stack().back().dereference_mutable();
@@ -1894,11 +1997,21 @@ struct AIR_Traits_apply_operator_dec_pre : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_unset : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_unset
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
         // Unset the reference and store the result as a temporary.
@@ -1908,8 +2021,27 @@ struct AIR_Traits_apply_operator_unset : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_countof
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -1950,8 +2082,27 @@ struct AIR_Traits_apply_operator_countof : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_typeof
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -1966,8 +2117,27 @@ struct AIR_Traits_apply_operator_typeof : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_sqrt
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -1996,8 +2166,27 @@ struct AIR_Traits_apply_operator_sqrt : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_isnan
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2027,8 +2216,27 @@ struct AIR_Traits_apply_operator_isnan : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_isinf
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2058,8 +2266,27 @@ struct AIR_Traits_apply_operator_isinf : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_abs
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2095,8 +2322,27 @@ struct AIR_Traits_apply_operator_abs : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_sign
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2125,8 +2371,27 @@ struct AIR_Traits_apply_operator_sign : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_round
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2153,8 +2418,27 @@ struct AIR_Traits_apply_operator_round : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_floor
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2181,8 +2465,27 @@ struct AIR_Traits_apply_operator_floor : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_ceil
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2209,8 +2512,27 @@ struct AIR_Traits_apply_operator_ceil : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_trunc
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2237,8 +2559,27 @@ struct AIR_Traits_apply_operator_trunc : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_iround
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2265,8 +2606,27 @@ struct AIR_Traits_apply_operator_iround : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_ifloor
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2293,8 +2653,27 @@ struct AIR_Traits_apply_operator_ifloor : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_iceil
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2321,8 +2700,27 @@ struct AIR_Traits_apply_operator_iceil : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_itrunc
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2349,8 +2747,27 @@ struct AIR_Traits_apply_operator_itrunc : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_eq
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2368,8 +2785,27 @@ struct AIR_Traits_apply_operator_cmp_eq : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_ne
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2387,8 +2823,27 @@ struct AIR_Traits_apply_operator_cmp_ne : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_lt
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2410,8 +2865,27 @@ struct AIR_Traits_apply_operator_cmp_lt : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_gt
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2433,8 +2907,27 @@ struct AIR_Traits_apply_operator_cmp_gt : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_lte
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2456,8 +2949,27 @@ struct AIR_Traits_apply_operator_cmp_lte : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_gte
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2479,8 +2991,27 @@ struct AIR_Traits_apply_operator_cmp_gte : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_cmp_3way
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2516,8 +3047,27 @@ struct AIR_Traits_apply_operator_cmp_3way : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_add
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2575,8 +3125,27 @@ struct AIR_Traits_apply_operator_add : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_sub
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2626,8 +3195,27 @@ struct AIR_Traits_apply_operator_sub : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_mul
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2724,8 +3312,27 @@ struct AIR_Traits_apply_operator_mul : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_div
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2771,8 +3378,27 @@ struct AIR_Traits_apply_operator_div : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_mod
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2818,8 +3444,27 @@ struct AIR_Traits_apply_operator_mod : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_sll
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2880,8 +3525,27 @@ struct AIR_Traits_apply_operator_sll : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_srl
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -2942,8 +3606,27 @@ struct AIR_Traits_apply_operator_srl : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_sla
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -3013,8 +3696,27 @@ struct AIR_Traits_apply_operator_sla : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_sra
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -3072,8 +3774,27 @@ struct AIR_Traits_apply_operator_sra : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_andb
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -3125,8 +3846,27 @@ struct AIR_Traits_apply_operator_andb : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_orb
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -3179,8 +3919,27 @@ struct AIR_Traits_apply_operator_orb : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_xorb
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -3233,11 +3992,21 @@ struct AIR_Traits_apply_operator_xorb : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_assign : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_assign
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is binary. `assign` is ignored.
         do_simple_assign_value_common(ctx);
@@ -3245,8 +4014,27 @@ struct AIR_Traits_apply_operator_assign : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_fma
   {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.p8[0] = altr.assign;
+        return up;
+      }
+
     static
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
@@ -3279,11 +4067,21 @@ struct AIR_Traits_apply_operator_fma : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_head : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_head
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is binary. `assign` is ignored.
         ctx.stack().mut_back().zoom_in(Reference::M_array_head());
@@ -3291,11 +4089,21 @@ struct AIR_Traits_apply_operator_head : AIR_Traits_apply_operator_common
       }
   };
 
-struct AIR_Traits_apply_operator_tail : AIR_Traits_apply_operator_common
+struct AIR_Traits_apply_operator_tail
   {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx)
       {
         // This operator is binary. `assign` is ignored.
         ctx.stack().mut_back().zoom_in(Reference::M_array_tail());
@@ -3305,8 +4113,8 @@ struct AIR_Traits_apply_operator_tail : AIR_Traits_apply_operator_common
 
 struct AIR_Traits_unpack_struct_array
   {
-    // `Uparam` is `immutable` and `nelems`.
-    // `Sparam` is unused.
+    // `up` is `immutable` and `nelems`.
+    // `sp` is unused.
 
     static
     const Source_Location&
@@ -3363,8 +4171,8 @@ struct AIR_Traits_unpack_struct_array
 
 struct AIR_Traits_unpack_struct_object
   {
-    // `Uparam` is `immutable`.
-    // `Sparam` is the list of keys.
+    // `up` is `immutable`.
+    // `sp` is the list of keys.
 
     static
     AVMC_Queue::Uparam
@@ -3427,8 +4235,8 @@ struct AIR_Traits_unpack_struct_object
 
 struct AIR_Traits_define_null_variable
   {
-    // `Uparam` is `immutable`.
-    // `Sparam` is the source location and name.
+    // `up` is `immutable`.
+    // `sp` is the source location and name.
 
     static
     AVMC_Queue::Uparam
@@ -3481,8 +4289,8 @@ struct AIR_Traits_define_null_variable
 
 struct AIR_Traits_single_step_trap
   {
-    // `Uparam` is unused.
-    // `Sparam` is the source location.
+    // `up` is unused.
+    // `sp` is the source location.
 
     static
     const Source_Location&
@@ -3511,8 +4319,8 @@ struct AIR_Traits_single_step_trap
 
 struct AIR_Traits_variadic_call
   {
-    // `Uparam` is `ptc`.
-    // `Sparam` is the source location.
+    // `up` is `ptc`.
+    // `sp` is the source location.
 
     static
     const Source_Location&
@@ -3635,8 +4443,8 @@ struct AIR_Traits_variadic_call
 
 struct AIR_Traits_defer_expression
   {
-    // `Uparam` is unused.
-    // `Sparam` is the source location and body.
+    // `up` is unused.
+    // `sp` is the source location and body.
 
     static
     const Source_Location&
@@ -3676,8 +4484,8 @@ struct AIR_Traits_defer_expression
 
 struct AIR_Traits_import_call
   {
-    // `Uparam` is `nargs`.
-    // `Sparam` is the source location and compiler options.
+    // `up` is `nargs`.
+    // `sp` is the source location and compiler options.
 
     static
     const Source_Location&
@@ -3780,8 +4588,8 @@ struct AIR_Traits_import_call
 
 struct AIR_Traits_break_or_continue
   {
-    // `Uparam` is `status`.
-    // `Sparam` is the source location.
+    // `up` is `status`.
+    // `sp` is the source location.
 
     static
     AVMC_Queue::Uparam
@@ -3819,8 +4627,8 @@ struct AIR_Traits_break_or_continue
 
 struct AIR_Traits_declare_reference
   {
-    // `Uparam` is unused.
-    // `Sparam` is the name;
+    // `up` is unused.
+    // `sp` is the name;
 
     static
     Sparam_name
@@ -3843,8 +4651,8 @@ struct AIR_Traits_declare_reference
 
 struct AIR_Traits_initialize_reference
   {
-    // `Uparam` is unused.
-    // `Sparam` is the name;
+    // `up` is unused.
+    // `sp` is the name;
 
     static
     const Source_Location&
