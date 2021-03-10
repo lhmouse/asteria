@@ -4735,73 +4735,108 @@ struct has_sparam<TraitsT, NodeT,
   : ::std::true_type
   { };
 
-template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::true_type /*has_uparam*/, ::std::true_type /*has_sparam*/)
-  {
-    auto uparam = TraitsT::make_uparam(reachable, altr);
-    auto sparam = TraitsT::make_sparam(reachable, altr);
-    queue.append(
-        *[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-          { return TraitsT::execute(ctx,
-                static_cast<decltype(uparam)>(head->uparam),
-                reinterpret_cast<const decltype(sparam)&>(head->sparam));  },
-        symbol_getter<TraitsT, NodeT>::opt(altr),
-        ::std::move(uparam), ::std::move(sparam));
-  }
+template<typename TraitsT, typename NodeT, bool, bool>
+struct solidify_disp;
 
 template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::false_type /*has_uparam*/, ::std::true_type /*has_sparam*/)
+struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
   {
-    auto sparam = TraitsT::make_sparam(reachable, altr);
-    queue.append(
-        *[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-          { return TraitsT::execute(ctx,
-                reinterpret_cast<const decltype(sparam)&>(head->sparam));  },
-        symbol_getter<TraitsT, NodeT>::opt(altr),
-        ::std::move(sparam));
-  }
+    static
+    AIR_Status
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx,
+            static_cast<typename ::std::decay<decltype(
+                TraitsT::make_uparam(::std::declval<bool&>(),
+                    ::std::declval<const NodeT&>()))>::type>(head->uparam),
+            reinterpret_cast<const typename ::std::decay<decltype(
+                TraitsT::make_sparam(::std::declval<bool&>(),
+                    ::std::declval<const NodeT&>()))>::type&>(head->sparam));
+      }
+
+    static
+    void
+    append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
+      {
+        queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
+            TraitsT::make_uparam(reachable, altr),
+            TraitsT::make_sparam(reachable, altr));
+      }
+  };
 
 template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& reachable, AVMC_Queue& queue, const NodeT& altr,
-      ::std::true_type /*has_uparam*/, ::std::false_type /*has_sparam*/)
+struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
   {
-    auto uparam = TraitsT::make_uparam(reachable, altr);
-    queue.append(
-        *[](Executive_Context& ctx, const AVMC_Queue::Header* head)
-          { return TraitsT::execute(ctx,
-                static_cast<decltype(uparam)>(head->uparam));  },
-        symbol_getter<TraitsT, NodeT>::opt(altr),
-        ::std::move(uparam));
-  }
+    static
+    AIR_Status
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx,
+            reinterpret_cast<const typename ::std::decay<decltype(
+                TraitsT::make_sparam(::std::declval<bool&>(),
+                    ::std::declval<const NodeT&>()))>::type&>(head->sparam));
+      }
+
+    static
+    void
+    append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
+      {
+        queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
+            TraitsT::make_sparam(reachable, altr));
+      }
+  };
 
 template<typename TraitsT, typename NodeT>
-inline
-void
-do_solidify_dispatch(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& altr,
-      ::std::false_type /*has_uparam*/, ::std::false_type /*has_sparam*/)
+struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
   {
-    queue.append(
-        *[](Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
-          { return TraitsT::execute(ctx);  },
-        symbol_getter<TraitsT, NodeT>::opt(altr));
-  }
+    static
+    AIR_Status
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
+      {
+        return TraitsT::execute(ctx,
+            static_cast<typename ::std::decay<decltype(
+                TraitsT::make_uparam(::std::declval<bool&>(),
+                    ::std::declval<const NodeT&>()))>::type>(head->uparam));
+      }
+
+    static
+    void
+    append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
+      {
+        queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
+            TraitsT::make_uparam(reachable, altr));
+      }
+  };
+
+template<typename TraitsT, typename NodeT>
+struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
+  {
+    static
+    AIR_Status
+    thunk(Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
+      {
+        return TraitsT::execute(ctx);
+      }
+
+    static
+    void
+    append(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& altr)
+      {
+        queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr));
+      }
+  };
 
 template<typename TraitsT, typename NodeT>
 inline
 bool
 do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
+    using disp = solidify_disp<TraitsT, NodeT,
+                     has_uparam<TraitsT, NodeT>::value,
+                     has_sparam<TraitsT, NodeT>::value>;
+
     bool reachable = true;
-    do_solidify_dispatch<TraitsT>(reachable, queue, altr,
-        has_uparam<TraitsT, NodeT>(), has_sparam<TraitsT, NodeT>());
+    disp::append(reachable, queue, altr);
     return reachable;
   }
 
