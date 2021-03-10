@@ -357,18 +357,18 @@ class variant
     visit(visitorT&& visitor)
       const
       {
-        static constexpr details_variant::const_ptr_table<void (const void*, visitorT&&),
-                   details_variant::wrapped_visit<const alternativesT>...> table;
-        table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
+        static constexpr details_variant::const_func_table<void (const void*, visitorT&&),
+                                details_variant::wrapped_visit<const alternativesT>...> table;
+        table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     template<typename visitorT>
     void
     visit(visitorT&& visitor)
       {
-        static constexpr details_variant::const_ptr_table<void (void*, visitorT&&),
-                   details_variant::wrapped_visit<alternativesT>...> table;
-        table[this->m_index](this->m_stor, ::std::forward<visitorT>(visitor));
+        static constexpr details_variant::const_func_table<void (void*, visitorT&&),
+                                details_variant::wrapped_visit<alternativesT>...> table;
+        table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     // 23.7.3.4, modifiers
