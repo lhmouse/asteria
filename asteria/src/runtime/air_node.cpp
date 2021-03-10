@@ -526,10 +526,10 @@ struct AIR_Traits_do_while_statement
 
     static
     Sparam_queues_2
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
+    make_sparam(bool& reachable, const AIR_Node::S_do_while_statement& altr)
       {
         Sparam_queues_2 sp;
-        do_solidify_nodes(sp.queues[0], altr.code_body);
+        reachable &= do_solidify_nodes(sp.queues[0], altr.code_body);
         do_solidify_nodes(sp.queues[1], altr.code_cond);
         return sp;
       }
