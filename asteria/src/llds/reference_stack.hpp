@@ -105,10 +105,20 @@ class Reference_Stack
       const noexcept
       { return this->m_bptr;  }
 
+    const Reference*
+    top()
+      const noexcept
+      { return this->m_bptr + this->m_etop;  }
+
     Reference*
     mut_bottom()
       noexcept
       { return this->m_bptr;  }
+
+    Reference*
+    mut_top()
+      noexcept
+      { return this->m_bptr + this->m_etop;  }
 
     Reference_Stack&
     clear()
@@ -134,14 +144,14 @@ class Reference_Stack
       const noexcept
       {
         ROCKET_ASSERT(index < this->size());
-        return this->bottom()[this->size() + ~index];
+        return this->top()[~index];
       }
 
     Reference&
     mut_back(size_t index = 0)
       {
         ROCKET_ASSERT(index < this->size());
-        return this->mut_bottom()[this->size() + ~index];
+        return this->mut_top()[~index];
       }
 
     template<typename XRefT>

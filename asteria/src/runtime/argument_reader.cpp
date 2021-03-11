@@ -508,8 +508,7 @@ end_overload(cow_vector<Reference>& vargs)
 
     size_t index = this->m_state.nparams - 1;
     if(index < this->m_stack.size()) {
-      vargs.append(this->m_stack.bottom() + index,
-                   this->m_stack.bottom() + this->m_stack.size());
+      vargs.append(this->m_stack.bottom() + index, this->m_stack.top());
     }
     return true;
   }
@@ -529,8 +528,7 @@ end_overload(cow_vector<Value>& vargs)
     size_t index = this->m_state.nparams - 1;
     if(index < this->m_stack.size()) {
       vargs.reserve(this->m_stack.size() - index);
-      ::std::transform(this->m_stack.bottom() + index,
-                       this->m_stack.bottom() + this->m_stack.size(),
+      ::std::transform(this->m_stack.bottom() + index, this->m_stack.top(),
                        ::std::back_inserter(vargs),
                        ::std::mem_fn(&Reference::dereference_readonly));
     }

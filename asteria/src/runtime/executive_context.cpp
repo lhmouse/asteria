@@ -29,8 +29,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     // Prepare iterators to arguments.
     // As function arguments are evaluated from left to right, the reference at the top
     // is the last argument.
-    auto bpos = stack.bottom();
-    auto epos = stack.bottom() + stack.size();
+    auto bptr = stack.bottom();
+    auto eptr = stack.top();
 
     // Set parameters, which are local references.
     bool variadic = false;
@@ -46,20 +46,20 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
       // Try popping an argument from `stack` and assign it to this parameter.
       // If no more arguments follow, declare a constant `null`.
-      if(ROCKET_EXPECT(bpos != epos))
-        this->open_named_reference(name) = ::std::move(*(bpos++));
+      if(ROCKET_EXPECT(bptr != eptr))
+        this->open_named_reference(name) = ::std::move(*(bptr++));
       else
         this->open_named_reference(name) = Reference::S_constant();
     }
 
     // If the function is not variadic, then all arguments shall have been consumed.
-    if(!variadic && (bpos != epos))
+    if(!variadic && (bptr != eptr))
       ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
 
     // Stash variadic arguments, if any.
-    if(ROCKET_UNEXPECT(bpos != epos))
-      this->m_lazy_args.append(
-              ::std::make_move_iterator(bpos), ::std::make_move_iterator(epos));
+    if(ROCKET_UNEXPECT(bptr != eptr))
+      this->m_lazy_args.append(::std::make_move_iterator(bptr),
+                     ::std::make_move_iterator(eptr));
   }
 
 Executive_Context::
