@@ -42,7 +42,7 @@ class Analytic_Context
       { return this->get_parent_opt();  }
 
     Reference*
-    do_create_lazy_reference(const phsh_string& /*name*/)
+    do_create_lazy_reference(Reference* /*hint_opt*/, const phsh_string& /*name*/)
       const override
       { return nullptr;  }
 

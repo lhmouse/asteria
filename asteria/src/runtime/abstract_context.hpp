@@ -41,20 +41,30 @@ class Abstract_Context
       const noexcept
       = 0;
 
+    // This function is called when a name is not found in `m_named_refs`.
+    // Builtin references such as `__func` are only created when they are
+    // mentioned.
     virtual
     Reference*
-    do_create_lazy_reference(const phsh_string& name)
+    do_create_lazy_reference(Reference* hint_opt, const phsh_string& name)
       const
       = 0;
 
+    // This function is called by `do_create_lazy_reference()` to avoid
+    // possibility of infinite recursion, which would otherwise be caused
+    // if `open_named_reference()` was called instead.
     template<typename XRefT>
     Reference*
-    do_set_named_reference(const phsh_string& name, XRefT&& xref)
+    do_set_named_reference(Reference* hint_opt, const phsh_string& name,
+                           XRefT&& xref)
       const
       {
-        auto pair = this->m_named_refs.insert(name);
-        *(pair.first) = ::std::forward<XRefT>(xref);
-        return pair.first;
+        auto qref = hint_opt;
+        if(ROCKET_UNEXPECT(!qref))
+          qref = this->m_named_refs.insert(name).first;
+
+        *qref = ::std::forward<XRefT>(xref);
+        return qref;
       }
 
   public:
@@ -76,7 +86,7 @@ class Abstract_Context
       {
         auto qref = this->m_named_refs.find_opt(name);
         if(ROCKET_UNEXPECT(!qref))
-          qref = this->do_create_lazy_reference(name);
+          qref = this->do_create_lazy_reference(nullptr, name);
         return qref;
       }
 
@@ -85,7 +95,7 @@ class Abstract_Context
       {
         auto pair = this->m_named_refs.insert(name);
         if(ROCKET_UNEXPECT(pair.second))
-          this->do_create_lazy_reference(name);
+          this->do_create_lazy_reference(pair.first, name);
         return *(pair.first);
       }
   };

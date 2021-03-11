@@ -69,7 +69,7 @@ Executive_Context::
 
 Reference*
 Executive_Context::
-do_create_lazy_reference(const phsh_string& name)
+do_create_lazy_reference(Reference* hint_opt, const phsh_string& name)
   const
   {
     // Create pre-defined references as needed.
@@ -78,26 +78,25 @@ do_create_lazy_reference(const phsh_string& name)
     if(name == "__func") {
       // Note: This can only happen inside a function context.
       Reference::S_constant xref = { this->m_zvarg->func() };
-      return this->do_set_named_reference(name, ::std::move(xref));
+      return this->do_set_named_reference(hint_opt, name, ::std::move(xref));
     }
 
     if(name == "__this") {
       // Note: This can only happen inside a function context and the `this` argument
       // is null.
       Reference::S_constant xref = { };
-      return this->do_set_named_reference(name, ::std::move(xref));
+      return this->do_set_named_reference(hint_opt, name, ::std::move(xref));
     }
 
     if(name == "__varg") {
       // Note: This can only happen inside a function context.
-      cow_function varg;
+      Reference::S_constant xref;
       if(ROCKET_UNEXPECT(this->m_lazy_args.empty()))
-        varg = this->m_zvarg;
+        xref.val = this->m_zvarg;
       else
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), this->m_lazy_args);
-
-      Reference::S_constant xref = { ::std::move(varg) };
-      return this->do_set_named_reference(name, ::std::move(xref));
+        xref.val = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
+                                 this->m_lazy_args);
+      return this->do_set_named_reference(hint_opt, name, ::std::move(xref));
     }
 
     return nullptr;
