@@ -40,7 +40,7 @@ class Global_Context
 
     Reference*
     do_lazy_lookup_opt(const phsh_string& /*name*/)
-      override
+      const override
       { return nullptr;  }
 
   public:

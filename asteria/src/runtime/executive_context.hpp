@@ -69,7 +69,7 @@ class Executive_Context
 
     Reference*
     do_lazy_lookup_opt(const phsh_string& name)
-      override;
+      const override;
 
     AIR_Status
     do_on_scope_exit_slow(AIR_Status status);

@@ -20,7 +20,7 @@ class Abstract_Context
   private:
     // This stores all named references (variables, parameters, etc.) of
     // this context.
-    Reference_Dictionary m_named_refs;
+    mutable Reference_Dictionary m_named_refs;
 
   protected:
     explicit
@@ -44,7 +44,18 @@ class Abstract_Context
     virtual
     Reference*
     do_lazy_lookup_opt(const phsh_string& name)
+      const
       = 0;
+
+    template<typename XRefT>
+    Reference*
+    do_set_named_reference(const phsh_string& name, XRefT&& xref)
+      const
+      {
+        auto& ref = this->m_named_refs.open(name);
+        ref = ::std::forward<XRefT>(xref);
+        return &ref;
+      }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Abstract_Context);
@@ -61,21 +72,10 @@ class Abstract_Context
 
     const Reference*
     get_named_reference_opt(const phsh_string& name)
-      {
-        auto qref = this->m_named_refs.find_opt(name);
-        if(ROCKET_UNEXPECT(!qref))
-          qref = this->do_lazy_lookup_opt(name);
-        return qref;
-      }
+      const;
 
     Reference&
-    open_named_reference(const phsh_string& name)
-      { return this->m_named_refs.open(name);  }
-
-    Abstract_Context&
-    clear_named_references()
-      noexcept
-      { return this->m_named_refs.clear(), *this;  }
+    open_named_reference(const phsh_string& name);
   };
 
 }  // namespace asteria

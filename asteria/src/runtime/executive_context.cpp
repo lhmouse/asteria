@@ -70,6 +70,7 @@ Executive_Context::
 Reference*
 Executive_Context::
 do_lazy_lookup_opt(const phsh_string& name)
+  const
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp'
@@ -77,27 +78,26 @@ do_lazy_lookup_opt(const phsh_string& name)
     if(name == "__func") {
       // Note: This can only happen inside a function context.
       Reference::S_constant xref = { this->m_zvarg->func() };
-      return &(this->open_named_reference(name) = ::std::move(xref));
+      return this->do_set_named_reference(name, ::std::move(xref));
     }
 
     if(name == "__this") {
       // Note: This can only happen inside a function context and the `this` argument
       // is null.
       Reference::S_constant xref = { };
-      return &(this->open_named_reference(name) = ::std::move(xref));
+      return this->do_set_named_reference(name, ::std::move(xref));
     }
 
     if(name == "__varg") {
       // Note: This can only happen inside a function context.
       cow_function varg;
-      if(ROCKET_EXPECT(this->m_lazy_args.size()))
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(
-                             *(this->m_zvarg), ::std::move(this->m_lazy_args));
-      else
+      if(ROCKET_UNEXPECT(this->m_lazy_args.empty()))
         varg = this->m_zvarg;
+      else
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), this->m_lazy_args);
 
       Reference::S_constant xref = { ::std::move(varg) };
-      return &(this->open_named_reference(name) = ::std::move(xref));
+      return this->do_set_named_reference(name, ::std::move(xref));
     }
 
     return nullptr;

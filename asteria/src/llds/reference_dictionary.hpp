@@ -146,6 +146,24 @@ class Reference_Dictionary
         return qbkt->vstor;
       }
 
+    Reference*
+    mut_find_opt(const phsh_string& name)
+      noexcept
+      {
+        // Be advised that `do_xprobe()` shall not be called when the
+        // table has not been allocated.
+        if(!this->m_bptr)
+          return nullptr;
+
+        // Find the bucket for the name.
+        auto qbkt = this->do_xprobe(name);
+        if(!*qbkt)
+          return nullptr;
+
+        ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
+        return qbkt->vstor;
+      }
+
     Reference&
     open(const phsh_string& name)
       {
