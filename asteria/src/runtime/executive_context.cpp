@@ -69,7 +69,7 @@ Executive_Context::
 
 Reference*
 Executive_Context::
-do_lazy_lookup_opt(const phsh_string& name)
+do_create_lazy_reference(const phsh_string& name)
   const
   {
     // Create pre-defined references as needed.

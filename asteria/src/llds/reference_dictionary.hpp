@@ -164,8 +164,8 @@ class Reference_Dictionary
         return qbkt->vstor;
       }
 
-    Reference&
-    open(const phsh_string& name)
+    pair<Reference*, bool>
+    insert(const phsh_string& name)
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
@@ -177,11 +177,11 @@ class Reference_Dictionary
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(name);
         if(*qbkt)
-          return qbkt->vstor[0];
+          return ::std::make_pair(qbkt->vstor, false);
 
         // Construct a null reference and return it.
         this->do_attach(qbkt, name);
-        return qbkt->vstor[0];
+        return ::std::make_pair(qbkt->vstor, true);
       }
 
     bool

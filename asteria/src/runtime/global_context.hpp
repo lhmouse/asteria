@@ -39,7 +39,7 @@ class Global_Context
       { return this->get_parent_opt();  }
 
     Reference*
-    do_lazy_lookup_opt(const phsh_string& /*name*/)
+    do_create_lazy_reference(const phsh_string& /*name*/)
       const override
       { return nullptr;  }
 

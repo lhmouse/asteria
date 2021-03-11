@@ -43,7 +43,7 @@ class Abstract_Context
 
     virtual
     Reference*
-    do_lazy_lookup_opt(const phsh_string& name)
+    do_create_lazy_reference(const phsh_string& name)
       const
       = 0;
 
@@ -52,9 +52,9 @@ class Abstract_Context
     do_set_named_reference(const phsh_string& name, XRefT&& xref)
       const
       {
-        auto& ref = this->m_named_refs.open(name);
-        ref = ::std::forward<XRefT>(xref);
-        return &ref;
+        auto pair = this->m_named_refs.insert(name);
+        *(pair.first) = ::std::forward<XRefT>(xref);
+        return pair.first;
       }
 
   public:
@@ -72,10 +72,22 @@ class Abstract_Context
 
     const Reference*
     get_named_reference_opt(const phsh_string& name)
-      const;
+      const
+      {
+        auto qref = this->m_named_refs.find_opt(name);
+        if(ROCKET_UNEXPECT(!qref))
+          qref = this->do_create_lazy_reference(name);
+        return qref;
+      }
 
     Reference&
-    open_named_reference(const phsh_string& name);
+    open_named_reference(const phsh_string& name)
+      {
+        auto pair = this->m_named_refs.insert(name);
+        if(ROCKET_UNEXPECT(pair.second))
+          this->do_create_lazy_reference(name);
+        return *(pair.first);
+      }
   };
 
 }  // namespace asteria
