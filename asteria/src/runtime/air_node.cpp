@@ -4741,6 +4741,7 @@ struct solidify_disp;
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
   {
+    ROCKET_FLATTEN_FUNCTION
     static
     AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
@@ -4767,6 +4768,7 @@ struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
   {
+    ROCKET_FLATTEN_FUNCTION
     static
     AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
@@ -4789,6 +4791,7 @@ struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
   {
+    ROCKET_FLATTEN_FUNCTION
     static
     AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
@@ -4811,6 +4814,7 @@ struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
   {
+    ROCKET_FLATTEN_FUNCTION
     static
     AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
