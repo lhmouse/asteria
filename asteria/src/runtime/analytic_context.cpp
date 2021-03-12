@@ -25,15 +25,15 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
         break;
 
       // Its contents are out of interest.
-      this->open_named_reference(name) /*= Reference::S_uninit()*/;
+      this->do_set_named_reference(nullptr, name, Reference::S_uninit());
     }
 
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp'
     // as well.
-    this->open_named_reference(sref("__varg")) /*= Reference::S_uninit()*/;
-    this->open_named_reference(sref("__this")) /*= Reference::S_uninit()*/;
-    this->open_named_reference(sref("__func")) /*= Reference::S_uninit()*/;
+    this->do_set_named_reference(nullptr, sref("__varg"), Reference::S_uninit());
+    this->do_set_named_reference(nullptr, sref("__this"), Reference::S_uninit());
+    this->do_set_named_reference(nullptr, sref("__func"), Reference::S_uninit());
   }
 
 Analytic_Context::
