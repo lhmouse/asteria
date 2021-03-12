@@ -180,6 +180,16 @@ class const_func_table
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
   };
 
+template<typename... altsT>
+struct max_sizeof
+  : integral_constant<size_t, 0>
+  { };
+
+template<typename firstT, typename... restT>
+struct max_sizeof<firstT, restT...>
+  : integral_constant<size_t, noadl::max(sizeof(firstT), max_sizeof<restT...>::value)>
+  { };
+
 template<typename altT>
 void*
 wrapped_copy_construct(void* dptr, const void* sptr)
@@ -196,7 +206,7 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
     static constexpr const_func_table<void* (void*, const void*), wrapped_copy_construct<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
+      return ::std::memcpy(dptr, sptr, max_sizeof<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -217,7 +227,7 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
     static constexpr const_func_table<void* (void*, void*), wrapped_move_construct<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
+      return ::std::memcpy(dptr, sptr, max_sizeof<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -238,7 +248,7 @@ dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
     static constexpr const_func_table<void* (void*, const void*), wrapped_copy_assign<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
+      return ::std::memmove(dptr, sptr, max_sizeof<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -259,7 +269,7 @@ dispatch_move_assign(size_t k, void* dptr, void* sptr)
     static constexpr const_func_table<void* (void*, void*), wrapped_move_assign<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memmove(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
+      return ::std::memmove(dptr, sptr, max_sizeof<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -303,7 +313,7 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
     static constexpr const_func_table<void* (void*, void*), wrapped_move_then_destroy<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, sizeof(typename aligned_union<1, altsT...>::type));
+      return ::std::memcpy(dptr, sptr, max_sizeof<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -324,7 +334,7 @@ dispatch_swap(size_t k, void* dptr, void* sptr)
     static constexpr const_func_table<void (void*, void*), wrapped_xswap<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return wrapped_xswap<typename aligned_union<1, altsT...>::type>(dptr, sptr);
+      return wrapped_xswap<typename aligned_union<0, altsT...>::type>(dptr, sptr);
     else
       return funcs(k, dptr, sptr);
   }
