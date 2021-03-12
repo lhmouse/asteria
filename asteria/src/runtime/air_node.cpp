@@ -1008,49 +1008,7 @@ struct AIR_Traits_push_immediate_boolean
       }
   };
 
-constexpr
-bool
-do_is_int48(int64_t value)
-  noexcept
-  {
-    return value >> 47 == value >> 48;
-  }
-
-struct AIR_Traits_push_immediate_int48
-  {
-    // `up` is the value to push.
-    // `sp` is unused.
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_immediate& altr)
-      {
-        int64_t value = altr.value.as_integer();
-        ROCKET_ASSERT(do_is_int48(value));
-        uint64_t bits = static_cast<uint64_t>(value);
-
-        AVMC_Queue::Uparam up;
-        up.s16 = static_cast<uint16_t>(bits >> 32);
-        up.s32 = static_cast<uint32_t>(bits);
-        return up;
-      }
-
-    static
-    AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
-      {
-        uint64_t bits = static_cast<uint64_t>(static_cast<int16_t>(up.s16));
-        bits = bits << 32 | up.s32;
-        int64_t value = static_cast<int64_t>(bits);
-
-        // Push a constant integer.
-        Reference::S_constant xref = { V_integer(value) };
-        ctx.stack().emplace_back(::std::move(xref));
-        return air_status_next;
-      }
-  };
-
-struct AIR_Traits_push_immediate_generic
+struct AIR_Traits_push_immediate
   {
     // `up` is unused.
     // `sp` is the value to push.
@@ -4383,8 +4341,7 @@ struct AIR_Traits_variadic_call
             // Pass an empty argument stack to get the number of arguments to generate.
             // This inreadonlys the `self` reference so we have to copy it first.
             ctx.stack().emplace_back(ctx.stack().back());
-            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc,
-                              ::std::move(alt_stack));
+            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc, ::std::move(alt_stack));
             value = ctx.stack().back().dereference_readonly();
             ctx.stack().pop_back();
 
@@ -5153,24 +5110,9 @@ solidify(AVMC_Queue& queue)
         return do_solidify<AIR_Traits_glvalue_to_prvalue>(queue,
                                      this->m_stor.as<index_glvalue_to_prvalue>());
 
-      case index_push_immediate: {
-        const auto& altr = this->m_stor.as<index_push_immediate>();
-        switch(weaken_enum(altr.value.type())) {
-          case type_null:
-            return do_solidify<AIR_Traits_push_immediate_null>(queue, altr);
-
-          case type_boolean:
-            return do_solidify<AIR_Traits_push_immediate_boolean>(queue, altr);
-
-          case type_integer:
-            if(do_is_int48(altr.value.as_integer()))
-              return do_solidify<AIR_Traits_push_immediate_int48>(queue, altr);
-            else
-              // Fallthrough
-          default:
-              return do_solidify<AIR_Traits_push_immediate_generic>(queue, altr);
-        }
-      }
+      case index_push_immediate:
+        return do_solidify<AIR_Traits_push_immediate>(queue,
+                                     this->m_stor.as<index_push_immediate>());
 
       case index_push_global_reference:
         return do_solidify<AIR_Traits_push_global_reference>(queue,
