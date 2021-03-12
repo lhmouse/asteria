@@ -171,8 +171,7 @@ class Reference_Dictionary
         // exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
         if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
-          // Ensure the number of buckets is an odd number.
-          this->do_rehash(this->m_size * 3 | 17);
+          this->do_rehash(this->m_size * 3 | 9);
 
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(name);

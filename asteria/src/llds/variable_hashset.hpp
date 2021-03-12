@@ -154,8 +154,7 @@ class Variable_HashSet
         // exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
         if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
-          // Ensure the number of buckets is an odd number.
-          this->do_rehash(this->m_size * 3 | 97);
+          this->do_rehash(this->m_size * 3 | 19);
 
         // Find a bucket for the new variable. Fail if it already exists.
         auto qbkt = this->do_xprobe(var);
