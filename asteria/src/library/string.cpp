@@ -72,6 +72,7 @@ class BMH_Searcher
       {
         // Calculate the pattern length.
         this->m_plen = ::std::distance(pbegin, pend);
+        ROCKET_ASSERT(this->m_plen > 0);
 
         // Build a table according to the Bad Character Rule.
         for(size_t i = 0;  i < 0x100;  ++i)
