@@ -94,36 +94,6 @@ do_xrelocate_but(Bucket* qxcld)
 
 void
 Variable_HashSet::
-do_list_attach(Bucket* qbkt)
-  noexcept
-  {
-    // Insert the bucket before `head`.
-    auto next = ::std::exchange(this->m_head, qbkt);
-    // Update the forward list, which is non-circular.
-    qbkt->next = next;
-    // Update the backward list, which is circular.
-    qbkt->prev = next ? ::std::exchange(next->prev, qbkt) : qbkt;
-  }
-
-void
-Variable_HashSet::
-do_list_detach(Bucket* qbkt)
-  noexcept
-  {
-    auto next = qbkt->next;
-    auto prev = qbkt->prev;
-    auto head = this->m_head;
-
-    // Update the forward list, which is non-circular.
-    ((qbkt == head) ? this->m_head : prev->next) = next;
-    // Update the backward list, which is circular.
-    (next ? next : head)->prev = prev;
-    // Mark the bucket empty.
-    qbkt->prev = nullptr;
-  }
-
-void
-Variable_HashSet::
 do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
@@ -168,35 +138,6 @@ do_rehash(size_t nbkt)
     }
     if(bold)
       ::operator delete(bold);
-  }
-
-void
-Variable_HashSet::
-do_attach(Bucket* qbkt, const rcptr<Variable>& var)
-  noexcept
-  {
-    // Construct the node, then attach it.
-    ROCKET_ASSERT(!*qbkt);
-    this->do_list_attach(qbkt);
-    ::rocket::construct_at(qbkt->kstor, var);
-    ROCKET_ASSERT(*qbkt);
-    this->m_size++;
-  }
-
-void
-Variable_HashSet::
-do_detach(Bucket* qbkt)
-  noexcept
-  {
-    // Transfer ownership of the old variable, then detach the bucket.
-    this->m_size--;
-    ROCKET_ASSERT(*qbkt);
-    ::rocket::destroy_at(qbkt->kstor);
-    this->do_list_detach(qbkt);
-    ROCKET_ASSERT(!*qbkt);
-
-    // Relocate nodes that follow `qbkt`, if any.
-    this->do_xrelocate_but(qbkt);
   }
 
 Variable_Callback&

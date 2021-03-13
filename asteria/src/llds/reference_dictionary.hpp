@@ -48,37 +48,71 @@ class Reference_Dictionary
       const noexcept;
 
     // This function is used for relocation after an element is erased.
-    inline
     void
     do_xrelocate_but(Bucket* qxcld)
       noexcept;
 
     // Valid buckets are linked altogether for efficient iteration.
-    inline
     void
     do_list_attach(Bucket* qbkt)
-      noexcept;
+      noexcept
+      {
+        // Insert the bucket before `head`.
+        auto next = ::std::exchange(this->m_head, qbkt);
+        // Update the forward list, which is non-circular.
+        qbkt->next = next;
+        // Update the backward list, which is circular.
+        qbkt->prev = next ? ::std::exchange(next->prev, qbkt) : qbkt;
+      }
 
-    inline
     void
     do_list_detach(Bucket* qbkt)
-      noexcept;
+      noexcept
+      {
+        auto next = qbkt->next;
+        auto prev = qbkt->prev;
+        auto head = this->m_head;
+
+        // Update the forward list, which is non-circular.
+        ((qbkt == head) ? this->m_head : prev->next) = next;
+        // Update the backward list, which is circular.
+        (next ? next : head)->prev = prev;
+        // Mark the bucket empty.
+        qbkt->prev = nullptr;
+      }
+
+    void
+    do_attach(Bucket* qbkt, const phsh_string& name)
+      noexcept
+      {
+        // Construct the node, then attach it.
+        ROCKET_ASSERT(!*qbkt);
+        this->do_list_attach(qbkt);
+        ::rocket::construct_at(qbkt->kstor, name);
+        ::rocket::construct_at(qbkt->vstor, Reference::S_uninit());
+        ROCKET_ASSERT(*qbkt);
+        this->m_size++;
+      }
+
+    void
+    do_detach(Bucket* qbkt)
+      noexcept
+      {
+        // Destroy the old name and reference, then detach the bucket.
+        this->m_size--;
+        ROCKET_ASSERT(*qbkt);
+        ::rocket::destroy_at(qbkt->kstor);
+        ::rocket::destroy_at(qbkt->vstor);
+        this->do_list_detach(qbkt);
+        ROCKET_ASSERT(!*qbkt);
+
+        // Relocate nodes that follow `qbkt`, if any.
+        this->do_xrelocate_but(qbkt);
+      }
 
     // This function is primarily used to reallocate a larger table.
     void
     do_rehash(size_t nbkt);
-
-    // This functions stores `var` in the bucket `*qbkt`.
-    // `*qbkt` must be empty.
-    void
-    do_attach(Bucket* qbkt, const phsh_string& name)
-      noexcept;
-
-    // This functions clears the bucket `*qbkt`
-    // `*qbkt` must not be empty.
-    void
-    do_detach(Bucket* qbkt)
-      noexcept;
 
   public:
     ~Reference_Dictionary()

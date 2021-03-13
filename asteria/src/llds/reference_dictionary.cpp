@@ -96,36 +96,6 @@ do_xrelocate_but(Bucket* qxcld)
 
 void
 Reference_Dictionary::
-do_list_attach(Bucket* qbkt)
-  noexcept
-  {
-    // Insert the bucket before `head`.
-    auto next = ::std::exchange(this->m_head, qbkt);
-    // Update the forward list, which is non-circular.
-    qbkt->next = next;
-    // Update the backward list, which is circular.
-    qbkt->prev = next ? ::std::exchange(next->prev, qbkt) : qbkt;
-  }
-
-void
-Reference_Dictionary::
-do_list_detach(Bucket* qbkt)
-  noexcept
-  {
-    auto next = qbkt->next;
-    auto prev = qbkt->prev;
-    auto head = this->m_head;
-
-    // Update the forward list, which is non-circular.
-    ((qbkt == head) ? this->m_head : prev->next) = next;
-    // Update the backward list, which is circular.
-    (next ? next : head)->prev = prev;
-    // Mark the bucket empty.
-    qbkt->prev = nullptr;
-  }
-
-void
-Reference_Dictionary::
 do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_size);
@@ -171,37 +141,6 @@ do_rehash(size_t nbkt)
     }
     if(bold)
       ::operator delete(bold);
-  }
-
-void
-Reference_Dictionary::
-do_attach(Bucket* qbkt, const phsh_string& name)
-  noexcept
-  {
-    // Construct the node, then attach it.
-    ROCKET_ASSERT(!*qbkt);
-    this->do_list_attach(qbkt);
-    ::rocket::construct_at(qbkt->kstor, name);
-    ::rocket::construct_at(qbkt->vstor, Reference::S_uninit());
-    ROCKET_ASSERT(*qbkt);
-    this->m_size++;
-  }
-
-void
-Reference_Dictionary::
-do_detach(Bucket* qbkt)
-  noexcept
-  {
-    // Destroy the old name and reference, then detach the bucket.
-    this->m_size--;
-    ROCKET_ASSERT(*qbkt);
-    ::rocket::destroy_at(qbkt->kstor);
-    ::rocket::destroy_at(qbkt->vstor);
-    this->do_list_detach(qbkt);
-    ROCKET_ASSERT(!*qbkt);
-
-    // Relocate nodes that follow `qbkt`, if any.
-    this->do_xrelocate_but(qbkt);
   }
 
 Variable_Callback&
