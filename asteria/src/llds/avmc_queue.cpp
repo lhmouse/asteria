@@ -83,25 +83,25 @@ do_reserve_one(Uparam uparam, size_t size)
 
     // Round the size up to the nearest number of headers.
     // This shall not result in overflows.
-    size_t nheaders = (sizeof(Header) * 2 - 1 + size) / sizeof(Header);
+    size_t nheaders_p1 = (sizeof(Header) * 2 - 1 + size) / sizeof(Header);
 
     // Allocate a new memory block as needed.
-    if(ROCKET_UNEXPECT(this->m_rsrv - this->m_used < nheaders)) {
-      size_t nadd = nheaders;
+    if(ROCKET_UNEXPECT(this->m_rsrv - this->m_used < nheaders_p1)) {
+      size_t nadd = nheaders_p1;
 #ifndef ROCKET_DEBUG
       // Reserve more space for non-debug builds.
       nadd |= this->m_used * 4;
 #endif
       this->do_reallocate(static_cast<uint32_t>(nadd));
     }
-    ROCKET_ASSERT(this->m_rsrv - this->m_used >= nheaders);
+    ROCKET_ASSERT(this->m_rsrv - this->m_used >= nheaders_p1);
 
     // Append a new node.
     // `uparam` is overlapped with `nheaders` so it must be assigned first.
     // The others can occur in any order.
     auto qnode = this->m_bptr + this->m_used;
     qnode->uparam = uparam;
-    qnode->nheaders = static_cast<uint8_t>(nheaders - UINT32_C(1));
+    qnode->nheaders = static_cast<uint8_t>(nheaders_p1 - UINT32_C(1));
     qnode->meta_ver = 0;
     return qnode;
   }
