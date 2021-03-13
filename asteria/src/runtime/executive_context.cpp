@@ -26,14 +26,12 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     if(!self.is_void() && !(self.is_constant() && self.dereference_readonly().is_null()))
       this->do_set_named_reference(nullptr, sref("__this"), ::std::move(self));
 
-    // Prepare iterators to arguments.
-    // As function arguments are evaluated from left to right, the reference at the top
-    // is the last argument.
+    // Set arguments. As arguments are evaluated from left to right, the reference at
+    // the top is the last argument.
     auto bptr = stack.bottom();
     auto eptr = stack.top();
-
-    // Set parameters, which are local references.
     bool variadic = false;
+
     for(const auto& name : params) {
       if(name.empty())
         continue;
