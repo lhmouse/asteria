@@ -40,8 +40,10 @@ enumerate_variables(Variable_Callback& callback)
 
       case index_variable: {
         auto var = unerase_pointer_cast<Variable>(this->m_root.as<index_variable>().var);
-        if(var)
-          callback.process(var);
+        if(!var)
+          return callback;
+
+        callback.process(var);
         return callback;
       }
 
