@@ -415,6 +415,18 @@ do_accept_equal_initializer_opt(Token_Stream& tstrm)
     return do_accept_expression_opt(tstrm);
   }
 
+opt<Statement::S_expression>
+do_accept_ref_initializer_opt(Token_Stream& tstrm)
+  {
+    // ref-initializer ::=
+    //   "->" expression
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
+    if(!kpunct)
+      return nullopt;
+
+    return do_accept_expression_opt(tstrm);
+  }
+
 opt<Statement>
 do_accept_null_statement_opt(Token_Stream& tstrm)
   {
@@ -476,8 +488,8 @@ opt<Statement>
 do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
   {
     // immutable-variable-definition ::=
-    //   "const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" )
-    //   ";"
+    //   "const" variable-declarator equal-initailizer ( "," variable-declarator
+    //   equal-initializer | "" ) ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
     if(!qkwrd)
       return nullopt;
@@ -519,25 +531,41 @@ opt<Statement>
 do_accept_reference_definition_opt(Token_Stream& tstrm)
   {
     // reference-definition ::=
-    //   "ref" identifier "->" expression ";"
+    //   "ref" identifier ref-initailizer-opt ( "," identifier ref-initializer-opt | "" ) ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_ref });
     if(!qkwrd)
       return nullopt;
 
-    auto sloc = tstrm.next_sloc();
-    auto qname = do_accept_identifier_opt(tstrm, true);
-    if(!qname)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+    // Each declaractor has its own source location.
+    cow_vector<Source_Location> slocs;
+    cow_vector<phsh_string> names;
+    cow_vector<Statement::S_expression> inits;
+    for(;;) {
+      // Accept the name of this declared reference.
+      auto sloc = tstrm.next_sloc();
+      auto qname = do_accept_identifier_opt(tstrm, true);
+      if(!qname)
+        throw Parser_Error(parser_status_identifier_expected, tstrm);
 
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
+      auto qinit = do_accept_ref_initializer_opt(tstrm);
+      if(!qinit)
+        throw Parser_Error(parser_status_arrow_expected, tstrm);
+
+      slocs.emplace_back(::std::move(sloc));
+      names.emplace_back(::std::move(*qname));
+      inits.emplace_back(::std::move(*qinit));
+
+      // Look for the separator.
+      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      if(!kpunct)
+        break;
+    }
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_arrow_expected, tstrm);
+      throw Parser_Error(parser_status_semicolon_expected, tstrm);
 
-    auto qinit = do_accept_expression_opt(tstrm);
-    if(!qinit)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
-
-    Statement::S_reference xstmt = { ::std::move(sloc), ::std::move(*qname), ::std::move(*qinit) };
+    Statement::S_references xstmt = { ::std::move(slocs), ::std::move(names),
+                                      ::std::move(inits) };
     return ::std::move(xstmt);
   }
 
@@ -1544,7 +1572,7 @@ opt<Statement::S_block>
 do_accept_closure_body_opt(Token_Stream& tstrm)
   {
     // closure-body ::=
-    //   block | equal-initializer
+    //   block | equal-initializer | ref-initializer
     auto qblock = do_accept_block_opt(tstrm);
     if(qblock)
       return qblock;
@@ -1557,6 +1585,15 @@ do_accept_closure_body_opt(Token_Stream& tstrm)
       Statement::S_return xstmt = { ::std::move(sloc), false, ::std::move(*qinit) };
       return do_blockify_statement(::std::move(xstmt));
     }
+
+    qinit = do_accept_ref_initializer_opt(tstrm);
+    if(qinit) {
+      // In the case of a `ref-initializer`, behave as if it was a `return-statement`.
+      // Note that the result is returned by reference.
+      Statement::S_return xstmt = { ::std::move(sloc), true, ::std::move(*qinit) };
+      return do_blockify_statement(::std::move(xstmt));
+    }
+
     return nullopt;
   }
 

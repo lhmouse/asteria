@@ -102,10 +102,10 @@ equal-initializer ::=
 	"=" expression
 
 immutable-variable-definition ::=
-	"const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
+	"const" variable-declarator equal-initailizer ( "," variable-declarator equal-initializer | "" ) ";"
 
 reference-definition ::=
-	"ref" identifier "->" expression ";"
+	"ref" identifier ref-initailizer-opt ( "," identifier ref-initializer-opt | "" ) ";"
 
 function-definition ::=
 	"func" identifier "(" parameter-list-opt ")" block
@@ -235,7 +235,10 @@ closure-function ::=
 	"func" "(" parameter-list-opt ")" closure-body
 
 closure-body ::=
-	block | equal-initializer
+	block | equal-initializer | ref-initializer
+
+ref-initializer ::=
+	"->" expression
 
 unnamed-array ::=
 	"[" array-element-list-opt "]"

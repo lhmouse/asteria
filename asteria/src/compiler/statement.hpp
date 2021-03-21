@@ -132,11 +132,11 @@ class Statement
         S_expression expr;
       };
 
-    struct S_reference
+    struct S_references
       {
-        Source_Location sloc;
-        phsh_string name;
-        S_expression init;
+        cow_vector<Source_Location> slocs;
+        cow_vector<phsh_string> names;
+        cow_vector<S_expression> inits;
       };
 
     enum Index : uint8_t
@@ -158,7 +158,7 @@ class Statement
         index_return      = 14,
         index_assert      = 15,
         index_defer       = 16,
-        index_reference   = 17,
+        index_references  = 17,
       };
 
   private:
@@ -181,7 +181,7 @@ class Statement
         ,S_return      // 14,
         ,S_assert      // 15,
         ,S_defer       // 16,
-        ,S_reference   // 17,
+        ,S_references  // 17,
       )>;
 
     Storage m_stor;

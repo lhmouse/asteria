@@ -25,6 +25,17 @@ int main()
         assert a == 3;
         assert b == 3;
 
+        var f = func() = a;  // return by value
+        try
+          f() = 4;
+        catch(e)
+          ;
+        assert a == 3;
+
+        f = func() -> a;  // return by ref
+        f() = 5;
+        assert a == 5;
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     Global_Context global;

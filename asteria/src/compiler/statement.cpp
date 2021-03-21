@@ -158,7 +158,6 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         ROCKET_ASSERT(nvars == altr.decls.size());
         ROCKET_ASSERT(nvars == altr.inits.size());
 
-        // Declare all variables from left to right.
         for(size_t i = 0;  i < nvars;  ++i) {
           // Validate the declaration.
           // It has to match any of the following:
@@ -554,26 +553,30 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         return code;
       }
 
-      case index_reference: {
-        const auto& altr = this->m_stor.as<index_reference>();
+      case index_references: {
+        const auto& altr = this->m_stor.as<index_references>();
 
-        // Create a reference for further name lookups.
-        do_user_declare(names_opt, ctx, altr.name);
+        // Get the number of references to declare.
+        auto nvars = altr.slocs.size();
+        ROCKET_ASSERT(nvars == altr.names.size());
+        ROCKET_ASSERT(nvars == altr.inits.size());
 
-        // Clear the stack before pushing variables.
-        do_generate_clear_stack(code);
+        for(size_t i = 0;  i < nvars;  ++i) {
+          // Note that references don't support structured bindings.
+          // Create a dummy references for further name lookups.
+          do_user_declare(names_opt, ctx, altr.names[i]);
 
-        // Declare a void reference.
-        AIR_Node::S_declare_reference xnode_decl = { altr.name };
-        code.emplace_back(::std::move(xnode_decl));
+          // Declare a void reference.
+          AIR_Node::S_declare_reference xnode_decl = { altr.names[i] };
+          code.emplace_back(::std::move(xnode_decl));
 
-        // Generate code for the initializer.
-        // Note: Do not destroy the stack.
-        do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.init);
+          // Generate code for the initializer.
+          do_generate_expression(code, opts, ptc_aware_none, ctx, altr.inits[i]);
 
-        // Initialize the reference.
-        AIR_Node::S_initialize_reference xnode_init = { altr.sloc, altr.name };
-        code.emplace_back(::std::move(xnode_init));
+          // Initialize the reference.
+          AIR_Node::S_initialize_reference xnode_init = { altr.slocs[i], altr.names[i] };
+          code.emplace_back(::std::move(xnode_init));
+        }
         return code;
       }
 
