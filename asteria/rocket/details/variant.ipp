@@ -181,13 +181,15 @@ class const_func_table
   };
 
 template<typename... altsT>
-struct max_sizeof
+struct max_sizeof_trivial
   : integral_constant<size_t, 0>
   { };
 
 template<typename firstT, typename... restT>
-struct max_sizeof<firstT, restT...>
-  : integral_constant<size_t, noadl::max(sizeof(firstT), max_sizeof<restT...>::value)>
+struct max_sizeof_trivial<firstT, restT...>
+  : integral_constant<size_t,
+        noadl::max(sizeof(firstT) * is_trivial<firstT>::value,
+                   max_sizeof_trivial<restT...>::value)>
   { };
 
 template<typename altT>
@@ -206,7 +208,7 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
     static constexpr const_func_table<void* (void*, const void*), wrapped_copy_construct<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, max_sizeof<altsT...>::value);
+      return ::std::memcpy(dptr, sptr, max_sizeof_trivial<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -227,7 +229,7 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
     static constexpr const_func_table<void* (void*, void*), wrapped_move_construct<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, max_sizeof<altsT...>::value);
+      return ::std::memcpy(dptr, sptr, max_sizeof_trivial<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -247,8 +249,10 @@ dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
     static constexpr const_bitset<is_trivially_copy_assignable<altsT>::value...> trivial;
     static constexpr const_func_table<void* (void*, const void*), wrapped_copy_assign<altsT>...> funcs;
 
-    if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memmove(dptr, sptr, max_sizeof<altsT...>::value);
+    if(ROCKET_UNEXPECT(dptr == sptr))
+      return dptr;
+    else if(ROCKET_EXPECT(trivial[k]))
+      return ::std::memcpy(dptr, sptr, max_sizeof_trivial<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -268,8 +272,10 @@ dispatch_move_assign(size_t k, void* dptr, void* sptr)
     static constexpr const_bitset<is_trivially_move_assignable<altsT>::value...> trivial;
     static constexpr const_func_table<void* (void*, void*), wrapped_move_assign<altsT>...> funcs;
 
-    if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memmove(dptr, sptr, max_sizeof<altsT...>::value);
+    if(ROCKET_UNEXPECT(dptr == sptr))
+      return dptr;
+    else if(ROCKET_EXPECT(trivial[k]))
+      return ::std::memcpy(dptr, sptr, max_sizeof_trivial<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
@@ -313,7 +319,7 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
     static constexpr const_func_table<void* (void*, void*), wrapped_move_then_destroy<altsT>...> funcs;
 
     if(ROCKET_EXPECT(trivial[k]))
-      return ::std::memcpy(dptr, sptr, max_sizeof<altsT...>::value);
+      return ::std::memcpy(dptr, sptr, max_sizeof_trivial<altsT...>::value);
     else
       return funcs(k, dptr, sptr);
   }
