@@ -181,15 +181,19 @@ class const_func_table
   };
 
 template<typename... altsT>
-struct max_sizeof_trivial
+struct max_sizeof_trivial;
+
+template<>
+struct max_sizeof_trivial<>
   : integral_constant<size_t, 0>
   { };
 
 template<typename firstT, typename... restT>
 struct max_sizeof_trivial<firstT, restT...>
-  : integral_constant<size_t,
-        noadl::max(sizeof(firstT) * is_trivial<firstT>::value,
-                   max_sizeof_trivial<restT...>::value)>
+  : conditional<
+        sizeof(firstT) >= max_sizeof_trivial<restT...>::value,
+        integral_constant<size_t, sizeof(firstT)>,
+        max_sizeof_trivial<restT...>>::type
   { };
 
 template<typename altT>
