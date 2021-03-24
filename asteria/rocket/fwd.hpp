@@ -105,6 +105,7 @@ using ::std::is_signed;
 using ::std::make_signed;
 using ::std::is_unsigned;
 using ::std::make_unsigned;
+using ::std::is_empty;
 using ::std::is_final;
 using ::std::is_enum;
 using ::std::is_class;
