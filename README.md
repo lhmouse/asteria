@@ -4,7 +4,7 @@
 
 |CI            |Category                   |Build on OS     |Host OS         |Build Status     |Remarks          |
 |:-------------|:--------------------------|:---------------|:---------------|:----------------|:----------------|
-|[**Travis CI**](https://travis-ci.org/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |Linux (Ubuntu)  |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria/) |       |
+|[**Travis CI**](https://travis-ci.com/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |Linux (Ubuntu)  |[![Build Status](https://travis-ci.com/lhmouse/asteria.svg?branch=master)](https://travis-ci.com/lhmouse/asteria/) |       |
 |[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria/) |Standard I/O not in **UTF-32**.  |
 |[**LGTM**](https://lgtm.com/projects/g/lhmouse/asteria) | | | |[![Alerts](https://img.shields.io/lgtm/alerts/github/lhmouse/asteria.svg)](https://lgtm.com/projects/g/lhmouse/asteria/alerts/)  | |
 
