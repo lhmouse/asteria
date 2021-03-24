@@ -40,7 +40,7 @@ class variant
     // The first member of this union is used for trivial initialization.
     union {
       typename alternative_at<0>::type m_first;
-      typename aligned_union<1, alternativesT...>::type m_stor[1];
+      typename aligned_union<0, alternativesT...>::type m_stor[1];
     };
     typename lowest_unsigned<alternative_size - 1>::type m_index;
 
@@ -130,7 +130,7 @@ class variant
         }
         else {
           // Make a backup.
-          typename aligned_union<1, alternativesT...>::type backup[1];
+          typename aligned_union<0, alternativesT...>::type backup[1];
           details_variant::dispatch_move_then_destroy<alternativesT...>(
                 index_old, backup, this->m_stor);
           try {
@@ -194,7 +194,7 @@ class variant
         }
         else {
           // Make a backup.
-          typename aligned_union<1, alternativesT...>::type backup[1];
+          typename aligned_union<0, alternativesT...>::type backup[1];
           details_variant::dispatch_move_then_destroy<alternativesT...>(
                 index_old, backup, this->m_stor);
           try {
@@ -389,7 +389,7 @@ class variant
         }
         else {
           // Make a backup.
-          typename aligned_union<1, alternativesT...>::type backup[1];
+          typename aligned_union<0, alternativesT...>::type backup[1];
           details_variant::dispatch_move_then_destroy<alternativesT...>(
                 index_old, backup, this->m_stor);
           try {
@@ -430,7 +430,7 @@ class variant
         }
         else {
           // Swap active alternatives using an indeterminate buffer.
-          typename aligned_union<1, alternativesT...>::type backup[1];
+          typename aligned_union<0, alternativesT...>::type backup[1];
           details_variant::dispatch_move_then_destroy<alternativesT...>(
                 index_old, backup, this->m_stor);
           // Move-construct the other alternative in place.

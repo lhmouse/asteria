@@ -359,8 +359,11 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
               is_trivially_move_assignable<altsT>::value)...>::value;
 
       if(nbytes != 0)
-        wrapped_xswap<typename aligned_union<nbytes,
-                                 char>::type>(dptr, sptr);
+        wrapped_xswap<typename aligned_union<0,
+              typename conditional<
+                  is_trivially_move_assignable<altsT>::value,
+                  altsT, char>::type...
+                >::type>(dptr, sptr);
     }
     else {
       // Use a jump table for non-trivial types.
