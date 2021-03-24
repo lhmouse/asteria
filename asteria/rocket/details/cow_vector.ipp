@@ -51,7 +51,7 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
 
     size_type nblk;
-    value_type data[0];
+    value_type data[];
 
     basic_storage(unknown_function* xdtor, size_t xnskip,
                   const allocator_type& xalloc, size_type xnblk)
@@ -69,7 +69,9 @@ struct basic_storage
 #endif
       }
 
-    ~basic_storage()
+    void
+    destroy_elements()
+      noexcept
       {
         // Destroy all elements backwards.
         size_t off = this->nelem;
@@ -88,6 +90,9 @@ struct basic_storage
 
     basic_storage&
     operator=(const basic_storage&)
+      = delete;
+
+    ~basic_storage()
       = delete;
 
     template<typename... paramsT>
@@ -270,7 +275,7 @@ class storage_handle
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
-        noadl::destroy_at(noadl::unfancy(qstor));
+        qstor->destroy_elements();
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 
