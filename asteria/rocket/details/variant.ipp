@@ -7,32 +7,34 @@
 
 namespace details_variant {
 
-template<size_t indexT, typename targetT, typename... altsT>
+// Get the index of `T` in `S`.
+template<size_t N, typename T, typename... S>
 struct type_finder
   { };
 
-template<size_t indexT, typename targetT, typename firstT, typename... restT>
-struct type_finder<indexT, targetT, firstT, restT...>
-  : type_finder<indexT + 1, targetT, restT...>  // recursive
+template<size_t N, typename T, typename... S>
+struct type_finder<N, T, T, S...>
+  : integral_constant<size_t, N>  // found
   { };
 
-template<size_t indexT, typename targetT, typename... restT>
-struct type_finder<indexT, targetT, targetT, restT...>
-  : integral_constant<size_t, indexT>  // found
+template<size_t N, typename T, typename M, typename... S>
+struct type_finder<N, T, M, S...>
+  : type_finder<N + 1, T, S...>
   { };
 
-template<size_t indexT, typename... altsT>
+// Get the `N`-th type in `S`.
+template<size_t N, typename... S>
 struct type_getter
   { };
 
-template<size_t indexT, typename firstT, typename... restT>
-struct type_getter<indexT, firstT, restT...>
-  : type_getter<indexT - 1, restT...>  // recursive
+template<typename M, typename... S>
+struct type_getter<0, M, S...>
+  : identity<M>  // found
   { };
 
-template<typename firstT, typename... restT>
-struct type_getter<0, firstT, restT...>
-  : identity<firstT>  // found
+template<size_t N, typename M, typename... S>
+struct type_getter<N, M, S...>
+  : type_getter<N - 1, S...>
   { };
 
 // In a `catch` block that is conditionally unreachable, direct use of `throw` is
