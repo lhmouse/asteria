@@ -41,7 +41,7 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;  }
 
     size_type nblk;
-    value_type data[];
+    value_type data[0];
 
     basic_storage(const allocator_type& xalloc, size_type xnblk)
       noexcept
@@ -54,9 +54,7 @@ struct basic_storage
 #endif
       }
 
-    void
-    destroy_elements()
-      noexcept
+    ~basic_storage()
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->data), '~',
@@ -69,9 +67,6 @@ struct basic_storage
 
     basic_storage&
     operator=(const basic_storage&)
-      = delete;
-
-    ~basic_storage()
       = delete;
   };
 
@@ -145,7 +140,7 @@ class storage_handle
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
-        qstor->destroy_elements();
+        noadl::destroy_at(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 

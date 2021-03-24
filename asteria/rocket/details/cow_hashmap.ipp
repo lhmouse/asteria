@@ -149,7 +149,7 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type);  }
 
     size_type nblk;
-    bucket_type bkts[];
+    bucket_type bkts[0];
 
     basic_storage(unknown_function* xdtor, const allocator_type& xalloc,
                   const hasher& hf, size_type xnblk)
@@ -167,9 +167,7 @@ struct basic_storage
           noadl::construct_at(this->bkts + k);
       }
 
-    void
-    destroy_elements()
-      noexcept
+    ~basic_storage()
       {
         // Destroy all buckets.
         size_t nbkts = this->bucket_count();
@@ -192,9 +190,6 @@ struct basic_storage
 
     basic_storage&
     operator=(const basic_storage&)
-      = delete;
-
-    ~basic_storage()
       = delete;
 
     constexpr
@@ -449,7 +444,7 @@ class storage_handle
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
-        qstor->destroy_elements();
+        noadl::destroy_at(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 
