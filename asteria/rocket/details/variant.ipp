@@ -37,101 +37,13 @@ struct type_getter<N, M, S...>
   : type_getter<N - 1, S...>
   { };
 
-// In a `catch` block that is conditionally unreachable, direct use of `throw` is
-// subject to compiler warnings. Wrapping the `throw` expression in a function could
-// silence this warning.
+// In a `catch` block that is conditionally unreachable, direct use of `throw`
+// is subject to compiler warnings. Wrapping the `throw` expression in a function
+// silences this warning.
 [[noreturn]] ROCKET_FORCED_INLINE_FUNCTION
 void
 rethrow_current_exception()
   { throw;  }
-
-template<uint32_t... M>
-struct u32seq
-  { };
-
-// Prepend `M` to `N...` to create a new sequence.
-template<uint32_t M, typename S>
-struct prepend_u32seq;
-
-template<uint32_t M, uint32_t... N>
-struct prepend_u32seq<M, u32seq<N...>>
-  : identity<u32seq<M, N...>>
-  { };
-
-// Pack bools as bytes.
-template<typename S>
-struct pack_bool
-  : identity<u32seq<>>
-  { };
-
-template<uint32_t A>
-struct pack_bool<u32seq<A>>
-  : identity<u32seq<(A)>>
-  { };
-
-template<uint32_t A, uint32_t B>
-struct pack_bool<u32seq<A, B>>
-  : identity<u32seq<(A | B << 1)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C>
-struct pack_bool<u32seq<A, B, C>>
-  : identity<u32seq<(A | B << 1 | C << 2)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C, uint32_t D>
-struct pack_bool<u32seq<A, B, C, D>>
-  : identity<u32seq<(A | B << 1 | C << 2 | D << 3)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C, uint32_t D, uint32_t E>
-struct pack_bool<u32seq<A, B, C, D, E>>
-  : identity<u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C, uint32_t D, uint32_t E, uint32_t F>
-struct pack_bool<u32seq<A, B, C, D, E, F>>
-  : identity<u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C, uint32_t D, uint32_t E, uint32_t F, uint32_t G>
-struct pack_bool<u32seq<A, B, C, D, E, F, G>>
-  : identity<u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5 | G << 6)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C, uint32_t D, uint32_t E, uint32_t F, uint32_t G,
-         uint32_t H, uint32_t... N>
-struct pack_bool<u32seq<A, B, C, D, E, F, G, H, N...>>
-  : prepend_u32seq<(A | B << 1 | C << 2 | D << 3 | E << 4 | F << 5 | G << 6 | H << 7),
-                   typename pack_bool<u32seq<N...>>::type>
-  { };
-
-// Pack bytes as 32-bit integers in little endian.
-template<typename S>
-struct pack_byte
-  : identity<u32seq<>>
-  { };
-
-template<uint32_t A>
-struct pack_byte<u32seq<A>>
-  : identity<u32seq<(A)>>
-  { };
-
-template<uint32_t A, uint32_t B>
-struct pack_byte<u32seq<A, B>>
-  : identity<u32seq<(A | B << 8)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C>
-struct pack_byte<u32seq<A, B, C>>
-  : identity<u32seq<(A | B << 8 | C << 16)>>
-  { };
-
-template<uint32_t A, uint32_t B, uint32_t C, uint32_t D, uint32_t... N>
-struct pack_byte<u32seq<A, B, C, D, N...>>
-  : prepend_u32seq<(A | B << 8 | C << 16 | D << 24),
-                   typename pack_byte<u32seq<N...>>::type>
-  { };
 
 // Store packed integers into an array.
 template<bool... B>
@@ -141,24 +53,21 @@ class const_bitset
     uint32_t m_words[(sizeof...(B) + 31) / 32];
 
   public:
-    template<uint32_t... M>
-    explicit constexpr
-    const_bitset(u32seq<M...>)
-      noexcept
-      : m_words{ M... }
-      { }
-
     constexpr
     const_bitset()
       noexcept
-      : const_bitset(typename pack_byte<typename pack_bool<u32seq<B...>>::type>::type())
-      { }
+      : m_words{ }
+      {
+        constexpr uint32_t ext_bits[] = { B... };
+        for(size_t k = 0;  k != sizeof...(B);  ++k)
+          this->m_words[k / 32] |= ext_bits[k] << k % 32;
+      }
 
     constexpr
     bool
     operator[](size_t k)
       const noexcept
-      { return this->m_words[k / 32] & (uint32_t(1) << k % 32);  }
+      { return this->m_words[k / 32] & UINT32_C(1) << k % 32;  }
   };
 
 template<typename targetT, targetT*... ptrsT>
@@ -178,7 +87,7 @@ class const_func_table
     constexpr
     typename ::std::result_of<targetT*(argsT&&...)>::type
     operator()(size_t k, argsT&&... args)
-      const noexcept(noexcept(::std::declval<targetT*>()(args...)))
+      const
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
   };
 
