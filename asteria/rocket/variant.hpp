@@ -426,7 +426,7 @@ class variant
         auto index_new = other.m_index;
         if(index_old == index_new) {
           // Swap both alternatives in place.
-          details_variant::dispatch_swap<alternativesT...>(index_old, this->m_stor, other.m_stor);
+          details_variant::dispatch_xswap<alternativesT...>(index_old, this->m_stor, other.m_stor);
         }
         else {
           // Swap active alternatives using an indeterminate buffer.
