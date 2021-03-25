@@ -209,7 +209,7 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_copy_constructible<altsT>::value...)>();
+                      is_trivially_copy_constructible<altsT>::value)...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -234,7 +234,7 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_move_constructible<altsT>::value...)>();
+                      is_trivially_move_constructible<altsT>::value)...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -259,7 +259,7 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_copyable<altsT>::value...)>();
+                      is_trivially_copyable<altsT>::value)...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -284,7 +284,7 @@ dispatch_destroy(size_t k, void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_destructible<altsT>::value...)>();
+                      is_trivially_destructible<altsT>::value)...>();
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*),
@@ -301,7 +301,7 @@ dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_copy_assignable<altsT>::value...)>();
+                      is_trivially_copy_assignable<altsT>::value)...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -329,7 +329,7 @@ dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_move_assignable<altsT>::value...)>();
+                      is_trivially_move_assignable<altsT>::value)...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -357,7 +357,7 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
         const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_move_assignable<altsT>::value...)>();
+                      is_trivially_move_assignable<altsT>::value)...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
