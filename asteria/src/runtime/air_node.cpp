@@ -1044,23 +1044,20 @@ struct AIR_Traits_push_global_reference
       }
 
     static
-    Sparam_sloc_name
+    phsh_string
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_global_reference& altr)
       {
-        Sparam_sloc_name sp;
-        sp.sloc = altr.sloc;
-        sp.name = altr.name;
-        return sp;
+        return altr.name;
       }
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, const phsh_string& name)
       {
         // Look for the name in the global context.
-        auto qref = ctx.global().get_named_reference_opt(sp.name);
+        auto qref = ctx.global().get_named_reference_opt(name);
         if(!qref)
-          ASTERIA_THROW("Undeclared identifier `$1`", sp.name);
+          ASTERIA_THROW("Undeclared identifier `$1`", name);
 
         // Push a copy of it.
         ctx.stack().emplace_back(*qref);
@@ -1090,33 +1087,31 @@ struct AIR_Traits_push_local_reference
       }
 
     static
-    Sparam_sloc_name
+    phsh_string
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
       {
-        Sparam_sloc_name sp;
-        sp.sloc = altr.sloc;
-        sp.name = altr.name;
-        return sp;
+        return altr.name;
       }
 
     static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_name& sp)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const phsh_string& name)
       {
         // Get the context.
         Executive_Context* qctx = &ctx;
-        ::rocket::ranged_for(UINT32_C(0), up.s32,
-                             [&](uint32_t) { qctx = qctx->get_parent_opt();  });
-        ROCKET_ASSERT(qctx);
+        for(uint32_t k = 0;  k != up.s32;  ++k) {
+          qctx = qctx->get_parent_opt();
+          ROCKET_ASSERT(qctx);
+        }
 
         // Look for the name in the context.
-        auto qref = qctx->get_named_reference_opt(sp.name);
+        auto qref = qctx->get_named_reference_opt(name);
         if(!qref)
-          ASTERIA_THROW("Undeclared identifier `$1`", sp.name);
+          ASTERIA_THROW("Undeclared identifier `$1`", name);
 
         // Check if control flow has bypassed its initialization.
         if(qref->is_uninit())
-          ASTERIA_THROW("Use of bypassed variable or reference `$1`", sp.name);
+          ASTERIA_THROW("Use of bypassed variable or reference `$1`", name);
 
         // Push a copy of it.
         ctx.stack().emplace_back(*qref);
