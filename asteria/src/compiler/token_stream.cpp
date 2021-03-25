@@ -18,8 +18,12 @@ class Line_Reader
     cow_string m_file;
     size_t m_line = 0;
 
+    // current line
     size_t m_off = 0;
     cow_string m_str;
+
+    // string cache
+    cow_dictionary<bool> m_csc_cache;
 
   public:
     explicit
@@ -87,9 +91,10 @@ class Line_Reader
     data(size_t add = 0)
       const
       {
-        if(add > this->navail())
+        if(add > this->navail()) {
           ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
+        }
         return this->m_str.data() + (this->m_off + add);
       }
 
@@ -97,27 +102,36 @@ class Line_Reader
     peek(size_t add = 0)
       const noexcept
       {
-        if(add > this->navail())
+        if(add > this->navail()) {
           return 0;
+        }
         return this->m_str[this->m_off + add];
       }
 
     void
     consume(size_t add)
       {
-        if(add > this->navail())
+        if(add > this->navail()) {
           ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
+        }
         this->m_off += add;
       }
 
     void
     rewind(size_t off = 0)
       {
-        if(off > this->m_str.size())
+        if(off > this->m_str.size()) {
           ASTERIA_THROW("Invalid offset within current line (`$1` > `$2`)",
                         off, this->m_str.size());
+        }
         this->m_off = off;
+      }
+
+    const phsh_string&
+    cache_string(cow_string&& val)
+      {
+        return this->m_csc_cache.try_emplace(::std::move(val)).first->first;
       }
   };
 
@@ -652,7 +666,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       }
     }
 
-    Token::S_string_literal xtoken = { ::std::move(val) };
+    Token::S_string_literal xtoken = { reader.cache_string(::std::move(val)) };
     return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
 
@@ -743,7 +757,10 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
     }
 
     // Accept a plain identifier.
-    Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
+    cow_string name;
+    name.assign(reader.data(), tlen);
+
+    Token::S_identifier xtoken = { reader.cache_string(::std::move(name)) };
     return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
 
