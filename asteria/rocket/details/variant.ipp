@@ -226,7 +226,7 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
 
     // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, dptr, sptr);
+      return nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -253,7 +253,7 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
 
     // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, dptr, sptr);
+      return nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -280,7 +280,7 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
 
     // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, dptr, sptr);
+      return nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -298,7 +298,7 @@ dispatch_destroy(size_t k, void* sptr)
 
     // Call the destructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, sptr);
+      return nt_funcs(k, sptr);
   }
 
 template<typename... altsT>
