@@ -51,29 +51,55 @@ struct max_size<M, N, S...>
   : max_size<(N < M) ? M : N, S...>
   { };
 
-// Store packed integers into an array.
-template<bool... B>
+// Pack bits as integers.
+template<size_t N, typename C, uint32_t... S>
+struct packed_words;
+
+template<uint32_t... M, uint32_t... S>
+struct packed_words<0, integer_sequence<uint32_t, M...>, S...>
+  {
+    uint32_t data[sizeof...(M)] = { M... };
+  };
+
+template<size_t N, uint32_t... M, uint32_t a0, uint32_t a1, uint32_t a2,
+         uint32_t a3, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t a7,
+         uint32_t b0, uint32_t b1, uint32_t b2, uint32_t b3, uint32_t b4,
+         uint32_t b5, uint32_t b6, uint32_t b7, uint32_t c0, uint32_t c1,
+         uint32_t c2, uint32_t c3, uint32_t c4, uint32_t c5, uint32_t c6,
+         uint32_t c7, uint32_t d0, uint32_t d1, uint32_t d2, uint32_t d3,
+         uint32_t d4, uint32_t d5, uint32_t d6, uint32_t d7, uint32_t... S>
+struct packed_words<N, integer_sequence<uint32_t, M...>,
+         a0,a1,a2,a3,a4,a5,a6,a7, b0,b1,b2,b3,b4,b5,b6,b7,
+         c0,c1,c2,c3,c4,c5,c6,c7, d0,d1,d2,d3,d4,d5,d6,d7, S...>
+  : packed_words<
+         N - 1, integer_sequence<uint32_t, M...,
+         (a0|a1<<1|a2<<2|a3<<3|a4<<4|a5<<5|a6<<6|a7<<7|b0<<8|b1<<9|b2<<10|
+          b3<<11|b4<<12|b5<<13|b6<<14|b7<<15|c0<<16|c1<<17|c2<<18|c3<<19|
+          c4<<20|c5<<21|c6<<22|c7<<23|d0<<24|d1<<25|d2<<26|d3<<27|d4<<28|
+          d5<<29|d6<<30|d7<<31)>, S...>
+  { };
+
+// These are jump tables.
+template<bool... bitsT>
 class const_bitset
   {
   private:
-    uint32_t m_words[(sizeof...(B) + 31) / 32];
+    packed_words<(sizeof...(bitsT)+31)/32,
+        integer_sequence<uint32_t>, bitsT...,
+        0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0> m_seq;
 
   public:
     constexpr
     const_bitset()
       noexcept
-      : m_words{ }
-      {
-        constexpr uint32_t ext_bits[] = { B... };
-        for(size_t k = 0;  k != sizeof...(B);  ++k)
-          this->m_words[k / 32] |= ext_bits[k] << k % 32;
-      }
+      { }
 
     constexpr
     bool
     operator[](size_t k)
       const noexcept
-      { return this->m_words[k / 32] & UINT32_C(1) << k % 32;  }
+      { return this->m_seq.data[k / 32] & UINT32_C(1) << k % 32;  }
   };
 
 template<typename targetT, targetT*... ptrsT>
