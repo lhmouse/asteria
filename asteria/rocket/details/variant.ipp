@@ -220,9 +220,11 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
         const_func_table<void (void*, const void*),
                          wrapped_copy_construct<altsT>...>();
 
+    // Perform an unconditional bytewise copy for constructors.
     if(t_nbytes != 0)
       ::std::memcpy(dptr, sptr, t_nbytes);
 
+    // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
       nt_funcs(k, dptr, sptr);
   }
@@ -245,9 +247,11 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
         const_func_table<void (void*, void*),
                          wrapped_move_construct<altsT>...>();
 
+    // Perform an unconditional bytewise copy for constructors.
     if(t_nbytes != 0)
       ::std::memcpy(dptr, sptr, t_nbytes);
 
+    // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
       nt_funcs(k, dptr, sptr);
   }
@@ -270,9 +274,11 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
         const_func_table<void (void*, void*),
                          wrapped_move_then_destroy<altsT>...>();
 
+    // Perform an unconditional bytewise copy for constructors.
     if(t_nbytes != 0)
       ::std::memcpy(dptr, sptr, t_nbytes);
 
+    // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
       nt_funcs(k, dptr, sptr);
   }
@@ -290,7 +296,8 @@ dispatch_destroy(size_t k, void* sptr)
         const_func_table<void (void*),
                          wrapped_destroy<altsT>...>();
 
-    if(ROCKET_UNEXPECT(trivial[k]))
+    // Call the destructor, only if the type is non-trivial.
+    if(ROCKET_UNEXPECT(!trivial[k]))
       nt_funcs(k, sptr);
   }
 
@@ -312,14 +319,17 @@ dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
         const_func_table<void (void*, const void*),
                          wrapped_copy_assign<altsT>...>();
 
+    // Don't bother writing overlapped regions.
     if(ROCKET_UNEXPECT(dptr == sptr))
       return;
 
+    // If the type is non-trivial, call the assignment operator.
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      return nt_funcs(k, dptr, sptr);
+
+    // Perform a bytewise copy for trivial types.
     if(t_nbytes != 0)
       ::std::memcpy(dptr, sptr, t_nbytes);
-
-    if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -340,14 +350,17 @@ dispatch_move_assign(size_t k, void* dptr, void* sptr)
         const_func_table<void (void*, void*),
                          wrapped_move_assign<altsT>...>();
 
+    // Don't bother writing overlapped regions.
     if(ROCKET_UNEXPECT(dptr == sptr))
       return;
 
+    // If the type is non-trivial, call the assignment operator.
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      return nt_funcs(k, dptr, sptr);
+
+    // Perform a bytewise copy for trivial types.
     if(t_nbytes != 0)
       ::std::memcpy(dptr, sptr, t_nbytes);
-
-    if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -368,18 +381,21 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
         const_func_table<void (void*, void*),
                          wrapped_xswap<altsT>...>();
 
+    // Don't bother writing overlapped regions.
     if(ROCKET_UNEXPECT(dptr == sptr))
       return;
 
+    // If the type is non-trivial, call the swap function.
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      return nt_funcs(k, dptr, sptr);
+
+    // Perform a bytewise swap for trivial types.
     if(t_nbytes != 0)
       wrapped_xswap<typename aligned_union<0,
               typename conditional<
                   is_trivially_move_assignable<altsT>::value,
                   altsT, char>::type...
                 >::type>(dptr, sptr);
-
-    if(ROCKET_UNEXPECT(!trivial[k]))
-      nt_funcs(k, dptr, sptr);
   }
 
 }  // namespace details_variant

@@ -369,9 +369,9 @@ class variant
     visit(visitorT&& visitor)
       const
       {
-        static constexpr auto table = details_variant::const_func_table<
-                  void (const void*, visitorT&&),
-                  details_variant::wrapped_visit<const alternativesT>...>();
+        static constexpr auto nt_funcs =
+             details_variant::const_func_table<void (const void*, visitorT&&),
+                         details_variant::wrapped_visit<const alternativesT>...>();
 
         table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
@@ -380,9 +380,9 @@ class variant
     void
     visit(visitorT&& visitor)
       {
-        static constexpr auto table = details_variant::const_func_table<
-                  void (void*, visitorT&&),
-                  details_variant::wrapped_visit<alternativesT>...>();
+        static constexpr auto nt_funcs =
+             details_variant::const_func_table<void (void*, visitorT&&),
+                         details_variant::wrapped_visit<alternativesT>...>();
 
         table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
