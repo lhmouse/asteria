@@ -29,7 +29,7 @@ struct type_getter
 
 template<typename M, typename... S>
 struct type_getter<0, M, S...>
-  : identity<M>  // found
+  : enable_if<true, M>  // found
   { };
 
 template<size_t N, typename M, typename... S>
@@ -80,13 +80,12 @@ template<typename targetT, targetT*... ptrsT>
 class const_func_table
   {
   private:
-    targetT* m_ptrs[sizeof...(ptrsT)];
+    targetT* m_ptrs[sizeof...(ptrsT)] = { ptrsT... };
 
   public:
     constexpr
     const_func_table()
       noexcept
-      : m_ptrs{ ptrsT... }
       { }
 
     template<typename... argsT>
