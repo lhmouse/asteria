@@ -45,6 +45,8 @@ do_xprobe(const rcptr<Variable>& var)
                             reinterpret_cast<uintptr_t>(var.get()));
     auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
                             [&](const Bucket& r) { return r.kstor[0] == var;  });
+
+    // The load factor is kept <= 0.5 so there must always be a bucket available.
     ROCKET_ASSERT(qbkt);
     return qbkt;
   }
