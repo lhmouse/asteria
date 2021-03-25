@@ -210,24 +210,20 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
     static constexpr auto trivial =
         const_bitset<is_trivially_copy_constructible<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k])) {
-      // Get the maximum possible size of trivial storage.
-      static constexpr auto nbytes =
-          max_size<(sizeof(altsT) *
+    static constexpr auto t_nbytes =
+        max_size<(sizeof(altsT) *
               !is_empty<altsT>::value *
               is_trivially_copy_constructible<altsT>::value)...>::value;
 
-      if(nbytes != 0)
-        ::std::memcpy(dptr, sptr, nbytes);
-    }
-    else {
-      // Use a jump table for non-trivial types.
-      static constexpr auto funcs =
-          const_func_table<void (void*, const void*),
+    static constexpr auto nt_funcs =
+        const_func_table<void (void*, const void*),
                          wrapped_copy_construct<altsT>...>();
 
-      funcs(k, dptr, sptr);
-    }
+    if(t_nbytes != 0)
+      ::std::memcpy(dptr, sptr, t_nbytes);
+
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -238,24 +234,20 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
     static constexpr auto trivial =
         const_bitset<is_trivially_move_constructible<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k])) {
-      // Get the maximum possible size of trivial storage.
-      static constexpr auto nbytes =
-          max_size<(sizeof(altsT) *
+    static constexpr auto t_nbytes =
+        max_size<(sizeof(altsT) *
               !is_empty<altsT>::value *
               is_trivially_move_constructible<altsT>::value)...>::value;
 
-      if(nbytes != 0)
-        ::std::memcpy(dptr, sptr, nbytes);
-    }
-    else {
-      // Use a jump table for non-trivial types.
-      static constexpr auto funcs =
-          const_func_table<void (void*, void*),
+    static constexpr auto nt_funcs =
+        const_func_table<void (void*, void*),
                          wrapped_move_construct<altsT>...>();
 
-      funcs(k, dptr, sptr);
-    }
+    if(t_nbytes != 0)
+      ::std::memcpy(dptr, sptr, t_nbytes);
+
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -266,24 +258,20 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
     static constexpr auto trivial =
         const_bitset<is_trivially_copyable<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k])) {
-      // Get the maximum possible size of trivial storage.
-      static constexpr auto nbytes =
-          max_size<(sizeof(altsT) *
+    static constexpr auto t_nbytes =
+        max_size<(sizeof(altsT) *
               !is_empty<altsT>::value *
               is_trivially_copyable<altsT>::value)...>::value;
 
-      if(nbytes != 0)
-        ::std::memcpy(dptr, sptr, nbytes);
-    }
-    else {
-      // Use a jump table for non-trivial types.
-      static constexpr auto funcs =
-          const_func_table<void (void*, void*),
+    static constexpr auto nt_funcs =
+        const_func_table<void (void*, void*),
                          wrapped_move_then_destroy<altsT>...>();
 
-      funcs(k, dptr, sptr);
-    }
+    if(t_nbytes != 0)
+      ::std::memcpy(dptr, sptr, t_nbytes);
+
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -294,15 +282,12 @@ dispatch_destroy(size_t k, void* sptr)
     static constexpr auto trivial =
         const_bitset<is_trivially_destructible<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k]))
-      return;
-
-    // Use a jump table for non-trivial types.
-    static constexpr auto funcs =
+    static constexpr auto nt_funcs =
         const_func_table<void (void*),
                          wrapped_destroy<altsT>...>();
 
-    funcs(k, sptr);
+    if(ROCKET_UNEXPECT(trivial[k]))
+      nt_funcs(k, sptr);
   }
 
 template<typename... altsT>
@@ -310,29 +295,26 @@ ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
-    if(ROCKET_UNEXPECT(dptr == sptr))
-      return;
-
     static constexpr auto trivial =
         const_bitset<is_trivially_copy_assignable<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k])) {
-      // Get the maximum possible size of trivial storage.
-      static constexpr auto nbytes =
-          max_size<(sizeof(altsT) *
+    static constexpr auto t_nbytes =
+        max_size<(sizeof(altsT) *
               !is_empty<altsT>::value *
               is_trivially_copy_assignable<altsT>::value)...>::value;
 
-      ::std::memcpy(dptr, sptr, nbytes);
-    }
-    else {
-      // Use a jump table for non-trivial types.
-      static constexpr auto funcs =
-          const_func_table<void (void*, const void*),
+    static constexpr auto nt_funcs =
+        const_func_table<void (void*, const void*),
                          wrapped_copy_assign<altsT>...>();
 
-      funcs(k, dptr, sptr);
-    }
+    if(ROCKET_UNEXPECT(dptr == sptr))
+      return;
+
+    if(t_nbytes != 0)
+      ::std::memcpy(dptr, sptr, t_nbytes);
+
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -340,29 +322,26 @@ ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
-    if(ROCKET_UNEXPECT(dptr == sptr))
-      return;
-
     static constexpr auto trivial =
         const_bitset<is_trivially_move_assignable<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k])) {
-      // Get the maximum possible size of trivial storage.
-      static constexpr auto nbytes =
-          max_size<(sizeof(altsT) *
+    static constexpr auto t_nbytes =
+        max_size<(sizeof(altsT) *
               !is_empty<altsT>::value *
               is_trivially_move_assignable<altsT>::value)...>::value;
 
-      ::std::memcpy(dptr, sptr, nbytes);
-    }
-    else {
-      // Use a jump table for non-trivial types.
-      static constexpr auto funcs =
-          const_func_table<void (void*, void*),
+    static constexpr auto nt_funcs =
+        const_func_table<void (void*, void*),
                          wrapped_move_assign<altsT>...>();
 
-      funcs(k, dptr, sptr);
-    }
+    if(ROCKET_UNEXPECT(dptr == sptr))
+      return;
+
+    if(t_nbytes != 0)
+      ::std::memcpy(dptr, sptr, t_nbytes);
+
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      nt_funcs(k, dptr, sptr);
   }
 
 template<typename... altsT>
@@ -370,34 +349,30 @@ ROCKET_FORCED_INLINE_FUNCTION
 void
 dispatch_xswap(size_t k, void* dptr, void* sptr)
   {
-    if(ROCKET_UNEXPECT(dptr == sptr))
-      return;
-
     static constexpr auto trivial =
         const_bitset<is_trivially_move_assignable<altsT>::value...>();
 
-    if(ROCKET_EXPECT(trivial[k])) {
-      // Get the maximum possible size of trivial storage.
-      static constexpr auto nbytes =
-          max_size<(sizeof(altsT) *
+    static constexpr auto t_nbytes =
+        max_size<(sizeof(altsT) *
               !is_empty<altsT>::value *
               is_trivially_move_assignable<altsT>::value)...>::value;
 
-      if(nbytes != 0)
-        wrapped_xswap<typename aligned_union<0,
+    static constexpr auto nt_funcs =
+        const_func_table<void (void*, void*),
+                         wrapped_xswap<altsT>...>();
+
+    if(ROCKET_UNEXPECT(dptr == sptr))
+      return;
+
+    if(t_nbytes != 0)
+      wrapped_xswap<typename aligned_union<0,
               typename conditional<
                   is_trivially_move_assignable<altsT>::value,
                   altsT, char>::type...
                 >::type>(dptr, sptr);
-    }
-    else {
-      // Use a jump table for non-trivial types.
-      static constexpr auto funcs =
-          const_func_table<void (void*, void*),
-                           wrapped_xswap<altsT>...>();
 
-      funcs(k, dptr, sptr);
-    }
+    if(ROCKET_UNEXPECT(!trivial[k]))
+      nt_funcs(k, dptr, sptr);
   }
 
 }  // namespace details_variant
