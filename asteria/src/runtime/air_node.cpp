@@ -4948,9 +4948,10 @@ rebind_opt(Abstract_Context& ctx)
         // Get the context.
         // Don't bind references in analytic contexts.
         Abstract_Context* qctx = &ctx;
-        ::rocket::ranged_for(UINT32_C(0), altr.depth,
-                             [&](uint32_t) { qctx = qctx->get_parent_opt();  });
-        ROCKET_ASSERT(qctx);
+        for(uint32_t k = 0;  k != altr.depth;  ++k) {
+          qctx = qctx->get_parent_opt();
+          ROCKET_ASSERT(qctx);
+        }
         if(qctx->is_analytic())
           return nullopt;
 
