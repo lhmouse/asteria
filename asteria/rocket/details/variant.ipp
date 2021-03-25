@@ -208,8 +208,7 @@ void
 dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_copy_constructible<altsT>::value)...>();
+        const_bitset<is_trivially_copy_constructible<altsT>::value...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -221,12 +220,16 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
                          wrapped_copy_construct<altsT>...>();
 
     // Perform an unconditional bytewise copy for constructors.
-    if(t_nbytes != 0)
+    if(t_nbytes - 1 < 64)
       ::std::memcpy(dptr, sptr, t_nbytes);
 
     // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
       return nt_funcs(k, dptr, sptr);
+
+    // Perform a bytewise copy for trivial types.
+    if(t_nbytes > 64)
+      ::std::memcpy(dptr, sptr, t_nbytes);
   }
 
 template<typename... altsT>
@@ -235,8 +238,7 @@ void
 dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_move_constructible<altsT>::value)...>();
+        const_bitset<is_trivially_move_constructible<altsT>::value...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -248,12 +250,16 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
                          wrapped_move_construct<altsT>...>();
 
     // Perform an unconditional bytewise copy for constructors.
-    if(t_nbytes != 0)
+    if(t_nbytes - 1 < 64)
       ::std::memcpy(dptr, sptr, t_nbytes);
 
     // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
       return nt_funcs(k, dptr, sptr);
+
+    // Perform a bytewise copy for trivial types.
+    if(t_nbytes > 64)
+      ::std::memcpy(dptr, sptr, t_nbytes);
   }
 
 template<typename... altsT>
@@ -262,8 +268,7 @@ void
 dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_copyable<altsT>::value)...>();
+        const_bitset<is_trivially_copyable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -275,12 +280,16 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
                          wrapped_move_then_destroy<altsT>...>();
 
     // Perform an unconditional bytewise copy for constructors.
-    if(t_nbytes != 0)
+    if(t_nbytes - 1 < 64)
       ::std::memcpy(dptr, sptr, t_nbytes);
 
     // Call the constructor, only if the type is non-trivial.
     if(ROCKET_UNEXPECT(!trivial[k]))
       return nt_funcs(k, dptr, sptr);
+
+    // Perform a bytewise copy for trivial types.
+    if(t_nbytes > 64)
+      ::std::memcpy(dptr, sptr, t_nbytes);
   }
 
 template<typename... altsT>
@@ -289,8 +298,7 @@ void
 dispatch_destroy(size_t k, void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_destructible<altsT>::value)...>();
+        const_bitset<is_trivially_destructible<altsT>::value...>();
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*),
@@ -307,8 +315,7 @@ void
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_copy_assignable<altsT>::value)...>();
+        const_bitset<is_trivially_copy_assignable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -338,8 +345,7 @@ void
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_move_assignable<altsT>::value)...>();
+        const_bitset<is_trivially_move_assignable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
@@ -369,8 +375,7 @@ void
 dispatch_xswap(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
-        const_bitset<((sizeof(altsT) <= 128) &&
-                      is_trivially_move_assignable<altsT>::value)...>();
+        const_bitset<is_trivially_move_assignable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
         max_size<(sizeof(altsT) *
