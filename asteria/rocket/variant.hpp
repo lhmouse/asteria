@@ -50,14 +50,20 @@ class variant
     const typename alternative_at<indexT>::type*
     do_cast_storage()
       const noexcept
-      { return reinterpret_cast<const typename alternative_at<indexT>::type*>(this->m_stor);  }
+      {
+        return reinterpret_cast<const typename alternative_at<indexT>::type*>(
+                                  this->m_stor);
+      }
 
     template<size_t indexT>
     ROCKET_PURE_FUNCTION
     typename alternative_at<indexT>::type*
     do_cast_storage()
       noexcept
-      { return reinterpret_cast<typename alternative_at<indexT>::type*>(this->m_stor);  }
+      {
+        return reinterpret_cast<typename alternative_at<indexT>::type*>(
+                                  this->m_stor);
+      }
 
   public:
     // 23.7.3.1, constructors
@@ -77,7 +83,8 @@ class variant
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
-        noadl::construct_at(this->do_cast_storage<index_new>(), ::std::forward<paramT>(param));
+        noadl::construct_at(this->do_cast_storage<index_new>(),
+            ::std::forward<paramT>(param));
         this->m_index = index_new;
       }
 
@@ -186,7 +193,8 @@ class variant
         }
         else if(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value) {
           // Destroy the old alternative.
-          details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
+          details_variant::dispatch_destroy<alternativesT...>(
+                index_old, this->m_stor);
           // Copy-construct the alternative in place.
           details_variant::dispatch_copy_construct<alternativesT...>(
                 index_new, this->m_stor, other.m_stor);
@@ -227,7 +235,8 @@ class variant
         }
         else {
           // Move-construct the alternative in place.
-          details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
+          details_variant::dispatch_destroy<alternativesT...>(
+                index_old, this->m_stor);
           details_variant::dispatch_move_construct<alternativesT...>(
                 index_new, this->m_stor, other.m_stor);
           this->m_index = index_new;
@@ -240,7 +249,8 @@ class variant
       {
         auto index_old = this->m_index;
         // Destroy the active alternative in place.
-        details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
+        details_variant::dispatch_destroy<alternativesT...>(
+                index_old, this->m_stor);
 #ifdef ROCKET_DEBUG
         this->m_index = static_cast<decltype(m_index)>(0xBAD1BEEF);
         ::std::memset(this->m_stor, '@', sizeof(m_stor));
@@ -321,7 +331,8 @@ class variant
       {
         auto ptr = this->get<indexT>();
         if(!ptr)
-          this->do_throw_index_mismatch(indexT, typeid(typename alternative_at<indexT>::type));
+          this->do_throw_index_mismatch(indexT,
+                       typeid(typename alternative_at<indexT>::type));
         return *ptr;
       }
 
@@ -340,7 +351,8 @@ class variant
       {
         auto ptr = this->get<indexT>();
         if(!ptr)
-          this->do_throw_index_mismatch(indexT, typeid(typename alternative_at<indexT>::type));
+          this->do_throw_index_mismatch(indexT,
+                       typeid(typename alternative_at<indexT>::type));
         return *ptr;
       }
 
@@ -357,8 +369,10 @@ class variant
     visit(visitorT&& visitor)
       const
       {
-        static constexpr details_variant::const_func_table<void (const void*, visitorT&&),
-                                details_variant::wrapped_visit<const alternativesT>...> table;
+        static constexpr auto table = details_variant::const_func_table<
+                  void (const void*, visitorT&&),
+                  details_variant::wrapped_visit<const alternativesT>...>();
+
         table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
@@ -366,8 +380,10 @@ class variant
     void
     visit(visitorT&& visitor)
       {
-        static constexpr details_variant::const_func_table<void (void*, visitorT&&),
-                                details_variant::wrapped_visit<alternativesT>...> table;
+        static constexpr auto table = details_variant::const_func_table<
+                  void (void*, visitorT&&),
+                  details_variant::wrapped_visit<alternativesT>...>();
+
         table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
@@ -375,13 +391,16 @@ class variant
     template<size_t indexT, typename... paramsT>
     typename alternative_at<indexT>::type&
     emplace(paramsT&&... params)
-      noexcept(is_nothrow_constructible<typename alternative_at<indexT>::type, paramsT&&...>::value)
+      noexcept(is_nothrow_constructible<typename alternative_at<indexT>::type,
+                                        paramsT&&...>::value)
       {
         auto index_old = this->m_index;
         constexpr auto index_new = indexT;
-        if(is_nothrow_constructible<typename alternative_at<index_new>::type, paramsT&&...>::value) {
+        if(is_nothrow_constructible<typename alternative_at<index_new>::type,
+                                    paramsT&&...>::value) {
           // Destroy the old alternative.
-          details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
+          details_variant::dispatch_destroy<alternativesT...>(
+                      index_old, this->m_stor);
           // Construct the alternative in place.
           noadl::construct_at(this->do_cast_storage<index_new>(),
                               ::std::forward<paramsT>(params)...);
@@ -414,7 +433,8 @@ class variant
     emplace(paramsT&&... params)
       noexcept(is_nothrow_constructible<targetT, paramsT&&...>::value)
       {
-        return this->emplace<index_of<targetT>::value>(::std::forward<paramsT>(params)...);
+        return this->emplace<index_of<targetT>::value>(
+                         ::std::forward<paramsT>(params)...);
       }
 
     // 23.7.3.6, swap
@@ -426,7 +446,8 @@ class variant
         auto index_new = other.m_index;
         if(index_old == index_new) {
           // Swap both alternatives in place.
-          details_variant::dispatch_xswap<alternativesT...>(index_old, this->m_stor, other.m_stor);
+          details_variant::dispatch_xswap<alternativesT...>(
+                index_old, this->m_stor, other.m_stor);
         }
         else {
           // Swap active alternatives using an indeterminate buffer.
