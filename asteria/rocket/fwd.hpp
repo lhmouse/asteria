@@ -50,6 +50,8 @@ using ::std::initializer_list;
 using ::std::numeric_limits;
 using ::std::type_info;
 using ::std::nothrow_t;
+using ::std::integer_sequence;
+using ::std::index_sequence;
 
 using ::std::true_type;
 using ::std::false_type;
