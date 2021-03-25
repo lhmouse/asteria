@@ -84,10 +84,10 @@ template<bool... bitsT>
 class const_bitset
   {
   private:
-    packed_words<(sizeof...(bitsT)+31)/32,
-        integer_sequence<uint32_t>, bitsT...,
-        0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0> m_seq;
+    packed_words<(sizeof...(bitsT) + 31) / 32,
+        integer_sequence<uint32_t>,
+        bitsT..., 0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0> m_seq;
 
   public:
     constexpr
