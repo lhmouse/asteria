@@ -967,47 +967,6 @@ struct AIR_Traits_glvalue_to_prvalue
       }
   };
 
-struct AIR_Traits_push_immediate_null
-  {
-    // `up` is unused.
-    // `sp` is unused.
-
-    static
-    AIR_Status
-    execute(Executive_Context& ctx)
-      {
-        // Push a constant `null`.
-        Reference::S_constant xref = { };
-        ctx.stack().emplace_back(::std::move(xref));
-        return air_status_next;
-      }
-  };
-
-struct AIR_Traits_push_immediate_boolean
-  {
-    // `up` is the value to push.
-    // `sp` is unused.
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_immediate& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.s32 = altr.value.as_boolean();
-        return up;
-      }
-
-    static
-    AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
-      {
-        // Push a constant boolean.
-        Reference::S_constant xref = { V_boolean(up.s32) };
-        ctx.stack().emplace_back(::std::move(xref));
-        return air_status_next;
-      }
-  };
-
 struct AIR_Traits_push_immediate
   {
     // `up` is unused.
