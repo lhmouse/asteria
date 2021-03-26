@@ -224,12 +224,12 @@ class Reference
     bool
     is_lvalue()
       const noexcept
-      { return this->is_variable();  }
+      { return (1 << this->index()) & (1 << index_variable);  }
 
     bool
     is_rvalue()
       const noexcept
-      { return this->is_constant() || this->is_temporary();  }
+      { return (1 << this->index()) & (1 << index_constant | 1 << index_temporary);  }
 
     // A glvalue is an lvalue or a subobject of an rvalue.
     // A prvalue is an rvalue that is not a subobject.

@@ -202,7 +202,7 @@ class Value
     bool
     is_convertible_to_real()
       const noexcept
-      { return this->is_integer() || this->is_real();  }
+      { return (1 << this->type()) & (1 << type_integer | 1 << type_real);  }
 
     V_real
     convert_to_real()
