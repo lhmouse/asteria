@@ -392,9 +392,6 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
 
-    int64_t roffset = offset.value_or(0);
-    int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
-
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
@@ -404,25 +401,42 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
 
     // We return data that have been read as a byte string.
     V_string data;
-    ::ssize_t nread;
+    int64_t roffset = offset.value_or(0);
+    int64_t rlimit = limit.value_or(INT64_MAX);
 
-    // Don't read too many bytes at a time.
-    data.resize(static_cast<size_t>(rlimit));
-    if(offset) {
-      nread = ::pread(fd, data.mut_data(), data.size(), roffset);
-      if(nread < 0)
-        ASTERIA_THROW("Error reading file '$2'\n"
-                      "[`pread()` failed: $1]",
-                      format_errno(errno), path);
+    for(;;) {
+      // Don't read too many bytes at a time.
+      if(rlimit <= 0)
+        break;
+
+      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
+      ::ssize_t nread;
+      auto insert_pos = data.insert(data.end(), nbatch, '/');
+
+      if(offset) {
+        // Use `roffset`. The file must be seekable in this case.
+        nread = ::pread(fd, &*insert_pos, nbatch, roffset);
+        if(nread < 0)
+          ASTERIA_THROW("Error reading file '$2'\n"
+                        "[`pread()` failed: $1]",
+                        format_errno(errno), path);
+      }
+      else {
+        // Use the internal file pointer.
+        nread = ::read(fd, &*insert_pos, nbatch);
+        if(nread < 0)
+          ASTERIA_THROW("Error reading file '$2'\n"
+                        "[`read()` failed: $1]",
+                        format_errno(errno), path);
+      }
+      data.erase(insert_pos + nread, data.end());
+      roffset += nread;
+      rlimit -= nread;
+
+      // Check for end of file.
+      if(nread == 0)
+        break;
     }
-    else {
-      nread = ::read(fd, data.mut_data(), data.size());
-      if(nread < 0)
-        ASTERIA_THROW("Error reading file '$2'\n"
-                      "[`read()` failed: $1]",
-                      format_errno(errno), path);
-    }
-    data.erase(static_cast<size_t>(nread));
     return data;
   }
 
