@@ -1172,11 +1172,9 @@ struct AIR_Traits_branch_expression
       {
         // Check the value of the condition.
         if(ctx.stack().back().dereference_readonly().test())
-          // Execute the true branch and forward the status verbatim.
           return do_evaluate_subexpression(ctx, up.p8[0], sp.queues[0]);
-
-        // Execute the false branch and forward the status verbatim.
-        return do_evaluate_subexpression(ctx, up.p8[0], sp.queues[1]);
+        else
+          return do_evaluate_subexpression(ctx, up.p8[0], sp.queues[1]);
       }
   };
 
@@ -1216,11 +1214,9 @@ struct AIR_Traits_coalescence
       {
         // Check the value of the condition.
         if(!ctx.stack().back().dereference_readonly().is_null())
-          // Leave the condition on the stack.
           return air_status_next;
-
-        // Execute the null branch and forward the status verbatim.
-        return do_evaluate_subexpression(ctx, up.p8[0], queue);
+        else
+          return do_evaluate_subexpression(ctx, up.p8[0], queue);
       }
   };
 
