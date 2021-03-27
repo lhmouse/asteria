@@ -48,7 +48,7 @@ class Reference_Stack
     template<typename XRefT>
     ROCKET_NOINLINE
     Reference&
-    do_reallocate_emplace_back(XRefT&& xref)
+    do_reallocate_push_back(XRefT&& xref)
       {
         // Allocate a larger block of memory and then construct the new element
         // above the top. If the operation succeeds, replace the old block.
@@ -157,7 +157,7 @@ class Reference_Stack
     template<typename XRefT>
     ROCKET_FORCED_INLINE_FUNCTION
     Reference&
-    emplace_back(XRefT&& xref)
+    push_back(XRefT&& xref)
       {
         // If there is an initialized element above the top, reuse it.
         if(ROCKET_EXPECT(this->m_etop != this->m_einit)) {
@@ -176,7 +176,7 @@ class Reference_Stack
           return *ptr;
         }
 
-        return this->do_reallocate_emplace_back(::std::forward<XRefT>(xref));
+        return this->do_reallocate_push_back(::std::forward<XRefT>(xref));
       }
 
     Reference_Stack&

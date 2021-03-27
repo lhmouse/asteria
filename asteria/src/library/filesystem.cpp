@@ -483,9 +483,10 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
       // Call the function but discard its return value.
       stack.clear();
       Reference::S_temporary xref = { roffset };
-      stack.emplace_back(::std::move(xref));
+      stack.push_back(::std::move(xref));
       xref.val = ::std::move(data);
-      stack.emplace_back(::std::move(xref));
+      stack.push_back(::std::move(xref));
+
       Reference self = Reference::S_constant();
       callback.invoke(self, global, ::std::move(stack));
     }

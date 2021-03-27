@@ -338,7 +338,7 @@ struct AIR_Traits_declare_variable
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Push a copy of the reference onto the stack.
-        ctx.stack().emplace_back(::std::move(xref));
+        ctx.stack().push_back(::std::move(xref));
         return air_status_next;
       }
   };
@@ -985,7 +985,7 @@ struct AIR_Traits_push_immediate
       {
         // Push a constant.
         Reference::S_constant xref = { value };
-        ctx.stack().emplace_back(::std::move(xref));
+        ctx.stack().push_back(::std::move(xref));
         return air_status_next;
       }
   };
@@ -1019,7 +1019,7 @@ struct AIR_Traits_push_global_reference
           ASTERIA_THROW("Undeclared identifier `$1`", name);
 
         // Push a copy of it.
-        ctx.stack().emplace_back(*qref);
+        ctx.stack().push_back(*qref);
         return air_status_next;
       }
   };
@@ -1073,7 +1073,7 @@ struct AIR_Traits_push_local_reference
           ASTERIA_THROW("Use of bypassed variable or reference `$1`", name);
 
         // Push a copy of it.
-        ctx.stack().emplace_back(*qref);
+        ctx.stack().push_back(*qref);
         return air_status_next;
       }
   };
@@ -1095,7 +1095,7 @@ struct AIR_Traits_push_bound_reference
     execute(Executive_Context& ctx, const Reference& ref)
       {
         // Push a copy of the bound reference.
-        ctx.stack().emplace_back(ref);
+        ctx.stack().push_back(ref);
         return air_status_next;
       }
   };
@@ -1129,7 +1129,7 @@ struct AIR_Traits_define_function
 
         // Push the function as a temporary.
         Reference::S_temporary xref = { ::std::move(qtarget) };
-        ctx.stack().emplace_back(::std::move(xref));
+        ctx.stack().push_back(::std::move(xref));
         return air_status_next;
       }
   };
@@ -1261,7 +1261,7 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     }
 
     // Pack arguments for this proper tail call.
-    stack.emplace_back(::std::move(self));
+    stack.push_back(::std::move(self));
     auto ptca = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack));
 
     // Set the result, which will be unpacked outside this scope.
@@ -1287,7 +1287,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
       arg.dereference_readonly();
 
       // Push the argument verbatim.
-      alt_stack.emplace_back(::std::move(arg));
+      alt_stack.push_back(::std::move(arg));
     }
     ctx.stack().pop_back(nargs);
     return alt_stack;
@@ -1414,7 +1414,7 @@ struct AIR_Traits_push_unnamed_array
 
         // Push the array as a temporary.
         Reference::S_temporary xref = { ::std::move(array) };
-        ctx.stack().emplace_back(::std::move(xref));
+        ctx.stack().push_back(::std::move(xref));
         return air_status_next;
       }
   };
@@ -1454,7 +1454,7 @@ struct AIR_Traits_push_unnamed_object
 
         // Push the object as a temporary.
         Reference::S_temporary xref = { ::std::move(object) };
-        ctx.stack().emplace_back(::std::move(xref));
+        ctx.stack().push_back(::std::move(xref));
         return air_status_next;
       }
   };
@@ -4283,7 +4283,7 @@ struct AIR_Traits_variadic_call
             // Push all arguments backwards as temporaries.
             for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
               Reference::S_temporary xref = { ::std::move(*it) };
-              alt_stack.emplace_back(::std::move(xref));
+              alt_stack.push_back(::std::move(xref));
             }
             break;
           }
@@ -4294,7 +4294,7 @@ struct AIR_Traits_variadic_call
 
             // Pass an empty argument stack to get the number of arguments to generate.
             // This inreadonlys the `self` reference so we have to copy it first.
-            ctx.stack().emplace_back(ctx.stack().back());
+            ctx.stack().push_back(ctx.stack().back());
             do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc, ::std::move(alt_stack));
             value = ctx.stack().back().dereference_readonly();
             ctx.stack().pop_back();
@@ -4310,7 +4310,7 @@ struct AIR_Traits_variadic_call
 
             // Prepare `self` references for all upcoming  calls.
             for(int64_t k = 0;  k < nvargs;  ++k)
-              ctx.stack().emplace_back(ctx.stack().back());
+              ctx.stack().push_back(ctx.stack().back());
 
             // Generate arguments and push them onto `ctx.stack()`.
             // The top is the first argument.
@@ -4318,7 +4318,7 @@ struct AIR_Traits_variadic_call
               // Initialize arguments for the generator function.
               alt_stack.clear();
               Reference::S_constant xref = { k };
-              alt_stack.emplace_back(::std::move(xref));
+              alt_stack.push_back(::std::move(xref));
 
               // Generate an argument. Ensure it is dereferenceable.
               auto& arg = ctx.stack().mut_back(static_cast<size_t>(k));
@@ -4330,7 +4330,7 @@ struct AIR_Traits_variadic_call
             // This reverses all arguments so the top will be the last argument.
             alt_stack.clear();
             for(int64_t k = 0;  k < nvargs;  ++k) {
-              alt_stack.emplace_back(::std::move(ctx.stack().mut_back()));
+              alt_stack.push_back(::std::move(ctx.stack().mut_back()));
               ctx.stack().pop_back();
             }
             break;
@@ -4524,7 +4524,7 @@ struct AIR_Traits_break_or_continue
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         Reference::S_jump_src xref = { sloc };
-        ctx.stack().emplace_back(::std::move(xref));
+        ctx.stack().push_back(::std::move(xref));
 
         auto status = static_cast<AIR_Status>(up.p8[0]);
         ROCKET_ASSERT(::rocket::is_any_of(status,
