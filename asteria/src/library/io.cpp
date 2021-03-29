@@ -95,6 +95,26 @@ do_write_utf8_common(::FILE* fp, const cow_string& text)
     return ncps;
   }
 
+size_t
+do_format_write_utf8_common(::FILE* fp, const V_string& templ,
+                            const cow_vector<Value>& values)
+  {
+    // Prepare inserters.
+    cow_vector<::rocket::formatter> insts;
+    insts.reserve(values.size());
+    for(size_t i = 0;  i < values.size();  ++i)
+      insts.push_back({
+        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
+          { return static_cast<const Value*>(ptr)->print(fmt);  },
+        values.data() + i
+      });
+
+    // Compose the string into a stream and write it.
+    ::rocket::tinyfmt_str fmt;
+    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
+    return do_write_utf8_common(fp, fmt.get_string());
+  }
+
 }  // namespace
 
 Opt_integer
@@ -263,22 +283,8 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     if(!do_set_wide(fp, "w", +1))
       ASTERIA_THROW("Invalid text write to binary-oriented output");
 
-    // Prepare inserters.
-    cow_vector<::rocket::formatter> insts;
-    insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i)
-      insts.push_back({
-        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
-          { return static_cast<const Value*>(ptr)->print(fmt);  },
-        values.data() + i
-      });
-
-    // Compose the string into a stream.
-    ::rocket::tinyfmt_str fmt;
-    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
-
-    // Write the string now.
-    size_t ncps = do_write_utf8_common(fp, fmt.get_string());
+    // Write the string itself.
+    size_t ncps = do_format_write_utf8_common(fp, templ, values);
 
     // Return the number of code points that have been written.
     return static_cast<int64_t>(ncps);
