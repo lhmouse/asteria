@@ -290,6 +290,32 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     return static_cast<int64_t>(ncps);
   }
 
+Opt_integer
+std_io_putlnf(V_string templ, cow_vector<Value> values)
+  {
+    const IOF_Sentry fp(stdout);
+
+    // Check stream status.
+    if(::ferror_unlocked(fp))
+      ASTERIA_THROW("Standard output failure (error bit set)");
+
+    if(!do_set_wide(fp, "w", +1))
+      ASTERIA_THROW("Invalid text write to binary-oriented output");
+
+    // Write the string itself.
+    size_t ncps = do_format_write_utf8_common(fp, templ, values);
+
+    // Append a line feed and flush.
+    if(::fputwc_unlocked(L'\n', fp) == WEOF)
+      ASTERIA_THROW("Error writing standard output\n"
+                    "[`fputwc_unlocked()` failed: $1]",
+                    format_errno(errno));
+
+    // Return the number of code points that have been written.
+    // The implicit LF also counts.
+    return static_cast<int64_t>(ncps + 1);
+  }
+
 Opt_string
 std_io_read(Opt_integer limit)
   {
@@ -436,6 +462,19 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         if(reader.end_overload(values))  // ...
           ASTERIA_BINDING_RETURN_MOVE(self,
                     std_io_putf, templ, values);
+      }
+      ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("putlnf"),
+      ASTERIA_BINDING_BEGIN("std.io.putlnf", self, global, reader) {
+        V_string templ;
+        cow_vector<Value> values;
+
+        reader.start_overload();
+        reader.required(templ);          // template
+        if(reader.end_overload(values))  // ...
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_io_putlnf, templ, values);
       }
       ASTERIA_BINDING_END);
 

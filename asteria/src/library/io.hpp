@@ -31,6 +31,10 @@ std_io_putln(V_string value);
 Opt_integer
 std_io_putf(V_string templ, cow_vector<Value> values);
 
+// `std.io.putlnf`
+Opt_integer
+std_io_putlnf(V_string templ, cow_vector<Value> values);
+
 // `std.io.read`
 Opt_string
 std_io_read(Opt_integer limit);
