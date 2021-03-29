@@ -143,11 +143,11 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
 
     while(bp < ep) {
       ::ssize_t nwrtn = ::write(fd, bp, static_cast<size_t>(ep - bp));
-      if(nwrtn < 0)
+      if(nwrtn < 0) {
         ASTERIA_THROW("Error writing file '$2'\n"
                       "[`write()` failed: $1]",
                       format_errno(errno), path);
-
+      }
       bp += nwrtn;
     }
     return bp;
@@ -161,10 +161,11 @@ std_filesystem_get_working_directory()
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
     auto qcwd = ::rocket::make_unique_handle(::getcwd(nullptr, 0), ::free);
-    if(!qcwd)
+    if(!qcwd) {
       ASTERIA_THROW("Could not get current working directory\n"
                     "[`getcwd()` failed: $1]",
                     format_errno(errno));
+    }
     return V_string(qcwd);
   }
 
@@ -173,10 +174,11 @@ std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
     auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
-    if(!abspath)
+    if(!abspath) {
       ASTERIA_THROW("Could not resolve path '$2'\n"
                     "[`realpath()` failed: $1]",
                     format_errno(errno), path);
+    }
     return V_string(abspath);
   }
 
@@ -409,8 +411,8 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
       if(rlimit <= 0)
         break;
 
-      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
       ::ssize_t nread;
+      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
       auto insert_pos = data.insert(data.end(), nbatch, '/');
 
       if(offset) {
@@ -447,9 +449,6 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
 
-    int64_t roffset = offset.value_or(0);
-    int64_t rlimit = ::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
-
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
@@ -457,54 +456,56 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
                     "[`open()` failed: $1]",
                     format_errno(errno), path);
 
-    // These are reused for each iteration.
-    V_string data;
-    ::ssize_t nread;
+    // We return data that have been read as a byte string.
     Reference_Stack stack;
+    V_string data;
+    int64_t roffset = offset.value_or(0);
+    int64_t rlimit = limit.value_or(INT64_MAX);
 
-    // Read and process all data in blocks.
-    int64_t ntlimit = ::rocket::max(limit.value_or(INT64_MAX), 0);
-    int64_t ntotal = 0;
     for(;;) {
-      // Check for user-provided limit.
-      if(ntotal >= ntlimit)
+      // Don't read too many bytes at a time.
+      if(rlimit <= 0)
         break;
 
-      // Don't read too many bytes at a time.
-      data.resize(static_cast<size_t>(rlimit));
+      ::ssize_t nread;
+      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
+      data.resize(nbatch, '/');
+
       if(offset) {
-        nread = ::pread(fd, data.mut_data(), data.size(), roffset);
+        // Use `roffset`. The file must be seekable in this case.
+        nread = ::pread(fd, data.mut_data(), nbatch, roffset);
         if(nread < 0)
           ASTERIA_THROW("Error reading file '$2'\n"
                         "[`pread()` failed: $1]",
                         format_errno(errno), path);
       }
       else {
-        nread = ::read(fd, data.mut_data(), data.size());
+        // Use the internal file pointer.
+        nread = ::read(fd, data.mut_data(), nbatch);
         if(nread < 0)
           ASTERIA_THROW("Error reading file '$2'\n"
                         "[`read()` failed: $1]",
                         format_errno(errno), path);
       }
-      data.erase(static_cast<size_t>(nread));
-      if(data.empty())
-        break;
-
-      // Read the next block.
+      data.erase(data.begin() + nread, data.end());
       roffset += nread;
-      ntotal += nread;
+      rlimit -= nread;
+
+      // Check for end of file.
+      if(nread == 0)
+        break;
 
       // Call the function but discard its return value.
       stack.clear();
       Reference::S_temporary xref = { roffset };
       stack.push_back(::std::move(xref));
-      xref.val = ::std::move(data);
+      xref.val = data;
       stack.push_back(::std::move(xref));
 
       Reference self = Reference::S_constant();
       callback.invoke(self, global, ::std::move(stack));
     }
-    return ntotal;
+    return roffset - offset.value_or(0);
   }
 
 void
@@ -513,11 +514,11 @@ std_filesystem_file_write(V_string path, Opt_integer offset, V_string data)
     if(offset && (*offset < 0))
       ASTERIA_THROW("Negative file offset (offset `$1`)", *offset);
 
-    int64_t roffset = offset.value_or(0);
-
     // Calculate the `flags` argument.
-    // If we are to write from the beginning, truncate the file at creation.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
+
+    // If we are to write from the beginning, truncate the file at creation.
+    int64_t roffset = offset.value_or(0);
     if(roffset == 0)
       flags |= O_TRUNC;
 
@@ -528,14 +529,13 @@ std_filesystem_file_write(V_string path, Opt_integer offset, V_string data)
                     "[`open()` failed: $1]",
                     format_errno(errno), path);
 
-    // Set the file pointer when an offset is specified, even when it is an explicit zero.
-    if(offset) {
-      // This also ensures it is a normal file (not a pipe or socket whatsoever).
-      if(::ftruncate(fd, roffset) != 0)
-        ASTERIA_THROW("Could not truncate file '$2'\n"
-                      "[`ftruncate()` failed: $1]",
-                      format_errno(errno), path);
-    }
+    // Set the file pointer when an offset is specified, even when it is an explicit
+    // zero. This ensures that the file is actually seekable (not a pipe or socket
+    // whatsoever).
+    if(offset && (::ftruncate(fd, roffset) != 0))
+      ASTERIA_THROW("Could not truncate file '$2'\n"
+                    "[`ftruncate()` failed: $1]",
+                    format_errno(errno), path);
 
     // Write all data.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -546,6 +546,8 @@ std_filesystem_file_append(V_string path, V_string data, Opt_boolean exclusive)
   {
     // Calculate the `flags` argument.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
+
+    // Treat `exclusive` as `false` if it is not specified at all.
     if(exclusive == true)
       flags |= O_EXCL;
 
