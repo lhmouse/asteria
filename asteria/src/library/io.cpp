@@ -100,7 +100,6 @@ do_write_utf8_common(::FILE* fp, const cow_string& text)
 Opt_integer
 std_io_getc()
   {
-    // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
 
     // Check stream status.
@@ -114,12 +113,13 @@ std_io_getc()
     wint_t wch = ::fgetwc_unlocked(fp);
     if(wch == WEOF) {
       // Throw an exception on error.
-      // Return `null` on EOF.
       int err = do_recover(fp);
       if(err != 0)
         ASTERIA_THROW("Error reading standard input\n"
                       "[`fgetwc_unlocked()` failed: $1]",
                       format_errno(err));
+
+      // Return `null` on EOF.
       return nullopt;
     }
 
@@ -130,7 +130,6 @@ std_io_getc()
 Opt_string
 std_io_getln()
   {
-    // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
 
     // Check stream status.
@@ -150,12 +149,13 @@ std_io_getln()
           break;
 
         // Throw an exception on error.
-        // Return `null` on EOF.
         int err = do_recover(fp);
         if(err != 0)
           ASTERIA_THROW("Error reading standard input\n"
                         "[`fgetwc_unlocked()` failed: $1]",
                         format_errno(err));
+
+        // Return `null` on EOF.
         return nullopt;
       }
       // If a LF is encountered, finish this line.
@@ -174,7 +174,6 @@ std_io_getln()
 Opt_integer
 std_io_putc(V_integer value)
   {
-    // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
 
     // Check stream status.
@@ -210,7 +209,6 @@ std_io_putc(V_integer value)
 Opt_integer
 std_io_putc(V_string value)
   {
-    // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
 
     // Check stream status.
@@ -230,7 +228,6 @@ std_io_putc(V_string value)
 Opt_integer
 std_io_putln(V_string value)
   {
-    // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
 
     // Check stream status.
@@ -257,7 +254,6 @@ std_io_putln(V_string value)
 Opt_integer
 std_io_putf(V_string templ, cow_vector<Value> values)
   {
-    // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
 
     // Check stream status.
@@ -291,9 +287,6 @@ std_io_putf(V_string templ, cow_vector<Value> values)
 Opt_string
 std_io_read(Opt_integer limit)
   {
-    size_t rlimit = (size_t)::rocket::clamp(limit.value_or(INT32_MAX), 0, 0x10'00000);
-
-    // Lock standard input for reading.
     const IOF_Sentry fp(stdin);
 
     // Check stream status.
@@ -303,28 +296,39 @@ std_io_read(Opt_integer limit)
     if(!do_set_wide(fp, "r", -1))
       ASTERIA_THROW("Invalid binary read from text-oriented input");
 
-    // Read some bytes from the stream.
-    cow_string data(rlimit, '\0');
-    size_t ntotal = ::fread_unlocked(data.mut_data(), 1, data.size(), fp);
-    if(ntotal == 0) {
-      // Throw an exception on error.
-      // Return `null` on EOF.
-      int err = do_recover(fp);
-      if(err != 0)
-        ASTERIA_THROW("Error reading standard input\n"
-                      "[`fread_unlocked()` failed: $1]",
-                      format_errno(err));
-      return nullopt;
-    }
+    V_string data;
+    int64_t rlimit = limit.value_or(INT64_MAX);
+    for(;;) {
+      if(rlimit <= 0)
+        break;
 
-    // Return the byte string verbatim.
-    return ::std::move(data.erase(ntotal));
+      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
+      auto insert_pos = data.insert(data.end(), nbatch, '/');
+
+      // Read some bytes.
+      size_t nread = ::fread_unlocked(&*insert_pos, 1, nbatch, fp);
+      if(nread == 0) {
+        int err = do_recover(fp);
+        if(err != 0)
+          ASTERIA_THROW("Error reading standard input\n"
+                        "[`fread_unlocked()` failed: $1]",
+                        format_errno(err));
+
+        if(data.size())
+          break;
+
+        // If nothing has been read, fail.
+        return nullopt;
+      }
+      data.erase(insert_pos + static_cast<ptrdiff_t>(nread), data.end());
+      rlimit -= static_cast<int64_t>(nread);
+    }
+    return ::std::move(data);
   }
 
 Opt_integer
 std_io_write(V_string data)
   {
-    // Lock standard output for writing.
     const IOF_Sentry fp(stdout);
 
     // Check stream status.
@@ -334,22 +338,23 @@ std_io_write(V_string data)
     if(!do_set_wide(fp, "w", -1))
       ASTERIA_THROW("Invalid binary write to text-oriented output");
 
-    // Don't pass zero to `fwrite()`
-    if(data.empty())
-      return 0;
+    size_t ntotal = 0;
+    while(ntotal < data.size()) {
+      // Write some bytes.
+      size_t nwrtn = ::fwrite_unlocked(data.data() + ntotal,
+                                  1, data.size() - ntotal, fp);
+      if(nwrtn == 0) {
+        int err = do_recover(fp);
+        if(err != 0)
+          ASTERIA_THROW("Error writing standard output\n"
+                        "[`fwrite_unlocked()` failed: $1]",
+                        format_errno(err));
 
-    // Write the byte string verbatim.
-    size_t ntotal = ::fwrite_unlocked(data.data(), 1, data.size(), fp);
-    if(ntotal == 0) {
-      // Throw an exception on error.
-      int err = do_recover(fp);
-      if(err != 0)
-        ASTERIA_THROW("Error writing standard output\n"
-                      "[`fwrite_unlocked()` failed: $1]",
-                      format_errno(errno));
+        // If nothing has been written, fail.
+        return nullopt;
+      }
+      ntotal += nwrtn;
     }
-
-    // Return the number of bytes written.
     return static_cast<int64_t>(ntotal);
   }
 
