@@ -99,15 +99,26 @@ class Reference
     cow_vector<Modifier> m_mods;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Root, XRootT, xroot)
+    // Constructors and assignment operators
+    template<typename XRootT,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_root), XRootT&&>::value)>
+    constexpr
+    Reference(XRootT&& xroot)
+      noexcept(::std::is_nothrow_constructible<decltype(m_root), XRootT&&>::value)
       : m_root(::std::forward<XRootT>(xroot)),
         m_mods()
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Reference, Root, XRootT, xroot)
-      { this->m_root = ::std::forward<XRootT>(xroot);
+    template<typename XRootT,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_root)&, XRootT&&>::value)>
+    Reference&
+    operator=(XRootT&& xroot)
+      noexcept(::std::is_nothrow_assignable<decltype(m_root)&, XRootT&&>::value)
+      {
+        this->m_root = ::std::forward<XRootT>(xroot);
         this->m_mods.clear();
-        return *this;  }
+        return *this;
+      }
 
   private:
     Reference&

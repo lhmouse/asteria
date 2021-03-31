@@ -36,18 +36,6 @@
 #include <wchar.h>
 #include <endian.h>
 
-#define ASTERIA_VARIANT_CONSTRUCTOR(C, m, T, t)  \
-    template<typename T,  \
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(C::m), T&&>::value)>  \
-    C(T&& t)  \
-      noexcept(::std::is_nothrow_constructible<decltype(C::m), T&&>::value)
-
-#define ASTERIA_VARIANT_ASSIGNMENT(C, m, T, t)  \
-    template<typename T,  \
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(C::m)&, T&&>::value)>  \
-    C& operator=(T&& t)  \
-      noexcept(::std::is_nothrow_assignable<decltype(C::m)&, T&&>::value)
-
 #define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
     C(const C&) = default;  \
     C(C&&) noexcept = default;  \

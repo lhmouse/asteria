@@ -186,13 +186,24 @@ class Statement
       m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Statement, m_stor, XStmtT, xstmt)
+    // Constructors and assignment operators
+    template<typename XStmtT,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XStmtT&&>::value)>
+    constexpr
+    Statement(XStmtT&& xstmt)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XStmtT&&>::value)
       : m_stor(::std::forward<XStmtT>(xstmt))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Statement, m_stor, XStmtT, xstmt)
-      { this->m_stor = ::std::forward<XStmtT>(xstmt);
-        return *this;  }
+    template<typename XStmtT,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XStmtT&&>::value)>
+    Statement&
+    operator=(XStmtT&& xstmt)
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XStmtT&&>::value)
+      {
+        this->m_stor = ::std::forward<XStmtT>(xstmt);
+        return *this;
+      }
 
   public:
     Index

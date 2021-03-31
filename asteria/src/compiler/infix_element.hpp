@@ -77,13 +77,24 @@ class Infix_Element
       m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, m_stor, XElemT, xelem)
+    // Constructors and assignment operators
+    template<typename XElemT,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XElemT&&>::value)>
+    constexpr
+    Infix_Element(XElemT&& xelem)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XElemT&&>::value)
       : m_stor(::std::forward<XElemT>(xelem))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, m_stor, XElemT, xelem)
-      { this->m_stor = ::std::forward<XElemT>(xelem);
-        return *this;  }
+    template<typename XElemT,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XElemT&&>::value)>
+    Infix_Element&
+    operator=(XElemT&& xelem)
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XElemT&&>::value)
+      {
+        this->m_stor = ::std::forward<XElemT>(xelem);
+        return *this;
+      }
 
   public:
     Index

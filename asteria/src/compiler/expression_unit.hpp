@@ -140,13 +140,24 @@ class Expression_Unit
       m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, m_stor, XUnitT, xunit)
+    // Constructors and assignment operators
+    template<typename XUnitT,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XUnitT&&>::value)>
+    constexpr
+    Expression_Unit(XUnitT&& xunit)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XUnitT&&>::value)
       : m_stor(::std::forward<XUnitT>(xunit))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, m_stor, XUnitT, xunit)
-      { this->m_stor = ::std::forward<XUnitT>(xunit);
-        return *this;  }
+    template<typename XUnitT,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XUnitT&&>::value)>
+    Expression_Unit&
+    operator=(XUnitT&& xunit)
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
+      {
+        this->m_stor = ::std::forward<XUnitT>(xunit);
+        return *this;
+      }
 
   public:
     Index
