@@ -27,6 +27,7 @@ class Value
       m_stor;
 
   public:
+    // Constructors and assignment operators
     constexpr
     Value(nullopt_t = nullopt)
       noexcept
@@ -38,7 +39,7 @@ class Value
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor(typename details_value::Valuable<XValT>::via_type(
-                  ::std::forward<XValT>(xval)))
+                                        ::std::forward<XValT>(xval)))
       { }
 
     template<typename XValT,
@@ -48,7 +49,7 @@ class Value
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
-                                           ::std::forward<XValT>(xval));
+                                        ::std::forward<XValT>(xval));
       }
 
     template<typename XValT,
@@ -194,27 +195,36 @@ class Value
     bool
     is_scalar()
       const noexcept
-      { return (1 << this->type()) & (1 << type_null | 1 << type_boolean |
-                                      1 << type_integer | 1 << type_real |
-                                      1 << type_string);  }
+      {
+        return details_value::imask({ this->type() }) &
+               details_value::imask({ type_null, type_boolean, type_integer,
+                                      type_real, type_string });
+      }
 
     bool
     is_convertible_to_real()
       const noexcept
-      { return (1 << this->type()) & (1 << type_integer | 1 << type_real);  }
+      {
+        return details_value::imask({ this->type() }) &
+               details_value::imask({ type_integer, type_real });
+      }
 
     V_real
     convert_to_real()
       const
-      { return this->is_integer()
-          ? V_real(this->as_integer())
-          : this->as_real();  }
+      {
+        return this->is_integer()
+            ? V_real(this->as_integer())
+            : this->as_real();
+      }
 
     V_real&
     mutate_into_real()
-      { return this->is_integer()
-          ? this->m_stor.emplace<type_real>(V_real(this->as_integer()))
-          : this->open_real();  }
+      {
+        return this->is_integer()
+            ? this->m_stor.emplace<type_real>(V_real(this->as_integer()))
+            : this->open_real();
+      }
 
     Value&
     swap(Value& other)
