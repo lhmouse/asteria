@@ -100,7 +100,7 @@ class AIR_Node
         cow_string msg;
       };
 
-    struct S_return_statement
+    struct S_simple_status
       {
         AIR_Status status;
       };
@@ -229,12 +229,6 @@ class AIR_Node
         uint32_t nargs;
       };
 
-    struct S_break_or_continue
-      {
-        Source_Location sloc;
-        AIR_Status status;
-      };
-
     struct S_declare_reference
       {
         phsh_string name;
@@ -261,7 +255,7 @@ class AIR_Node
         index_try_statement          = 10,
         index_throw_statement        = 11,
         index_assert_statement       = 12,
-        index_return_statement       = 13,
+        index_simple_status          = 13,
         index_glvalue_to_prvalue     = 14,
         index_push_global_reference  = 15,
         index_push_local_reference   = 16,
@@ -281,9 +275,8 @@ class AIR_Node
         index_variadic_call          = 30,
         index_defer_expression       = 31,
         index_import_call            = 32,
-        index_break_or_continue      = 33,
-        index_declare_reference      = 34,
-        index_initialize_reference   = 35,
+        index_declare_reference      = 33,
+        index_initialize_reference   = 34,
       };
 
   private:
@@ -302,7 +295,7 @@ class AIR_Node
         ,S_try_statement          // 10,
         ,S_throw_statement        // 11,
         ,S_assert_statement       // 12,
-        ,S_return_statement       // 13,
+        ,S_simple_status          // 13,
         ,S_glvalue_to_prvalue     // 14,
         ,S_push_global_reference  // 15,
         ,S_push_local_reference   // 16,
@@ -322,9 +315,8 @@ class AIR_Node
         ,S_variadic_call          // 30,
         ,S_defer_expression       // 31,
         ,S_import_call            // 32,
-        ,S_break_or_continue      // 33,
-        ,S_declare_reference      // 34,
-        ,S_initialize_reference   // 35,
+        ,S_declare_reference      // 33,
+        ,S_initialize_reference   // 34,
       )>;
 
     Storage m_stor;

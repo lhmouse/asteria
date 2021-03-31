@@ -917,14 +917,14 @@ struct AIR_Traits_assert_statement
       }
   };
 
-struct AIR_Traits_return_statement
+struct AIR_Traits_simple_status
   {
     // `up` is `status`.
     // `sp` is unused.
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_return_statement& altr)
+    make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
       {
         AVMC_Queue::Uparam up;
         up.p8[0] = weaken_enum(altr.status);
@@ -936,10 +936,7 @@ struct AIR_Traits_return_statement
     AIR_Status
     execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
-        auto status = static_cast<AIR_Status>(up.p8[0]);
-        ROCKET_ASSERT(::rocket::is_any_of(status, { air_status_return_void,
-                                                    air_status_return_ref }));
-        return status;
+        return static_cast<AIR_Status>(up.p8[0]);
       }
   };
 
@@ -4470,45 +4467,6 @@ struct AIR_Traits_import_call
       }
   };
 
-struct AIR_Traits_break_or_continue
-  {
-    // `up` is `status`.
-    // `sp` is the source location.
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_break_or_continue& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.p8[0] = weaken_enum(altr.status);
-        reachable = false;
-        return up;
-      }
-
-    static
-    Source_Location
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_break_or_continue& altr)
-      {
-        return altr.sloc;
-      }
-
-    static
-    AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
-      {
-        Reference::S_jump_src xref = { sloc };
-        ctx.stack().push_back(::std::move(xref));
-
-        auto status = static_cast<AIR_Status>(up.p8[0]);
-        ROCKET_ASSERT(::rocket::is_any_of(status,
-                           { air_status_break_unspec, air_status_break_switch,
-                             air_status_break_while, air_status_break_for,
-                             air_status_continue_unspec, air_status_continue_while,
-                             air_status_continue_for }));
-        return status;
-      }
-  };
-
 struct AIR_Traits_declare_reference
   {
     // `up` is unused.
@@ -4862,7 +4820,7 @@ rebind_opt(Abstract_Context& ctx)
 
       case index_throw_statement:
       case index_assert_statement:
-      case index_return_statement:
+      case index_simple_status:
       case index_glvalue_to_prvalue:
       case index_push_global_reference:
         // There is nothing to rebind.
@@ -4960,7 +4918,6 @@ rebind_opt(Abstract_Context& ctx)
       }
 
       case index_import_call:
-      case index_break_or_continue:
       case index_declare_reference:
       case index_initialize_reference:
         // There is nothing to rebind.
@@ -5029,9 +4986,9 @@ solidify(AVMC_Queue& queue)
         return do_solidify<AIR_Traits_assert_statement>(queue,
                                      this->m_stor.as<index_assert_statement>());
 
-      case index_return_statement:
-        return do_solidify<AIR_Traits_return_statement>(queue,
-                                     this->m_stor.as<index_return_statement>());
+      case index_simple_status:
+        return do_solidify<AIR_Traits_simple_status>(queue,
+                                     this->m_stor.as<index_simple_status>());
 
       case index_glvalue_to_prvalue:
         return do_solidify<AIR_Traits_glvalue_to_prvalue>(queue,
@@ -5257,10 +5214,6 @@ solidify(AVMC_Queue& queue)
         return do_solidify<AIR_Traits_import_call>(queue,
                                      this->m_stor.as<index_import_call>());
 
-      case index_break_or_continue:
-        return do_solidify<AIR_Traits_break_or_continue>(queue,
-                                     this->m_stor.as<index_break_or_continue>());
-
       case index_declare_reference:
         return do_solidify<AIR_Traits_declare_reference>(queue,
                                      this->m_stor.as<index_declare_reference>());
@@ -5348,7 +5301,7 @@ enumerate_variables(Variable_Callback& callback)
 
       case index_throw_statement:
       case index_assert_statement:
-      case index_return_statement:
+      case index_simple_status:
       case index_glvalue_to_prvalue:
       case index_push_global_reference:
       case index_push_local_reference:
@@ -5398,7 +5351,6 @@ enumerate_variables(Variable_Callback& callback)
       }
 
       case index_import_call:
-      case index_break_or_continue:
       case index_declare_reference:
       case index_initialize_reference:
         return callback;

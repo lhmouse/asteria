@@ -5,6 +5,7 @@
 #include "fwd.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/abstract_hooks.hpp"
+#include "../source_location.hpp"
 #include "../utils.hpp"
 #include <signal.h>  // sig_atomic_t, sigaction()
 #include <string.h>  // strsignal()

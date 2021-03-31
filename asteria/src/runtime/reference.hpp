@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../value.hpp"
-#include "../source_location.hpp"
 
 namespace asteria {
 
@@ -41,11 +40,6 @@ class Reference
         rcfwdp<PTC_Arguments> ptca;
       };
 
-    struct S_jump_src
-      {
-        Source_Location sloc;
-      };
-
     enum Index : uint8_t
       {
         index_uninit     = 0,
@@ -54,7 +48,6 @@ class Reference
         index_temporary  = 3,
         index_variable   = 4,
         index_ptc_args   = 5,
-        index_jump_src   = 6,
       };
 
     struct M_array_index
@@ -84,7 +77,6 @@ class Reference
         ,S_temporary  // 3,
         ,S_variable   // 4,
         ,S_ptc_args   // 5,
-        ,S_jump_src   // 6,
       )>;
 
     enum MIndex : uint8_t
@@ -194,16 +186,6 @@ class Reference
           ? this->do_finish_call_slow(global)
           : *this;
       }
-
-    bool
-    is_jump_src()
-      const noexcept
-      { return this->index() == index_jump_src;  }
-
-    const Source_Location&
-    as_jump_src()
-      const
-      { return this->m_root.as<index_jump_src>().sloc;  }
 
     Reference&
     swap(Reference& other)

@@ -88,12 +88,12 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_break_switch:
       case air_status_break_while:
       case air_status_break_for:
-        ASTERIA_THROW("Stray `break` statement\n[jumped from '$1']", stack.back().as_jump_src());
+        ASTERIA_THROW("Stray `break` statement");
 
       case air_status_continue_unspec:
       case air_status_continue_while:
       case air_status_continue_for:
-        ASTERIA_THROW("Stray `continue` statement\n[jumped from '$1']", stack.back().as_jump_src());
+        ASTERIA_THROW("Stray `continue` statement");
 
       default:
         ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);
