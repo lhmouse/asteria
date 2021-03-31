@@ -311,20 +311,46 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
+// Scope flags
+// Each type of scope is assigned a unique bit. This determines whether `break`
+// or `continue` is allowed inside it. Blocks may be nested, so flags may be OR'd.
+enum Scope_Flags : uint32_t
+  {
+    scope_plain      = 0b00000000,
+    scope_switch     = 0b00000001,
+    scope_while      = 0b00000010,
+    scope_for        = 0b00000100,
+
+    scope_xbreak     = 0b00000111,
+    scope_xcontinue  = 0b00000110,
+  };
+
+constexpr
+Scope_Flags
+operator&(Scope_Flags x, Scope_Flags y)
+  noexcept
+  { return Scope_Flags(uint32_t(x) & uint32_t(y));  }
+
+constexpr
+Scope_Flags
+operator|(Scope_Flags x, Scope_Flags y)
+  noexcept
+  { return Scope_Flags(uint32_t(x) | uint32_t(y));  }
+
 // Accept a statement; a blockt is converted to a single statement.
 opt<Statement>
-do_accept_statement_opt(Token_Stream& tstrm);
+do_accept_statement_opt(Token_Stream& tstrm, Scope_Flags scfl);
 
-// Accept a statement; a non-block statement is converted to a block consisting of a single
-// statement.
+// Accept a statement; a non-block statement is converted to a block consisting of
+// a single statement.
 opt<Statement::S_block>
-do_accept_statement_as_block_opt(Token_Stream& tstrm);
+do_accept_statement_as_block_opt(Token_Stream& tstrm, Scope_Flags scfl);
 
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
 
 bool
-do_accept_expression_and_convert_to_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+do_accept_expression_as_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     auto sloc = tstrm.next_sloc();
     bool succ = do_accept_expression(units, tstrm);
@@ -352,13 +378,13 @@ do_accept_expression_opt(Token_Stream& tstrm)
   }
 
 opt<Statement::S_expression>
-do_accept_expression_and_convert_to_rvalue_opt(Token_Stream& tstrm)
+do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
   {
     // expression-opt ::=
     //   expression | ""
     cow_vector<Expression_Unit> units;
     auto sloc = tstrm.next_sloc();
-    bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
+    bool succ = do_accept_expression_as_rvalue(units, tstrm);
     if(!succ)
       return nullopt;
 
@@ -367,7 +393,7 @@ do_accept_expression_and_convert_to_rvalue_opt(Token_Stream& tstrm)
   }
 
 opt<Statement::S_block>
-do_accept_block_opt(Token_Stream& tstrm)
+do_accept_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // block ::=
     //   "{" statement-list-opt "}"
@@ -380,7 +406,7 @@ do_accept_block_opt(Token_Stream& tstrm)
       return nullopt;
 
     cow_vector<Statement> body;
-    while(auto qstmt = do_accept_statement_opt(tstrm))
+    while(auto qstmt = do_accept_statement_opt(tstrm, scfl))
       body.emplace_back(::std::move(*qstmt));
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -392,9 +418,9 @@ do_accept_block_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_block_statement_opt(Token_Stream& tstrm)
+do_accept_block_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
-    auto qblock = do_accept_block_opt(tstrm);
+    auto qblock = do_accept_block_opt(tstrm, scfl);
     if(!qblock)
       return nullopt;
 
@@ -624,12 +650,12 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
 
-    auto qbody = do_accept_block_opt(tstrm);
+    auto qbody = do_accept_block_opt(tstrm, scope_plain);
     if(!qbody)
       throw Parser_Error(parser_status_open_brace_expected, tstrm);
 
-    Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname), ::std::move(*kparams),
-                                    ::std::move(qbody->stmts) };
+    Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname),
+                                    ::std::move(*kparams), ::std::move(qbody->stmts) };
     return ::std::move(xstmt);
   }
 
@@ -651,7 +677,7 @@ do_accept_expression_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement::S_block>
-do_accept_else_branch_opt(Token_Stream& tstrm)
+do_accept_else_branch_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // else-branch-opt ::=
     //   "else" statement | ""
@@ -659,7 +685,7 @@ do_accept_else_branch_opt(Token_Stream& tstrm)
     if(!qkwrd)
       return nullopt;
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qblock)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
@@ -667,7 +693,7 @@ do_accept_else_branch_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_if_statement_opt(Token_Stream& tstrm)
+do_accept_if_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // if-statement ::=
     //   "if" negation-opt "(" expression ")" statement else-branch-opt
@@ -685,7 +711,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
 
-    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -693,11 +719,11 @@ do_accept_if_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
 
-    auto qbtrue = do_accept_statement_as_block_opt(tstrm);
+    auto qbtrue = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbtrue)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
-    auto qbfalse = do_accept_else_branch_opt(tstrm);
+    auto qbfalse = do_accept_else_branch_opt(tstrm, scfl);
     if(!qbfalse)
       qbfalse.emplace();
 
@@ -707,7 +733,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_switch_statement_opt(Token_Stream& tstrm)
+do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // switch-statement ::=
     //   "switch" "(" expression ")" switch-block
@@ -727,7 +753,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
 
-    auto qctrl = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto qctrl = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qctrl)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -750,7 +776,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm)
 
       if(*qkwrd == keyword_case) {
         // The `case` label requires an expression argument.
-        auto qlabel = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+        auto qlabel = do_accept_expression_as_rvalue_opt(tstrm);
         if(!qlabel)
           throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -765,7 +791,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm)
         throw Parser_Error(parser_status_colon_expected, tstrm);
 
       cow_vector<Statement> body;
-      while(auto qstmt = do_accept_statement_opt(tstrm))
+      while(auto qstmt = do_accept_statement_opt(tstrm, scfl | scope_switch))
         body.emplace_back(::std::move(*qstmt));
 
       Statement::S_block xstmt = { ::std::move(body) };
@@ -781,7 +807,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_do_while_statement_opt(Token_Stream& tstrm)
+do_accept_do_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // do-while-statement ::=
     //   "do" statement "while" negation-opt "(" expression ")" ";"
@@ -789,7 +815,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm)
     if(!qkwrd)
       return nullopt;
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_while);
     if(!qblock)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
@@ -805,7 +831,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
 
-    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -822,7 +848,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_while_statement_opt(Token_Stream& tstrm)
+do_accept_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // while-statement ::=
     //   "while" negation-opt "(" expression ")" statement
@@ -838,7 +864,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
 
-    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -846,7 +872,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_while);
     if(!qblock)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
@@ -855,7 +881,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_for_complement_range_opt(Token_Stream& tstrm)
+do_accept_for_complement_range_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // for-complement-range ::=
     //   "each" identifier "," identifier "->" expression ")" statement
@@ -879,7 +905,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_arrow_expected, tstrm);
 
-    auto qinit = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto qinit = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qinit)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -887,7 +913,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
     if(!qblock)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
@@ -940,7 +966,7 @@ do_set_empty_expression(opt<Statement::S_expression>& qexpr, const Token_Stream&
   }
 
 opt<Statement>
-do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
+do_accept_for_complement_triplet_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // for-complement-triplet ::=
     //   for-initializer expression-opt ";" expression-opt ")" statement
@@ -948,7 +974,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     if(!qinit)
       return nullopt;
 
-    auto qcond = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
       do_set_empty_expression(qcond, tstrm);
 
@@ -964,31 +990,31 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
     if(!qblock)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
-    Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond), ::std::move(*kstep),
-                               ::std::move(*qblock) };
+    Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond),
+                               ::std::move(*kstep), ::std::move(*qblock) };
     return ::std::move(xstmt);
   }
 
 opt<Statement>
-do_accept_for_complement_opt(Token_Stream& tstrm)
+do_accept_for_complement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // for-complement ::=
     //   for-complement-range | for-complement-triplet
-    if(auto qcompl = do_accept_for_complement_range_opt(tstrm))
+    if(auto qcompl = do_accept_for_complement_range_opt(tstrm, scfl))
       return qcompl;
 
-    if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm))
+    if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm, scfl))
       return qcompl;
 
     return nullopt;
   }
 
 opt<Statement>
-do_accept_for_statement_opt(Token_Stream& tstrm)
+do_accept_for_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // for-statement ::=
     //   "for" "(" for-complement
@@ -1000,87 +1026,87 @@ do_accept_for_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
 
-    auto qcompl = do_accept_for_complement_opt(tstrm);
+    auto qcompl = do_accept_for_complement_opt(tstrm, scfl);
     if(!qcompl)
       throw Parser_Error(parser_status_for_statement_initializer_expected, tstrm);
 
     return ::std::move(*qcompl);
   }
 
-opt<Jump_Target>
-do_accept_break_target_opt(Token_Stream& tstrm)
+opt<pair<Jump_Target, Scope_Flags>>
+do_accept_jump_target_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
   {
-    // break-target-opt ::=
-    //   "switch" | "while" | "for" | ""
-    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch, keyword_while, keyword_for });
-    if(qkwrd == keyword_switch)
-      return jump_target_switch;
+    auto qkwrd = do_accept_keyword_opt(tstrm, accept);
+    if(!qkwrd)
+      return nullopt;
 
-    if(qkwrd == keyword_while)
-      return jump_target_while;
+    switch(weaken_enum(*qkwrd)) {
+      case keyword_switch:
+        return ::std::make_pair(jump_target_switch, scope_switch);
 
-    if(qkwrd == keyword_for)
-      return jump_target_for;
+      case keyword_while:
+        return ::std::make_pair(jump_target_while, scope_while);
 
-    return nullopt;
+      case keyword_for:
+        return ::std::make_pair(jump_target_for, scope_for);
+
+      default:
+        ROCKET_ASSERT(false);
+    }
   }
 
 opt<Statement>
-do_accept_break_statement_opt(Token_Stream& tstrm)
+do_accept_break_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // break-statement ::=
     //   "break" break-target-opt ";"
+    // break-target-opt ::=
+    //   "switch" | "while" | "for" | ""
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_break });
     if(!qkwrd)
       return nullopt;
 
-    auto qtarget = do_accept_break_target_opt(tstrm);
-    if(!qtarget)
-      qtarget.emplace();
+    auto ktarg = do_accept_jump_target_opt(tstrm, { keyword_switch,
+                                                    keyword_while, keyword_for });
+    if(!ktarg)
+      ktarg.emplace(jump_target_unspec, scope_xbreak);
+
+    if(!(scfl & ktarg->second))
+      throw Parser_Error(parser_status_break_no_matching_scope, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm);
 
-    Statement::S_break xstmt = { ::std::move(sloc), *qtarget };
+    Statement::S_break xstmt = { ::std::move(sloc), ktarg->first };
     return ::std::move(xstmt);
   }
 
-opt<Jump_Target>
-do_accept_continue_target_opt(Token_Stream& tstrm)
-  {
-    // continue-target-opt ::=
-    //   "while" | "for" | ""
-    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while, keyword_for });
-    if(qkwrd == keyword_while)
-      return jump_target_while;
-
-    if(qkwrd == keyword_for)
-      return jump_target_for;
-
-    return nullopt;
-  }
-
 opt<Statement>
-do_accept_continue_statement_opt(Token_Stream& tstrm)
+do_accept_continue_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // continue-statement ::=
     //   "continue" continue-target-opt ";"
+    // continue-target-opt ::=
+    //   "while" | "for" | ""
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_continue });
     if(!qkwrd)
       return nullopt;
 
-    auto qtarget = do_accept_continue_target_opt(tstrm);
-    if(!qtarget)
-      qtarget.emplace();
+    auto ktarg = do_accept_jump_target_opt(tstrm, { keyword_while, keyword_for });
+    if(!ktarg)
+      ktarg.emplace(jump_target_unspec, scope_xcontinue);
+
+    if(!(scfl & ktarg->second))
+      throw Parser_Error(parser_status_break_no_matching_scope, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm);
 
-    Statement::S_continue xstmt = { ::std::move(sloc), *qtarget };
+    Statement::S_continue xstmt = { ::std::move(sloc), ktarg->first };
     return ::std::move(xstmt);
   }
 
@@ -1094,7 +1120,7 @@ do_accept_throw_statement_opt(Token_Stream& tstrm)
     if(!qkwrd)
       return nullopt;
 
-    auto kexpr = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto kexpr = do_accept_expression_as_rvalue_opt(tstrm);
     if(!kexpr)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -1216,7 +1242,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
     if(!kneg)
       kneg.emplace();
 
-    auto kexpr = do_accept_expression_and_convert_to_rvalue_opt(tstrm);
+    auto kexpr = do_accept_expression_as_rvalue_opt(tstrm);
     if(!kexpr)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -1234,7 +1260,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_try_statement_opt(Token_Stream& tstrm)
+do_accept_try_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // try-statement ::=
     //   "try" statement "catch" "(" identifier ")" statement
@@ -1243,7 +1269,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm)
     if(!qkwrd)
       return nullopt;
 
-    auto qbtry = do_accept_statement_as_block_opt(tstrm);
+    auto qbtry = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbtry)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
@@ -1265,7 +1291,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
 
-    auto qbcatch = do_accept_statement_as_block_opt(tstrm);
+    auto qbcatch = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbcatch)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
@@ -1297,7 +1323,7 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_nonblock_statement_opt(Token_Stream& tstrm)
+do_accept_nonblock_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // nonblock-statement ::=
     //   null-statement |
@@ -1324,25 +1350,25 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm)
     if(auto qstmt = do_accept_expression_statement_opt(tstrm))
       return qstmt;
 
-    if(auto qstmt = do_accept_if_statement_opt(tstrm))
+    if(auto qstmt = do_accept_if_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_switch_statement_opt(tstrm))
+    if(auto qstmt = do_accept_switch_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_do_while_statement_opt(tstrm))
+    if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_while_statement_opt(tstrm))
+    if(auto qstmt = do_accept_while_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_for_statement_opt(tstrm))
+    if(auto qstmt = do_accept_for_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_break_statement_opt(tstrm))
+    if(auto qstmt = do_accept_break_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_continue_statement_opt(tstrm))
+    if(auto qstmt = do_accept_continue_statement_opt(tstrm, scfl))
       return qstmt;
 
     if(auto qstmt = do_accept_throw_statement_opt(tstrm))
@@ -1354,7 +1380,7 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm)
     if(auto qstmt = do_accept_assert_statement_opt(tstrm))
       return qstmt;
 
-    if(auto qstmt = do_accept_try_statement_opt(tstrm))
+    if(auto qstmt = do_accept_try_statement_opt(tstrm, scfl))
       return qstmt;
 
     if(auto qstmt = do_accept_defer_statement_opt(tstrm))
@@ -1364,33 +1390,33 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_statement_opt(Token_Stream& tstrm)
+do_accept_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // statement ::=
     //   block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    if(auto qstmt = do_accept_block_statement_opt(tstrm))
+    if(auto qstmt = do_accept_block_statement_opt(tstrm, scfl))
       return qstmt;
 
-    if(auto qstmt = do_accept_nonblock_statement_opt(tstrm))
+    if(auto qstmt = do_accept_nonblock_statement_opt(tstrm, scfl))
       return qstmt;
 
     return nullopt;
   }
 
 opt<Statement::S_block>
-do_accept_statement_as_block_opt(Token_Stream& tstrm)
+do_accept_statement_as_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
   {
     // statement ::=
     //   block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    auto qblock = do_accept_block_opt(tstrm);
+    auto qblock = do_accept_block_opt(tstrm, scfl);
     if(qblock)
       return qblock;
 
-    auto qstmt = do_accept_nonblock_statement_opt(tstrm);
+    auto qstmt = do_accept_nonblock_statement_opt(tstrm, scfl);
     if(qstmt)
       return do_blockify_statement(::std::move(*qstmt));
 
@@ -1573,7 +1599,7 @@ do_accept_closure_body_opt(Token_Stream& tstrm)
   {
     // closure-body ::=
     //   block | equal-initializer | ref-initializer
-    auto qblock = do_accept_block_opt(tstrm);
+    auto qblock = do_accept_block_opt(tstrm, scope_plain);
     if(qblock)
       return qblock;
 
@@ -1649,7 +1675,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     uint32_t nelems = 0;
     bool comma_allowed = false;
     for(;;) {
-      bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
+      bool succ = do_accept_expression_as_rvalue(units, tstrm);
       if(!succ)
         break;
 
@@ -1709,7 +1735,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       if(!kpunct)
         throw Parser_Error(parser_status_equals_sign_or_colon_expected, tstrm);
 
-      bool succ = do_accept_expression_and_convert_to_rvalue(units, tstrm);
+      bool succ = do_accept_expression_as_rvalue(units, tstrm);
       if(!succ)
         throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -2349,7 +2375,7 @@ reload(Token_Stream& tstrm)
 
     // document ::=
     //   statement-list-opt
-    while(auto qstmt = do_accept_statement_opt(tstrm))
+    while(auto qstmt = do_accept_statement_opt(tstrm, scope_plain))
       stmts.emplace_back(::std::move(*qstmt));
 
     // If there are any non-statement tokens left in the stream, fail.

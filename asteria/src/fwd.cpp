@@ -319,6 +319,12 @@ describe_parser_status(Parser_Status status)
       case parser_status_reserved_identifier_not_declarable:
         return "reserved identifier not declarable";
 
+      case parser_status_break_no_matching_scope:
+        return "no matching scope found for `break`";
+
+      case parser_status_continue_no_matching_scope:
+        return "no matching scope found for `continue`";
+
       default:
         return "[unknown parser error]";
     }
