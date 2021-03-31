@@ -967,29 +967,6 @@ struct AIR_Traits_glvalue_to_prvalue
       }
   };
 
-struct AIR_Traits_push_immediate
-  {
-    // `up` is unused.
-    // `sp` is the value to push.
-
-    static
-    Value
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_immediate& altr)
-      {
-        return altr.value;
-      }
-
-    static
-    AIR_Status
-    execute(Executive_Context& ctx, const Value& value)
-      {
-        // Push a constant.
-        Reference::S_constant xref = { value };
-        ctx.stack().push_back(::std::move(xref));
-        return air_status_next;
-      }
-  };
-
 struct AIR_Traits_push_global_reference
   {
     // `up` is unused.
@@ -4887,7 +4864,6 @@ rebind_opt(Abstract_Context& ctx)
       case index_assert_statement:
       case index_return_statement:
       case index_glvalue_to_prvalue:
-      case index_push_immediate:
       case index_push_global_reference:
         // There is nothing to rebind.
         return nullopt;
@@ -5060,10 +5036,6 @@ solidify(AVMC_Queue& queue)
       case index_glvalue_to_prvalue:
         return do_solidify<AIR_Traits_glvalue_to_prvalue>(queue,
                                      this->m_stor.as<index_glvalue_to_prvalue>());
-
-      case index_push_immediate:
-        return do_solidify<AIR_Traits_push_immediate>(queue,
-                                     this->m_stor.as<index_push_immediate>());
 
       case index_push_global_reference:
         return do_solidify<AIR_Traits_push_global_reference>(queue,
@@ -5378,14 +5350,6 @@ enumerate_variables(Variable_Callback& callback)
       case index_assert_statement:
       case index_return_statement:
       case index_glvalue_to_prvalue:
-        return callback;
-
-      case index_push_immediate: {
-        const auto& altr = this->m_stor.as<index_push_immediate>();
-        altr.value.enumerate_variables(callback);
-        return callback;
-      }
-
       case index_push_global_reference:
       case index_push_local_reference:
         return callback;
