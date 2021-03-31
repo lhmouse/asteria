@@ -58,7 +58,7 @@ struct packed_words;
 template<uint32_t... M, uint32_t... S>
 struct packed_words<0, integer_sequence<uint32_t, M...>, S...>
   {
-    uint32_t data[sizeof...(M)] = { M... };
+    uint32_t m_words[sizeof...(M)] = { M... };
   };
 
 template<size_t N, uint32_t... M, uint32_t a0, uint32_t a1, uint32_t a2,
@@ -82,24 +82,21 @@ struct packed_words<N, integer_sequence<uint32_t, M...>,
 // These are jump tables.
 template<bool... bitsT>
 class const_bitset
+  : private packed_words<(sizeof...(bitsT) + 31) / 32,
+        integer_sequence<uint32_t>, bitsT..., 0,0,0,0,0,0,0,
+              0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0>
   {
-  private:
-    packed_words<(sizeof...(bitsT) + 31) / 32,
-        integer_sequence<uint32_t>,
-        bitsT..., 0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0> m_seq;
-
   public:
     constexpr
     const_bitset()
       noexcept
-      { }
+      = default;
 
     constexpr
     bool
     operator[](size_t k)
       const noexcept
-      { return this->m_seq.data[k / 32] & UINT32_C(1) << k % 32;  }
+      { return this->m_words[k / 32] & UINT32_C(1) << k % 32;  }
   };
 
 template<typename targetT, targetT*... ptrsT>
@@ -112,13 +109,13 @@ class const_func_table
     constexpr
     const_func_table()
       noexcept
-      { }
+      = default;
 
     template<typename... argsT>
     constexpr
     typename ::std::result_of<targetT*(argsT&&...)>::type
     operator()(size_t k, argsT&&... args)
-      const
+      const noexcept(noexcept(::std::declval<targetT*>()(args...)))
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
   };
 
@@ -128,7 +125,9 @@ class const_func_table
 [[noreturn]] ROCKET_FORCED_INLINE_FUNCTION
 void
 rethrow_current_exception()
-  { throw;  }
+  {
+    throw;
+  }
 
 // These are copy/move helpers.
 template<typename altT>
