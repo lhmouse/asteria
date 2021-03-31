@@ -37,7 +37,7 @@ class variant
     static constexpr size_t alternative_size = sizeof...(alternativesT);
 
   private:
-    // The first member of this union is used for trivial initialization.
+    // The first member of this union is used for constexpr initialization.
     union {
       typename alternative_at<0>::type m_first;
       typename aligned_union<0, alternativesT...>::type m_stor[1];
