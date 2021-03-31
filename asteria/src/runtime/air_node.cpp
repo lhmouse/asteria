@@ -639,7 +639,7 @@ struct AIR_Traits_for_each_statement
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
         Reference::S_variable xref = { vkey };
-        ctx_for.open_named_reference(sp.name_key) = xref;
+        ctx_for.open_named_reference(sp.name_key) = ::std::move(xref);
 
         // Create the mapped reference.
         auto& mapped = do_declare(ctx_for, sp.name_mapped);
