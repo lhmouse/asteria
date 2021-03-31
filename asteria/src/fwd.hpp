@@ -157,6 +157,7 @@ enum PTC_Aware : int8_t;  // this is a bitmask!
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
+class Reference_Modifier;
 class Variable;
 class Variable_Callback;
 class PTC_Arguments;

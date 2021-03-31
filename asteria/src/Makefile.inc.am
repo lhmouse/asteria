@@ -32,6 +32,7 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/enums.hpp  \
   %reldir%/runtime/abstract_hooks.hpp  \
   %reldir%/runtime/reference.hpp  \
+  %reldir%/runtime/reference_modifier.hpp  \
   %reldir%/runtime/variable.hpp  \
   %reldir%/runtime/variable_callback.hpp  \
   %reldir%/runtime/ptc_arguments.hpp  \
@@ -95,6 +96,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/enums.cpp  \
   %reldir%/runtime/abstract_hooks.cpp  \
   %reldir%/runtime/reference.cpp  \
+  %reldir%/runtime/reference_modifier.cpp  \
   %reldir%/runtime/variable.cpp  \
   %reldir%/runtime/variable_callback.cpp  \
   %reldir%/runtime/ptc_arguments.cpp  \
