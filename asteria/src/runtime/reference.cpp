@@ -619,15 +619,13 @@ Value&
 Reference::
 do_mutate_into_temporary_slow()
   {
-    // Return a mutable reference to the existent temporary value if any.
-    if(ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty()))
-      return this->m_root.as<index_temporary>().val;
-
-    // Replace `*this` with a temporary.
+    // Otherwise, try dereferencing.
     S_temporary xref = { this->dereference_readonly() };
-    auto& r = this->m_root.emplace<index_temporary>(::std::move(xref));
+    this->m_root = ::std::move(xref);
     this->m_mods.clear();
-    return r.val;
+
+    ROCKET_ASSERT(this->m_root.index() == index_temporary);
+    return this->m_root.as<index_temporary>().val;
   }
 
 }  // namespace asteria
