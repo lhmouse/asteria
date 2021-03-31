@@ -280,7 +280,7 @@ class AIR_Node
       };
 
   private:
-    using Storage = ::rocket::variant<
+    ::rocket::variant<
       ROCKET_CDR(
         ,S_clear_stack            //  0,
         ,S_execute_block          //  1,
@@ -317,16 +317,15 @@ class AIR_Node
         ,S_import_call            // 32,
         ,S_declare_reference      // 33,
         ,S_initialize_reference   // 34,
-      )>;
-
-    Storage m_stor;
+      )>
+      m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Storage, XNodeT, xnode)
+    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, m_stor, XNodeT, xnode)
       : m_stor(::std::forward<XNodeT>(xnode))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Storage, XNodeT, xnode)
+    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, m_stor, XNodeT, xnode)
       { this->m_stor = ::std::forward<XNodeT>(xnode);
         return *this;  }
 

@@ -162,7 +162,7 @@ class Statement
       };
 
   private:
-    using Storage = ::rocket::variant<
+    ::rocket::variant<
       ROCKET_CDR(
         ,S_expression  //  0,
         ,S_block       //  1,
@@ -182,16 +182,15 @@ class Statement
         ,S_assert      // 15,
         ,S_defer       // 16,
         ,S_references  // 17,
-      )>;
-
-    Storage m_stor;
+      )>
+      m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Statement, Storage, XStmtT, xstmt)
+    ASTERIA_VARIANT_CONSTRUCTOR(Statement, m_stor, XStmtT, xstmt)
       : m_stor(::std::forward<XStmtT>(xstmt))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Statement, Storage, XStmtT, xstmt)
+    ASTERIA_VARIANT_ASSIGNMENT(Statement, m_stor, XStmtT, xstmt)
       { this->m_stor = ::std::forward<XStmtT>(xstmt);
         return *this;  }
 

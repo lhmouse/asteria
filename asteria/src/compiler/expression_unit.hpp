@@ -120,7 +120,7 @@ class Expression_Unit
       };
 
   private:
-    using Storage = ::rocket::variant<
+    ::rocket::variant<
       ROCKET_CDR(
         ,S_literal           //  0,
         ,S_local_reference   //  1,
@@ -136,16 +136,15 @@ class Expression_Unit
         ,S_variadic_call     // 11,
         ,S_argument_finish   // 12,
         ,S_import_call       // 13,
-      )>;
-
-    Storage m_stor;
+      )>
+      m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, Storage, XUnitT, xunit)
+    ASTERIA_VARIANT_CONSTRUCTOR(Expression_Unit, m_stor, XUnitT, xunit)
       : m_stor(::std::forward<XUnitT>(xunit))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, Storage, XUnitT, xunit)
+    ASTERIA_VARIANT_ASSIGNMENT(Expression_Unit, m_stor, XUnitT, xunit)
       { this->m_stor = ::std::forward<XUnitT>(xunit);
         return *this;  }
 

@@ -65,7 +65,7 @@ class Infix_Element
       };
 
   private:
-    using Storage = ::rocket::variant<
+    ::rocket::variant<
       ROCKET_CDR(
         ,S_head         // 0,
         ,S_ternary      // 1,
@@ -73,16 +73,15 @@ class Infix_Element
         ,S_logical_or   // 3,
         ,S_coalescence  // 4,
         ,S_general      // 5,
-      )>;
-
-    Storage m_stor;
+      )>
+      m_stor;
 
   public:
-    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Storage, XElemT, xelem)
+    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, m_stor, XElemT, xelem)
       : m_stor(::std::forward<XElemT>(xelem))
       { }
 
-    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Storage, XElemT, xelem)
+    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, m_stor, XElemT, xelem)
       { this->m_stor = ::std::forward<XElemT>(xelem);
         return *this;  }
 

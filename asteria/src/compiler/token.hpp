@@ -53,7 +53,10 @@ class Token
       };
 
   private:
-    using Storage = ::rocket::variant<
+    Source_Location m_sloc;
+    size_t m_length;
+
+    ::rocket::variant<
       ROCKET_CDR(
         ,S_keyword          // 0,
         ,S_punctuator       // 1,
@@ -61,15 +64,11 @@ class Token
         ,S_integer_literal  // 3,
         ,S_real_literal     // 4,
         ,S_string_literal   // 5,
-      )>;
-
-    Source_Location m_sloc;
-    size_t m_length;
-    Storage m_stor;
+      )>
+      m_stor;
 
   public:
     template<typename XTokT>
-    explicit
     Token(const Source_Location& xsloc, size_t xlen, XTokT&& xtok)
       : m_sloc(xsloc), m_length(xlen), m_stor(::std::forward<XTokT>(xtok))
       { }

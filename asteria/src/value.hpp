@@ -12,7 +12,7 @@ namespace asteria {
 class Value
   {
   private:
-    using Storage = ::rocket::variant<
+    ::rocket::variant<
       ROCKET_CDR(
         ,V_null      // 0,
         ,V_boolean   // 1,
@@ -23,9 +23,8 @@ class Value
         ,V_function  // 6,
         ,V_array     // 7,
         ,V_object    // 8,
-      )>;
-
-    Storage m_stor;
+      )>
+      m_stor;
 
   public:
     constexpr
@@ -36,7 +35,7 @@ class Value
     template<typename XValT,
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
-      noexcept(::std::is_nothrow_constructible<Storage&,
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor(typename details_value::Valuable<XValT>::via_type(
                   ::std::forward<XValT>(xval)))
@@ -45,22 +44,22 @@ class Value
     template<typename XValT,
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
-      noexcept(::std::is_nothrow_assignable<Storage&,
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
-                  ::std::forward<XValT>(xval));
+                                           ::std::forward<XValT>(xval));
       }
 
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
     operator=(XValT&& xval)
-      noexcept(::std::is_nothrow_assignable<Storage&,
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
-                  ::std::forward<XValT>(xval));
+                                           ::std::forward<XValT>(xval));
         return *this;
       }
 
