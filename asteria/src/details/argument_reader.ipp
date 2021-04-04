@@ -44,8 +44,8 @@ struct Applier<RetT, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
     Reference&
     do_apply(Reference& self, FuncT& func, ::std::tuple<ArgsT...>& args)
       {
-        Reference::S_temporary xref = { func(::std::get<N>(args)...)  };
-        return self = ::std::move(xref);
+        auto val = func(::std::get<N>(args)...);
+        return self.set_temporary(::std::move(val));
       }
   };
 
@@ -57,7 +57,7 @@ struct Applier<void, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
     do_apply(Reference& self, FuncT& func, ::std::tuple<ArgsT...>& args)
       {
         func(::std::get<N>(args)...);
-        return self = Reference::S_void();
+        return self.set_void();
       }
   };
 

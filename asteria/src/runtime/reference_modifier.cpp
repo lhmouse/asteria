@@ -215,7 +215,7 @@ apply_open(Value& parent)
 
         auto& arr = parent.open_array();
         if(arr.empty())
-          arr.insert(arr.begin(), V_null());
+          arr.insert(arr.begin(), nullopt);
         else
           arr.insert(arr.begin(), arr.front());
 
@@ -256,7 +256,7 @@ apply_unset(Value& parent)
         const auto& altr = this->m_stor.as<index_array_index>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
-          return V_null();
+          return nullopt;
         }
         else if(!parent.is_array())
           ASTERIA_THROW("Integer subscript inapplicable (parent `$1`, index `$2`)",
@@ -265,7 +265,7 @@ apply_unset(Value& parent)
         auto& arr = parent.open_array();
         auto w = wrap_index(altr.index, arr.size());
         if(w.nprepend | w.nappend)
-          return V_null();
+          return nullopt;
 
         auto val = arr[w.rindex];
         arr.erase(w.rindex, 1);
@@ -277,7 +277,7 @@ apply_unset(Value& parent)
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
           // Members of null values are also null values.
-          return V_null();
+          return nullopt;
         }
         else if(!parent.is_object())
           ASTERIA_THROW("String subscript inapplicable (parent `$1`, key `$2`)",
@@ -286,7 +286,7 @@ apply_unset(Value& parent)
         auto& obj = parent.open_object();
         auto it = obj.find(altr.key);
         if(it == obj.end())
-          return V_null();
+          return nullopt;
 
         auto val = it->second;
         obj.erase(it);
@@ -297,14 +297,14 @@ apply_unset(Value& parent)
         // Get the first element.
         if(parent.is_null()) {
           // Elements of null values are also null values.
-          return V_null();
+          return nullopt;
         }
         else if(!parent.is_array())
           ASTERIA_THROW("Head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
-          return V_null();
+          return nullopt;
 
         auto val = arr.front();
         arr.erase(arr.begin());
@@ -315,14 +315,14 @@ apply_unset(Value& parent)
         // Get the last element.
         if(parent.is_null()) {
           // Elements of null values are also null values.
-          return V_null();
+          return nullopt;
         }
         else if(!parent.is_array())
           ASTERIA_THROW("Tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
-          return V_null();
+          return nullopt;
 
         auto val = arr.back();
         arr.pop_back();

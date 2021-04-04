@@ -14,9 +14,9 @@ namespace {
 ::std::reference_wrapper<V_opaque>
 do_open_private(Reference&& self, const phsh_string& name)
   {
-    Reference::M_object_key xmod = { name };
-    self.zoom_in(::std::move(xmod));
-    return ::std::ref(self.dereference_mutable().open_opaque());
+    self.push_modifier_object_key(name);
+    auto& value = self.dereference_mutable();
+    return value.open_opaque();
   }
 
 void

@@ -21,15 +21,18 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     m_zvarg(zvarg)
   {
     // Set the `this` reference.
-    // If the self reference is void, it is likely that `this` isn't ever referenced in
-    // this function, so perform lazy initialization to avoid this overhead.
-    if(!self.is_void() && !(self.is_constant() && self.dereference_readonly().is_null()))
-      this->do_set_named_reference(nullptr, sref("__this"), ::std::move(self));
+    // If the self reference is null, it is likely that `this` isn't ever referenced
+    // in this function, so perform lazy initialization to avoid this overhead.
+    if(self.is_uninit() || self.is_void())
+      ASTERIA_THROW("Invalid `this` reference passed to `$1`", zvarg->func());
+
+    if(!(self.is_temporary() && self.dereference_readonly().is_null()))
+      this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
 
     // Set arguments. As arguments are evaluated from left to right, the reference at
     // the top is the last argument.
-    auto bptr = stack.bottom();
-    auto eptr = stack.top();
+    auto bptr = ::std::make_move_iterator(stack.bottom());
+    auto eptr = ::std::make_move_iterator(stack.top());
     bool variadic = false;
 
     for(const auto& name : params) {
@@ -45,9 +48,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       // Try popping an argument from `stack` and assign it to this parameter.
       // If no more arguments follow, declare a constant `null`.
       if(ROCKET_EXPECT(bptr != eptr))
-        this->do_set_named_reference(nullptr, name, ::std::move(*(bptr++)));
+        this->do_open_named_reference(nullptr, name) = *(bptr++);
       else
-        this->do_set_named_reference(nullptr, name, Reference::S_constant());
+        this->do_open_named_reference(nullptr, name).set_temporary(nullopt);
     }
 
     // If the function is not variadic, then all arguments shall have been consumed.
@@ -56,8 +59,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // Stash variadic arguments, if any.
     if(ROCKET_UNEXPECT(bptr != eptr))
-      this->m_lazy_args.append(::std::make_move_iterator(bptr),
-                     ::std::make_move_iterator(eptr));
+      this->m_lazy_args.append(bptr, eptr);
   }
 
 Executive_Context::
@@ -75,26 +77,28 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name)
     // as well.
     if(name == "__func") {
       // Note: This can only happen inside a function context.
-      Reference::S_constant xref = { this->m_zvarg->func() };
-      return this->do_set_named_reference(hint_opt, name, ::std::move(xref));
+      auto& ref = this->do_open_named_reference(hint_opt, name);
+      ref.set_temporary(this->m_zvarg->func());
+      return &ref;
     }
 
     if(name == "__this") {
       // Note: This can only happen inside a function context and the `this` argument
       // is null.
-      Reference::S_constant xref = { };
-      return this->do_set_named_reference(hint_opt, name, ::std::move(xref));
+      auto& ref = this->do_open_named_reference(hint_opt, name);
+      ref.set_temporary(nullopt);
+      return &ref;
     }
 
     if(name == "__varg") {
       // Note: This can only happen inside a function context.
-      Reference::S_constant xref;
+      auto& ref = this->do_open_named_reference(hint_opt, name);
       if(ROCKET_UNEXPECT(this->m_lazy_args.empty()))
-        xref.val = this->m_zvarg;
+        ref.set_temporary(this->m_zvarg);
       else
-        xref.val = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg),
-                                 this->m_lazy_args);
-      return this->do_set_named_reference(hint_opt, name, ::std::move(xref));
+        ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(
+                              *(this->m_zvarg), this->m_lazy_args));
+      return &ref;
     }
 
     return nullptr;
@@ -113,7 +117,7 @@ Executive_Context::
 do_on_scope_exit_slow(AIR_Status status)
   {
     // Stash the returned reference, if any.
-    Reference self = Reference::S_uninit();
+    Reference self;
     if(status == air_status_return_ref)
       self = ::std::move(this->m_stack->mut_back());
 

@@ -42,8 +42,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_literal>();
 
         // Copy the value as is.
-        Reference::S_constant xref = { altr.value };
-        AIR_Node::S_push_bound_reference xnode = { ::std::move(xref) };
+        AIR_Node::S_push_bound_reference xnode;
+        xnode.ref.set_temporary(altr.value);
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -208,7 +208,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           return code;
 
         // Encode arguments.
-        AIR_Node::S_glvalue_to_prvalue xnode = { altr.sloc };
+        AIR_Node::S_convert_to_temporary xnode = { altr.sloc };
         code.emplace_back(::std::move(xnode));
         return code;
       }

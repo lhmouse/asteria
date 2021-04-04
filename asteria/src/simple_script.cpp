@@ -91,8 +91,10 @@ execute(Global_Context& global, Reference_Stack&& stack)
   const
   {
     // Execute the script as a plain function.
+    Reference self;
+    self.set_temporary(nullopt);
+
     const StdIO_Sentry sentry;
-    Reference self = Reference::S_constant();
     this->m_func.invoke(self, global, ::std::move(stack));
     return self;
   }
@@ -104,10 +106,10 @@ execute(Global_Context& global, cow_vector<Value>&& vals)
   {
     // Push all arguments backwards as temporaries.
     Reference_Stack stack;
-    for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
-      Reference::S_temporary xref = { ::std::move(*it) };
-      stack.push_back(::std::move(xref));
-    }
+    for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it)
+      stack.emplace_back_uninit()
+        .set_temporary(::std::move(*it));
+
     return this->execute(global, ::std::move(stack));
   }
 

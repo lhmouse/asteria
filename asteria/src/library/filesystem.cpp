@@ -457,6 +457,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
                     format_errno(errno), path);
 
     // We return data that have been read as a byte string.
+    Reference self;
     Reference_Stack stack;
     V_string data;
     int64_t roffset = offset.value_or(0);
@@ -497,12 +498,9 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 
       // Call the function but discard its return value.
       stack.clear();
-      Reference::S_temporary xref = { roffset };
-      stack.push_back(::std::move(xref));
-      xref.val = data;
-      stack.push_back(::std::move(xref));
-
-      Reference self = Reference::S_constant();
+      stack.emplace_back_uninit().set_temporary(roffset);
+      stack.emplace_back_uninit().set_temporary(::std::move(data));
+      self.set_temporary(nullopt);
       callback.invoke(self, global, ::std::move(stack));
     }
     return roffset - offset.value_or(0);

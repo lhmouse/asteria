@@ -38,43 +38,7 @@ class Reference_Stack
       noexcept;
 
     void
-    do_reallocate_reserve(Reference*& bptr, uint32_t& estor, uint32_t nadd)
-      const;
-
-    void
-    do_reallocate_finish(Reference* bptr, uint32_t estor)
-      noexcept;
-
-    template<typename XRefT>
-    ROCKET_NOINLINE
-    Reference&
-    do_reallocate_push_back(XRefT&& xref)
-      {
-        // Allocate a larger block of memory and then construct the new element
-        // above the top. If the operation succeeds, replace the old block.
-        uint32_t nadd = 1;
-#ifndef ROCKET_DEBUG
-        // Reserve more space for non-debug builds.
-        nadd |= 31;
-        nadd |= this->m_estor * 2;
-#endif
-        Reference* bptr;
-        uint32_t estor;
-        this->do_reallocate_reserve(bptr, estor, nadd);
-
-        auto ptr = bptr + this->m_etop;
-        try {
-          ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
-        }
-        catch(...) {
-          ::operator delete(bptr);
-          throw;
-        }
-        this->do_reallocate_finish(bptr, estor);
-        this->m_etop += 1;
-        this->m_einit += 1;
-        return *ptr;
-      }
+    do_reserve_more();
 
   public:
     ~Reference_Stack()
@@ -154,29 +118,18 @@ class Reference_Stack
         return this->mut_top()[~index];
       }
 
-    template<typename XRefT>
-    ROCKET_FORCED_INLINE_FUNCTION
     Reference&
-    push_back(XRefT&& xref)
+    emplace_back_uninit()
       {
-        // If there is an initialized element above the top, reuse it.
-        if(ROCKET_EXPECT(this->m_etop != this->m_einit)) {
-          auto ptr = this->m_bptr + this->m_etop;
-          *ptr = ::std::forward<XRefT>(xref);
-          this->m_etop += 1;
-          return *ptr;
-        }
+        if(ROCKET_UNEXPECT(this->m_etop == this->m_einit)) {
+          // Construct a new reference.
+          if(ROCKET_UNEXPECT(this->m_etop == this->m_estor))
+            this->do_reserve_more();
 
-        // If there is an uninitialized element above the top, construct a new one.
-        if(ROCKET_EXPECT(this->m_etop != this->m_estor)) {
-          auto ptr = this->m_bptr + this->m_etop;
-          ::rocket::construct_at(ptr, ::std::forward<XRefT>(xref));
-          this->m_etop += 1;
-          this->m_einit += 1;
-          return *ptr;
+          ::rocket::construct_at(this->m_bptr + this->m_einit);
+          this->m_einit++;
         }
-
-        return this->do_reallocate_push_back(::std::forward<XRefT>(xref));
+        return this->m_bptr[this->m_etop++];
       }
 
     Reference_Stack&

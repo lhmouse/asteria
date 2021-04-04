@@ -104,7 +104,7 @@ Argument_Reader&
 Argument_Reader::
 optional(Reference& out)
   {
-    out = Reference::S_uninit();
+    out.set_uninit();
     this->do_prepare_parameter("[reference]");
 
     auto qref = this->do_peek_argument();

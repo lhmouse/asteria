@@ -71,26 +71,19 @@ do_find_opt(IterT begin, IterT end, const Value& target)
     return nullopt;
   }
 
-inline
-Reference&
-do_push_temporary(Reference_Stack& stack, const Value& value)
-  {
-    Reference::S_temporary xref = { value };
-    return stack.push_back(::std::move(xref));
-  }
-
 template<typename IterT>
 opt<IterT>
 do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function& pred, bool match)
   {
+    Reference self;
     Reference_Stack stack;
     for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
       stack.clear();
-      do_push_temporary(stack, *it);
+      stack.emplace_back_uninit().set_temporary(*it);
 
       // Call the predictor function and check the return value.
-      Reference self = Reference::S_constant();
+      self.set_temporary(nullopt);
       pred.invoke(self, global, ::std::move(stack));
       if(self.dereference_readonly().test() == match)
         return ::std::move(it);
@@ -109,11 +102,12 @@ do_compare(Global_Context& global, Reference_Stack& stack,
 
     // Set up arguments for the user-defined comparator.
     stack.clear();
-    do_push_temporary(stack, lhs);
-    do_push_temporary(stack, rhs);
+    stack.emplace_back_uninit().set_temporary(lhs);
+    stack.emplace_back_uninit().set_temporary(rhs);
 
     // Call the predictor function and compare the result with `0`.
-    Reference self = Reference::S_constant();
+    Reference self;
+    self.set_temporary(nullopt);
     kcomp.invoke(self, global, ::std::move(stack));
     return self.dereference_readonly().compare(V_integer(0));
   }
@@ -548,7 +542,7 @@ std_array_max_of(Global_Context& global, V_array data, Opt_function comparator)
     auto qmax = data.begin();
     if(qmax == data.end())
       // Return `null` if `data` is empty.
-      return V_null();
+      return nullopt;
 
     // Compare `*qmax` with the other elements, ignoring unordered elements.
     Reference_Stack stack;
@@ -564,7 +558,7 @@ std_array_min_of(Global_Context& global, V_array data, Opt_function comparator)
     auto qmin = data.begin();
     if(qmin == data.end())
       // Return `null` if `data` is empty.
-      return V_null();
+      return nullopt;
 
     // Compare `*qmin` with the other elements, ignoring unordered elements.
     Reference_Stack stack;
@@ -586,15 +580,19 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
   {
     V_array data;
     data.reserve(static_cast<size_t>(length));
+    Reference self;
     Reference_Stack stack;
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
       stack.clear();
-      do_push_temporary(stack, i);
-      do_push_temporary(stack, data.empty() ? null_value : data.back());
+      stack.emplace_back_uninit().set_temporary(i);
+      if(data.empty())
+        stack.emplace_back_uninit().set_temporary(nullopt);
+      else
+        stack.emplace_back_uninit().set_temporary(data.back());
 
       // Call the generator function and push the return value.
-      Reference self = Reference::S_constant();
+      self.set_temporary(nullopt);
       generator.invoke(self, global, ::std::move(stack));
       data.emplace_back(self.dereference_readonly());
     }

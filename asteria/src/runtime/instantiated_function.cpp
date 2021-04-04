@@ -69,7 +69,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_next:
       case air_status_return_void:
         // Return void if the control flow reached the end of the function.
-        self = Reference::S_void();
+        self.set_void();
         break;
 
       case air_status_return_ref:
@@ -78,10 +78,8 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
         // In case of PTCs, set up source location.
         // This cannot be set at the call site where such information isn't available.
-        if(auto ptca = self.get_ptc_args_opt()) {
-          PTC_Arguments::Caller call = { this->m_zvarg->sloc(), this->m_zvarg->func() };
-          ptca->set_caller(::std::move(call));
-        }
+        if(auto ptca = self.get_ptc_args_opt())
+          ptca->set_caller({ this->m_zvarg->sloc(), this->m_zvarg->func() });
         break;
 
       case air_status_break_unspec:

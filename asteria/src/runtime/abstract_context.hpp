@@ -53,18 +53,14 @@ class Abstract_Context
     // This function is called by `do_create_lazy_reference()` to avoid
     // possibility of infinite recursion, which would otherwise be caused
     // if `open_named_reference()` was called instead.
-    template<typename XRefT>
-    Reference*
-    do_set_named_reference(Reference* hint_opt, const phsh_string& name,
-                           XRefT&& xref)
+    Reference&
+    do_open_named_reference(Reference* hint_opt, const phsh_string& name)
       const
       {
         auto qref = hint_opt;
         if(ROCKET_UNEXPECT(!qref))
           qref = this->m_named_refs.insert(name).first;
-
-        *qref = ::std::forward<XRefT>(xref);
-        return qref;
+        return *qref;
       }
 
   public:

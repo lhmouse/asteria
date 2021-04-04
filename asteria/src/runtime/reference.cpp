@@ -22,37 +22,63 @@ Reference::
   {
   }
 
-Variable_Callback&
+const Value&
 Reference::
-enumerate_variables(Variable_Callback& callback)
+do_dereference_readonly_slow()
   const
   {
+    const Value* qval;
+
+    // Get the root value.
     switch(this->index()) {
       case index_uninit:
-      case index_void:
-        return callback;
+        ASTERIA_THROW("Attempt to use a bypassed variable or reference");
 
-      case index_constant:
-        return this->m_root.as<index_constant>().val.enumerate_variables(callback);
+      case index_void:
+        ASTERIA_THROW("Attempt to use the result of a function call which returned no value");
 
       case index_temporary:
-        return this->m_root.as<index_temporary>().val.enumerate_variables(callback);
+        qval = &(this->m_value);
+        break;
 
       case index_variable: {
-        auto var = unerase_pointer_cast<Variable>(this->m_root.as<index_variable>().var);
-        if(!var)
-          return callback;
+        auto qvar = unerase_cast<Variable*>(this->m_var);
+        if(!qvar)
+          ASTERIA_THROW("Attempt to use a moved-away reference (this is probably a bug)");
 
-        callback.process(var);
-        return callback;
+        if(!qvar->is_initialized())
+          ASTERIA_THROW("Attempt to read from an uninitialized variable");
+
+        qval = &(qvar->get_value());
+        break;
       }
 
       case index_ptc_args:
-        return callback;
+        ASTERIA_THROW("Tail call wrapper not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
     }
+
+    // Apply modifiers.
+    auto bpos = this->m_mods.begin();
+    auto epos = this->m_mods.end();
+
+    while(bpos != epos)
+      if(!(qval = bpos++->apply_read_opt(*qval)))
+        return null_value;
+
+    return *qval;
+  }
+
+Value&
+Reference::
+do_mutate_into_temporary_slow()
+  {
+    // Dereference and copy the value. Don't move-assign a value into itself.
+    auto val = this->dereference_readonly();
+    this->set_temporary(::std::move(val));
+    return this->m_value;
   }
 
 Reference&
@@ -137,144 +163,30 @@ do_finish_call_slow(Global_Context& global)
       throw;
     }
 
-    // The function call yields an rvalue unless all wrapped calls returned by reference.
-    if(ptc_conj == ptc_aware_void)
-      return *this = Reference::S_void();
+    if(!this->is_void()) {
+      // If any of the calls inbetween is void, the result is void.
+      // If all of the calls inbetween are by reference, the result is by reference.
+      if(ptc_conj == ptc_aware_void)
+        this->set_void();
+      else if(ptc_conj != ptc_aware_by_ref)
+        this->mutate_into_temporary();
+    }
 
-    if(ptc_conj == ptc_aware_by_ref)
-      return *this;
-
-    if(!this->is_glvalue())
-      return *this;
-
-    Reference::S_temporary xref = { this->dereference_readonly() };
-    return *this = ::std::move(xref);
+    return *this;
   }
 
-const Value&
+Variable_Callback&
 Reference::
-do_dereference_readonly_slow()
+enumerate_variables(Variable_Callback& callback)
   const
   {
-    const Value* qval;
+    this->m_value.enumerate_variables(callback);
 
-    switch(this->index()) {
-      case index_uninit:
-        ASTERIA_THROW("Attempt to use a bypassed variable or reference");
+    auto qvar = unerase_pointer_cast<Variable>(this->m_var);
+    if(qvar)
+      callback.process(qvar);
 
-      case index_void:
-        ASTERIA_THROW("Attempt to use the result of a function call which returned no value");
-
-      case index_constant:
-        qval = &(this->m_root.as<index_constant>().val);
-        break;
-
-      case index_temporary:
-        qval = &(this->m_root.as<index_temporary>().val);
-        break;
-
-      case index_variable: {
-        auto var = unerase_cast<Variable*>(this->m_root.as<index_variable>().var);
-        if(!var)
-          return null_value;
-
-        if(!var->is_initialized())
-          ASTERIA_THROW("Attempt to read from an uninitialized variable");
-
-        qval = &(var->get_value());
-        break;
-      }
-
-      case index_ptc_args:
-        ASTERIA_THROW("Tail call wrapper not dereferenceable");
-
-      default:
-        ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
-    }
-
-    // If there is no modifier, return the root verbatim.
-    if(ROCKET_EXPECT(this->m_mods.empty()))
-      return *qval;
-
-    // We get to apply modifiers, one by one.
-    for(size_t k = 0;  k != this->m_mods.size();  ++k) {
-      const auto& mod = this->m_mods[k];
-      switch(MIndex(mod.index())) {
-        case mindex_array_index: {
-          const auto& altr = mod.as<mindex_array_index>();
-
-          // Elements of null values are also null values.
-          if(qval->is_null())
-            return null_value;
-          else if(!qval->is_array())
-            ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
-
-          // Get the element at the given index.
-          const auto& arr = qval->as_array();
-          auto w = wrap_index(altr.index, arr.size());
-          if(w.nprepend | w.nappend)
-            return null_value;
-
-          qval = &(arr[w.rindex]);
-          break;
-        }
-
-        case mindex_object_key: {
-          const auto& altr = mod.as<mindex_object_key>();
-
-          // Members of null values are also null values.
-          if(qval->is_null())
-            return null_value;
-          else if(!qval->is_object())
-            ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
-
-          // Get the value with the given key.
-          const auto& obj = qval->as_object();
-          auto it = obj.find(altr.key);
-          if(it == obj.end())
-            return null_value;
-
-          qval = &(it->second);
-          break;
-        }
-
-        case mindex_array_head: {
-          // Elements of null values are also null values.
-          if(qval->is_null())
-            return null_value;
-          else if(!qval->is_array())
-            ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
-
-          // Get the first element.
-          const auto& arr = qval->as_array();
-          if(arr.empty())
-            return null_value;
-
-          qval = &(arr.front());
-          break;
-        }
-
-        case mindex_array_tail: {
-          // Elements of null values are also null values.
-          if(qval->is_null())
-            return null_value;
-          else if(!qval->is_array())
-            ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
-
-          // Get the last element.
-          const auto& arr = qval->as_array();
-          if(arr.empty())
-            return null_value;
-
-          qval = &(arr.back());
-          break;
-        }
-
-        default:
-          ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
-      }
-    }
-    return *qval;
+    return callback;
   }
 
 Value&
@@ -284,6 +196,7 @@ dereference_mutable()
   {
     Value* qval;
 
+    // Get the root value.
     switch(this->index()) {
       case index_uninit:
         ASTERIA_THROW("Attempt to use a bypassed variable or reference");
@@ -291,24 +204,19 @@ dereference_mutable()
       case index_void:
         ASTERIA_THROW("Attempt to use the result of a function call which returned no value");
 
-      case index_constant:
-        ASTERIA_THROW("Attempt to modify a constant `$1`", this->m_root.as<index_constant>().val);
-
       case index_temporary:
-        ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_root.as<index_temporary>().val);
+        ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_value);
+        break;
 
       case index_variable: {
-        auto var = unerase_cast<Variable*>(this->m_root.as<index_variable>().var);
-        if(!var)
-          ASTERIA_THROW("Attempt to dereference a moved-away reference");
+        auto qvar = unerase_cast<Variable*>(this->m_var);
+        if(!qvar)
+          ASTERIA_THROW("Attempt to use a moved-away reference (this is probably a bug)");
 
-        if(!var->is_initialized())
-          ASTERIA_THROW("Attempt to modify an uninitialized variable");
+        if(!qvar->is_initialized())
+          ASTERIA_THROW("Attempt to read from an uninitialized variable");
 
-        if(var->is_immutable())
-          ASTERIA_THROW("Attempt to modify an immutable variable `$1`", var->get_value());
-
-        qval = &(var->open_value());
+        qval = &(qvar->open_value());
         break;
       }
 
@@ -319,82 +227,13 @@ dereference_mutable()
         ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
     }
 
-    // If there is no modifier, return the root verbatim.
-    if(ROCKET_EXPECT(this->m_mods.empty()))
-      return *qval;
+    // Apply modifiers.
+    auto bpos = this->m_mods.begin();
+    auto epos = this->m_mods.end();
 
-    // We get to apply modifiers, one by one.
-    for(size_t k = 0;  k != this->m_mods.size();  ++k) {
-      const auto& mod = this->m_mods[k];
-      switch(MIndex(mod.index())) {
-        case mindex_array_index: {
-          const auto& altr = mod.as<mindex_array_index>();
+    while(bpos != epos)
+      qval = &(bpos++->apply_open(*qval));
 
-          // Create values as needed.
-          if(qval->is_null())
-            *qval = V_array();
-          else if(!qval->is_array())
-            ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
-
-          // Get the element at the given index.
-          auto& arr = qval->open_array();
-          auto w = wrap_index(altr.index, arr.size());
-          if(w.nprepend)
-            arr.insert(arr.begin(), w.nprepend);
-          else if(w.nappend)
-            arr.append(w.nappend);
-          qval = arr.mut_data() + w.rindex;
-          break;
-        }
-
-        case mindex_object_key: {
-          const auto& altr = mod.as<mindex_object_key>();
-
-          // Create values as needed.
-          if(qval->is_null())
-            *qval = V_object();
-          else if(!qval->is_object())
-            ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
-
-          // Get the value with the given key.
-          auto& obj = qval->open_object();
-          auto it = obj.try_emplace(altr.key).first;
-          qval = &(it->second);
-          break;
-        }
-
-        case mindex_array_head: {
-          // Create values as needed.
-          if(qval->is_null())
-            *qval = V_array();
-          else if(!qval->is_array())
-            ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
-
-          // Prepend a copy of the first element.
-          auto& arr = qval->open_array();
-          auto it = arr.insert(arr.begin(), arr.empty() ? null_value : arr.front());
-          qval = &*it;
-          break;
-        }
-
-        case mindex_array_tail: {
-          // Create values as needed.
-          if(qval->is_null())
-            *qval = V_array();
-          else if(!qval->is_array())
-            ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
-
-          // Append a copy of the last element.
-          auto& arr = qval->open_array();
-          auto& back = arr.emplace_back(arr.empty() ? null_value : arr.back());
-          qval = &back;
-          break;
-        }
-
-        default:
-          ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
-      }
-    }
     return *qval;
   }
 
@@ -405,6 +244,7 @@ dereference_unset()
   {
     Value* qval;
 
+    // Get the root value.
     switch(this->index()) {
       case index_uninit:
         ASTERIA_THROW("Attempt to use a bypassed variable or reference");
@@ -412,24 +252,19 @@ dereference_unset()
       case index_void:
         ASTERIA_THROW("Attempt to use the result of a function call which returned no value");
 
-      case index_constant:
-        ASTERIA_THROW("Attempt to modify a constant `$1`", this->m_root.as<index_constant>().val);
-
       case index_temporary:
-        ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_root.as<index_temporary>().val);
+        ASTERIA_THROW("Attempt to modify a temporary `$1`", this->m_value);
+        break;
 
       case index_variable: {
-        auto var = unerase_cast<Variable*>(this->m_root.as<index_variable>().var);
-        if(!var)
-          ASTERIA_THROW("Attempt to dereference a moved-away reference");
+        auto qvar = unerase_cast<Variable*>(this->m_var);
+        if(!qvar)
+          ASTERIA_THROW("Attempt to use a moved-away reference (this is probably a bug)");
 
-        if(!var->is_initialized())
-          ASTERIA_THROW("Attempt to modify an uninitialized variable");
+        if(!qvar->is_initialized())
+          ASTERIA_THROW("Attempt to read from an uninitialized variable");
 
-        if(var->is_immutable())
-          ASTERIA_THROW("Attempt to modify an immutable variable `$1`", var->get_value());
-
-        qval = &(var->open_value());
+        qval = &(qvar->open_value());
         break;
       }
 
@@ -440,182 +275,18 @@ dereference_unset()
         ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
     }
 
-    // If there is no modifier, fail.
-    if(this->m_mods.empty())
-      ASTERIA_THROW("Non-member values cannot be unset");
+    // Apply modifiers except the last one.
+    auto bpos = this->m_mods.begin();
+    auto epos = this->m_mods.end();
 
-    // We get to apply modifiers other than the last one.
-    for(size_t k = 0;  k != this->m_mods.size() - 1;  ++k) {
-      const auto& mod = this->m_mods[k];
-      switch(MIndex(mod.index())) {
-        case mindex_array_index: {
-          const auto& altr = mod.as<mindex_array_index>();
+    if(bpos == epos)
+      ASTERIA_THROW("Root values cannot be unset");
 
-          // Elements of null values are also null values.
-          if(qval->is_null())
-            return nullopt;
-          else if(!qval->is_array())
-            ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
+    while(bpos != epos - 1)
+      if(!(qval = bpos++->apply_write_opt(*qval)))
+        return null_value;
 
-          // Get the element at the given index.
-          auto& arr = qval->open_array();
-          auto w = wrap_index(altr.index, arr.size());
-          if(w.nprepend | w.nappend)
-            return nullopt;
-
-          qval = &(arr.mut(w.rindex));
-          break;
-        }
-
-        case mindex_object_key: {
-          const auto& altr = mod.as<mindex_object_key>();
-
-          // Members of null values are also null values.
-          if(qval->is_null())
-            return nullopt;
-          else if(!qval->is_object())
-            ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
-
-          // Get the value with the given key.
-          auto& obj = qval->open_object();
-          auto it = obj.mut_find(altr.key);
-          if(it == obj.end())
-            return nullopt;
-
-          qval = &(it->second);
-          break;
-        }
-
-        case mindex_array_head: {
-          // Elements of null values are also null values.
-          if(qval->is_null())
-            return nullopt;
-          else if(!qval->is_array())
-            ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
-
-          // Get the first element.
-          auto& arr = qval->open_array();
-          if(arr.empty())
-            return nullopt;
-
-          qval = &(arr.mut_front());
-          break;
-        }
-
-        case mindex_array_tail: {
-          // Elements of null values are also null values.
-          if(qval->is_null())
-            return nullopt;
-          else if(!qval->is_array())
-            ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
-
-          // Get the last element.
-          auto& arr = qval->open_array();
-          if(arr.empty())
-            return nullopt;
-
-          qval = &(arr.mut_back());
-          break;
-        }
-
-        default:
-          ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
-      }
-    }
-
-    // Apply the last modifier.
-    const auto& mod = this->m_mods.back();
-    switch(MIndex(mod.index())) {
-      case mindex_array_index: {
-        const auto& altr = mod.as<mindex_array_index>();
-
-        // Elements of null values are also null values.
-        if(qval->is_null())
-          return nullopt;
-        else if(!qval->is_array())
-          ASTERIA_THROW("Integer subscript inapplicable (value `$1`, index `$2`)", *qval, altr.index);
-
-        // Get the element at the given index.
-        auto& arr = qval->open_array();
-        auto w = wrap_index(altr.index, arr.size());
-        if(w.nprepend | w.nappend)
-          return nullopt;
-
-        auto val = ::std::move(arr.mut(w.rindex));
-        arr.erase(w.rindex, 1);
-        return val;
-      }
-
-      case mindex_object_key: {
-        const auto& altr = mod.as<mindex_object_key>();
-
-        // Members of null values are also null values.
-        if(qval->is_null())
-          return nullopt;
-        else if(!qval->is_object())
-          ASTERIA_THROW("String subscript inapplicable (value `$1`, key `$2`)", *qval, altr.key);
-
-        // Get the value with the given key.
-        auto& obj = qval->open_object();
-        auto it = obj.mut_find(altr.key);
-        if(it == obj.end())
-          return nullopt;
-
-        auto val = ::std::move(it->second);
-        obj.erase(it);
-        return val;
-      }
-
-      case mindex_array_head: {
-        // Elements of null values are also null values.
-        if(qval->is_null())
-          return nullopt;
-        else if(!qval->is_array())
-          ASTERIA_THROW("Head operator inapplicable (value `$1`)", *qval);
-
-        // Get the first element.
-        auto& arr = qval->open_array();
-        if(arr.empty())
-          return nullopt;
-
-        auto val = ::std::move(arr.mut_front());
-        arr.erase(arr.begin());
-        return val;
-      }
-
-      case mindex_array_tail: {
-        // Elements of null values are also null values.
-        if(qval->is_null())
-          return nullopt;
-        else if(!qval->is_array())
-          ASTERIA_THROW("Tail operator inapplicable (value `$1`)", *qval);
-
-        // Get the last element.
-        auto& arr = qval->open_array();
-        if(arr.empty())
-          return nullopt;
-
-        auto val = ::std::move(arr.mut_back());
-        arr.pop_back();
-        return val;
-      }
-
-      default:
-        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
-    }
-  }
-
-Value&
-Reference::
-do_mutate_into_temporary_slow()
-  {
-    // Otherwise, try dereferencing.
-    S_temporary xref = { this->dereference_readonly() };
-    this->m_root = ::std::move(xref);
-    this->m_mods.clear();
-
-    ROCKET_ASSERT(this->m_root.index() == index_temporary);
-    return this->m_root.as<index_temporary>().val;
+    return bpos->apply_unset(*qval);
   }
 
 }  // namespace asteria

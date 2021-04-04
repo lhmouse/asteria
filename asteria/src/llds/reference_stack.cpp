@@ -30,40 +30,33 @@ do_destroy_elements()
 
 void
 Reference_Stack::
-do_reallocate_reserve(Reference*& bptr, uint32_t& estor, uint32_t nadd)
-  const
+do_reserve_more()
   {
     // Allocate a new table.
-    constexpr size_t size_max = PTRDIFF_MAX / sizeof(Reference);
-    size_t size_cur = this->size();
-    if(size_max - size_cur < nadd)
+    uint32_t estor = (this->m_estor * 3 / 2 + 5) | 29;
+    if(estor > PTRDIFF_MAX / sizeof(Reference))
       throw ::std::bad_array_new_length();
 
-    estor = static_cast<uint32_t>(size_cur + nadd);
-    bptr = static_cast<Reference*>(::operator new(estor * sizeof(Reference)));
-  }
+    if(estor <= this->m_estor)
+      throw ::std::bad_alloc();
 
-void
-Reference_Stack::
-do_reallocate_finish(Reference* bptr, uint32_t estor)
-  noexcept
-  {
-    // Set up the partially initialized storage.
-    // The caller may have constructed elements above the top, but the top index
-    // shall be left intact.
+    auto bptr = static_cast<Reference*>(::operator new(estor * sizeof(Reference)));
+#ifdef ROCKET_DEBUG
+    ::std::memset((void*)bptr, 0xE6, estor * sizeof(Reference));
+#endif
+
+    // Move-construct references below `m_etop` into the new storage. This shall
+    // not throw exceptions. `m_etop` is left unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    uint32_t etop = this->m_etop;
-    uint32_t eiold = ::std::exchange(this->m_einit, etop);
-    this->m_estor = estor;
+    size_t esold = ::std::exchange(this->m_estor, estor);
+    this->m_einit = this->m_etop;
 
-    // Relocate references within [0,top]. Destroy the others.
-    for(uint32_t k = 0;  k != etop;  ++k) {
+    for(size_t k = 0;  k != this->m_einit;  ++k)
       ::rocket::construct_at(bptr + k, ::std::move(bold[k]));
+
+    for(size_t k = 0;  k != esold;  ++k)
       ::rocket::destroy_at(bold + k);
-    }
-    for(uint32_t k = etop;  k != eiold;  ++k) {
-      ::rocket::destroy_at(bold + k);
-    }
+
     if(bold)
       ::operator delete(bold);
   }

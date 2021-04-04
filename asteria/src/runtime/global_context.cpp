@@ -104,9 +104,8 @@ Global_Context(API_Version version)
     vstd->initialize(::std::move(ostd), true);
 
     // Set the `std` reference now.
-    Reference::S_variable xref = { vstd };
-    this->do_set_named_reference(nullptr, sref("std"), ::std::move(xref));
-    this->m_vstd = vstd;
+    this->do_open_named_reference(nullptr, sref("std")).set_variable(vstd);
+    this->m_vstd = ::std::move(vstd);
   }
 
 Global_Context::

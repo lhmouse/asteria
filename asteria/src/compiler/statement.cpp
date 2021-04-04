@@ -38,9 +38,9 @@ do_generate_clear_stack(cow_vector<AIR_Node>& code)
   }
 
 cow_vector<AIR_Node>&
-do_generate_glvalue_to_prvalue(cow_vector<AIR_Node>& code, const Source_Location& sloc)
+do_generate_convert_to_temporary(cow_vector<AIR_Node>& code, const Source_Location& sloc)
   {
-    AIR_Node::S_glvalue_to_prvalue xnode = { sloc };
+    AIR_Node::S_convert_to_temporary xnode = { sloc };
     code.emplace_back(::std::move(xnode));
     return code;
   }
@@ -518,7 +518,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           else {
             // This may be PTC'd by value.
             do_generate_expression(code, opts, ptc_aware_by_val, ctx, altr.expr);
-            do_generate_glvalue_to_prvalue(code, altr.expr.sloc);
+            do_generate_convert_to_temporary(code, altr.expr.sloc);
           }
           // Forward the result as is.
           AIR_Node::S_simple_status xnode = { air_status_return_ref };

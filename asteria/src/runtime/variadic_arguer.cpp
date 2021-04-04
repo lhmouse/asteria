@@ -42,16 +42,14 @@ invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& 
       reader.throw_no_matching_function_call();
 
     // If no argument is given, return the number of variadic arguments.
-    if(!qindex) {
-      Reference::S_constant xref = { this->m_vargs.ssize() };
-      return self = ::std::move(xref);
-    }
+    if(!qindex)
+      return self.set_temporary(this->m_vargs.ssize());
 
     // Wrap the index as necessary.
     // If the index is out of range, return a constant `null`.
     auto w = wrap_index(*qindex, this->m_vargs.size());
     if(w.nprepend | w.nappend)
-      return self = Reference::S_constant();
+      return self.set_temporary(nullopt);
 
     // Copy the reference at `*qindex`.
     return self = this->m_vargs.at(w.rindex);

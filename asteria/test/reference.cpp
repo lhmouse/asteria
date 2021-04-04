@@ -9,7 +9,8 @@ using namespace asteria;
 
 int main()
   {
-    auto ref = Reference(Reference::S_constant { V_string(sref("meow")) });
+    Reference ref;
+    ref.set_temporary(V_string(sref("meow")));
     auto val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_string());
     ASTERIA_TEST_CHECK(val.as_string() == "meow");
@@ -20,7 +21,7 @@ int main()
     ASTERIA_TEST_CHECK(val.as_string() == "meow");
     ASTERIA_TEST_CHECK_CATCH(ref.dereference_mutable() = V_boolean(true));
 
-    ref = Reference::S_temporary { V_integer(42) };
+    ref.set_temporary(V_integer(42));
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_integer());
     ASTERIA_TEST_CHECK(val.as_integer() == 42);
@@ -32,36 +33,36 @@ int main()
 
     auto var = ::rocket::make_refcnt<Variable>();
     var->initialize(V_null(), false);
-    ref = Reference::S_variable { var };
-    ref.zoom_in(Reference::M_array_index { -3 });
+    ref.set_variable(var);
+    ref.push_modifier_array_index(-3);
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_null());
     ref.dereference_mutable() = V_integer(36);
-    ref.zoom_out();
-    ref.zoom_in(Reference::M_array_index { 0 });
+    ref.pop_modifier();
+    ref.push_modifier_array_index(0);
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_integer());
     ASTERIA_TEST_CHECK(val.as_integer() == 36);
-    ref.zoom_out();
+    ref.pop_modifier();
 
-    ref.zoom_in(Reference::M_array_index { 2 });
-    ref.zoom_in(Reference::M_object_key { phsh_string(sref("my_key")) });
+    ref.push_modifier_array_index(2);
+    ref.push_modifier_object_key(sref("my_key"));
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_null());
     ref.dereference_mutable() = V_real(10.5);
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_real());
     ASTERIA_TEST_CHECK(val.as_real() == 10.5);
-    ref.zoom_out();
-    ref.zoom_out();
-    ref.zoom_in(Reference::M_array_index { -1 });
-    ref.zoom_in(Reference::M_object_key { phsh_string(sref("my_key")) });
+    ref.pop_modifier();
+    ref.pop_modifier();
+    ref.push_modifier_array_index(-1);
+    ref.push_modifier_object_key(sref("my_key"));
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_real());
     ASTERIA_TEST_CHECK(val.as_real() == 10.5);
-    ref.zoom_in(Reference::M_object_key { phsh_string(sref("invalid_access")) });
+    ref.push_modifier_object_key(sref("invalid_access"));
     ASTERIA_TEST_CHECK_CATCH(val = ref.dereference_readonly());
-    ref.zoom_out();
+    ref.pop_modifier();
 
     val = ref.dereference_unset();
     ASTERIA_TEST_CHECK(val.is_real());
