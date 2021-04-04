@@ -113,13 +113,15 @@ do_xrelocate_but(Bucket* qxcld)
 
 void
 Reference_Dictionary::
-do_rehash(size_t nbkt)
+do_rehash_more()
   {
-    ROCKET_ASSERT(nbkt / 2 > this->m_size);
-
     // Allocate a new table.
+    size_t nbkt = (this->m_size * 3 + 5) | 9;
     if(nbkt > PTRDIFF_MAX / sizeof(Bucket))
       throw ::std::bad_array_new_length();
+
+    if(nbkt / 2 <= this->m_size)
+      throw ::std::bad_alloc();
 
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;

@@ -110,9 +110,8 @@ class Reference_Dictionary
         this->do_xrelocate_but(qbkt);
       }
 
-    // This function is primarily used to reallocate a larger table.
     void
-    do_rehash(size_t nbkt);
+    do_rehash_more();
 
   public:
     ~Reference_Dictionary()
@@ -205,7 +204,7 @@ class Reference_Dictionary
         // exceed 0.5.
         auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
         if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
-          this->do_rehash(this->m_size * 3 | 9);
+          this->do_rehash_more();
 
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(name);
