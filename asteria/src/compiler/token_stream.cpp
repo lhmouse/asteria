@@ -271,7 +271,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
           return false;
 
         auto sptr = reader.data() + tlen - 8;
-        if(!mem_equal(sptr + 1, "nfinity", 7))  // `infinity` or `Infinity`
+        if(::std::memcmp(sptr + 1, "nfinity", 7) != 0)  // `infinity` or `Infinity`
           return false;
 
         Token::S_real_literal xtoken;
@@ -509,7 +509,7 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
       if(reader.navail() < tlen)
         continue;
 
-      if(!mem_equal(reader.data(), cur.str, tlen))
+      if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
         continue;
 
       Token::S_punctuator xtoken = { cur.punct };
@@ -748,7 +748,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
         if(::std::strlen(cur.str) != tlen)
           continue;
 
-        if(!mem_equal(reader.data(), cur.str, tlen))
+        if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
           continue;
 
         Token::S_keyword xtoken = { cur.kwrd };

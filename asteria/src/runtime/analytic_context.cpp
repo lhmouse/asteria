@@ -20,7 +20,7 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
 
       // Nothing is set for the variadic placeholder, but the parameter list
       // terminates here.
-      variadic = (name.size() == 3) && mem_equal(name.c_str(), "...", 4);
+      variadic = (name.size() == 3) && (::std::memcmp(name.c_str(), "...", 4) == 0);
       if(variadic)
         break;
 
