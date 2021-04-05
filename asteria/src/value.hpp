@@ -65,6 +65,7 @@ class Value
       }
 
   public:
+    // Accessors
     Type
     type()
       const noexcept

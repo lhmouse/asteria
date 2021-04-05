@@ -39,67 +39,21 @@ class Reference
 
     Reference(const Reference& other)
       noexcept
-      { *this = other;  }
+      { this->assign(other);  }
 
     Reference(Reference&& other)
       noexcept
-      { *this = ::std::move(other);  }
+      { this->assign(::std::move(other));  }
 
     Reference&
     operator=(const Reference& other)
       noexcept
-      {
-        // Note not all fields have to be copied.
-        switch(other.m_index) {
-          case index_uninit:
-          case index_void:
-            break;
-
-          case index_temporary:
-            this->m_value = other.m_value;
-            break;
-
-          case index_variable:
-            this->m_var = other.m_var;
-            break;
-
-          case index_ptc_args:
-            this->m_ptca = other.m_ptca;
-            break;
-        }
-
-        this->m_mods = other.m_mods;
-        this->m_index = other.m_index;
-        return *this;
-      }
+      { return this->assign(other);  }
 
     Reference&
     operator=(Reference&& other)
       noexcept
-      {
-        // Note not all fields have to be moved.
-        switch(other.m_index) {
-          case index_uninit:
-          case index_void:
-            break;
-
-          case index_temporary:
-            this->m_value = ::std::move(other.m_value);
-            break;
-
-          case index_variable:
-            this->m_var = ::std::move(other.m_var);
-            break;
-
-          case index_ptc_args:
-            this->m_ptca = ::std::move(other.m_ptca);
-            break;
-        }
-
-        this->m_mods = ::std::move(other.m_mods);
-        this->m_index = other.m_index;
-        return *this;
-      }
+      { return this->assign(::std::move(other));  }
 
   private:
     const Value&
@@ -115,6 +69,7 @@ class Reference
   public:
     ~Reference();
 
+    // Accessors
     Index
     index()
       const noexcept
@@ -210,6 +165,62 @@ class Reference
       {
         this->m_ptca = ptca;
         this->m_index = index_ptc_args;
+        return *this;
+      }
+
+    Reference&
+    assign(const Reference& other)
+      noexcept
+      {
+        // Note not all fields have to be copied.
+        switch(other.m_index) {
+          case index_uninit:
+          case index_void:
+            break;
+
+          case index_temporary:
+            this->m_value = other.m_value;
+            break;
+
+          case index_variable:
+            this->m_var = other.m_var;
+            break;
+
+          case index_ptc_args:
+            this->m_ptca = other.m_ptca;
+            break;
+        }
+
+        this->m_mods = other.m_mods;
+        this->m_index = other.m_index;
+        return *this;
+      }
+
+    Reference&
+    assign(Reference&& other)
+      noexcept
+      {
+        // Note not all fields have to be moved.
+        switch(other.m_index) {
+          case index_uninit:
+          case index_void:
+            break;
+
+          case index_temporary:
+            this->m_value = ::std::move(other.m_value);
+            break;
+
+          case index_variable:
+            this->m_var = ::std::move(other.m_var);
+            break;
+
+          case index_ptc_args:
+            this->m_ptca = ::std::move(other.m_ptca);
+            break;
+        }
+
+        this->m_mods = ::std::move(other.m_mods);
+        this->m_index = other.m_index;
         return *this;
       }
 
