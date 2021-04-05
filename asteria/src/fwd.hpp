@@ -293,16 +293,14 @@ struct Abstract_Opaque
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
 
     // This function is called to convert this object to a human-readble string.
-    virtual
-    tinyfmt&
+    virtual tinyfmt&
     describe(tinyfmt& fmt) const
       = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual
-    Variable_Callback&
+    virtual Variable_Callback&
     enumerate_variables(Variable_Callback& callback) const
       = 0;
 
@@ -310,8 +308,7 @@ struct Abstract_Opaque
     // is shared. If this function returns a null pointer, the shared instance is used. If this
     // function returns a non-null pointer, it replaces the current value. Derived classes that
     // are not copyable should throw an exception in this function.
-    virtual
-    Abstract_Opaque*
+    virtual Abstract_Opaque*
     clone_opt(rcptr<Abstract_Opaque>& output) const
       = 0;
   };
@@ -331,22 +328,19 @@ struct Abstract_Function
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
 
     // This function is called to convert this object to a human-readble string.
-    virtual
-    tinyfmt&
+    virtual tinyfmt&
     describe(tinyfmt& fmt) const
       = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual
-    Variable_Callback&
+    virtual Variable_Callback&
     enumerate_variables(Variable_Callback& callback) const
       = 0;
 
     // This function may return a proper tail call wrapper.
-    virtual
-    Reference&
+    virtual Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const
       = 0;
   };

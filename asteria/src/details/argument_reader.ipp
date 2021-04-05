@@ -38,8 +38,7 @@ struct Applier;
 template<typename RetT, size_t... N, typename FuncT, typename... ArgsT>
 struct Applier<RetT, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
   {
-    static
-    Reference&
+    static Reference&
     do_apply(Reference& self, FuncT& func, ::std::tuple<ArgsT...>& args)
       {
         auto val = func(::std::get<N>(args)...);
@@ -50,8 +49,7 @@ struct Applier<RetT, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
 template<size_t... N, typename FuncT, typename... ArgsT>
 struct Applier<void, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
   {
-    static
-    Reference&
+    static Reference&
     do_apply(Reference& self, FuncT& func, ::std::tuple<ArgsT...>& args)
       {
         func(::std::get<N>(args)...);

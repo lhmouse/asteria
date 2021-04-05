@@ -63,38 +63,31 @@ class basic_shallow_string
       { }
 
   public:
-    constexpr
-    const charT*
+    constexpr const charT*
     c_str() const noexcept
       { return this->m_ptr;  }
 
-    constexpr
-    size_t
+    constexpr size_t
     length() const noexcept
       { return this->m_len;  }
 
-    constexpr
-    const charT*
+    constexpr const charT*
     begin() const noexcept
       { return this->m_ptr;  }
 
-    constexpr
-    const charT*
+    constexpr const charT*
     end() const noexcept
       { return this->m_ptr + this->m_len;  }
 
-    constexpr
-    const charT*
+    constexpr const charT*
     data() const noexcept
       { return this->m_ptr;  }
 
-    constexpr
-    size_t
+    constexpr size_t
     size() const noexcept
       { return this->m_len;  }
 
-    constexpr
-    charT
+    constexpr charT
     operator[](size_t pos) const noexcept
       { return ROCKET_ASSERT(pos <= this->m_len), this->m_ptr[pos];  }
   };
@@ -461,29 +454,24 @@ class basic_cow_string
       { return ::std::move_iterator<reverse_iterator>(this->mut_rend());  }
 
     // 24.3.2.4, capacity
-    constexpr
-    bool
+    constexpr bool
     empty() const noexcept
       { return this->m_len == 0;  }
 
-    constexpr
-    size_type
+    constexpr size_type
     size() const noexcept
       { return this->m_len;  }
 
-    constexpr
-    size_type
+    constexpr size_type
     length() const noexcept
       { return this->m_len;  }
 
     // N.B. This is a non-standard extension.
-    constexpr
-    difference_type
+    constexpr difference_type
     ssize() const noexcept
       { return static_cast<difference_type>(this->size());  }
 
-    constexpr
-    size_type
+    constexpr size_type
     max_size() const noexcept
       { return this->m_sth.max_size();  }
 
@@ -497,8 +485,7 @@ class basic_cow_string
           return this->pop_back(this->size() - n);
       }
 
-    constexpr
-    size_type
+    constexpr size_type
     capacity() const noexcept
       { return this->m_sth.capacity();  }
 
@@ -1362,13 +1349,11 @@ class basic_cow_string
       }
 
     // 24.3.2.7, string operations
-    constexpr
-    const value_type*
+    constexpr const value_type*
     data() const noexcept
       { return this->m_ptr;  }
 
-    constexpr
-    const value_type*
+    constexpr const value_type*
     c_str() const noexcept
       { return this->m_ptr;  }
 
@@ -1404,8 +1389,7 @@ class basic_cow_string
       }
 
     // N.B. The return type differs from `std::basic_string`.
-    constexpr
-    const allocator_type&
+    constexpr const allocator_type&
     get_allocator() const noexcept
       { return this->m_sth.as_allocator();  }
 
@@ -1874,15 +1858,13 @@ struct basic_cow_string<charT, traitsT, allocT>::hash
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
 
-    constexpr
-    result_type
+    constexpr result_type
     operator()(const argument_type& str) const noexcept
       { return details_cow_string::basic_hasher<charT, traitsT>()
                    .append(str.data(), str.size())
                    .finish();  }
 
-    constexpr
-    result_type
+    constexpr result_type
     operator()(const charT* s) const noexcept
       { return details_cow_string::basic_hasher<charT, traitsT>()
                    .append(s)

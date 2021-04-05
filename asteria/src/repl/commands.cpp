@@ -13,26 +13,22 @@ struct Command
     virtual
     ~Command();
 
-    virtual
-    const char*
+    virtual const char*
     cmd()  // the name of this command
       const noexcept
       = 0;
 
-    virtual
-    const char*
+    virtual const char*
     oneline()  // the one-line description for `help`
       const noexcept
       = 0;
 
-    virtual
-    const char*
+    virtual const char*
     description()  // the long description for `help [cmd]`
       const noexcept
       = 0;
 
-    virtual
-    void
+    virtual void
     handle(cow_string&& args)  // do something
       const
       = 0;

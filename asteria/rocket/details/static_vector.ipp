@@ -71,8 +71,7 @@ class storage_handle
       = delete;
 
   public:
-    constexpr
-    const allocator_type&
+    constexpr const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -80,13 +79,11 @@ class storage_handle
     as_allocator() noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    ROCKET_CONST_FUNCTION static constexpr
-    size_type
+    ROCKET_CONST_FUNCTION static constexpr size_type
     capacity() noexcept
       { return capacityT;  }
 
-    constexpr
-    size_type
+    constexpr size_type
     max_size() const noexcept
       { return this->capacity();  }
 
@@ -103,8 +100,7 @@ class storage_handle
         return base + add;
       }
 
-    ROCKET_PURE_FUNCTION constexpr
-    const value_type*
+    ROCKET_PURE_FUNCTION constexpr const value_type*
     data() const noexcept
       { return this->m_data;  }
 
@@ -112,8 +108,7 @@ class storage_handle
     mut_data() noexcept
       { return this->m_data;  }
 
-    ROCKET_PURE_FUNCTION constexpr
-    size_type
+    ROCKET_PURE_FUNCTION constexpr size_type
     size() const noexcept
       { return this->m_nelem;  }
 
@@ -368,14 +363,12 @@ class vector_iterator
       }
 
     template<typename yvalueT>
-    constexpr
-    bool
+    constexpr bool
     operator==(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename yvalueT>
-    constexpr
-    bool
+    constexpr bool
     operator!=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 

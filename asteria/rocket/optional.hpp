@@ -167,8 +167,7 @@ class optional
 
   public:
     // 19.6.3.5, observers
-    constexpr
-    bool
+    constexpr bool
     has_value() const noexcept
       { return this->m_stor.size() != 0;  }
 
@@ -219,23 +218,19 @@ class optional
       { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
                    : ::std::move(this->m_stor.mut_front());  }
 
-    constexpr
-    const_reference
+    constexpr const_reference
     operator*() const
       { return this->m_stor.front();  }
 
-    constexpr
-    reference
+    constexpr reference
     operator*()
       { return this->m_stor.mut_front();  }
 
-    constexpr
-    const value_type*
+    constexpr const value_type*
     operator->() const
       { return ::std::addressof(this->m_stor.front());  }
 
-    constexpr
-    value_type*
+    constexpr value_type*
     operator->()
       { return ::std::addressof(this->m_stor.mut_front());  }
 

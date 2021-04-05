@@ -282,8 +282,7 @@ class MD5_Hasher
   : public Abstract_Opaque
   {
   private:
-    static constexpr
-    array<uint32_t, 4>
+    static constexpr array<uint32_t, 4>
     init() noexcept
       { return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };  }
 
@@ -533,8 +532,7 @@ class SHA1_Hasher
   : public Abstract_Opaque
   {
   private:
-    static constexpr
-    array<uint32_t, 5>
+    static constexpr array<uint32_t, 5>
     init() noexcept
       { return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };  }
 
@@ -814,8 +812,7 @@ class SHA256_Hasher
   : public Abstract_Opaque
   {
   private:
-    static constexpr
-    array<uint32_t, 8>
+    static constexpr array<uint32_t, 8>
     init() noexcept
       { return { 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
                  0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 };  }

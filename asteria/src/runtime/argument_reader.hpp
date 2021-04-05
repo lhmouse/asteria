@@ -29,20 +29,16 @@ class Argument_Reader
       { }
 
   private:
-    inline
-    void
+    inline void
     do_prepare_parameter(const char* param);
 
-    inline
-    void
+    inline void
     do_terminate_parameter_list();
 
-    inline
-    Argument_Reader&
+    inline Argument_Reader&
     do_mark_match_failure() noexcept;
 
-    inline
-    const Reference*
+    inline const Reference*
     do_peek_argument() const;
 
   public:

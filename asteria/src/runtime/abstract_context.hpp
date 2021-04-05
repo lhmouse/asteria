@@ -28,21 +28,18 @@ class Abstract_Context
       = default;
 
   protected:
-    virtual
-    bool
+    virtual bool
     do_is_analytic() const noexcept
       = 0;
 
-    virtual
-    Abstract_Context*
+    virtual Abstract_Context*
     do_get_parent_opt() const noexcept
       = 0;
 
     // This function is called when a name is not found in `m_named_refs`.
     // Builtin references such as `__func` are only created when they are
     // mentioned.
-    virtual
-    Reference*
+    virtual Reference*
     do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
       = 0;
 

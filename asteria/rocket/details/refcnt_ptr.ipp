@@ -86,8 +86,7 @@ class stored_pointer
         return ptr->reference_counter_base::use_count();
       }
 
-    constexpr
-    pointer
+    constexpr pointer
     get() const noexcept
       { return this->m_ptr;  }
 

@@ -781,8 +781,7 @@ class cow_hashmap
       }
 
     // N.B. The return type differs from `std::unordered_map`.
-    constexpr
-      const
+    constexpr const
     allocator_type&
     get_allocator() const noexcept
       { return this->m_sth.as_allocator();  }
@@ -792,8 +791,7 @@ class cow_hashmap
       { return this->m_sth.as_allocator();  }
 
     // N.B. The return type differs from `std::unordered_map`.
-    constexpr
-    const hasher&
+    constexpr const hasher&
     hash_function() const noexcept
       { return this->m_sth.as_hasher();  }
 
@@ -802,8 +800,7 @@ class cow_hashmap
       { return this->m_sth.as_hasher();  }
 
     // N.B. The return type differs from `std::unordered_map`.
-    constexpr
-      const
+    constexpr const
     key_equal&
     key_eq() const noexcept
       { return this->m_sth.as_key_equal();  }

@@ -33,13 +33,11 @@ class posix_fd_closer
     operator()(handle_type fd) const noexcept
       { return this->close(fd);  }
 
-    constexpr
-    handle_type
+    constexpr handle_type
     null() const noexcept
       { return -1;  }
 
-    constexpr
-    bool
+    constexpr bool
     is_null(handle_type fd) const noexcept
       { return fd == -1;  }
 

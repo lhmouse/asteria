@@ -42,8 +42,7 @@ struct tinybuf_base
         open_exclusive   = 0b000001000010,  // O_EXCL
       };
 
-    static constexpr
-    bool
+    static constexpr bool
     has_mode(open_mode mode, open_mode opt) noexcept
       { return (mode & opt) == opt;  }
   };
@@ -117,8 +116,7 @@ class basic_tinybuf
     // * Estimates how many characters are available for non-blocking reads.
     // * Returns `0` if the number is unknown.
     //   Returns `-1` if no character is available.
-    virtual
-    off_type
+    virtual off_type
     do_fortell() const
       {
         // The default implementation indicates an unknown number.
@@ -127,8 +125,7 @@ class basic_tinybuf
 
     // * Synchronizes the get and put areas with the external device.
     // * Throws an exception on failure.
-    virtual
-    basic_tinybuf&
+    virtual basic_tinybuf&
     do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/,
              char_type*& /*pcur*/, char_type*& /*pend*/)
       {
@@ -139,8 +136,7 @@ class basic_tinybuf
     // * Sets the stream position.
     // * Returns its absolute value.
     // * Throws an exception on failure.
-    virtual
-    off_type
+    virtual off_type
     do_seek(off_type /*off*/, seek_dir /*dir*/)
       {
         // The default implementation always fails.
@@ -153,8 +149,7 @@ class basic_tinybuf
     //   more characters.
     // * Throws an exception in case of failure.
     // This function may reallocate the get area as needed.
-    virtual
-    int_type
+    virtual int_type
     do_underflow(const char_type*& /*gcur*/, const char_type*& /*gend*/, bool /*peek*/)
       {
         // The default implementation always fails.
@@ -165,8 +160,7 @@ class basic_tinybuf
     //   unless `nadd` is zero, to the external device.
     // * Throws an exception on failure.
     // This function may reallocate the put area as needed.
-    virtual
-    basic_tinybuf&
+    virtual basic_tinybuf&
     do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
                 const char_type* /*sadd*/, size_type /*nadd*/)
       {

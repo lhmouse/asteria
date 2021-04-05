@@ -152,8 +152,7 @@ class basic_prehashed_string
 
   public:
     // getters
-    constexpr
-    const string_type&
+    constexpr const string_type&
     rdstr() const noexcept
       { return this->m_sth.str();  }
 
@@ -161,13 +160,11 @@ class basic_prehashed_string
     const string_type&() const noexcept
       { return this->m_sth.str();  }
 
-    constexpr
-    size_t
+    constexpr size_t
     rdhash() const noexcept
       { return this->m_sth.hval();  }
 
-    constexpr
-    bool
+    constexpr bool
     equals(const basic_prehashed_string& other) const
       noexcept(noexcept(::std::declval<const key_equal&>()(
           ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
@@ -177,8 +174,7 @@ class basic_prehashed_string
                && this->m_sth.as_key_equal()(this->m_sth.str(), other.m_sth.str());
       }
 
-    constexpr
-    bool
+    constexpr bool
     equals(const string_type& other) const
       noexcept(noexcept(::std::declval<const key_equal&>()(
           ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
@@ -188,8 +184,7 @@ class basic_prehashed_string
       }
 
     template<typename otherT>
-    constexpr
-    bool
+    constexpr bool
     equals(const otherT& other) const
       noexcept(noexcept(::std::declval<const key_equal&>()(
           ::std::declval<const string_type&>(), ::std::declval<const otherT&>())))
@@ -301,8 +296,7 @@ class basic_prehashed_string
       }
 
     // 24.3.2.7, string operations
-    constexpr
-    const value_type*
+    constexpr const value_type*
     data() const noexcept
       { return this->m_sth.str().data();  }
 
@@ -317,8 +311,7 @@ struct basic_prehashed_string<stringT, hashT, eqT>::hash
     using result_type    = size_t;
     using argument_type  = basic_prehashed_string;
 
-    constexpr
-    result_type
+    constexpr result_type
     operator()(const argument_type& str) const noexcept
       { return str.rdhash();  }
   };

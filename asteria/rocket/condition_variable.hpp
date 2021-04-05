@@ -37,8 +37,7 @@ class condition_variable
       }
 
   private:
-    static
-    bool
+    static bool
     do_make_abstime(::timespec& ts, long msecs) noexcept
       {
         // Get the current time.

@@ -26,14 +26,12 @@ struct basic_storage
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-    static constexpr
-    size_type
+    static constexpr size_type
     min_nblk_for_nchar(size_t nchar) noexcept
       { return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1)
                     / sizeof(basic_storage) + 1;  }
 
-    static constexpr
-    size_t
+    static constexpr size_t
     max_nchar_for_nblk(size_type nblk) noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;  }
 
@@ -126,8 +124,7 @@ class storage_handle
         this->do_destroy_storage(qstor);
       }
 
-    ROCKET_NOINLINE static
-    void
+    ROCKET_NOINLINE static void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -137,8 +134,7 @@ class storage_handle
       }
 
   public:
-    constexpr
-    const allocator_type&
+    constexpr const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -281,8 +277,7 @@ struct comparator
     using traits_type  = traitsT;
     using size_type    = size_t;
 
-    static
-    int
+    static int
     inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
       {
         if(n1 != n2)
@@ -293,8 +288,7 @@ struct comparator
           return traits_type::compare(s1, s2, n1);
       }
 
-    static
-    int
+    static int
     relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
       {
         if(n1 < n2)
@@ -317,8 +311,7 @@ class basic_hasher
     char32_t m_reg = xoffset;
 
   public:
-    constexpr
-    basic_hasher&
+    constexpr basic_hasher&
     append(const charT& c) noexcept
       {
         char32_t word = static_cast<char32_t>(c);
@@ -331,8 +324,7 @@ class basic_hasher
         return *this;
       }
 
-    constexpr
-    basic_hasher&
+    constexpr basic_hasher&
     append(const charT* s, size_t n)
       {
         for(auto sp = s;  sp != s + n;  ++sp)
@@ -340,8 +332,7 @@ class basic_hasher
         return *this;
       }
 
-    constexpr
-    basic_hasher&
+    constexpr basic_hasher&
     append(const charT* s)
       {
         for(auto sp = s;  !traitsT::eq(*sp, charT());  ++sp)
@@ -349,8 +340,7 @@ class basic_hasher
         return *this;
       }
 
-    constexpr
-    size_t
+    constexpr size_t
     finish() noexcept
       {
         char32_t reg = this->m_reg;
@@ -497,14 +487,12 @@ class string_iterator
       }
 
     template<typename ycharT>
-    constexpr
-    bool
+    constexpr bool
     operator==(const string_iterator<stringT, ycharT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ycharT>
-    constexpr
-    bool
+    constexpr bool
     operator!=(const string_iterator<stringT, ycharT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 

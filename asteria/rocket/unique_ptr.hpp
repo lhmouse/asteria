@@ -97,8 +97,7 @@ class unique_ptr
 
   public:
     // 23.11.1.2.4, observers
-    constexpr
-    pointer
+    constexpr pointer
     get() const noexcept
       { return this->m_sth.get();  }
 
@@ -126,8 +125,7 @@ class unique_ptr
     pointer() const noexcept
       { return this->get();  }
 
-    constexpr
-    const deleter_type&
+    constexpr const deleter_type&
     get_deleter() const noexcept
       { return this->m_sth.as_deleter();  }
 

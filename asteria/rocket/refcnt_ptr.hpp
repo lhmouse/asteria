@@ -196,8 +196,7 @@ class refcnt_ptr
     use_count() const noexcept
       { return this->m_sth.use_count();  }
 
-    constexpr
-    pointer
+    constexpr pointer
     get() const noexcept
       { return this->m_sth.get();  }
 

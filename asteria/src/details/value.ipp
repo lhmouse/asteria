@@ -22,8 +22,7 @@ struct Valuable_impl<nullopt_t>
     using via_type     = V_null;
 
     template<typename StorT>
-    static
-    void
+    static void
     assign(StorT& stor, nullopt_t)
       {
         stor = V_null();
@@ -37,8 +36,7 @@ struct Valuable_impl<bool>
     using via_type     = V_boolean;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_boolean(xval);
@@ -55,8 +53,7 @@ struct Valuable_impl<IntegerT, typename ::std::enable_if<
     using via_type     = V_integer;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_integer(xval);
@@ -73,8 +70,7 @@ struct Valuable_impl<FloatT, typename ::std::enable_if<
     using via_type     = V_real;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_real(xval);
@@ -91,8 +87,7 @@ struct Valuable_impl<StringT, typename ::std::enable_if<
     using via_type     = V_string;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_string(::std::forward<XValT>(xval));
@@ -106,8 +101,7 @@ struct Valuable_impl<cow_opaque>
     using via_type     = V_opaque;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
@@ -127,8 +121,7 @@ struct Valuable_impl<rcptr<OpaqueT>, typename ::std::enable_if<
     using via_type     = V_opaque;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
@@ -145,8 +138,7 @@ struct Valuable_impl<cow_function>
     using via_type     = V_function;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
@@ -166,8 +158,7 @@ struct Valuable_impl<rcptr<FunctionT>, typename ::std::enable_if<
     using via_type     = V_function;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
@@ -184,8 +175,7 @@ struct Valuable_impl<cow_vector<Value>>
     using via_type     = V_array;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_array(::std::forward<XValT>(xval));
@@ -199,8 +189,7 @@ struct Valuable_impl<cow_dictionary<Value>>
     using via_type     = V_object;
 
     template<typename StorT, typename XValT>
-    static
-    void
+    static void
     assign(StorT& stor, XValT&& xval)
       {
         stor = V_object(::std::forward<XValT>(xval));
@@ -214,8 +203,7 @@ struct Valuable_impl<XValT [N]>
     using via_type     = V_array;
 
     template<typename StorT, typename XArrT>
-    static
-    void
+    static void
     assign(StorT& stor, XArrT&& xarr)
       {
         V_array arr;
@@ -237,8 +225,7 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
     using via_type     = V_array;
 
     template<size_t... N, typename XTupT>
-    static
-    void
+    static void
     unpack_tuple_aux(V_array& arr, ::std::index_sequence<N...>,
                      XTupT&& xtup)
       {
@@ -248,8 +235,7 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
       }
 
     template<typename StorT, typename XTupT>
-    static
-    void
+    static void
     assign(StorT& stor, XTupT&& xtup)
       {
         V_array arr;
@@ -270,8 +256,7 @@ struct Valuable_impl<opt<XValT>, typename ::std::conditional<
     using via_type     = typename Valuable_impl<XValT>::via_type;
 
     template<typename StorT, typename XOptT>
-    static
-    void
+    static void
     assign(StorT& stor, XOptT&& xopt)
       {
         if(xopt)

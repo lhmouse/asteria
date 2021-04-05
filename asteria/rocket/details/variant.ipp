@@ -91,8 +91,7 @@ class const_bitset
     const_bitset() noexcept
       = default;
 
-    constexpr
-    bool
+    constexpr bool
     operator[](size_t k) const noexcept
       { return this->m_words[k / 32] & UINT32_C(1) << k % 32;  }
   };

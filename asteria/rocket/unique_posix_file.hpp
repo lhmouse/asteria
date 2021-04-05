@@ -37,13 +37,11 @@ class posix_file_closer
     operator()(handle_type fp) const noexcept
       { return this->close(fp);  }
 
-    constexpr
-    handle_type
+    constexpr handle_type
     null() const noexcept
       { return nullptr;  }
 
-    constexpr
-    bool
+    constexpr bool
     is_null(handle_type fp) const noexcept
       { return fp == nullptr;  }
 

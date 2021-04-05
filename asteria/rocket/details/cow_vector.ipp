@@ -36,14 +36,12 @@ struct basic_storage
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-    static constexpr
-    size_type
+    static constexpr size_type
     min_nblk_for_nelem(size_t nelem) noexcept
       { return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1)
                     / sizeof(basic_storage) + 1;  }
 
-    static constexpr
-    size_t
+    static constexpr size_t
     max_nelem_for_nblk(size_type nblk) noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
 
@@ -121,8 +119,7 @@ struct storage_traits
     using storage_type     = storageT;
     using value_type       = typename allocator_type::value_type;
 
-    [[noreturn]] static
-    void
+    [[noreturn]] static void
     do_transfer(false_type,   // 1. movable?
                 bool,         // 2. trivial?
                 bool,         // 3. copyable?
@@ -132,8 +129,7 @@ struct storage_traits
                                                typeid(value_type).name());
       }
 
-    static
-    void
+    static void
     do_transfer(true_type,    // 1. movable?
                 true_type,    // 2. trivial?
                 bool,         // 3. copyable?
@@ -144,8 +140,7 @@ struct storage_traits
         st_new.nskip = st_old.nskip;
       }
 
-    static
-    void
+    static void
     do_transfer(true_type,    // 1. movable?
                 false_type,   // 2. trivial?
                 true_type,    // 3. copyable?
@@ -163,8 +158,7 @@ struct storage_traits
             st_new.nskip = k;
       }
 
-    static
-    void
+    static void
     do_transfer(true_type,    // 1. movable?
                 false_type,   // 2. trivial?
                 false_type,   // 3. copyable?
@@ -180,8 +174,7 @@ struct storage_traits
                                                  typeid(value_type).name());
       }
 
-    static
-    void
+    static void
     dispatch_transfer(storage_type& st_new, storage_type& st_old, size_t nskip)
       {
         ROCKET_ASSERT(st_old.nskip <= st_old.nelem);
@@ -255,8 +248,7 @@ class storage_handle
         reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
       }
 
-    ROCKET_NOINLINE static
-    void
+    ROCKET_NOINLINE static void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -266,8 +258,7 @@ class storage_handle
       }
 
   public:
-    constexpr
-    const allocator_type&
+    constexpr const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -620,14 +611,12 @@ class vector_iterator
       }
 
     template<typename yvalueT>
-    constexpr
-    bool
+    constexpr bool
     operator==(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename yvalueT>
-    constexpr
-    bool
+    constexpr bool
     operator!=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 

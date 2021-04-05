@@ -147,8 +147,7 @@ class basic_linear_buffer
       }
 
   public:
-    constexpr
-    const allocator_type&
+    constexpr const allocator_type&
     get_allocator() const noexcept
       { return this->m_stor.as_allocator();  }
 

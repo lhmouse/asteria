@@ -260,8 +260,7 @@ class variant
 
   public:
     // 23.7.3.5, value status
-    constexpr
-    size_t
+    constexpr size_t
     index() const noexcept
       { return ROCKET_ASSERT(this->m_index < alternative_size), this->m_index;  }
 

@@ -85,13 +85,11 @@ class unique_handle
 
   public:
     // 23.11.1.2.4, observers
-    constexpr
-    handle_type
+    constexpr handle_type
     get() const noexcept
       { return this->m_sth.get();  }
 
-    constexpr
-    const closer_type&
+    constexpr const closer_type&
     get_closer() const noexcept
       { return this->m_sth.as_closer();  }
 

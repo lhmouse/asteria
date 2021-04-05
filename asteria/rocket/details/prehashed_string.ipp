@@ -43,33 +43,27 @@ class string_storage
       = delete;
 
   public:
-    constexpr
-    const hasher&
+    constexpr const hasher&
     as_hasher() const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
-    constexpr
-    hasher&
+    constexpr hasher&
     as_hasher() noexcept
       { return static_cast<hasher_base&>(*this);  }
 
-    constexpr
-    const key_equal&
+    constexpr const key_equal&
     as_key_equal() const noexcept
       { return static_cast<const key_equal_base&>(*this);  }
 
-    constexpr
-    key_equal&
+    constexpr key_equal&
     as_key_equal() noexcept
       { return static_cast<key_equal_base&>(*this);  }
 
-    constexpr
-    const string_type&
+    constexpr const string_type&
     str() const noexcept
       { return this->m_str;  }
 
-    constexpr
-    size_t
+    constexpr size_t
     hval() const noexcept
       { return this->m_hval;  }
 

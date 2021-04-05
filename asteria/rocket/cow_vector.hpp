@@ -858,8 +858,7 @@ class cow_vector
       }
 
     // N.B. The return type differs from `std::vector`.
-    constexpr
-    const allocator_type&
+    constexpr const allocator_type&
     get_allocator() const noexcept
       { return this->m_sth.as_allocator();  }
 

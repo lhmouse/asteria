@@ -15,8 +15,7 @@ class Variable_Callback
     // The return value indicates whether to invoke `*this` on child variables
     // recursively. It has no effect on children that are not variables, which
     // are always enumerated.
-    virtual
-    bool
+    virtual bool
     do_process_one(const rcptr<Variable>& var)
       = 0;
 
