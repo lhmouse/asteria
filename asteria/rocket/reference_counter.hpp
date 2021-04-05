@@ -29,26 +29,22 @@ class reference_counter
 
   public:
     constexpr
-    reference_counter()
-      noexcept
+    reference_counter() noexcept
       : m_nref(1)
       { }
 
     explicit constexpr
-    reference_counter(value_type nref)
-      noexcept
+    reference_counter(value_type nref) noexcept
       : m_nref(nref)
       { }
 
     constexpr
-    reference_counter(const reference_counter&)
-      noexcept
+    reference_counter(const reference_counter&) noexcept
       : reference_counter()
       { }
 
     reference_counter&
-    operator=(const reference_counter&)
-      noexcept
+    operator=(const reference_counter&) noexcept
       { return *this;  }
 
     ~reference_counter()
@@ -60,18 +56,15 @@ class reference_counter
 
   public:
     bool
-    unique()
-      const noexcept
+    unique() const noexcept
       { return this->m_nref.load(::std::memory_order_relaxed) == 1;  }
 
     value_type
-    get()
-      const noexcept
+    get() const noexcept
       { return this->m_nref.load(::std::memory_order_relaxed);  }
 
     bool
-    try_increment()
-      noexcept
+    try_increment() noexcept
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
         for(;;)
@@ -83,16 +76,14 @@ class reference_counter
       }
 
     void
-    increment()
-      noexcept
+    increment() noexcept
       {
         auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
         ROCKET_ASSERT(old >= 1);
       }
 
     bool
-    decrement()
-      noexcept
+    decrement() noexcept
       {
         auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
         ROCKET_ASSERT(old >= 1);

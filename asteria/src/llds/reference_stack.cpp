@@ -10,8 +10,7 @@ namespace asteria {
 
 void
 Reference_Stack::
-do_destroy_elements()
-  noexcept
+do_destroy_elements() noexcept
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_einit;
@@ -63,8 +62,7 @@ do_reserve_more()
 
 Variable_Callback&
 Reference_Stack::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_einit;

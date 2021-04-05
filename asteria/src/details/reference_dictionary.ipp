@@ -22,8 +22,7 @@ struct Bucket
       { }
 
     explicit operator
-    bool()
-      const noexcept
+    bool() const noexcept
       { return this->prev != nullptr;  }
   };
 

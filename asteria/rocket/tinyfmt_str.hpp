@@ -35,14 +35,12 @@ class basic_tinyfmt_str
     mutable tinybuf_type m_buf;
 
   public:
-    basic_tinyfmt_str()
-      noexcept
+    basic_tinyfmt_str() noexcept
       : m_buf(tinybuf_base::open_write)
       { }
 
     explicit
-    basic_tinyfmt_str(open_mode mode)
-      noexcept
+    basic_tinyfmt_str(open_mode mode) noexcept
       : m_buf(mode)
       { }
 
@@ -52,8 +50,7 @@ class basic_tinyfmt_str
       : m_buf(::std::forward<xstrT>(xstr), mode)
       { }
 
-    ~basic_tinyfmt_str()
-      override;
+    ~basic_tinyfmt_str() override;
 
     basic_tinyfmt_str(basic_tinyfmt_str&&)
       = default;
@@ -64,23 +61,19 @@ class basic_tinyfmt_str
 
   public:
     tinybuf_type&
-    get_tinybuf()
-      const override
+    get_tinybuf() const override
       { return this->m_buf;  }
 
     const string_type&
-    get_string()
-      const noexcept
+    get_string() const noexcept
       { return this->m_buf.get_string();  }
 
     const char_type*
-    c_str()
-      const noexcept
+    c_str() const noexcept
       { return this->m_buf.c_str();  }
 
     size_type
-    length()
-      const noexcept
+    length() const noexcept
       { return this->m_buf.length();  }
 
     basic_tinyfmt_str&
@@ -105,8 +98,7 @@ class basic_tinyfmt_str
       }
 
     basic_tinyfmt_str&
-    swap(basic_tinyfmt_str& other)
-      noexcept(is_nothrow_swappable<tinybuf_type>::value)
+    swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
         noadl::xswap(this->m_buf, other.m_buf);
         return *this;
@@ -121,8 +113,7 @@ basic_tinyfmt_str<charT, traitsT, allocT>::
 template<typename charT, typename traitsT, typename allocT>
 inline
 void
-swap(basic_tinyfmt_str<charT, traitsT, allocT>& lhs, basic_tinyfmt_str<charT, traitsT, allocT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinyfmt_str<charT, traitsT, allocT>& lhs, basic_tinyfmt_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

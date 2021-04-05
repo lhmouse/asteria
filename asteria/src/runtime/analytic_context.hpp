@@ -32,31 +32,26 @@ class Analytic_Context
 
   protected:
     bool
-    do_is_analytic()
-      const noexcept final
+    do_is_analytic() const noexcept final
       { return this->is_analytic();  }
 
     Abstract_Context*
-    do_get_parent_opt()
-      const noexcept override
+    do_get_parent_opt() const noexcept override
       { return this->get_parent_opt();  }
 
     Reference*
-    do_create_lazy_reference(Reference* /*hint_opt*/, const phsh_string& /*name*/)
-      const override
+    do_create_lazy_reference(Reference* /*hint_opt*/, const phsh_string& /*name*/) const override
       { return nullptr;  }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
 
     bool
-    is_analytic()
-      const noexcept
+    is_analytic() const noexcept
       { return true;  }
 
     Abstract_Context*
-    get_parent_opt()
-      const noexcept
+    get_parent_opt() const noexcept
       { return this->m_parent_opt;  }
   };
 

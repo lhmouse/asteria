@@ -14,8 +14,7 @@ namespace asteria {
 
 // Error handling
 ptrdiff_t
-write_log_to_stderr(const char* file, long line, cow_string&& msg)
-  noexcept;
+write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 template<typename... ParamsT>
 ROCKET_NOINLINE ROCKET_FLATTEN_FUNCTION
@@ -42,30 +41,26 @@ format_string(const char* templ, const ParamsT&... params)
 
 // UTF-8 conversion functions
 bool
-utf8_encode(char*& pos, char32_t cp)
-  noexcept;
+utf8_encode(char*& pos, char32_t cp) noexcept;
 
 bool
 utf8_encode(cow_string& text, char32_t cp);
 
 bool
-utf8_decode(char32_t& cp, const char*& pos, size_t avail)
-  noexcept;
+utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
 
 bool
 utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
 // UTF-16 conversion functions
 bool
-utf16_encode(char16_t*& pos, char32_t cp)
-  noexcept;
+utf16_encode(char16_t*& pos, char32_t cp) noexcept;
 
 bool
 utf16_encode(cow_u16string& text, char32_t cp);
 
 bool
-utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
-  noexcept;
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept;
 
 bool
 utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
@@ -74,8 +69,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 template<typename enumT>
 ROCKET_CONST_FUNCTION constexpr
 typename ::std::underlying_type<enumT>::type
-weaken_enum(enumT value)
-  noexcept
+weaken_enum(enumT value) noexcept
   { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
 
 // C character types
@@ -91,8 +85,7 @@ enum : uint8_t
 
 ROCKET_CONST_FUNCTION inline
 uint8_t
-get_cctype(char c)
-  noexcept
+get_cctype(char c) noexcept
   {
     size_t m = static_cast<uint8_t>(c);
     if(m >= 128)
@@ -102,15 +95,13 @@ get_cctype(char c)
 
 ROCKET_CONST_FUNCTION inline
 bool
-is_cctype(char c, uint8_t mask)
-  noexcept
+is_cctype(char c, uint8_t mask) noexcept
   { return noadl::get_cctype(c) & mask;  }
 
 // Numeric conversion
 ROCKET_CONST_FUNCTION inline
 bool
-is_convertible_to_integer(double val)
-  noexcept
+is_convertible_to_integer(double val) noexcept
   {
     return ::std::islessequal(-0x1p63, val) &&
            ::std::isless(val, 0x1p63);
@@ -118,8 +109,7 @@ is_convertible_to_integer(double val)
 
 ROCKET_CONST_FUNCTION inline
 bool
-is_safe_integer(double val)
-  noexcept
+is_safe_integer(double val) noexcept
   {
     double absv = ::std::abs(val);
     return ::std::islessequal(1 - 0x1p53, absv) &&
@@ -130,34 +120,29 @@ is_safe_integer(double val)
 // C-style quoting
 constexpr
 details_utils::Quote_Wrapper
-quote(const char* str, size_t len)
-  noexcept
+quote(const char* str, size_t len) noexcept
   { return { str, len };  }
 
 inline
 details_utils::Quote_Wrapper
-quote(const char* str)
-  noexcept
+quote(const char* str) noexcept
   { return noadl::quote(str, ::std::strlen(str));  }
 
 inline
 details_utils::Quote_Wrapper
-quote(const cow_string& str)
-  noexcept
+quote(const cow_string& str) noexcept
   { return noadl::quote(str.data(), str.size());  }
 
 // Justifying
 constexpr
 details_utils::Paragraph_Wrapper
-pwrap(size_t indent, size_t hanging)
-  noexcept
+pwrap(size_t indent, size_t hanging) noexcept
   { return { indent, hanging };  }
 
 // Error numbers
 constexpr
 details_utils::Formatted_errno
-format_errno(int err)
-  noexcept
+format_errno(int err) noexcept
   { return { err };  }
 
 // Negative array index wrapper
@@ -171,13 +156,11 @@ struct Wrapped_Index
 
 ROCKET_CONST_FUNCTION
 Wrapped_Index
-wrap_index(int64_t index, size_t size)
-  noexcept;
+wrap_index(int64_t index, size_t size) noexcept;
 
 // Note that all bits in the result are filled.
 uint64_t
-generate_random_seed()
-  noexcept;
+generate_random_seed() noexcept;
 
 }  // namespace asteria
 

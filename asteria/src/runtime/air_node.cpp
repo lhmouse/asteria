@@ -166,8 +166,7 @@ struct Sparam_queues
     array<AVMC_Queue, sizeT> queues;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const
+    enumerate_variables(Variable_Callback& callback) const
       {
         ::rocket::for_each(this->queues, callback);
         return callback;
@@ -185,8 +184,7 @@ struct Sparam_switch
     cow_vector<cow_vector<phsh_string>> names_added;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const
+    enumerate_variables(Variable_Callback& callback) const
       {
         ::rocket::for_each(this->queues_labels, callback);
         ::rocket::for_each(this->queues_bodies, callback);
@@ -202,8 +200,7 @@ struct Sparam_for_each
     AVMC_Queue queue_body;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const
+    enumerate_variables(Variable_Callback& callback) const
       {
         this->queue_init.enumerate_variables(callback);
         this->queue_body.enumerate_variables(callback);
@@ -220,8 +217,7 @@ struct Sparam_try_catch
     AVMC_Queue queue_catch;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const
+    enumerate_variables(Variable_Callback& callback) const
       {
         this->queue_try.enumerate_variables(callback);
         this->queue_catch.enumerate_variables(callback);
@@ -238,8 +234,7 @@ struct Sparam_func
     cow_vector<AIR_Node> code_body;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const
+    enumerate_variables(Variable_Callback& callback) const
       {
         ::rocket::for_each(this->code_body, callback);
         return callback;
@@ -252,8 +247,7 @@ struct Sparam_defer
     cow_vector<AIR_Node> code_body;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const
+    enumerate_variables(Variable_Callback& callback) const
       {
         ::rocket::for_each(this->code_body, callback);
         return callback;
@@ -1422,8 +1416,7 @@ enum : uint32_t
 
 inline
 uint32_t
-do_tmask_of(const Value& val)
-  noexcept
+do_tmask_of(const Value& val) noexcept
   {
     return UINT32_C(1) << val.type();
   }
@@ -4500,8 +4493,7 @@ struct symbol_getter
   {
     static constexpr
     const Source_Location*
-    opt(const NodeT&)
-      noexcept
+    opt(const NodeT&) noexcept
       { return nullptr;  }
  };
 
@@ -4513,8 +4505,7 @@ struct symbol_getter<TraitsT, NodeT,
   {
     static constexpr
     const Source_Location*
-    opt(const NodeT& altr)
-      noexcept
+    opt(const NodeT& altr) noexcept
       { return ::std::addressof(TraitsT::get_symbols(altr));  }
   };
 
@@ -4657,8 +4648,7 @@ do_solidify(AVMC_Queue& queue, const NodeT& altr)
 
 opt<AIR_Node>
 AIR_Node::
-rebind_opt(Abstract_Context& ctx)
-  const
+rebind_opt(Abstract_Context& ctx) const
   {
     switch(this->index()) {
       case index_clear_stack:
@@ -4897,8 +4887,7 @@ rebind_opt(Abstract_Context& ctx)
 
 bool
 AIR_Node::
-solidify(AVMC_Queue& queue)
-  const
+solidify(AVMC_Queue& queue) const
   {
     switch(this->index()) {
       case index_clear_stack:
@@ -5196,8 +5185,7 @@ solidify(AVMC_Queue& queue)
 
 Variable_Callback&
 AIR_Node::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->index()) {
       case index_clear_stack:

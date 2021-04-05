@@ -19,23 +19,19 @@ class Reference_Stack
 
   public:
     explicit constexpr
-    Reference_Stack()
-      noexcept
+    Reference_Stack() noexcept
       { }
 
-    Reference_Stack(Reference_Stack&& other)
-      noexcept
+    Reference_Stack(Reference_Stack&& other) noexcept
       { this->swap(other);  }
 
     Reference_Stack&
-    operator=(Reference_Stack&& other)
-      noexcept
+    operator=(Reference_Stack&& other) noexcept
       { return this->swap(other);  }
 
   private:
     void
-    do_destroy_elements()
-      noexcept;
+    do_destroy_elements() noexcept;
 
     void
     do_reserve_more();
@@ -55,46 +51,38 @@ class Reference_Stack
       }
 
     bool
-    empty()
-      const noexcept
+    empty() const noexcept
       { return this->m_etop == 0;  }
 
     size_t
-    size()
-      const noexcept
+    size() const noexcept
       { return this->m_etop;  }
 
     const Reference*
-    bottom()
-      const noexcept
+    bottom() const noexcept
       { return this->m_bptr;  }
 
     const Reference*
-    top()
-      const noexcept
+    top() const noexcept
       { return this->m_bptr + this->m_etop;  }
 
     Reference*
-    mut_bottom()
-      noexcept
+    mut_bottom() noexcept
       { return this->m_bptr;  }
 
     Reference*
-    mut_top()
-      noexcept
+    mut_top() noexcept
       { return this->m_bptr + this->m_etop;  }
 
     Reference_Stack&
-    clear()
-      noexcept
+    clear() noexcept
       {
         this->m_etop = 0;
         return *this;
       }
 
     Reference_Stack&
-    swap(Reference_Stack& other)
-      noexcept
+    swap(Reference_Stack& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_etop, other.m_etop);
@@ -104,8 +92,7 @@ class Reference_Stack
       }
 
     const Reference&
-    back(size_t index = 0)
-      const noexcept
+    back(size_t index = 0) const noexcept
       {
         ROCKET_ASSERT(index < this->size());
         return this->top()[~index];
@@ -133,8 +120,7 @@ class Reference_Stack
       }
 
     Reference_Stack&
-    pop_back(size_t count = 1)
-      noexcept
+    pop_back(size_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->size());
         this->m_etop -= static_cast<uint32_t>(count);
@@ -142,14 +128,12 @@ class Reference_Stack
       }
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const;
+    enumerate_variables(Variable_Callback& callback) const;
   };
 
 inline
 void
-swap(Reference_Stack& lhs, Reference_Stack& rhs)
-  noexcept
+swap(Reference_Stack& lhs, Reference_Stack& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

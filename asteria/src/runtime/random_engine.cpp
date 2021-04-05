@@ -16,8 +16,7 @@ Random_Engine::
 
 void
 Random_Engine::
-do_isaac()
-  noexcept
+do_isaac() noexcept
   {
     ///////////////////////////////////////////////////////////////////////////
     // Below is a direct copy with a few fixups.
@@ -59,8 +58,7 @@ do_isaac()
 
 void
 Random_Engine::
-init()
-  noexcept
+init() noexcept
   {
     // Initialize internal states.
     this->m_randa = 0;

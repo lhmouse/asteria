@@ -327,14 +327,12 @@ enum Scope_Flags : uint32_t
 
 constexpr
 Scope_Flags
-operator&(Scope_Flags x, Scope_Flags y)
-  noexcept
+operator&(Scope_Flags x, Scope_Flags y) noexcept
   { return Scope_Flags(uint32_t(x) & uint32_t(y));  }
 
 constexpr
 Scope_Flags
-operator|(Scope_Flags x, Scope_Flags y)
-  noexcept
+operator|(Scope_Flags x, Scope_Flags y) noexcept
   { return Scope_Flags(uint32_t(x) | uint32_t(y));  }
 
 // Accept a statement; a blockt is converted to a single statement.
@@ -1451,8 +1449,7 @@ constexpr s_prefix_op_keywords[] =
 
 constexpr
 bool
-operator==(const Prefix_Op_Keyword& lhs, Keyword rhs)
-  noexcept
+operator==(const Prefix_Op_Keyword& lhs, Keyword rhs) noexcept
   {
     return lhs.kwrd == rhs;
   }
@@ -1474,8 +1471,7 @@ constexpr s_prefix_op_punctuators[] =
 
 constexpr
 bool
-operator==(const Prefix_Op_Punctuator& lhs, Punctuator rhs)
-  noexcept
+operator==(const Prefix_Op_Punctuator& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
   }
@@ -1959,8 +1955,7 @@ constexpr s_postfix_op_punctuators[] =
 
 constexpr
 bool
-operator==(const Postfix_Op_Punctuator& lhs, Punctuator rhs)
-  noexcept
+operator==(const Postfix_Op_Punctuator& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
   }
@@ -2248,8 +2243,7 @@ constexpr s_infix_op_punctuators[] =
 
 constexpr
 bool
-operator==(const Infix_Op_Punctuator& lhs, Punctuator rhs)
-  noexcept
+operator==(const Infix_Op_Punctuator& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
   }

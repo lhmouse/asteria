@@ -45,38 +45,32 @@ class string_storage
   public:
     constexpr
     const hasher&
-    as_hasher()
-      const noexcept
+    as_hasher() const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
     constexpr
     hasher&
-    as_hasher()
-      noexcept
+    as_hasher() noexcept
       { return static_cast<hasher_base&>(*this);  }
 
     constexpr
     const key_equal&
-    as_key_equal()
-      const noexcept
+    as_key_equal() const noexcept
       { return static_cast<const key_equal_base&>(*this);  }
 
     constexpr
     key_equal&
-    as_key_equal()
-      noexcept
+    as_key_equal() noexcept
       { return static_cast<key_equal_base&>(*this);  }
 
     constexpr
     const string_type&
-    str()
-      const noexcept
+    str() const noexcept
       { return this->m_str;  }
 
     constexpr
     size_t
-    hval()
-      const noexcept
+    hval() const noexcept
       { return this->m_hval;  }
 
     void

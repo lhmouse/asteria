@@ -18,8 +18,7 @@ class Sentry
 
   public:
     explicit
-    Sentry(long& ref)
-      noexcept
+    Sentry(long& ref) noexcept
       : m_old(ref), m_ptr(::std::addressof(ref))
       { ++*(this->m_ptr);  }
 
@@ -28,8 +27,7 @@ class Sentry
 
   public:
     explicit operator
-    bool()
-      const noexcept
+    bool() const noexcept
       { return this->m_old == 0;  }
   };
 
@@ -43,15 +41,13 @@ class Variable_Walker
 
   public:
     explicit
-    Variable_Walker(FuncT& func)
-      noexcept
+    Variable_Walker(FuncT& func) noexcept
       : m_func(func)
       { }
 
   protected:
     bool
-    do_process_one(const rcptr<Variable>& var)
-      override
+    do_process_one(const rcptr<Variable>& var) override
       { return this->m_func(var);  }
   };
 
@@ -79,8 +75,7 @@ class Variable_Wiper
   {
   protected:
     bool
-    do_process_one(const rcptr<Variable>& var)
-      override
+    do_process_one(const rcptr<Variable>& var) override
       {
         // Don't modify variables in place which might have side effects.
         auto value = ::std::move(var->open_value());
@@ -112,8 +107,7 @@ track_variable(const rcptr<Variable>& var)
 
 bool
 Collector::
-untrack_variable(const rcptr<Variable>& var)
-  noexcept
+untrack_variable(const rcptr<Variable>& var) noexcept
   {
     return this->m_tracked.erase(var);
   }
@@ -277,8 +271,7 @@ auto_collect()
 
 Collector&
 Collector::
-wipe_out_variables()
-  noexcept
+wipe_out_variables() noexcept
   {
     // Ignore recursive requests.
     const Sentry sentry(this->m_recur);

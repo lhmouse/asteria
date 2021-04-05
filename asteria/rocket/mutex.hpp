@@ -25,8 +25,7 @@ class mutex
 
   public:
     constexpr
-    mutex()
-      noexcept
+    mutex() noexcept
       { }
 
     mutex(const mutex&)
@@ -52,22 +51,18 @@ class mutex::unique_lock
 
   public:
     constexpr
-    unique_lock()
-      noexcept
+    unique_lock() noexcept
       { }
 
     explicit
-    unique_lock(mutex& parent)
-      noexcept
+    unique_lock(mutex& parent) noexcept
       { this->lock(parent);  }
 
-    unique_lock(unique_lock&& other)
-      noexcept
+    unique_lock(unique_lock&& other) noexcept
       { this->swap(other);  }
 
     unique_lock&
-    operator=(unique_lock&& other)
-      noexcept
+    operator=(unique_lock&& other) noexcept
       { return this->swap(other);  }
 
     ~unique_lock()
@@ -75,31 +70,26 @@ class mutex::unique_lock
 
   public:
     explicit operator
-    bool()
-      const noexcept
+    bool() const noexcept
       { return this->m_sth.get() != nullptr;  }
 
     bool
-    is_locking(const mutex& m)
-      const noexcept
+    is_locking(const mutex& m) const noexcept
       { return this->m_sth.get() == m.m_mutex;  }
 
     bool
-    is_locking(const mutex&&)
-      const noexcept
+    is_locking(const mutex&&) const noexcept
       = delete;
 
     unique_lock&
-    unlock()
-      noexcept
+    unlock() noexcept
       {
         this->m_sth.reset(nullptr);
         return *this;
       }
 
     unique_lock&
-    try_lock(mutex& m)
-      noexcept
+    try_lock(mutex& m) noexcept
       {
         // Return immediately if the same mutex is already held.
         // Otherwise deadlocks would occur.
@@ -119,8 +109,7 @@ class mutex::unique_lock
       }
 
     unique_lock&
-    lock(mutex& m)
-      noexcept
+    lock(mutex& m) noexcept
       {
         // Return immediately if the same mutex is already held.
         // Otherwise deadlocks would occur.
@@ -137,8 +126,7 @@ class mutex::unique_lock
       }
 
     unique_lock&
-    swap(unique_lock& other)
-      noexcept
+    swap(unique_lock& other) noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -147,8 +135,7 @@ class mutex::unique_lock
 
 inline
 void
-swap(mutex::unique_lock& lhs, mutex::unique_lock& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(mutex::unique_lock& lhs, mutex::unique_lock& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

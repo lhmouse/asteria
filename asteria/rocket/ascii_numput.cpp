@@ -1087,8 +1087,7 @@ do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
 
 ascii_numput&
 ascii_numput::
-put_TB(bool value)
-  noexcept
+put_TB(bool value) noexcept
   {
     this->clear();
     char* bp;
@@ -1112,8 +1111,7 @@ put_TB(bool value)
 
 ascii_numput&
 ascii_numput::
-put_XP(const void* value)
-  noexcept
+put_XP(const void* value) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1137,8 +1135,7 @@ put_XP(const void* value)
 
 ascii_numput&
 ascii_numput::
-put_BU(uint64_t value, size_t precision)
-  noexcept
+put_BU(uint64_t value, size_t precision) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1162,8 +1159,7 @@ put_BU(uint64_t value, size_t precision)
 
 ascii_numput&
 ascii_numput::
-put_XU(uint64_t value, size_t precision)
-  noexcept
+put_XU(uint64_t value, size_t precision) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1187,8 +1183,7 @@ put_XU(uint64_t value, size_t precision)
 
 ascii_numput&
 ascii_numput::
-put_DU(uint64_t value, size_t precision)
-  noexcept
+put_DU(uint64_t value, size_t precision) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1208,8 +1203,7 @@ put_DU(uint64_t value, size_t precision)
 
 ascii_numput&
 ascii_numput::
-put_BI(int64_t value, size_t precision)
-  noexcept
+put_BI(int64_t value, size_t precision) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1240,8 +1234,7 @@ put_BI(int64_t value, size_t precision)
 
 ascii_numput&
 ascii_numput::
-put_XI(int64_t value, size_t precision)
-  noexcept
+put_XI(int64_t value, size_t precision) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1272,8 +1265,7 @@ put_XI(int64_t value, size_t precision)
 
 ascii_numput&
 ascii_numput::
-put_DI(int64_t value, size_t precision)
-  noexcept
+put_DI(int64_t value, size_t precision) noexcept
   {
     this->clear();
     char* bp = this->m_stor + M;
@@ -1300,8 +1292,7 @@ put_DI(int64_t value, size_t precision)
 
 ascii_numput&
 ascii_numput::
-put_BF(double value, bool single)
-  noexcept
+put_BF(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -1365,8 +1356,7 @@ put_BF(double value, bool single)
 
 ascii_numput&
 ascii_numput::
-put_BE(double value, bool /*single*/)
-  noexcept
+put_BE(double value, bool /*single*/) noexcept
   {
     this->clear();
     char* bp;
@@ -1416,8 +1406,7 @@ put_BE(double value, bool /*single*/)
 
 ascii_numput&
 ascii_numput::
-put_XF(double value, bool single)
-  noexcept
+put_XF(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -1484,8 +1473,7 @@ put_XF(double value, bool single)
 
 ascii_numput&
 ascii_numput::
-put_XE(double value, bool /*single*/)
-  noexcept
+put_XE(double value, bool /*single*/) noexcept
   {
     this->clear();
     char* bp;
@@ -1539,8 +1527,7 @@ put_XE(double value, bool /*single*/)
 
 ascii_numput&
 ascii_numput::
-put_DF(double value, bool single)
-  noexcept
+put_DF(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -1599,8 +1586,7 @@ put_DF(double value, bool single)
 
 ascii_numput&
 ascii_numput::
-put_DE(double value, bool single)
-  noexcept
+put_DE(double value, bool single) noexcept
   {
     this->clear();
     char* bp;

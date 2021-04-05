@@ -40,68 +40,56 @@ class Parser_Error
     ASTERIA_COPYABLE_DESTRUCTOR(Parser_Error);
 
     const char*
-    what()
-      const noexcept override
+    what() const noexcept override
       { return this->m_what.c_str();  }
 
     Parser_Status
-    status()
-      const noexcept
+    status() const noexcept
       { return this->m_stat;  }
 
     const char*
-    what_status()
-      const noexcept
+    what_status() const noexcept
       { return describe_parser_status(this->m_stat);  }
 
     const Source_Location&
-    sloc()
-      const noexcept
+    sloc() const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
-    file()
-      const noexcept
+    file() const noexcept
       { return this->m_sloc.file();  }
 
     int
-    line()
-      const noexcept
+    line() const noexcept
       { return this->m_sloc.line();  }
 
     int
-    column()
-      const noexcept
+    column() const noexcept
       { return this->m_sloc.column();  }
 
     size_t
-    length()
-      const noexcept
+    length() const noexcept
       { return this->m_length;  }
   };
 
 inline
 bool
-operator==(const Parser_Error& lhs, Parser_Status rhs)
-  noexcept
+operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
   { return lhs.status() == rhs;  }
 
 inline
 bool
-operator!=(const Parser_Error& lhs, Parser_Status rhs)
-  noexcept
+operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
   { return lhs.status() != rhs;  }
 
 inline
 bool
-operator==(Parser_Status lhs, const Parser_Error& rhs)
-  noexcept
+operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
   { return lhs == rhs.status();  }
 
 inline
 bool
-operator!=(Parser_Status lhs, const Parser_Error& rhs)
-  noexcept
+operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 
 }  // namespace asteria

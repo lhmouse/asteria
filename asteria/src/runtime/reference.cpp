@@ -24,8 +24,7 @@ Reference::
 
 const Value&
 Reference::
-do_dereference_readonly_slow()
-  const
+do_dereference_readonly_slow() const
   {
     const Value* qval;
 
@@ -177,8 +176,7 @@ do_finish_call_slow(Global_Context& global)
 
 Variable_Callback&
 Reference::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     this->m_value.enumerate_variables(callback);
 
@@ -191,8 +189,7 @@ enumerate_variables(Variable_Callback& callback)
 
 Value&
 Reference::
-dereference_mutable()
-  const
+dereference_mutable() const
   {
     Value* qval;
 
@@ -239,8 +236,7 @@ dereference_mutable()
 
 Value
 Reference::
-dereference_unset()
-  const
+dereference_unset() const
   {
     Value* qval;
 

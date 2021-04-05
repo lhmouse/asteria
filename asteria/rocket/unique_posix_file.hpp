@@ -20,42 +20,35 @@ class posix_file_closer
 
   public:
     constexpr
-    posix_file_closer(closer_type cl)
-      noexcept
+    posix_file_closer(closer_type cl) noexcept
       : m_cl(cl)
       { }
 
   public:
     constexpr operator
-    const closer_type&()
-      const noexcept
+    const closer_type&() const noexcept
       { return this->m_cl;  }
 
     operator
-    closer_type&()
-      noexcept
+    closer_type&() noexcept
       { return this->m_cl;  }
 
     int
-    operator()(handle_type fp)
-      const noexcept
+    operator()(handle_type fp) const noexcept
       { return this->close(fp);  }
 
     constexpr
     handle_type
-    null()
-      const noexcept
+    null() const noexcept
       { return nullptr;  }
 
     constexpr
     bool
-    is_null(handle_type fp)
-      const noexcept
+    is_null(handle_type fp) const noexcept
       { return fp == nullptr;  }
 
     int
-    close(handle_type fp)
-      const noexcept
+    close(handle_type fp) const noexcept
       {
         if(!this->m_cl)
           return 0;  // no close

@@ -22,8 +22,7 @@ class Verbose_Hooks
 
   public:
     explicit
-    Verbose_Hooks()
-      noexcept
+    Verbose_Hooks() noexcept
       = default;
 
   private:
@@ -53,8 +52,7 @@ class Verbose_Hooks
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Verbose_Hooks);
 
     void
-    on_single_step_trap(const Source_Location& sloc)
-      override
+    on_single_step_trap(const Source_Location& sloc) override
       {
         int sig = get_and_clear_last_signal();
         if(sig)
@@ -63,16 +61,14 @@ class Verbose_Hooks
       }
 
     void
-    on_variable_declare(const Source_Location& sloc, const phsh_string& name)
-      override
+    on_variable_declare(const Source_Location& sloc, const phsh_string& name) override
       {
         this->do_verbose_trace(sloc,
                 "declaring variable `$1`", name);
       }
 
     void
-    on_function_call(const Source_Location& sloc, const cow_function& target)
-      override
+    on_function_call(const Source_Location& sloc, const cow_function& target) override
       {
         this->do_verbose_trace(sloc,
                 "initiating function call: $1", target);
@@ -80,8 +76,7 @@ class Verbose_Hooks
 
     void
     on_function_return(const Source_Location& sloc, const cow_function& target,
-                       const Reference&)
-      override
+                       const Reference&) override
       {
         this->do_verbose_trace(sloc,
                 "returned from function call: $1", target);
@@ -89,8 +84,7 @@ class Verbose_Hooks
 
     void
     on_function_except(const Source_Location& sloc, const cow_function& target,
-                       const Runtime_Error&)
-      override
+                       const Runtime_Error&) override
       {
         this->do_verbose_trace(sloc,
                 "caught an exception inside function call: $1", target);
@@ -107,8 +101,7 @@ volatile ::sig_atomic_t s_intsig;
 }  // namespace
 
 int
-get_and_clear_last_signal()
-  noexcept
+get_and_clear_last_signal() noexcept
   {
     return ::std::exchange(s_intsig, 0);
   }

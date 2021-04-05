@@ -33,32 +33,26 @@ class Reference
   public:
     // Constructors and assignment operators
     constexpr
-    Reference()
-      noexcept
+    Reference() noexcept
       { }
 
-    Reference(const Reference& other)
-      noexcept
+    Reference(const Reference& other) noexcept
       { this->assign(other);  }
 
-    Reference(Reference&& other)
-      noexcept
+    Reference(Reference&& other) noexcept
       { this->assign(::std::move(other));  }
 
     Reference&
-    operator=(const Reference& other)
-      noexcept
+    operator=(const Reference& other) noexcept
       { return this->assign(other);  }
 
     Reference&
-    operator=(Reference&& other)
-      noexcept
+    operator=(Reference&& other) noexcept
       { return this->assign(::std::move(other));  }
 
   private:
     const Value&
-    do_dereference_readonly_slow()
-      const;
+    do_dereference_readonly_slow() const;
 
     Value&
     do_mutate_into_temporary_slow();
@@ -71,45 +65,38 @@ class Reference
 
     // Accessors
     Index
-    index()
-      const noexcept
+    index() const noexcept
       { return this->m_index;  }
 
     bool
-    is_uninit()
-      const noexcept
+    is_uninit() const noexcept
       { return this->index() == index_uninit;  }
 
     Reference&
-    set_uninit()
-      noexcept
+    set_uninit() noexcept
       {
         this->m_index = index_uninit;
         return *this;
       }
 
     bool
-    is_void()
-      const noexcept
+    is_void() const noexcept
       { return this->index() == index_void;  }
 
     Reference&
-    set_void()
-      noexcept
+    set_void() noexcept
       {
         this->m_index = index_void;
         return *this;
       }
 
     bool
-    is_temporary()
-      const noexcept
+    is_temporary() const noexcept
       { return this->index() == index_temporary;  }
 
     template<typename XValT>
     Reference&
-    set_temporary(XValT&& xval)
-      noexcept
+    set_temporary(XValT&& xval) noexcept
       {
         this->m_value = ::std::forward<XValT>(xval);
         this->m_mods.clear();
@@ -118,14 +105,12 @@ class Reference
       }
 
     bool
-    is_variable()
-      const noexcept
+    is_variable() const noexcept
       { return this->index() == index_variable;  }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
-    get_variable_opt()
-      const noexcept
+    get_variable_opt() const noexcept
       {
         return this->is_variable()
             ? unerase_pointer_cast<Variable>(this->m_var)
@@ -134,8 +119,7 @@ class Reference
 
     ASTERIA_INCOMPLET(Variable)
     Reference&
-    set_variable(const rcptr<Variable>& var)
-      noexcept
+    set_variable(const rcptr<Variable>& var) noexcept
       {
         this->m_var = var;
         this->m_mods.clear();
@@ -144,14 +128,12 @@ class Reference
       }
 
     bool
-    is_ptc_args()
-      const noexcept
+    is_ptc_args() const noexcept
       { return this->index() == index_ptc_args;  }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     rcptr<PTC_Arguments>
-    get_ptc_args_opt()
-      const noexcept
+    get_ptc_args_opt() const noexcept
       {
         return this->is_ptc_args()
             ? unerase_pointer_cast<PTC_Arguments>(this->m_ptca)
@@ -160,8 +142,7 @@ class Reference
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     Reference&
-    set_ptc_args(const rcptr<PTC_Arguments>& ptca)
-      noexcept
+    set_ptc_args(const rcptr<PTC_Arguments>& ptca) noexcept
       {
         this->m_ptca = ptca;
         this->m_index = index_ptc_args;
@@ -169,8 +150,7 @@ class Reference
       }
 
     Reference&
-    assign(const Reference& other)
-      noexcept
+    assign(const Reference& other) noexcept
       {
         // Note not all fields have to be copied.
         switch(other.m_index) {
@@ -197,8 +177,7 @@ class Reference
       }
 
     Reference&
-    assign(Reference&& other)
-      noexcept
+    assign(Reference&& other) noexcept
       {
         // Note not all fields have to be moved.
         switch(other.m_index) {
@@ -225,8 +204,7 @@ class Reference
       }
 
     Reference&
-    swap(Reference& other)
-      noexcept
+    swap(Reference& other) noexcept
       {
         this->m_value.swap(other.m_value);
         this->m_var.swap(other.m_var);
@@ -237,16 +215,14 @@ class Reference
       }
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const;
+    enumerate_variables(Variable_Callback& callback) const;
 
     // A modifier is created by a dot or bracket operator.
     // For instance, the expression `obj.x[42]` results in a reference having two
     // modifiers. Modifiers can be removed to yield references to ancestor objects.
     // Removing the last modifier shall yield the constant `null`.
     size_t
-    count_modifiers()
-      const noexcept
+    count_modifiers() const noexcept
       { return this->m_mods.size();  }
 
     Reference&
@@ -280,8 +256,7 @@ class Reference
       }
 
     Reference&
-    pop_modifier()
-      noexcept
+    pop_modifier() noexcept
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           // Set to null.
@@ -299,8 +274,7 @@ class Reference
     // Some references are placeholders that do not denote values.
     ROCKET_FORCED_INLINE_FUNCTION
     const Value&
-    dereference_readonly()
-      const
+    dereference_readonly() const
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
             ? this->m_value
@@ -326,18 +300,15 @@ class Reference
       }
 
     Value&
-    dereference_mutable()
-      const;
+    dereference_mutable() const;
 
     Value
-    dereference_unset()
-      const;
+    dereference_unset() const;
   };
 
 inline
 void
-swap(Reference& lhs, Reference& rhs)
-  noexcept
+swap(Reference& lhs, Reference& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

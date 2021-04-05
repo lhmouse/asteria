@@ -16,8 +16,7 @@ Genius_Collector::
 
 Collector Genius_Collector::*
 Genius_Collector::
-do_locate(GC_Generation gc_gen)
-  const
+do_locate(GC_Generation gc_gen) const
   {
     switch(gc_gen) {
       case gc_generation_newest:
@@ -69,8 +68,7 @@ collect_variables(GC_Generation gc_limit)
 
 Genius_Collector&
 Genius_Collector::
-wipe_out_variables()
-  noexcept
+wipe_out_variables() noexcept
   {
     // Uninitialize all variables recursively.
     this->m_newest.wipe_out_variables();

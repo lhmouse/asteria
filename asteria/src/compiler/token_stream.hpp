@@ -19,8 +19,7 @@ class Token_Stream
 
   public:
     explicit constexpr
-    Token_Stream(const Compiler_Options& opts)
-      noexcept
+    Token_Stream(const Compiler_Options& opts) noexcept
       : m_opts(opts)
       { }
 
@@ -29,60 +28,49 @@ class Token_Stream
 
     // This provides stack overflow protection.
     Recursion_Sentry
-    copy_recursion_sentry()
-      const
+    copy_recursion_sentry() const
       { return this->m_sentry;  }
 
     const void*
-    get_recursion_base()
-      const noexcept
+    get_recursion_base() const noexcept
       { return this->m_sentry.get_base();  }
 
     Token_Stream&
-    set_recursion_base(const void* base)
-      noexcept
+    set_recursion_base(const void* base) noexcept
       { return this->m_sentry.set_base(base), *this;  }
 
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
-    get_options()
-      const noexcept
+    get_options() const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
-    open_options()
-      noexcept
+    open_options() noexcept
       { return this->m_opts;  }
 
     Token_Stream&
-    set_options(const Compiler_Options& opts)
-      noexcept
+    set_options(const Compiler_Options& opts) noexcept
       { return this->m_opts = opts, *this;  }
 
     // These are accessors and modifiers of tokens in this stream.
     bool
-    empty()
-      const noexcept
+    empty() const noexcept
       { return this->m_rtoks.empty();  }
 
     size_t
-    size()
-      const noexcept
+    size() const noexcept
       { return this->m_rtoks.size();  }
 
     const Token*
-    peek_opt(size_t offset = 0)
-      const noexcept
+    peek_opt(size_t offset = 0) const noexcept
       { return this->m_rtoks.ptr(this->m_rtoks.size() + ~offset);  }
 
     Token_Stream&
-    shift(size_t count = 1)
-      noexcept
+    shift(size_t count = 1) noexcept
       { return this->m_rtoks.pop_back(count), *this;  }
 
     Source_Location
-    next_sloc()
-      const noexcept
+    next_sloc() const noexcept
       {
         if(this->m_rtoks.empty())
           return Source_Location(sref("[end of stream]"), -1, -1);
@@ -91,8 +79,7 @@ class Token_Stream
       }
 
     size_t
-    next_length()
-      const noexcept
+    next_length() const noexcept
       {
         if(this->m_rtoks.empty())
           return 0;
@@ -101,8 +88,7 @@ class Token_Stream
       }
 
     Token_Stream&
-    clear()
-      noexcept
+    clear() noexcept
       {
         this->m_rtoks.clear();
         return *this;

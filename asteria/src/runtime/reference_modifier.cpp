@@ -10,8 +10,7 @@ namespace asteria {
 
 const Value*
 Reference_Modifier::
-apply_read_opt(const Value& parent)
-const
+apply_read_opt(const Value& parent) const
   {
     switch(this->index()) {
       case index_array_index: {
@@ -87,8 +86,7 @@ const
 
 Value*
 Reference_Modifier::
-apply_write_opt(Value& parent)
-  const
+apply_write_opt(Value& parent) const
   {
     switch(this->index()) {
       case index_array_index: {
@@ -164,8 +162,7 @@ apply_write_opt(Value& parent)
 
 Value&
 Reference_Modifier::
-apply_open(Value& parent)
-  const
+apply_open(Value& parent) const
   {
     switch(this->index()) {
       case index_array_index: {
@@ -247,8 +244,7 @@ apply_open(Value& parent)
 
 Value
 Reference_Modifier::
-apply_unset(Value& parent)
-  const
+apply_unset(Value& parent) const
   {
     switch(this->index()) {
       case index_array_index: {

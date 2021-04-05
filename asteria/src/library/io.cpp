@@ -16,8 +16,7 @@ class IOF_Sentry
 
   public:
     explicit
-    IOF_Sentry(::FILE* fp)
-      noexcept
+    IOF_Sentry(::FILE* fp) noexcept
       : m_fp(fp)
       { ::flockfile(this->m_fp);  }
 
@@ -26,8 +25,7 @@ class IOF_Sentry
 
   public:
     operator
-    ::FILE*()
-      const noexcept
+    ::FILE*() const noexcept
       { return this->m_fp;  }
   };
 
@@ -49,8 +47,7 @@ do_recover(::FILE* fp)
 
 constexpr
 int
-do_normalize_fwide(int wide)
-  noexcept
+do_normalize_fwide(int wide) noexcept
   {
     return (wide == 0) ? 0 : ((wide >> (WORD_BIT - 1)) | 1);
   }

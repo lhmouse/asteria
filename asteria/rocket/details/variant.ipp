@@ -88,14 +88,12 @@ class const_bitset
   {
   public:
     constexpr
-    const_bitset()
-      noexcept
+    const_bitset() noexcept
       = default;
 
     constexpr
     bool
-    operator[](size_t k)
-      const noexcept
+    operator[](size_t k) const noexcept
       { return this->m_words[k / 32] & UINT32_C(1) << k % 32;  }
   };
 
@@ -107,15 +105,13 @@ class const_func_table
 
   public:
     constexpr
-    const_func_table()
-      noexcept
+    const_func_table() noexcept
       = default;
 
     template<typename... argsT>
     constexpr
     typename ::std::result_of<targetT*(argsT&&...)>::type
-    operator()(size_t k, argsT&&... args)
-      const noexcept(noexcept(::std::declval<targetT*>()(args...)))
+    operator()(size_t k, argsT&&... args) const noexcept(noexcept(::std::declval<targetT*>()(args...)))
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
   };
 

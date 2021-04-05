@@ -22,40 +22,33 @@ class Variable_HashSet
 
   public:
     explicit constexpr
-    Variable_HashSet()
-      noexcept
+    Variable_HashSet() noexcept
       { }
 
-    Variable_HashSet(Variable_HashSet&& other)
-      noexcept
+    Variable_HashSet(Variable_HashSet&& other) noexcept
       { this->swap(other);  }
 
     Variable_HashSet&
-    operator=(Variable_HashSet&& other)
-      noexcept
+    operator=(Variable_HashSet&& other) noexcept
       { return this->swap(other);  }
 
   private:
     void
-    do_destroy_buckets()
-      noexcept;
+    do_destroy_buckets() noexcept;
 
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `var`, but in no case
     // can a null pointer be returned.
     Bucket*
-    do_xprobe(const rcptr<Variable>& var)
-      const noexcept;
+    do_xprobe(const rcptr<Variable>& var) const noexcept;
 
     // This function is used for relocation after an element is erased.
     void
-    do_xrelocate_but(Bucket* qxcld)
-      noexcept;
+    do_xrelocate_but(Bucket* qxcld) noexcept;
 
     // Valid buckets are linked altogether for efficient iteration.
     void
-    do_list_attach(Bucket* qbkt)
-      noexcept
+    do_list_attach(Bucket* qbkt) noexcept
       {
         // Insert the bucket before `head`.
         auto next = ::std::exchange(this->m_head, qbkt);
@@ -66,8 +59,7 @@ class Variable_HashSet
       }
 
     void
-    do_list_detach(Bucket* qbkt)
-      noexcept
+    do_list_detach(Bucket* qbkt) noexcept
       {
         auto next = qbkt->next;
         auto prev = qbkt->prev;
@@ -82,8 +74,7 @@ class Variable_HashSet
       }
 
     void
-    do_attach(Bucket* qbkt, const rcptr<Variable>& var)
-      noexcept
+    do_attach(Bucket* qbkt, const rcptr<Variable>& var) noexcept
       {
         // Construct the node, then attach it.
         ROCKET_ASSERT(!*qbkt);
@@ -94,8 +85,7 @@ class Variable_HashSet
       }
 
     void
-    do_detach(Bucket* qbkt)
-      noexcept
+    do_detach(Bucket* qbkt) noexcept
       {
         // Transfer ownership of the old variable, then detach the bucket.
         this->m_size--;
@@ -126,18 +116,15 @@ class Variable_HashSet
       }
 
     bool
-    empty()
-      const noexcept
+    empty() const noexcept
       { return this->m_head == nullptr;  }
 
     size_t
-    size()
-      const noexcept
+    size() const noexcept
       { return this->m_size;  }
 
     Variable_HashSet&
-    clear()
-      noexcept
+    clear() noexcept
       {
         if(this->m_head)
           this->do_destroy_buckets();
@@ -149,8 +136,7 @@ class Variable_HashSet
       }
 
     Variable_HashSet&
-    swap(Variable_HashSet& other)
-      noexcept
+    swap(Variable_HashSet& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_eptr, other.m_eptr);
@@ -160,8 +146,7 @@ class Variable_HashSet
       }
 
     bool
-    has(const rcptr<Variable>& var)
-      const noexcept
+    has(const rcptr<Variable>& var) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -178,8 +163,7 @@ class Variable_HashSet
       }
 
     bool
-    insert(const rcptr<Variable>& var)
-      noexcept
+    insert(const rcptr<Variable>& var) noexcept
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
@@ -198,8 +182,7 @@ class Variable_HashSet
       }
 
     bool
-    erase(const rcptr<Variable>& var)
-      noexcept
+    erase(const rcptr<Variable>& var) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -219,8 +202,7 @@ class Variable_HashSet
       }
 
     rcptr<Variable>
-    erase_random_opt()
-      noexcept
+    erase_random_opt() noexcept
       {
         // Get a random bucket that contains a variable.
         auto qbkt = this->m_head;
@@ -234,14 +216,12 @@ class Variable_HashSet
       }
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const;
+    enumerate_variables(Variable_Callback& callback) const;
   };
 
 inline
 void
-swap(Variable_HashSet& lhs, Variable_HashSet& rhs)
-  noexcept
+swap(Variable_HashSet& lhs, Variable_HashSet& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

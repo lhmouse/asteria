@@ -17,41 +17,34 @@ class Source_Location
 
   public:
     explicit
-    Source_Location()
-      noexcept
+    Source_Location() noexcept
       : m_file(sref("[unknown]")), m_line(-1), m_column(-1)
       { }
 
     explicit
-    Source_Location(const cow_string& xfile, int xline, int xcolumn)
-      noexcept
+    Source_Location(const cow_string& xfile, int xline, int xcolumn) noexcept
       : m_file(xfile), m_line(xline), m_column(xcolumn)
       { }
 
   public:
     const cow_string&
-    file()
-      const noexcept
+    file() const noexcept
       { return this->m_file;  }
 
     const char*
-    c_file()
-      const noexcept
+    c_file() const noexcept
       { return this->m_file.c_str();  }
 
     int
-    line()
-      const noexcept
+    line() const noexcept
       { return this->m_line;  }
 
     int
-    column()
-      const noexcept
+    column() const noexcept
       { return this->m_column;  }
 
     Source_Location&
-    swap(Source_Location& other)
-      noexcept
+    swap(Source_Location& other) noexcept
       {
         this->m_file.swap(other.m_file);
         ::std::swap(this->m_line, other.m_line);
@@ -60,14 +53,12 @@ class Source_Location
       }
 
     tinyfmt&
-    print(tinyfmt& fmt)
-      const;
+    print(tinyfmt& fmt) const;
   };
 
 inline
 void
-swap(Source_Location& lhs, Source_Location& rhs)
-  noexcept
+swap(Source_Location& lhs, Source_Location& rhs) noexcept
   { lhs.swap(rhs);  }
 
 inline

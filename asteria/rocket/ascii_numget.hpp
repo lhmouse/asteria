@@ -43,8 +43,7 @@ class ascii_numget
     uint64_t m_mant;  // the mantissa (see `m_base`)
 
   public:
-    ascii_numget()
-      noexcept
+    ascii_numget() noexcept
       { this->clear();  }
 
     template<typename valueT,
@@ -55,48 +54,39 @@ class ascii_numget
   public:
     // accessors
     explicit operator
-    bool()
-      const noexcept
+    bool() const noexcept
       { return this->m_succ;  }
 
     bool
-    overflowed()
-      const noexcept
+    overflowed() const noexcept
       { return this->m_ovfl;  }
 
     bool
-    underflowed()
-      const noexcept
+    underflowed() const noexcept
       { return this->m_udfl;  }
 
     bool
-    inexact()
-      const noexcept
+    inexact() const noexcept
       { return this->m_inxc;  }
 
     bool
-    is_finite()
-      const noexcept
+    is_finite() const noexcept
       { return this->m_vcls == 0;  }
 
     bool
-    is_infinitesimal()
-      const noexcept
+    is_infinitesimal() const noexcept
       { return this->m_vcls == 1;  }
 
     bool
-    is_infinity()
-      const noexcept
+    is_infinity() const noexcept
       { return this->m_vcls == 2;  }
 
     bool
-    is_nan()
-      const noexcept
+    is_nan() const noexcept
       { return this->m_vcls == 3;  }
 
     ascii_numget&
-    clear()
-      noexcept
+    clear() noexcept
       {
         this->m_bits = 0;
         this->m_expo = 0;
@@ -126,18 +116,15 @@ class ascii_numget
 
     // * unsigned 64-bit integer
     ascii_numget&
-    cast_U(uint64_t& value, uint64_t lower, uint64_t upper)
-      noexcept;
+    cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept;
 
     // * signed 64-bit integer
     ascii_numget&
-    cast_I(int64_t& value, int64_t lower, int64_t upper)
-      noexcept;
+    cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept;
 
     // * IEEE-754 double-precision floating-point
     ascii_numget&
-    cast_F(double& value, double lower, double upper, bool single = false)
-      noexcept;
+    cast_F(double& value, double lower, double upper, bool single = false) noexcept;
 
     ascii_numget&
     get(bool& value, const char*& bptr, const char* eptr)

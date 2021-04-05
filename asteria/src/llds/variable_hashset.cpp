@@ -10,8 +10,7 @@ namespace asteria {
 
 void
 Variable_HashSet::
-do_destroy_buckets()
-  noexcept
+do_destroy_buckets() noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -32,8 +31,7 @@ do_destroy_buckets()
 
 details_variable_hashset::Bucket*
 Variable_HashSet::
-do_xprobe(const rcptr<Variable>& var)
-  const noexcept
+do_xprobe(const rcptr<Variable>& var) const noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -53,8 +51,7 @@ do_xprobe(const rcptr<Variable>& var)
 
 void
 Variable_HashSet::
-do_xrelocate_but(Bucket* qxcld)
-  noexcept
+do_xrelocate_but(Bucket* qxcld) noexcept
   {
     ::rocket::linear_probe(
       this->m_bptr,
@@ -146,8 +143,7 @@ do_rehash_more()
 
 Variable_Callback&
 Variable_HashSet::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {

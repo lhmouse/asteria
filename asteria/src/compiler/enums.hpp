@@ -74,8 +74,7 @@ enum Punctuator : uint8_t
 
 ROCKET_CONST_FUNCTION
 const char*
-stringify_punctuator(Punctuator punct)
-  noexcept;
+stringify_punctuator(Punctuator punct) noexcept;
 
 // Keywords
 enum Keyword : uint8_t
@@ -132,8 +131,7 @@ enum Keyword : uint8_t
 
 ROCKET_CONST_FUNCTION
 const char*
-stringify_keyword(Keyword kwrd)
-  noexcept;
+stringify_keyword(Keyword kwrd) noexcept;
 
 // Target of jump statements
 enum Jump_Target : uint8_t

@@ -25,16 +25,14 @@ Abstract_Function::
 
 void
 cow_opaque::
-do_throw_null_pointer()
-  const
+do_throw_null_pointer() const
   {
     ASTERIA_THROW("Attempt to dereference a null opaque pointer");
   }
 
 tinyfmt&
 cow_opaque::
-describe(tinyfmt& fmt)
-  const
+describe(tinyfmt& fmt) const
   {
     if(auto ptr = this->m_sptr.get())
       return ptr->describe(fmt);
@@ -44,16 +42,14 @@ describe(tinyfmt& fmt)
 
 void
 cow_function::
-do_throw_null_pointer()
-  const
+do_throw_null_pointer() const
   {
     ASTERIA_THROW("Attempt to dereference a null function pointer");
   }
 
 tinyfmt&
 cow_function::
-describe(tinyfmt& fmt)
-  const
+describe(tinyfmt& fmt) const
   {
     if(this->m_fptr)
       return fmt << "native function " << this->m_desc;  // static
@@ -66,8 +62,7 @@ describe(tinyfmt& fmt)
 
 Reference&
 cow_function::
-invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-  const
+invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
     if(auto fptr = this->m_fptr)
       return fptr(self, global, ::std::move(stack));  // static
@@ -80,16 +75,14 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
 Reference&
 cow_function::
-invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
-  const
+invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
     this->invoke_ptc_aware(self, global, ::std::move(stack));
     return self.finish_call(global);
   }
 
 const char*
-describe_type(Type type)
-  noexcept
+describe_type(Type type) noexcept
   {
     switch(type) {
       case type_null:
@@ -125,8 +118,7 @@ describe_type(Type type)
   }
 
 const char*
-describe_frame_type(Frame_Type type)
-  noexcept
+describe_frame_type(Frame_Type type) noexcept
   {
     switch(type) {
       case frame_type_native:
@@ -159,8 +151,7 @@ describe_frame_type(Frame_Type type)
   }
 
 const char*
-describe_parser_status(Parser_Status status)
-  noexcept
+describe_parser_status(Parser_Status status) noexcept
   {
     switch(status) {
       case parser_status_success:

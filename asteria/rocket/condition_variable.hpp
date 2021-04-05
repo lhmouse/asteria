@@ -20,8 +20,7 @@ class condition_variable
 
   public:
     constexpr
-    condition_variable()
-      noexcept
+    condition_variable() noexcept
       { }
 
     condition_variable(const condition_variable&)
@@ -40,8 +39,7 @@ class condition_variable
   private:
     static
     bool
-    do_make_abstime(::timespec& ts, long msecs)
-      noexcept
+    do_make_abstime(::timespec& ts, long msecs) noexcept
       {
         // Get the current time.
         int r = ::clock_gettime(CLOCK_REALTIME, &ts);
@@ -122,8 +120,7 @@ class condition_variable
 
   public:
     void
-    wait_for(mutex::unique_lock& lock, long msecs)
-      noexcept
+    wait_for(mutex::unique_lock& lock, long msecs) noexcept
       {
         if(msecs <= 0)
           return;
@@ -135,8 +132,7 @@ class condition_variable
 
     template<typename predT>
     bool
-    wait_for(mutex::unique_lock& lock, long msecs, predT&& pred)
-      noexcept(noexcept(pred()))
+    wait_for(mutex::unique_lock& lock, long msecs, predT&& pred) noexcept(noexcept(pred()))
       {
         if(pred())
           return true;
@@ -150,8 +146,7 @@ class condition_variable
       }
 
     void
-    wait(mutex::unique_lock& lock)
-      noexcept
+    wait(mutex::unique_lock& lock) noexcept
       {
         this->do_wait_check_loop(lock,
             [&](::timespec& /*ts*/) { return false;  },
@@ -160,8 +155,7 @@ class condition_variable
 
     template<typename predT>
     bool
-    wait(mutex::unique_lock& lock, predT&& pred)
-      noexcept(noexcept(pred()))
+    wait(mutex::unique_lock& lock, predT&& pred) noexcept(noexcept(pred()))
       {
         if(pred())
           return true;
@@ -172,16 +166,14 @@ class condition_variable
       }
 
     void
-    notify_one()
-      noexcept
+    notify_one() noexcept
       {
         int r = ::pthread_cond_signal(this->m_cond);
         ROCKET_ASSERT(r == 0);
       }
 
     void
-    notify_all()
-      noexcept
+    notify_all() noexcept
       {
         int r = ::pthread_cond_broadcast(this->m_cond);
         ROCKET_ASSERT(r == 0);

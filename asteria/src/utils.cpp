@@ -56,8 +56,7 @@ constexpr char s_escapes[][8] =
 // POSIX
 constexpr
 const char*
-do_result_of_strerror_r(int /*r*/, char* s)
-  noexcept
+do_result_of_strerror_r(int /*r*/, char* s) noexcept
   {
     return s;
   }
@@ -65,16 +64,14 @@ do_result_of_strerror_r(int /*r*/, char* s)
 // GNU
 constexpr
 const char*
-do_result_of_strerror_r(char* r, char* /*s*/)
-  noexcept
+do_result_of_strerror_r(char* r, char* /*s*/) noexcept
   {
     return r;
   }
 
 inline
 const char*
-do_xstrerror_r(int errnum, char *strerrbuf, size_t buflen)
-  noexcept
+do_xstrerror_r(int errnum, char *strerrbuf, size_t buflen) noexcept
   {
     return do_result_of_strerror_r(
                ::strerror_r(errnum, strerrbuf, buflen),
@@ -159,8 +156,7 @@ operator<<(tinyfmt& fmt, const Formatted_errno& e)
 }  // namespace details_utils
 
 ptrdiff_t
-write_log_to_stderr(const char* file, long line, cow_string&& msg)
-  noexcept
+write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
   {
     cow_string log_text;
     log_text.reserve(1023);
@@ -201,8 +197,7 @@ write_log_to_stderr(const char* file, long line, cow_string&& msg)
   }
 
 bool
-utf8_encode(char*& pos, char32_t cp)
-  noexcept
+utf8_encode(char*& pos, char32_t cp) noexcept
   {
     if(cp < 0x80) {
       // This character takes only one byte.
@@ -256,8 +251,7 @@ utf8_encode(cow_string& text, char32_t cp)
   }
 
 bool
-utf8_decode(char32_t& cp, const char*& pos, size_t avail)
-  noexcept
+utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
   {
     if(avail == 0)
       return false;
@@ -326,8 +320,7 @@ utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   }
 
 bool
-utf16_encode(char16_t*& pos, char32_t cp)
-  noexcept
+utf16_encode(char16_t*& pos, char32_t cp) noexcept
   {
     if((0xD800 <= cp) && (cp < 0xE000))
       // Surrogates are reserved for UTF-16.
@@ -364,8 +357,7 @@ utf16_encode(cow_u16string& text, char32_t cp)
   }
 
 bool
-utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
-  noexcept
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept
   {
     if(avail == 0)
       return false;
@@ -411,8 +403,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
   }
 
 Wrapped_Index
-wrap_index(int64_t index, size_t size)
-  noexcept
+wrap_index(int64_t index, size_t size) noexcept
   {
     ROCKET_ASSERT(size <= PTRDIFF_MAX);
 
@@ -442,8 +433,7 @@ wrap_index(int64_t index, size_t size)
   }
 
 uint64_t
-generate_random_seed()
-  noexcept
+generate_random_seed() noexcept
   {
     // Get the system time of very high resolution.
     ::timespec ts;

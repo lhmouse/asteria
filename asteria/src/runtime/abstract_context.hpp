@@ -24,21 +24,18 @@ class Abstract_Context
 
   protected:
     explicit
-    Abstract_Context()
-      noexcept
+    Abstract_Context() noexcept
       = default;
 
   protected:
     virtual
     bool
-    do_is_analytic()
-      const noexcept
+    do_is_analytic() const noexcept
       = 0;
 
     virtual
     Abstract_Context*
-    do_get_parent_opt()
-      const noexcept
+    do_get_parent_opt() const noexcept
       = 0;
 
     // This function is called when a name is not found in `m_named_refs`.
@@ -46,16 +43,14 @@ class Abstract_Context
     // mentioned.
     virtual
     Reference*
-    do_create_lazy_reference(Reference* hint_opt, const phsh_string& name)
-      const
+    do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
       = 0;
 
     // This function is called by `do_create_lazy_reference()` to avoid
     // possibility of infinite recursion, which would otherwise be caused
     // if `open_named_reference()` was called instead.
     Reference&
-    do_open_named_reference(Reference* hint_opt, const phsh_string& name)
-      const
+    do_open_named_reference(Reference* hint_opt, const phsh_string& name) const
       {
         auto qref = hint_opt;
         if(ROCKET_UNEXPECT(!qref))
@@ -67,18 +62,15 @@ class Abstract_Context
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Abstract_Context);
 
     bool
-    is_analytic()
-      const noexcept
+    is_analytic() const noexcept
       { return this->do_is_analytic();  }
 
     Abstract_Context*
-    get_parent_opt()
-      const noexcept
+    get_parent_opt() const noexcept
       { return this->do_get_parent_opt();  }
 
     const Reference*
-    get_named_reference_opt(const phsh_string& name)
-      const
+    get_named_reference_opt(const phsh_string& name) const
       {
         auto qref = this->m_named_refs.find_opt(name);
         if(ROCKET_UNEXPECT(!qref))

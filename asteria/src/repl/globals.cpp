@@ -23,8 +23,7 @@ cow_string repl_source;  // snippet text
 cow_string repl_heredoc;  // heredoc terminator
 
 void
-repl_printf(const char* fmt, ...)
-  noexcept
+repl_printf(const char* fmt, ...) noexcept
   {
     // Output the string to standard error.
     ::va_list ap;
@@ -34,8 +33,7 @@ repl_printf(const char* fmt, ...)
   }
 
 void
-exit_printf(Exit_Status stat, const char* fmt, ...)
-  noexcept
+exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
   {
     // Output the string to standard error.
     ::va_list ap;

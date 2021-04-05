@@ -32,56 +32,45 @@ class Variadic_Arguer
 
   public:
     const Source_Location&
-    sloc()
-      const noexcept
+    sloc() const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
-    file()
-      const noexcept
+    file() const noexcept
       { return this->m_sloc.file();  }
 
     int
-    line()
-      const noexcept
+    line() const noexcept
       { return this->m_sloc.line();  }
 
     int
-    column()
-      const noexcept
+    column() const noexcept
       { return this->m_sloc.column();  }
 
     const cow_string&
-    func()
-      const noexcept
+    func() const noexcept
       { return this->m_func;  }
 
     bool
-    empty()
-      const noexcept
+    empty() const noexcept
       { return this->m_vargs.empty();  }
 
     size_t
-    size()
-      const noexcept
+    size() const noexcept
       { return this->m_vargs.size();  }
 
     const Reference&
-    arg(size_t index)
-      const
+    arg(size_t index) const
       { return this->m_vargs.at(index);  }
 
     tinyfmt&
-    describe(tinyfmt& fmt)
-      const override;
+    describe(tinyfmt& fmt) const override;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const override;
+    enumerate_variables(Variable_Callback& callback) const override;
 
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-      const override;
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override;
   };
 
 }  // namespace asteria

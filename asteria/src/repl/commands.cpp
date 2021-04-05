@@ -48,18 +48,15 @@ struct Command_exit
   : public Command
   {
     const char*
-    cmd()
-      const noexcept override
+    cmd() const noexcept override
       { return "exit";  }
 
     const char*
-    oneline()
-      const noexcept override
+    oneline() const noexcept override
       { return "exit the interpreter";  }
 
     const char*
-    description()
-      const noexcept override
+    description() const noexcept override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -77,8 +74,7 @@ struct Command_exit
 
     [[noreturn]]
     void
-    handle(cow_string&& args)
-      const override
+    handle(cow_string&& args) const override
       {
         const char* bptr = args.data();
         const char* eptr = bptr + args.size();
@@ -100,18 +96,15 @@ struct Command_help
   : public Command
   {
     const char*
-    cmd()
-      const noexcept override
+    cmd() const noexcept override
       { return "help";  }
 
     const char*
-    oneline()
-      const noexcept override
+    oneline() const noexcept override
       { return "obtain information about a command";  }
 
     const char*
-    description()
-      const noexcept override
+    description() const noexcept override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -127,8 +120,7 @@ struct Command_help
       }
 
     void
-    handle(cow_string&& args)
-      const override;
+    handle(cow_string&& args) const override;
   };
 
 struct Command_heredoc
@@ -136,18 +128,15 @@ struct Command_heredoc
   : public Command
   {
     const char*
-    cmd()
-      const noexcept override
+    cmd() const noexcept override
       { return "heredoc";  }
 
     const char*
-    oneline()
-      const noexcept override
+    oneline() const noexcept override
       { return "enter heredoc mode";  }
 
     const char*
-    description()
-      const noexcept override
+    description() const noexcept override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -163,8 +152,7 @@ struct Command_heredoc
       }
 
     void
-    handle(cow_string&& args)
-      const override
+    handle(cow_string&& args) const override
       {
         if(args.empty())
           return repl_printf("! `heredoc` requires a terminator string\n");
@@ -180,18 +168,15 @@ struct Command_source
   : public Command
   {
     const char*
-    cmd()
-      const noexcept override
+    cmd() const noexcept override
       { return "source";  }
 
     const char*
-    oneline()
-      const noexcept override
+    oneline() const noexcept override
       { return "load and execute a script file";  }
 
     const char*
-    description()
-      const noexcept override
+    description() const noexcept override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -205,8 +190,7 @@ struct Command_source
       }
 
     void
-    handle(cow_string&& args)
-      const override
+    handle(cow_string&& args) const override
       {
         if(args.empty())
           return repl_printf("! `source` requires a file path\n");
@@ -269,8 +253,7 @@ const uptr<const Command> s_commands[] =
 
 void
 Command_help::
-handle(cow_string&& args)
-  const
+handle(cow_string&& args) const
   {
     if(!args.empty()) {
       // Convert all letters in `args` into lowercase.

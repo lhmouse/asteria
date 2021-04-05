@@ -23,20 +23,17 @@ struct deleter_reference
     deleterT* m_qdel;
 
     constexpr
-    deleter_reference(deleterT& del)
-      noexcept
+    deleter_reference(deleterT& del) noexcept
       : m_qdel(::std::addressof(del))
       { }
 
     constexpr operator
-    deleterT&()
-      const noexcept
+    deleterT&() const noexcept
       { return *(this->m_qdel);  }
 
     constexpr
     deleterT&
-    get()
-      const noexcept
+    get() const noexcept
       { return *(this->m_qdel);  }
   };
 
@@ -57,20 +54,17 @@ class stored_pointer
 
   public:
     constexpr
-    stored_pointer()
-      noexcept(is_nothrow_constructible<deleter_type>::value)
+    stored_pointer() noexcept(is_nothrow_constructible<deleter_type>::value)
       : deleter_base(), m_ptr()
       { }
 
     explicit constexpr
-    stored_pointer(const deleter_type& del)
-      noexcept
+    stored_pointer(const deleter_type& del) noexcept
       : deleter_base(del)
       { }
 
     explicit constexpr
-    stored_pointer(deleter_type&& del)
-      noexcept
+    stored_pointer(deleter_type&& del) noexcept
       : deleter_base(::std::move(del))
       { }
 
@@ -93,29 +87,24 @@ class stored_pointer
 
   public:
     const deleter_type&
-    as_deleter()
-      const noexcept
+    as_deleter() const noexcept
       { return static_cast<const deleter_base&>(*this);  }
 
     deleter_type&
-    as_deleter()
-      noexcept
+    as_deleter() noexcept
       { return static_cast<deleter_base&>(*this);  }
 
     constexpr
     pointer
-    get()
-      const noexcept
+    get() const noexcept
       { return this->m_ptr;  }
 
     pointer
-    release()
-      noexcept
+    release() noexcept
       { return ::std::exchange(this->m_ptr, nullptr);  }
 
     void
-    reset(pointer ptr_new)
-      noexcept
+    reset(pointer ptr_new) noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
         if(ptr)
@@ -123,8 +112,7 @@ class stored_pointer
       }
 
     void
-    exchange_with(stored_pointer& other)
-      noexcept
+    exchange_with(stored_pointer& other) noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
@@ -145,8 +133,7 @@ class stored_pointer<pointerT, deleterT&>
 
   public:
     explicit constexpr
-    stored_pointer(deleterT& del)
-      noexcept
+    stored_pointer(deleterT& del) noexcept
       : deleter_base(del)
       { }
 
@@ -169,29 +156,24 @@ class stored_pointer<pointerT, deleterT&>
 
   public:
     const deleter_base&
-    as_deleter()
-      const noexcept
+    as_deleter() const noexcept
       { return static_cast<const deleter_base&>(*this);  }
 
     deleter_base&
-    as_deleter()
-      noexcept
+    as_deleter() noexcept
       { return static_cast<deleter_base&>(*this);  }
 
     constexpr
     pointer
-    get()
-      const noexcept
+    get() const noexcept
       { return this->m_ptr;  }
 
     pointer
-    release()
-      noexcept
+    release() noexcept
       { return ::std::exchange(this->m_ptr, nullptr);  }
 
     void
-    reset(pointer ptr_new)
-      noexcept
+    reset(pointer ptr_new) noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
         if(ptr)
@@ -199,8 +181,7 @@ class stored_pointer<pointerT, deleterT&>
       }
 
     void
-    exchange_with(stored_pointer& other)
-      noexcept
+    exchange_with(stored_pointer& other) noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 

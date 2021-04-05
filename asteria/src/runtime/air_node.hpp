@@ -325,16 +325,14 @@ class AIR_Node
     template<typename XNodeT,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XNodeT&&>::value)>
     constexpr
-    AIR_Node(XNodeT&& xnode)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XNodeT&&>::value)
+    AIR_Node(XNodeT&& xnode) noexcept(::std::is_nothrow_constructible<decltype(m_stor), XNodeT&&>::value)
       : m_stor(::std::forward<XNodeT>(xnode))
       { }
 
     template<typename XNodeT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XNodeT&&>::value)>
     AIR_Node&
-    operator=(XNodeT&& xnode)
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XNodeT&&>::value)
+    operator=(XNodeT&& xnode) noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XNodeT&&>::value)
       {
         this->m_stor = ::std::forward<XNodeT>(xnode);
         return *this;
@@ -342,13 +340,11 @@ class AIR_Node
 
   public:
     Index
-    index()
-      const noexcept
+    index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     AIR_Node&
-    swap(AIR_Node& other)
-      noexcept
+    swap(AIR_Node& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -358,26 +354,22 @@ class AIR_Node
     // If this node refers to a local reference, which has been allocated in an
     // executive context now, we need to replace `*this` with a copy of it.
     opt<AIR_Node>
-    rebind_opt(Abstract_Context& ctx)
-      const;
+    rebind_opt(Abstract_Context& ctx) const;
 
     // Compress this IR node.
     // The return value indicates whether this node terminates control flow i.e.
     // all subsequent nodes are unreachable.
     bool
-    solidify(AVMC_Queue& queue)
-      const;
+    solidify(AVMC_Queue& queue) const;
 
     // This is needed because the body of a closure should not be solidified.
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const;
+    enumerate_variables(Variable_Callback& callback) const;
   };
 
 inline
 void
-swap(AIR_Node& lhs, AIR_Node& rhs)
-  noexcept
+swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

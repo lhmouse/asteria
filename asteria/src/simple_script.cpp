@@ -87,8 +87,7 @@ reload_file(const char* path)
 
 Reference
 Simple_Script::
-execute(Global_Context& global, Reference_Stack&& stack)
-  const
+execute(Global_Context& global, Reference_Stack&& stack) const
   {
     // Execute the script as a plain function.
     Reference self;
@@ -101,8 +100,7 @@ execute(Global_Context& global, Reference_Stack&& stack)
 
 Reference
 Simple_Script::
-execute(Global_Context& global, cow_vector<Value>&& vals)
-  const
+execute(Global_Context& global, cow_vector<Value>&& vals) const
   {
     // Push all arguments backwards as temporaries.
     Reference_Stack stack;

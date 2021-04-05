@@ -28,38 +28,31 @@ class Backtrace_Frame
 
   public:
     Frame_Type
-    type()
-      const noexcept
+    type() const noexcept
       { return this->m_type;  }
 
     const char*
-    what_type()
-      const noexcept
+    what_type() const noexcept
       { return describe_frame_type(this->m_type);  }
 
     const Source_Location&
-    sloc()
-      const noexcept
+    sloc() const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
-    file()
-      const noexcept
+    file() const noexcept
       { return this->m_sloc.file();  }
 
     int
-    line()
-      const noexcept
+    line() const noexcept
       { return this->m_sloc.line();  }
 
     int
-    column()
-      const noexcept
+    column() const noexcept
       { return this->m_sloc.column();  }
 
     const Value&
-    value()
-      const noexcept
+    value() const noexcept
       { return this->m_value;  }
   };
 

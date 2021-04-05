@@ -23,14 +23,12 @@ struct State
 template<typename XValT>
 constexpr
 typename ::std::remove_reference<XValT>::type&&
-move(XValT&& xval)
-  noexcept
+move(XValT&& xval) noexcept
   { return static_cast<typename ::std::remove_reference<XValT>::type&&>(xval);  }
 
 constexpr
 Global_Context&
-move(Global_Context& global)
-  noexcept
+move(Global_Context& global) noexcept
   { return global;  }
 
 // The void return type needs special treatment.

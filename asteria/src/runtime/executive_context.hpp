@@ -58,18 +58,15 @@ class Executive_Context
 
   private:
     bool
-    do_is_analytic()
-      const noexcept final
+    do_is_analytic() const noexcept final
       { return this->is_analytic();  }
 
     Abstract_Context*
-    do_get_parent_opt()
-      const noexcept override
+    do_get_parent_opt() const noexcept override
       { return this->get_parent_opt();  }
 
     Reference*
-    do_create_lazy_reference(Reference* hint_opt, const phsh_string& name)
-      const override;
+    do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const override;
 
     AIR_Status
     do_on_scope_exit_slow(AIR_Status status);
@@ -81,28 +78,23 @@ class Executive_Context
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
 
     bool
-    is_analytic()
-      const noexcept
+    is_analytic() const noexcept
       { return false;  }
 
     Executive_Context*
-    get_parent_opt()
-      const noexcept
+    get_parent_opt() const noexcept
       { return this->m_parent_opt;  }
 
     Global_Context&
-    global()
-      const noexcept
+    global() const noexcept
       { return *(this->m_global);  }
 
     Reference_Stack&
-    stack()
-      const noexcept
+    stack() const noexcept
       { return *(this->m_stack);  }
 
     Reference_Stack&
-    alt_stack()
-      const noexcept
+    alt_stack() const noexcept
       { return *(this->m_alt_stack);  }
 
     // Defer an expression which will be evaluated at scope exit.

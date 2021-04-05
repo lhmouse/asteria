@@ -45,8 +45,7 @@ do_terminate_parameter_list()
 
 Argument_Reader&
 Argument_Reader::
-do_mark_match_failure()
-  noexcept
+do_mark_match_failure() noexcept
   {
     // Set the current overload as unmatched.
     this->m_state.matched = false;
@@ -55,8 +54,7 @@ do_mark_match_failure()
 
 const Reference*
 Argument_Reader::
-do_peek_argument()
-  const
+do_peek_argument() const
   {
     // Try getting an argument for the next parameter.
     // Prior to this function, `do_prepare_parameter()` shall have been called.
@@ -90,8 +88,7 @@ save_state(size_t index)
 
 Argument_Reader&
 Argument_Reader::
-start_overload()
-  noexcept
+start_overload() noexcept
   {
     this->m_state.params.clear();
     this->m_state.nparams = 0;
@@ -537,8 +534,7 @@ end_overload(cow_vector<Value>& vargs)
 
 void
 Argument_Reader::
-throw_no_matching_function_call()
-  const
+throw_no_matching_function_call() const
   {
     // Compose the list of types of arguments.
     cow_string arguments;

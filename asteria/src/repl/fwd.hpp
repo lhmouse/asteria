@@ -45,21 +45,18 @@ extern cow_string repl_heredoc;  // heredoc terminator
 
 // These functions are defined in 'globals.cpp'.
 void
-repl_printf(const char* fmt, ...)
-  noexcept;
+repl_printf(const char* fmt, ...) noexcept;
 
 [[noreturn]]
 void
-exit_printf(Exit_Status stat, const char* fmt = "", ...)
-  noexcept;
+exit_printf(Exit_Status stat, const char* fmt = "", ...) noexcept;
 
 void
 initialize_global_context(const void* stack_base);
 
 // These functions are defined in 'hooks.cpp'.
 int
-get_and_clear_last_signal()
-  noexcept;
+get_and_clear_last_signal() noexcept;
 
 void
 install_signal_and_verbose_hooks();

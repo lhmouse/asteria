@@ -22,40 +22,33 @@ class Reference_Dictionary
 
   public:
     explicit constexpr
-    Reference_Dictionary()
-      noexcept
+    Reference_Dictionary() noexcept
       { }
 
-    Reference_Dictionary(Reference_Dictionary&& other)
-      noexcept
+    Reference_Dictionary(Reference_Dictionary&& other) noexcept
       { this->swap(other);  }
 
     Reference_Dictionary&
-    operator=(Reference_Dictionary&& other)
-      noexcept
+    operator=(Reference_Dictionary&& other) noexcept
       { return this->swap(other);  }
 
   private:
     void
-    do_destroy_buckets()
-      noexcept;
+    do_destroy_buckets() noexcept;
 
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `name`, but in no case
     // can a null pointer be returned.
     Bucket*
-    do_xprobe(const phsh_string& name)
-      const noexcept;
+    do_xprobe(const phsh_string& name) const noexcept;
 
     // This function is used for relocation after an element is erased.
     void
-    do_xrelocate_but(Bucket* qxcld)
-      noexcept;
+    do_xrelocate_but(Bucket* qxcld) noexcept;
 
     // Valid buckets are linked altogether for efficient iteration.
     void
-    do_list_attach(Bucket* qbkt)
-      noexcept
+    do_list_attach(Bucket* qbkt) noexcept
       {
         // Insert the bucket before `head`.
         auto next = ::std::exchange(this->m_head, qbkt);
@@ -66,8 +59,7 @@ class Reference_Dictionary
       }
 
     void
-    do_list_detach(Bucket* qbkt)
-      noexcept
+    do_list_detach(Bucket* qbkt) noexcept
       {
         auto next = qbkt->next;
         auto prev = qbkt->prev;
@@ -82,8 +74,7 @@ class Reference_Dictionary
       }
 
     void
-    do_attach(Bucket* qbkt, const phsh_string& name)
-      noexcept
+    do_attach(Bucket* qbkt, const phsh_string& name) noexcept
       {
         // Construct the node, then attach it.
         ROCKET_ASSERT(!*qbkt);
@@ -95,8 +86,7 @@ class Reference_Dictionary
       }
 
     void
-    do_detach(Bucket* qbkt)
-      noexcept
+    do_detach(Bucket* qbkt) noexcept
       {
         // Destroy the old name and reference, then detach the bucket.
         this->m_size--;
@@ -128,18 +118,15 @@ class Reference_Dictionary
       }
 
     bool
-    empty()
-      const noexcept
+    empty() const noexcept
       { return this->m_head == nullptr;  }
 
     size_t
-    size()
-      const noexcept
+    size() const noexcept
       { return this->m_size;  }
 
     Reference_Dictionary&
-    clear()
-      noexcept
+    clear() noexcept
       {
         if(this->m_head)
           this->do_destroy_buckets();
@@ -151,8 +138,7 @@ class Reference_Dictionary
       }
 
     Reference_Dictionary&
-    swap(Reference_Dictionary& other)
-      noexcept
+    swap(Reference_Dictionary& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_eptr, other.m_eptr);
@@ -162,8 +148,7 @@ class Reference_Dictionary
       }
 
     const Reference*
-    find_opt(const phsh_string& name)
-      const noexcept
+    find_opt(const phsh_string& name) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -180,8 +165,7 @@ class Reference_Dictionary
       }
 
     Reference*
-    mut_find_opt(const phsh_string& name)
-      noexcept
+    mut_find_opt(const phsh_string& name) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -217,8 +201,7 @@ class Reference_Dictionary
       }
 
     bool
-    erase(const phsh_string& name)
-      noexcept
+    erase(const phsh_string& name) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
         // table has not been allocated.
@@ -236,14 +219,12 @@ class Reference_Dictionary
       }
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const;
+    enumerate_variables(Variable_Callback& callback) const;
   };
 
 inline
 void
-swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs)
-  noexcept
+swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

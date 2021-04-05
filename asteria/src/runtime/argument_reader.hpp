@@ -24,8 +24,7 @@ class Argument_Reader
 
   public:
     explicit
-    Argument_Reader(const cow_string& name, Reference_Stack&& stack)
-      noexcept
+    Argument_Reader(const cow_string& name, Reference_Stack&& stack) noexcept
       : m_name(name), m_stack(::std::move(stack))
       { }
 
@@ -40,20 +39,17 @@ class Argument_Reader
 
     inline
     Argument_Reader&
-    do_mark_match_failure()
-      noexcept;
+    do_mark_match_failure() noexcept;
 
     inline
     const Reference*
-    do_peek_argument()
-      const;
+    do_peek_argument() const;
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Argument_Reader);
 
     const cow_string&
-    name()
-      const noexcept
+    name() const noexcept
       { return this->m_name;  }
 
     // These functions access `m_saved_states`.
@@ -70,8 +66,7 @@ class Argument_Reader
 
     // Start an overload. Effectively, this function clears `m_state`.
     Argument_Reader&
-    start_overload()
-      noexcept;
+    start_overload() noexcept;
 
     // Gets an optional argument. The argument may be of the desired type
     // or null.
@@ -146,8 +141,7 @@ class Argument_Reader
     // from all overloads that have been tested so far.
     [[noreturn]]
     void
-    throw_no_matching_function_call()
-      const;
+    throw_no_matching_function_call() const;
   };
 
 #define ASTERIA_BINDING_BEGIN(name, self, global, reader)  \

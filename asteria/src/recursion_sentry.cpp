@@ -9,8 +9,7 @@ namespace asteria {
 
 void
 Recursion_Sentry::
-do_throw_stack_overflow(size_t usage, size_t limit)
-  const
+do_throw_stack_overflow(size_t usage, size_t limit) const
   {
     ASTERIA_THROW("Stack overflow averted (stack usage `$1` exceeded `$2`)", usage, limit);
   }

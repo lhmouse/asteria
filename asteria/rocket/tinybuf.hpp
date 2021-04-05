@@ -44,33 +44,28 @@ struct tinybuf_base
 
     static constexpr
     bool
-    has_mode(open_mode mode, open_mode opt)
-      noexcept
+    has_mode(open_mode mode, open_mode opt) noexcept
       { return (mode & opt) == opt;  }
   };
 
 constexpr
 tinybuf_base::open_mode
-operator~(tinybuf_base::open_mode rhs)
-  noexcept
+operator~(tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode(~(uint32_t)rhs);  }
 
 constexpr
 tinybuf_base::open_mode
-operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs)
-  noexcept
+operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode((uint32_t)lhs & (uint32_t)rhs);  }
 
 constexpr
 tinybuf_base::open_mode
-operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs)
-  noexcept
+operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode((uint32_t)lhs | (uint32_t)rhs);  }
 
 constexpr
 tinybuf_base::open_mode
-operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs)
-  noexcept
+operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode((uint32_t)lhs ^ (uint32_t)rhs);  }
 
 template<typename charT, typename traitsT>
@@ -95,17 +90,14 @@ class basic_tinybuf
     char_type* m_pend = nullptr;
 
   protected:
-    basic_tinybuf()
-      noexcept
+    basic_tinybuf() noexcept
       = default;
 
-    basic_tinybuf(const basic_tinybuf&)
-      noexcept
+    basic_tinybuf(const basic_tinybuf&) noexcept
       = default;
 
     basic_tinybuf&
-    operator=(const basic_tinybuf&)
-      noexcept
+    operator=(const basic_tinybuf&) noexcept
       = default;
 
   public:
@@ -127,8 +119,7 @@ class basic_tinybuf
     //   Returns `-1` if no character is available.
     virtual
     off_type
-    do_fortell()
-      const
+    do_fortell() const
       {
         // The default implementation indicates an unknown number.
         return 0;
@@ -199,8 +190,7 @@ class basic_tinybuf
     // * Destroys the get and put areas.
     // This function may be useful when clearing this buffer.
     basic_tinybuf&
-    do_purge_areas()
-      noexcept
+    do_purge_areas() noexcept
       {
         // Purge both the get area and the put area.
         this->m_gcur = nullptr;
@@ -212,8 +202,7 @@ class basic_tinybuf
 
   public:
     off_type
-    fortell()
-      const
+    fortell() const
       {
         if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
           // Return the number of characters in the get area.
@@ -325,8 +314,7 @@ class basic_tinybuf
       }
 
     basic_tinybuf&
-    swap(basic_tinybuf& other)
-      noexcept
+    swap(basic_tinybuf& other) noexcept
       {
         noadl::xswap(this->m_gcur, other.m_gcur);
         noadl::xswap(this->m_gend, other.m_gend);
@@ -344,8 +332,7 @@ basic_tinybuf<charT, traitsT>::
 template<typename charT, typename traitsT>
 inline
 void
-swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template

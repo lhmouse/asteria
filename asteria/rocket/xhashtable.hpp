@@ -11,8 +11,7 @@ namespace rocket {
 
 template<typename bucketT>
 bucketT*
-get_probing_origin(bucketT* begin, bucketT* end, size_t hval)
-  noexcept
+get_probing_origin(bucketT* begin, bucketT* end, size_t hval) noexcept
   {
     ROCKET_ASSERT(begin < end);
 

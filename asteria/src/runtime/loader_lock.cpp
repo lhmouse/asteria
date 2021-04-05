@@ -44,8 +44,7 @@ do_lock_stream(const char* path)
 
 void
 Loader_Lock::
-do_unlock_stream(element_type* qelem)
-  noexcept
+do_unlock_stream(element_type* qelem) noexcept
   {
     // Erase the element denoted by `qelem`.
     ROCKET_ASSERT(qelem);

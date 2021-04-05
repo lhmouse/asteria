@@ -46,53 +46,43 @@ class PTC_Arguments
     ASTERIA_COPYABLE_DESTRUCTOR(PTC_Arguments);
 
     const Source_Location&
-    sloc()
-      const noexcept
+    sloc() const noexcept
       { return this->m_sloc;  }
 
     PTC_Aware
-    ptc_aware()
-      const noexcept
+    ptc_aware() const noexcept
       { return this->m_ptc;  }
 
     const cow_function&
-    get_target()
-      const noexcept
+    get_target() const noexcept
       { return this->m_target;  }
 
     const Reference_Stack&
-    get_stack()
-      const noexcept
+    get_stack() const noexcept
       { return this->m_stack;  }
 
     Reference_Stack&
-    open_stack()
-      noexcept
+    open_stack() noexcept
       { return this->m_stack;  }
 
     const Caller*
-    caller_opt()
-      const noexcept
+    caller_opt() const noexcept
       { return this->m_caller.value_ptr();  }
 
     PTC_Arguments&
-    set_caller(Caller&& caller)
-      noexcept
+    set_caller(Caller&& caller) noexcept
       { return this->m_caller = ::std::move(caller), *this;  }
 
     PTC_Arguments&
-    clear_caller()
-      noexcept
+    clear_caller() noexcept
       { return this->m_caller.reset(), *this;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
-    get_defer()
-      const noexcept
+    get_defer() const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVMC_Queue>&
-    open_defer()
-      noexcept
+    open_defer() noexcept
       { return this->m_defer;  }
   };
 

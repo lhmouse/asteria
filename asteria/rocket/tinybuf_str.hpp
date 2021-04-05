@@ -36,20 +36,17 @@ class basic_tinybuf_str
     bool m_appm = false;  // append mode
 
   public:
-    basic_tinybuf_str()
-      noexcept(is_nothrow_constructible<string_type>::value)
+    basic_tinybuf_str() noexcept(is_nothrow_constructible<string_type>::value)
       : m_stor()
       { }
 
     explicit
-    basic_tinybuf_str(const allocator_type& alloc)
-      noexcept
+    basic_tinybuf_str(const allocator_type& alloc) noexcept
       : m_stor(alloc)
       { }
 
     explicit
-    basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type())
-      noexcept
+    basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       : basic_tinybuf_str(alloc)
       { this->clear_string(mode);  }
 
@@ -59,8 +56,7 @@ class basic_tinybuf_str
       : basic_tinybuf_str(alloc)
       { this->set_string(::std::forward<xstrT>(xstr), mode);  }
 
-    ~basic_tinybuf_str()
-      override;
+    ~basic_tinybuf_str() override;
 
     basic_tinybuf_str(basic_tinybuf_str&&)
       = default;
@@ -71,8 +67,7 @@ class basic_tinybuf_str
 
   protected:
     off_type
-    do_fortell()
-      const override
+    do_fortell() const override
       {
         // Calculate the number of characters after the get area.
         auto navail = this->m_stor.size() - this->m_goff;
@@ -86,8 +81,7 @@ class basic_tinybuf_str
       }
 
     basic_tinybuf_str&
-    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/)
-      override
+    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/) override
       {
         if(gcur) {
           // If the get area exists, update the offset and clear it.
@@ -100,8 +94,7 @@ class basic_tinybuf_str
       }
 
     off_type
-    do_seek(off_type off, seek_dir dir)
-      override
+    do_seek(off_type off, seek_dir dir) override
       {
         // Invalidate the get area before doing anything else.
         this->do_sync_areas();
@@ -128,8 +121,7 @@ class basic_tinybuf_str
       }
 
     int_type
-    do_underflow(const char_type*& gcur, const char_type*& gend, bool peek)
-      override
+    do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
       {
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
@@ -149,8 +141,7 @@ class basic_tinybuf_str
       }
 
     basic_tinybuf_str&
-    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd)
-      override
+    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd) override
       {
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->do_sync_areas();
@@ -172,18 +163,15 @@ class basic_tinybuf_str
 
   public:
     const string_type&
-    get_string()
-      const noexcept
+    get_string() const noexcept
       { return this->m_stor;  }
 
     const char_type*
-    c_str()
-      const noexcept
+    c_str() const noexcept
       { return this->m_stor.c_str();  }
 
     size_type
-    length()
-      const noexcept
+    length() const noexcept
       { return this->m_stor.length();  }
 
     void
@@ -223,8 +211,7 @@ class basic_tinybuf_str
       }
 
     basic_tinybuf_str&
-    swap(basic_tinybuf_str& other)
-      noexcept(is_nothrow_swappable<string_type>::value)
+    swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
       {
         this->tinybuf_type::swap(other);
 
@@ -243,8 +230,7 @@ basic_tinybuf_str<charT, traitsT, allocT>::
 template<typename charT, typename traitsT, typename allocT>
 inline
 void
-swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs, basic_tinybuf_str<charT, traitsT, allocT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs, basic_tinybuf_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template

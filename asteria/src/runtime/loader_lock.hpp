@@ -22,8 +22,7 @@ class Loader_Lock
 
   public:
     explicit
-    Loader_Lock()
-      noexcept
+    Loader_Lock() noexcept
       { }
 
   private:
@@ -31,8 +30,7 @@ class Loader_Lock
     do_lock_stream(const char* path);
 
     void
-    do_unlock_stream(element_type* qelem)
-      noexcept;
+    do_unlock_stream(element_type* qelem) noexcept;
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Loader_Lock);
@@ -46,8 +44,7 @@ class Loader_Lock::Unique_Stream
 
   public:
     explicit constexpr
-    Unique_Stream()
-      noexcept
+    Unique_Stream() noexcept
       { }
 
     explicit
@@ -55,13 +52,11 @@ class Loader_Lock::Unique_Stream
       { this->reset(lock, path);  }
 
     explicit
-    Unique_Stream(Unique_Stream&& other)
-      noexcept
+    Unique_Stream(Unique_Stream&& other) noexcept
       { this->swap(other);  }
 
     Unique_Stream&
-    operator=(Unique_Stream&& other)
-      noexcept
+    operator=(Unique_Stream&& other) noexcept
       { return this->swap(other);  }
 
   public:
@@ -69,23 +64,19 @@ class Loader_Lock::Unique_Stream
       { this->reset();  }
 
     explicit operator
-    bool()
-      const noexcept
+    bool() const noexcept
       { return bool(this->m_elem);  }
 
     ::rocket::tinybuf_file&
-    get()
-      const noexcept
+    get() const noexcept
       { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
     operator
-    ::rocket::tinybuf_file&()
-      const noexcept
+    ::rocket::tinybuf_file&() const noexcept
       { return ROCKET_ASSERT(this->m_elem), this->m_elem->second;  }
 
     Unique_Stream&
-    reset()
-      noexcept
+    reset() noexcept
       {
         // Update contents of *this.
         auto qlock = ::std::exchange(this->m_lock, nullptr);
@@ -116,8 +107,7 @@ class Loader_Lock::Unique_Stream
       }
 
     Unique_Stream&
-    swap(Unique_Stream& other)
-      noexcept
+    swap(Unique_Stream& other) noexcept
       {
         this->m_lock.swap(other.m_lock);
         ::std::swap(this->m_elem, other.m_elem);
@@ -127,8 +117,7 @@ class Loader_Lock::Unique_Stream
 
 inline
 void
-swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs)
-  noexcept
+swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

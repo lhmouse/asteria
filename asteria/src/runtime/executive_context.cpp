@@ -69,8 +69,7 @@ Executive_Context::
 
 Reference*
 Executive_Context::
-do_create_lazy_reference(Reference* hint_opt, const phsh_string& name)
-  const
+do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp'

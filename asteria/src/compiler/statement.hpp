@@ -190,16 +190,14 @@ class Statement
     template<typename XStmtT,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XStmtT&&>::value)>
     constexpr
-    Statement(XStmtT&& xstmt)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XStmtT&&>::value)
+    Statement(XStmtT&& xstmt) noexcept(::std::is_nothrow_constructible<decltype(m_stor), XStmtT&&>::value)
       : m_stor(::std::forward<XStmtT>(xstmt))
       { }
 
     template<typename XStmtT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XStmtT&&>::value)>
     Statement&
-    operator=(XStmtT&& xstmt)
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XStmtT&&>::value)
+    operator=(XStmtT&& xstmt) noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XStmtT&&>::value)
       {
         this->m_stor = ::std::forward<XStmtT>(xstmt);
         return *this;
@@ -207,13 +205,11 @@ class Statement
 
   public:
     Index
-    index()
-      const noexcept
+    index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     bool
-    is_empty_return()
-      const noexcept
+    is_empty_return() const noexcept
       {
         if(this->index() != index_return)
           return false;
@@ -222,8 +218,7 @@ class Statement
       }
 
     Statement&
-    swap(Statement& other)
-      noexcept
+    swap(Statement& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -231,14 +226,12 @@ class Statement
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                  Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc)
-      const;
+                  Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const;
   };
 
 inline
 void
-swap(Statement& lhs, Statement& rhs)
-  noexcept
+swap(Statement& lhs, Statement& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

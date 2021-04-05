@@ -28,16 +28,14 @@ class Variable
 
   public:
     explicit
-    Variable()
-      noexcept
+    Variable() noexcept
       { }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
 
     const Value&
-    get_value()
-      const noexcept
+    get_value() const noexcept
       { return this->m_value;  }
 
     Value&
@@ -45,18 +43,15 @@ class Variable
       { return this->m_value;  }
 
     bool
-    is_immutable()
-      const noexcept
+    is_immutable() const noexcept
       { return this->m_immut;  }
 
     Variable&
-    set_immutable(bool immutable)
-      noexcept
+    set_immutable(bool immutable) noexcept
       { return this->m_immut = immutable, *this;  }
 
     bool
-    is_initialized()
-      const noexcept
+    is_initialized() const noexcept
       { return this->m_valid;  }
 
     template<typename XValT>
@@ -70,8 +65,7 @@ class Variable
       }
 
     Variable&
-    uninitialize()
-      noexcept
+    uninitialize() noexcept
       {
         this->m_value = INT64_C(0x6EEF8BADF00DDEAD);
         this->m_immut = true;
@@ -80,13 +74,11 @@ class Variable
       }
 
     long
-    get_gc_ref()
-      const noexcept
+    get_gc_ref() const noexcept
       { return this->m_gc_ref;  }
 
     Variable&
-    reset_gc_ref(long ref)
-      noexcept
+    reset_gc_ref(long ref) noexcept
       {
         this->m_gc_mark = false;
         this->m_gc_ref = ref;
@@ -94,8 +86,7 @@ class Variable
       }
 
     bool
-    add_gc_ref()
-      noexcept
+    add_gc_ref() noexcept
       {
         bool m = ::std::exchange(this->m_gc_mark, true);
         this->m_gc_ref += 1;

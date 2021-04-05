@@ -23,20 +23,17 @@ class stored_handle
 
   public:
     constexpr
-    stored_handle()
-      noexcept(is_nothrow_constructible<closer_type>::value)
+    stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
       : closer_base(), m_hv(this->as_closer().null())
       { }
 
     explicit constexpr
-    stored_handle(const closer_type& cl)
-      noexcept
+    stored_handle(const closer_type& cl) noexcept
       : closer_base(cl), m_hv(this->as_closer().null())
       { }
 
     explicit constexpr
-    stored_handle(closer_type&& cl)
-      noexcept
+    stored_handle(closer_type&& cl) noexcept
       : closer_base(::std::move(cl)), m_hv(this->as_closer().null())
       { }
 
@@ -52,29 +49,24 @@ class stored_handle
 
   public:
     const closer_type&
-    as_closer()
-      const noexcept
+    as_closer() const noexcept
       { return static_cast<const closer_base&>(*this);  }
 
     closer_type&
-    as_closer()
-      noexcept
+    as_closer() noexcept
       { return static_cast<closer_base&>(*this);  }
 
     constexpr
     const handle_type&
-    get()
-      const noexcept
+    get() const noexcept
       { return this->m_hv;  }
 
     handle_type
-    release()
-      noexcept
+    release() noexcept
       { return ::std::exchange(this->m_hv, this->as_closer().null());  }
 
     void
-    reset(handle_type hv_new)
-      noexcept
+    reset(handle_type hv_new) noexcept
       {
         auto hv_old = ::std::exchange(this->m_hv, ::std::move(hv_new));
         if(!this->as_closer().is_null(hv_old))
@@ -82,8 +74,7 @@ class stored_handle
       }
 
     void
-    exchange_with(stored_handle& other)
-      noexcept
+    exchange_with(stored_handle& other) noexcept
       { ::std::swap(this->m_hv, other.m_hv);  }
   };
 
@@ -106,14 +97,12 @@ class default_closer_wrapper
   public:
     constexpr
     handleT
-    null()
-      const noexcept
+    null() const noexcept
       { return { };  }
 
     constexpr
     bool
-    is_null(handleT hv)
-      const noexcept
+    is_null(handleT hv) const noexcept
       { return static_cast<bool>(hv) == false;  }
 
     constexpr

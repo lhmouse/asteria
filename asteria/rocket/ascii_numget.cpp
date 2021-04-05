@@ -1240,8 +1240,7 @@ parse_F(const char*& bptr, const char* eptr, uint8_t ibase)
 
 ascii_numget&
 ascii_numget::
-cast_U(uint64_t& value, uint64_t lower, uint64_t upper)
-  noexcept
+cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept
   {
     this->m_stat = 0;
 
@@ -1363,8 +1362,7 @@ cast_U(uint64_t& value, uint64_t lower, uint64_t upper)
 
 ascii_numget&
 ascii_numget::
-cast_I(int64_t& value, int64_t lower, int64_t upper)
-  noexcept
+cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept
   {
     this->m_stat = 0;
 
@@ -1489,8 +1487,7 @@ cast_I(int64_t& value, int64_t lower, int64_t upper)
 
 ascii_numget&
 ascii_numget::
-cast_F(double& value, double lower, double upper, bool single)
-  noexcept
+cast_F(double& value, double lower, double upper, bool single) noexcept
   {
     this->m_stat = 0;
 

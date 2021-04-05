@@ -28,8 +28,7 @@ class atomic
 
   public:
     constexpr
-    atomic(value_type val = { })
-      noexcept
+    atomic(value_type val = { }) noexcept
       : m_val(val)
       { }
 
@@ -43,8 +42,7 @@ class atomic
   private:
     static constexpr
     ::std::memory_order
-    do_order_acquire()
-      noexcept
+    do_order_acquire() noexcept
       {
         switch(memorderT) {
           case ::std::memory_order_consume:
@@ -62,8 +60,7 @@ class atomic
 
     static constexpr
     ::std::memory_order
-    do_order_release()
-      noexcept
+    do_order_release() noexcept
       {
         switch(memorderT) {
           case ::std::memory_order_consume:
@@ -79,8 +76,7 @@ class atomic
 
     static constexpr
     ::std::memory_order
-    do_order_acq_rel()
-      noexcept
+    do_order_acq_rel() noexcept
       {
         switch(memorderT) {
           case ::std::memory_order_consume:
@@ -97,55 +93,46 @@ class atomic
   public:
     // load/store operations
     value_type
-    load()
-      const noexcept
+    load() const noexcept
       { return this->m_val.load(this->do_order_acquire());  }
 
     atomic&
-    store(value_type val)
-      noexcept
+    store(value_type val) noexcept
       { return this->m_val.store(val, this->do_order_release()), *this;  }
 
     // exchange operations
     value_type
-    exchange(value_type val)
-      noexcept
+    exchange(value_type val) noexcept
       { return this->m_val.exchange(val, this->do_order_acq_rel());  }
 
     bool
-    compare_exchange(value_type& cmp, value_type xchg)
-      noexcept
+    compare_exchange(value_type& cmp, value_type xchg) noexcept
       { return this->m_val.compare_exchange_weak(cmp, xchg, this->do_order_acq_rel());  }
 
     // arithmetic operations
     template<typename otherT>
     value_type
-    fetch_add(otherT other)
-      noexcept
+    fetch_add(otherT other) noexcept
       { return this->m_val.fetch_add(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
-    fetch_sub(otherT other)
-      noexcept
+    fetch_sub(otherT other) noexcept
       { return this->m_val.fetch_sub(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
-    fetch_and(otherT other)
-      noexcept
+    fetch_and(otherT other) noexcept
       { return this->m_val.fetch_and(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
-    fetch_or(otherT other)
-      noexcept
+    fetch_or(otherT other) noexcept
       { return this->m_val.fetch_or(other, this->do_order_acq_rel());  }
 
     template<typename otherT>
     value_type
-    fetch_xor(otherT other)
-      noexcept
+    fetch_xor(otherT other) noexcept
       { return this->m_val.fetch_xor(other, this->do_order_acq_rel());  }
   };
 

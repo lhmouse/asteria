@@ -126,8 +126,7 @@ do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context&
 cow_vector<AIR_Node>&
 Statement::
 generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-              Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc)
-  const
+              Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const
   {
     switch(this->index()) {
       case index_expression: {

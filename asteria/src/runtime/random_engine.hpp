@@ -30,27 +30,23 @@ class Random_Engine
 
   public:
     explicit
-    Random_Engine()
-      noexcept
+    Random_Engine() noexcept
       { this->init();  }
 
   private:
     void
-    do_isaac()
-      noexcept;
+    do_isaac() noexcept;
 
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
 
     // Initializes this PRNG with some external entropy source.
     void
-    init()
-      noexcept;
+    init() noexcept;
 
     // Gets a random 32-bit number.
     uint32_t
-    bump()
-      noexcept
+    bump() noexcept
       {
         // This matches `main()` from 'rand.c'.
         //   https://www.burtleburtle.net/bob/c/rand.c
@@ -63,19 +59,16 @@ class Random_Engine
     // This class is a UniformRandomBitGenerator.
     static constexpr
     result_type
-    min()
-      noexcept
+    min() noexcept
       { return 0; }
 
     static constexpr
     result_type
-    max()
-      noexcept
+    max() noexcept
       { return UINT32_MAX;  }
 
     result_type
-    operator()()
-      noexcept
+    operator()() noexcept
       { return this->bump();  }
   };
 

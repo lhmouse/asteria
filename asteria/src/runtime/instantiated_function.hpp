@@ -33,16 +33,13 @@ class Instantiated_Function
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);
 
     tinyfmt&
-    describe(tinyfmt& fmt)
-      const override;
+    describe(tinyfmt& fmt) const override;
 
     Variable_Callback&
-    enumerate_variables(Variable_Callback& callback)
-      const override;
+    enumerate_variables(Variable_Callback& callback) const override;
 
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
-      const override;
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override;
   };
 
 }  // namespace asteria

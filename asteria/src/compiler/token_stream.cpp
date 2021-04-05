@@ -36,28 +36,23 @@ class Line_Reader
       = default;
 
     tinybuf&
-    cbuf()
-      const noexcept
+    cbuf() const noexcept
       { return *(this->m_cbuf);  }
 
     const cow_string&
-    file()
-      const noexcept
+    file() const noexcept
       { return this->m_file;  }
 
     int
-    line()
-      const noexcept
+    line() const noexcept
       { return static_cast<int>(this->m_line);  }
 
     int
-    column()
-      const noexcept
+    column() const noexcept
       { return static_cast<int>(this->m_off + 1);  }
 
     Source_Location
-    tell()
-      const noexcept
+    tell() const noexcept
       { return Source_Location(this->file(), this->line(), this->column());  }
 
     bool
@@ -83,13 +78,11 @@ class Line_Reader
       }
 
     size_t
-    navail()
-      const noexcept
+    navail() const noexcept
       { return this->m_str.size() - this->m_off;  }
 
     const char*
-    data(size_t add = 0)
-      const
+    data(size_t add = 0) const
       {
         if(add > this->navail()) {
           ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
@@ -99,8 +92,7 @@ class Line_Reader
       }
 
     char
-    peek(size_t add = 0)
-      const noexcept
+    peek(size_t add = 0) const noexcept
       {
         if(add > this->navail()) {
           return 0;
@@ -398,21 +390,18 @@ struct Prefix_Comparator
   {
     template<typename ElementT>
     bool
-    operator()(const ElementT& lhs, const ElementT& rhs)
-      const noexcept
+    operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
       { return ::rocket::char_traits<char>::compare(
                    lhs.str, rhs.str, ::rocket::size(lhs.str)) < 0;  }
 
     template<typename ElementT>
     bool
-    operator()(char lhs, const ElementT& rhs)
-      const noexcept
+    operator()(char lhs, const ElementT& rhs) const noexcept
       { return ::rocket::char_traits<char>::lt(lhs, rhs.str[0]);  }
 
     template<typename ElementT>
     bool
-    operator()(const ElementT& lhs, char rhs)
-      const noexcept
+    operator()(const ElementT& lhs, char rhs) const noexcept
       { return ::rocket::char_traits<char>::lt(lhs.str[0], rhs);  }
   };
 

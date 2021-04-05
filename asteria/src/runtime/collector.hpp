@@ -23,8 +23,7 @@ class Collector
 
   public:
     explicit
-    Collector(Variable_HashSet* output_opt, Collector* tied_opt, uint32_t threshold)
-      noexcept
+    Collector(Variable_HashSet* output_opt, Collector* tied_opt, uint32_t threshold) noexcept
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold)
       { }
 
@@ -32,46 +31,38 @@ class Collector
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Collector);
 
     Variable_HashSet*
-    get_output_pool_opt()
-      const noexcept
+    get_output_pool_opt() const noexcept
       { return this->m_output_opt;  }
 
     Collector&
-    set_output_pool(Variable_HashSet* output_opt)
-      noexcept
+    set_output_pool(Variable_HashSet* output_opt) noexcept
       { return this->m_output_opt = output_opt, *this;  }
 
     Collector*
-    get_tied_collector_opt()
-      const noexcept
+    get_tied_collector_opt() const noexcept
       { return this->m_tied_opt;  }
 
     Collector&
-    tie_collector(Collector* tied_opt)
-      noexcept
+    tie_collector(Collector* tied_opt) noexcept
       { return this->m_tied_opt = tied_opt, *this;  }
 
     uint32_t
-    get_threshold()
-      const noexcept
+    get_threshold() const noexcept
       { return this->m_threshold;  }
 
     Collector&
-    set_threshold(uint32_t threshold)
-      noexcept
+    set_threshold(uint32_t threshold) noexcept
       { return this->m_threshold = threshold, *this;  }
 
     size_t
-    count_tracked_variables()
-      const noexcept
+    count_tracked_variables() const noexcept
       { return this->m_tracked.size();  }
 
     bool
     track_variable(const rcptr<Variable>& var);
 
     bool
-    untrack_variable(const rcptr<Variable>& var)
-      noexcept;
+    untrack_variable(const rcptr<Variable>& var) noexcept;
 
     Collector*
     collect_single_opt();
@@ -80,8 +71,7 @@ class Collector
     auto_collect();
 
     Collector&
-    wipe_out_variables()
-      noexcept;
+    wipe_out_variables() noexcept;
   };
 
 }  // namespace asteria

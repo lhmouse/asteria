@@ -19,16 +19,13 @@ union guard
 
 extern "C"
 int
-__cxa_guard_acquire(guard* g)
-  noexcept;
+__cxa_guard_acquire(guard* g) noexcept;
 
 extern "C"
-void __cxa_guard_abort(guard* g)
-  noexcept;
+void __cxa_guard_abort(guard* g) noexcept;
 
 extern "C"
 void
-__cxa_guard_release(guard* g)
-  noexcept;
+__cxa_guard_release(guard* g) noexcept;
 
 }  // namespace details_once_flag

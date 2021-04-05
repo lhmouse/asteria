@@ -13,8 +13,7 @@ namespace asteria {
 
 void
 AVMC_Queue::
-do_destroy_nodes()
-  noexcept
+do_destroy_nodes() noexcept
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
@@ -163,8 +162,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
 
 AIR_Status
 AVMC_Queue::
-execute(Executive_Context& ctx)
-  const
+execute(Executive_Context& ctx) const
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
@@ -196,8 +194,7 @@ execute(Executive_Context& ctx)
 
 Variable_Callback&
 AVMC_Queue::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;

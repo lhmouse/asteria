@@ -20,8 +20,7 @@ class once_flag
 
   public:
     constexpr
-    once_flag()
-      noexcept
+    once_flag() noexcept
       { }
 
     once_flag(const once_flag&)

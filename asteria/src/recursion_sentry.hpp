@@ -20,14 +20,12 @@ class Recursion_Sentry
 
   public:
     explicit constexpr
-    Recursion_Sentry()
-      noexcept
+    Recursion_Sentry() noexcept
       : m_base(this)
       { }
 
     explicit constexpr
-    Recursion_Sentry(const void* base)
-      noexcept
+    Recursion_Sentry(const void* base) noexcept
       : m_base(base)
       { }
 
@@ -46,12 +44,10 @@ class Recursion_Sentry
   private:
     [[noreturn]]
     void
-    do_throw_stack_overflow(size_t usage, size_t limit)
-      const;
+    do_throw_stack_overflow(size_t usage, size_t limit) const;
 
     void
-    do_check()
-      const
+    do_check() const
       {
         // Estimate stack usage.
         size_t usage = static_cast<size_t>(
@@ -67,13 +63,11 @@ class Recursion_Sentry
       { }
 
     const void*
-    get_base()
-      const noexcept
+    get_base() const noexcept
       { return this->m_base;  }
 
     Recursion_Sentry&
-    set_base(const void* base)
-      noexcept
+    set_base(const void* base) noexcept
       { return this->m_base = base, *this;  }
   };
 

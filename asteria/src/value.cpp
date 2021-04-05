@@ -35,8 +35,7 @@ do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
 
 bool
 Value::
-test()
-  const noexcept
+test() const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -71,8 +70,7 @@ test()
 
 Compare
 Value::
-compare(const Value& other)
-  const noexcept
+compare(const Value& other) const noexcept
   {
     // Compare values of different types
     if(this->type() != other.type()) {
@@ -134,8 +132,7 @@ compare(const Value& other)
 
 bool
 Value::
-unique()
-  const noexcept
+unique() const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -168,8 +165,7 @@ unique()
 
 long
 Value::
-use_count()
-  const noexcept
+use_count() const noexcept
   {
     switch(this->type()) {
       case type_null:
@@ -202,8 +198,7 @@ use_count()
 
 tinyfmt&
 Value::
-print(tinyfmt& fmt, bool escape)
-  const
+print(tinyfmt& fmt, bool escape) const
   {
     switch(this->type()) {
       case type_null:
@@ -261,8 +256,7 @@ print(tinyfmt& fmt, bool escape)
 
 tinyfmt&
 Value::
-dump(tinyfmt& fmt, size_t indent, size_t hanging)
-  const
+dump(tinyfmt& fmt, size_t indent, size_t hanging) const
   {
     switch(this->type()) {
       case type_null:
@@ -324,8 +318,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging)
 
 Variable_Callback&
 Value::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->type()) {
       case type_null:

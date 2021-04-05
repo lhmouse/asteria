@@ -106,8 +106,7 @@ template<typename SparamT, typename = void>
 struct select_enumerate_variables
   {
     constexpr operator
-    Enumerator*()
-      const noexcept
+    Enumerator*() const noexcept
       { return nullptr;  }
   };
 
@@ -118,8 +117,7 @@ struct select_enumerate_variables<SparamT,
             ::std::declval<Variable_Callback&>())))>
   {
     constexpr operator
-    Enumerator*()
-      const noexcept
+    Enumerator*() const noexcept
       { return do_call_enumerate_variables<SparamT>;  }
   };
 

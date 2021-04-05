@@ -290,8 +290,7 @@ using Valuable = Valuable_impl<
 
 constexpr
 uint32_t
-imask(initializer_list<uint32_t> bits)
-  noexcept
+imask(initializer_list<uint32_t> bits) noexcept
   {
     uint32_t sum = 0;
     for(uint32_t b : bits)

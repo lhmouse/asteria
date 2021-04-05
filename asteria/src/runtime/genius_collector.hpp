@@ -23,8 +23,7 @@ class Genius_Collector
 
   public:
     explicit
-    Genius_Collector()
-      noexcept
+    Genius_Collector() noexcept
       : m_oldest(&(this->m_pool), nullptr, 10),
         m_middle(&(this->m_pool), &(this->m_oldest), 60),
         m_newest(&(this->m_pool), &(this->m_middle), 800)
@@ -32,25 +31,21 @@ class Genius_Collector
 
   private:
     Collector Genius_Collector::*
-    do_locate(GC_Generation gc_gen)
-      const;
+    do_locate(GC_Generation gc_gen) const;
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Genius_Collector);
 
     size_t
-    get_pool_size()
-      const noexcept
+    get_pool_size() const noexcept
       { return this->m_pool.size();  }
 
     Genius_Collector&
-    clear_pool()
-      noexcept
+    clear_pool() noexcept
       { return this->m_pool.clear(), *this;  }
 
     const Collector&
-    get_collector(GC_Generation gc_gen)
-      const
+    get_collector(GC_Generation gc_gen) const
       { return this->*(this->do_locate(gc_gen));  }
 
     Collector&
@@ -64,8 +59,7 @@ class Genius_Collector
     collect_variables(GC_Generation gc_limit = gc_generation_oldest);
 
     Genius_Collector&
-    wipe_out_variables()
-      noexcept;
+    wipe_out_variables() noexcept;
   };
 
 }  // namespace asteria

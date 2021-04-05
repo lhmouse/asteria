@@ -10,8 +10,7 @@ namespace asteria {
 
 void
 Reference_Dictionary::
-do_destroy_buckets()
-  noexcept
+do_destroy_buckets() noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -33,8 +32,7 @@ do_destroy_buckets()
 
 details_reference_dictionary::Bucket*
 Reference_Dictionary::
-do_xprobe(const phsh_string& name)
-  const noexcept
+do_xprobe(const phsh_string& name) const noexcept
   {
     auto bptr = this->m_bptr;
     auto eptr = this->m_eptr;
@@ -68,8 +66,7 @@ do_xprobe(const phsh_string& name)
 
 void
 Reference_Dictionary::
-do_xrelocate_but(Bucket* qxcld)
-  noexcept
+do_xrelocate_but(Bucket* qxcld) noexcept
   {
     ::rocket::linear_probe(
       this->m_bptr,
@@ -164,8 +161,7 @@ do_rehash_more()
 
 Variable_Callback&
 Reference_Dictionary::
-enumerate_variables(Variable_Callback& callback)
-  const
+enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {

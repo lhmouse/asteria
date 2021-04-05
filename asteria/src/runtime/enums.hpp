@@ -63,8 +63,7 @@ enum Xop : uint8_t
 
 ROCKET_CONST_FUNCTION
 const char*
-describe_xop(Xop xop)
-  noexcept;
+describe_xop(Xop xop) noexcept;
 
 // IR status codes
 enum AIR_Status : uint8_t

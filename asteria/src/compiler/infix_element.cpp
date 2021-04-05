@@ -13,8 +13,7 @@ namespace asteria {
 
 Precedence
 Infix_Element::
-tell_precedence()
-  const noexcept
+tell_precedence() const noexcept
   {
     switch(this->index()) {
       case index_head:
@@ -171,8 +170,7 @@ extract(cow_vector<Expression_Unit>& units)
 
 cow_vector<Expression_Unit>&
 Infix_Element::
-open_junction()
-  noexcept
+open_junction() noexcept
   {
     switch(this->index()) {
       case index_head:

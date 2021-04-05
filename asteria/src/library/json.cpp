@@ -20,8 +20,7 @@ struct Indenter
 
     virtual
     tinyfmt&
-    break_line(tinyfmt& fmt)
-      const
+    break_line(tinyfmt& fmt) const
       = 0;
 
     virtual
@@ -36,8 +35,7 @@ struct Indenter
 
     virtual
     bool
-    has_indention()
-      const noexcept
+    has_indention() const noexcept
       = 0;
   };
 
@@ -57,23 +55,19 @@ class Indenter_none
 
   public:
     tinyfmt&
-    break_line(tinyfmt& fmt)
-      const override
+    break_line(tinyfmt& fmt) const override
       { return fmt;  }
 
     void
-    increment_level()
-      override
+    increment_level() override
       { }
 
     void
-    decrement_level()
-      override
+    decrement_level() override
       { }
 
     bool
-    has_indention()
-      const noexcept override
+    has_indention() const noexcept override
       { return false;  }
   };
 
@@ -93,23 +87,19 @@ class Indenter_string
 
   public:
     tinyfmt&
-    break_line(tinyfmt& fmt)
-      const override
+    break_line(tinyfmt& fmt) const override
       { return fmt << this->m_cur;  }
 
     void
-    increment_level()
-      override
+    increment_level() override
       { this->m_cur.append(this->m_add);  }
 
     void
-    decrement_level()
-      override
+    decrement_level() override
       { this->m_cur.pop_back(this->m_add.size());  }
 
     bool
-    has_indention()
-      const noexcept override
+    has_indention() const noexcept override
       { return this->m_add.size();  }
   };
 
@@ -129,23 +119,19 @@ class Indenter_spaces
 
   public:
     tinyfmt&
-    break_line(tinyfmt& fmt)
-      const override
+    break_line(tinyfmt& fmt) const override
       { return fmt << pwrap(this->m_add, this->m_cur);  }
 
     void
-    increment_level()
-      override
+    increment_level() override
       { this->m_cur += this->m_add;  }
 
     void
-    decrement_level()
-      override
+    decrement_level() override
       { this->m_cur -= this->m_add;  }
 
     bool
-    has_indention()
-      const noexcept override
+    has_indention() const noexcept override
       { return this->m_add;  }
   };
 

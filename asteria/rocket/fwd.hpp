@@ -166,15 +166,13 @@ struct identity
 template<typename containerT>
 constexpr
 decltype(::std::declval<const containerT&>().size())
-size(const containerT& cont)
-  noexcept(noexcept(cont.size()))
+size(const containerT& cont) noexcept(noexcept(cont.size()))
   { return cont.size();  }
 
 template<typename elementT, size_t countT>
 constexpr
 size_t
-size(const elementT (&)[countT])
-  noexcept
+size(const elementT (&)[countT]) noexcept
   { return countT;  }
 
 template<typename... typesT>
@@ -222,8 +220,7 @@ struct copy_cv<targetT, const volatile sourceT>
 template<typename typeT>
 inline
 void
-xswap(typeT& lhs, typeT& rhs)
-  noexcept(noexcept(swap(lhs, rhs)))
+xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
   { swap(lhs, rhs);  }
 
 template<typename firstT, typename secondT, typename... restT>
@@ -314,8 +311,7 @@ estimate_distance(iteratorT first, iteratorT last)
 
 template<typename elementT, typename... paramsT>
 elementT*
-construct_at(elementT* ptr, paramsT&&... params)
-  noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
+construct_at(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
@@ -325,8 +321,7 @@ construct_at(elementT* ptr, paramsT&&... params)
 
 template<typename elementT>
 elementT*
-default_construct_at(elementT* ptr)
-  noexcept(is_nothrow_default_constructible<elementT>::value)
+default_construct_at(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xBE, sizeof(elementT));
@@ -336,8 +331,7 @@ default_construct_at(elementT* ptr)
 
 template<typename elementT>
 void
-destroy_at(elementT* ptr)
-  noexcept(is_nothrow_destructible<elementT>::value)
+destroy_at(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     // The C++ standard says the lifetime of a trivial object does not end.
     if(is_trivially_destructible<elementT>::value)

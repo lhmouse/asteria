@@ -144,16 +144,14 @@ class Expression_Unit
     template<typename XUnitT,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XUnitT&&>::value)>
     constexpr
-    Expression_Unit(XUnitT&& xunit)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XUnitT&&>::value)
+    Expression_Unit(XUnitT&& xunit) noexcept(::std::is_nothrow_constructible<decltype(m_stor), XUnitT&&>::value)
       : m_stor(::std::forward<XUnitT>(xunit))
       { }
 
     template<typename XUnitT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XUnitT&&>::value)>
     Expression_Unit&
-    operator=(XUnitT&& xunit)
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
+    operator=(XUnitT&& xunit) noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
       {
         this->m_stor = ::std::forward<XUnitT>(xunit);
         return *this;
@@ -161,13 +159,11 @@ class Expression_Unit
 
   public:
     Index
-    index()
-      const noexcept
+    index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
     Expression_Unit&
-    swap(Expression_Unit& other)
-      noexcept
+    swap(Expression_Unit& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -175,14 +171,12 @@ class Expression_Unit
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                  Analytic_Context& ctx, PTC_Aware ptc)
-      const;
+                  Analytic_Context& ctx, PTC_Aware ptc) const;
   };
 
 inline
 void
-swap(Expression_Unit& lhs, Expression_Unit& rhs)
-  noexcept
+swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
