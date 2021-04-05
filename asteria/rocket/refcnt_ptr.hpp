@@ -61,22 +61,22 @@ class refcnt_base
     bool
     unique()
       const noexcept
-      { return this->details_refcnt_ptr::reference_counter_base::unique();  }
+      { return this->reference_counter_base::unique();  }
 
     long
     use_count()
       const noexcept
-      { return this->details_refcnt_ptr::reference_counter_base::use_count();  }
+      { return this->reference_counter_base::use_count();  }
 
     void
     add_reference()
       const noexcept
-      { return this->details_refcnt_ptr::reference_counter_base::add_reference();  }
+      { return this->reference_counter_base::add_reference();  }
 
     bool
     drop_reference()
       const noexcept
-      { return this->details_refcnt_ptr::reference_counter_base::drop_reference();  }
+      { return this->reference_counter_base::drop_reference();  }
 
     template<typename yelementT = elementT, typename selfT = refcnt_base>
     refcnt_ptr<const yelementT>
