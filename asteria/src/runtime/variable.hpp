@@ -101,10 +101,6 @@ class Variable
         this->m_gc_ref += 1;
         return m;
       }
-
-    Variable_Callback&
-    enumerate_variables_descent(Variable_Callback& callback)
-      const;
   };
 
 }  // namespace asteria

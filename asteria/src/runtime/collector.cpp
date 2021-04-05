@@ -70,8 +70,7 @@ do_traverse(const Variable& var, FuncT&& func)
     if(ROCKET_EXPECT(var.get_value().is_scalar()))
       return;
 
-    Variable_Walker<FuncT> walker(func);
-    var.enumerate_variables_descent(walker);
+    (Variable_Walker<FuncT>(func)(var.get_value()));
   }
 
 class Variable_Wiper
