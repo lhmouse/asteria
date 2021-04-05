@@ -53,16 +53,18 @@ int main()
         sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-          var x, y;
-          var z;
+          var x,y,z;
 
           func foo() { return [x,y,z];  }
           func bar() { return [z,y,x];  }
 
-          x = [foo,bar,foo];
+          x = [foo,bar,foo,bar,foo];
           y = [x,[bar,foo,bar]];
           z = x;
           y = x;
+
+          foo();
+          bar();
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
