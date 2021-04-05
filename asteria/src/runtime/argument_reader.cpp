@@ -547,8 +547,8 @@ throw_no_matching_function_call()
         do {
           arguments += ", ";  // fallthrough
       default:
-          arguments += this->m_stack.bottom()[index]
-                              .dereference_readonly().what_type();
+          arguments += describe_type(
+              this->m_stack.bottom()[index].dereference_readonly().type());
         }
         while(++index != this->m_stack.size());  // fallthrough
       case 0:

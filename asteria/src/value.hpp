@@ -71,11 +71,6 @@ class Value
       const noexcept
       { return static_cast<Type>(this->m_stor.index());  }
 
-    const char*
-    what_type()
-      const noexcept
-      { return describe_type(this->type());  }
-
     bool
     is_null()
       const noexcept

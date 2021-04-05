@@ -1966,7 +1966,7 @@ struct AIR_Traits_apply_operator_typeof
 
         // Get the type name of the operand, which is constant.
         // N.B. This is one of the few operators that work on all types.
-        rhs = sref(rhs.what_type());
+        rhs = sref(describe_type(rhs.type()));
         return air_status_next;
       }
   };
