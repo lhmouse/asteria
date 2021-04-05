@@ -380,7 +380,8 @@ basic_tinybuf_file<charT, traitsT, allocT>::
 template<typename charT, typename traitsT, typename allocT>
 inline
 void
-swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs, basic_tinybuf_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs, basic_tinybuf_file<charT, traitsT, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 extern template
