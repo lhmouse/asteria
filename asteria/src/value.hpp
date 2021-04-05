@@ -214,16 +214,6 @@ class Value
     Compare
     compare(const Value& other) const noexcept;
 
-    // These functions are used by the garbage collector.
-    // Read `runtime/collector.cpp` for details.
-    ROCKET_PURE_FUNCTION
-    bool
-    unique() const noexcept;
-
-    ROCKET_PURE_FUNCTION
-    long
-    use_count() const noexcept;
-
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
     print(tinyfmt& fmt, bool escape = false) const;
