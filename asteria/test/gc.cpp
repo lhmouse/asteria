@@ -46,28 +46,23 @@ int main()
       Global_Context global;
       var = global.genius_collector()->create_variable();
       var->initialize(V_string("meow"), true);
+      ::fprintf(stderr, "--> test variable: %p\n", (void*)var.get());
 
       Simple_Script code;
       code.reload_string(
-        sref(__FILE__), __LINE__, sref(""
-#ifdef __OPTIMIZE__
-        "const nloop = 1000000;"
-#else
-        "const nloop = 10000;"
-#endif
-        R"__(
+        sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-          var g;
-          func leak() {
-            var f;
-            f = func() { return f; };
-            var k = f;
-            g = k;
-          }
-          for(var i = 0;  i < nloop;  ++i) {
-            leak();
-          }
+          var x, y;
+
+          // Define two functions that capture `x` and `y`.
+          func foo() { return [x,y];  }
+          func bar() { return [y,x];  }
+
+          // Make `x` and `y` reference them.
+          x = [foo,bar,foo];
+          y = [x,[bar,foo,bar]];
+          x = [y,y];
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
