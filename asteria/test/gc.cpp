@@ -54,15 +54,15 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
 
           var x, y;
+          var z;
 
-          // Define two functions that capture `x` and `y`.
-          func foo() { return [x,y];  }
-          func bar() { return [y,x];  }
+          func foo() { return [x,y,z];  }
+          func bar() { return [z,y,x];  }
 
-          // Make `x` and `y` reference them.
           x = [foo,bar,foo];
           y = [x,[bar,foo,bar]];
-          x = [y,y];
+          z = x;
+          y = x;
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
