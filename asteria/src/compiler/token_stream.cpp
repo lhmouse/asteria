@@ -409,7 +409,7 @@ template<typename ElementT, size_t N>
 pair<ElementT*, ElementT*>
 do_prefix_range(ElementT (&table)[N], char ch)
   {
-    Prefix_Comparator comp;
+    static constexpr Prefix_Comparator comp;
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(::std::is_sorted(table, table + N, comp));
 #endif

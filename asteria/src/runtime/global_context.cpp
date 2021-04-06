@@ -75,14 +75,15 @@ Global_Context(API_Version version)
     ROCKET_ASSERT(gcoll);
 
     // Get the range of modules to initialize.
-    // This also determines the maximum version number of the library, which will be
-    // referenced as `yend[-1].version`.
+    // This also determines the maximum version number of the library, which
+    // will be referenced as `yend[-1].version`.
     cow_dictionary<Value> ostd;
+    static constexpr Module_Comparator comp;
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(::std::is_sorted(begin(s_modules), end(s_modules), Module_Comparator()));
+    ROCKET_ASSERT(::std::is_sorted(begin(s_modules), end(s_modules), comp));
 #endif
     auto bptr = begin(s_modules);
-    auto eptr = ::std::upper_bound(bptr, end(s_modules), version, Module_Comparator());
+    auto eptr = ::std::upper_bound(bptr, end(s_modules), version, comp);
 
     // Initialize library modules.
     for(auto q = bptr;  q != eptr;  ++q) {
@@ -108,8 +109,8 @@ Global_Context::
     const auto gcoll = unerase_cast<Genius_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
 
-    // Perform the final garbage collection.
-    // Note if there are still cyclic references afterwards, they are left uncollected!
+    // Perform the final garbage collection. Note if there are still cyclic
+    // references afterwards, they are left uncollected!
     gcoll->wipe_out_variables();
   }
 
