@@ -56,8 +56,9 @@ class optional
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&,
                                     value_type>::value)>
-    optional(const optional<yvalueT>& other) noexcept(is_nothrow_constructible<value_type,
-                 const typename optional<yvalueT>::value_type&>::value)
+    optional(const optional<yvalueT>& other)
+      noexcept(is_nothrow_constructible<value_type,
+               const typename optional<yvalueT>::value_type&>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.emplace_back(other.m_stor.front());
@@ -66,8 +67,9 @@ class optional
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&,
                                     value_type>::value)>
-    optional(optional<yvalueT>&& other) noexcept(is_nothrow_constructible<value_type,
-                 typename optional<yvalueT>::value_type&&>::value)
+    optional(optional<yvalueT>&& other)
+      noexcept(is_nothrow_constructible<value_type,
+               typename optional<yvalueT>::value_type&&>::value)
       {
         if(!other.m_stor.empty())
           this->m_stor.emplace_back(::std::move(other.m_stor.mut_front()));
@@ -177,46 +179,67 @@ class optional
 
     const_reference
     value() const
-      { return this->m_stor.empty() ? this->do_throw_valueless()
-                   : this->m_stor.front();  }
+      {
+        return this->m_stor.empty()
+                 ? this->do_throw_valueless()
+                 : this->m_stor.front();
+      }
 
     reference
     value()
-      { return this->m_stor.empty() ? this->do_throw_valueless()
-                   : this->m_stor.mut_front();  }
+      {
+        return this->m_stor.empty()
+                 ? this->do_throw_valueless()
+                 : this->m_stor.mut_front();
+      }
 
     // N.B. This is a non-standard extension.
     const value_type*
     value_ptr() const
-      { return this->m_stor.empty() ? nullptr
-                   : ::std::addressof(this->m_stor.front());  }
+      {
+        return this->m_stor.empty()
+                 ? nullptr
+                 : this->m_stor.data();
+      }
 
     // N.B. This is a non-standard extension.
     value_type*
     value_ptr()
-      { return this->m_stor.empty() ? nullptr
-                   : ::std::addressof(this->m_stor.mut_front());  }
+      {
+        return this->m_stor.empty()
+                 ? nullptr
+                 : this->m_stor.mut_data();
+      }
 
     // N.B. The return type differs from `std::variant`.
-    template<typename dvalueT>
-    typename select_type<const_reference, dvalueT&&>::type
-    value_or(dvalueT&& dvalue) const
-      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
-                   : this->m_stor.front();  }
+    template<typename defvalT>
+    typename select_type<const_reference, defvalT&&>::type
+    value_or(defvalT&& defval) const
+      {
+        return this->m_stor.empty()
+                 ? ::std::forward<defvalT>(defval)
+                 : this->m_stor.front();
+      }
 
     // N.B. The return type differs from `std::variant`.
-    template<typename dvalueT>
-    typename select_type<reference, dvalueT&&>::type
-    value_or(dvalueT&& dvalue)
-      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
-                   : this->m_stor.mut_front();  }
+    template<typename defvalT>
+    typename select_type<reference, defvalT&&>::type
+    value_or(defvalT&& defval)
+      {
+        return this->m_stor.empty()
+                 ? ::std::forward<defvalT>(defval)
+                 : this->m_stor.mut_front();
+      }
 
     // N.B. This is a non-standard extension.
-    template<typename dvalueT>
-    typename select_type<value_type&&, dvalueT&&>::type
-    move_value_or(dvalueT&& dvalue)
-      { return this->m_stor.empty() ? ::std::forward<dvalueT>(dvalue)
-                   : ::std::move(this->m_stor.mut_front());  }
+    template<typename defvalT>
+    typename select_type<value_type&&, defvalT&&>::type
+    move_value_or(defvalT&& defval)
+      {
+        return this->m_stor.empty()
+                 ? ::std::forward<defvalT>(defval)
+                 : ::std::move(this->m_stor.mut_front());
+      }
 
     constexpr const_reference
     operator*() const
@@ -228,11 +251,11 @@ class optional
 
     constexpr const value_type*
     operator->() const
-      { return ::std::addressof(this->m_stor.front());  }
+      { return this->m_stor.data();  }
 
     constexpr value_type*
     operator->()
-      { return ::std::addressof(this->m_stor.mut_front());  }
+      { return this->m_stor.mut_data();  }
 
     // 19.6.3.6, modifiers
     optional&
