@@ -67,8 +67,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
 // Type conversion
 template<typename enumT>
-ROCKET_CONST_FUNCTION constexpr
-typename ::std::underlying_type<enumT>::type
+ROCKET_CONST_FUNCTION constexpr typename ::std::underlying_type<enumT>::type
 weaken_enum(enumT value) noexcept
   { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
 
@@ -83,8 +82,7 @@ enum : uint8_t
     cctype_blank   = 0x20,  // [ \t]
   };
 
-ROCKET_CONST_FUNCTION inline
-uint8_t
+ROCKET_CONST_FUNCTION inline uint8_t
 get_cctype(char c) noexcept
   {
     size_t m = static_cast<uint8_t>(c);
@@ -93,22 +91,19 @@ get_cctype(char c) noexcept
     return details_utils::cctype_table[m];
   }
 
-ROCKET_CONST_FUNCTION inline
-bool
+ROCKET_CONST_FUNCTION inline bool
 is_cctype(char c, uint8_t mask) noexcept
   { return noadl::get_cctype(c) & mask;  }
 
 // Numeric conversion
-ROCKET_CONST_FUNCTION inline
-bool
+ROCKET_CONST_FUNCTION inline bool
 is_convertible_to_integer(double val) noexcept
   {
     return ::std::islessequal(-0x1p63, val) &&
            ::std::isless(val, 0x1p63);
   }
 
-ROCKET_CONST_FUNCTION inline
-bool
+ROCKET_CONST_FUNCTION inline bool
 is_safe_integer(double val) noexcept
   {
     double absv = ::std::abs(val);
@@ -118,30 +113,25 @@ is_safe_integer(double val) noexcept
   }
 
 // C-style quoting
-constexpr
-details_utils::Quote_Wrapper
+constexpr details_utils::Quote_Wrapper
 quote(const char* str, size_t len) noexcept
   { return { str, len };  }
 
-inline
-details_utils::Quote_Wrapper
+inline details_utils::Quote_Wrapper
 quote(const char* str) noexcept
   { return noadl::quote(str, ::std::strlen(str));  }
 
-inline
-details_utils::Quote_Wrapper
+inline details_utils::Quote_Wrapper
 quote(const cow_string& str) noexcept
   { return noadl::quote(str.data(), str.size());  }
 
 // Justifying
-constexpr
-details_utils::Paragraph_Wrapper
+constexpr details_utils::Paragraph_Wrapper
 pwrap(size_t indent, size_t hanging) noexcept
   { return { indent, hanging };  }
 
 // Error numbers
-constexpr
-details_utils::Formatted_errno
+constexpr details_utils::Formatted_errno
 format_errno(int err) noexcept
   { return { err };  }
 

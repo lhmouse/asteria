@@ -19,8 +19,7 @@
 namespace asteria {
 namespace {
 
-inline
-void
+inline void
 do_put_FFFF(cow_string::iterator wpos, bool rlowerc, uint64_t value)
   {
     static constexpr char xdigits[] = "00112233445566778899AaBbCcDdEeFf";
@@ -28,16 +27,14 @@ do_put_FFFF(cow_string::iterator wpos, bool rlowerc, uint64_t value)
       wpos[k] = xdigits[(value >> (12 - 4 * k)) % 16 * 2 + rlowerc];
   }
 
-constexpr
-GC_Generation
+constexpr GC_Generation
 do_clamp_gc_gen(V_integer param)
   {
     return static_cast<GC_Generation>(::rocket::clamp(param,
                weaken_enum(gc_generation_newest), weaken_enum(gc_generation_oldest)));
   }
 
-inline
-bool
+inline bool
 do_check_punctuator(const Token* qtok, initializer_list<Punctuator> accept)
   {
     return qtok && qtok->is_punctuator() && ::rocket::is_any_of(qtok->as_punctuator(), accept);

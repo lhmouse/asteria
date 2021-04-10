@@ -336,8 +336,7 @@ class basic_linear_buffer
   };
 
 template<typename charT, typename traitsT, typename allocT>
-inline
-void
+inline void
 swap(basic_linear_buffer<charT, traitsT, allocT>& lhs, basic_linear_buffer<charT, traitsT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

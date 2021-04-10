@@ -34,8 +34,7 @@ constexpr char s_nums_00_99[100][2] =
     '9','0','9','1','9','2','9','3','9','4','9','5','9','6','9','7','9','8','9','9',
   };
 
-inline
-void
+inline void
 do_put_00_99(cow_string::iterator wpos, uint64_t value)
   {
     ROCKET_ASSERT(value <= 99);
@@ -43,8 +42,7 @@ do_put_00_99(cow_string::iterator wpos, uint64_t value)
       wpos[k] = s_nums_00_99[value][k];
   }
 
-inline
-bool
+inline bool
 do_get_integer(cow_string::const_iterator& rpos, cow_string::const_iterator epos,
                uint64_t& value, uint64_t lim_lo, uint64_t lim_hi)
   {
@@ -77,8 +75,7 @@ do_get_integer(cow_string::const_iterator& rpos, cow_string::const_iterator epos
     return value >= lim_lo;
   }
 
-inline
-bool
+inline bool
 do_get_separator(cow_string::const_iterator& rpos, cow_string::const_iterator epos,
                  ::std::initializer_list<uint8_t> seps)
   {

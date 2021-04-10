@@ -10,8 +10,7 @@ namespace {
 
 template<typename ValT,
 ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
-constexpr
-Compare
+constexpr Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
   {
     return (lhs < rhs) ? compare_less
@@ -21,8 +20,7 @@ do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
 
 template<typename ValT,
 ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
-constexpr
-Compare
+constexpr Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
   {
     return ::std::isless(lhs, rhs)      ? compare_less

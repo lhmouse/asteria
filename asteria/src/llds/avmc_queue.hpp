@@ -156,8 +156,7 @@ class AVMC_Queue
     enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline
-void
+inline void
 swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
   { lhs.swap(rhs);  }
 

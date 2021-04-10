@@ -367,8 +367,7 @@ class AIR_Node
     enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline
-void
+inline void
 swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
   { lhs.swap(rhs);  }
 

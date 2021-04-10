@@ -9,22 +9,19 @@ namespace rocket {
 namespace {
 
 template<typename valueT>
-constexpr
-typename make_unsigned<valueT>::type
+constexpr typename make_unsigned<valueT>::type
 do_cast_U(const valueT& value)
   {
     return static_cast<typename make_unsigned<valueT>::type>(value);
   }
 
-constexpr
-char
+constexpr char
 do_pdigit_D(uint32_t dval)
   {
     return static_cast<char>('0' + dval);
   }
 
-constexpr
-char
+constexpr char
 do_pdigit_X(uint32_t dval)
   {
     return static_cast<char>('0' + dval + ((9 - dval) >> 29));
@@ -900,8 +897,7 @@ constexpr s_decmult_F[] =
   };
 static_assert(size(s_decmult_F) == 633, "");
 
-inline
-uint64_t
+inline uint64_t
 do_get_max_bias(uint64_t ireg, uint32_t add, bool single)
   {
     uint64_t m = ireg >> (single ? 24 : 53);

@@ -219,8 +219,7 @@ class Variable_HashSet
     enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline
-void
+inline void
 swap(Variable_HashSet& lhs, Variable_HashSet& rhs) noexcept
   { lhs.swap(rhs);  }
 

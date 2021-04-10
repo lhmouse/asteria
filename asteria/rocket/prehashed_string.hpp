@@ -329,60 +329,52 @@ extern template
 class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
 template<typename stringT, typename hashT, typename eqT>
-constexpr
-bool
+constexpr bool
 operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
            const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr
-bool
+constexpr bool
 operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr
-bool
+constexpr bool
 operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(rhs.equals(lhs)))
   { return rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
-constexpr
-bool
+constexpr bool
 operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
            const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return !lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr
-bool
+constexpr bool
 operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return !lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr
-bool
+constexpr bool
 operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(rhs.equals(lhs)))
   { return !rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
-inline
-void
+inline void
 swap(basic_prehashed_string<stringT, hashT, eqT>& lhs,
      basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename stringT, typename hashT, typename eqT>
-inline
-basic_tinyfmt<charT, traitsT>&
+inline basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt,
            const basic_prehashed_string<stringT, hashT, eqT>& str)
   { return fmt << str.rdstr();  }

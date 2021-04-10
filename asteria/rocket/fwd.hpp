@@ -170,8 +170,7 @@ size(const containerT& cont) noexcept(noexcept(cont.size()))
   { return cont.size();  }
 
 template<typename elementT, size_t countT>
-constexpr
-size_t
+constexpr size_t
 size(const elementT (&)[countT]) noexcept
   { return countT;  }
 
@@ -218,8 +217,7 @@ struct copy_cv<targetT, const volatile sourceT>
 #include "details/fwd.ipp"
 
 template<typename typeT>
-inline
-void
+inline void
 xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
   { swap(lhs, rhs);  }
 
@@ -234,8 +232,7 @@ struct select_type<firstT, secondT>
   { };
 
 template<typename lhsT, typename rhsT>
-constexpr
-typename select_type<lhsT&&, rhsT&&>::type
+constexpr typename select_type<lhsT&&, rhsT&&>::type
 min(lhsT&& lhs, rhsT&& rhs)
   {
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
@@ -243,8 +240,7 @@ min(lhsT&& lhs, rhsT&& rhs)
   }
 
 template<typename lhsT, typename rhsT>
-constexpr
-typename select_type<lhsT&&, rhsT&&>::type
+constexpr typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
   {
     return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
@@ -252,8 +248,7 @@ max(lhsT&& lhs, rhsT&& rhs)
   }
 
 template<typename xvT, typename loT, typename upT>
-constexpr
-typename select_type<xvT&&, loT&&, upT&&>::type
+constexpr typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
   {
     return (xv < lo) ?             ::std::forward<loT>(lo)
@@ -300,8 +295,7 @@ ranged_do_while(firstT first, lastT last, funcT&& func, const paramsT&... params
   }
 
 template<typename iteratorT>
-constexpr
-size_t
+constexpr size_t
 estimate_distance(iteratorT first, iteratorT last)
   {
     return details_fwd::estimate_distance_aux(
@@ -404,8 +398,7 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
   }
 
 template<typename containerT, typename callbackT>
-constexpr
-void
+constexpr void
 for_each(containerT&& cont, callbackT&& callback)
   {
     return details_fwd::for_each_nonconstexpr(::std::forward<containerT>(cont),
@@ -413,8 +406,7 @@ for_each(containerT&& cont, callbackT&& callback)
   }
 
 template<typename elementT, typename callbackT>
-constexpr
-void
+constexpr void
 for_each(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_fwd::for_each_nonconstexpr(init,
@@ -422,8 +414,7 @@ for_each(initializer_list<elementT> init, callbackT&& callback)
   }
 
 template<typename containerT, typename callbackT>
-constexpr
-bool
+constexpr bool
 any_of(containerT&& cont, callbackT&& callback)
   {
     return details_fwd::any_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -431,8 +422,7 @@ any_of(containerT&& cont, callbackT&& callback)
   }
 
 template<typename elementT, typename callbackT>
-constexpr
-bool
+constexpr bool
 any_of(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_fwd::any_of_nonconstexpr(init,
@@ -440,8 +430,7 @@ any_of(initializer_list<elementT> init, callbackT&& callback)
   }
 
 template<typename containerT, typename callbackT>
-constexpr
-bool
+constexpr bool
 none_of(containerT&& cont, callbackT&& callback)
   {
     return details_fwd::none_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -449,8 +438,7 @@ none_of(containerT&& cont, callbackT&& callback)
   }
 
 template<typename elementT, typename callbackT>
-constexpr
-bool
+constexpr bool
 none_of(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_fwd::none_of_nonconstexpr(init,
@@ -458,8 +446,7 @@ none_of(initializer_list<elementT> init, callbackT&& callback)
   }
 
 template<typename containerT, typename callbackT>
-constexpr
-bool
+constexpr bool
 all_of(containerT&& cont, callbackT&& callback)
   {
     return details_fwd::all_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -467,8 +454,7 @@ all_of(containerT&& cont, callbackT&& callback)
   }
 
 template<typename elementT, typename callbackT>
-constexpr
-bool
+constexpr bool
 all_of(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_fwd::all_of_nonconstexpr(init,
@@ -476,8 +462,7 @@ all_of(initializer_list<elementT> init, callbackT&& callback)
   }
 
 template<typename targetT, typename containerT>
-constexpr
-bool
+constexpr bool
 is_any_of(targetT&& targ, containerT&& cont)
   {
     return details_fwd::is_any_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -485,8 +470,7 @@ is_any_of(targetT&& targ, containerT&& cont)
   }
 
 template<typename targetT, typename elementT>
-constexpr
-bool
+constexpr bool
 is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
     return details_fwd::is_any_of_nonconstexpr(init,
@@ -494,8 +478,7 @@ is_any_of(targetT&& targ, initializer_list<elementT> init)
   }
 
 template<typename targetT, typename containerT, typename predictorT>
-constexpr
-bool
+constexpr bool
 is_any_of(targetT&& targ, containerT&& cont, predictorT&& pred)
   {
     return details_fwd::is_any_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -503,8 +486,7 @@ is_any_of(targetT&& targ, containerT&& cont, predictorT&& pred)
   }
 
 template<typename targetT, typename elementT, typename predictorT>
-constexpr
-bool
+constexpr bool
 is_any_of(targetT&& targ, initializer_list<elementT> init, predictorT&& pred)
   {
     return details_fwd::is_any_of_nonconstexpr(init,
@@ -512,8 +494,7 @@ is_any_of(targetT&& targ, initializer_list<elementT> init, predictorT&& pred)
   }
 
 template<typename targetT, typename containerT>
-constexpr
-bool
+constexpr bool
 is_none_of(targetT&& targ, containerT&& cont)
   {
     return details_fwd::is_none_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -521,8 +502,7 @@ is_none_of(targetT&& targ, containerT&& cont)
   }
 
 template<typename targetT, typename elementT>
-constexpr
-bool
+constexpr bool
 is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
     return details_fwd::is_none_of_nonconstexpr(init,
@@ -530,8 +510,7 @@ is_none_of(targetT&& targ, initializer_list<elementT> init)
   }
 
 template<typename targetT, typename containerT, typename predictorT>
-constexpr
-bool
+constexpr bool
 is_none_of(targetT&& targ, containerT&& cont, predictorT&& pred)
   {
     return details_fwd::is_none_of_nonconstexpr(::std::forward<containerT>(cont),
@@ -539,8 +518,7 @@ is_none_of(targetT&& targ, containerT&& cont, predictorT&& pred)
   }
 
 template<typename targetT, typename elementT, typename predictorT>
-constexpr
-bool
+constexpr bool
 is_none_of(targetT&& targ, initializer_list<elementT> init, predictorT&& pred)
   {
     return details_fwd::is_none_of_nonconstexpr(init,
@@ -557,8 +535,7 @@ find(containerT&& cont, targetT&& targ)
   }
 
 template<typename elementT, typename targetT>
-constexpr
-const elementT*
+constexpr const elementT*
 find(initializer_list<elementT> init, targetT&& targ)
   {
     return details_fwd::find_nonconstexpr(init,
@@ -575,8 +552,7 @@ find(containerT&& cont, targetT&& targ, predictorT&& pred)
   }
 
 template<typename elementT, typename targetT, typename predictorT>
-constexpr
-const elementT*
+constexpr const elementT*
 find(initializer_list<elementT> init, targetT&& targ, predictorT&& pred)
   {
     return details_fwd::find_nonconstexpr(init,
@@ -593,8 +569,7 @@ find_if(containerT&& cont, predictorT&& pred)
   }
 
 template<typename elementT, typename predictorT>
-constexpr
-const elementT*
+constexpr const elementT*
 find_if(initializer_list<elementT> init, predictorT&& pred)
   {
     return details_fwd::find_if_nonconstexpr(init,
@@ -621,8 +596,7 @@ unfancy(pointerT&& ptr)
   { return ptr ? ::std::addressof(*ptr) : nullptr;  }
 
 template<typename targetT, typename sourceT>
-constexpr
-targetT
+constexpr targetT
 static_or_dynamic_cast(sourceT&& src)
   { return details_fwd::static_or_dynamic_cast_aux<targetT, sourceT>(
                         details_fwd::use_static_cast_aux<targetT, sourceT>(),

@@ -225,13 +225,11 @@ class Value
     enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline
-void
+inline void
 swap(Value& lhs, Value& rhs) noexcept
   { lhs.swap(rhs);  }
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
   { return value.print(fmt);  }
 

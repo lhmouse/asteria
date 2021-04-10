@@ -47,23 +47,19 @@ struct tinybuf_base
       { return (mode & opt) == opt;  }
   };
 
-constexpr
-tinybuf_base::open_mode
+constexpr tinybuf_base::open_mode
 operator~(tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode(~(uint32_t)rhs);  }
 
-constexpr
-tinybuf_base::open_mode
+constexpr tinybuf_base::open_mode
 operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode((uint32_t)lhs & (uint32_t)rhs);  }
 
-constexpr
-tinybuf_base::open_mode
+constexpr tinybuf_base::open_mode
 operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode((uint32_t)lhs | (uint32_t)rhs);  }
 
-constexpr
-tinybuf_base::open_mode
+constexpr tinybuf_base::open_mode
 operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
   { return tinybuf_base::open_mode((uint32_t)lhs ^ (uint32_t)rhs);  }
 
@@ -324,8 +320,7 @@ basic_tinybuf<charT, traitsT>::
   { }
 
 template<typename charT, typename traitsT>
-inline
-void
+inline void
 swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

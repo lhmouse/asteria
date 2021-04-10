@@ -325,13 +325,11 @@ enum Scope_Flags : uint32_t
     scope_xcontinue  = 0b00000110,
   };
 
-constexpr
-Scope_Flags
+constexpr Scope_Flags
 operator&(Scope_Flags x, Scope_Flags y) noexcept
   { return Scope_Flags(uint32_t(x) & uint32_t(y));  }
 
-constexpr
-Scope_Flags
+constexpr Scope_Flags
 operator|(Scope_Flags x, Scope_Flags y) noexcept
   { return Scope_Flags(uint32_t(x) | uint32_t(y));  }
 
@@ -1447,8 +1445,7 @@ constexpr s_prefix_op_keywords[] =
     { keyword_itrunc,    xop_itrunc   },
   };
 
-constexpr
-bool
+constexpr bool
 operator==(const Prefix_Op_Keyword& lhs, Keyword rhs) noexcept
   {
     return lhs.kwrd == rhs;
@@ -1469,8 +1466,7 @@ constexpr s_prefix_op_punctuators[] =
     { punctuator_dec,   xop_dec_pre  },
   };
 
-constexpr
-bool
+constexpr bool
 operator==(const Prefix_Op_Punctuator& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
@@ -1953,8 +1949,7 @@ constexpr s_postfix_op_punctuators[] =
     { punctuator_tail,  xop_tail      },
   };
 
-constexpr
-bool
+constexpr bool
 operator==(const Postfix_Op_Punctuator& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
@@ -2241,8 +2236,7 @@ constexpr s_infix_op_punctuators[] =
     { punctuator_spaceship,  xop_cmp_3way,  0 },
   };
 
-constexpr
-bool
+constexpr bool
 operator==(const Infix_Op_Punctuator& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;

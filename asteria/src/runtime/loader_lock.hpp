@@ -115,8 +115,7 @@ class Loader_Lock::Unique_Stream
       }
   };
 
-inline
-void
+inline void
 swap(Loader_Lock::Unique_Stream& lhs, Loader_Lock::Unique_Stream& rhs) noexcept
   { lhs.swap(rhs);  }
 

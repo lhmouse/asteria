@@ -141,8 +141,7 @@ operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ascii_numput& nump)
     return fmt;
   }
 
-inline
-basic_tinyfmt<char>&
+inline basic_tinyfmt<char>&
 operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
   {
     // Optimize it a bit if no conversion is required.

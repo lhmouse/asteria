@@ -229,8 +229,7 @@ class Statement
                   Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const;
   };
 
-inline
-void
+inline void
 swap(Statement& lhs, Statement& rhs) noexcept
   { lhs.swap(rhs);  }
 

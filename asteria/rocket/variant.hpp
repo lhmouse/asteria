@@ -449,8 +449,7 @@ const size_t variant<alternativesT...>::alternative_size;
 #endif
 
 template<typename... alternativesT>
-inline
-void
+inline void
 swap(variant<alternativesT...>& lhs, variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 

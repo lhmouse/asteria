@@ -264,18 +264,15 @@ constexpr char s_url_chars[256] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
 
-constexpr
-bool
+constexpr bool
 do_is_url_invalid_char(char c) noexcept
   { return s_url_chars[uint8_t(c)] == 0;  }
 
-constexpr
-bool
+constexpr bool
 do_is_url_unreserved_char(char c) noexcept
   { return s_url_chars[uint8_t(c)] == 2;  }
 
-constexpr
-bool
+constexpr bool
 do_is_url_query_char(char c) noexcept
   { return s_url_chars[uint8_t(c)] & 2;  }
 
@@ -374,43 +371,35 @@ do_url_decode(const V_string& text)
     return data;
   }
 
-ROCKET_CONST_FUNCTION inline
-int64_t
+ROCKET_CONST_FUNCTION inline int64_t
 bswap_be(int64_t value) noexcept
   { return static_cast<int64_t>(be64toh(static_cast<uint64_t>(value)));  }
 
-ROCKET_CONST_FUNCTION inline
-int32_t
+ROCKET_CONST_FUNCTION inline int32_t
 bswap_be(int32_t value) noexcept
   { return static_cast<int32_t>(be32toh(static_cast<uint32_t>(value)));  }
 
-ROCKET_CONST_FUNCTION inline
-int16_t
+ROCKET_CONST_FUNCTION inline int16_t
 bswap_be(int16_t value) noexcept
   { return static_cast<int16_t>(be16toh(static_cast<uint16_t>(value)));  }
 
-ROCKET_CONST_FUNCTION inline
-int8_t
+ROCKET_CONST_FUNCTION inline int8_t
 bswap_be(int8_t value) noexcept
   { return value;  }
 
-ROCKET_CONST_FUNCTION inline
-int64_t
+ROCKET_CONST_FUNCTION inline int64_t
 bswap_le(int64_t value) noexcept
   { return static_cast<int64_t>(le64toh(static_cast<uint64_t>(value)));  }
 
-ROCKET_CONST_FUNCTION inline
-int32_t
+ROCKET_CONST_FUNCTION inline int32_t
 bswap_le(int32_t value) noexcept
   { return static_cast<int32_t>(le32toh(static_cast<uint32_t>(value)));  }
 
-ROCKET_CONST_FUNCTION inline
-int16_t
+ROCKET_CONST_FUNCTION inline int16_t
 bswap_le(int16_t value) noexcept
   { return static_cast<int16_t>(le16toh(static_cast<uint16_t>(value)));  }
 
-ROCKET_CONST_FUNCTION inline
-int8_t
+ROCKET_CONST_FUNCTION inline int8_t
 bswap_le(int8_t value) noexcept
   { return value;  }
 
@@ -512,8 +501,7 @@ class PCRE2_Error
       { return this->m_buf.data();  }
   };
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const PCRE2_Error& err)
   { return fmt << err.c_str();  }
 

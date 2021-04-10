@@ -130,8 +130,7 @@ class recursive_mutex::unique_lock
       }
   };
 
-inline
-void
+inline void
 swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 

@@ -274,8 +274,7 @@ class array
   };
 
 template<typename valueT, size_t capacityT, size_t... nestedT>
-inline
-void
+inline void
 swap(array<valueT, capacityT, nestedT...>& lhs, array<valueT, capacityT, nestedT...>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

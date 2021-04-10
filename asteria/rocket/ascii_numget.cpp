@@ -9,8 +9,7 @@
 namespace rocket {
 namespace {
 
-constexpr
-bool
+constexpr bool
 do_match_char_ci(char ch, char cmp)
   {
     return static_cast<uint8_t>(ch | 0x20) == static_cast<uint8_t>(cmp);

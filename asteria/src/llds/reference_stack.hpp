@@ -131,8 +131,7 @@ class Reference_Stack
     enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline
-void
+inline void
 swap(Reference_Stack& lhs, Reference_Stack& rhs) noexcept
   { lhs.swap(rhs);  }
 

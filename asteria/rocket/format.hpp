@@ -50,8 +50,7 @@ struct basic_formatter
   };
 
 template<typename charT, typename traitsT = char_traits<charT>, typename paramT>
-constexpr
-basic_formatter<charT, traitsT>
+constexpr basic_formatter<charT, traitsT>
 make_default_formatter(paramT& param) noexcept
   {
     return { [](basic_tinyfmt<charT, traitsT>& fmt, const void* ptr) -> basic_tinyfmt<charT, traitsT>&

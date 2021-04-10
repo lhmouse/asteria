@@ -36,14 +36,12 @@ struct CRC32_Generator<valT, divT, 8>
   { };
 
 template<uint32_t divT, size_t... S>
-constexpr
-array<uint32_t, 256>
+constexpr array<uint32_t, 256>
 do_CRC32_table_impl(const index_sequence<S...>&) noexcept
   { return { CRC32_Generator<uint8_t(S), divT, 0>::value... };  }
 
 template<uint32_t divT>
-constexpr
-array<uint32_t, 256>
+constexpr array<uint32_t, 256>
 do_CRC32_table() noexcept
   { return do_CRC32_table_impl<divT>(::std::make_index_sequence<256>());  }
 
@@ -270,8 +268,7 @@ do_load_le(const uint8_t* ptr) noexcept
     return le32toh(word);
   }
 
-constexpr
-uint32_t
+constexpr uint32_t
 do_rotl(uint32_t value, size_t n) noexcept
   {
     return value << n % 32 | value >> (32 - n) % 32;
@@ -1060,8 +1057,7 @@ do_construct_SHA256(V_object& result)
   }
 
 template<typename HasherT>
-inline
-rcptr<HasherT>
+inline rcptr<HasherT>
 do_cast_hasher(V_opaque& h)
   {
     auto hptr = h.open_opt<HasherT>();

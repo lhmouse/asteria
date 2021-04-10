@@ -72,23 +72,19 @@ class Parser_Error
       { return this->m_length;  }
   };
 
-inline
-bool
+inline bool
 operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
   { return lhs.status() == rhs;  }
 
-inline
-bool
+inline bool
 operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
   { return lhs.status() != rhs;  }
 
-inline
-bool
+inline bool
 operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
   { return lhs == rhs.status();  }
 
-inline
-bool
+inline bool
 operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 

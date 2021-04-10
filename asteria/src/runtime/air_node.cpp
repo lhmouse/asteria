@@ -1347,8 +1347,7 @@ enum : uint32_t
     tmask_object    = UINT32_C(1) << type_object,
   };
 
-inline
-uint32_t
+inline uint32_t
 do_tmask_of(const Value& val) noexcept
   {
     return UINT32_C(1) << val.type();
@@ -4389,8 +4388,7 @@ struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
   };
 
 template<typename TraitsT, typename NodeT>
-inline
-bool
+inline bool
 do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
     using disp = solidify_disp<TraitsT, NodeT,

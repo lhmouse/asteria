@@ -156,107 +156,91 @@ class unique_ptr
   };
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
-constexpr
-bool
+constexpr bool
 operator==(const unique_ptr<xelementT, xdeleterT>& lhs,
            const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
   { return lhs.get() == rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
-constexpr
-bool
+constexpr bool
 operator!=(const unique_ptr<xelementT, xdeleterT>& lhs,
            const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
   { return lhs.get() != rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
-constexpr
-bool
+constexpr bool
 operator<(const unique_ptr<xelementT, xdeleterT>& lhs,
            const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() < rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
-constexpr
-bool
+constexpr bool
 operator>(const unique_ptr<xelementT, xdeleterT>& lhs,
            const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() > rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
-constexpr
-bool
+constexpr bool
 operator<=(const unique_ptr<xelementT, xdeleterT>& lhs,
            const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() <= rhs.get();  }
 
 template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
-constexpr
-bool
+constexpr bool
 operator>=(const unique_ptr<xelementT, xdeleterT>& lhs,
            const unique_ptr<yelementT, ydeleterT>& rhs)
   { return lhs.get() >= rhs.get();  }
 
 template<typename elementT, typename deleterT>
-constexpr
-bool
+constexpr bool
 operator==(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
   { return !lhs;  }
 
 template<typename elementT, typename deleterT>
-constexpr
-bool
+constexpr bool
 operator!=(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
   { return !!lhs;  }
 
 template<typename elementT, typename deleterT>
-constexpr
-bool
+constexpr bool
 operator==(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   { return !rhs;  }
 
 template<typename elementT, typename deleterT>
-constexpr
-bool
+constexpr bool
 operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   { return !!rhs;  }
 
 template<typename elementT, typename deleterT>
-inline
-void
+inline void
 swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename elementT, typename deleterT>
-inline
-basic_tinyfmt<charT, traitsT>&
+inline basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt,
            const unique_ptr<elementT, deleterT>& rhs)
   { return fmt << rhs.get();  }
 
 template<typename elementT, typename... paramsT>
-inline
-unique_ptr<elementT>
+inline unique_ptr<elementT>
 make_unique(paramsT&&... params)
   { return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));  }
 
 template<typename targetT, typename sourceT>
-inline
-unique_ptr<targetT>
+inline unique_ptr<targetT>
 static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
-inline
-unique_ptr<targetT>
+inline unique_ptr<targetT>
 dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
 
 template<typename targetT, typename sourceT>
-inline
-unique_ptr<targetT>
+inline unique_ptr<targetT>
 const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
                [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }

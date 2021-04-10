@@ -21,13 +21,11 @@ struct State
 
 // This ensures `Global_Context` is always passed as a non-const lvalue.
 template<typename XValT>
-constexpr
-typename ::std::remove_reference<XValT>::type&&
+constexpr typename ::std::remove_reference<XValT>::type&&
 move(XValT&& xval) noexcept
   { return static_cast<typename ::std::remove_reference<XValT>::type&&>(xval);  }
 
-constexpr
-Global_Context&
+constexpr Global_Context&
 move(Global_Context& global) noexcept
   { return global;  }
 
@@ -58,8 +56,7 @@ struct Applier<void, ::std::index_sequence<N...>, FuncT, ::std::tuple<ArgsT...>>
   };
 
 template<typename FuncT, typename... ArgsT>
-inline
-Reference&
+inline Reference&
 apply_and_set_result(Reference& self, FuncT&& func, ::std::tuple<ArgsT...>&& args)
   {
     return Applier<decltype(func(::std::declval<ArgsT>()...)),

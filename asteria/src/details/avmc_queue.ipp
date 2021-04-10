@@ -74,8 +74,7 @@ struct Header
   };
 
 template<typename SparamT>
-inline
-void
+inline void
 do_nontrivial_reloc(Header* head, Header* from)
   {
     auto ptr = reinterpret_cast<SparamT*>(head->sparam);
@@ -85,8 +84,7 @@ do_nontrivial_reloc(Header* head, Header* from)
   }
 
 template<typename SparamT>
-inline
-void
+inline void
 do_nontrivial_dtor(Header* head)
   {
     auto ptr = reinterpret_cast<SparamT*>(head->sparam);
@@ -94,8 +92,7 @@ do_nontrivial_dtor(Header* head)
   }
 
 template<typename SparamT>
-inline
-void
+inline void
 do_call_enumerate_variables(Variable_Callback& callback, const Header* head)
   {
     reinterpret_cast<const SparamT*>(head->sparam)->
@@ -139,8 +136,7 @@ struct Sparam_traits
   };
 
 template<typename XSparamT>
-inline
-void
+inline void
 do_forward_ctor(Header* head, intptr_t arg)
   {
     using Sparam = typename ::std::decay<XSparamT>::type;

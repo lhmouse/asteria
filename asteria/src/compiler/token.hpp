@@ -162,13 +162,11 @@ class Token
     print(tinyfmt& fmt) const;
   };
 
-inline
-void
+inline void
 swap(Token& lhs, Token& rhs) noexcept
   { lhs.swap(rhs);  }
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const Token& token)
   { return token.print(fmt);  }
 

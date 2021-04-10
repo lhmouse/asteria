@@ -273,8 +273,7 @@ template<typename XValT>
 using Valuable = Valuable_impl<
            typename ::rocket::remove_cvref<XValT>::type, void>;
 
-constexpr
-uint32_t
+constexpr uint32_t
 imask(initializer_list<uint32_t> bits) noexcept
   {
     uint32_t sum = 0;

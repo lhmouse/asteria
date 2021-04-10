@@ -31,8 +31,7 @@ class reference_counter_base
   };
 
 template<typename elementT, typename deleterT>
-constexpr
-deleterT
+constexpr deleterT
 copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
   { return base.as_deleter();  }
 

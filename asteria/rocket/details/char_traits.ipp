@@ -8,8 +8,7 @@
 namespace details_char_traits {
 
 template<typename charT>
-constexpr
-charT*
+constexpr charT*
 assign(charT* p, size_t n, charT c) noexcept
   {
     for(auto bp = p, ep = p + n;  bp != ep;  ++bp)
@@ -18,8 +17,7 @@ assign(charT* p, size_t n, charT c) noexcept
   }
 
 template<typename charT>
-constexpr
-const charT*
+constexpr const charT*
 find(const charT* p, size_t n, charT c) noexcept
   {
     for(auto bp = p, ep = p + n;  bp != ep;  ++bp)
@@ -29,8 +27,7 @@ find(const charT* p, size_t n, charT c) noexcept
   }
 
 template<typename charT>
-constexpr
-size_t
+constexpr size_t
 length(const charT* p) noexcept
   {
     for(auto bp = p;  true;  ++bp)
@@ -39,14 +36,12 @@ length(const charT* p) noexcept
   }
 
 template<typename charT>
-constexpr
-typename make_unsigned<charT>::type
+constexpr typename make_unsigned<charT>::type
 ucast(charT c) noexcept
   { return static_cast<typename make_unsigned<charT>::type>(c);  }
 
 template<typename charT>
-constexpr
-int
+constexpr int
 compare(const charT* p, const charT* s, size_t n) noexcept
   {
     for(size_t k = 0;  k != n;  ++k)

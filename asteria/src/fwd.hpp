@@ -247,15 +247,13 @@ template<typename RealT>
 using rcfwdp = rcptr<Rcfwd<RealT>>;
 
 template<typename TargetT, typename RealT>
-constexpr
-TargetT
+constexpr TargetT
 unerase_cast(const rcfwdp<RealT>& ptr)  // like `static_cast`
   noexcept
   { return static_cast<TargetT>(ptr.get());  }
 
 template<typename TargetT, typename RealT>
-constexpr
-rcptr<TargetT>
+constexpr rcptr<TargetT>
 unerase_pointer_cast(const rcfwdp<RealT>& ptr)  // like `static_pointer_cast`
   noexcept
   { return static_pointer_cast<TargetT>(ptr);  }
@@ -313,8 +311,7 @@ struct Abstract_Opaque
       = 0;
   };
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
@@ -345,8 +342,7 @@ struct Abstract_Function
       = 0;
   };
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Function& func)
   { return func.describe(fmt);  }
 
@@ -419,14 +415,12 @@ class cow_opaque
     open_opt();
   };
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   { return opaq.describe(fmt);  }
 
 template<typename OpaqueT>
-inline
-rcptr<const OpaqueT>
+inline rcptr<const OpaqueT>
 cow_opaque::
 get_opt() const
   {
@@ -438,8 +432,7 @@ get_opt() const
   }
 
 template<typename OpaqueT>
-inline
-rcptr<OpaqueT>
+inline rcptr<OpaqueT>
 cow_opaque::
 open_opt()
   {
@@ -468,8 +461,7 @@ open_opt()
 
 // Clones an opaque object.
 template<typename OpaqueT>
-inline
-OpaqueT*
+inline OpaqueT*
 clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
   {
     auto sptr = ::rocket::make_refcnt<OpaqueT>(src);
@@ -559,8 +551,7 @@ class cow_function
     invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const;
   };
 
-inline
-tinyfmt&
+inline tinyfmt&
 operator<<(tinyfmt& fmt, const cow_function& func)
   { return func.describe(fmt);  }
 

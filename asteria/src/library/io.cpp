@@ -45,8 +45,7 @@ do_recover(::FILE* fp)
     return err;
   }
 
-constexpr
-int
+constexpr int
 do_normalize_fwide(int wide) noexcept
   {
     return (wide == 0) ? 0 : ((wide >> (WORD_BIT - 1)) | 1);

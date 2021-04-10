@@ -222,8 +222,7 @@ class Reference_Dictionary
     enumerate_variables(Variable_Callback& callback) const;
   };
 
-inline
-void
+inline void
 swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
   { lhs.swap(rhs);  }
 
