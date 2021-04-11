@@ -31,7 +31,7 @@ class Genius_Collector
 
   private:
     Collector Genius_Collector::*
-    do_locate(GC_Generation gc_gen) const;
+    do_locate(size_t gc_gen) const;
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Genius_Collector);
@@ -45,18 +45,18 @@ class Genius_Collector
       { return this->m_pool.clear(), *this;  }
 
     const Collector&
-    get_collector(GC_Generation gc_gen) const
+    get_collector(size_t gc_gen) const
       { return this->*(this->do_locate(gc_gen));  }
 
     Collector&
-    open_collector(GC_Generation gc_gen)
+    open_collector(size_t gc_gen)
       { return this->*(this->do_locate(gc_gen));  }
 
     rcptr<Variable>
-    create_variable(GC_Generation gc_hint = gc_generation_newest);
+    create_variable(size_t gc_hint = 0);
 
     size_t
-    collect_variables(GC_Generation gc_limit = gc_generation_oldest);
+    collect_variables(size_t gc_limit = 2);
 
     Genius_Collector&
     wipe_out_variables() noexcept;

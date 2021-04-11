@@ -95,7 +95,7 @@ Global_Context(API_Version version)
       }
       q->init(pair.first->second.open_object(), eptr[-1].version);
     }
-    auto vstd = gcoll->create_variable(gc_generation_oldest);
+    auto vstd = gcoll->create_variable(2);
     vstd->initialize(::std::move(ostd), true);
 
     // Set the `std` reference now.

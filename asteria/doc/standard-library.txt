@@ -21,16 +21,18 @@
 	  `0`, `1` and `2`.
 
 	* Returns the number of variables being tracked. This value is
-	  only informative. If `generation` is not valid, `null` is
-	  returned.
+	  only informative.
+
+	* Throws an exception if `generation` is out of range.
 
 `std.system.gc_get_threshold(generation)`
 
 	* Gets the threshold of the collector for `generation`. Valid
 	  values for `generation` are `0`, `1` and `2`.
 
-	* Returns the threshold. If `generation` is not valid, `null` is
-	  returned.
+	* Returns the threshold.
+
+	* Throws an exception if `generation` is out of range.
 
 `std.system.gc_set_threshold(generation, threshold)`
 
@@ -42,8 +44,9 @@
 	  collection run less often but slower. Setting `threshold` to
 	  `0` ensures all unreachable variables be collected immediately.
 
-	* Returns the threshold before the call. If `generation` is not
-	  valid, `null` is returned.
+	* Returns the threshold before the call.
+
+	* Throws an exception if `generation` is out of range.
 
 `std.system.gc_collect([generation_limit])`
 

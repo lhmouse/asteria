@@ -27,17 +27,11 @@ do_put_FFFF(cow_string::iterator wpos, bool rlowerc, uint64_t value)
       wpos[k] = xdigits[(value >> (12 - 4 * k)) % 16 * 2 + rlowerc];
   }
 
-constexpr GC_Generation
-do_clamp_gc_gen(V_integer param)
-  {
-    return static_cast<GC_Generation>(::rocket::clamp(param,
-               weaken_enum(gc_generation_newest), weaken_enum(gc_generation_oldest)));
-  }
-
 inline bool
 do_check_punctuator(const Token* qtok, initializer_list<Punctuator> accept)
   {
-    return qtok && qtok->is_punctuator() && ::rocket::is_any_of(qtok->as_punctuator(), accept);
+    return qtok && qtok->is_punctuator()
+                && ::rocket::is_any_of(qtok->as_punctuator(), accept);
   }
 
 struct Key_with_sloc
@@ -85,8 +79,10 @@ Value&
 do_insert_unique(V_object& obj, Key_with_sloc&& key, Value&& value)
   {
     auto pair = obj.try_emplace(::std::move(key.name), ::std::move(value));
-    if(!pair.second)
-      throw Parser_Error(parser_status_duplicate_key_in_object, key.sloc, key.length);
+    if(!pair.second) {
+      throw Parser_Error(parser_status_duplicate_key_in_object,
+                         key.sloc, key.length);
+    }
     return pair.first->second;
   }
 
@@ -128,7 +124,8 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
               // Open an array.
               qtok = tstrm.peek_opt();
               if(!qtok) {
-                throw Parser_Error(parser_status_closed_bracket_or_comma_expected, tstrm);
+                throw Parser_Error(parser_status_closed_bracket_or_comma_expected,
+                                   tstrm);
               }
               else if(!do_check_punctuator(qtok, { punctuator_bracket_cl })) {
                 // Descend into the new array.
@@ -149,13 +146,15 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
               // Open an object.
               qtok = tstrm.peek_opt();
               if(!qtok) {
-                throw Parser_Error(parser_status_closed_brace_or_comma_expected, tstrm);
+                throw Parser_Error(parser_status_closed_brace_or_comma_expected,
+                                   tstrm);
               }
               else if(!do_check_punctuator(qtok, { punctuator_brace_cl })) {
                 // Get the first key.
                 auto qkey = do_accept_object_key_opt(tstrm);
                 if(!qkey)
-                  throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm);
+                  throw Parser_Error(parser_status_closed_brace_or_json5_key_expected,
+                                     tstrm);
 
                 // Descend into the new object.
                 S_xparse_object ctxo = { V_object(), ::std::move(*qkey) };
@@ -268,7 +267,8 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
             // Get the next key.
             auto qkey = do_accept_object_key_opt(tstrm);
             if(!qkey)
-              throw Parser_Error(parser_status_closed_brace_or_json5_key_expected, tstrm);
+              throw Parser_Error(parser_status_closed_brace_or_json5_key_expected,
+                                 tstrm);
 
             // Look for the next value.
             ctxo.key = ::std::move(*qkey);
@@ -286,57 +286,55 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 
 }  // namespace
 
-Opt_integer
+V_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
-    auto gc_gen = do_clamp_gc_gen(generation);
-    if(gc_gen != generation)
-      return nullopt;
+    if(generation != ::rocket::clamp(generation, 0, 2))
+      ASTERIA_THROW("Invalid generation `$1`", generation);
+
+    const auto gcoll = global.genius_collector();
+    const auto& coll = gcoll->get_collector(static_cast<size_t>(generation));
 
     // Get the current number of variables being tracked.
-    auto gcoll = global.genius_collector();
-    size_t count = gcoll->get_collector(gc_gen).count_tracked_variables();
-    return static_cast<int64_t>(count);
+    return static_cast<int64_t>(coll.count_tracked_variables());
   }
 
-Opt_integer
+V_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
-    auto gc_gen = do_clamp_gc_gen(generation);
-    if(gc_gen != generation)
-      return nullopt;
+    if(generation != ::rocket::clamp(generation, 0, 2))
+      ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    // Get the current threshold.
-    auto gcoll = global.genius_collector();
-    uint32_t thres = gcoll->get_collector(gc_gen).get_threshold();
-    return static_cast<int64_t>(thres);
+    const auto gcoll = global.genius_collector();
+    const auto& coll = gcoll->get_collector(static_cast<size_t>(generation));
+
+    // Get the current number of variables being tracked.
+    return static_cast<int64_t>(coll.get_threshold());
   }
 
-Opt_integer
+V_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
-    auto gc_gen = do_clamp_gc_gen(generation);
-    if(gc_gen != generation)
-      return nullopt;
+    if(generation != ::rocket::clamp(generation, 0, 2))
+      ASTERIA_THROW("Invalid generation `$1`", generation);
+
+    const auto gcoll = global.genius_collector();
+    auto& coll = gcoll->open_collector(static_cast<size_t>(generation));
 
     // Set the threshold and return its old value.
-    auto gcoll = global.genius_collector();
-    uint32_t thres_new = static_cast<uint32_t>(::rocket::clamp(threshold, 0, INT32_MAX));
-    uint32_t thres_old = gcoll->get_collector(gc_gen).get_threshold();
-    gcoll->open_collector(gc_gen).set_threshold(thres_new);
-    return static_cast<int64_t>(thres_old);
+    uint32_t oldval = coll.get_threshold();
+    coll.set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, 4294967295)));
+    return static_cast<int64_t>(oldval);
   }
 
 V_integer
 std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
   {
-    auto gc_limit = gc_generation_oldest;
-    if(generation_limit)
-      gc_limit = do_clamp_gc_gen(*generation_limit);
+    size_t rglimit = static_cast<size_t>(::rocket::clamp(generation_limit.value_or(2), 0, 2));
+    const auto gcoll = global.genius_collector();
 
     // Perform garbage collection up to the generation specified.
-    auto gcoll = global.genius_collector();
-    size_t nvars = gcoll->collect_variables(gc_limit);
+    size_t nvars = gcoll->collect_variables(rglimit);
     return static_cast<int64_t>(nvars);
   }
 
@@ -346,14 +344,16 @@ std_system_env_get_variable(V_string name)
     const char* val = ::getenv(name.safe_c_str());
     if(!val)
       return nullopt;
+
+    // XXX: Use `sref()`? But environment variables may be modified or deleted.
     return cow_string(val);
   }
 
 V_object
 std_system_env_get_variables()
   {
-    V_object vars;
     const char* const* vpos = ::environ;
+    V_object vars;
     while(const char* str = *(vpos++)) {
       // The key is terminated by an equals sign.
       const char* equ = ::std::strchr(str, '=');
@@ -516,6 +516,7 @@ std_system_conf_load_file(V_string path)
     // Ensure all data have been consumed.
     if(!tstrm.empty())
       throw Parser_Error(parser_status_identifier_expected, tstrm);
+
     return root;
   }
 

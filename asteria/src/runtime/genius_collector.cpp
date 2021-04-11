@@ -16,16 +16,16 @@ Genius_Collector::
 
 Collector Genius_Collector::*
 Genius_Collector::
-do_locate(GC_Generation gc_gen) const
+do_locate(size_t gc_gen) const
   {
     switch(gc_gen) {
-      case gc_generation_newest:
+      case 0:
         return &Genius_Collector::m_newest;
 
-      case gc_generation_middle:
+      case 1:
         return &Genius_Collector::m_middle;
 
-      case gc_generation_oldest:
+      case 2:
         return &Genius_Collector::m_oldest;
 
       default:
@@ -35,7 +35,7 @@ do_locate(GC_Generation gc_gen) const
 
 rcptr<Variable>
 Genius_Collector::
-create_variable(GC_Generation gc_hint)
+create_variable(size_t gc_hint)
   {
     // Locate the collector, which will be responsible for tracking the new variable.
     auto& coll = this->*(this->do_locate(gc_hint));
@@ -53,7 +53,7 @@ create_variable(GC_Generation gc_hint)
 
 size_t
 Genius_Collector::
-collect_variables(GC_Generation gc_limit)
+collect_variables(size_t gc_limit)
   {
     // Collect variables from the newest generation to the oldest.
     for(auto p = ::std::make_pair(&(this->m_newest), gc_limit + 1);

@@ -9,15 +9,15 @@
 namespace asteria {
 
 // `std.system.gc_count_variables`
-Opt_integer
+V_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation);
 
 // `std.system.gc_get_threshold`
-Opt_integer
+V_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation);
 
 // `std.system.gc_set_threshold`
-Opt_integer
+V_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold);
 
 // `std.system.gc_collect`

@@ -619,14 +619,6 @@ ROCKET_CONST_FUNCTION
 const char*
 describe_frame_type(Frame_Type type) noexcept;
 
-// Garbage collection generations
-enum GC_Generation : uint8_t
-  {
-    gc_generation_newest  = 0,
-    gc_generation_middle  = 1,
-    gc_generation_oldest  = 2,
-  };
-
 // Parser status codes
 enum Parser_Status : uint32_t
   {
