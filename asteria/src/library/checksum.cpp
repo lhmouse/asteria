@@ -47,8 +47,7 @@ do_CRC32_table() noexcept
 
 constexpr auto s_iso3309_CRC32_table = do_CRC32_table<0xEDB88320>();
 
-class CRC32_Hasher
-  final
+class CRC32_Hasher final
   : public Abstract_Opaque
   {
   private:
@@ -123,8 +122,7 @@ do_construct_CRC32(V_object& result)
       ASTERIA_BINDING_END);
   }
 
-class FNV1a32_Hasher
-  final
+class FNV1a32_Hasher final
   : public Abstract_Opaque
   {
   public:
@@ -274,8 +272,7 @@ do_rotl(uint32_t value, size_t n) noexcept
     return value << n % 32 | value >> (32 - n) % 32;
   }
 
-class MD5_Hasher
-  final
+class MD5_Hasher final
   : public Abstract_Opaque
   {
   private:
@@ -524,8 +521,7 @@ do_construct_MD5(V_object& result)
       ASTERIA_BINDING_END);
   }
 
-class SHA1_Hasher
-  final
+class SHA1_Hasher final
   : public Abstract_Opaque
   {
   private:
@@ -804,8 +800,7 @@ do_construct_SHA1(V_object& result)
       ASTERIA_BINDING_END);
   }
 
-class SHA256_Hasher
-  final
+class SHA256_Hasher final
   : public Abstract_Opaque
   {
   private:

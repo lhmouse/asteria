@@ -10,8 +10,7 @@
 
 namespace asteria {
 
-class PTC_Arguments
-  final
+class PTC_Arguments final
   : public Rcfwd<PTC_Arguments>
   {
   public:

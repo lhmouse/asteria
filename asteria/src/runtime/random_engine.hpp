@@ -8,8 +8,7 @@
 
 namespace asteria {
 
-class Random_Engine
-  final
+class Random_Engine final
   : public Rcfwd<Random_Engine>
   {
   public:

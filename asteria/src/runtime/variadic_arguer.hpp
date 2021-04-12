@@ -10,8 +10,7 @@
 
 namespace asteria {
 
-class Variadic_Arguer
-  final
+class Variadic_Arguer final
   : public Abstract_Function
   {
   private:

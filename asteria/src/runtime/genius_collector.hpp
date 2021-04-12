@@ -10,8 +10,7 @@
 
 namespace asteria {
 
-class Genius_Collector
-  final
+class Genius_Collector final
   : public Rcfwd<Genius_Collector>
   {
   private:

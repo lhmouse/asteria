@@ -32,8 +32,7 @@ class Sentry
   };
 
 template<typename FuncT>
-class Variable_Walker
-  final
+class Variable_Walker final
   : public Variable_Callback
   {
   private:
@@ -69,8 +68,7 @@ do_traverse(const Variable& var, FuncT&& func)
     (Variable_Walker<FuncT>(func)(var.get_value()));
   }
 
-class Variable_Wiper
-  final
+class Variable_Wiper final
   : public Variable_Callback
   {
   protected:

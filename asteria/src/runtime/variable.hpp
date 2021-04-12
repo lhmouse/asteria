@@ -9,8 +9,7 @@
 
 namespace asteria {
 
-class Variable
-  final
+class Variable final
   : public Rcfwd<Variable>
   {
   private:

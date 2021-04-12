@@ -39,8 +39,7 @@ Command::
   {
   }
 
-struct Command_exit
-  final
+struct Command_exit final
   : public Command
   {
     const char*
@@ -87,8 +86,7 @@ struct Command_exit
       }
   };
 
-struct Command_help
-  final
+struct Command_help final
   : public Command
   {
     const char*
@@ -119,8 +117,7 @@ struct Command_help
     handle(cow_string&& args) const override;
   };
 
-struct Command_heredoc
-  final
+struct Command_heredoc final
   : public Command
   {
     const char*
@@ -159,8 +156,7 @@ struct Command_heredoc
       }
   };
 
-struct Command_source
-  final
+struct Command_source final
   : public Command
   {
     const char*

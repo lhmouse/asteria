@@ -40,8 +40,7 @@ Indenter::
   {
   }
 
-class Indenter_none
-  final
+class Indenter_none final
   : public Indenter
   {
   public:
@@ -67,8 +66,7 @@ class Indenter_none
       { return false;  }
   };
 
-class Indenter_string
-  final
+class Indenter_string final
   : public Indenter
   {
   private:
@@ -99,8 +97,7 @@ class Indenter_string
       { return this->m_add.size();  }
   };
 
-class Indenter_spaces
-  final
+class Indenter_spaces final
   : public Indenter
   {
   private:

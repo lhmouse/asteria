@@ -9,8 +9,7 @@
 
 namespace asteria {
 
-class Loader_Lock
-  final
+class Loader_Lock final
   : public Rcfwd<Loader_Lock>
   {
   public:

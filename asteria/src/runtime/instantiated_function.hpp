@@ -10,8 +10,7 @@
 
 namespace asteria {
 
-class Instantiated_Function
-  final
+class Instantiated_Function final
   : public Abstract_Function
   {
   private:

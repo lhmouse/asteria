@@ -13,8 +13,7 @@
 namespace asteria {
 namespace {
 
-class Verbose_Hooks
-  final
+class Verbose_Hooks final
   : public Abstract_Hooks
   {
   private:
