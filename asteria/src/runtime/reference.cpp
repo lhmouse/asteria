@@ -17,11 +17,6 @@
 
 namespace asteria {
 
-Reference::
-~Reference()
-  {
-  }
-
 const Value&
 Reference::
 do_dereference_readonly_slow() const

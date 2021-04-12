@@ -61,8 +61,6 @@ class Reference
     do_finish_call_slow(Global_Context& global);
 
   public:
-    ~Reference();
-
     // Accessors
     Index
     index() const noexcept
