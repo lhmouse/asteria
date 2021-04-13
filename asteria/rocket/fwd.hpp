@@ -235,25 +235,31 @@ template<typename lhsT, typename rhsT>
 constexpr typename select_type<lhsT&&, rhsT&&>::type
 min(lhsT&& lhs, rhsT&& rhs)
   {
-    return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
-                       : ::std::forward<lhsT>(lhs);
+    return (rhs < lhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
 constexpr typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
   {
-    return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
-                       : ::std::forward<lhsT>(lhs);
+    return (lhs < rhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
   }
 
 template<typename xvT, typename loT, typename upT>
 constexpr typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
   {
-    return (xv < lo) ?             ::std::forward<loT>(lo)
-                     : (up < xv) ? ::std::forward<upT>(up)
-                                 : ::std::forward<xvT>(xv);
+    return (xv < lo) ? ::std::forward<loT>(lo) :
+           (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv);
+  }
+
+template<typename resultT, typename xvT, typename loT, typename upT>
+constexpr resultT
+clamp_cast(xvT&& xv, loT&& lo, upT&& up)
+  {
+    return static_cast<resultT>(
+             (xv < lo) ? ::std::forward<loT>(lo) :
+             (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv));
   }
 
 template<typename iteratorT>

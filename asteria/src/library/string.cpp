@@ -1279,7 +1279,7 @@ std_string_utf8_encode(V_integer code_point, Opt_boolean permissive)
     text.reserve(4);
 
     // Try encoding the code point.
-    auto cp = static_cast<char32_t>(::rocket::clamp(code_point, -1, INT32_MAX));
+    auto cp = ::rocket::clamp_cast<char32_t>(code_point, -1, INT32_MAX);
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true)
@@ -1297,7 +1297,7 @@ std_string_utf8_encode(V_array code_points, Opt_boolean permissive)
     for(const auto& elem : code_points) {
       // Try encoding the code point.
       V_integer value = elem.as_integer();
-      auto cp = static_cast<char32_t>(::rocket::clamp(value, -1, INT32_MAX));
+      auto cp = ::rocket::clamp_cast<char32_t>(value, -1, INT32_MAX);
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)

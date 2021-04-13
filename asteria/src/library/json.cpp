@@ -107,7 +107,7 @@ class Indenter_spaces final
   public:
     explicit
     Indenter_spaces(int64_t add)
-      : m_add(static_cast<size_t>(::rocket::clamp(add, 0, 10))), m_cur(0)
+      : m_add(::rocket::clamp_cast<size_t>(add, 0, 10)), m_cur(0)
       { }
 
   public:

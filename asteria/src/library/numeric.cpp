@@ -14,27 +14,30 @@ namespace {
 int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
-    if(!(lower <= upper))
+    if(!(lower <= upper)) {
       ASTERIA_THROW("Bounds not valid (`$1` is not less than or equal to `$2`)",
                     lower, upper);
+    }
     return upper;
   }
 
 double
 do_verify_bounds(double lower, double upper)
   {
-    if(!::std::islessequal(lower, upper))
+    if(!::std::islessequal(lower, upper)) {
       ASTERIA_THROW("Bounds not valid (`$1` is not less than or equal to `$2`)",
                     lower, upper);
+    }
     return upper;
   }
 
 int64_t
 do_cast_to_integer(double value)
   {
-    if(!is_convertible_to_integer(value))
+    if(!is_convertible_to_integer(value)) {
       ASTERIA_THROW("Real value not representable as integer (value `$1`)",
                     value);
+    }
     return static_cast<int64_t>(value);
   }
 
@@ -353,29 +356,25 @@ std_numeric_frexp(V_real x)
 V_real
 std_numeric_ldexp(V_real frac, V_integer exp)
   {
-    return ::std::ldexp(frac,
-               static_cast<int>(::rocket::clamp(exp, INT_MIN, INT_MAX)));
+    return ::std::ldexp(frac, ::rocket::clamp_cast<int>(exp, INT_MIN, INT_MAX));
   }
 
 V_integer
 std_numeric_addm(V_integer x, V_integer y)
   {
-    return static_cast<int64_t>(
-               static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
+    return static_cast<int64_t>(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
 V_integer
 std_numeric_subm(V_integer x, V_integer y)
   {
-    return static_cast<int64_t>(
-               static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
+    return static_cast<int64_t>(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
 V_integer
 std_numeric_mulm(V_integer x, V_integer y)
   {
-    return static_cast<int64_t>(
-               static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
+    return static_cast<int64_t>(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
 V_integer
