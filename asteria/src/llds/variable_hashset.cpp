@@ -152,7 +152,7 @@ enumerate_variables(Variable_Callback& callback) const
 
       // Enumerate a child variable.
       ROCKET_ASSERT(*qbkt);
-      callback.process(qbkt->kstor[0]);
+      callback.process(qbkt->kstor, qbkt->kstor[0]);
     }
     return callback;
   }

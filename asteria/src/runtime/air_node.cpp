@@ -359,7 +359,7 @@ struct AIR_Traits_initialize_variable
 
         // Get the variable back.
         auto var = ctx.stack().back().get_variable_opt();
-        ROCKET_ASSERT(var && !var->is_initialized());
+        ROCKET_ASSERT(var && var->is_uninitialized());
         ctx.stack().pop_back();
 
         // Initialize it.
@@ -3799,7 +3799,7 @@ struct AIR_Traits_unpack_struct_array
           ctx.stack().pop_back();
 
           // Initialize it.
-          ROCKET_ASSERT(var && !var->is_initialized());
+          ROCKET_ASSERT(var && var->is_uninitialized());
           auto qinit = arr.mut_ptr(i);
           if(qinit)
             var->initialize(::std::move(*qinit), up.p8[0]);
@@ -3859,7 +3859,7 @@ struct AIR_Traits_unpack_struct_object
           ctx.stack().pop_back();
 
           // Initialize it.
-          ROCKET_ASSERT(var && !var->is_initialized());
+          ROCKET_ASSERT(var && var->is_uninitialized());
           auto qinit = obj.mut_ptr(*it);
           if(qinit)
             var->initialize(::std::move(*qinit), up.p8[0]);

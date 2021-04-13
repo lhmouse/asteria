@@ -55,6 +55,10 @@ class Abstract_Context
         return *qref;
       }
 
+    void
+    do_clear_named_references() noexcept
+      { this->m_named_refs.clear();  }
+
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Abstract_Context);
 

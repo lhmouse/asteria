@@ -40,7 +40,7 @@ do_dereference_readonly_slow() const
         if(!qvar)
           ASTERIA_THROW("Attempt to use a moved-away reference (this is probably a bug)");
 
-        if(!qvar->is_initialized())
+        if(qvar->is_uninitialized())
           ASTERIA_THROW("Attempt to read from an uninitialized variable");
 
         qval = &(qvar->get_value());
@@ -174,11 +174,7 @@ Reference::
 enumerate_variables(Variable_Callback& callback) const
   {
     this->m_value.enumerate_variables(callback);
-
-    auto qvar = unerase_pointer_cast<Variable>(this->m_var);
-    if(qvar)
-      callback.process(qvar);
-
+    callback.process(&(this->m_var), unerase_pointer_cast<Variable>(this->m_var));
     return callback;
   }
 
@@ -205,7 +201,7 @@ dereference_mutable() const
         if(!qvar)
           ASTERIA_THROW("Attempt to use a moved-away reference (this is probably a bug)");
 
-        if(!qvar->is_initialized())
+        if(qvar->is_uninitialized())
           ASTERIA_THROW("Attempt to read from an uninitialized variable");
 
         qval = &(qvar->open_value());
@@ -252,7 +248,7 @@ dereference_unset() const
         if(!qvar)
           ASTERIA_THROW("Attempt to use a moved-away reference (this is probably a bug)");
 
-        if(!qvar->is_initialized())
+        if(qvar->is_uninitialized())
           ASTERIA_THROW("Attempt to read from an uninitialized variable");
 
         qval = &(qvar->open_value());

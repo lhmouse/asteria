@@ -40,14 +40,9 @@ int main()
     // Ignore leaks of emutls, emergency pool, etc.
     delete new int;
 
-    rcptr<Variable> var;
     bcnt.store(0, ::std::memory_order_relaxed);
     {
       Global_Context global;
-      var = global.garbage_collector()->create_variable();
-      var->initialize(V_string("meow"), true);
-      ::fprintf(stderr, "--> test variable: %p\n", (void*)var.get());
-
       Simple_Script code;
       code.reload_string(
         sref(__FILE__), __LINE__, sref(""
@@ -74,7 +69,5 @@ int main()
         )__"));
       code.execute(global);
     }
-    ASTERIA_TEST_CHECK(var->is_initialized() == false);
-    var.reset();
     ASTERIA_TEST_CHECK(bcnt.load(::std::memory_order_relaxed) == 0);
   }

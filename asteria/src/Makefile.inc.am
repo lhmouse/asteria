@@ -38,7 +38,6 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/variable.hpp  \
   %reldir%/runtime/variable_callback.hpp  \
   %reldir%/runtime/ptc_arguments.hpp  \
-  %reldir%/runtime/collector.hpp  \
   %reldir%/runtime/backtrace_frame.hpp  \
   %reldir%/runtime/runtime_error.hpp  \
   %reldir%/runtime/abstract_context.hpp  \
@@ -103,7 +102,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/variable.cpp  \
   %reldir%/runtime/variable_callback.cpp  \
   %reldir%/runtime/ptc_arguments.cpp  \
-  %reldir%/runtime/collector.cpp  \
   %reldir%/runtime/runtime_error.cpp  \
   %reldir%/runtime/abstract_context.cpp  \
   %reldir%/runtime/analytic_context.cpp  \

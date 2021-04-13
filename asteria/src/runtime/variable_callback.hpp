@@ -13,10 +13,14 @@ class Variable_Callback
   {
   protected:
     // The return value indicates whether to invoke `*this` on child
-    // variables/ recursively. It has no effect on children that are
-    // not variables, which are always enumerated.
+    // variables recursively. It has no effect on children that are
+    // not variables, which are always enumerated. Because values are
+    // copy-on-write, it is possible for the same (shared) value to
+    // be encountered multiple times during garbave collection. So we
+    // require the `idptr` argument to tell whether a pointer to
+    // variable itself has been marked or not.
     virtual bool
-    do_process_one(const rcptr<Variable>& var)
+    do_process_one(const void* idptr, const rcptr<Variable>& var)
       = 0;
 
   public:
@@ -24,12 +28,11 @@ class Variable_Callback
     ~Variable_Callback();
 
     Variable_Callback&
-    process(const rcptr<Variable>& var)
+    process(const void* idptr, const rcptr<Variable>& var_opt)
       {
-        const auto& value = var->get_value();
-        if(this->do_process_one(var) && !value.is_scalar())
-          value.enumerate_variables(*this);
-        return *this;
+        return var_opt && this->do_process_one(idptr, var_opt)
+                  ? var_opt->get_value().enumerate_variables(*this)
+                  : *this;
       }
 
     template<typename ContainerT>

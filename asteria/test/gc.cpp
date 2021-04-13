@@ -9,7 +9,8 @@
 
 using namespace asteria;
 
-::std::atomic<long> bcnt;
+sso_vector<void*, 1000> alloc_list;
+sso_vector<void*, 1000> free_list;
 
 void* operator new(size_t cb)
   {
@@ -17,7 +18,7 @@ void* operator new(size_t cb)
     if(!ptr)
       throw ::std::bad_alloc();
 
-    bcnt.fetch_add(1, ::std::memory_order_relaxed);
+    alloc_list.push_back(ptr);
     return ptr;
   }
 
@@ -26,13 +27,13 @@ void operator delete(void* ptr) noexcept
     if(!ptr)
       return;
 
-    bcnt.fetch_sub(1, ::std::memory_order_relaxed);
+    free_list.push_back(ptr);
     ::std::free(ptr);
   }
 
 void operator delete(void* ptr, size_t) noexcept
   {
-    operator delete(ptr);
+    ::operator delete(ptr);
   }
 
 int main()
@@ -40,13 +41,11 @@ int main()
     // Ignore leaks of emutls, emergency pool, etc.
     delete new int;
 
-    rcptr<Variable> var;
-    bcnt.store(0, ::std::memory_order_relaxed);
+    auto foreign = ::rocket::make_refcnt<Variable>();
+    foreign->initialize(V_string("foreign"), true);
     {
       Global_Context global;
-      var = global.garbage_collector()->create_variable();
-      var->initialize(V_string("meow"), true);
-      ::fprintf(stderr, "--> test variable: %p\n", (void*)var.get());
+      global.open_named_reference(sref("foreign_variable")).set_variable(foreign);
 
       Simple_Script code;
       code.reload_string(
@@ -54,9 +53,10 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
 
           var x,y,z;
+          ref gr -> __global foreign_variable;
 
-          func foo() { return [x,y,z];  }
-          func bar() { return [z,y,x];  }
+          func foo() { return [x,y,z,gr];  }
+          func bar() { return [z,y,x,gr];  }
 
           x = [foo,bar,foo,bar,foo];
           y = [x,[bar,foo,bar]];
@@ -70,7 +70,14 @@ int main()
         )__"));
       code.execute(global);
     }
-    ASTERIA_TEST_CHECK(var->is_initialized() == false);
-    var.reset();
-    ASTERIA_TEST_CHECK(bcnt.load(::std::memory_order_relaxed) == 0);
+
+    ASTERIA_TEST_CHECK(foreign->use_count() == 1);
+    ASTERIA_TEST_CHECK(foreign->is_uninitialized() == false);
+    ASTERIA_TEST_CHECK(foreign->get_value().type() == type_string);
+    foreign.reset();
+
+    std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
+    std::sort(free_list.mut_begin(), free_list.mut_end());
+    ASTERIA_TEST_CHECK(::std::equal(
+           alloc_list.begin(), alloc_list.end(), free_list.begin(), free_list.end()));
   }

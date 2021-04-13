@@ -289,51 +289,55 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 V_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
-    if(generation != ::rocket::clamp(generation, 0, 2))
+    uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
+    if(rgen != generation)
       ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    const auto gcoll = global.garbage_collector();
-    const auto& coll = gcoll->get_collector(static_cast<size_t>(generation));
-
     // Get the current number of variables being tracked.
-    return static_cast<int64_t>(coll.count_tracked_variables());
+    const auto gcoll = global.garbage_collector();
+    size_t nvars = gcoll->count_tracked_variables(rgen);
+    return static_cast<int64_t>(nvars);
   }
 
 V_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
-    if(generation != ::rocket::clamp(generation, 0, 2))
+    uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
+    if(rgen != generation)
       ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    const auto gcoll = global.garbage_collector();
-    const auto& coll = gcoll->get_collector(static_cast<size_t>(generation));
-
     // Get the current number of variables being tracked.
-    return static_cast<int64_t>(coll.get_threshold());
+    const auto gcoll = global.garbage_collector();
+    size_t thres = gcoll->get_threshold(rgen);
+    return static_cast<int64_t>(thres);
   }
 
 V_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
-    if(generation != ::rocket::clamp(generation, 0, 2))
+    uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
+    if(rgen != generation)
       ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    const auto gcoll = global.garbage_collector();
-    auto& coll = gcoll->open_collector(static_cast<size_t>(generation));
-
     // Set the threshold and return its old value.
-    uint32_t oldval = coll.get_threshold();
-    coll.set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, 4294967295)));
+    const auto gcoll = global.garbage_collector();
+    size_t oldval = gcoll->get_threshold(rgen);
+    gcoll->set_threshold(rgen, ::rocket::clamp_cast<size_t>(threshold, 0, PTRDIFF_MAX));
     return static_cast<int64_t>(oldval);
   }
 
 V_integer
 std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
   {
-    size_t rglimit = static_cast<size_t>(::rocket::clamp(generation_limit.value_or(2), 0, 2));
-    const auto gcoll = global.garbage_collector();
+    uint8_t rglimit = 2;
+    if(generation_limit) {
+      rglimit = ::rocket::clamp_cast<uint8_t>(*generation_limit, 0, 2);
+      if(rglimit != *generation_limit)
+        ASTERIA_THROW("Invalid generation limit `$1`", *generation_limit);
+    }
 
     // Perform garbage collection up to the generation specified.
+    const auto gcoll = global.garbage_collector();
     size_t nvars = gcoll->collect_variables(rglimit);
     return static_cast<int64_t>(nvars);
   }
@@ -345,7 +349,7 @@ std_system_env_get_variable(V_string name)
     if(!val)
       return nullopt;
 
-    // XXX: Use `sref()`? But environment variables may be modified or deleted.
+    // XXX: Use `sref()`?  But environment variables may be unset!
     return cow_string(val);
   }
 

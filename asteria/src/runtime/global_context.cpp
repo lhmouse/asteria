@@ -71,13 +71,9 @@ Global_Context(API_Version version)
     m_prng(::rocket::make_refcnt<Random_Engine>()),
     m_ldrlk(::rocket::make_refcnt<Loader_Lock>())
   {
-    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which
     // will be referenced as `yend[-1].version`.
-    cow_dictionary<Value> ostd;
     static constexpr Module_Comparator comp;
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(::std::is_sorted(begin(s_modules), end(s_modules), comp));
@@ -85,20 +81,21 @@ Global_Context(API_Version version)
     auto bptr = begin(s_modules);
     auto eptr = ::std::upper_bound(bptr, end(s_modules), version, comp);
 
-    // Initialize library modules.
-    for(auto q = bptr;  q != eptr;  ++q) {
-      // Create the subobject if it doesn't exist.
-      auto pair = ostd.try_emplace(sref(q->name));
-      if(pair.second) {
-        ROCKET_ASSERT(pair.first->second.is_null());
-        pair.first->second = cow_dictionary<Value>();
-      }
-      q->init(pair.first->second.open_object(), eptr[-1].version);
-    }
+    V_object ostd;
+    ::std::for_each(bptr, eptr,
+      [&](const Module& mod) {
+        auto r = ostd.try_emplace(sref(mod.name));
+        if(r.second)
+          r.first->second = V_object();
+
+        mod.init(r.first->second.open_object(), eptr[-1].version);
+      });
+
+    // Allocate the global variable `std`.
+    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
     auto vstd = gcoll->create_variable(2);
     vstd->initialize(::std::move(ostd), true);
-
-    // Set the `std` reference now.
     this->do_open_named_reference(nullptr, sref("std")).set_variable(vstd);
     this->m_vstd = ::std::move(vstd);
   }
@@ -106,12 +103,12 @@ Global_Context(API_Version version)
 Global_Context::
 ~Global_Context()
   {
-    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-
     // Perform the final garbage collection. Note if there are still cyclic
     // references afterwards, they are left uncollected!
-    gcoll->wipe_out_variables();
+    this->do_clear_named_references();
+    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
+    ROCKET_ASSERT(gcoll);
+    gcoll->finalize();
   }
 
 API_Version

@@ -5,60 +5,72 @@
 #define ASTERIA_RUNTIME_GARBAGE_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
-#include "collector.hpp"
 #include "../llds/variable_hashset.hpp"
+#include "../llds/pointer_hashset.hpp"
 
 namespace asteria {
 
 class Garbage_Collector final
   : public Rcfwd<Garbage_Collector>
   {
+  public:
+    enum : uint8_t {
+      generation_youngest  = 0,
+      generation_oldest    = 2,
+    };
+
   private:
-    // Mind the order of construction and destruction.
+    static constexpr size_t gMax = generation_oldest;
+    array<size_t, gMax+1> m_thres = { 10, 70, 500 };
+    array<Variable_HashSet, gMax+1> m_tracked;
+
+    long m_recur = 0;
     Variable_HashSet m_pool;
-    Collector m_oldest;
-    Collector m_middle;
-    Collector m_newest;
+    Variable_HashSet m_staging;
+    Pointer_HashSet m_idptrs;
 
   public:
     explicit
     Garbage_Collector() noexcept
-      : m_oldest(&(this->m_pool), nullptr, 10),
-        m_middle(&(this->m_pool), &(this->m_oldest), 60),
-        m_newest(&(this->m_pool), &(this->m_middle), 800)
       { }
 
   private:
-    Collector Garbage_Collector::*
-    do_locate(size_t gc_gen) const;
+    inline void
+    do_collect_generation(size_t& nvars, size_t gen);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Garbage_Collector);
 
+    // Properties
     size_t
-    get_pool_size() const noexcept
+    get_threshold(uint8_t gen) const
+      { return this->m_thres.at(gMax-gen);  }
+
+    Garbage_Collector&
+    set_threshold(uint8_t gen, size_t thres)
+      { return this->m_thres.mut(gMax-gen) = thres, *this;  }
+
+    size_t
+    count_tracked_variables(uint8_t gen) const
+      { return this->m_tracked.at(gMax-gen).size();  }
+
+    size_t
+    count_pooled_variables() const noexcept
       { return this->m_pool.size();  }
 
     Garbage_Collector&
-    clear_pool() noexcept
+    clear_pooled_variables() noexcept
       { return this->m_pool.clear(), *this;  }
 
-    const Collector&
-    get_collector(size_t gc_gen) const
-      { return this->*(this->do_locate(gc_gen));  }
-
-    Collector&
-    open_collector(size_t gc_gen)
-      { return this->*(this->do_locate(gc_gen));  }
-
+    // Allocation and collection
     rcptr<Variable>
-    create_variable(size_t gc_hint = 0);
+    create_variable(uint8_t gen_hint = generation_youngest);
 
     size_t
-    collect_variables(size_t gc_limit = 2);
+    collect_variables(uint8_t gen_limit = generation_oldest);
 
-    Garbage_Collector&
-    wipe_out_variables() noexcept;
+    size_t
+    finalize() noexcept;
   };
 
 }  // namespace asteria

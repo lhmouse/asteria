@@ -12,18 +12,18 @@ namespace asteria {
 class Variable final
   : public Rcfwd<Variable>
   {
-  private:
-    Value m_value;
-    bool m_immut = false;
-    bool m_valid = false;
+  public:
+    enum State : uint8_t
+      {
+        state_uninit     = 0,
+        state_immutable  = 1,
+        state_mutable    = 2,
+      };
 
-    // These are fields for garbage collection and are uninitialized by
-    // default. Because values are reference-counted, it is possible for
-    // a variable to be encountered multiple times at the marking stage
-    // during garbage collection. It is essential that we mark the value
-    // exactly once.
-    bool m_gc_mark;
-    long m_gc_ref;
+  private:
+    State m_state = state_uninit;
+    Value m_value;
+    long m_gc_ref;  // uninitialized by default
 
   public:
     explicit
@@ -33,6 +33,19 @@ class Variable final
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
 
+    // Accessors
+    State
+    get_state() const noexcept
+      { return this->m_state;  }
+
+    bool
+    is_uninitialized() const noexcept
+      { return this->m_state == state_uninit;  }
+
+    bool
+    is_mutable() const noexcept
+      { return this->m_state == state_mutable;  }
+
     const Value&
     get_value() const noexcept
       { return this->m_value;  }
@@ -41,55 +54,35 @@ class Variable final
     open_value()
       { return this->m_value;  }
 
-    bool
-    is_immutable() const noexcept
-      { return this->m_immut;  }
-
-    Variable&
-    set_immutable(bool immutable) noexcept
-      { return this->m_immut = immutable, *this;  }
-
-    bool
-    is_initialized() const noexcept
-      { return this->m_valid;  }
-
+    // Modifiers
     template<typename XValT>
     Variable&
     initialize(XValT&& xval, bool immut)
       {
         this->m_value = ::std::forward<XValT>(xval);
-        this->m_immut = immut;
-        this->m_valid = true;
+        this->m_state = immut ? state_immutable : state_mutable;
         return *this;
       }
 
     Variable&
     uninitialize() noexcept
       {
-        this->m_value = INT64_C(0x6EEF8BADF00DDEAD);
-        this->m_immut = true;
-        this->m_valid = false;
+        this->m_value = nullopt;
+        this->m_state = state_uninit;
         return *this;
       }
 
+    // GC interfaces
     long
     get_gc_ref() const noexcept
       { return this->m_gc_ref;  }
 
     Variable&
-    reset_gc_ref(long ref) noexcept
+    set_gc_ref(long ref) noexcept
       {
-        this->m_gc_mark = false;
+        ROCKET_ASSERT(ref <= this->use_count());
         this->m_gc_ref = ref;
         return *this;
-      }
-
-    bool
-    add_gc_ref() noexcept
-      {
-        bool m = ::std::exchange(this->m_gc_mark, true);
-        this->m_gc_ref += 1;
-        return m;
       }
   };
 

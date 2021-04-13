@@ -4,77 +4,302 @@
 #include "../precompiled.hpp"
 #include "garbage_collector.hpp"
 #include "variable.hpp"
-#include "reference.hpp"
+#include "variable_callback.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
+namespace {
+
+class Sentry
+  {
+  private:
+    long* m_ptr;
+    long m_old;
+
+  public:
+    explicit
+    Sentry(long& ref) noexcept
+      : m_ptr(&ref), m_old(ref)
+      { ++*(this->m_ptr);  }
+
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Sentry)
+      { --*(this->m_ptr);  }
+
+  public:
+    explicit operator
+    bool() const noexcept
+      { return this->m_old == 0;  }
+  };
+
+struct S1_init_gc_ref_1 : Variable_Callback
+  {
+    Variable_HashSet* staging = nullptr;
+
+    bool
+    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+      {
+        // Add the variable. Do nothing if it has already been added.
+        bool added = staging->insert(var);
+        if(!added)
+          return false;
+
+        // Initialize `gc_ref` to one. This can be overwritten later if
+        // the variable is reached again from `m_tracked`. All variables
+        // reachable indirectly are collected via this callback.
+        var->set_gc_ref(1);
+        return true;
+      }
+  };
+
+struct S1_init_gc_ref_2_NR : Variable_Callback
+  {
+    Variable_HashSet* staging = nullptr;
+
+    bool
+    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+      {
+        // If `var` is a unique reference, mark the variable for collection
+        // immediately. It is however not safe to erase it when iterating.
+        if(var.unique())
+          var->uninitialize();
+
+        // Try adding the variable first.
+        bool added = staging->insert(var);
+
+        // No matter whether it succeeds or not, there shall be at least
+        // two references to `var` (one is from `m_tracked` and the other
+        // is from `m_staging`), so initialize `gc_ref` to two.
+        var->set_gc_ref(2);
+
+        // If the variable had been added already, do nothing.
+        if(!added)
+          return false;
+
+        // Collect indirectly reachable variables with another recursive
+        // function. The current one is not recursive.
+        S1_init_gc_ref_1 s1_init;
+        s1_init.staging = staging;
+        var->get_value().enumerate_variables(s1_init);
+        return false;
+      }
+  };
+
+struct S2_add_gc_ref_frac_NR : Variable_Callback
+  {
+    Pointer_HashSet* idptrs = nullptr;
+
+    bool
+    do_process_one(const void* idptr, const rcptr<Variable>& var) final
+      {
+        // Ensure each reference pointer is added only once.
+        bool added = idptrs->insert(idptr);
+        if(!added)
+          return false;
+
+        // Drop the reference count from this pointer.
+        var->set_gc_ref(var->get_gc_ref() + 1);
+        return false;
+      }
+  };
+
+struct S2_iref_internal_NR : Variable_Callback
+  {
+    Pointer_HashSet* idptrs = nullptr;
+
+    bool
+    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+      {
+        // Drop indirect references from `m_staging`.
+        S2_add_gc_ref_frac_NR s2_gcadd;
+        s2_gcadd.idptrs = idptrs;
+        var->get_value().enumerate_variables(s2_gcadd);
+        return false;
+      }
+  };
+
+struct S3_mark_reachable : Variable_Callback
+  {
+    bool
+    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+      {
+        // Skip unrachable variables.
+        if(var->get_gc_ref() >= var->use_count())
+          return false;
+
+        // Skip marked variables.
+        if(var->get_gc_ref() == 0)
+          return false;
+
+        // Mark this variable reachable, as well as all children.
+        // This is recursive.
+        var->set_gc_ref(0);
+        return true;
+      }
+  };
+
+struct S4_reap_unreachable : Variable_Callback
+  {
+    Variable_HashSet* pool = nullptr;
+    Variable_HashSet* tracked = nullptr;
+    Variable_HashSet* next_opt = nullptr;
+    size_t nvars = 0;
+
+    bool
+    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+      {
+        // Skip reachable variables.
+        if(var->get_gc_ref() == 0)
+          return false;
+
+        // Wipe the value out.
+        var->uninitialize();
+        tracked->erase(var);
+        nvars++;
+
+        // Pool the variable. Exceptions are ignored.
+        try {
+          pool->insert(var);
+        }
+        catch(exception& stdex) {
+          ::fprintf(stderr,
+              "WARNING: An exception was thrown during garbage collection. "
+              "If this problem persists, please file a bug report.\n"
+              "\n"
+              "  exception class: %s\n"
+              "  what(): %s\n",
+              typeid(stdex).name(), stdex.what());
+        }
+        return false;
+      }
+  };
+
+struct Sz_wipe_variable : Variable_Callback
+  {
+    bool
+    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+      {
+        // Destroy the value. This shall not be recursive.
+        var->uninitialize();
+        return false;
+      }
+  };
+
+}  // namespace
 
 Garbage_Collector::
 ~Garbage_Collector()
   {
   }
 
-Collector Garbage_Collector::*
+void
 Garbage_Collector::
-do_locate(size_t gc_gen) const
+do_collect_generation(size_t& nvars, size_t gen)
   {
-    switch(gc_gen) {
-      case 0:
-        return &Garbage_Collector::m_newest;
+    // Ignore recursive requests.
+    const Sentry sentry(this->m_recur);
+    if(!sentry)
+      return;
 
-      case 1:
-        return &Garbage_Collector::m_middle;
+    // This algorithm is described at
+    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
+    auto& tracked = this->m_tracked.mut(gMax-gen);
+    this->m_staging.clear();
+    this->m_idptrs.clear();
 
-      case 2:
-        return &Garbage_Collector::m_oldest;
+    // Collect all variables from `tracked` into `m_staging`, recursively.
+    // The reference from `tracked` shall be excluded, so the `gc_ref` counter
+    // is initialized to one if a variable is reached from `tracked`, and to
+    // zero if it is reached indirectly.
+    S1_init_gc_ref_2_NR s1_init;
+    s1_init.staging = ::std::addressof(this->m_staging);
+    tracked.enumerate_variables(s1_init);
 
-      default:
-        ASTERIA_THROW("Invalid GC generation (gc_gen `$1`)", gc_gen);
-    }
+    // For each variable that is exactly one-level indirectly reachable from
+    // those in `m_staging`, the `gc_ref` counter is incremented by one.
+    S2_iref_internal_NR s2_iref;
+    s2_iref.idptrs = ::std::addressof(this->m_idptrs);
+    this->m_staging.enumerate_variables(s2_iref);
+
+    // A variable whose `gc_ref` counter is less than its reference count is
+    // reachable. Variables that are reachable from it are reachable, too.
+    S3_mark_reachable s3_mark;
+    this->m_staging.enumerate_variables(s3_mark);
+
+    // Collect each variable whose `gc_ref` counter is zero.
+    S4_reap_unreachable s4_reap;
+    s4_reap.pool = ::std::addressof(this->m_pool);
+    s4_reap.tracked = ::std::addressof(tracked);
+    s4_reap.next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
+    this->m_staging.enumerate_variables(s4_reap);
+
+    // Accumulate the number of variables collected.
+    nvars += s4_reap.nvars;
   }
 
 rcptr<Variable>
 Garbage_Collector::
-create_variable(size_t gc_hint)
+create_variable(uint8_t gen_hint)
   {
-    // Locate the collector, which will be responsible for tracking the new variable.
-    auto& coll = this->*(this->do_locate(gc_hint));
+    // Perform automatic garbage collection.
+    size_t nvars = 0;
+    for(size_t gen = 0;  gen <= gMax;  ++gen) {
+      if(this->m_tracked[gMax-gen].size() >= this->m_thres[gMax-gen])
+        this->do_collect_generation(nvars, gen);
+    }
+    this->m_staging.clear();
+    this->m_idptrs.clear();
 
-    // Try allocating a variable from the pool.
+    // Get a cached variable.
+    // If the pool has been exhausted, allocate a new one.
     auto var = this->m_pool.erase_random_opt();
-    if(ROCKET_UNEXPECT(!var))
+    if(!var)
       var = ::rocket::make_refcnt<Variable>();
-    coll.track_variable(var);
 
-    // Mark it uninitialized.
-    var->uninitialize();
+    // Track it.
+    this->m_tracked.mut(gMax-gen_hint).insert(var);
     return var;
   }
 
 size_t
 Garbage_Collector::
-collect_variables(size_t gc_limit)
+collect_variables(uint8_t gen_limit)
   {
-    // Collect variables from the newest generation to the oldest.
-    for(auto p = ::std::make_pair(&(this->m_newest), gc_limit + 1);
-          p.first && p.second;  p.first = p.first->get_tied_collector_opt(), p.second--)
-      p.first->collect_single_opt();
-
-    // Clear the variable pool.
-    auto nvars = this->m_pool.size();
-    this->m_pool.clear();
+    // Collect all variables up to generation `gen_limit`.
+    size_t nvars = 0;
+    for(size_t gen = 0;  (gen <= gMax) && (gen <= gen_limit);  ++gen) {
+      this->do_collect_generation(nvars, gen);
+    }
     return nvars;
   }
 
-Garbage_Collector&
+size_t
 Garbage_Collector::
-wipe_out_variables() noexcept
+finalize() noexcept
   {
-    // Uninitialize all variables recursively.
-    this->m_newest.wipe_out_variables();
-    this->m_middle.wipe_out_variables();
-    this->m_oldest.wipe_out_variables();
-    return *this;
+    // Collect all variables.
+    size_t nvars = 0;
+    for(size_t gen = 0;  gen <= gMax;  ++gen) {
+      try {
+        this->do_collect_generation(nvars, gen);
+      }
+      catch(exception& stdex) {
+        ::fprintf(stderr,
+            "WARNING: An exception was thrown during the final garbage "
+            "collection. This exception has been ignored to prevent the "
+            "program from crashing, but some resources may have leaked.\n"
+            "\n"
+            "  exception class: %s\n"
+            "  what(): %s\n",
+            typeid(stdex).name(), stdex.what());
+      }
+    }
+    this->m_staging.clear();
+    this->m_idptrs.clear();
+
+    // Wipe out all tracked variables.
+    Sz_wipe_variable wipe;
+    this->m_pool.enumerate_variables(wipe);
+    return nvars;
   }
 
 }  // namespace asteria
