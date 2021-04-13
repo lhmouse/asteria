@@ -43,7 +43,7 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/analytic_context.hpp  \
   %reldir%/runtime/executive_context.hpp  \
   %reldir%/runtime/global_context.hpp  \
-  %reldir%/runtime/genius_collector.hpp  \
+  %reldir%/runtime/garbage_collector.hpp  \
   %reldir%/runtime/random_engine.hpp  \
   %reldir%/runtime/loader_lock.hpp  \
   %reldir%/runtime/variadic_arguer.hpp  \
@@ -106,7 +106,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/analytic_context.cpp  \
   %reldir%/runtime/executive_context.cpp  \
   %reldir%/runtime/global_context.cpp  \
-  %reldir%/runtime/genius_collector.cpp  \
+  %reldir%/runtime/garbage_collector.cpp  \
   %reldir%/runtime/random_engine.cpp  \
   %reldir%/runtime/loader_lock.cpp  \
   %reldir%/runtime/variadic_arguer.cpp  \

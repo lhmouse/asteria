@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "global_context.hpp"
-#include "genius_collector.hpp"
+#include "garbage_collector.hpp"
 #include "random_engine.hpp"
 #include "loader_lock.hpp"
 #include "variable.hpp"
@@ -67,11 +67,11 @@ struct Module_Comparator
 
 Global_Context::
 Global_Context(API_Version version)
-  : m_gcoll(::rocket::make_refcnt<Genius_Collector>()),
+  : m_gcoll(::rocket::make_refcnt<Garbage_Collector>()),
     m_prng(::rocket::make_refcnt<Random_Engine>()),
     m_ldrlk(::rocket::make_refcnt<Loader_Lock>())
   {
-    const auto gcoll = unerase_cast<Genius_Collector*>(this->m_gcoll);
+    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
 
     // Get the range of modules to initialize.
@@ -106,7 +106,7 @@ Global_Context(API_Version version)
 Global_Context::
 ~Global_Context()
   {
-    const auto gcoll = unerase_cast<Genius_Collector*>(this->m_gcoll);
+    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
 
     // Perform the final garbage collection. Note if there are still cyclic

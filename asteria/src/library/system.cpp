@@ -5,7 +5,7 @@
 #include "system.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/genius_collector.hpp"
+#include "../runtime/garbage_collector.hpp"
 #include "../runtime/random_engine.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/parser_error.hpp"
@@ -292,7 +292,7 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
     if(generation != ::rocket::clamp(generation, 0, 2))
       ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    const auto gcoll = global.genius_collector();
+    const auto gcoll = global.garbage_collector();
     const auto& coll = gcoll->get_collector(static_cast<size_t>(generation));
 
     // Get the current number of variables being tracked.
@@ -305,7 +305,7 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
     if(generation != ::rocket::clamp(generation, 0, 2))
       ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    const auto gcoll = global.genius_collector();
+    const auto gcoll = global.garbage_collector();
     const auto& coll = gcoll->get_collector(static_cast<size_t>(generation));
 
     // Get the current number of variables being tracked.
@@ -318,7 +318,7 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
     if(generation != ::rocket::clamp(generation, 0, 2))
       ASTERIA_THROW("Invalid generation `$1`", generation);
 
-    const auto gcoll = global.genius_collector();
+    const auto gcoll = global.garbage_collector();
     auto& coll = gcoll->open_collector(static_cast<size_t>(generation));
 
     // Set the threshold and return its old value.
@@ -331,7 +331,7 @@ V_integer
 std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
   {
     size_t rglimit = static_cast<size_t>(::rocket::clamp(generation_limit.value_or(2), 0, 2));
-    const auto gcoll = global.genius_collector();
+    const auto gcoll = global.garbage_collector();
 
     // Perform garbage collection up to the generation specified.
     size_t nvars = gcoll->collect_variables(rglimit);

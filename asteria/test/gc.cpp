@@ -4,7 +4,7 @@
 #include "utils.hpp"
 #include "../src/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include "../src/runtime/genius_collector.hpp"
+#include "../src/runtime/garbage_collector.hpp"
 #include "../src/runtime/variable.hpp"
 
 using namespace asteria;
@@ -44,7 +44,7 @@ int main()
     bcnt.store(0, ::std::memory_order_relaxed);
     {
       Global_Context global;
-      var = global.genius_collector()->create_variable();
+      var = global.garbage_collector()->create_variable();
       var->initialize(V_string("meow"), true);
       ::fprintf(stderr, "--> test variable: %p\n", (void*)var.get());
 

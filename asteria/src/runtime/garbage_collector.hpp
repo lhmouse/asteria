@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_GENIUS_COLLECTOR_HPP_
-#define ASTERIA_RUNTIME_GENIUS_COLLECTOR_HPP_
+#ifndef ASTERIA_RUNTIME_GARBAGE_COLLECTOR_HPP_
+#define ASTERIA_RUNTIME_GARBAGE_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
 #include "collector.hpp"
@@ -10,8 +10,8 @@
 
 namespace asteria {
 
-class Genius_Collector final
-  : public Rcfwd<Genius_Collector>
+class Garbage_Collector final
+  : public Rcfwd<Garbage_Collector>
   {
   private:
     // Mind the order of construction and destruction.
@@ -22,24 +22,24 @@ class Genius_Collector final
 
   public:
     explicit
-    Genius_Collector() noexcept
+    Garbage_Collector() noexcept
       : m_oldest(&(this->m_pool), nullptr, 10),
         m_middle(&(this->m_pool), &(this->m_oldest), 60),
         m_newest(&(this->m_pool), &(this->m_middle), 800)
       { }
 
   private:
-    Collector Genius_Collector::*
+    Collector Garbage_Collector::*
     do_locate(size_t gc_gen) const;
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Genius_Collector);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Garbage_Collector);
 
     size_t
     get_pool_size() const noexcept
       { return this->m_pool.size();  }
 
-    Genius_Collector&
+    Garbage_Collector&
     clear_pool() noexcept
       { return this->m_pool.clear(), *this;  }
 
@@ -57,7 +57,7 @@ class Genius_Collector final
     size_t
     collect_variables(size_t gc_limit = 2);
 
-    Genius_Collector&
+    Garbage_Collector&
     wipe_out_variables() noexcept;
   };
 

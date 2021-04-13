@@ -166,7 +166,7 @@ class Abstract_Context;
 class Analytic_Context;
 class Executive_Context;
 class Global_Context;
-class Genius_Collector;
+class Garbage_Collector;
 class Random_Engine;
 class Loader_Lock;
 class Variadic_Arguer;

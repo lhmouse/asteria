@@ -17,7 +17,7 @@ class Global_Context
     Recursion_Sentry m_sentry;
 
     rcfwdp<Abstract_Hooks> m_qhooks;
-    rcfwdp<Genius_Collector> m_gcoll;
+    rcfwdp<Garbage_Collector> m_gcoll;
     rcfwdp<Random_Engine> m_prng;
     rcfwdp<Loader_Lock> m_ldrlk;
     rcfwdp<Variable> m_vstd;
@@ -76,10 +76,10 @@ class Global_Context
       { return this->m_qhooks = ::std::move(hooks_opt), *this;  }
 
     // These are interfaces for individual global components.
-    ASTERIA_INCOMPLET(Genius_Collector)
-    rcptr<Genius_Collector>
-    genius_collector() const noexcept
-      { return unerase_pointer_cast<Genius_Collector>(this->m_gcoll);  }
+    ASTERIA_INCOMPLET(Garbage_Collector)
+    rcptr<Garbage_Collector>
+    garbage_collector() const noexcept
+      { return unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);  }
 
     ASTERIA_INCOMPLET(Random_Engine)
     rcptr<Random_Engine>

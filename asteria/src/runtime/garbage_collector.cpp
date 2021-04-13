@@ -2,31 +2,31 @@
 // Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "genius_collector.hpp"
+#include "garbage_collector.hpp"
 #include "variable.hpp"
 #include "reference.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
 
-Genius_Collector::
-~Genius_Collector()
+Garbage_Collector::
+~Garbage_Collector()
   {
   }
 
-Collector Genius_Collector::*
-Genius_Collector::
+Collector Garbage_Collector::*
+Garbage_Collector::
 do_locate(size_t gc_gen) const
   {
     switch(gc_gen) {
       case 0:
-        return &Genius_Collector::m_newest;
+        return &Garbage_Collector::m_newest;
 
       case 1:
-        return &Genius_Collector::m_middle;
+        return &Garbage_Collector::m_middle;
 
       case 2:
-        return &Genius_Collector::m_oldest;
+        return &Garbage_Collector::m_oldest;
 
       default:
         ASTERIA_THROW("Invalid GC generation (gc_gen `$1`)", gc_gen);
@@ -34,7 +34,7 @@ do_locate(size_t gc_gen) const
   }
 
 rcptr<Variable>
-Genius_Collector::
+Garbage_Collector::
 create_variable(size_t gc_hint)
   {
     // Locate the collector, which will be responsible for tracking the new variable.
@@ -52,7 +52,7 @@ create_variable(size_t gc_hint)
   }
 
 size_t
-Genius_Collector::
+Garbage_Collector::
 collect_variables(size_t gc_limit)
   {
     // Collect variables from the newest generation to the oldest.
@@ -66,8 +66,8 @@ collect_variables(size_t gc_limit)
     return nvars;
   }
 
-Genius_Collector&
-Genius_Collector::
+Garbage_Collector&
+Garbage_Collector::
 wipe_out_variables() noexcept
   {
     // Uninitialize all variables recursively.

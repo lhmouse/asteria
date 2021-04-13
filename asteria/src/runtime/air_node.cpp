@@ -8,7 +8,7 @@
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
 #include "analytic_context.hpp"
-#include "genius_collector.hpp"
+#include "garbage_collector.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
 #include "variable.hpp"
@@ -315,7 +315,7 @@ struct AIR_Traits_declare_variable
     execute(Executive_Context& ctx, const Sparam_sloc_name& sp)
       {
         const auto qhooks = ctx.global().get_hooks_opt();
-        const auto gcoll = ctx.global().genius_collector();
+        const auto gcoll = ctx.global().garbage_collector();
 
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
@@ -601,7 +601,7 @@ struct AIR_Traits_for_each_statement
     execute(Executive_Context& ctx, const Sparam_for_each& sp)
       {
         // Get global interfaces.
-        auto gcoll = ctx.global().genius_collector();
+        auto gcoll = ctx.global().garbage_collector();
 
         // We have to create an outer context due to the fact that the key and mapped
         // references outlast every iteration.
@@ -3902,7 +3902,7 @@ struct AIR_Traits_define_null_variable
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_name& sp)
       {
         const auto qhooks = ctx.global().get_hooks_opt();
-        const auto gcoll = ctx.global().genius_collector();
+        const auto gcoll = ctx.global().garbage_collector();
 
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
