@@ -391,7 +391,6 @@ std_chrono_utc_parse(V_string time_str)
             ASTERIA_THROW("Invalid date-time string (invalid subsecond digit in `$1`)", time_str);
 
           msec += dval * weight;
-
           weight /= 10;
           ++rpos;
         }
@@ -413,15 +412,19 @@ std_chrono_utc_parse(V_string time_str)
     // Note our 'years' start from March.
     if(month < 3)
       year -= 1;
+
     // There are 146097 days in every 400 years.
     uint64_t temp = (year - 1600) / 400 * 146097;
     year %= 400;
+
     // There are 36524 days in every 100 years.
     temp += year / 100 * 36524;
     year %= 100;
+
     // There are 1461 days in every 4 years.
     temp += year / 4 * 1461;
     year %= 4;
+
     // There are 365 days in every year.
     // Note we count from 03-01. The extra day of a leap year will be appended to the end.
     temp += year * 365;
