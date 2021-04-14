@@ -298,13 +298,13 @@ finalize() noexcept
             "  what(): %s\n",
             typeid(stdex).name(), stdex.what());
       }
+
+      // Wipe out all tracked variables.
+      Sz_wipe_variable wipe;
+      this->m_tracked.mut(gMax-gen).enumerate_variables(wipe);
     }
     this->m_staging.clear();
     this->m_id_ptrs.clear();
-
-    // Wipe out all tracked variables.
-    Sz_wipe_variable wipe;
-    this->m_pool.enumerate_variables(wipe);
     return nvars;
   }
 
