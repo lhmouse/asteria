@@ -207,9 +207,9 @@ do_collect_generation(size_t& nvars, size_t gen)
     this->m_id_ptrs.clear();
 
     // Collect all variables from `tracked` into `m_staging`, recursively.
-    // The reference from `tracked` shall be excluded, so the `gc_ref` counter
-    // is initialized to one if a variable is reached from `tracked`, and to
-    // zero if it is reached indirectly.
+    // The references from `tracked` and `m_staging` shall be excluded, so the
+    // `gc_ref` counter is initialized to two if a variable is reached from
+    // `tracked`, and to one if it is reached indirectly.
     S1_init_gc_ref_2_NR s1_init;
     s1_init.staging = &(this->m_staging);
     tracked.enumerate_variables(s1_init);
