@@ -39,7 +39,7 @@ class Variable_HashSet
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `var`, but in no case
     // can a null pointer be returned.
-    Bucket*
+    ROCKET_PURE_FUNCTION Bucket*
     do_xprobe(const rcptr<Variable>& var) const noexcept;
 
     // This function is used for relocation after an element is erased.
