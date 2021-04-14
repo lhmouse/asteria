@@ -270,8 +270,7 @@ class Reference
 
     // These are conceptual read/write functions.
     // Some references are placeholders that do not denote values.
-    ROCKET_FORCED_INLINE_FUNCTION
-    const Value&
+    ROCKET_FORCED_INLINE_FUNCTION const Value&
     dereference_readonly() const
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
@@ -279,8 +278,7 @@ class Reference
             : this->do_dereference_readonly_slow();
       }
 
-    ROCKET_FORCED_INLINE_FUNCTION
-    Value&
+    ROCKET_FORCED_INLINE_FUNCTION Value&
     mutate_into_temporary()
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
@@ -288,8 +286,7 @@ class Reference
             : this->do_mutate_into_temporary_slow();
       }
 
-    ROCKET_FORCED_INLINE_FUNCTION
-    Reference&
+    ROCKET_FORCED_INLINE_FUNCTION Reference&
     finish_call(Global_Context& global)
       {
         return ROCKET_EXPECT(!this->is_ptc_args())

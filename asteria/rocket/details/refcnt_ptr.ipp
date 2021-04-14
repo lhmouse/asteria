@@ -102,8 +102,7 @@ class stored_pointer
         return ptr;
       }
 
-    ROCKET_FORCED_INLINE_FUNCTION
-    void
+    ROCKET_FORCED_INLINE_FUNCTION void
     reset(pointer ptr_new) noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);

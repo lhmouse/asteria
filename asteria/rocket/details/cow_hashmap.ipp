@@ -438,8 +438,7 @@ class storage_handle
     as_allocator() noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    ROCKET_PURE_FUNCTION
-    bool
+    ROCKET_PURE_FUNCTION bool
     unique() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -457,8 +456,7 @@ class storage_handle
         return qstor->nref.get();
       }
 
-    ROCKET_PURE_FUNCTION
-    size_type
+    ROCKET_PURE_FUNCTION size_type
     bucket_count() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -467,8 +465,7 @@ class storage_handle
         return qstor->bucket_count();
       }
 
-    ROCKET_PURE_FUNCTION
-    size_type
+    ROCKET_PURE_FUNCTION size_type
     capacity() const noexcept
       { return this->bucket_count() / max_load_factor_reciprocal;  }
 
@@ -501,8 +498,7 @@ class storage_handle
         return storage::max_nbkt_for_nblk(nblk) / max_load_factor_reciprocal;
       }
 
-    ROCKET_PURE_FUNCTION
-    const bucket_type*
+    ROCKET_PURE_FUNCTION const bucket_type*
     buckets() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -520,8 +516,7 @@ class storage_handle
         return qstor->bkts;
       }
 
-    ROCKET_PURE_FUNCTION
-    size_type
+    ROCKET_PURE_FUNCTION size_type
     size() const noexcept
       {
         auto qstor = this->m_qstor;

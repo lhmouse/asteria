@@ -46,8 +46,7 @@ class variant
 
   private:
     template<size_t indexT>
-    ROCKET_PURE_FUNCTION
-    const typename alternative_at<indexT>::type*
+    ROCKET_PURE_FUNCTION const typename alternative_at<indexT>::type*
     do_cast_storage() const noexcept
       {
         return reinterpret_cast<const typename alternative_at<indexT>::type*>(
@@ -55,8 +54,7 @@ class variant
       }
 
     template<size_t indexT>
-    ROCKET_PURE_FUNCTION
-    typename alternative_at<indexT>::type*
+    ROCKET_PURE_FUNCTION typename alternative_at<indexT>::type*
     do_cast_storage() noexcept
       {
         return reinterpret_cast<typename alternative_at<indexT>::type*>(

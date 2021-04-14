@@ -61,8 +61,7 @@ enum Xop : uint8_t
     xop_tail      = 47,  // [$]
   };
 
-ROCKET_CONST_FUNCTION
-const char*
+ROCKET_CONST_FUNCTION const char*
 describe_xop(Xop xop) noexcept;
 
 // IR status codes

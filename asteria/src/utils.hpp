@@ -17,8 +17,7 @@ ptrdiff_t
 write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 template<typename... ParamsT>
-ROCKET_NOINLINE ROCKET_FLATTEN_FUNCTION
-cow_string
+ROCKET_NOINLINE ROCKET_FLATTEN_FUNCTION cow_string
 format_string(const char* templ, const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;
@@ -144,8 +143,7 @@ struct Wrapped_Index
                         // `nprepend` and `nappend` are zeroes)
   };
 
-ROCKET_CONST_FUNCTION
-Wrapped_Index
+ROCKET_CONST_FUNCTION Wrapped_Index
 wrap_index(int64_t index, size_t size) noexcept;
 
 // Note that all bits in the result are filled.

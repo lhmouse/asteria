@@ -589,8 +589,7 @@ enum Type : uint8_t
     type_object    = 8,
   };
 
-ROCKET_CONST_FUNCTION
-const char*
+ROCKET_CONST_FUNCTION const char*
 describe_type(Type type) noexcept;
 
 // Value comparison results
@@ -615,8 +614,7 @@ enum Frame_Type : uint8_t
     frame_type_try     = 7,  // An exception propagated across a try block.
   };
 
-ROCKET_CONST_FUNCTION
-const char*
+ROCKET_CONST_FUNCTION const char*
 describe_frame_type(Frame_Type type) noexcept;
 
 // Parser status codes
@@ -678,8 +676,7 @@ enum Parser_Status : uint32_t
     parser_status_continue_no_matching_scope                 = 3034,
   };
 
-ROCKET_CONST_FUNCTION
-const char*
+ROCKET_CONST_FUNCTION const char*
 describe_parser_status(Parser_Status status) noexcept;
 
 // API versioning of the standard library

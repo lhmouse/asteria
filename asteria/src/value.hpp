@@ -205,13 +205,11 @@ class Value
       }
 
     // This performs the builtin conversion to boolean values.
-    ROCKET_PURE_FUNCTION
-    bool
+    ROCKET_PURE_FUNCTION bool
     test() const noexcept;
 
     // This performs the builtin comparison with another value.
-    ROCKET_PURE_FUNCTION
-    Compare
+    ROCKET_PURE_FUNCTION Compare
     compare(const Value& other) const noexcept;
 
     // These are miscellaneous interfaces for debugging.
