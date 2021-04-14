@@ -33,14 +33,7 @@ class Pointer_HashSet
 
   private:
     void
-    do_destroy_buckets() noexcept
-      {
-#ifdef ROCKET_DEBUG
-        ::std::for_each(this->m_bptr, this->m_eptr, [&](Bucket& r) {
-                  ::std::memset((void*)&r, 0xD3, sizeof(r));  r.prev = nullptr;  });
-#endif
-        this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
-      }
+    do_destroy_buckets() noexcept;
 
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `ptr`, but in no case
@@ -85,7 +78,7 @@ class Pointer_HashSet
         // Construct the node, then attach it.
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
-        qbkt->key = ptr;
+        qbkt->key_ptr = ptr;
         ROCKET_ASSERT(*qbkt);
         this->m_size++;
       }
@@ -163,7 +156,7 @@ class Pointer_HashSet
         if(!*qbkt)
           return false;
 
-        ROCKET_ASSERT(qbkt->key == ptr);
+        ROCKET_ASSERT(qbkt->key_ptr == ptr);
         return true;
       }
 

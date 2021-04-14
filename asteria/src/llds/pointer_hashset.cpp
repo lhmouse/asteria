@@ -7,6 +7,26 @@
 
 namespace asteria {
 
+void
+Pointer_HashSet::
+do_destroy_buckets() noexcept
+  {
+    auto next = this->m_head;
+    while(ROCKET_EXPECT(next)) {
+      auto qbkt = next;
+      next = qbkt->next;
+
+      // Destroy this bucket.
+      ROCKET_ASSERT(*qbkt);
+      qbkt->prev = nullptr;
+    }
+#ifdef ROCKET_DEBUG
+    ::std::for_each(this->m_bptr, this->m_eptr, [&](Bucket& r) {
+              ::std::memset((void*)&r, 0xD3, sizeof(r));  r.prev = nullptr;  });
+#endif
+    this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
+  }
+
 details_pointer_hashset::Bucket*
 Pointer_HashSet::
 do_xprobe(const void* ptr) const noexcept
@@ -20,7 +40,7 @@ do_xprobe(const void* ptr) const noexcept
     auto mptr = ::rocket::get_probing_origin(bptr, eptr,
                     reinterpret_cast<uintptr_t>(ptr));
     auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-                    [&](const Bucket& r) { return r.key == ptr;  });
+                    [&](const Bucket& r) { return r.key_ptr == ptr;  });
 
     // The load factor is kept <= 0.5 so there must always be a bucket available.
     ROCKET_ASSERT(qbkt);
@@ -47,12 +67,12 @@ do_xrelocate_but(Bucket* qxcld) noexcept
         // Uniqueness has already been implied for all elements, so there is no need
         // to check for collisions.
         auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
-                        reinterpret_cast<uintptr_t>(sbkt->key));
+                        reinterpret_cast<uintptr_t>(sbkt->key_ptr));
         auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr,this->m_eptr,
                         [&](const Bucket&) { return false;  });
-        ROCKET_ASSERT(qbkt);
 
         // Mark the new bucket non-empty.
+        ROCKET_ASSERT(qbkt);
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
 
@@ -61,8 +81,8 @@ do_xrelocate_but(Bucket* qxcld) noexcept
           return false;
 
         // Relocate the bucket.
-        qbkt->key = sbkt->key;
-        sbkt->key = reinterpret_cast<void*>(0xBEEFDEAD);
+        qbkt->key_ptr = sbkt->key_ptr;
+        sbkt->key_ptr = reinterpret_cast<void*>(0xBEEFDEAD);
 
         // Keep probing until an empty bucket is found.
         return false;
@@ -99,18 +119,18 @@ do_rehash_more()
       // Uniqueness has already been implied for all elements, so there is no need
       // to check for collisions.
       auto mptr = ::rocket::get_probing_origin(bptr, eptr,
-                      reinterpret_cast<uintptr_t>(sbkt->key));
+                      reinterpret_cast<uintptr_t>(sbkt->key_ptr));
       auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
                       [&](const Bucket&) { return false;  });
-      ROCKET_ASSERT(qbkt);
 
       // Mark the new bucket non-empty.
+      ROCKET_ASSERT(qbkt);
       ROCKET_ASSERT(!*qbkt);
       this->do_list_attach(qbkt);
 
       // Relocate the bucket.
-      qbkt->key = sbkt->key;
-      sbkt->key = reinterpret_cast<void*>(0xBEEFDEAD);
+      qbkt->key_ptr = sbkt->key_ptr;
+      sbkt->key_ptr = reinterpret_cast<void*>(0xBEEFDEAD);
 
       // Process the next bucket.
       sbkt = sbkt->next;

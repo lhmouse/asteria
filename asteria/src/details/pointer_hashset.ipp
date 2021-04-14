@@ -12,7 +12,7 @@ struct Bucket
   {
     Bucket* next;  // the next bucket in the [non-circular] list
     Bucket* prev;  // the previous bucket in the [circular] list
-    const void* key;  // initialized iff `prev` is non-null
+    const void* key_ptr;  // initialized iff `prev` is non-null
 
     explicit operator
     bool() const noexcept
