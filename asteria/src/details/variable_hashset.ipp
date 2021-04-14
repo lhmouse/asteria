@@ -14,11 +14,8 @@ struct Bucket
     Bucket* prev;  // the previous bucket in the [circular] list
     union { rcptr<Variable> kstor[1];  };  // initialized iff `prev` is non-null
 
-    Bucket()
-      { }
-
-    ~Bucket()
-      { }
+    Bucket() noexcept { }
+    ~Bucket() noexcept { }
 
     explicit operator
     bool() const noexcept

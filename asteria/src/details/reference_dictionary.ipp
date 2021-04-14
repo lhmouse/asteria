@@ -15,11 +15,8 @@ struct Bucket
     union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
     union { Reference vstor[1];  };  // initialized iff `prev` is non-null
 
-    Bucket()
-      { }
-
-    ~Bucket()
-      { }
+    Bucket() noexcept { }
+    ~Bucket() noexcept { }
 
     explicit operator
     bool() const noexcept
