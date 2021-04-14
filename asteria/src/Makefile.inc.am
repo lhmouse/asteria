@@ -14,6 +14,7 @@ include_asteria_details_HEADERS =  \
   %reldir%/details/utils.ipp  \
   %reldir%/details/value.ipp  \
   %reldir%/details/variable_hashset.ipp  \
+  %reldir%/details/pointer_hashset.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
   %reldir%/details/avmc_queue.ipp  \
   %reldir%/details/argument_reader.ipp  \
@@ -22,6 +23,7 @@ include_asteria_details_HEADERS =  \
 include_asteria_lldsdir = ${includedir}/asteria/llds
 include_asteria_llds_HEADERS =  \
   %reldir%/llds/variable_hashset.hpp  \
+  %reldir%/llds/pointer_hashset.hpp  \
   %reldir%/llds/reference_dictionary.hpp  \
   %reldir%/llds/reference_stack.hpp  \
   %reldir%/llds/avmc_queue.hpp  \
@@ -90,6 +92,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/source_location.cpp  \
   %reldir%/simple_script.cpp  \
   %reldir%/llds/variable_hashset.cpp  \
+  %reldir%/llds/pointer_hashset.cpp  \
   %reldir%/llds/reference_dictionary.cpp  \
   %reldir%/llds/reference_stack.cpp  \
   %reldir%/llds/avmc_queue.cpp  \
