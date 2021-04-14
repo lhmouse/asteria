@@ -23,8 +23,7 @@ do_destroy_buckets() noexcept
       qbkt->prev = nullptr;
     }
 #ifdef ROCKET_DEBUG
-    ::std::for_each(this->m_bptr, this->m_eptr, [&](Bucket& r) {
-              ::std::memset((void*)&r, 0xD3, sizeof(r));  r.prev = nullptr;  });
+    ::std::for_each(this->m_bptr, this->m_eptr, ::std::mem_fn(&Bucket::debug_clear));
 #endif
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
   }

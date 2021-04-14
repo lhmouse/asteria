@@ -14,6 +14,13 @@ struct Bucket
     Bucket* prev;  // the previous bucket in the [circular] list
     const void* key_ptr;  // initialized iff `prev` is non-null
 
+    void
+    debug_clear() noexcept
+      {
+        ::std::memset(static_cast<void*>(this), 0xD3, sizeof(*this));
+        this->prev = nullptr;
+      }
+
     explicit operator
     bool() const noexcept
       { return this->prev != nullptr;  }
