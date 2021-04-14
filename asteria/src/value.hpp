@@ -60,6 +60,16 @@ class Value
         return *this;
       }
 
+  private:
+    Variable_Callback&
+    do_enumerate_variables_slow(Variable_Callback& callback) const;
+
+    ROCKET_PURE_FUNCTION bool
+    do_test_slow() const noexcept;
+
+    ROCKET_PURE_FUNCTION static Compare
+    do_compare_slow(const Value& lhs, const Value& rhs) noexcept;
+
   public:
     // Accessors
     Type
@@ -204,13 +214,28 @@ class Value
         return *this;
       }
 
+    // This is used by garbage collection.
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback) const
+      {
+        return this->is_scalar()
+            ? callback
+            : this->do_enumerate_variables_slow(callback);
+      }
+
     // This performs the builtin conversion to boolean values.
-    ROCKET_PURE_FUNCTION bool
-    test() const noexcept;
+    bool
+    test() const noexcept
+      {
+        return this->is_null() ? false
+            : this->is_boolean() ? this->as_boolean()
+            : this->do_test_slow();
+      }
 
     // This performs the builtin comparison with another value.
-    ROCKET_PURE_FUNCTION Compare
-    compare(const Value& other) const noexcept;
+    Compare
+    compare(const Value& other) const noexcept
+      { return this->do_compare_slow(*this, other);  }
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
@@ -218,9 +243,6 @@ class Value
 
     tinyfmt&
     dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0) const;
-
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const;
   };
 
 inline void

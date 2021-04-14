@@ -31,32 +31,65 @@ do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
 
 }  // namespace
 
+Variable_Callback&
+Value::
+do_enumerate_variables_slow(Variable_Callback& callback) const
+  {
+    switch(this->type()) {
+      case type_null:
+      case type_boolean:
+      case type_integer:
+      case type_real:
+      case type_string:
+        return callback;
+
+      case type_opaque:
+        return this->m_stor.as<V_opaque>().enumerate_variables(callback);
+
+      case type_function:
+        return this->m_stor.as<V_function>().enumerate_variables(callback);
+
+      case type_array:
+        ::rocket::for_each(this->m_stor.as<V_array>(),
+            [&](const auto& val) { val.enumerate_variables(callback);  });
+        return callback;
+
+      case type_object:
+        ::rocket::for_each(this->m_stor.as<V_object>(),
+            [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
+        return callback;
+
+      default:
+        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+    }
+  }
+
 bool
 Value::
-test() const noexcept
+do_test_slow() const noexcept
   {
     switch(this->type()) {
       case type_null:
         return false;
 
       case type_boolean:
-        return this->m_stor.as<type_boolean>();
+        return this->m_stor.as<V_boolean>();
 
       case type_integer:
-        return this->m_stor.as<type_integer>() != 0;
+        return this->m_stor.as<V_integer>() != 0;
 
       case type_real:
-        return this->m_stor.as<type_real>() != 0;
+        return this->m_stor.as<V_real>() != 0;
 
       case type_string:
-        return this->m_stor.as<type_string>().size() != 0;
+        return this->m_stor.as<V_string>().empty() == false;
 
       case type_opaque:
       case type_function:
         return true;
 
       case type_array:
-        return this->m_stor.as<type_array>().size() != 0;
+        return this->m_stor.as<V_array>().empty() == false;
 
       case type_object:
         return true;
@@ -68,63 +101,67 @@ test() const noexcept
 
 Compare
 Value::
-compare(const Value& other) const noexcept
+do_compare_slow(const Value& lhs, const Value& rhs) noexcept
   {
-    // Compare values of different types
-    if(this->type() != other.type()) {
-      // Compare operands that are both of arithmetic types.
-      if(this->is_convertible_to_real() && other.is_convertible_to_real())
-        return do_3way_compare_scalar(this->convert_to_real(), other.convert_to_real());
+    // Compare values of different types.
+    if(lhs.type() != rhs.type()) {
+      // If they both have arithmeteic types, convert them to `real`.
+      if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real())
+        return do_3way_compare_scalar(
+                   lhs.convert_to_real(), rhs.convert_to_real());
 
       // Otherwise, they are unordered.
       return compare_unordered;
     }
 
     // Compare values of the same type
-    switch(this->type()) {
+    switch(lhs.type()) {
       case type_null:
         return compare_equal;
 
       case type_boolean:
-        return do_3way_compare_scalar(this->m_stor.as<type_boolean>(),
-                                      other.m_stor.as<type_boolean>());
+        return do_3way_compare_scalar(
+                  lhs.m_stor.as<V_boolean>(), rhs.m_stor.as<V_boolean>());
 
       case type_integer:
-        return do_3way_compare_scalar(this->m_stor.as<type_integer>(),
-                                      other.m_stor.as<type_integer>());
+        return do_3way_compare_scalar(
+                  lhs.m_stor.as<V_integer>(), rhs.m_stor.as<V_integer>());
 
       case type_real:
-        return do_3way_compare_scalar(this->m_stor.as<type_real>(),
-                                      other.m_stor.as<type_real>());
+        return do_3way_compare_scalar(
+                  lhs.m_stor.as<V_real>(), rhs.m_stor.as<V_real>());
 
       case type_string:
-        return do_3way_compare_scalar(this->m_stor.as<type_string>().compare(
-                                               other.m_stor.as<type_string>()),
-                                      0);
+        return do_3way_compare_scalar(
+            lhs.m_stor.as<V_string>().compare(rhs.m_stor.as<V_string>()), 0);
 
       case type_opaque:
       case type_function:
         return compare_unordered;
 
       case type_array: {
-        const auto& lhs = this->m_stor.as<type_array>();
-        const auto& rhs = other.m_stor.as<type_array>();
+        // Perform lexicographical comparison on the longest initial sequences
+        // of the same length.
+        const auto& la = lhs.m_stor.as<V_array>();
+        const auto& ra = rhs.m_stor.as<V_array>();
+        size_t rlen = ::rocket::min(la.size(), ra.size());
 
-        // Perform lexicographical comparison on the longest initial sequences of the same length.
-        size_t rlen = ::rocket::min(lhs.size(), rhs.size());
-        for(size_t i = 0;  i < rlen;  ++i) {
-          auto cmp = lhs[i].compare(rhs[i]);
-          if(cmp != compare_equal)
-            return cmp;
-        }
-        return do_3way_compare_scalar(lhs.size(), rhs.size());
+        Compare comp;
+        for(size_t k = 0;  k != rlen;  ++k)
+          if((comp = do_compare_slow(la[k], ra[k])) != compare_equal)
+            return comp;
+
+        // If the initial sequences compare equal, the longer array is greater
+        // than the shorter.
+        comp = do_3way_compare_scalar(la.size(), ra.size());
+        return comp;
       }
 
       case type_object:
         return compare_unordered;
 
       default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+        ASTERIA_TERMINATE("invalid value type (type `$1`)", lhs.type());
     }
   }
 
@@ -137,28 +174,28 @@ print(tinyfmt& fmt, bool escape) const
         return fmt << "null";
 
       case type_boolean:
-        return fmt << this->m_stor.as<type_boolean>();
+        return fmt << this->m_stor.as<V_boolean>();
 
       case type_integer:
-        return fmt << this->m_stor.as<type_integer>();
+        return fmt << this->m_stor.as<V_integer>();
 
       case type_real:
-        return fmt << this->m_stor.as<type_real>();
+        return fmt << this->m_stor.as<V_real>();
 
       case type_string:
         if(!escape)
-          return fmt << this->m_stor.as<type_string>();
+          return fmt << this->m_stor.as<V_string>();
         else
-          return fmt << quote(this->m_stor.as<type_string>());
+          return fmt << quote(this->m_stor.as<V_string>());
 
       case type_opaque:
-        return fmt << "(opaque) [[" << this->m_stor.as<type_opaque>() << "]]";
+        return fmt << "(opaque) [[" << this->m_stor.as<V_opaque>() << "]]";
 
       case type_function:
-        return fmt << "(function) [[" << this->m_stor.as<type_function>() << "]]";
+        return fmt << "(function) [[" << this->m_stor.as<V_function>() << "]]";
 
       case type_array: {
-        const auto& altr = this->m_stor.as<type_array>();
+        const auto& altr = this->m_stor.as<V_array>();
         fmt << '[';
         for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << ' ';
@@ -170,7 +207,7 @@ print(tinyfmt& fmt, bool escape) const
       }
 
       case type_object: {
-        const auto& altr = this->m_stor.as<type_object>();
+        const auto& altr = this->m_stor.as<V_object>();
         fmt << '{';
         for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << ' ' << quote(q->first) << " = ";
@@ -195,34 +232,34 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         return fmt << "null";
 
       case type_boolean:
-        return fmt << "boolean " << this->m_stor.as<type_boolean>();
+        return fmt << "boolean " << this->m_stor.as<V_boolean>();
 
       case type_integer:
-        return fmt << "integer " << this->m_stor.as<type_integer>();
+        return fmt << "integer " << this->m_stor.as<V_integer>();
 
       case type_real:
-        return fmt << "real " << this->m_stor.as<type_real>();
+        return fmt << "real " << this->m_stor.as<V_real>();
 
       case type_string: {
-        const auto& altr = this->m_stor.as<type_string>();
+        const auto& altr = this->m_stor.as<V_string>();
         fmt << "string(" << altr.size() << ") " << quote(altr);
         return fmt;
       }
 
       case type_opaque: {
-        const auto& altr = this->m_stor.as<type_opaque>();
+        const auto& altr = this->m_stor.as<V_opaque>();
         fmt << "opaque(" << altr.get_opt() << ") [[" << altr << "]]";
         return fmt;
       }
 
       case type_function: {
-        const auto& altr = this->m_stor.as<type_function>();
+        const auto& altr = this->m_stor.as<V_function>();
         fmt << "function [[" << altr << "]]";
         return fmt;
       }
 
       case type_array: {
-        const auto& altr = this->m_stor.as<type_array>();
+        const auto& altr = this->m_stor.as<V_array>();
         fmt << "array(" << altr.size() << ") [";
         for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << pwrap(indent, hanging + indent) << i << " = ";
@@ -233,7 +270,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       case type_object: {
-        const auto& altr = this->m_stor.as<type_object>();
+        const auto& altr = this->m_stor.as<V_object>();
         fmt << "object(" << altr.size() << ") {";
         for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
@@ -242,39 +279,6 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         fmt << pwrap(indent, hanging) << '}';
         return fmt;
       }
-
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
-    }
-  }
-
-Variable_Callback&
-Value::
-enumerate_variables(Variable_Callback& callback) const
-  {
-    switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real:
-      case type_string:
-        return callback;
-
-      case type_opaque:
-        return this->m_stor.as<type_opaque>().enumerate_variables(callback);
-
-      case type_function:
-        return this->m_stor.as<type_function>().enumerate_variables(callback);
-
-      case type_array:
-        ::rocket::for_each(this->m_stor.as<type_array>(),
-            [&](const auto& val) { val.enumerate_variables(callback);  });
-        return callback;
-
-      case type_object:
-        ::rocket::for_each(this->m_stor.as<type_object>(),
-            [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
-        return callback;
 
       default:
         ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
