@@ -36,7 +36,7 @@ struct S1_init_gc_ref_1 : Variable_Callback
     Variable_HashSet* staging = nullptr;
 
     bool
-    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         // Add the variable. Do nothing if it has already been added.
         bool added = staging->insert(var);
@@ -56,7 +56,7 @@ struct S1_init_gc_ref_2_NR : Variable_Callback
     Variable_HashSet* staging = nullptr;
 
     bool
-    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         // If `var` is a unique reference, mark the variable for collection
         // immediately. It is however not safe to erase it when iterating.
@@ -86,13 +86,13 @@ struct S1_init_gc_ref_2_NR : Variable_Callback
 
 struct S2_add_gc_ref_frac_NR : Variable_Callback
   {
-    Pointer_HashSet* idptrs = nullptr;
+    Pointer_HashSet* id_ptrs = nullptr;
 
     bool
-    do_process_one(const void* idptr, const rcptr<Variable>& var) final
+    do_process_one(const void* id_ptr, const rcptr<Variable>& var) final
       {
         // Ensure each reference pointer is added only once.
-        bool added = idptrs->insert(idptr);
+        bool added = id_ptrs->insert(id_ptr);
         if(!added)
           return false;
 
@@ -104,14 +104,14 @@ struct S2_add_gc_ref_frac_NR : Variable_Callback
 
 struct S2_iref_internal_NR : Variable_Callback
   {
-    Pointer_HashSet* idptrs = nullptr;
+    Pointer_HashSet* id_ptrs = nullptr;
 
     bool
-    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         // Drop indirect references from `m_staging`.
         S2_add_gc_ref_frac_NR s2_gcadd;
-        s2_gcadd.idptrs = idptrs;
+        s2_gcadd.id_ptrs = id_ptrs;
         var->get_value().enumerate_variables(s2_gcadd);
         return false;
       }
@@ -120,7 +120,7 @@ struct S2_iref_internal_NR : Variable_Callback
 struct S3_mark_reachable : Variable_Callback
   {
     bool
-    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         // Skip unrachable variables.
         if(var->get_gc_ref() >= var->use_count())
@@ -145,7 +145,7 @@ struct S4_reap_unreachable : Variable_Callback
     size_t nvars = 0;
 
     bool
-    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         // Skip reachable variables.
         if(var->get_gc_ref() == 0)
@@ -176,7 +176,7 @@ struct S4_reap_unreachable : Variable_Callback
 struct Sz_wipe_variable : Variable_Callback
   {
     bool
-    do_process_one(const void* /*idptr*/, const rcptr<Variable>& var) final
+    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         // Destroy the value. This shall not be recursive.
         var->uninitialize();
@@ -204,7 +204,7 @@ do_collect_generation(size_t& nvars, size_t gen)
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     auto& tracked = this->m_tracked.mut(gMax-gen);
     this->m_staging.clear();
-    this->m_idptrs.clear();
+    this->m_id_ptrs.clear();
 
     // Collect all variables from `tracked` into `m_staging`, recursively.
     // The reference from `tracked` shall be excluded, so the `gc_ref` counter
@@ -217,7 +217,7 @@ do_collect_generation(size_t& nvars, size_t gen)
     // For each variable that is exactly one-level indirectly reachable from
     // those in `m_staging`, the `gc_ref` counter is incremented by one.
     S2_iref_internal_NR s2_iref;
-    s2_iref.idptrs = ::std::addressof(this->m_idptrs);
+    s2_iref.id_ptrs = ::std::addressof(this->m_id_ptrs);
     this->m_staging.enumerate_variables(s2_iref);
 
     // A variable whose `gc_ref` counter is less than its reference count is
@@ -247,7 +247,7 @@ create_variable(uint8_t gen_hint)
         this->do_collect_generation(nvars, gen);
     }
     this->m_staging.clear();
-    this->m_idptrs.clear();
+    this->m_id_ptrs.clear();
 
     // Get a cached variable.
     // If the pool has been exhausted, allocate a new one.
@@ -294,7 +294,7 @@ finalize() noexcept
       }
     }
     this->m_staging.clear();
-    this->m_idptrs.clear();
+    this->m_id_ptrs.clear();
 
     // Wipe out all tracked variables.
     Sz_wipe_variable wipe;

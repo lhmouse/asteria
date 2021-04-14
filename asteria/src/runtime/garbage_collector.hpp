@@ -27,7 +27,7 @@ class Garbage_Collector final
     long m_recur = 0;
     Variable_HashSet m_pool;
     Variable_HashSet m_staging;
-    Pointer_HashSet m_idptrs;
+    Pointer_HashSet m_id_ptrs;
 
   public:
     explicit

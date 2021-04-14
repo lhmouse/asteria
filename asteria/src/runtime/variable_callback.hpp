@@ -17,10 +17,10 @@ class Variable_Callback
     // not variables, which are always enumerated. Because values are
     // copy-on-write, it is possible for the same (shared) value to
     // be encountered multiple times during garbave collection. So we
-    // require the `idptr` argument to tell whether a pointer to
+    // require the `id_ptr` argument to tell whether a pointer to
     // variable itself has been marked or not.
     virtual bool
-    do_process_one(const void* idptr, const rcptr<Variable>& var)
+    do_process_one(const void* id_ptr, const rcptr<Variable>& var)
       = 0;
 
   public:
@@ -28,9 +28,9 @@ class Variable_Callback
     ~Variable_Callback();
 
     Variable_Callback&
-    process(const void* idptr, const rcptr<Variable>& var_opt)
+    process(const void* id_ptr, const rcptr<Variable>& var_opt)
       {
-        return var_opt && this->do_process_one(idptr, var_opt)
+        return var_opt && this->do_process_one(id_ptr, var_opt)
                   ? var_opt->get_value().enumerate_variables(*this)
                   : *this;
       }
