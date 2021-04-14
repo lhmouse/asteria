@@ -33,7 +33,7 @@ class Sentry
 
 struct S1_init_gc_ref_1 : Variable_Callback
   {
-    Variable_HashSet* staging = nullptr;
+    Variable_HashSet* staging;
 
     bool
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
@@ -53,7 +53,7 @@ struct S1_init_gc_ref_1 : Variable_Callback
 
 struct S1_init_gc_ref_2_NR : Variable_Callback
   {
-    Variable_HashSet* staging = nullptr;
+    Variable_HashSet* staging;
 
     bool
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
@@ -86,7 +86,7 @@ struct S1_init_gc_ref_2_NR : Variable_Callback
 
 struct S2_add_gc_ref_frac_NR : Variable_Callback
   {
-    Pointer_HashSet* id_ptrs = nullptr;
+    Pointer_HashSet* id_ptrs;
 
     bool
     do_process_one(const void* id_ptr, const rcptr<Variable>& var) final
@@ -104,7 +104,7 @@ struct S2_add_gc_ref_frac_NR : Variable_Callback
 
 struct S2_iref_internal_NR : Variable_Callback
   {
-    Pointer_HashSet* id_ptrs = nullptr;
+    Pointer_HashSet* id_ptrs;
 
     bool
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
@@ -139,10 +139,10 @@ struct S3_mark_reachable : Variable_Callback
 
 struct S4_reap_unreachable : Variable_Callback
   {
-    Variable_HashSet* pool = nullptr;
-    Variable_HashSet* tracked = nullptr;
-    Variable_HashSet* next_opt = nullptr;
-    size_t nvars = 0;
+    Variable_HashSet* pool;
+    Variable_HashSet* tracked;
+    Variable_HashSet* next_opt;
+    size_t* nvars;
 
     bool
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
@@ -154,7 +154,7 @@ struct S4_reap_unreachable : Variable_Callback
         // Wipe the value out.
         var->uninitialize();
         tracked->erase(var);
-        nvars++;
+        ++*nvars;
 
         // Pool the variable. Exceptions are ignored.
         try {
@@ -211,13 +211,13 @@ do_collect_generation(size_t& nvars, size_t gen)
     // is initialized to one if a variable is reached from `tracked`, and to
     // zero if it is reached indirectly.
     S1_init_gc_ref_2_NR s1_init;
-    s1_init.staging = ::std::addressof(this->m_staging);
+    s1_init.staging = &(this->m_staging);
     tracked.enumerate_variables(s1_init);
 
     // For each variable that is exactly one-level indirectly reachable from
     // those in `m_staging`, the `gc_ref` counter is incremented by one.
     S2_iref_internal_NR s2_iref;
-    s2_iref.id_ptrs = ::std::addressof(this->m_id_ptrs);
+    s2_iref.id_ptrs = &(this->m_id_ptrs);
     this->m_staging.enumerate_variables(s2_iref);
 
     // A variable whose `gc_ref` counter is less than its reference count is
@@ -227,13 +227,11 @@ do_collect_generation(size_t& nvars, size_t gen)
 
     // Collect each variable whose `gc_ref` counter is zero.
     S4_reap_unreachable s4_reap;
-    s4_reap.pool = ::std::addressof(this->m_pool);
-    s4_reap.tracked = ::std::addressof(tracked);
+    s4_reap.pool = &(this->m_pool);
+    s4_reap.tracked = &tracked;
     s4_reap.next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
+    s4_reap.nvars = &nvars;
     this->m_staging.enumerate_variables(s4_reap);
-
-    // Accumulate the number of variables collected.
-    nvars += s4_reap.nvars;
   }
 
 rcptr<Variable>
