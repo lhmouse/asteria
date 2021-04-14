@@ -84,12 +84,12 @@ do_xrelocate_but(Bucket* qxcld) noexcept
         // Uniqueness has already been implied for all elements, so there is
         // no need to check for collisions.
         auto mptr = ::rocket::get_probing_origin(
-                this->m_bptr, this->m_eptr, sbkt->kstor[0].rdhash());
+                        this->m_bptr, this->m_eptr, sbkt->kstor[0].rdhash());
         auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
-                [&](const Bucket&) { return false;  });
-        ROCKET_ASSERT(qbkt);
+                        [&](const Bucket&) { return false;  });
 
         // Mark the new bucket non-empty.
+        ROCKET_ASSERT(qbkt);
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
 
@@ -138,12 +138,12 @@ do_rehash_more()
       // Uniqueness has already been implied for all elements, so there is
       // no need to check for collisions.
       auto mptr = ::rocket::get_probing_origin(
-              bptr, eptr, sbkt->kstor[0].rdhash());
+                      bptr, eptr, sbkt->kstor[0].rdhash());
       auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-              [&](const Bucket&) { return false;  });
-      ROCKET_ASSERT(qbkt);
+                      [&](const Bucket&) { return false;  });
 
       // Mark the new bucket non-empty.
+      ROCKET_ASSERT(qbkt);
       ROCKET_ASSERT(!*qbkt);
       this->do_list_attach(qbkt);
 

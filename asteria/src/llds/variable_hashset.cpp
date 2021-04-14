@@ -40,9 +40,9 @@ do_xprobe(const rcptr<Variable>& var) const noexcept
     // We keep the load factor below 1.0 so there will always be some empty buckets
     // in the table.
     auto mptr = ::rocket::get_probing_origin(bptr, eptr,
-            reinterpret_cast<uintptr_t>(var.get()));
+                    reinterpret_cast<uintptr_t>(var.get()));
     auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-            [&](const Bucket& r) { return r.kstor[0] == var;  });
+                    [&](const Bucket& r) { return r.kstor[0] == var;  });
 
     // The load factor is kept <= 0.5 so there must always be a bucket available.
     ROCKET_ASSERT(qbkt);
@@ -69,12 +69,12 @@ do_xrelocate_but(Bucket* qxcld) noexcept
         // Uniqueness has already been implied for all elements, so there is no need
         // to check for collisions.
         auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
-                reinterpret_cast<uintptr_t>(sbkt->kstor[0].get()));
+                        reinterpret_cast<uintptr_t>(sbkt->kstor[0].get()));
         auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr,this->m_eptr,
-                [&](const Bucket&) { return false;  });
-        ROCKET_ASSERT(qbkt);
+                        [&](const Bucket&) { return false;  });
 
         // Mark the new bucket non-empty.
+        ROCKET_ASSERT(qbkt);
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
 
@@ -121,12 +121,12 @@ do_rehash_more()
       // Uniqueness has already been implied for all elements, so there is no need
       // to check for collisions.
       auto mptr = ::rocket::get_probing_origin(bptr, eptr,
-              reinterpret_cast<uintptr_t>(sbkt->kstor[0].get()));
+                      reinterpret_cast<uintptr_t>(sbkt->kstor[0].get()));
       auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-              [&](const Bucket&) { return false;  });
-      ROCKET_ASSERT(qbkt);
+                      [&](const Bucket&) { return false;  });
 
       // Mark the new bucket non-empty.
+      ROCKET_ASSERT(qbkt);
       ROCKET_ASSERT(!*qbkt);
       this->do_list_attach(qbkt);
 
