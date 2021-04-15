@@ -151,24 +151,15 @@ class Reference
     assign(const Reference& other) noexcept
       {
         // Note not all fields have to be copied.
-        switch(other.m_index) {
-          case index_uninit:
-          case index_void:
-            break;
-
-          case index_temporary:
-            this->m_value = other.m_value;
-            break;
-
-          case index_variable:
-            this->m_var = other.m_var;
-            break;
-
-          case index_ptc_args:
-            this->m_ptca = other.m_ptca;
-            break;
+        if(other.m_index == index_temporary) {
+          this->m_value = other.m_value;
         }
-
+        else if(other.m_index == index_variable) {
+          this->m_var = other.m_var;
+        }
+        else if(other.m_index == index_ptc_args) {
+          this->m_ptca = other.m_ptca;
+        }
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
         return *this;
@@ -178,24 +169,15 @@ class Reference
     assign(Reference&& other) noexcept
       {
         // Note not all fields have to be moved.
-        switch(other.m_index) {
-          case index_uninit:
-          case index_void:
-            break;
-
-          case index_temporary:
-            this->m_value = ::std::move(other.m_value);
-            break;
-
-          case index_variable:
-            this->m_var = ::std::move(other.m_var);
-            break;
-
-          case index_ptc_args:
-            this->m_ptca = ::std::move(other.m_ptca);
-            break;
+        if(other.m_index == index_temporary) {
+          this->m_value = ::std::move(other.m_value);
         }
-
+        else if(other.m_index == index_variable) {
+          this->m_var = ::std::move(other.m_var);
+        }
+        else if(other.m_index == index_ptc_args) {
+          this->m_ptca = ::std::move(other.m_ptca);
+        }
         this->m_mods = ::std::move(other.m_mods);
         this->m_index = other.m_index;
         return *this;
