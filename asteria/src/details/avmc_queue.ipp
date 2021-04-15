@@ -52,8 +52,8 @@ struct Metadata
   };
 
 // This is the header of each variable-length element that is stored in an AVMC
-// queue. User-defined data may immediate follow this struct, so the size of
-// this struct has to be a multiple of `alignof(max_align_t)`.
+// queue. User-defined data (the `sparam`) may follow this struct, so the size
+// of this struct has to be a multiple of `alignof(max_align_t)`.
 struct Header
   {
     union {
