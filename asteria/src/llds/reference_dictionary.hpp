@@ -40,7 +40,37 @@ class Reference_Dictionary
     // bucket containing a key which is equal to `name`, but in no case
     // can a null pointer be returned.
     ROCKET_PURE_FUNCTION Bucket*
-    do_xprobe(const phsh_string& name) const noexcept;
+    do_xprobe(const phsh_string& name) const noexcept
+      {
+        auto bptr = this->m_bptr;
+        auto eptr = this->m_eptr;
+
+        // Find a bucket using linear probing.
+        // We keep the load factor below 1.0 so there will always be some empty buckets
+        // in the table.
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr, name.rdhash());
+        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+               [&](const Bucket& r) {
+                 // This handwritten bytewise comparison prevents unnecessary pushs and
+                 // pops in the prolog and epilog of this function.
+                 if(r.kstor[0].length() != name.length())
+                   return false;
+
+                 if(r.kstor[0].data() == name.data())
+                   return true;
+
+                 if(r.kstor[0].rdhash() != name.rdhash())
+                   return false;
+
+                 return ::std::equal(r.kstor[0].data(),
+                                     r.kstor[0].data() + r.kstor[0].length(),
+                                     static_cast<const volatile char*>(name.data()));
+               });
+
+        // The load factor is kept <= 0.5 so there must always be a bucket available.
+        ROCKET_ASSERT(qbkt);
+        return qbkt;
+      }
 
     // This function is used for relocation after an element is erased.
     void

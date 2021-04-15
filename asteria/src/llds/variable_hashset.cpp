@@ -28,26 +28,6 @@ do_destroy_buckets() noexcept
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
   }
 
-details_variable_hashset::Bucket*
-Variable_HashSet::
-do_xprobe(const rcptr<Variable>& var) const noexcept
-  {
-    auto bptr = this->m_bptr;
-    auto eptr = this->m_eptr;
-
-    // Find a bucket using linear probing.
-    // We keep the load factor below 1.0 so there will always be some empty buckets
-    // in the table.
-    auto mptr = ::rocket::get_probing_origin(bptr, eptr,
-                    reinterpret_cast<uintptr_t>(var.get()));
-    auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-                    [&](const Bucket& r) { return r.kstor[0] == var;  });
-
-    // The load factor is kept <= 0.5 so there must always be a bucket available.
-    ROCKET_ASSERT(qbkt);
-    return qbkt;
-  }
-
 void
 Variable_HashSet::
 do_xrelocate_but(Bucket* qxcld) noexcept

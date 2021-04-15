@@ -40,7 +40,23 @@ class Variable_HashSet
     // bucket containing a key which is equal to `var`, but in no case
     // can a null pointer be returned.
     ROCKET_PURE_FUNCTION Bucket*
-    do_xprobe(const rcptr<Variable>& var) const noexcept;
+    do_xprobe(const rcptr<Variable>& var) const noexcept
+      {
+        auto bptr = this->m_bptr;
+        auto eptr = this->m_eptr;
+
+        // Find a bucket using linear probing.
+        // We keep the load factor below 1.0 so there will always be some empty buckets
+        // in the table.
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr,
+                        reinterpret_cast<uintptr_t>(var.get()));
+        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+                        [&](const Bucket& r) { return r.kstor[0] == var;  });
+
+        // The load factor is kept <= 0.5 so there must always be a bucket available.
+        ROCKET_ASSERT(qbkt);
+        return qbkt;
+      }
 
     // This function is used for relocation after an element is erased.
     void
