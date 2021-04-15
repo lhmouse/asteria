@@ -67,7 +67,7 @@ class Variable final
     Variable&
     uninitialize() noexcept
       {
-        this->m_value = nullopt;
+        this->m_value = ::rocket::sref("[[`dead value`]]");
         this->m_state = state_uninit;
         return *this;
       }
