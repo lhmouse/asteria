@@ -142,7 +142,7 @@ struct S4_reap_unreachable : Variable_Callback
     Variable_HashSet* pool;
     Variable_HashSet* tracked;
     Variable_HashSet* next_opt;
-    size_t* nvars;
+    size_t nvars = 0;
 
     bool
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
@@ -162,7 +162,7 @@ struct S4_reap_unreachable : Variable_Callback
           // Wipe the value out.
           var->uninitialize();
           tracked->erase(var);
-          ++*nvars;
+          nvars++;
 
           // Pool the variable. This shall be the last operation due to
           // possible exceptions.
@@ -181,7 +181,7 @@ struct S4_reap_unreachable : Variable_Callback
       }
   };
 
-struct Sz_wipe_variable : Variable_Callback
+struct Sz_wipe_variable_NR : Variable_Callback
   {
     bool
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
@@ -199,20 +199,21 @@ Garbage_Collector::
   {
   }
 
-void
+size_t
 Garbage_Collector::
-do_collect_generation(size_t& nvars, size_t gen)
+do_collect_generation(size_t gen)
   {
     // Ignore recursive requests.
     const Sentry sentry(this->m_recur);
     if(!sentry)
-      return;
+      return 0;
 
-    // This algorithm is described at
-    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     auto& tracked = this->m_tracked.mut(gMax-gen);
     this->m_staging.clear();
     this->m_id_ptrs.clear();
+
+    // This algorithm is described at
+    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
 
     // Collect all variables from `tracked` into `m_staging`, recursively.
     // The references from `tracked` and `m_staging` shall be excluded, so the
@@ -238,8 +239,8 @@ do_collect_generation(size_t& nvars, size_t gen)
     s4_reap.pool = &(this->m_pool);
     s4_reap.tracked = &tracked;
     s4_reap.next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
-    s4_reap.nvars = &nvars;
     this->m_staging.enumerate_variables(s4_reap);
+    return s4_reap.nvars;
   }
 
 rcptr<Variable>
@@ -247,11 +248,10 @@ Garbage_Collector::
 create_variable(uint8_t gen_hint)
   {
     // Perform automatic garbage collection.
-    size_t nvars = 0;
-    for(size_t gen = 0;  gen <= gMax;  ++gen) {
+    for(size_t gen = 0;  gen <= gMax;  ++gen)
       if(this->m_tracked[gMax-gen].size() >= this->m_thres[gMax-gen])
-        this->do_collect_generation(nvars, gen);
-    }
+        this->do_collect_generation(gen);
+
     this->m_staging.clear();
     this->m_id_ptrs.clear();
 
@@ -272,9 +272,10 @@ collect_variables(uint8_t gen_limit)
   {
     // Collect all variables up to generation `gen_limit`.
     size_t nvars = 0;
-    for(size_t gen = 0;  (gen <= gMax) && (gen <= gen_limit);  ++gen) {
-      this->do_collect_generation(nvars, gen);
-    }
+    for(size_t gen = 0;  (gen <= gMax) && (gen <= gen_limit);  ++gen)
+      nvars += this->do_collect_generation(gen);
+
+    // Return the number of variables that have been collected.
     return nvars;
   }
 
@@ -282,29 +283,31 @@ size_t
 Garbage_Collector::
 finalize() noexcept
   {
-    // Collect all variables.
+    // Ensure no garbage collection is in progress.
+    const Sentry sentry(this->m_recur);
+    if(!sentry)
+      ASTERIA_TERMINATE("garbage collector not finalizable while in use");
+
+    // Wipe out all tracked variables.
     size_t nvars = 0;
     for(size_t gen = 0;  gen <= gMax;  ++gen) {
-      try {
-        this->do_collect_generation(nvars, gen);
-      }
-      catch(exception& stdex) {
-        ::fprintf(stderr,
-            "WARNING: An exception was thrown during the final garbage "
-            "collection. This exception has been ignored to prevent the "
-            "program from crashing, but some resources may have leaked.\n"
-            "\n"
-            "  exception class: %s\n"
-            "  what(): %s\n",
-            typeid(stdex).name(), stdex.what());
-      }
+      auto& tracked = this->m_tracked.mut(gMax-gen);
 
-      // Wipe out all tracked variables.
-      Sz_wipe_variable wipe;
-      this->m_tracked.mut(gMax-gen).enumerate_variables(wipe);
+      // Wipe variables that are reachable directly. Indirect ones may
+      // be foreign so they must not be wiped.
+      Sz_wipe_variable_NR wipe;
+      tracked.enumerate_variables(wipe);
+
+      nvars += tracked.size();
+      tracked.clear();
     }
+
     this->m_staging.clear();
     this->m_id_ptrs.clear();
+
+    // Clear cached variables.
+    nvars += this->m_pool.size();
+    this->m_pool.clear();
     return nvars;
   }
 

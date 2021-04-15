@@ -35,8 +35,8 @@ class Garbage_Collector final
       { }
 
   private:
-    inline void
-    do_collect_generation(size_t& nvars, size_t gen);
+    inline size_t
+    do_collect_generation(size_t gen);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Garbage_Collector);
