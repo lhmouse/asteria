@@ -51,7 +51,7 @@ class Reference
       { return this->assign(::std::move(other));  }
 
   private:
-    ROCKET_PURE_FUNCTION const Value&
+    const Value&
     do_dereference_readonly_slow() const;
 
     Value&
