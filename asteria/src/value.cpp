@@ -196,11 +196,16 @@ print(tinyfmt& fmt, bool escape) const
 
       case type_array: {
         const auto& altr = this->m_stor.as<V_array>();
-        fmt << '[';
-        for(size_t i = 0;  i < altr.size();  ++i) {
-          fmt << ' ';
-          altr[i].print(fmt, true);
-          fmt << ',';
+        fmt << "[";
+        auto it = altr.begin();
+        if(it != altr.end()) {
+          for(;;) {
+            fmt << ' ';
+            it->print(fmt, true);
+            if(++it == altr.end())
+              break;
+            fmt << ',';
+          }
         }
         fmt << " ]";
         return fmt;
@@ -208,11 +213,17 @@ print(tinyfmt& fmt, bool escape) const
 
       case type_object: {
         const auto& altr = this->m_stor.as<V_object>();
-        fmt << '{';
-        for(auto q = altr.begin();  q != altr.end();  ++q) {
-          fmt << ' ' << quote(q->first) << " = ";
-          q->second.print(fmt, true);
-          fmt << ',';
+        fmt << "{";
+        auto it = altr.begin();
+        if(it != altr.end()) {
+          for(;;) {
+            fmt << ' ';
+            fmt << quote(it->first) << " = ";
+            it->second.print(fmt, true);
+            if(++it == altr.end())
+              break;
+            fmt << ',';
+          }
         }
         fmt << " }";
         return fmt;
