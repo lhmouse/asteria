@@ -47,7 +47,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
       // Try popping an argument from `stack` and assign it to this parameter.
       // If no more arguments follow, declare a constant `null`.
-      if(ROCKET_EXPECT(bptr != eptr))
+      if(bptr != eptr)
         this->do_open_named_reference(nullptr, name) = *(bptr++);
       else
         this->do_open_named_reference(nullptr, name).set_temporary(nullopt);
@@ -58,7 +58,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
 
     // Stash variadic arguments, if any.
-    if(ROCKET_UNEXPECT(bptr != eptr))
+    if(bptr != eptr)
       this->m_lazy_args.append(bptr, eptr);
   }
 
