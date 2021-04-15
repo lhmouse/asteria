@@ -39,12 +39,10 @@ void
 AVMC_Queue::
 do_reallocate(uint32_t nadd)
   {
-    ROCKET_ASSERT(nadd <= UINT16_MAX);
-
     // Allocate a new table.
     constexpr size_t nheaders_max = UINT32_MAX / sizeof(Header);
     if(nheaders_max - this->m_used < nadd)
-      throw ::std::bad_array_new_length();
+      throw ::std::bad_alloc();
 
     uint32_t rsrv = this->m_used + nadd;
     auto bptr = static_cast<Header*>(::operator new(rsrv * sizeof(Header)));

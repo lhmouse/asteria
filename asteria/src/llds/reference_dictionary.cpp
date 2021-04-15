@@ -78,10 +78,7 @@ Reference_Dictionary::
 do_rehash_more()
   {
     // Allocate a new table.
-    size_t nbkt = (this->m_size * 3 + 5) | 9;
-    if(nbkt > PTRDIFF_MAX / sizeof(Bucket))
-      throw ::std::bad_array_new_length();
-
+    size_t nbkt = (this->m_size * 3 + 2) | 7;
     if(nbkt / 2 <= this->m_size)
       throw ::std::bad_alloc();
 

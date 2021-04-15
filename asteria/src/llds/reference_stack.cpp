@@ -33,9 +33,6 @@ do_reserve_more()
   {
     // Allocate a new table.
     uint32_t estor = (this->m_estor * 3 / 2 + 5) | 29;
-    if(estor > PTRDIFF_MAX / sizeof(Reference))
-      throw ::std::bad_array_new_length();
-
     if(estor <= this->m_estor)
       throw ::std::bad_alloc();
 
