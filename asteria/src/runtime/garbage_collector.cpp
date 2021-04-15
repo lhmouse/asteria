@@ -148,25 +148,27 @@ struct S4_reap_unreachable : Variable_Callback
     do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
       {
         try {
-          // Transfer reachable variables to the next generation, unless
-          // this is the oldest one.
-          if(var->get_gc_ref() == 0) {
-            // Note exception safety.
-            if(next_opt) {
-              next_opt->insert(var);
-              tracked->erase(var);
-            }
-            return false;
+          // Reachable variables shall have `gc_ref` counters set to zero.
+          if(var->get_gc_ref() != 0) {
+            // Wipe the value out.
+            var->uninitialize();
+            bool erased = tracked->erase(var);
+            nvars++;
+
+            // Pool the variable. This shall be the last operation due to
+            // possible exceptions. If the variable cannot be pooled, it is
+            // deallocated immediately.
+            if(erased)
+              pool->insert(var);
           }
-
-          // Wipe the value out.
-          var->uninitialize();
-          tracked->erase(var);
-          nvars++;
-
-          // Pool the variable. This shall be the last operation due to
-          // possible exceptions.
-          pool->insert(var);
+          else if(next_opt) {
+            // Transfer this reachable variable to the next generation.
+            // Note exception safety.
+            next_opt->insert(var);
+            bool erased = tracked->erase(var);
+            if(!erased)
+              next_opt->erase(var);
+          }
         }
         catch(exception& stdex) {
           ::fprintf(stderr,

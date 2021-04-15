@@ -42,7 +42,7 @@ int main()
     delete new int;
 
     auto foreign = ::rocket::make_refcnt<Variable>();
-    foreign->initialize(V_string("foreign"), true);
+    foreign->initialize(42, false);
     {
       Global_Context global;
       global.open_named_reference(sref("foreign_variable")).set_variable(foreign);
@@ -52,29 +52,35 @@ int main()
         sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-          var x,y,z;
           ref gr -> __global foreign_variable;
 
-          func foo() { return [x,y,z,gr];  }
-          func bar() { return [z,y,x,gr];  }
+          func test() {
+            var x,y,z;
 
-          x = [foo,bar,foo,bar,foo];
-          y = [x,[bar,foo,bar]];
-          z = x;
-          y = x;
+            func foo() { return [x,y,z,gr];  }
+            func bar() { return [z,y,x,gr];  }
 
-          foo();
-          bar();
+            x = [foo,bar,foo,bar,foo];
+            y = [x,[bar,foo,bar]];
+            z = x;
+            y = x;
+            gr = y;
+          }
+
+          test();
+          assert std.system.gc_collect() == 0;  // nothing
+
+          gr = "meow";
+          assert std.system.gc_collect() == 5;  // x,y,z,foo,bar
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
       code.execute(global);
     }
-
     ASTERIA_TEST_CHECK(foreign->use_count() == 1);
     ASTERIA_TEST_CHECK(foreign->is_uninitialized() == false);
     ASTERIA_TEST_CHECK(foreign->get_value().type() == type_string);
-    foreign.reset();
+    foreign = nullptr;
 
     std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
     std::sort(free_list.mut_begin(), free_list.mut_end());
