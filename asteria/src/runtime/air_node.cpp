@@ -26,8 +26,7 @@ namespace asteria {
 namespace {
 
 bool&
-do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code,
-                Abstract_Context& ctx)
+do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i) {
       auto qnode = code[i].rebind_opt(ctx);
@@ -39,8 +38,7 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code,
   }
 
 bool&
-do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs,
-                Abstract_Context& ctx)
+do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs, Abstract_Context& ctx)
   {
     for(size_t k = 0;  k < seqs.size();  ++k) {
       for(size_t i = 0;  i < seqs[k].size();  ++i) {
