@@ -287,7 +287,7 @@ std_io_putf(V_string templ, cow_vector<Value> values)
   }
 
 Opt_integer
-std_io_putlnf(V_string templ, cow_vector<Value> values)
+std_io_putfln(V_string templ, cow_vector<Value> values)
   {
     const IOF_Sentry fp(stdout);
 
@@ -461,8 +461,8 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       }
       ASTERIA_BINDING_END);
 
-    result.insert_or_assign(sref("putlnf"),
-      ASTERIA_BINDING_BEGIN("std.io.putlnf", self, global, reader) {
+    result.insert_or_assign(sref("putfln"),
+      ASTERIA_BINDING_BEGIN("std.io.putfln", self, global, reader) {
         V_string templ;
         cow_vector<Value> values;
 
@@ -470,7 +470,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.required(templ);          // template
         if(reader.end_overload(values))  // ...
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_putlnf, templ, values);
+                    std_io_putfln, templ, values);
       }
       ASTERIA_BINDING_END);
 

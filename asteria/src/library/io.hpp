@@ -31,9 +31,9 @@ std_io_putln(V_string value);
 Opt_integer
 std_io_putf(V_string templ, cow_vector<Value> values);
 
-// `std.io.putlnf`
+// `std.io.putfln`
 Opt_integer
-std_io_putlnf(V_string templ, cow_vector<Value> values);
+std_io_putfln(V_string templ, cow_vector<Value> values);
 
 // `std.io.read`
 Opt_string
