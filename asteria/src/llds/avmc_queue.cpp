@@ -162,13 +162,13 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
+    AIR_Status status = air_status_next;
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      AIR_Status status;
       if(ROCKET_UNEXPECT(qnode->meta_ver >= 2)) {
         // Symbols are available.
         ASTERIA_RUNTIME_TRY {
@@ -185,9 +185,9 @@ execute(Executive_Context& ctx) const
                                   : qnode->pv_exec)(ctx, qnode);
       }
       if(ROCKET_UNEXPECT(status != air_status_next))
-        return status;
+        break;
     }
-    return air_status_next;
+    return status;
   }
 
 Variable_Callback&
