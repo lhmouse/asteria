@@ -21,14 +21,21 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     m_zvarg(zvarg)
   {
     // Set the `this` reference.
-    // If the self reference is null, it is likely that `this` isn't ever
-    // referenced in this function, so perform lazy initialization to avoid
-    // this overhead.
-    if(self.is_uninit() || self.is_void())
-      ASTERIA_THROW("Invalid `this` reference passed to `$1`", zvarg->func());
-
-    if(!(self.is_temporary() && self.dereference_readonly().is_null()))
+    if(self.is_temporary()) {
+      // If the self reference is null, it is likely that `this` isn't ever
+      // referenced in this function, so perform lazy initialization to avoid
+      // this overhead.
+      const auto& val = self.dereference_readonly();
+      if(!val.is_null())
+        this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
+    }
+    else if(self.is_variable()) {
+      // If the self reference points to a variable, copy it because it is
+      // always an lvalue.
       this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
+    }
+    else
+      ASTERIA_THROW("Invalid `this` reference passed to `$1`", zvarg->func());
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
