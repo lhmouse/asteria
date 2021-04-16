@@ -258,7 +258,7 @@ struct Sparam_defer
 // Each traits struct must contain the `execute()` function, and optionally,
 // these functions: `make_uparam()`, `make_sparam()`, `get_symbols()`.
 
-struct AIR_Traits_clear_stack
+struct Traits_clear_stack
   {
     // `up` is unused.
     // `sp` is unused.
@@ -271,7 +271,7 @@ struct AIR_Traits_clear_stack
       }
   };
 
-struct AIR_Traits_execute_block
+struct Traits_execute_block
   {
     // `up` is unused.
     // `sp` is the solidified body.
@@ -291,7 +291,7 @@ struct AIR_Traits_execute_block
       }
   };
 
-struct AIR_Traits_declare_variable
+struct Traits_declare_variable
   {
     // `up` is unused.
     // `sp` is the source location and name;
@@ -330,7 +330,7 @@ struct AIR_Traits_declare_variable
       }
   };
 
-struct AIR_Traits_initialize_variable
+struct Traits_initialize_variable
   {
     // `up` is `immutable`.
     // `sp` is unused.
@@ -368,7 +368,7 @@ struct AIR_Traits_initialize_variable
       }
   };
 
-struct AIR_Traits_if_statement
+struct Traits_if_statement
   {
     // `up` is `negative`.
     // `sp` is the two branches.
@@ -404,7 +404,7 @@ struct AIR_Traits_if_statement
       }
   };
 
-struct AIR_Traits_switch_statement
+struct Traits_switch_statement
   {
     // `up` is unused.
     // `sp` is ... everything.
@@ -489,7 +489,7 @@ struct AIR_Traits_switch_statement
       }
   };
 
-struct AIR_Traits_do_while_statement
+struct Traits_do_while_statement
   {
     // `up` is `negative`.
     // `sp` is the loop body and condition.
@@ -536,7 +536,7 @@ struct AIR_Traits_do_while_statement
       }
   };
 
-struct AIR_Traits_while_statement
+struct Traits_while_statement
   {
     // `up` is `negative`.
     // `sp` is the condition and loop body.
@@ -583,7 +583,7 @@ struct AIR_Traits_while_statement
       }
   };
 
-struct AIR_Traits_for_each_statement
+struct Traits_for_each_statement
   {
     // `up` is unused.
     // `sp` is ... everything.
@@ -680,7 +680,7 @@ struct AIR_Traits_for_each_statement
       }
   };
 
-struct AIR_Traits_for_statement
+struct Traits_for_statement
   {
     // `up` is unused.
     // `sp` is ... everything.
@@ -736,7 +736,7 @@ struct AIR_Traits_for_statement
       }
   };
 
-struct AIR_Traits_try_statement
+struct Traits_try_statement
   {
     // `up` is unused.
     // `sp` is ... everything.
@@ -817,7 +817,7 @@ struct AIR_Traits_try_statement
       }
   };
 
-struct AIR_Traits_throw_statement
+struct Traits_throw_statement
   {
     // `up` is unused.
     // `sp` is the source location.
@@ -839,7 +839,7 @@ struct AIR_Traits_throw_statement
       }
   };
 
-struct AIR_Traits_assert_statement
+struct Traits_assert_statement
   {
     // `up` is `negative`.
     // `sp` is the source location.
@@ -875,7 +875,7 @@ struct AIR_Traits_assert_statement
       }
   };
 
-struct AIR_Traits_simple_status
+struct Traits_simple_status
   {
     // `up` is `status`.
     // `sp` is unused.
@@ -896,7 +896,7 @@ struct AIR_Traits_simple_status
       }
   };
 
-struct AIR_Traits_convert_to_temporary
+struct Traits_convert_to_temporary
   {
     // `up` is unused.
     // `sp` is unused.
@@ -915,7 +915,7 @@ struct AIR_Traits_convert_to_temporary
       }
   };
 
-struct AIR_Traits_push_global_reference
+struct Traits_push_global_reference
   {
     // `up` is unused.
     // `sp` is the source location and name;
@@ -946,7 +946,7 @@ struct AIR_Traits_push_global_reference
       }
   };
 
-struct AIR_Traits_push_local_reference
+struct Traits_push_local_reference
   {
     // `up` is the depth.
     // `sp` is the source location and name;
@@ -996,7 +996,7 @@ struct AIR_Traits_push_local_reference
       }
   };
 
-struct AIR_Traits_push_bound_reference
+struct Traits_push_bound_reference
   {
     // `up` is unused.
     // `sp` is the reference to push.
@@ -1015,7 +1015,7 @@ struct AIR_Traits_push_bound_reference
       }
   };
 
-struct AIR_Traits_define_function
+struct Traits_define_function
   {
     // `up` is unused.
     // `sp` is ... everything.
@@ -1046,7 +1046,7 @@ struct AIR_Traits_define_function
       }
   };
 
-struct AIR_Traits_branch_expression
+struct Traits_branch_expression
   {
     // `up` is `assign`.
     // `sp` is the branches.
@@ -1086,7 +1086,7 @@ struct AIR_Traits_branch_expression
       }
   };
 
-struct AIR_Traits_coalescence
+struct Traits_coalescence
   {
     // `up` is `assign`.
     // `sp` is the null branch.
@@ -1188,7 +1188,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
     return alt_stack;
   }
 
-struct AIR_Traits_function_call
+struct Traits_function_call
   {
     // `up` is `nargs` and `ptc`.
     // `sp` is the source location.
@@ -1239,7 +1239,7 @@ struct AIR_Traits_function_call
       }
   };
 
-struct AIR_Traits_member_access
+struct Traits_member_access
   {
     // `up` is unused.
     // `sp` is the name.
@@ -1264,7 +1264,7 @@ struct AIR_Traits_member_access
       }
   };
 
-struct AIR_Traits_push_unnamed_array
+struct Traits_push_unnamed_array
   {
     // `up` is `nelems`.
     // `sp` is unused.
@@ -1301,7 +1301,7 @@ struct AIR_Traits_push_unnamed_array
       }
   };
 
-struct AIR_Traits_push_unnamed_object
+struct Traits_push_unnamed_object
   {
     // `up` is unused.
     // `sp` is the list of keys.
@@ -1367,7 +1367,7 @@ do_icast(double value)
     return static_cast<int64_t>(value);
   }
 
-struct AIR_Traits_apply_operator_inc_post
+struct Traits_apply_xop_inc_post
   {
     // `up` is unused.
     // `sp` is unused.
@@ -1413,7 +1413,7 @@ struct AIR_Traits_apply_operator_inc_post
       }
   };
 
-struct AIR_Traits_apply_operator_dec_post
+struct Traits_apply_xop_dec_post
   {
     // `up` is unused.
     // `sp` is unused.
@@ -1459,7 +1459,7 @@ struct AIR_Traits_apply_operator_dec_post
       }
   };
 
-struct AIR_Traits_apply_operator_subscr
+struct Traits_apply_xop_subscr
   {
     // `up` is unused.
     // `sp` is unused.
@@ -1497,7 +1497,7 @@ struct AIR_Traits_apply_operator_subscr
       }
   };
 
-struct AIR_Traits_apply_operator_pos
+struct Traits_apply_xop_pos
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1526,7 +1526,7 @@ struct AIR_Traits_apply_operator_pos
       }
   };
 
-struct AIR_Traits_apply_operator_neg
+struct Traits_apply_xop_neg
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1579,7 +1579,7 @@ struct AIR_Traits_apply_operator_neg
       }
   };
 
-struct AIR_Traits_apply_operator_notb
+struct Traits_apply_xop_notb
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1635,7 +1635,7 @@ struct AIR_Traits_apply_operator_notb
       }
   };
 
-struct AIR_Traits_apply_operator_notl
+struct Traits_apply_xop_notl
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1667,7 +1667,7 @@ struct AIR_Traits_apply_operator_notl
       }
   };
 
-struct AIR_Traits_apply_operator_inc_pre
+struct Traits_apply_xop_inc_pre
   {
     // `up` is unused.
     // `sp` is unused.
@@ -1712,7 +1712,7 @@ struct AIR_Traits_apply_operator_inc_pre
       }
   };
 
-struct AIR_Traits_apply_operator_dec_pre
+struct Traits_apply_xop_dec_pre
   {
     // `up` is unused.
     // `sp` is unused.
@@ -1757,7 +1757,7 @@ struct AIR_Traits_apply_operator_dec_pre
       }
   };
 
-struct AIR_Traits_apply_operator_unset
+struct Traits_apply_xop_unset
   {
     // `up` is unused.
     // `sp` is unused.
@@ -1779,7 +1779,7 @@ struct AIR_Traits_apply_operator_unset
       }
   };
 
-struct AIR_Traits_apply_operator_countof
+struct Traits_apply_xop_countof
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1837,7 +1837,7 @@ struct AIR_Traits_apply_operator_countof
       }
   };
 
-struct AIR_Traits_apply_operator_typeof
+struct Traits_apply_xop_typeof
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1869,7 +1869,7 @@ struct AIR_Traits_apply_operator_typeof
       }
   };
 
-struct AIR_Traits_apply_operator_sqrt
+struct Traits_apply_xop_sqrt
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1915,7 +1915,7 @@ struct AIR_Traits_apply_operator_sqrt
       }
   };
 
-struct AIR_Traits_apply_operator_isnan
+struct Traits_apply_xop_isnan
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -1962,7 +1962,7 @@ struct AIR_Traits_apply_operator_isnan
       }
   };
 
-struct AIR_Traits_apply_operator_isinf
+struct Traits_apply_xop_isinf
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2009,7 +2009,7 @@ struct AIR_Traits_apply_operator_isinf
       }
   };
 
-struct AIR_Traits_apply_operator_abs
+struct Traits_apply_xop_abs
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2062,7 +2062,7 @@ struct AIR_Traits_apply_operator_abs
       }
   };
 
-struct AIR_Traits_apply_operator_sign
+struct Traits_apply_xop_sign
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2108,7 +2108,7 @@ struct AIR_Traits_apply_operator_sign
       }
   };
 
-struct AIR_Traits_apply_operator_round
+struct Traits_apply_xop_round
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2152,7 +2152,7 @@ struct AIR_Traits_apply_operator_round
       }
   };
 
-struct AIR_Traits_apply_operator_floor
+struct Traits_apply_xop_floor
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2196,7 +2196,7 @@ struct AIR_Traits_apply_operator_floor
       }
   };
 
-struct AIR_Traits_apply_operator_ceil
+struct Traits_apply_xop_ceil
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2240,7 +2240,7 @@ struct AIR_Traits_apply_operator_ceil
       }
   };
 
-struct AIR_Traits_apply_operator_trunc
+struct Traits_apply_xop_trunc
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2284,7 +2284,7 @@ struct AIR_Traits_apply_operator_trunc
       }
   };
 
-struct AIR_Traits_apply_operator_iround
+struct Traits_apply_xop_iround
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2328,7 +2328,7 @@ struct AIR_Traits_apply_operator_iround
       }
   };
 
-struct AIR_Traits_apply_operator_ifloor
+struct Traits_apply_xop_ifloor
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2372,7 +2372,7 @@ struct AIR_Traits_apply_operator_ifloor
       }
   };
 
-struct AIR_Traits_apply_operator_iceil
+struct Traits_apply_xop_iceil
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2416,7 +2416,7 @@ struct AIR_Traits_apply_operator_iceil
       }
   };
 
-struct AIR_Traits_apply_operator_itrunc
+struct Traits_apply_xop_itrunc
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2460,7 +2460,7 @@ struct AIR_Traits_apply_operator_itrunc
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_eq
+struct Traits_apply_xop_cmp_eq
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2495,7 +2495,7 @@ struct AIR_Traits_apply_operator_cmp_eq
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_ne
+struct Traits_apply_xop_cmp_ne
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2530,7 +2530,7 @@ struct AIR_Traits_apply_operator_cmp_ne
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_lt
+struct Traits_apply_xop_cmp_lt
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2569,7 +2569,7 @@ struct AIR_Traits_apply_operator_cmp_lt
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_gt
+struct Traits_apply_xop_cmp_gt
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2608,7 +2608,7 @@ struct AIR_Traits_apply_operator_cmp_gt
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_lte
+struct Traits_apply_xop_cmp_lte
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2647,7 +2647,7 @@ struct AIR_Traits_apply_operator_cmp_lte
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_gte
+struct Traits_apply_xop_cmp_gte
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2686,7 +2686,7 @@ struct AIR_Traits_apply_operator_cmp_gte
       }
   };
 
-struct AIR_Traits_apply_operator_cmp_3way
+struct Traits_apply_xop_cmp_3way
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2739,7 +2739,7 @@ struct AIR_Traits_apply_operator_cmp_3way
       }
   };
 
-struct AIR_Traits_apply_operator_add
+struct Traits_apply_xop_add
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2814,7 +2814,7 @@ struct AIR_Traits_apply_operator_add
       }
   };
 
-struct AIR_Traits_apply_operator_sub
+struct Traits_apply_xop_sub
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2881,7 +2881,7 @@ struct AIR_Traits_apply_operator_sub
       }
   };
 
-struct AIR_Traits_apply_operator_mul
+struct Traits_apply_xop_mul
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -2995,7 +2995,7 @@ struct AIR_Traits_apply_operator_mul
       }
   };
 
-struct AIR_Traits_apply_operator_div
+struct Traits_apply_xop_div
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3058,7 +3058,7 @@ struct AIR_Traits_apply_operator_div
       }
   };
 
-struct AIR_Traits_apply_operator_mod
+struct Traits_apply_xop_mod
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3121,7 +3121,7 @@ struct AIR_Traits_apply_operator_mod
       }
   };
 
-struct AIR_Traits_apply_operator_sll
+struct Traits_apply_xop_sll
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3199,7 +3199,7 @@ struct AIR_Traits_apply_operator_sll
       }
   };
 
-struct AIR_Traits_apply_operator_srl
+struct Traits_apply_xop_srl
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3277,7 +3277,7 @@ struct AIR_Traits_apply_operator_srl
       }
   };
 
-struct AIR_Traits_apply_operator_sla
+struct Traits_apply_xop_sla
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3364,7 +3364,7 @@ struct AIR_Traits_apply_operator_sla
       }
   };
 
-struct AIR_Traits_apply_operator_sra
+struct Traits_apply_xop_sra
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3439,7 +3439,7 @@ struct AIR_Traits_apply_operator_sra
       }
   };
 
-struct AIR_Traits_apply_operator_andb
+struct Traits_apply_xop_andb
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3508,7 +3508,7 @@ struct AIR_Traits_apply_operator_andb
       }
   };
 
-struct AIR_Traits_apply_operator_orb
+struct Traits_apply_xop_orb
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3578,7 +3578,7 @@ struct AIR_Traits_apply_operator_orb
       }
   };
 
-struct AIR_Traits_apply_operator_xorb
+struct Traits_apply_xop_xorb
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3648,7 +3648,7 @@ struct AIR_Traits_apply_operator_xorb
       }
   };
 
-struct AIR_Traits_apply_operator_assign
+struct Traits_apply_xop_assign
   {
     // `up` is unused.
     // `sp` is unused.
@@ -3668,7 +3668,7 @@ struct AIR_Traits_apply_operator_assign
       }
   };
 
-struct AIR_Traits_apply_operator_fma
+struct Traits_apply_xop_fma
   {
     // `up` is `assign`.
     // `sp` is unused.
@@ -3718,7 +3718,7 @@ struct AIR_Traits_apply_operator_fma
       }
   };
 
-struct AIR_Traits_apply_operator_head
+struct Traits_apply_xop_head
   {
     // `up` is unused.
     // `sp` is unused.
@@ -3738,7 +3738,7 @@ struct AIR_Traits_apply_operator_head
       }
   };
 
-struct AIR_Traits_apply_operator_tail
+struct Traits_apply_xop_tail
   {
     // `up` is unused.
     // `sp` is unused.
@@ -3758,7 +3758,7 @@ struct AIR_Traits_apply_operator_tail
       }
   };
 
-struct AIR_Traits_unpack_struct_array
+struct Traits_unpack_struct_array
   {
     // `up` is `immutable` and `nelems`.
     // `sp` is unused.
@@ -3813,7 +3813,7 @@ struct AIR_Traits_unpack_struct_array
       }
   };
 
-struct AIR_Traits_unpack_struct_object
+struct Traits_unpack_struct_object
   {
     // `up` is `immutable`.
     // `sp` is the list of keys.
@@ -3873,7 +3873,7 @@ struct AIR_Traits_unpack_struct_object
       }
   };
 
-struct AIR_Traits_define_null_variable
+struct Traits_define_null_variable
   {
     // `up` is `immutable`.
     // `sp` is the source location and name.
@@ -3920,7 +3920,7 @@ struct AIR_Traits_define_null_variable
       }
   };
 
-struct AIR_Traits_single_step_trap
+struct Traits_single_step_trap
   {
     // `up` is unused.
     // `sp` is the source location.
@@ -3947,7 +3947,7 @@ struct AIR_Traits_single_step_trap
       }
   };
 
-struct AIR_Traits_variadic_call
+struct Traits_variadic_call
   {
     // `up` is `ptc`.
     // `sp` is the source location.
@@ -4065,7 +4065,7 @@ struct AIR_Traits_variadic_call
       }
   };
 
-struct AIR_Traits_defer_expression
+struct Traits_defer_expression
   {
     // `up` is unused.
     // `sp` is the source location and body.
@@ -4103,7 +4103,7 @@ struct AIR_Traits_defer_expression
       }
   };
 
-struct AIR_Traits_import_call
+struct Traits_import_call
   {
     // `up` is `nargs`.
     // `sp` is the source location and compiler options.
@@ -4203,7 +4203,7 @@ struct AIR_Traits_import_call
       }
   };
 
-struct AIR_Traits_declare_reference
+struct Traits_declare_reference
   {
     // `up` is unused.
     // `sp` is the name;
@@ -4224,7 +4224,7 @@ struct AIR_Traits_declare_reference
       }
   };
 
-struct AIR_Traits_initialize_reference
+struct Traits_initialize_reference
   {
     // `up` is unused.
     // `sp` is the name;
@@ -4646,251 +4646,251 @@ solidify(AVMC_Queue& queue) const
   {
     switch(this->index()) {
       case index_clear_stack:
-        return do_solidify<AIR_Traits_clear_stack>(queue,
-                                     this->m_stor.as<index_clear_stack>());
+        return do_solidify<Traits_clear_stack>(queue,
+                       this->m_stor.as<index_clear_stack>());
 
       case index_execute_block:
-        return do_solidify<AIR_Traits_execute_block>(queue,
-                                     this->m_stor.as<index_execute_block>());
+        return do_solidify<Traits_execute_block>(queue,
+                       this->m_stor.as<index_execute_block>());
 
       case index_declare_variable:
-        return do_solidify<AIR_Traits_declare_variable>(queue,
-                                     this->m_stor.as<index_declare_variable>());
+        return do_solidify<Traits_declare_variable>(queue,
+                       this->m_stor.as<index_declare_variable>());
 
       case index_initialize_variable:
-        return do_solidify<AIR_Traits_initialize_variable>(queue,
-                                     this->m_stor.as<index_initialize_variable>());
+        return do_solidify<Traits_initialize_variable>(queue,
+                       this->m_stor.as<index_initialize_variable>());
 
       case index_if_statement:
-        return do_solidify<AIR_Traits_if_statement>(queue,
-                                     this->m_stor.as<index_if_statement>());
+        return do_solidify<Traits_if_statement>(queue,
+                       this->m_stor.as<index_if_statement>());
 
       case index_switch_statement:
-        return do_solidify<AIR_Traits_switch_statement>(queue,
-                                     this->m_stor.as<index_switch_statement>());
+        return do_solidify<Traits_switch_statement>(queue,
+                       this->m_stor.as<index_switch_statement>());
 
       case index_do_while_statement:
-        return do_solidify<AIR_Traits_do_while_statement>(queue,
-                                     this->m_stor.as<index_do_while_statement>());
+        return do_solidify<Traits_do_while_statement>(queue,
+                       this->m_stor.as<index_do_while_statement>());
 
       case index_while_statement:
-        return do_solidify<AIR_Traits_while_statement>(queue,
-                                     this->m_stor.as<index_while_statement>());
+        return do_solidify<Traits_while_statement>(queue,
+                       this->m_stor.as<index_while_statement>());
 
       case index_for_each_statement:
-        return do_solidify<AIR_Traits_for_each_statement>(queue,
-                                     this->m_stor.as<index_for_each_statement>());
+        return do_solidify<Traits_for_each_statement>(queue,
+                       this->m_stor.as<index_for_each_statement>());
 
       case index_for_statement:
-        return do_solidify<AIR_Traits_for_statement>(queue,
-                                     this->m_stor.as<index_for_statement>());
+        return do_solidify<Traits_for_statement>(queue,
+                       this->m_stor.as<index_for_statement>());
 
       case index_try_statement:
-        return do_solidify<AIR_Traits_try_statement>(queue,
-                                     this->m_stor.as<index_try_statement>());
+        return do_solidify<Traits_try_statement>(queue,
+                       this->m_stor.as<index_try_statement>());
 
       case index_throw_statement:
-        return do_solidify<AIR_Traits_throw_statement>(queue,
-                                     this->m_stor.as<index_throw_statement>());
+        return do_solidify<Traits_throw_statement>(queue,
+                       this->m_stor.as<index_throw_statement>());
 
       case index_assert_statement:
-        return do_solidify<AIR_Traits_assert_statement>(queue,
-                                     this->m_stor.as<index_assert_statement>());
+        return do_solidify<Traits_assert_statement>(queue,
+                       this->m_stor.as<index_assert_statement>());
 
       case index_simple_status:
-        return do_solidify<AIR_Traits_simple_status>(queue,
-                                     this->m_stor.as<index_simple_status>());
+        return do_solidify<Traits_simple_status>(queue,
+                       this->m_stor.as<index_simple_status>());
 
       case index_convert_to_temporary:
-        return do_solidify<AIR_Traits_convert_to_temporary>(queue,
-                                     this->m_stor.as<index_convert_to_temporary>());
+        return do_solidify<Traits_convert_to_temporary>(queue,
+                       this->m_stor.as<index_convert_to_temporary>());
 
       case index_push_global_reference:
-        return do_solidify<AIR_Traits_push_global_reference>(queue,
-                                     this->m_stor.as<index_push_global_reference>());
+        return do_solidify<Traits_push_global_reference>(queue,
+                       this->m_stor.as<index_push_global_reference>());
 
       case index_push_local_reference:
-        return do_solidify<AIR_Traits_push_local_reference>(queue,
-                                     this->m_stor.as<index_push_local_reference>());
+        return do_solidify<Traits_push_local_reference>(queue,
+                       this->m_stor.as<index_push_local_reference>());
 
       case index_push_bound_reference:
-        return do_solidify<AIR_Traits_push_bound_reference>(queue,
-                                     this->m_stor.as<index_push_bound_reference>());
+        return do_solidify<Traits_push_bound_reference>(queue,
+                       this->m_stor.as<index_push_bound_reference>());
 
       case index_define_function:
-        return do_solidify<AIR_Traits_define_function>(queue,
-                                     this->m_stor.as<index_define_function>());
+        return do_solidify<Traits_define_function>(queue,
+                       this->m_stor.as<index_define_function>());
 
       case index_branch_expression:
-        return do_solidify<AIR_Traits_branch_expression>(queue,
-                                     this->m_stor.as<index_branch_expression>());
+        return do_solidify<Traits_branch_expression>(queue,
+                       this->m_stor.as<index_branch_expression>());
 
       case index_coalescence:
-        return do_solidify<AIR_Traits_coalescence>(queue,
-                                     this->m_stor.as<index_coalescence>());
+        return do_solidify<Traits_coalescence>(queue,
+                       this->m_stor.as<index_coalescence>());
 
       case index_function_call:
-        return do_solidify<AIR_Traits_function_call>(queue,
-                                     this->m_stor.as<index_function_call>());
+        return do_solidify<Traits_function_call>(queue,
+                       this->m_stor.as<index_function_call>());
 
       case index_member_access:
-        return do_solidify<AIR_Traits_member_access>(queue,
-                                     this->m_stor.as<index_member_access>());
+        return do_solidify<Traits_member_access>(queue,
+                       this->m_stor.as<index_member_access>());
 
       case index_push_unnamed_array:
-        return do_solidify<AIR_Traits_push_unnamed_array>(queue,
-                                     this->m_stor.as<index_push_unnamed_array>());
+        return do_solidify<Traits_push_unnamed_array>(queue,
+                       this->m_stor.as<index_push_unnamed_array>());
 
       case index_push_unnamed_object:
-        return do_solidify<AIR_Traits_push_unnamed_object>(queue,
-                                     this->m_stor.as<index_push_unnamed_object>());
+        return do_solidify<Traits_push_unnamed_object>(queue,
+                       this->m_stor.as<index_push_unnamed_object>());
 
       case index_apply_operator: {
         const auto& altr = this->m_stor.as<index_apply_operator>();
         switch(altr.xop) {
           case xop_inc_post:
-            return do_solidify<AIR_Traits_apply_operator_inc_post>(queue, altr);
+            return do_solidify<Traits_apply_xop_inc_post>(queue, altr);
 
           case xop_dec_post:
-            return do_solidify<AIR_Traits_apply_operator_dec_post>(queue, altr);
+            return do_solidify<Traits_apply_xop_dec_post>(queue, altr);
 
           case xop_subscr:
-            return do_solidify<AIR_Traits_apply_operator_subscr>(queue, altr);
+            return do_solidify<Traits_apply_xop_subscr>(queue, altr);
 
           case xop_pos:
-            return do_solidify<AIR_Traits_apply_operator_pos>(queue, altr);
+            return do_solidify<Traits_apply_xop_pos>(queue, altr);
 
           case xop_neg:
-            return do_solidify<AIR_Traits_apply_operator_neg>(queue, altr);
+            return do_solidify<Traits_apply_xop_neg>(queue, altr);
 
           case xop_notb:
-            return do_solidify<AIR_Traits_apply_operator_notb>(queue, altr);
+            return do_solidify<Traits_apply_xop_notb>(queue, altr);
 
           case xop_notl:
-            return do_solidify<AIR_Traits_apply_operator_notl>(queue, altr);
+            return do_solidify<Traits_apply_xop_notl>(queue, altr);
 
           case xop_inc_pre:
-            return do_solidify<AIR_Traits_apply_operator_inc_pre>(queue, altr);
+            return do_solidify<Traits_apply_xop_inc_pre>(queue, altr);
 
           case xop_dec_pre:
-            return do_solidify<AIR_Traits_apply_operator_dec_pre>(queue, altr);
+            return do_solidify<Traits_apply_xop_dec_pre>(queue, altr);
 
           case xop_unset:
-            return do_solidify<AIR_Traits_apply_operator_unset>(queue, altr);
+            return do_solidify<Traits_apply_xop_unset>(queue, altr);
 
           case xop_countof:
-            return do_solidify<AIR_Traits_apply_operator_countof>(queue, altr);
+            return do_solidify<Traits_apply_xop_countof>(queue, altr);
 
           case xop_typeof:
-            return do_solidify<AIR_Traits_apply_operator_typeof>(queue, altr);
+            return do_solidify<Traits_apply_xop_typeof>(queue, altr);
 
           case xop_sqrt:
-            return do_solidify<AIR_Traits_apply_operator_sqrt>(queue, altr);
+            return do_solidify<Traits_apply_xop_sqrt>(queue, altr);
 
           case xop_isnan:
-            return do_solidify<AIR_Traits_apply_operator_isnan>(queue, altr);
+            return do_solidify<Traits_apply_xop_isnan>(queue, altr);
 
           case xop_isinf:
-            return do_solidify<AIR_Traits_apply_operator_isinf>(queue, altr);
+            return do_solidify<Traits_apply_xop_isinf>(queue, altr);
 
           case xop_abs:
-            return do_solidify<AIR_Traits_apply_operator_abs>(queue, altr);
+            return do_solidify<Traits_apply_xop_abs>(queue, altr);
 
           case xop_sign:
-            return do_solidify<AIR_Traits_apply_operator_sign>(queue, altr);
+            return do_solidify<Traits_apply_xop_sign>(queue, altr);
 
           case xop_round:
-            return do_solidify<AIR_Traits_apply_operator_round>(queue, altr);
+            return do_solidify<Traits_apply_xop_round>(queue, altr);
 
           case xop_floor:
-            return do_solidify<AIR_Traits_apply_operator_floor>(queue, altr);
+            return do_solidify<Traits_apply_xop_floor>(queue, altr);
 
           case xop_ceil:
-            return do_solidify<AIR_Traits_apply_operator_ceil>(queue, altr);
+            return do_solidify<Traits_apply_xop_ceil>(queue, altr);
 
           case xop_trunc:
-            return do_solidify<AIR_Traits_apply_operator_trunc>(queue, altr);
+            return do_solidify<Traits_apply_xop_trunc>(queue, altr);
 
           case xop_iround:
-            return do_solidify<AIR_Traits_apply_operator_iround>(queue, altr);
+            return do_solidify<Traits_apply_xop_iround>(queue, altr);
 
           case xop_ifloor:
-            return do_solidify<AIR_Traits_apply_operator_ifloor>(queue, altr);
+            return do_solidify<Traits_apply_xop_ifloor>(queue, altr);
 
           case xop_iceil:
-            return do_solidify<AIR_Traits_apply_operator_iceil>(queue, altr);
+            return do_solidify<Traits_apply_xop_iceil>(queue, altr);
 
           case xop_itrunc:
-            return do_solidify<AIR_Traits_apply_operator_itrunc>(queue, altr);
+            return do_solidify<Traits_apply_xop_itrunc>(queue, altr);
 
           case xop_cmp_eq:
-            return do_solidify<AIR_Traits_apply_operator_cmp_eq>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_eq>(queue, altr);
 
           case xop_cmp_ne:
-            return do_solidify<AIR_Traits_apply_operator_cmp_ne>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_ne>(queue, altr);
 
           case xop_cmp_lt:
-            return do_solidify<AIR_Traits_apply_operator_cmp_lt>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_lt>(queue, altr);
 
           case xop_cmp_gt:
-            return do_solidify<AIR_Traits_apply_operator_cmp_gt>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_gt>(queue, altr);
 
           case xop_cmp_lte:
-            return do_solidify<AIR_Traits_apply_operator_cmp_lte>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_lte>(queue, altr);
 
           case xop_cmp_gte:
-            return do_solidify<AIR_Traits_apply_operator_cmp_gte>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_gte>(queue, altr);
 
           case xop_cmp_3way:
-            return do_solidify<AIR_Traits_apply_operator_cmp_3way>(queue, altr);
+            return do_solidify<Traits_apply_xop_cmp_3way>(queue, altr);
 
           case xop_add:
-            return do_solidify<AIR_Traits_apply_operator_add>(queue, altr);
+            return do_solidify<Traits_apply_xop_add>(queue, altr);
 
           case xop_sub:
-            return do_solidify<AIR_Traits_apply_operator_sub>(queue, altr);
+            return do_solidify<Traits_apply_xop_sub>(queue, altr);
 
           case xop_mul:
-            return do_solidify<AIR_Traits_apply_operator_mul>(queue, altr);
+            return do_solidify<Traits_apply_xop_mul>(queue, altr);
 
           case xop_div:
-            return do_solidify<AIR_Traits_apply_operator_div>(queue, altr);
+            return do_solidify<Traits_apply_xop_div>(queue, altr);
 
           case xop_mod:
-            return do_solidify<AIR_Traits_apply_operator_mod>(queue, altr);
+            return do_solidify<Traits_apply_xop_mod>(queue, altr);
 
           case xop_sll:
-            return do_solidify<AIR_Traits_apply_operator_sll>(queue, altr);
+            return do_solidify<Traits_apply_xop_sll>(queue, altr);
 
           case xop_srl:
-            return do_solidify<AIR_Traits_apply_operator_srl>(queue, altr);
+            return do_solidify<Traits_apply_xop_srl>(queue, altr);
 
           case xop_sla:
-            return do_solidify<AIR_Traits_apply_operator_sla>(queue, altr);
+            return do_solidify<Traits_apply_xop_sla>(queue, altr);
 
           case xop_sra:
-            return do_solidify<AIR_Traits_apply_operator_sra>(queue, altr);
+            return do_solidify<Traits_apply_xop_sra>(queue, altr);
 
           case xop_andb:
-            return do_solidify<AIR_Traits_apply_operator_andb>(queue, altr);
+            return do_solidify<Traits_apply_xop_andb>(queue, altr);
 
           case xop_orb:
-            return do_solidify<AIR_Traits_apply_operator_orb>(queue, altr);
+            return do_solidify<Traits_apply_xop_orb>(queue, altr);
 
           case xop_xorb:
-            return do_solidify<AIR_Traits_apply_operator_xorb>(queue, altr);
+            return do_solidify<Traits_apply_xop_xorb>(queue, altr);
 
           case xop_assign:
-            return do_solidify<AIR_Traits_apply_operator_assign>(queue, altr);
+            return do_solidify<Traits_apply_xop_assign>(queue, altr);
 
           case xop_fma:
-            return do_solidify<AIR_Traits_apply_operator_fma>(queue, altr);
+            return do_solidify<Traits_apply_xop_fma>(queue, altr);
 
           case xop_head:
-            return do_solidify<AIR_Traits_apply_operator_head>(queue, altr);
+            return do_solidify<Traits_apply_xop_head>(queue, altr);
 
           case xop_tail:
-            return do_solidify<AIR_Traits_apply_operator_tail>(queue, altr);
+            return do_solidify<Traits_apply_xop_tail>(queue, altr);
 
           default:
             ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
@@ -4898,40 +4898,40 @@ solidify(AVMC_Queue& queue) const
       }
 
       case index_unpack_struct_array:
-        return do_solidify<AIR_Traits_unpack_struct_array>(queue,
-                                     this->m_stor.as<index_unpack_struct_array>());
+        return do_solidify<Traits_unpack_struct_array>(queue,
+                       this->m_stor.as<index_unpack_struct_array>());
 
       case index_unpack_struct_object:
-        return do_solidify<AIR_Traits_unpack_struct_object>(queue,
-                                     this->m_stor.as<index_unpack_struct_object>());
+        return do_solidify<Traits_unpack_struct_object>(queue,
+                       this->m_stor.as<index_unpack_struct_object>());
 
       case index_define_null_variable:
-        return do_solidify<AIR_Traits_define_null_variable>(queue,
-                                     this->m_stor.as<index_define_null_variable>());
+        return do_solidify<Traits_define_null_variable>(queue,
+                       this->m_stor.as<index_define_null_variable>());
 
       case index_single_step_trap:
-        return do_solidify<AIR_Traits_single_step_trap>(queue,
-                                     this->m_stor.as<index_single_step_trap>());
+        return do_solidify<Traits_single_step_trap>(queue,
+                       this->m_stor.as<index_single_step_trap>());
 
       case index_variadic_call:
-        return do_solidify<AIR_Traits_variadic_call>(queue,
-                                     this->m_stor.as<index_variadic_call>());
+        return do_solidify<Traits_variadic_call>(queue,
+                       this->m_stor.as<index_variadic_call>());
 
       case index_defer_expression:
-        return do_solidify<AIR_Traits_defer_expression>(queue,
-                                     this->m_stor.as<index_defer_expression>());
+        return do_solidify<Traits_defer_expression>(queue,
+                       this->m_stor.as<index_defer_expression>());
 
       case index_import_call:
-        return do_solidify<AIR_Traits_import_call>(queue,
-                                     this->m_stor.as<index_import_call>());
+        return do_solidify<Traits_import_call>(queue,
+                       this->m_stor.as<index_import_call>());
 
       case index_declare_reference:
-        return do_solidify<AIR_Traits_declare_reference>(queue,
-                                     this->m_stor.as<index_declare_reference>());
+        return do_solidify<Traits_declare_reference>(queue,
+                       this->m_stor.as<index_declare_reference>());
 
       case index_initialize_reference:
-        return do_solidify<AIR_Traits_initialize_reference>(queue,
-                                     this->m_stor.as<index_initialize_reference>());
+        return do_solidify<Traits_initialize_reference>(queue,
+                       this->m_stor.as<index_initialize_reference>());
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
