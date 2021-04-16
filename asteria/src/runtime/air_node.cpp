@@ -30,9 +30,10 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i) {
       auto qnode = code[i].rebind_opt(ctx);
-      dirty |= !!qnode;
-      if(qnode)
+      if(qnode) {
         code.mut(i) = ::std::move(*qnode);
+        dirty |= true;
+      }
     }
     return dirty;
   }
@@ -43,9 +44,10 @@ do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs, Abstract_Co
     for(size_t k = 0;  k < seqs.size();  ++k) {
       for(size_t i = 0;  i < seqs[k].size();  ++i) {
         auto qnode = seqs[k][i].rebind_opt(ctx);
-        dirty |= !!qnode;
-        if(qnode)
+        if(qnode) {
           seqs.mut(k).mut(i) = ::std::move(*qnode);
+          dirty |= true;
+        }
       }
     }
     return dirty;
