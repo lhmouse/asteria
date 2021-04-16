@@ -21,16 +21,17 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     m_zvarg(zvarg)
   {
     // Set the `this` reference.
-    // If the self reference is null, it is likely that `this` isn't ever referenced
-    // in this function, so perform lazy initialization to avoid this overhead.
+    // If the self reference is null, it is likely that `this` isn't ever
+    // referenced in this function, so perform lazy initialization to avoid
+    // this overhead.
     if(self.is_uninit() || self.is_void())
       ASTERIA_THROW("Invalid `this` reference passed to `$1`", zvarg->func());
 
     if(!(self.is_temporary() && self.dereference_readonly().is_null()))
       this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
 
-    // Set arguments. As arguments are evaluated from left to right, the reference at
-    // the top is the last argument.
+    // Set arguments. As arguments are evaluated from left to right, the
+    // reference at the top is the last argument.
     auto bptr = ::std::make_move_iterator(stack.bottom());
     auto eptr = ::std::make_move_iterator(stack.top());
     bool variadic = false;
@@ -39,8 +40,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       if(name.empty())
         continue;
 
-      // Nothing is set for the variadic placeholder, but the parameter list
-      // terminates here.
+      // Nothing is set for the variadic placeholder, but the parameter
+      // list terminates here.
       variadic = (name.size() == 3) && (::std::memcmp(name.c_str(), "...", 4) == 0);
       if(variadic)
         break;
@@ -53,7 +54,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
         this->do_open_named_reference(nullptr, name).set_temporary(nullopt);
     }
 
-    // If the function is not variadic, then all arguments shall have been consumed.
+    // If the function is not variadic, then all arguments must have been consumed.
     if(!variadic && (bptr != eptr))
       ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
 
@@ -72,8 +73,8 @@ Executive_Context::
 do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
   {
     // Create pre-defined references as needed.
-    // N.B. If you have ever changed these, remember to update 'analytic_context.cpp'
-    // as well.
+    // N.B. If you have ever changed these, remember to update
+    // 'analytic_context.cpp' as well.
     if(name == "__func") {
       // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
@@ -82,8 +83,8 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
     }
 
     if(name == "__this") {
-      // Note: This can only happen inside a function context and the `this` argument
-      // is null.
+      // Note: This can only happen inside a function context and the `this`
+      // argument is null.
       auto& ref = this->do_open_named_reference(hint_opt, name);
       ref.set_temporary(nullopt);
       return &ref;
@@ -92,11 +93,11 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
     if(name == "__varg") {
       // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
-      if(ROCKET_UNEXPECT(this->m_lazy_args.empty()))
-        ref.set_temporary(this->m_zvarg);
-      else
-        ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(
-                              *(this->m_zvarg), this->m_lazy_args));
+      ref.set_temporary(
+            this->m_lazy_args.empty()
+              ? this->m_zvarg
+              : ::rocket::make_refcnt<Variadic_Arguer>(
+                          *(this->m_zvarg), this->m_lazy_args));
       return &ref;
     }
 
@@ -121,13 +122,13 @@ do_on_scope_exit_slow(AIR_Status status)
       self = ::std::move(this->m_stack->mut_back());
 
     if(auto ptca = self.get_ptc_args_opt()) {
-      // If a PTC wrapper was returned, prepend all deferred expressions to it.
-      // These callbacks will be unpacked later, so we just return.
+      // If a PTC wrapper was returned, prepend all deferred expressions
+      // to it. These callbacks will be unpacked later, so we just return.
       if(ptca->get_defer().empty())
         ptca->open_defer().swap(this->m_defer);
       else
         ptca->open_defer().append(
-                  this->m_defer.move_begin(), this->m_defer.move_end());
+                this->m_defer.move_begin(), this->m_defer.move_end());
     }
     else {
       // Execute all deferred expressions backwards.

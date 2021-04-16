@@ -18,8 +18,8 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
       if(name.empty())
         continue;
 
-      // Nothing is set for the variadic placeholder, but the parameter list
-      // terminates here.
+      // Nothing is set for the variadic placeholder, but the parameter
+      // list terminates here.
       variadic = (name.size() == 3) && (::std::memcmp(name.c_str(), "...", 4) == 0);
       if(variadic)
         break;
@@ -29,8 +29,8 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
     }
 
     // Set pre-defined references.
-    // N.B. If you have ever changed these, remember to update 'executive_context.cpp'
-    // as well.
+    // N.B. If you have ever changed these, remember to update
+    // 'executive_context.cpp' as well.
     this->do_open_named_reference(nullptr, sref("__varg")).set_uninit();
     this->do_open_named_reference(nullptr, sref("__this")).set_uninit();
     this->do_open_named_reference(nullptr, sref("__func")).set_uninit();
