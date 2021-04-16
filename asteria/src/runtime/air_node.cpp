@@ -470,8 +470,8 @@ struct AIR_Traits_switch_statement
             do {
               // Execute the body.
               status = sp.queues_bodies[bp].execute(ctx_body);
-              if(::rocket::is_any_of(status, { air_status_break_unspec,
-                                               air_status_break_switch }))
+              if(::rocket::is_any_of(status,
+                    { air_status_break_unspec, air_status_break_switch }))
                 break;
 
               if(status != air_status_next)
@@ -518,11 +518,12 @@ struct AIR_Traits_do_while_statement
         for(;;) {
           // Execute the body.
           auto status = do_execute_block(sp.queues[0], ctx);
-          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
+          if(::rocket::is_any_of(status,
+                { air_status_break_unspec, air_status_break_while }))
             break;
 
-          if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                            air_status_continue_while }))
+          if(::rocket::is_none_of(status, { air_status_next,
+                  air_status_continue_unspec, air_status_continue_while }))
             return status;
 
           // Check the condition.
@@ -570,11 +571,12 @@ struct AIR_Traits_while_statement
 
           // Execute the body.
           status = do_execute_block(sp.queues[1], ctx);
-          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
+          if(::rocket::is_any_of(status,
+                { air_status_break_unspec, air_status_break_while }))
             break;
 
-          if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                            air_status_continue_while }))
+          if(::rocket::is_none_of(status, { air_status_next,
+                  air_status_continue_unspec, air_status_continue_while }))
             return status;
         }
         return air_status_next;
@@ -635,12 +637,12 @@ struct AIR_Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec,
-                                               air_status_break_for }))
+              if(::rocket::is_any_of(status,
+                    { air_status_break_unspec, air_status_break_for }))
                 break;
 
-              if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                air_status_continue_for }))
+              if(::rocket::is_none_of(status, { air_status_next,
+                      air_status_continue_unspec, air_status_continue_for }))
                 return status;
 
               // Restore the mapped reference.
@@ -658,12 +660,12 @@ struct AIR_Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec,
-                                               air_status_break_for }))
+              if(::rocket::is_any_of(status,
+                    { air_status_break_unspec, air_status_break_for }))
                 break;
 
-              if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                air_status_continue_for }))
+              if(::rocket::is_none_of(status, { air_status_next,
+                      air_status_continue_unspec, air_status_continue_for }))
                 return status;
 
               // Restore the mapped reference.
@@ -718,11 +720,12 @@ struct AIR_Traits_for_statement
 
           // Execute the body.
           status = do_execute_block(sp.queues[3], ctx_for);
-          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+          if(::rocket::is_any_of(status,
+                { air_status_break_unspec, air_status_break_for }))
             break;
 
-          if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                            air_status_continue_for }))
+          if(::rocket::is_none_of(status, { air_status_next,
+                  air_status_continue_unspec, air_status_continue_for }))
             return status;
 
           // Execute the increment.
