@@ -55,7 +55,7 @@ do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& seqs, Abstract_Co
 
 template<typename NodeT>
 opt<AIR_Node>
-do_rebind_return_opt(bool dirty, NodeT&& xnode)
+do_return_rebound_opt(bool dirty, NodeT&& xnode)
   {
     if(!dirty)
       return nullopt;
@@ -4417,7 +4417,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_declare_variable:
@@ -4436,7 +4436,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_true, ctx_body);
         do_rebind_nodes(dirty, bound.code_false, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_switch_statement: {
@@ -4450,7 +4450,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_labels, ctx);  // this is not part of the body!
         do_rebind_nodes(dirty, bound.code_bodies, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_do_while_statement: {
@@ -4464,7 +4464,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
         do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_while_statement: {
@@ -4478,7 +4478,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_for_each_statement: {
@@ -4493,7 +4493,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_for_statement: {
@@ -4510,7 +4510,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_step, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_try_statement: {
@@ -4524,7 +4524,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_try, ctx_body);
         do_rebind_nodes(dirty, bound.code_catch, ctx_body);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_throw_statement:
@@ -4573,7 +4573,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_body, ctx_func);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_branch_expression: {
@@ -4586,7 +4586,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_true, ctx);
         do_rebind_nodes(dirty, bound.code_false, ctx);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_coalescence: {
@@ -4598,7 +4598,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_null, ctx);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_function_call:
@@ -4623,7 +4623,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_body, ctx);
 
-        return do_rebind_return_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
       case index_import_call:
