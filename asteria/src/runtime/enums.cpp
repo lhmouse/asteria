@@ -163,6 +163,24 @@ describe_xop(Xop xop) noexcept
       case xop_popcnt:
         return "prefix `__popcnt`";
 
+      case xop_addm:
+        return "prefix `__addm`";
+
+      case xop_subm:
+        return "prefix `__subm`";
+
+      case xop_mulm:
+        return "prefix `__mulm`";
+
+      case xop_adds:
+        return "prefix `__adds`";
+
+      case xop_subs:
+        return "prefix `__subs`";
+
+      case xop_muls:
+        return "prefix `__muls`";
+
       default:
         return "[unknown operator]";
     }

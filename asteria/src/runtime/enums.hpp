@@ -62,6 +62,12 @@ enum Xop : uint8_t
     xop_lzcnt     = 48,  // __lzcnt
     xop_tzcnt     = 49,  // __tzcnt
     xop_popcnt    = 50,  // __popcnt
+    xop_addm      = 51,  // __addm
+    xop_subm      = 52,  // __subm
+    xop_mulm      = 53,  // __mulm
+    xop_adds      = 54,  // __adds
+    xop_subs      = 55,  // __subs
+    xop_muls      = 56,  // __muls
   };
 
 ROCKET_CONST_FUNCTION const char*

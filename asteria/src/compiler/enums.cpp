@@ -349,6 +349,24 @@ stringify_keyword(Keyword kwrd) noexcept
       case keyword_popcnt:
         return "__popcnt";
 
+      case keyword_addm:
+        return "__addm";
+
+      case keyword_subm:
+        return "__subm";
+
+      case keyword_mulm:
+        return "__mulm";
+
+      case keyword_adds:
+        return "__adds";
+
+      case keyword_subs:
+        return "__subs";
+
+      case keyword_muls:
+        return "__muls";
+
       default:
         return "[unknown keyword]";
     }

@@ -1815,6 +1815,72 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
     return true;
   }
 
+constexpr Prefix_Keyword_Xop s_prefix_keyword_binary_xop[] =
+  {
+    { keyword_addm,      xop_addm     },
+    { keyword_subm,      xop_subm     },
+    { keyword_mulm,      xop_mulm     },
+    { keyword_adds,      xop_adds     },
+    { keyword_subs,      xop_subs     },
+    { keyword_muls,      xop_muls     },
+  };
+
+opt<Expression_Unit>
+do_accept_prefix_binary_operator_opt(Token_Stream& tstrm)
+  {
+    // prefix-binary-operator ::=
+    //   "__addm" | "__subm" | "__mulm" | "__adds" | "__subs" | "__muls"
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      return nullopt;
+
+    auto sloc = qtok->sloc();
+    if(qtok->is_keyword()) {
+      auto qconf = ::rocket::find(s_prefix_keyword_binary_xop, qtok->as_keyword());
+      if(!qconf)
+        return nullopt;
+
+      // Return the prefix operator and discard this token.
+      tstrm.shift();
+      Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
+      return ::std::move(xunit);
+    }
+    return nullopt;
+  }
+
+bool
+do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    // prefix-binary-expression ::=
+    //   prefix-binary-operator "(" expression "," expression ")"
+    auto qxunit = do_accept_prefix_binary_operator_opt(tstrm);
+    if(!qxunit)
+      return false;
+
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
+    if(!kpunct)
+      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+
+    bool succ = do_accept_expression(units, tstrm);
+    if(!succ)
+      throw Parser_Error(parser_status_expression_expected, tstrm);
+
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+    if(!kpunct)
+      throw Parser_Error(parser_status_comma_expected, tstrm);
+
+    succ = do_accept_expression(units, tstrm);
+    if(!succ)
+      throw Parser_Error(parser_status_expression_expected, tstrm);
+
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
+    if(!kpunct)
+      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm);
+
+    units.emplace_back(::std::move(*qxunit));
+    return true;
+  }
+
 bool
 do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
@@ -1901,8 +1967,8 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
   {
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array |
-    //   unnamed-object | nested-expression | fused-multiply-add | variadic-function-call |
-    //   import-function-call
+    //   unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
+    //   variadic-function-call | import-function-call
     if(do_accept_local_reference(units, tstrm))
       return true;
 
@@ -1928,6 +1994,9 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
       return true;
 
     if(do_accept_fused_multiply_add(units, tstrm))
+      return true;
+
+    if(do_accept_prefix_binary_expression(units, tstrm))
       return true;
 
     if(do_accept_variadic_function_call(units, tstrm))

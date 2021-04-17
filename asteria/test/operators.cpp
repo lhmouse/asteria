@@ -428,6 +428,65 @@ int main()
         assert __popcnt 0x60 == 2;
         assert __popcnt 0x12345 == 7;
 
+        const iMin = -0x80000000`00000000;
+        const iMax = +0x7FFFFFFF`FFFFFFFF;
+
+        assert __addm(2, 1) == 3;
+        assert __addm(iMax, 1) == iMin;
+        assert __addm(iMin, iMin) == 0;
+        assert __addm(iMax, iMax) == -2;
+        assert __addm(iMax, iMin) == -1;
+        assert __subm(2, 1) == 1;
+        assert __subm(iMin, 1) == iMax;
+        assert __subm(iMin, iMax) == 1;
+        assert __subm(iMax, -1) == iMin;
+        assert __subm(iMax, iMin) == -1;
+        assert __mulm(2, 3) == 6;
+        assert __mulm(-1, -1) == 1;
+        assert __mulm(iMax, 1) == iMax;
+        assert __mulm(iMax, -1) == -iMax;
+        assert __mulm(iMin, 1) == iMin;
+        assert __mulm(iMin, -1) == iMin;
+
+        assert __adds(2, 1) == 3;
+        assert __adds(iMax, 1) == iMax;
+        assert __adds(iMin, iMin) == iMin;
+        assert __adds(iMax, iMax) == iMax;
+        assert __adds(iMax, iMin) == -1;
+        assert __subs(2, 1) == 1;
+        assert __subs(iMin, 1) == iMin;
+        assert __subs(iMin, iMax) == iMin;
+        assert __subs(iMax, -1) == iMax;
+        assert __subs(iMax, iMin) == iMax;
+        assert __muls(2, 3) == 6;
+        assert __muls(-1, -1) == 1;
+        assert __muls(iMax, 1) == iMax;
+        assert __muls(iMax, -1) == -iMax;
+        assert __muls(iMin, 1) == iMin;
+        assert __muls(iMin, -1) == iMax;
+
+        assert __adds(1.5, 2.5) == 4;
+        assert __adds(infinity, 1) == infinity;
+        assert __adds(1, infinity) == infinity;
+        assert __adds(-infinity, 1) == -infinity;
+        assert __adds(1, -infinity) == -infinity;
+        assert __isnan __adds(nan, 1);
+        assert __isnan __adds(1, nan);
+        assert __subs(1.5, 2.5) == -1;
+        assert __subs(infinity, 1) == infinity;
+        assert __subs(1, infinity) == -infinity;
+        assert __subs(-infinity, 1) == -infinity;
+        assert __subs(1, -infinity) == infinity;
+        assert __isnan __subs(nan, 1);
+        assert __isnan __subs(1, nan);
+        assert __muls(1.5, 2.5) == 3.75;
+        assert __muls(infinity, 1) == infinity;
+        assert __muls(1, infinity) == infinity;
+        assert __muls(-infinity, 1) == -infinity;
+        assert __muls(1, -infinity) == -infinity;
+        assert __isnan __muls(nan, 1);
+        assert __isnan __muls(1, nan);
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     Global_Context global;

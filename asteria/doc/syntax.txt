@@ -226,7 +226,8 @@ prefix-operator ::=
 
 primary-expression ::=
 	identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
-	nested-expression | fused-multiply-add | variadic-function-call | import-function-call
+	nested-expression | fused-multiply-add | prefix-binary-expression |
+	variadic-function-call | import-function-call
 
 global-identifier ::=
 	"__global" identifier
@@ -263,6 +264,12 @@ nested-expression ::=
 
 fused-multiply-add ::=
 	"__fma" "(" expression "," expression "," expression ")"
+
+prefix-binary-expression ::=
+	prefix-binary-operator "(" expression "," expression ")"
+
+prefix-binary-operator ::=
+	"__addm" | "__subm" | "__mulm" | "__adds" | "__subs" | "__muls"
 
 variadic-function-call ::=
 	"__vcall" "(" expression "," expression ")"

@@ -129,6 +129,12 @@ enum Keyword : uint8_t
     keyword_lzcnt     = 48,  // __lzcnt
     keyword_tzcnt     = 49,  // __tzcnt
     keyword_popcnt    = 50,  // __popcnt
+    keyword_addm      = 51,  // __addm
+    keyword_subm      = 52,  // __subm
+    keyword_mulm      = 53,  // __mulm
+    keyword_adds      = 54,  // __adds
+    keyword_subs      = 55,  // __subs
+    keyword_muls      = 56,  // __muls
   };
 
 ROCKET_CONST_FUNCTION const char*

@@ -667,6 +667,8 @@ struct Keyword_Element
 constexpr s_keywords[] =
   {
     { "__abs",     keyword_abs       },
+    { "__addm",    keyword_addm      },
+    { "__adds",    keyword_adds      },
     { "__ceil",    keyword_ceil      },
     { "__floor",   keyword_floor     },
     { "__fma",     keyword_fma       },
@@ -678,10 +680,14 @@ constexpr s_keywords[] =
     { "__isnan",   keyword_isnan     },
     { "__itrunc",  keyword_itrunc    },
     { "__lzcnt",   keyword_lzcnt     },
+    { "__mulm",    keyword_mulm      },
+    { "__muls",    keyword_muls      },
     { "__popcnt",  keyword_popcnt    },
     { "__round",   keyword_round     },
     { "__sign",    keyword_sign      },
     { "__sqrt",    keyword_sqrt      },
+    { "__subm",    keyword_subm      },
+    { "__subs",    keyword_subs      },
     { "__trunc",   keyword_trunc     },
     { "__tzcnt",   keyword_tzcnt     },
     { "__vcall",   keyword_vcall     },

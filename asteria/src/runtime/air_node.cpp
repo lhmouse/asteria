@@ -1407,8 +1407,9 @@ struct Traits_apply_xop_inc_post
           }
 
           default:
-            ASTERIA_THROW("Postfix increment not applicable (operand was `$1`)",
-                          lhs);
+            ASTERIA_THROW(
+                "Postfix increment not applicable (operand was `$1`)",
+                lhs);
         }
       }
   };
@@ -1453,8 +1454,9 @@ struct Traits_apply_xop_dec_post
           }
 
           default:
-            ASTERIA_THROW("Postfix decrement not applicable (operand was `$1`)",
-                          lhs);
+            ASTERIA_THROW(
+                "Postfix decrement not applicable (operand was `$1`)",
+                lhs);
         }
       }
   };
@@ -1573,8 +1575,9 @@ struct Traits_apply_xop_neg
           }
 
           default:
-            ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "Logical negation not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -1629,8 +1632,9 @@ struct Traits_apply_xop_notb
           }
 
           default:
-            ASTERIA_THROW("Prefix negation not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "Bitwise NOT not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -1706,8 +1710,9 @@ struct Traits_apply_xop_inc_pre
           }
 
           default:
-            ASTERIA_THROW("Prefix increment not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "Prefix increment not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -1751,8 +1756,9 @@ struct Traits_apply_xop_dec_pre
           }
 
           default:
-            ASTERIA_THROW("Prefix decrement not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "Prefix decrement not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -1831,8 +1837,9 @@ struct Traits_apply_xop_countof
           }
 
           default:
-            ASTERIA_THROW("Prefix `countof` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`countof` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -1909,8 +1916,9 @@ struct Traits_apply_xop_sqrt
           }
 
           default:
-            ASTERIA_THROW("Prefix `__sqrt` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__sqrt` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -1956,8 +1964,9 @@ struct Traits_apply_xop_isnan
           }
 
           default:
-            ASTERIA_THROW("Prefix `__isnan` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__isnan` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2003,8 +2012,9 @@ struct Traits_apply_xop_isinf
           }
 
           default:
-            ASTERIA_THROW("Prefix `__isinf` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__isinf` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2056,8 +2066,9 @@ struct Traits_apply_xop_abs
           }
 
           default:
-            ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__abs` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2102,8 +2113,9 @@ struct Traits_apply_xop_sign
           }
 
           default:
-            ASTERIA_THROW("Prefix `__abs` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__sign` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2146,8 +2158,9 @@ struct Traits_apply_xop_round
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__round` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__round` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2190,8 +2203,9 @@ struct Traits_apply_xop_floor
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__floor` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__floor` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2234,8 +2248,9 @@ struct Traits_apply_xop_ceil
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__ceil` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__ceil` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2278,8 +2293,9 @@ struct Traits_apply_xop_trunc
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__trunc` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__trunc` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2322,8 +2338,9 @@ struct Traits_apply_xop_iround
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__iround` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__iround` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2366,8 +2383,9 @@ struct Traits_apply_xop_ifloor
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__ifloor` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__ifloor` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2410,8 +2428,9 @@ struct Traits_apply_xop_iceil
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__iceil` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__iceil` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2454,8 +2473,9 @@ struct Traits_apply_xop_itrunc
             return air_status_next;
 
           default:
-            ASTERIA_THROW("Prefix `__itrunc` not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__itrunc` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -2808,8 +2828,9 @@ struct Traits_apply_xop_add
           }
 
           default:
-            ASTERIA_THROW("Infix addition not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Addition not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -2875,8 +2896,9 @@ struct Traits_apply_xop_sub
           }
 
           default:
-            ASTERIA_THROW("Infix subtraction not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Subtraction not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -2989,8 +3011,9 @@ struct Traits_apply_xop_mul
           }
 
           default:
-            ASTERIA_THROW("Infix multiplication not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Multiplication not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -3052,8 +3075,9 @@ struct Traits_apply_xop_div
           }
 
           default:
-            ASTERIA_THROW("Infix division not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Division not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -3115,11 +3139,11 @@ struct Traits_apply_xop_mod
           }
 
           default:
-            ASTERIA_THROW("Infix modulo not applicable (operands were `$1` and `$2`)",
+            ASTERIA_THROW("Modulo not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
       }
-  };
+   };
 
 struct Traits_apply_xop_sll
   {
@@ -3193,7 +3217,7 @@ struct Traits_apply_xop_sll
 
           default:
             ASTERIA_THROW(
-                "Infix logical left shift not applicable (operands were `$1` and `$2`)",
+                "Logical left shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3271,7 +3295,7 @@ struct Traits_apply_xop_srl
 
           default:
             ASTERIA_THROW(
-                "Infix logical right shift not applicable (operands were `$1` and `$2`)",
+                "Logical right shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3358,7 +3382,7 @@ struct Traits_apply_xop_sla
 
           default:
             ASTERIA_THROW(
-                "Infix arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3433,7 +3457,7 @@ struct Traits_apply_xop_sra
 
           default:
             ASTERIA_THROW(
-                "Infix arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3502,8 +3526,9 @@ struct Traits_apply_xop_andb
           }
 
           default:
-            ASTERIA_THROW("Infix bitwise AND not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -3572,8 +3597,9 @@ struct Traits_apply_xop_orb
           }
 
           default:
-            ASTERIA_THROW("Infix bitwise OR not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -3642,8 +3668,9 @@ struct Traits_apply_xop_xorb
           }
 
           default:
-            ASTERIA_THROW("Infix bitwise XOR not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW(
+                "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -4292,8 +4319,9 @@ struct Traits_apply_xop_lzcnt
           }
 
           default:
-            ASTERIA_THROW("Prefix LZCNT not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__lzcnt` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -4333,8 +4361,9 @@ struct Traits_apply_xop_tzcnt
           }
 
           default:
-            ASTERIA_THROW("Prefix TZCNT not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__tzcnt` not applicable (operand was `$1`)",
+                rhs);
         }
       }
   };
@@ -4374,8 +4403,350 @@ struct Traits_apply_xop_popcnt
           }
 
           default:
-            ASTERIA_THROW("Prefix POPCNT not applicable (operand was `$1`)",
-                          rhs);
+            ASTERIA_THROW(
+                "`__popcnt` not applicable (operand was `$1`)",
+                rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_addm
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().back().dereference_readonly();
+        ctx.stack().pop_back();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` type, perform modular addition.
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(lhs.is_integer());
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& x = lhs.open_integer();
+            auto y = rhs.as_integer();
+            x = static_cast<int64_t>(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW(
+                "Modular addition not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_subm
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().back().dereference_readonly();
+        ctx.stack().pop_back();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` type, perform modular subtraction.
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(lhs.is_integer());
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& x = lhs.open_integer();
+            auto y = rhs.as_integer();
+            x = static_cast<int64_t>(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW(
+                "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_mulm
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().back().dereference_readonly();
+        ctx.stack().pop_back();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` type, perform modular multiplication.
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(lhs.is_integer());
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& x = lhs.open_integer();
+            auto y = rhs.as_integer();
+            x = static_cast<int64_t>(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW(
+                "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_adds
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().back().dereference_readonly();
+        ctx.stack().pop_back();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` and `real` types, perform saturation addition.
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(lhs.is_integer());
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& x = lhs.open_integer();
+            auto y = rhs.as_integer();
+
+            // Check for overflows.
+            if((y >= 0) && (x > INT64_MAX - y)) {
+              x = INT64_MAX;
+            }
+            else if((y <= 0) && (x < INT64_MIN - y)) {
+              x = INT64_MIN;
+            }
+            else {
+              x += y;
+            }
+            return air_status_next;
+          }
+
+          case tmask_real | tmask_integer:
+          case tmask_real: {
+            ROCKET_ASSERT(lhs.is_convertible_to_real());
+            ROCKET_ASSERT(rhs.is_convertible_to_real());
+            lhs.mutate_into_real() += rhs.convert_to_real();
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW(
+                "Saturation addition not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_subs
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().back().dereference_readonly();
+        ctx.stack().pop_back();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` and `real` types, perform saturation subtraction.
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(lhs.is_integer());
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& x = lhs.open_integer();
+            auto y = rhs.as_integer();
+
+            // Check for overflows.
+            if((y >= 0) && (x < INT64_MIN + y)) {
+              x = INT64_MIN;
+            }
+            else if((y <= 0) && (x > INT64_MAX + y)) {
+              x = INT64_MAX;
+            }
+            else {
+              x -= y;
+            }
+            return air_status_next;
+          }
+
+          case tmask_real | tmask_integer:
+          case tmask_real: {
+            ROCKET_ASSERT(lhs.is_convertible_to_real());
+            ROCKET_ASSERT(rhs.is_convertible_to_real());
+            lhs.mutate_into_real() -= rhs.convert_to_real();
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW(
+                "Saturation subtraction not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_muls
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().back().dereference_readonly();
+        ctx.stack().pop_back();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` and `real` types, perform saturation multiplication.
+        switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(lhs.is_integer());
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& x = lhs.open_integer();
+            auto y = rhs.as_integer();
+
+            // Check for overflows.
+            if((x == 0) || (y == 0)) {
+              x = 0;
+            }
+            else if((x == INT64_MIN) || (y == INT64_MIN)) {
+              x = ((x ^ y) >> 63) ^ INT64_MAX;
+            }
+            else {
+              int64_t m = y >> 63;
+              int64_t s = (x ^ m) - m;  // x
+              int64_t u = (y ^ m) - m;  // abs(y)
+
+              if((s >= 0) && (s > INT64_MAX / u)) {
+                x = INT64_MAX;
+              }
+              else if((s <= 0) && (s < INT64_MIN / u)) {
+                x = INT64_MIN;
+              }
+              else
+                x *= y;
+            }
+            return air_status_next;
+          }
+
+          case tmask_real | tmask_integer:
+          case tmask_real: {
+            ROCKET_ASSERT(lhs.is_convertible_to_real());
+            ROCKET_ASSERT(rhs.is_convertible_to_real());
+            lhs.mutate_into_real() *= rhs.convert_to_real();
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW(
+                "Saturation multiplication not applicable (operands were `$1` and `$2`)",
+                lhs, rhs);
         }
       }
   };
@@ -5023,6 +5394,24 @@ solidify(AVMC_Queue& queue) const
 
           case xop_popcnt:
             return do_solidify<Traits_apply_xop_popcnt>(queue, altr);
+
+          case xop_addm:
+            return do_solidify<Traits_apply_xop_addm>(queue, altr);
+
+          case xop_subm:
+            return do_solidify<Traits_apply_xop_subm>(queue, altr);
+
+          case xop_mulm:
+            return do_solidify<Traits_apply_xop_mulm>(queue, altr);
+
+          case xop_adds:
+            return do_solidify<Traits_apply_xop_adds>(queue, altr);
+
+          case xop_subs:
+            return do_solidify<Traits_apply_xop_subs>(queue, altr);
+
+          case xop_muls:
+            return do_solidify<Traits_apply_xop_muls>(queue, altr);
 
           default:
             ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
