@@ -8,24 +8,25 @@
 namespace asteria {
 namespace details_avmc_queue {
 
-// This union can be used to encapsulate trivial information in solidified nodes.
-// At most 48 bits can be stored here. You may make appropriate use of them.
+// This union can be used to encapsulate trivial information in solidified
+// nodes. Each field is assigned a unique suffix. At most 48 bits can be
+// stored here. You may make appropriate use of them.
 union Uparam
   {
     struct {
       uint16_t _do_not_use_0_;
-      uint16_t s16;
-      uint32_t s32;
+      uint16_t u16;
+      uint32_t u32;
     };
 
     struct {
       uint16_t _do_not_use_1_;
-      uint8_t p8[6];
+      uint8_t u8v[6];
     };
 
     struct {
       uint16_t _do_not_use_2_;
-      uint16_t p16[3];
+      uint16_t u16p[3];
     };
   };
 
