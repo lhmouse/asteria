@@ -1817,12 +1817,12 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
 
 constexpr Prefix_Keyword_Xop s_prefix_keyword_binary_xop[] =
   {
-    { keyword_addm,      xop_addm     },
-    { keyword_subm,      xop_subm     },
-    { keyword_mulm,      xop_mulm     },
-    { keyword_adds,      xop_adds     },
-    { keyword_subs,      xop_subs     },
-    { keyword_muls,      xop_muls     },
+    { keyword_addm, xop_addm },
+    { keyword_subm, xop_subm },
+    { keyword_mulm, xop_mulm },
+    { keyword_adds, xop_adds },
+    { keyword_subs, xop_subs },
+    { keyword_muls, xop_muls },
   };
 
 opt<Expression_Unit>
