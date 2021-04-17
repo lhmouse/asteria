@@ -165,27 +165,31 @@ execute(Executive_Context& ctx) const
     AIR_Status status = air_status_next;
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
-    while(ROCKET_EXPECT(next != eptr)) {
+    while(ROCKET_EXPECT(next != eptr) && (status == air_status_next)) {
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      if(ROCKET_UNEXPECT(qnode->meta_ver >= 2)) {
-        // Symbols are available.
-        ASTERIA_RUNTIME_TRY {
+      switch(qnode->meta_ver) {
+        case 0:
+          // Symbols are not available.
+          status = qnode->pv_exec(ctx, qnode);
+          break;
+
+        case 1:
+          // Symbols are not available.
           status = qnode->pv_meta->exec(ctx, qnode);
-        }
-        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
-          throw;
-        }
+          break;
+
+        default:
+          // Symbols are available.
+          ASTERIA_RUNTIME_TRY {
+            status = qnode->pv_meta->exec(ctx, qnode);
+          }
+          ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+            except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+            throw;
+          }
       }
-      else {
-        // Symbols are not available.
-        status = (qnode->meta_ver ? qnode->pv_meta->exec
-                                  : qnode->pv_exec)(ctx, qnode);
-      }
-      if(ROCKET_UNEXPECT(status != air_status_next))
-        break;
     }
     return status;
   }
