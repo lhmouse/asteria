@@ -1419,12 +1419,12 @@ do_accept_statement_as_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
     return nullopt;
   }
 
-struct Prefix_Op_Keyword
+struct Prefix_Keyword_Xop
   {
     Keyword kwrd;
     Xop xop;
   }
-constexpr s_prefix_op_keywords[] =
+constexpr s_prefix_keyword_xop[] =
   {
     { keyword_unset,     xop_unset    },
     { keyword_countof,   xop_countof  },
@@ -1449,17 +1449,17 @@ constexpr s_prefix_op_keywords[] =
   };
 
 constexpr bool
-operator==(const Prefix_Op_Keyword& lhs, Keyword rhs) noexcept
+operator==(const Prefix_Keyword_Xop& lhs, Keyword rhs) noexcept
   {
     return lhs.kwrd == rhs;
   }
 
-struct Prefix_Op_Punctuator
+struct Prefix_Punctuator_Xop
   {
     Punctuator punct;
     Xop xop;
   }
-constexpr s_prefix_op_punctuators[] =
+constexpr s_prefix_punctuator_xop[] =
   {
     { punctuator_add,   xop_pos      },
     { punctuator_sub,   xop_neg      },
@@ -1470,7 +1470,7 @@ constexpr s_prefix_op_punctuators[] =
   };
 
 constexpr bool
-operator==(const Prefix_Op_Punctuator& lhs, Punctuator rhs) noexcept
+operator==(const Prefix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
   }
@@ -1490,7 +1490,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 
     auto sloc = qtok->sloc();
     if(qtok->is_keyword()) {
-      auto qconf = ::rocket::find(s_prefix_op_keywords, qtok->as_keyword());
+      auto qconf = ::rocket::find(s_prefix_keyword_xop, qtok->as_keyword());
       if(!qconf)
         return false;
 
@@ -1502,7 +1502,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     }
 
     if(qtok->is_punctuator()) {
-      auto qconf = ::rocket::find(s_prefix_op_punctuators, qtok->as_punctuator());
+      auto qconf = ::rocket::find(s_prefix_punctuator_xop, qtok->as_punctuator());
       if(!qconf)
         return false;
 
@@ -1939,12 +1939,12 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
     return false;
   }
 
-struct Postfix_Op_Punctuator
+struct Postfix_Punctuator_Xop
   {
     Punctuator punct;
     Xop xop;
   }
-constexpr s_postfix_op_punctuators[] =
+constexpr s_postfix_punctuator_xop[] =
   {
     { punctuator_inc,   xop_inc_post  },
     { punctuator_dec,   xop_dec_post  },
@@ -1953,7 +1953,7 @@ constexpr s_postfix_op_punctuators[] =
   };
 
 constexpr bool
-operator==(const Postfix_Op_Punctuator& lhs, Punctuator rhs) noexcept
+operator==(const Postfix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
   }
@@ -1969,7 +1969,7 @@ do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
     auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
-      auto qconf = ::rocket::find(s_postfix_op_punctuators, qtok->as_punctuator());
+      auto qconf = ::rocket::find(s_postfix_punctuator_xop, qtok->as_punctuator());
       if(!qconf)
         return false;
 
@@ -2197,13 +2197,13 @@ do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
     return ::std::move(xelem);
   }
 
-struct Infix_Op_Punctuator
+struct Infix_Punctuator_Xop
   {
     Punctuator punct;
     Xop xop;
     bool assign;
   }
-constexpr s_infix_op_punctuators[] =
+constexpr s_infix_punctuator_xop[] =
   {
     { punctuator_add,        xop_add,       0 },
     { punctuator_sub,        xop_sub,       0 },
@@ -2240,7 +2240,7 @@ constexpr s_infix_op_punctuators[] =
   };
 
 constexpr bool
-operator==(const Infix_Op_Punctuator& lhs, Punctuator rhs) noexcept
+operator==(const Infix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
   {
     return lhs.punct == rhs;
   }
@@ -2258,7 +2258,7 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
 
     auto sloc = qtok->sloc();
     if(qtok->is_punctuator()) {
-      auto qconf = ::rocket::find(s_infix_op_punctuators, qtok->as_punctuator());
+      auto qconf = ::rocket::find(s_infix_punctuator_xop, qtok->as_punctuator());
       if(!qconf)
         return nullopt;
 
