@@ -4,27 +4,29 @@ Precedence (descending)       | Operators                     | Associativity
 Postfix operators             | ()    []     .                | Left-to-right
                               | [^]   [$]                     |
 ------------------------------+-------------------------------+---------------
-                              | +    -    ~    !    ++   --   |
+                              | +     -     ~     !           |
+                              | ++    --                      |
                               | unset     countof   typeof    |
                               | __abs     __sign    __sqrt    |
 Prefix operators              | __isnan   __isinf             | Right-to-left
                               | __round   __iround  __floor   |
                               | __ifloor  __ceil    __iceil   |
                               | __trunc   __itrunc            |
+                              | __lzcnt   __tzcnt   __popcnt  |
 ------------------------------+-------------------------------+---------------
-Multiplicative operators      | *    /    %                   |
+Multiplicative operators      | *     /     %                 |
 ------------------------------+-------------------------------+
-Additive operators            | +    -                        |
+Additive operators            | +     -                       |
 ------------------------------+-------------------------------+
-Shift operators               | <<<  >>>  <<   >>             |
+Shift operators               | <<<   >>>   <<    >>          |
 ------------------------------+-------------------------------+
 Bitwise AND operator          | &                             |
 ------------------------------+-------------------------------+
-Bitwise XOR and OR operators  | ^    |                        |
+Bitwise XOR and OR operators  | ^     |                       |
 ------------------------------+-------------------------------+ Left-to-right
-Relational operators          | <    >    <=   >=             |
+Relational operators          | <     >     <=    >=          |
 ------------------------------+-------------------------------+
-Equality operators            | ==   !=   <=>                 |
+Equality operators            | ==    !=    <=>               |
 ------------------------------+-------------------------------+
 Logical AND operator          | &&                            |
 ------------------------------+-------------------------------+
@@ -32,9 +34,13 @@ Logical OR operator           | ||                            |
 ------------------------------+-------------------------------+
 Coalescence operator          | ??                            |
 ------------------------------+-------------------------------+---------------
-                              | =     ? :   ?= :              |
+                              | ? :   ?= :                    |
 Conditional operator          | *=    /=    %=    +=    -=    |
                               | <<<=  >>>=  <<=   >>=         | Right-to-left
 Assignment operators          | &=    ^=    |=                |
-                              | &&=   ||=   ??=               |
+                              | &&=   ||=   ??=   =           |
+==============================#===============================#===============
+                              | __addm    __subm    __mulm    |
+Special operators             | __adds    __subs    __muls    | N/A
+                              | __fma                         |
 ==============================#===============================#===============

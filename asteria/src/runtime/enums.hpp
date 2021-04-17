@@ -59,6 +59,9 @@ enum Xop : uint8_t
     xop_fma       = 45,  // __fma()
     xop_head      = 46,  // [^]
     xop_tail      = 47,  // [$]
+    xop_lzcnt     = 48,  // __lzcnt
+    xop_tzcnt     = 49,  // __tzcnt
+    xop_popcnt    = 50,  // __popcnt
   };
 
 ROCKET_CONST_FUNCTION const char*

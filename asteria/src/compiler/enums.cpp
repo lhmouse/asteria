@@ -340,6 +340,15 @@ stringify_keyword(Keyword kwrd) noexcept
       case keyword_vcall:
         return "__vcall";
 
+      case keyword_lzcnt:
+        return "__lzcnt";
+
+      case keyword_tzcnt:
+        return "__tzcnt";
+
+      case keyword_popcnt:
+        return "__popcnt";
+
       default:
         return "[unknown keyword]";
     }

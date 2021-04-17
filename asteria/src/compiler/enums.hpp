@@ -126,6 +126,9 @@ enum Keyword : uint8_t
     keyword_fma       = 45,  // __fma
     keyword_global    = 46,  // __global
     keyword_vcall     = 47,  // __vcall
+    keyword_lzcnt     = 48,  // __lzcnt
+    keyword_tzcnt     = 49,  // __tzcnt
+    keyword_popcnt    = 50,  // __popcnt
   };
 
 ROCKET_CONST_FUNCTION const char*

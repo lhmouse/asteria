@@ -154,6 +154,15 @@ describe_xop(Xop xop) noexcept
       case xop_tail:
         return "postfix `[$]`";
 
+      case xop_lzcnt:
+        return "prefix `__lzcnt`";
+
+      case xop_tzcnt:
+        return "prefix `__tzcnt`";
+
+      case xop_popcnt:
+        return "prefix `__popcnt`";
+
       default:
         return "[unknown operator]";
     }

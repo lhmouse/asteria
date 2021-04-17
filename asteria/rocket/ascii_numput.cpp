@@ -88,7 +88,7 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
 
     if(bexp == 0) {
       // Normalize the denormal value.
-      int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
+      int sh = ROCKET_LZCNT64(ireg) - 11;
       ireg <<= sh;
       bexp -= sh - 1;
 
@@ -952,7 +952,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
     if(bexp == 0) {
       // The value is denormal.
       // Adjust `ireg` such that its MSB is non-zero.
-      int sh = ROCKET_LZCNT64_NZ(ireg) - 11;
+      int sh = ROCKET_LZCNT64(ireg) - 11;
       ireg <<= sh;
       bexp -= sh - 1;
 

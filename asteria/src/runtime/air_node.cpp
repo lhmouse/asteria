@@ -4257,6 +4257,129 @@ struct Traits_initialize_reference
       }
   };
 
+struct Traits_apply_xop_lzcnt
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is unary.
+        auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` type, return the number of leading zero bits.
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& val = rhs.open_integer();
+            val = ROCKET_LZCNT64(static_cast<uint64_t>(val));
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW("Prefix LZCNT not applicable (operand was `$1`)",
+                          rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_tzcnt
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is unary.
+        auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` type, return the number of leading zero bits.
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& val = rhs.open_integer();
+            val = ROCKET_TZCNT64(static_cast<uint64_t>(val));
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW("Prefix TZCNT not applicable (operand was `$1`)",
+                          rhs);
+        }
+      }
+  };
+
+struct Traits_apply_xop_popcnt
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is unary.
+        auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // For the `integer` type, return the number of leading zero bits.
+        switch(do_tmask_of(rhs)) {
+          case tmask_integer: {
+            ROCKET_ASSERT(rhs.is_integer());
+            auto& val = rhs.open_integer();
+            val = ROCKET_POPCNT64(static_cast<uint64_t>(val));
+            return air_status_next;
+          }
+
+          default:
+            ASTERIA_THROW("Prefix POPCNT not applicable (operand was `$1`)",
+                          rhs);
+        }
+      }
+  };
+
 // Finally...
 template<typename TraitsT, typename NodeT, typename = void>
 struct symbol_getter
@@ -4891,6 +5014,15 @@ solidify(AVMC_Queue& queue) const
 
           case xop_tail:
             return do_solidify<Traits_apply_xop_tail>(queue, altr);
+
+          case xop_lzcnt:
+            return do_solidify<Traits_apply_xop_lzcnt>(queue, altr);
+
+          case xop_tzcnt:
+            return do_solidify<Traits_apply_xop_tzcnt>(queue, altr);
+
+          case xop_popcnt:
+            return do_solidify<Traits_apply_xop_popcnt>(queue, altr);
 
           default:
             ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);

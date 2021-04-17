@@ -22,10 +22,10 @@
 
 #define ROCKET_FUNCSIG                      __PRETTY_FUNCTION__
 
-#define ROCKET_LZCNT32_NZ(...)              __builtin_clz(__VA_ARGS__)
-#define ROCKET_LZCNT64_NZ(...)              __builtin_clzll(__VA_ARGS__)
-#define ROCKET_TZCNT32_NZ(...)              __builtin_ctz(__VA_ARGS__)
-#define ROCKET_TZCNT64_NZ(...)              __builtin_ctzll(__VA_ARGS__)
+#define ROCKET_LZCNT32(...)                 ((__VA_ARGS__ == 0) ? 32 : __builtin_clz(__VA_ARGS__))
+#define ROCKET_LZCNT64(...)                 ((__VA_ARGS__ == 0) ? 64 : __builtin_clzll(__VA_ARGS__))
+#define ROCKET_TZCNT32(...)                 ((__VA_ARGS__ == 0) ? 32 : __builtin_ctz(__VA_ARGS__))
+#define ROCKET_TZCNT64(...)                 ((__VA_ARGS__ == 0) ? 64 : __builtin_ctzll(__VA_ARGS__))
 #define ROCKET_POPCNT32(...)                __builtin_popcount(__VA_ARGS__)
 #define ROCKET_POPCNT64(...)                __builtin_popcountll(__VA_ARGS__)
 

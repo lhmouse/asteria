@@ -1443,6 +1443,9 @@ constexpr s_prefix_op_keywords[] =
     { keyword_ifloor,    xop_ifloor   },
     { keyword_iceil,     xop_iceil    },
     { keyword_itrunc,    xop_itrunc   },
+    { keyword_lzcnt,     xop_lzcnt    },
+    { keyword_tzcnt,     xop_tzcnt    },
+    { keyword_popcnt,    xop_popcnt   },
   };
 
 constexpr bool
@@ -1480,7 +1483,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     //   "unset" | "countof" | "typeof" | "not" |
     //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
     //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" |
-    //   "__iceil" | "__itrunc"
+    //   "__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" | "__popcnt"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;

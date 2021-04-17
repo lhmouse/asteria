@@ -444,19 +444,13 @@ std_numeric_muls(V_real x, V_real y)
 V_integer
 std_numeric_lzcnt(V_integer x)
   {
-    if(ROCKET_UNEXPECT(x == 0))
-      return 64;
-
-    return ROCKET_LZCNT64_NZ(static_cast<uint64_t>(x));
+    return ROCKET_LZCNT64(static_cast<uint64_t>(x));
   }
 
 V_integer
 std_numeric_tzcnt(V_integer x)
   {
-    if(ROCKET_UNEXPECT(x == 0))
-      return 64;
-
-    return ROCKET_TZCNT64_NZ(static_cast<uint64_t>(x));
+    return ROCKET_TZCNT64(static_cast<uint64_t>(x));
   }
 
 V_integer

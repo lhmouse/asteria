@@ -886,7 +886,7 @@ do_xldexp_I_generic(uint64_t ubits, int exp2)
 
     ROCKET_ASSERT(ubits <= INT64_MAX);
     uint64_t bits = ubits;
-    int sh = ROCKET_LZCNT64_NZ(ubits) - 1;
+    int sh = ROCKET_LZCNT64(ubits) - 1;
     bits <<= sh;
 
     uint64_t guard = bits & (ulp_mask - 1);
@@ -1540,7 +1540,7 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
             const auto& mult = s_decmult_F[mpos];
 
             // Adjust `ireg` such that its MSB is non-zero.
-            int sh = ROCKET_LZCNT64_NZ(ireg);
+            int sh = ROCKET_LZCNT64(ireg);
             ireg |= this->m_madd;
             ireg <<= sh;
             int exp2 = mult.exp2 - sh;

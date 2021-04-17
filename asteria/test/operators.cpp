@@ -415,6 +415,19 @@ int main()
         assert ("987654321" ^ "abcdefg") == "XZTRPRT21";
         assert ("987654" ^ "abcdefghi") == "XZTRPRghi";
 
+        assert __lzcnt 0 == 64;
+        assert __lzcnt 1 == 63;
+        assert __lzcnt 0x06000000`00000000 == 5;
+
+        assert __tzcnt 0 == 64;
+        assert __tzcnt 1 == 0;
+        assert __tzcnt 0x60 == 5;
+
+        assert __popcnt 0 == 0;
+        assert __popcnt 1 == 1;
+        assert __popcnt 0x60 == 2;
+        assert __popcnt 0x12345 == 7;
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     Global_Context global;
