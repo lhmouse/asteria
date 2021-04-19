@@ -29,6 +29,10 @@
 #define ROCKET_POPCNT32(...)                ((int)_mm_popcnt_u32(__VA_ARGS__))
 #define ROCKET_POPCNT64(...)                ((int)_mm_popcnt_u64(__VA_ARGS__))
 
+#define ROCKET_ADD_OVERFLOW(x,y,r)          `not implemented`
+#define ROCKET_SUB_OVERFLOW(x,y,r)          `not implemented`
+#define ROCKET_MUL_OVERFLOW(x,y,r)          `not implemented`
+
 // Check for project configuration.
 #if defined(_DEBUG)
 #  define ROCKET_DEBUG                      1

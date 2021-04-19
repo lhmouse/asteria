@@ -29,6 +29,10 @@
 #define ROCKET_POPCNT32(...)                __builtin_popcount(__VA_ARGS__)
 #define ROCKET_POPCNT64(...)                __builtin_popcountll(__VA_ARGS__)
 
+#define ROCKET_ADD_OVERFLOW(x,y,r)          __builtin_add_overflow(x,y,r)
+#define ROCKET_SUB_OVERFLOW(x,y,r)          __builtin_sub_overflow(x,y,r)
+#define ROCKET_MUL_OVERFLOW(x,y,r)          __builtin_mul_overflow(x,y,r)
+
 // Check for either libc++ or libstdc++.
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
 #  define ROCKET_DEBUG                      1

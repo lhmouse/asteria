@@ -1270,10 +1270,8 @@ cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept
         // Raise the mantissa accordingly.
         if(this->m_expo > 0) {
           for(int32_t i = 0; i != this->m_expo; ++i) {
-            uint64_t next = ireg * base;
-
-            // TODO: Overflow checks can be performed using intrinsics.
-            if(next / base != ireg) {
+            uint64_t next;
+            if(ROCKET_MUL_OVERFLOW(ireg, base, &next)) {
               ireg = UINT64_MAX;
               this->m_ovfl = true;
               break;
@@ -1289,7 +1287,6 @@ cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept
             if(ireg % base != 0)
               this->m_inxc = true;
 
-            // TODO: Overflow checks can be performed using intrinsics.
             if(next == 0) {
               ireg = 0;
               this->m_udfl = true;
@@ -1382,10 +1379,8 @@ cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept
         // Raise the mantissa accordingly.
         if(this->m_expo > 0) {
           for(int32_t i = 0; i != this->m_expo; ++i) {
-            uint64_t next = ireg * base;
-
-            // TODO: Overflow checks can be performed using intrinsics.
-            if(next / base != ireg) {
+            uint64_t next;
+            if(ROCKET_MUL_OVERFLOW(ireg, base, &next)) {
               ireg = UINT64_MAX;
               this->m_ovfl = true;
               break;
@@ -1401,7 +1396,6 @@ cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept
             if(ireg % base != 0)
               this->m_inxc = true;
 
-            // TODO: Overflow checks can be performed using intrinsics.
             if(next == 0) {
               ireg = 0;
               this->m_udfl = true;
