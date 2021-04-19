@@ -1359,11 +1359,11 @@ do_tmask_of(const Value& val) noexcept
 int64_t
 do_icast(double value)
   {
-    if(!is_convertible_to_integer(value))
+    if(!is_convertible_to_integer(value)) {
       ASTERIA_THROW(
           "Real value not representable as integer (value `$1`)",
           value);
-
+    }
     return static_cast<int64_t>(value);
   }
 
@@ -1391,7 +1391,6 @@ struct Traits_apply_xop_inc_post
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
 
-            // Check for overflows.
             if(val == INT64_MAX)
               ASTERIA_THROW("Integer increment overflow");
 
@@ -1438,7 +1437,6 @@ struct Traits_apply_xop_dec_post
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
 
-            // Check for overflows.
             if(val == INT64_MIN)
               ASTERIA_THROW("Integer decrement overflow");
 
@@ -1559,7 +1557,6 @@ struct Traits_apply_xop_neg
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
 
-            // Check for overflows.
             if(val == INT64_MIN)
               ASTERIA_THROW("Integer negation overflow");
 
@@ -1694,7 +1691,6 @@ struct Traits_apply_xop_inc_pre
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
 
-            // Check for overflows.
             if(val == INT64_MAX)
               ASTERIA_THROW("Integer increment overflow");
 
@@ -1740,7 +1736,6 @@ struct Traits_apply_xop_dec_pre
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
 
-            // Check for overflows.
             if(val == INT64_MIN)
               ASTERIA_THROW("Integer decrement overflow");
 
@@ -2050,7 +2045,6 @@ struct Traits_apply_xop_abs
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
 
-            // Check for overflows.
             if(val == INT64_MIN)
               ASTERIA_THROW("Integer absolute value overflow");
 
@@ -2803,12 +2797,10 @@ struct Traits_apply_xop_add
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
-            if((y >= 0) ? (x > INT64_MAX - y) : (x < INT64_MIN - y))
+            if(ROCKET_ADD_OVERFLOW(x, y, &x))
               ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
-            x += y;
             return air_status_next;
           }
 
@@ -2878,12 +2870,10 @@ struct Traits_apply_xop_sub
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
-            if((y >= 0) ? (x < INT64_MIN + y) : (x > INT64_MAX + y))
+            if(ROCKET_SUB_OVERFLOW(x, y, &x))
               ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
-            x -= y;
             return air_status_next;
           }
 
@@ -2947,24 +2937,10 @@ struct Traits_apply_xop_mul
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
-            if((x == 0) || (y == 0)) {
-              x = 0;
-            }
-            else if((x == INT64_MIN) || (y == INT64_MIN)) {
-              x = ((x ^ y) >> 63) ^ INT64_MAX;
-            }
-            else {
-              int64_t m = y >> 63;
-              int64_t s = (x ^ m) - m;  // x
-              int64_t u = (y ^ m) - m;  // abs(y)
+            if(ROCKET_MUL_OVERFLOW(x, y, &x))
+              ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)",
+                            lhs, rhs);
 
-              if((s >= 0) ? (s > INT64_MAX / u) : (s < INT64_MIN / u))
-                ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)",
-                              lhs, rhs);
-
-              x *= y;
-            }
             return air_status_next;
           }
 
@@ -3053,7 +3029,6 @@ struct Traits_apply_xop_div
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
             if(y == 0)
               ASTERIA_THROW("Integer division by zero (operands were `$1` and `$2`)",
                             lhs, rhs);
@@ -3117,7 +3092,6 @@ struct Traits_apply_xop_mod
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
             if(y == 0)
               ASTERIA_THROW("Integer division by zero (operands were `$1` and `$2`)",
                             lhs, rhs);
@@ -4444,7 +4418,7 @@ struct Traits_apply_xop_addm
             ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
-            x = static_cast<int64_t>(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
+            ROCKET_ADD_OVERFLOW(x, y, &x);
             return air_status_next;
           }
 
@@ -4490,7 +4464,7 @@ struct Traits_apply_xop_subm
             ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
-            x = static_cast<int64_t>(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
+            ROCKET_SUB_OVERFLOW(x, y, &x);
             return air_status_next;
           }
 
@@ -4536,7 +4510,7 @@ struct Traits_apply_xop_mulm
             ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
-            x = static_cast<int64_t>(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
+            ROCKET_MUL_OVERFLOW(x, y, &x);
             return air_status_next;
           }
 
@@ -4583,16 +4557,10 @@ struct Traits_apply_xop_adds
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
-            if((y >= 0) && (x > INT64_MAX - y)) {
-              x = INT64_MAX;
-            }
-            else if((y <= 0) && (x < INT64_MIN - y)) {
-              x = INT64_MIN;
-            }
-            else {
-              x += y;
-            }
+            auto s = x;
+            if(ROCKET_ADD_OVERFLOW(x, y, &x))
+              x = (s >> 63) ^ INT64_MAX;
+
             return air_status_next;
           }
 
@@ -4647,16 +4615,10 @@ struct Traits_apply_xop_subs
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
-            if((y >= 0) && (x < INT64_MIN + y)) {
-              x = INT64_MIN;
-            }
-            else if((y <= 0) && (x > INT64_MAX + y)) {
-              x = INT64_MAX;
-            }
-            else {
-              x -= y;
-            }
+            auto s = x;
+            if(ROCKET_SUB_OVERFLOW(x, y, &x))
+              x = (s >> 63) ^ INT64_MAX;
+
             return air_status_next;
           }
 
@@ -4711,27 +4673,10 @@ struct Traits_apply_xop_muls
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
 
-            // Check for overflows.
-            if((x == 0) || (y == 0)) {
-              x = 0;
-            }
-            else if((x == INT64_MIN) || (y == INT64_MIN)) {
-              x = ((x ^ y) >> 63) ^ INT64_MAX;
-            }
-            else {
-              int64_t m = y >> 63;
-              int64_t s = (x ^ m) - m;  // x
-              int64_t u = (y ^ m) - m;  // abs(y)
+            auto s = x;
+            if(ROCKET_MUL_OVERFLOW(x, y, &x))
+              x = ((s ^ y) >> 63) ^ INT64_MAX;
 
-              if((s >= 0) && (s > INT64_MAX / u)) {
-                x = INT64_MAX;
-              }
-              else if((s <= 0) && (s < INT64_MIN / u)) {
-                x = INT64_MIN;
-              }
-              else
-                x *= y;
-            }
             return air_status_next;
           }
 
