@@ -1282,9 +1282,9 @@ cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept
         else {
           for(int32_t i = 0; i != this->m_expo; --i) {
             uint64_t next = ireg / base;
+            uint64_t out = ireg % base;
 
-            // Set the inexact flag if a non-zero digit was shifted out.
-            if(ireg % base != 0)
+            if(out)
               this->m_inxc = true;
 
             if(next == 0) {
@@ -1391,9 +1391,9 @@ cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept
         else {
           for(int32_t i = 0; i != this->m_expo; --i) {
             uint64_t next = ireg / base;
+            uint64_t out = ireg % base;
 
-            // Set the inexact flag if a non-zero digit was shifted out.
-            if(ireg % base != 0)
+            if(out)
               this->m_inxc = true;
 
             if(next == 0) {
