@@ -363,31 +363,34 @@ std_numeric_ldexp(V_real frac, V_integer exp)
 V_integer
 std_numeric_addm(V_integer x, V_integer y)
   {
-    return static_cast<int64_t>(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
+    V_integer r;
+    ROCKET_ADD_OVERFLOW(x, y, &r);
+    return r;
   }
 
 V_integer
 std_numeric_subm(V_integer x, V_integer y)
   {
-    return static_cast<int64_t>(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
+    V_integer r;
+    ROCKET_SUB_OVERFLOW(x, y, &r);
+    return r;
   }
 
 V_integer
 std_numeric_mulm(V_integer x, V_integer y)
   {
-    return static_cast<int64_t>(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
+    V_integer r;
+    ROCKET_MUL_OVERFLOW(x, y, &r);
+    return r;
   }
 
 V_integer
 std_numeric_adds(V_integer x, V_integer y)
   {
-    if((y >= 0) && (x > INT64_MAX - y))
-      return INT64_MAX;
-
-    if((y <= 0) && (x < INT64_MIN - y))
-      return INT64_MIN;
-
-    return x + y;
+    V_integer r;
+    if(ROCKET_ADD_OVERFLOW(x, y, &r))
+      r = (x >> 63) ^ INT64_MAX;
+    return r;
   }
 
 V_real
@@ -399,13 +402,10 @@ std_numeric_adds(V_real x, V_real y)
 V_integer
 std_numeric_subs(V_integer x, V_integer y)
   {
-    if((y >= 0) && (x < INT64_MIN + y))
-      return INT64_MIN;
-
-    if((y <= 0) && (x > INT64_MAX + y))
-      return INT64_MAX;
-
-    return x - y;
+    V_integer r;
+    if(ROCKET_SUB_OVERFLOW(x, y, &r))
+      r = (x >> 63) ^ INT64_MAX;
+    return r;
   }
 
 V_real
@@ -417,23 +417,10 @@ std_numeric_subs(V_real x, V_real y)
 V_integer
 std_numeric_muls(V_integer x, V_integer y)
   {
-    if((x == 0) || (y == 0))
-      return 0;
-
-    if((x == INT64_MIN) || (y == INT64_MIN))
-      return ((x ^ y) >> 63) ^ INT64_MAX;
-
-    int64_t m = y >> 63;
-    int64_t s = (x ^ m) - m;  // x
-    int64_t u = (y ^ m) - m;  // abs(y)
-
-    if((s >= 0) && (s > INT64_MAX / u))
-      return INT64_MAX;
-
-    if((s <= 0) && (s < INT64_MIN / u))
-      return INT64_MIN;
-
-    return x * y;
+    V_integer r;
+    if(ROCKET_MUL_OVERFLOW(x, y, &r))
+      r = ((x ^ y) >> 63) ^ INT64_MAX;
+    return r;
   }
 
 V_real
