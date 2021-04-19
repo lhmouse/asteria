@@ -1628,6 +1628,7 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
                     | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH, pcre.match(), nullptr,
                   reinterpret_cast<const uint8_t*>(replacement.data()), replacement.size(),
                   reinterpret_cast<uint8_t*>(output_str.mut_data()), &output_len);
+
     if(err < 0) {
       if(err == PCRE2_ERROR_NOMATCH)
         return ::std::move(text);

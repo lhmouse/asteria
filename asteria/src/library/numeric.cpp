@@ -85,9 +85,10 @@ constexpr char s_spaces[] = " \f\n\r\t\v";
 V_integer
 std_numeric_abs(V_integer value)
   {
-    if(value == INT64_MIN)
+    if(value == INT64_MIN) {
       ASTERIA_THROW("Integer absolute value overflow (value `$1`)",
                     value);
+    }
     return ::std::abs(value);
   }
 
@@ -651,6 +652,7 @@ std_numeric_parse_integer(V_string text)
 
     if(!numg.cast_I(value, INT64_MIN, INT64_MAX))
       ASTERIA_THROW("Integer overflow (text `$1`)", text);
+
     return value;
   }
 
