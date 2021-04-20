@@ -1900,7 +1900,7 @@ struct Traits_apply_xop_sqrt
         switch(do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            rhs = ::std::sqrt(rhs.convert_to_real());
+            rhs = ::std::sqrt(rhs.as_real());
             return air_status_next;
           }
 
@@ -2806,9 +2806,9 @@ struct Traits_apply_xop_add
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() += rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() += rhs.as_real();
             return air_status_next;
           }
 
@@ -2879,9 +2879,9 @@ struct Traits_apply_xop_sub
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() -= rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() -= rhs.as_real();
             return air_status_next;
           }
 
@@ -2946,9 +2946,9 @@ struct Traits_apply_xop_mul
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() *= rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() *= rhs.as_real();
             return air_status_next;
           }
 
@@ -3043,9 +3043,9 @@ struct Traits_apply_xop_div
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() /= rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() /= rhs.as_real();
             return air_status_next;
           }
 
@@ -3106,9 +3106,9 @@ struct Traits_apply_xop_mod
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs = ::std::fmod(lhs.convert_to_real(), rhs.convert_to_real());
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs = ::std::fmod(lhs.as_real(), rhs.as_real());
             return air_status_next;
           }
 
@@ -3703,11 +3703,10 @@ struct Traits_apply_xop_fma
           case tmask_integer:
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(mid.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(),
-                             rhs.convert_to_real());
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(mid.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs = ::std::fma(lhs.as_real(), mid.as_real(), rhs.as_real());
             return air_status_next;
           }
 
@@ -4566,9 +4565,9 @@ struct Traits_apply_xop_adds
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() += rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() += rhs.as_real();
             return air_status_next;
           }
 
@@ -4624,9 +4623,9 @@ struct Traits_apply_xop_subs
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() -= rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() -= rhs.as_real();
             return air_status_next;
           }
 
@@ -4682,9 +4681,9 @@ struct Traits_apply_xop_muls
 
           case tmask_real | tmask_integer:
           case tmask_real: {
-            ROCKET_ASSERT(lhs.is_convertible_to_real());
-            ROCKET_ASSERT(rhs.is_convertible_to_real());
-            lhs.mutate_into_real() *= rhs.convert_to_real();
+            ROCKET_ASSERT(lhs.is_real());
+            ROCKET_ASSERT(rhs.is_real());
+            lhs.open_real() *= rhs.as_real();
             return air_status_next;
           }
 

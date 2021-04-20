@@ -106,9 +106,8 @@ do_compare_slow(const Value& lhs, const Value& rhs) noexcept
     // Compare values of different types.
     if(lhs.type() != rhs.type()) {
       // If they both have arithmeteic types, convert them to `real`.
-      if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real())
-        return do_3way_compare_scalar(
-                   lhs.convert_to_real(), rhs.convert_to_real());
+      if(lhs.is_real() && rhs.is_real())
+        return do_3way_compare_scalar(lhs.as_real(), rhs.as_real());
 
       // Otherwise, they are unordered.
       return compare_unordered;

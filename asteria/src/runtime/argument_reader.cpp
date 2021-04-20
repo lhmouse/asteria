@@ -188,13 +188,13 @@ optional(Opt_real& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_convertible_to_real())
+    if(!val.is_real())
       return this->do_mark_match_failure();
 
     if(val.is_null())
       return *this;
 
-    out = val.convert_to_real();
+    out = val.as_real();
     return *this;
   }
 
@@ -366,10 +366,10 @@ required(V_real& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_convertible_to_real())
+    if(!val.is_real())
       return this->do_mark_match_failure();
 
-    out = val.convert_to_real();
+    out = val.as_real();
     return *this;
   }
 

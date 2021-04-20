@@ -121,7 +121,7 @@ std_math_hypot(cow_vector<Value> values)
     V_real len = 0;
     for(const auto& val : values)
       if(!val.is_null())
-        len = ::hypot(len, val.convert_to_real());
+        len = ::hypot(len, val.as_real());
     return len;
   }
 

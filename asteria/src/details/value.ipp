@@ -273,14 +273,5 @@ template<typename XValT>
 using Valuable = Valuable_impl<
            typename ::rocket::remove_cvref<XValT>::type, void>;
 
-constexpr uint32_t
-imask(initializer_list<uint32_t> bits) noexcept
-  {
-    uint32_t sum = 0;
-    for(uint32_t b : bits)
-      sum |= UINT32_C(1) << b;
-    return sum;
-  }
-
 }  // namespace details_value
 }  // namespace asteria

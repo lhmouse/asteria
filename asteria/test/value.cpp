@@ -84,13 +84,13 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
-    ASTERIA_TEST_CHECK(value.convert_to_real() == 3.0);
+    ASTERIA_TEST_CHECK(value.as_real() == 3.0);
     ASTERIA_TEST_CHECK(value.is_integer());
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
-    ASTERIA_TEST_CHECK(value.mutate_into_real() == 3.0);
+    ASTERIA_TEST_CHECK(value.open_real() == 3.0);
     ASTERIA_TEST_CHECK(value.is_real());
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
     swap(value, cmp);

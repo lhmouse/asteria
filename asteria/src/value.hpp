@@ -34,7 +34,8 @@ class Value
 
     template<typename XValT,
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
-    Value(XValT&& xval) noexcept(::std::is_nothrow_constructible<decltype(m_stor),
+    Value(XValT&& xval)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor(typename details_value::Valuable<XValT>::via_type(
                                         ::std::forward<XValT>(xval)))
@@ -42,7 +43,8 @@ class Value
 
     template<typename XValT,
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
-    Value(XValT&& xval) noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
+    Value(XValT&& xval)
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
@@ -52,7 +54,8 @@ class Value
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
-    operator=(XValT&& xval) noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
+    operator=(XValT&& xval)
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
@@ -86,11 +89,11 @@ class Value
 
     V_boolean
     as_boolean() const
-      { return this->m_stor.as<type_boolean>();  }
+      { return this->m_stor.as<V_boolean>();  }
 
     V_boolean&
     open_boolean()
-      { return this->m_stor.as<type_boolean>();  }
+      { return this->m_stor.as<V_boolean>();  }
 
     bool
     is_integer() const noexcept
@@ -98,23 +101,35 @@ class Value
 
     V_integer
     as_integer() const
-      { return this->m_stor.as<type_integer>();  }
+      { return this->m_stor.as<V_integer>();  }
 
     V_integer&
     open_integer()
-      { return this->m_stor.as<type_integer>();  }
+      { return this->m_stor.as<V_integer>();  }
 
     bool
     is_real() const noexcept
-      { return this->type() == type_real;  }
+      {
+        return (this->type() == type_integer) ||
+               (this->type() == type_real);
+      }
 
     V_real
     as_real() const
-      { return this->m_stor.as<type_real>();  }
+      {
+        return this->is_integer()
+             ? V_real(this->m_stor.as<V_integer>())
+             : this->m_stor.as<V_real>();
+      }
 
     V_real&
     open_real()
-      { return this->m_stor.as<type_real>();  }
+      {
+        return this->is_integer()
+             ? this->m_stor.emplace<V_real>(
+                       V_real(this->m_stor.as<V_integer>()))
+             : this->m_stor.as<V_real>();
+      }
 
     bool
     is_string() const noexcept
@@ -122,11 +137,11 @@ class Value
 
     const V_string&
     as_string() const
-      { return this->m_stor.as<type_string>();  }
+      { return this->m_stor.as<V_string>();  }
 
     V_string&
     open_string()
-      { return this->m_stor.as<type_string>();  }
+      { return this->m_stor.as<V_string>();  }
 
     bool
     is_function() const noexcept
@@ -134,11 +149,11 @@ class Value
 
     const V_function&
     as_function() const
-      { return this->m_stor.as<type_function>();  }
+      { return this->m_stor.as<V_function>();  }
 
     V_function&
     open_function()
-      { return this->m_stor.as<type_function>();  }
+      { return this->m_stor.as<V_function>();  }
 
     bool
     is_opaque() const noexcept
@@ -146,11 +161,11 @@ class Value
 
     const V_opaque&
     as_opaque() const
-      { return this->m_stor.as<type_opaque>();  }
+      { return this->m_stor.as<V_opaque>();  }
 
     V_opaque&
     open_opaque()
-      { return this->m_stor.as<type_opaque>();  }
+      { return this->m_stor.as<V_opaque>();  }
 
     bool
     is_array() const noexcept
@@ -158,11 +173,11 @@ class Value
 
     const V_array&
     as_array() const
-      { return this->m_stor.as<type_array>();  }
+      { return this->m_stor.as<V_array>();  }
 
     V_array&
     open_array()
-      { return this->m_stor.as<type_array>();  }
+      { return this->m_stor.as<V_array>();  }
 
     bool
     is_object() const noexcept
@@ -170,41 +185,18 @@ class Value
 
     const V_object&
     as_object() const
-      { return this->m_stor.as<type_object>();  }
+      { return this->m_stor.as<V_object>();  }
 
     V_object&
     open_object()
-      { return this->m_stor.as<type_object>();  }
+      { return this->m_stor.as<V_object>();  }
 
     bool
     is_scalar() const noexcept
       {
-        return details_value::imask({ this->type() }) &
-               details_value::imask({ type_null, type_boolean, type_integer,
-                                      type_real, type_string });
-      }
-
-    bool
-    is_convertible_to_real() const noexcept
-      {
-        return details_value::imask({ this->type() }) &
-               details_value::imask({ type_integer, type_real });
-      }
-
-    V_real
-    convert_to_real() const
-      {
-        return this->is_integer()
-            ? V_real(this->as_integer())
-            : this->as_real();
-      }
-
-    V_real&
-    mutate_into_real()
-      {
-        return this->is_integer()
-            ? this->m_stor.emplace<type_real>(V_real(this->as_integer()))
-            : this->open_real();
+        return (1 << this->type()) &
+               (1 << type_null | 1 << type_boolean | 1 << type_integer |
+                1 << type_real | 1 << type_string);
       }
 
     Value&
