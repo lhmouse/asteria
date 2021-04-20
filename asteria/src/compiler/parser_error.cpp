@@ -6,10 +6,11 @@
 
 namespace asteria {
 
-static_assert(::std::is_nothrow_copy_constructible<Parser_Error>::value &&
-              ::std::is_nothrow_move_constructible<Parser_Error>::value &&
-              ::std::is_nothrow_copy_assignable<Parser_Error>::value &&
-              ::std::is_nothrow_move_assignable<Parser_Error>::value);
+static_assert(
+    ::std::is_nothrow_copy_constructible<Parser_Error>::value &&
+    ::std::is_nothrow_move_constructible<Parser_Error>::value &&
+    ::std::is_nothrow_copy_assignable<Parser_Error>::value &&
+    ::std::is_nothrow_move_assignable<Parser_Error>::value);
 
 Parser_Error::
 ~Parser_Error()
@@ -26,10 +27,9 @@ do_compose_message()
     fmt.clear_string();
 
     // Write the status code in digital form.
-    format(fmt, "asteria parser error $1: $2\n"
-                "[unexpected token at '$3']",
-                this->m_stat, describe_parser_status(this->m_stat),
-                this->m_sloc);
+    fmt << "parser error [" << this->m_stat << "]: "
+        << describe_parser_status(this->m_stat) << '\n'
+        << "[near '" << this->m_sloc << "']";
 
     // Set the new string.
     this->m_what = fmt.extract_string();

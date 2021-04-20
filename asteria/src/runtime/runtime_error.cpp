@@ -6,10 +6,11 @@
 
 namespace asteria {
 
-static_assert(::std::is_nothrow_copy_constructible<Runtime_Error>::value &&
-              ::std::is_nothrow_move_constructible<Runtime_Error>::value &&
-              ::std::is_nothrow_copy_assignable<Runtime_Error>::value &&
-              ::std::is_nothrow_move_assignable<Runtime_Error>::value);
+static_assert(
+    ::std::is_nothrow_copy_constructible<Runtime_Error>::value &&
+    ::std::is_nothrow_move_constructible<Runtime_Error>::value &&
+    ::std::is_nothrow_copy_assignable<Runtime_Error>::value &&
+    ::std::is_nothrow_move_assignable<Runtime_Error>::value);
 
 Runtime_Error::
 ~Runtime_Error()
@@ -25,10 +26,10 @@ do_backtrace(Backtrace_Frame&& new_frm)
       if(auto eptr = ::std::current_exception())
         ::std::rethrow_exception(eptr);
     }
-    catch(Runtime_Error& nested)
-      { this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());  }
-    catch(exception&)
-      { }
+    catch(Runtime_Error& nested) {
+      this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
+    }
+    catch(...) { }
 
     // Push a new frame.
     this->do_insert_frame(::std::move(new_frm));
@@ -49,8 +50,8 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     fmt.set_string(::std::move(this->m_what));
     fmt.clear_string();
 
-    // Write the value. Strings are written as is. ALl other values are prettified.
-    fmt << "asteria runtime error: ";
+    // Strings are written verbatim. All the others are formatted.
+    fmt << "runtime error: ";
     if(this->m_value.is_string())
       fmt << this->m_value.as_string();
     else
