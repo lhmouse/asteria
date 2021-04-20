@@ -34,7 +34,7 @@ inline bool
 do_compare_eq(const phsh_string& lhs, const phsh_string& rhs) noexcept
   {
     // Generally, we expect teh strings to compare equal.
-    if(lhs.length() != rhs.length())
+    if(lhs.size() != rhs.size())
       return false;
 
     if(ROCKET_EXPECT(lhs.data() == rhs.data()))
