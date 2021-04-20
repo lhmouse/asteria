@@ -21,14 +21,14 @@ do_lock_stream(const char* path)
     // Open the file first.
     ::rocket::unique_posix_file file(::fopen(path, "r"), ::fclose);
     if(!file)
-      ASTERIA_THROW("Could not open script file '$2'\n"
+      ASTERIA_THROW("could not open script file '$2'\n"
                     "[`fopen()` failed: $1]",
                     format_errno(errno), path);
 
     // Make the unique identifier of this file from its device ID and inode number.
     struct ::stat info;
     if(::fstat(::fileno(file), &info))
-      ASTERIA_THROW("Could not get information about script file '$2'\n"
+      ASTERIA_THROW("could not get information about script file '$2'\n"
                     "[`fstat()` failed: $1]",
                     format_errno(errno), path);
 
@@ -38,7 +38,7 @@ do_lock_stream(const char* path)
 
     auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));
     if(!result.second)
-      ASTERIA_THROW("Recursive import denied (loading '$1', file ID `$2`)", path, skey);
+      ASTERIA_THROW("recursive import denied (loading '$1', file ID `$2`)", path, skey);
     return &*(result.first);
   }
 

@@ -136,7 +136,7 @@ class basic_tinybuf
     do_seek(off_type /*off*/, seek_dir /*dir*/)
       {
         // The default implementation always fails.
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: Stream not seekable");
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
       }
 
     // * Reads data from the external device into the get area and discards it unless `peek`
@@ -149,7 +149,7 @@ class basic_tinybuf
     do_underflow(const char_type*& /*gcur*/, const char_type*& /*gend*/, bool /*peek*/)
       {
         // The default implementation always fails.
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: Stream not readable");
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");
       }
 
     // * Writes the contents of the put area, followed by the sequence denoted by `sadd`
@@ -161,7 +161,7 @@ class basic_tinybuf
                 const char_type* /*sadd*/, size_type /*nadd*/)
       {
        // The default implementation always fails.
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: Stream not writable");
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
       }
 
     // * Calls `do_flush()` only when either the get or put area is active.

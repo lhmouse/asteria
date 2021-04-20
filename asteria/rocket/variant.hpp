@@ -19,7 +19,7 @@ class variant;
 template<typename... altsT>
 class variant
   {
-    static_assert(sizeof...(altsT) > 0, "No alternative types provided");
+    static_assert(sizeof...(altsT) > 0, "no alternative types provided");
     static_assert(conjunction<is_nothrow_move_constructible<altsT>...>::value,
                   "Move constructors of alternative types must not throw exceptions");
 

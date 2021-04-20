@@ -56,7 +56,7 @@ int main()
 
         assert std.checksum.crc32_file((__file>>3)+"txt") == 3626666760;
         try { std.checksum.crc32_file("nonexistent") == null;  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // FNV1a-32
         const fnv1a32_results = [
@@ -97,7 +97,7 @@ int main()
 
         assert std.checksum.fnv1a32_file((__file>>3)+"txt") == 3790343712;
         try { std.checksum.fnv1a32_file("nonexistent") == null;  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // MD5
         const md5_results = [
@@ -186,7 +186,7 @@ int main()
 
         assert std.checksum.md5_file((__file>>3)+"txt") == "67C62663B722611BA87041EB05870EB9";
         try { std.checksum.md5_file("nonexistent") == null;  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // SHA-1
         const sha1_results = [
@@ -275,7 +275,7 @@ int main()
 
         assert std.checksum.sha1_file((__file>>3)+"txt") == "6BD103FB2F8F84E6A7B36D27E1FD6243B6320BE8";
         try { std.checksum.sha1_file("nonexistent") == null;  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         // SHA-256
         const sha256_results = [
@@ -428,7 +428,7 @@ int main()
 
         assert std.checksum.sha256_file((__file>>3)+"txt") == "F5C962601B413CCDA2FC14D64D98479D9FC74C90C2DDE15F25EE9922E57F5074";
         try { std.checksum.sha256_file("nonexistent") == null;  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));

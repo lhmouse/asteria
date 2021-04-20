@@ -41,18 +41,18 @@ int main()
 
         std.filesystem.move_from(dname + "/f5", dname + "/f2");
         try { std.filesystem.move_from(dname + "/f5", dname + "/f2");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.array.sort(std.array.copy_keys(std.filesystem.dir_list(dname))) == ["f3","f4","f5"];
 
         try { std.filesystem.file_remove(dname);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         try { std.filesystem.dir_remove(dname);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.filesystem.remove_recursive(dname) == 8;
         assert std.filesystem.dir_remove(dname) == 0;
 
         try { std.filesystem.file_read("/nonexistent") == null;  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         std.filesystem.file_append(fname, "@@@@$$", true);  // "@@@@$$"
         assert std.filesystem.get_information(fname).b_dir == false;
         assert std.filesystem.get_information(fname).n_size == 6;
@@ -68,7 +68,7 @@ int main()
         std.filesystem.file_append(fname, "!!");  // "helHE#??!!"
         assert std.filesystem.get_information(fname).n_size == 10;
         try { std.filesystem.file_append(fname, "!!", true);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         assert std.filesystem.file_read(fname) == "helHE#??!!";
         assert std.filesystem.file_read(fname, 2) == "lHE#??!!";
@@ -82,7 +82,7 @@ int main()
         var data = "";
         var appender = func(off, str) { data += str;  };
         try { std.filesystem.file_stream("/nonexistent", appender);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.filesystem.file_stream(fname, appender) == 10;
         assert data == "helHE#??!!";
         data = "";
@@ -99,14 +99,14 @@ int main()
         assert data == "lHE";
 
         try { std.filesystem.dir_create(fname);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.filesystem.file_remove(fname) == 1;
         assert std.filesystem.file_remove(fname) == 0;
         assert std.filesystem.file_remove(fname + ".2") == 1;
 
         assert std.filesystem.dir_create(fname) == 1;
         try { std.filesystem.file_remove(fname);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.filesystem.dir_remove(fname) == 1;
 
 ///////////////////////////////////////////////////////////////////////////////

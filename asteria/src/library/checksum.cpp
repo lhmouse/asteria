@@ -1057,7 +1057,7 @@ do_cast_hasher(V_opaque& h)
   {
     auto hptr = h.open_opt<HasherT>();
     if(!hptr)
-      ASTERIA_THROW("Invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
+      ASTERIA_THROW("invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
                     typeid(HasherT).name(), h.type().name());
     return hptr;
   }
@@ -1078,14 +1078,14 @@ do_hash_file(const V_string& path)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW("Could not open file '$2'\n"
+      ASTERIA_THROW("could not open file '$2'\n"
                     "[`open()` failed: $1]",
                     format_errno(errno), path);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb;
     if(::fstat(fd, &stb) != 0)
-      ASTERIA_THROW("Could not get information about source file '$2'\n"
+      ASTERIA_THROW("could not get information about source file '$2'\n"
                     "[`fstat()` failed: $1]",
                     format_errno(errno), path);
 
@@ -1100,7 +1100,7 @@ do_hash_file(const V_string& path)
       h.update(pbuf, static_cast<size_t>(nread));
 
     if(nread < 0)
-      ASTERIA_THROW("Error reading file '$2'\n"
+      ASTERIA_THROW("error reading file '$2'\n"
                     "[`read()` failed: $1]",
                     format_errno(errno), path);
 

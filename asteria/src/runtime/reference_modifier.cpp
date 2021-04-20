@@ -21,7 +21,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         const auto& arr = parent.as_array();
@@ -40,7 +40,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("String subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         const auto& obj = parent.as_object();
@@ -54,7 +54,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
 
         const auto& arr = parent.as_array();
         if(arr.empty())
@@ -70,7 +70,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
 
         const auto& arr = parent.as_array();
         if(arr.empty())
@@ -97,7 +97,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         auto& arr = parent.open_array();
@@ -116,7 +116,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("String subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         auto& obj = parent.open_object();
@@ -130,7 +130,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -146,7 +146,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -173,7 +173,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         auto& arr = parent.open_array();
@@ -194,7 +194,7 @@ apply_open(Value& parent) const
           parent = V_object();
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("String subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         auto& obj = parent.open_object();
@@ -208,7 +208,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -226,7 +226,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -255,7 +255,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         auto& arr = parent.open_array();
@@ -276,7 +276,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("String subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         auto& obj = parent.open_object();
@@ -296,7 +296,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -314,7 +314,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("Tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())

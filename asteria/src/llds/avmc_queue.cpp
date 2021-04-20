@@ -55,7 +55,7 @@ do_reallocate(uint32_t nadd)
     this->m_rsrv = rsrv;
 
     // Move old non-trivial nodes if any.
-    // Warning: No exception shall be thrown from the code below.
+    // Warning: no exception shall be thrown from the code below.
     uint32_t offset = 0;
     while(ROCKET_EXPECT(offset != this->m_used)) {
       auto qnode = bptr + offset;
@@ -76,7 +76,7 @@ do_reserve_one(Uparam uparam, size_t size)
   {
     constexpr size_t size_max = UINT8_MAX * sizeof(Header) - 1;
     if(size > size_max)
-      ASTERIA_THROW("Invalid AVMC node size (`$1` > `$2`)", size, size_max);
+      ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", size, size_max);
 
     // Round the size up to the nearest number of headers.
     // This shall not result in overflows.

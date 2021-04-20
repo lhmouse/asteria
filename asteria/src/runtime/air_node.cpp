@@ -445,7 +445,7 @@ struct Traits_switch_statement
               bp = i;
               continue;
             }
-            ASTERIA_THROW("Multiple `default` clauses");
+            ASTERIA_THROW("multiple `default` clauses");
           }
 
           // Evaluate the operand and check whether it equals `cond`.
@@ -675,7 +675,7 @@ struct Traits_for_each_statement
           }
 
           default:
-            ASTERIA_THROW("Range value not iterable (range `$1`)", range);
+            ASTERIA_THROW("range value not iterable (range `$1`)", range);
         }
       }
   };
@@ -938,7 +938,7 @@ struct Traits_push_global_reference
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
         if(!qref)
-          ASTERIA_THROW("Undeclared identifier `$1`", name);
+          ASTERIA_THROW("undeclared identifier `$1`", name);
 
         // Push a copy of it.
         ctx.stack().emplace_back_uninit() = *qref;
@@ -984,11 +984,11 @@ struct Traits_push_local_reference
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(name);
         if(!qref)
-          ASTERIA_THROW("Undeclared identifier `$1`", name);
+          ASTERIA_THROW("undeclared identifier `$1`", name);
 
         // Check if control flow has bypassed its initialization.
         if(qref->is_uninit())
-          ASTERIA_THROW("Use of bypassed variable or reference `$1`", name);
+          ASTERIA_THROW("use of bypassed variable or reference `$1`", name);
 
         // Push a copy of it.
         ctx.stack().emplace_back_uninit() = *qref;
@@ -1231,7 +1231,7 @@ struct Traits_function_call
         // Copy the target, which shall be of type `function`.
         auto value = ctx.stack().back().dereference_readonly();
         if(!value.is_function())
-          ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
+          ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
 
         return do_function_call_common(ctx.stack().mut_back().pop_modifier(), sloc, ctx,
                                        value.as_function(), static_cast<PTC_Aware>(up.u8v[0]),
@@ -1392,7 +1392,7 @@ struct Traits_apply_xop_inc_post
             auto& val = lhs.open_integer();
 
             if(val == INT64_MAX)
-              ASTERIA_THROW("Integer increment overflow");
+              ASTERIA_THROW("integer increment overflow");
 
             ctx.stack().mut_back().set_temporary(val++);
             return air_status_next;
@@ -1438,7 +1438,7 @@ struct Traits_apply_xop_dec_post
             auto& val = lhs.open_integer();
 
             if(val == INT64_MIN)
-              ASTERIA_THROW("Integer decrement overflow");
+              ASTERIA_THROW("integer decrement overflow");
 
             ctx.stack().mut_back().set_temporary(val--);
             return air_status_next;
@@ -1492,7 +1492,7 @@ struct Traits_apply_xop_subscr
           }
 
           default:
-            ASTERIA_THROW("Subscript not valid (value was `$1`)", rhs);
+            ASTERIA_THROW("subscript not valid (value was `$1`)", rhs);
         }
       }
   };
@@ -1558,7 +1558,7 @@ struct Traits_apply_xop_neg
             auto& val = rhs.open_integer();
 
             if(val == INT64_MIN)
-              ASTERIA_THROW("Integer negation overflow");
+              ASTERIA_THROW("integer negation overflow");
 
             val = -val;
             return air_status_next;
@@ -1692,7 +1692,7 @@ struct Traits_apply_xop_inc_pre
             auto& val = rhs.open_integer();
 
             if(val == INT64_MAX)
-              ASTERIA_THROW("Integer increment overflow");
+              ASTERIA_THROW("integer increment overflow");
 
             ++val;
             return air_status_next;
@@ -1737,7 +1737,7 @@ struct Traits_apply_xop_dec_pre
             auto& val = rhs.open_integer();
 
             if(val == INT64_MIN)
-              ASTERIA_THROW("Integer decrement overflow");
+              ASTERIA_THROW("integer decrement overflow");
 
             --val;
             return air_status_next;
@@ -2046,7 +2046,7 @@ struct Traits_apply_xop_abs
             auto& val = rhs.open_integer();
 
             if(val == INT64_MIN)
-              ASTERIA_THROW("Integer absolute value overflow");
+              ASTERIA_THROW("integer absolute value overflow");
 
             val = ::std::abs(val);
             return air_status_next;
@@ -2575,7 +2575,7 @@ struct Traits_apply_xop_cmp_lt
         // Throw an exception if they are unordered.
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         lhs = cmp == compare_less;
@@ -2614,7 +2614,7 @@ struct Traits_apply_xop_cmp_gt
         // Throw an exception if they are unordered.
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         lhs = cmp == compare_greater;
@@ -2653,7 +2653,7 @@ struct Traits_apply_xop_cmp_lte
         // Throw an exception if they are unordered.
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         lhs = cmp != compare_greater;
@@ -2692,7 +2692,7 @@ struct Traits_apply_xop_cmp_gte
         // Throw an exception if they are unordered.
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
-          ASTERIA_THROW("Values not comparable (operands were `$1` and `$2`)",
+          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         lhs = cmp != compare_less;
@@ -2798,7 +2798,7 @@ struct Traits_apply_xop_add
             auto y = rhs.as_integer();
 
             if(ROCKET_ADD_OVERFLOW(x, y, &x))
-              ASTERIA_THROW("Integer addition overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             return air_status_next;
@@ -2871,7 +2871,7 @@ struct Traits_apply_xop_sub
             auto y = rhs.as_integer();
 
             if(ROCKET_SUB_OVERFLOW(x, y, &x))
-              ASTERIA_THROW("Integer subtraction overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             return air_status_next;
@@ -2938,7 +2938,7 @@ struct Traits_apply_xop_mul
             auto y = rhs.as_integer();
 
             if(ROCKET_MUL_OVERFLOW(x, y, &x))
-              ASTERIA_THROW("Integer multiplication overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             return air_status_next;
@@ -2958,13 +2958,13 @@ struct Traits_apply_xop_mul
 
             // Optimize for special cases.
             if(n < 0) {
-              ASTERIA_THROW("Negative string duplicate count (value was `$2`)", n);
+              ASTERIA_THROW("negative string duplicate count (value was `$2`)", n);
             }
             else if((n == 0) || str.empty()) {
               str.clear();
             }
             else if(str.size() > str.max_size() / static_cast<uint64_t>(n)) {
-              ASTERIA_THROW("String length overflow (`$1` * `$2` > `$3`)",
+              ASTERIA_THROW("string length overflow (`$1` * `$2` > `$3`)",
                             str.size(), n, str.max_size());
             }
             else if(str.size() == 1) {
@@ -3030,11 +3030,11 @@ struct Traits_apply_xop_div
             auto y = rhs.as_integer();
 
             if(y == 0)
-              ASTERIA_THROW("Integer division by zero (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer division by zero (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             if((x == INT64_MIN) && (y == -1))
-              ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             x /= y;
@@ -3093,11 +3093,11 @@ struct Traits_apply_xop_mod
             auto y = rhs.as_integer();
 
             if(y == 0)
-              ASTERIA_THROW("Integer division by zero (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer division by zero (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             if((x == INT64_MIN) && (y == -1))
-              ASTERIA_THROW("Integer division overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
             x %= y;
@@ -3113,7 +3113,7 @@ struct Traits_apply_xop_mod
           }
 
           default:
-            ASTERIA_THROW("Modulo not applicable (operands were `$1` and `$2`)",
+            ASTERIA_THROW("modulo not applicable (operands were `$1` and `$2`)",
                           lhs, rhs);
         }
       }
@@ -3148,12 +3148,12 @@ struct Traits_apply_xop_sll
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not valid (operands were `$1` and `$2`)",
+          ASTERIA_THROW("shift count not valid (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
-          ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the left.
@@ -3226,12 +3226,12 @@ struct Traits_apply_xop_srl
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not valid (operands were `$1` and `$2`)",
+          ASTERIA_THROW("shift count not valid (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
-          ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the right.
@@ -3304,12 +3304,12 @@ struct Traits_apply_xop_sla
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not valid (operands were `$1` and `$2`)",
+          ASTERIA_THROW("shift count not valid (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
-          ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the left.
@@ -3323,7 +3323,7 @@ struct Traits_apply_xop_sla
             auto& val = lhs.open_integer();
 
             if(n >= 64) {
-              ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)",
+              ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
             }
             else {
@@ -3332,7 +3332,7 @@ struct Traits_apply_xop_sla
               uint64_t sgn = static_cast<uint64_t>(val >> 63) << bc;
 
               if(out != sgn)
-                ASTERIA_THROW("Integer left shift overflow (operands were `$1` and `$2`)",
+                ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)",
                               lhs, rhs);
 
               reinterpret_cast<uint64_t&>(val) <<= n;
@@ -3345,7 +3345,7 @@ struct Traits_apply_xop_sla
             auto& val = lhs.open_string();
 
             if(n >= static_cast<int64_t>(val.max_size() - val.size())) {
-              ASTERIA_THROW("String length overflow (`$1` + `$2` > `$3`)",
+              ASTERIA_THROW("string length overflow (`$1` + `$2` > `$3`)",
                             val.size(), n, val.max_size());
             }
             else {
@@ -3391,12 +3391,12 @@ struct Traits_apply_xop_sra
 
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
-          ASTERIA_THROW("Shift count not valid (operands were `$1` and `$2`)",
+          ASTERIA_THROW("shift count not valid (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
-          ASTERIA_THROW("Negative shift count (operands were `$1` and `$2`)",
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)",
                         lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the right.
@@ -4015,11 +4015,11 @@ struct Traits_variadic_call
 
             // Verify the argument count.
             if(!value.is_integer())
-              ASTERIA_THROW("Invalid number of variadic arguments (value `$1`)", value);
+              ASTERIA_THROW("invalid number of variadic arguments (value `$1`)", value);
 
             int64_t nvargs = value.as_integer();
             if((nvargs < 0) || (nvargs > INT32_MAX))
-              ASTERIA_THROW("Number of variadic arguments not acceptable (value `$1`)",
+              ASTERIA_THROW("number of variadic arguments not acceptable (value `$1`)",
                             nvargs);
 
             // Prepare `self` references for all upcoming  calls.
@@ -4050,14 +4050,14 @@ struct Traits_variadic_call
           }
 
           default:
-            ASTERIA_THROW("Invalid variadic argument generator (value `$1`)", value);
+            ASTERIA_THROW("invalid variadic argument generator (value `$1`)", value);
         }
         ctx.stack().pop_back();
 
         // Copy the target, which shall be of type `function`.
         value = ctx.stack().back().dereference_readonly();
         if(!value.is_function())
-          ASTERIA_THROW("Attempt to call a non-function (value `$1`)", value);
+          ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
 
         return do_function_call_common(ctx.stack().mut_back().pop_modifier(), sloc, ctx,
                                        value.as_function(), static_cast<PTC_Aware>(up.u8v[0]),
@@ -4148,12 +4148,12 @@ struct Traits_import_call
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().back().dereference_readonly();
         if(!value.is_string())
-          ASTERIA_THROW("Invalid path specified for `import` (value `$1` not a string)",
+          ASTERIA_THROW("invalid path specified for `import` (value `$1` not a string)",
                         value);
 
         auto path = value.as_string();
         if(path.empty())
-          ASTERIA_THROW("Empty path specified for `import`");
+          ASTERIA_THROW("empty path specified for `import`");
 
         // Rewrite the path if it is not absolute.
         if((path[0] != '/') && (sp.sloc.c_file()[0] == '/')) {
@@ -4165,7 +4165,7 @@ struct Traits_import_call
         auto abspath = ::rocket::make_unique_handle(
                              ::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
-          ASTERIA_THROW("Could not open script file '$2'\n"
+          ASTERIA_THROW("could not open script file '$2'\n"
                         "[`realpath()` failed: $1]",
                         format_errno(errno), path);
 

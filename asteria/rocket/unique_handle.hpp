@@ -36,7 +36,7 @@ class basic_tinyfmt;
 template<typename handleT, typename closerT>
 class unique_handle
   {
-    static_assert(!is_array<handleT>::value, "Invalid handle type");
+    static_assert(!is_array<handleT>::value, "invalid handle type");
 
   public:
     using handle_type  = handleT;

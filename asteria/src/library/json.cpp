@@ -641,16 +641,16 @@ do_json_parse(tinybuf& cbuf)
     Token_Stream tstrm(opts);
     tstrm.reload(sref("[JSON text]"), 1, cbuf);
     if(tstrm.empty())
-      ASTERIA_THROW("Empty JSON string");
+      ASTERIA_THROW("empty JSON string");
 
     // Parse a single value.
     auto value = do_json_parse_nonrecursive(tstrm);
     if(!tstrm.empty())
-      ASTERIA_THROW("Excess text at end of JSON string");
+      ASTERIA_THROW("excess text at end of JSON string");
     return value;
   }
   catch(Parser_Error& except) {
-    ASTERIA_THROW("Invalid JSON string: $3 (line $1, column $2)",
+    ASTERIA_THROW("invalid JSON string: $3 (line $1, column $2)",
                   except.line(), except.column(), describe_parser_status(except.status()));
   }
 
@@ -707,7 +707,7 @@ std_json_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
     if(!fp)
-      ASTERIA_THROW("Could not open file '$2'\n"
+      ASTERIA_THROW("could not open file '$2'\n"
                     "[`fopen()` failed: $1]",
                     format_errno(errno), path);
 

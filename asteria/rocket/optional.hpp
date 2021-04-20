@@ -22,8 +22,8 @@ enum class nullopt_t
 template<typename valueT>
 class optional
   {
-    static_assert(!is_array<valueT>::value, "Invalid element type");
-    static_assert(!is_same<valueT, nullopt_t>::value, "Invalid element type");
+    static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(!is_same<valueT, nullopt_t>::value, "invalid element type");
 
     template<typename>
     friend class optional;
@@ -164,7 +164,7 @@ class optional
     reference
     do_throw_valueless() const
       {
-        noadl::sprintf_and_throw<length_error>("variant: No value set");
+        noadl::sprintf_and_throw<length_error>("variant: no value set");
       }
 
   public:

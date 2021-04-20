@@ -216,9 +216,9 @@ int main()
         assert std.string.hex_decode("68 65 6c 6c 6f") == "hello";
         assert std.string.hex_decode("68 65 06 0c 6c 6f") == "he\x06\x0clo";
         try { std.string.hex_decode("686");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         try { std.string.hex_decode("6865invalid");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.hex_decode("") == "";
 
         assert std.string.base32_encode("hello") == "NBSWY3DP";
@@ -231,20 +231,20 @@ int main()
 
         assert std.string.base32_decode("NBSWY3DP") == "hello";
         try { std.string.base32_decode("nbSWy3DpE=======");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base32_decode("nbSWy3DpEe======") == "hello!";
         try { std.string.base32_decode("nbSWy3DpH4q=====");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base32_decode("nbSWy3DpH4qQ====") == "hello?!";
         assert std.string.base32_decode("nbSWy3DpIA7SC===") == "hello@?!";
         try { std.string.base32_decode("nbSWy3DpENAD6I==");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base32_decode("nbSWy3DpENAD6II=") == "hello#@?!";
         assert std.string.base32_decode("nbSWy3Dp   ENAD6II=") == "hello#@?!";
         try { std.string.base32_decode("NBSWY3D");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         try { std.string.base32_decode("NBSWY3DP!invalid");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base32_decode("") == "";
 
         assert std.string.base64_encode("hello") == "aGVsbG8=";
@@ -255,12 +255,12 @@ int main()
         assert std.string.base64_decode("aGVsbG8=") == "hello";
         assert std.string.base64_decode("aGVsbG8h") == "hello!";
         try { std.string.base64_decode("aGVsbG8/I===");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base64_decode("aGVsbG8/IQ==") == "hello?!";
         assert std.string.base64_decode("aGVs  bG8/IQ==") == "hello?!";
         assert std.string.base64_decode("aGVs  bG8/  IQ==") == "hello?!";
         try { std.string.base64_decode("aGVsbG8=!invalid");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.base64_decode("") == "";
 
         assert std.string.url_encode("") == "";
@@ -272,9 +272,9 @@ int main()
         assert std.string.url_decode("abcd1234%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcd1234АВГД甲乙丙丁";
         assert std.string.url_decode(":/?#[]@!$&'()*+,;=-._~") == ":/?#[]@!$&'()*+,;=-._~";
         try { std.string.url_decode("not valid");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         try { std.string.url_decode("无效的");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         assert std.string.url_encode_query("") == "";
         assert std.string.url_encode_query("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
@@ -285,9 +285,9 @@ int main()
         assert std.string.url_decode_query("abcd1234%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcd1234АВГД甲乙丙丁";
         assert std.string.url_decode_query(":/?#[]@!$&'()*+,;=-._~") == ":/?#[]@!$&'()* ,;=-._~";
         try { std.string.url_decode_query("not valid");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         try { std.string.url_decode_query("无效的");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";
@@ -298,19 +298,19 @@ int main()
 
         assert std.string.utf8_encode(30002) == "甲";
         try { std.string.utf8_encode(0xFFFFFF);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.utf8_encode(0xFFFFFF, true) == "\uFFFD";
         assert std.string.utf8_encode([ 97, 98, 99, 100, 1040, 1042, 1043, 1044, 30002, 20057, 19993, 19969 ]) == "abcdАВГД甲乙丙丁";
         try { std.string.utf8_encode([ 0xFFFFFF ]);  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.utf8_encode([ 0xFFFFFF ], true) == "\uFFFD";
 
         assert std.string.utf8_decode("abcdАВГД甲乙丙丁") == [ 97, 98, 99, 100, 1040, 1042, 1043, 1044, 30002, 20057, 19993, 19969 ];
         try { std.string.utf8_decode("\xC0\x80\x61");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.utf8_decode("\xC0\x80\x61", true) == [ 192, 128, 97 ];
         try { std.string.utf8_decode("\xFF\xFE\x62");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
         assert std.string.utf8_decode("\xFF\xFE\x62", true) == [ 255, 254, 98 ];
 
         assert std.string.pack_8(0x1234) == "\x34";

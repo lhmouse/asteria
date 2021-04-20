@@ -172,7 +172,7 @@ struct S4_reap_unreachable : Variable_Callback
         }
         catch(exception& stdex) {
           ::fprintf(stderr,
-              "WARNING: An exception was thrown during garbage collection. "
+              "WARNING: an exception was thrown during garbage collection. "
               "If this problem persists, please file a bug report.\n"
               "\n"
               "  exception class: %s\n"

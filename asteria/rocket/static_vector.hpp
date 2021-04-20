@@ -30,8 +30,8 @@ class static_vector;
 template<typename valueT, size_t capacityT, typename allocT>
 class static_vector
   {
-    static_assert(!is_array<valueT>::value, "Invalid element type");
-    static_assert(is_same<typename allocT::value_type, valueT>::value, "Inappropriate allocator type");
+    static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(is_same<typename allocT::value_type, valueT>::value, "inappropriate allocator type");
 
   public:
     // types

@@ -85,7 +85,7 @@ class Line_Reader
     data(size_t add = 0) const
       {
         if(add > this->navail()) {
-          ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
+          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
         }
         return this->m_str.data() + (this->m_off + add);
@@ -104,7 +104,7 @@ class Line_Reader
     consume(size_t add)
       {
         if(add > this->navail()) {
-          ASTERIA_THROW("Attempt to seek past end of line (`$1` + `$2` > `$3`)",
+          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
         }
         this->m_off += add;
@@ -114,7 +114,7 @@ class Line_Reader
     rewind(size_t off = 0)
       {
         if(off > this->m_str.size()) {
-          ASTERIA_THROW("Invalid offset within current line (`$1` > `$2`)",
+          ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)",
                         off, this->m_str.size());
         }
         this->m_off = off;

@@ -154,10 +154,10 @@ class basic_tinybuf_file
 
         // Reposition the file.
         if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No file opened");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
 
         if(::fseeko(this->m_file, off, whence) != 0)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Seek error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: seek error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
 
         // Return the new offset.
@@ -172,7 +172,7 @@ class basic_tinybuf_file
 
         // Load more characters into the input buffer.
         if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No file opened");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
 
         // Get the file position of the beginning of the new get area.
         auto goff = this->m_goff;
@@ -212,7 +212,7 @@ class basic_tinybuf_file
 
         // Check for read errors.
         if((navail == 0) && ::ferror(this->m_file))
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Read error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: read error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
 
         // Get the number of characters available in total.
@@ -237,14 +237,14 @@ class basic_tinybuf_file
         // Notice that we don't use put areas.
         // Write the string directly to the file.
         if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: No file opened");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
 
         // Optimize the one-character case a little.
         bool succ = ROCKET_EXPECT(nadd == 1)
                         ? (traits_type::is_eof(traits_type::fputc(this->m_file, sadd[0])) == false)
                         : (traits_type::fputn(this->m_file, sadd, nadd) == nadd);
         if(!succ)
-          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: Write error (errno `%d`, fileno `%d`)",
+          noadl::sprintf_and_throw<runtime_error>("tinybuf_file: write error (errno `%d`, fileno `%d`)",
                                                   errno, ::fileno(this->m_file));
         return *this;
       }

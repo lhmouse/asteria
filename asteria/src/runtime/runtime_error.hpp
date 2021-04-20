@@ -41,7 +41,7 @@ class Runtime_Error
 
     explicit
     Runtime_Error(M_assert, const Source_Location& sloc, const cow_string& msg)
-      : m_value("Assertion failure: " + msg)
+      : m_value("assertion failure: " + msg)
       { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
 
   private:

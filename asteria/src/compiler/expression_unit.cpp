@@ -58,7 +58,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         uint32_t depth = 0;
 
         if(altr.name.empty())
-          ASTERIA_THROW("Unnamed reference\n[inside expression at '$1']", altr.sloc);
+          ASTERIA_THROW("unnamed reference\n[inside expression at '$1']", altr.sloc);
 
         for(;;) {
           // Look for the name in the current context.

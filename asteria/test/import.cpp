@@ -22,10 +22,10 @@ int main()
         assert import("import_sub.txt", 3, 5,) == -2;
 
         try { import("nonexistent file");  assert false;  }
-          catch(e) { assert std.string.find(e, "Assertion failure") == null;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
 
         try { import("import_recursive.txt");  assert false;  }
-          catch(e) { assert std.string.find(e, "Recursive import") != null;  }
+          catch(e) { assert std.string.find(e, "recursive import") != null;  }
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));

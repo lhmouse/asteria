@@ -27,7 +27,7 @@ void
 cow_opaque::
 do_throw_null_pointer() const
   {
-    ASTERIA_THROW("Attempt to dereference a null opaque pointer");
+    ASTERIA_THROW("attempt to dereference a null opaque pointer");
   }
 
 tinyfmt&
@@ -44,7 +44,7 @@ void
 cow_function::
 do_throw_null_pointer() const
   {
-    ASTERIA_THROW("Attempt to dereference a null function pointer");
+    ASTERIA_THROW("attempt to dereference a null function pointer");
   }
 
 tinyfmt&

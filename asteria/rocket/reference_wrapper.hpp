@@ -11,8 +11,8 @@ namespace rocket {
 template<typename valueT>
 class reference_wrapper
   {
-    static_assert(!is_reference<valueT>::value, "Invalid element type");
-    static_assert(!is_void<valueT>::value, "Cannot form references to void");
+    static_assert(!is_reference<valueT>::value, "invalid element type");
+    static_assert(!is_void<valueT>::value, "cannot form references to void");
 
     template<typename>
     friend class reference_wrapper;

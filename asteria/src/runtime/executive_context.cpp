@@ -35,7 +35,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else
-      ASTERIA_THROW("Invalid `this` reference passed to `$1`", zvarg->func());
+      ASTERIA_THROW("invalid `this` reference passed to `$1`", zvarg->func());
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
@@ -63,7 +63,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // If the function is not variadic, then all arguments must have been consumed.
     if(!variadic && (bptr != eptr))
-      ASTERIA_THROW("Too many arguments passed to `$1`", zvarg->func());
+      ASTERIA_THROW("too many arguments passed to `$1`", zvarg->func());
 
     // Stash variadic arguments, if any.
     if(bptr != eptr)

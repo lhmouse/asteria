@@ -33,8 +33,8 @@ class cow_vector;
 template<typename valueT, typename allocT>
 class cow_vector
   {
-    static_assert(!is_array<valueT>::value, "Invalid element type");
-    static_assert(is_same<typename allocT::value_type, valueT>::value, "Inappropriate allocator type");
+    static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(is_same<typename allocT::value_type, valueT>::value, "inappropriate allocator type");
 
   public:
     // types
@@ -143,7 +143,7 @@ class cow_vector
     void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_vector: Subscript out of range (`%llu` %s `%llu`)",
+        noadl::sprintf_and_throw<out_of_range>("cow_vector: subscript out of range (`%llu` %s `%llu`)",
                                                static_cast<unsigned long long>(pos), rel,
                                                static_cast<unsigned long long>(this->size()));
       }

@@ -79,7 +79,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
 
       // Skip the dollar sign and parse the placeholder.
       if(pp == ep)
-        noadl::sprintf_and_throw<invalid_argument>("format: Incomplete placeholder (dangling `$`)");
+        noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (dangling `$`)");
 
       typename traitsT::int_type ch = traitsT::to_int_type(*++pp);
       bp = ++pp;

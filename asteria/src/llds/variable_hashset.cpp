@@ -88,7 +88,7 @@ do_rehash_more()
     this->m_eptr = eptr;
 
     // Move buckets into the new table.
-    // Warning: No exception shall be thrown from the code below.
+    // Warning: no exception shall be thrown from the code below.
     auto sbkt = ::std::exchange(this->m_head, nullptr);
     while(ROCKET_EXPECT(sbkt)) {
       ROCKET_ASSERT(*sbkt);
