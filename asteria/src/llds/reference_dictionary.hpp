@@ -51,20 +51,7 @@ class Reference_Dictionary
         auto mptr = ::rocket::get_probing_origin(bptr, eptr, name.rdhash());
         auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
                [&](const Bucket& r) {
-                 // This handwritten bytewise comparison prevents unnecessary pushs and
-                 // pops in the prolog and epilog of this function.
-                 if(r.kstor[0].length() != name.length())
-                   return false;
-
-                 if(r.kstor[0].data() == name.data())
-                   return true;
-
-                 if(r.kstor[0].rdhash() != name.rdhash())
-                   return false;
-
-                 return ::std::equal(r.kstor[0].data(),
-                                     r.kstor[0].data() + r.kstor[0].length(),
-                                     static_cast<const volatile char*>(name.data()));
+                 return details_reference_dictionary::do_compare_eq(r.kstor[0], name);
                });
 
         // The load factor is kept <= 0.5 so there must always be a bucket available.
