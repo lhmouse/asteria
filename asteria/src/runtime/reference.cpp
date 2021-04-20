@@ -163,7 +163,7 @@ do_finish_call_slow(Global_Context& global)
       if(ptc_conj == ptc_aware_void)
         this->set_void();
       else if(ptc_conj != ptc_aware_by_ref)
-        this->mutate_into_temporary();
+        this->open_temporary();
     }
 
     return *this;

@@ -261,7 +261,7 @@ class Reference
       }
 
     ROCKET_FORCED_INLINE_FUNCTION Value&
-    mutate_into_temporary()
+    open_temporary()
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
             ? this->m_value

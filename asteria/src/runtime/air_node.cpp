@@ -107,7 +107,7 @@ do_get_first_operand(Reference_Stack& stack, bool assign)
     if(assign)
       return stack.back().dereference_mutable();
     else
-      return stack.mut_back().mutate_into_temporary();
+      return stack.mut_back().open_temporary();
   }
 
 Reference&
@@ -910,7 +910,7 @@ struct Traits_convert_to_temporary
     static AIR_Status
     execute(Executive_Context& ctx)
       {
-        ctx.stack().mut_back().mutate_into_temporary();
+        ctx.stack().mut_back().open_temporary();
         return air_status_next;
       }
   };
