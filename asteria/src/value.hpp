@@ -127,7 +127,7 @@ class Value
       {
         return this->is_integer()
              ? this->m_stor.emplace<V_real>(
-                       V_real(this->m_stor.as<V_integer>()))
+                   static_cast<V_real>(this->m_stor.as<V_integer>()))
              : this->m_stor.as<V_real>();
       }
 
