@@ -33,21 +33,42 @@ struct Bucket
 inline bool
 do_compare_eq(const phsh_string& lhs, const phsh_string& rhs) noexcept
   {
-    // Generally, we expect teh strings to compare equal.
-    if(lhs.size() != rhs.size())
+    // Generally, we expect the strings to compare equal.
+    size_t n = lhs.size();
+    if(n != rhs.size())
       return false;
 
-    if(ROCKET_EXPECT(lhs.data() == rhs.data()))
+    const char* lp = lhs.data();
+    const char* rp = rhs.data();
+    if(lp == rp)
       return true;
 
     if(lhs.rdhash() != rhs.rdhash())
       return false;
 
-    // This handwritten bytewise comparison prevents unnecessary pushs
-    // and pops in the prolog and epilog of this function.
-    for(size_t k = 0;  k != lhs.size(); ++k)
-      if(lhs[k] != rhs[k])
+    // Perform word-wise comparison.
+    constexpr size_t M = sizeof(uintptr_t);
+    while(n >= M) {
+      uintptr_t words[2];
+      ::std::memcpy(words + 0, lp, M);
+      ::std::memcpy(words + 1, rp, M);
+      if(words[0] != words[1])
         return false;
+
+      lp += M;
+      rp += M;
+      n -= M;
+    }
+
+    // Perform character-wise comparison.
+    while(n > 0) {
+      if(static_cast<const volatile char&>(*lp) != *rp)
+        return false;
+
+      lp += 1;
+      rp += 1;
+      n -= 1;
+    }
 
     return true;
   }
