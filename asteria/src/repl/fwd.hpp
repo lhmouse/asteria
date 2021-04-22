@@ -47,8 +47,7 @@ extern cow_string repl_heredoc;  // heredoc terminator
 void
 repl_printf(const char* fmt, ...) noexcept;
 
-[[noreturn]]
-void
+[[noreturn]] void
 exit_printf(Exit_Status stat, const char* fmt = "", ...) noexcept;
 
 void
@@ -62,8 +61,7 @@ void
 install_signal_and_verbose_hooks();
 
 // This functions is defined in 'single.cpp'.
-[[noreturn]]
-void
+[[noreturn]] void
 load_and_execute_single_noreturn();
 
 // This function is defined in 'commands.cpp'.

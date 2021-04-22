@@ -1123,8 +1123,7 @@ struct Traits_coalescence
       }
   };
 
-ROCKET_NOINLINE
-Reference&
+ROCKET_NOINLINE Reference&
 do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
                   const cow_function& target, Reference_Stack&& stack)
   {

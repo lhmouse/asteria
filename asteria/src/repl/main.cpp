@@ -9,8 +9,7 @@
 namespace {
 using namespace asteria;
 
-[[noreturn]]
-int
+[[noreturn]] int
 do_print_help_and_exit(const char* self)
   {
     ::printf(
@@ -59,8 +58,7 @@ Report bugs to <%s>.
     ::quick_exit(0);
   }
 
-[[noreturn]]
-int
+[[noreturn]] int
 do_print_version_and_exit()
   {
     ::printf(
