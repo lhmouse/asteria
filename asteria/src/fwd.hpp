@@ -367,8 +367,7 @@ class cow_opaque
       { return this->reset();  }
 
   private:
-    [[noreturn]]
-    void
+    [[noreturn]] void
     do_throw_null_pointer() const;
 
   public:
@@ -503,8 +502,7 @@ class cow_function
       { return this->reset();  }
 
   private:
-    [[noreturn]]
-    void
+    [[noreturn]] void
     do_throw_null_pointer() const;
 
   public:

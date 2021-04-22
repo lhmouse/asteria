@@ -67,8 +67,7 @@ struct Command_exit final
 //       1         2         3         4         5         6         7      |
       }
 
-    [[noreturn]]
-    void
+    [[noreturn]] void
     handle(cow_string&& args) const override
       {
         const char* bptr = args.data();
