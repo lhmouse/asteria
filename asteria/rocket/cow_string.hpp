@@ -330,7 +330,7 @@ class basic_cow_string
 
         // Set the new storage up.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - tlen;
+        this->m_ptr = ptr - tpos;
         this->m_len -= tlen - n;
         return ptr;
       }
