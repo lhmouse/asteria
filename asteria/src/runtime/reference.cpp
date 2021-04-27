@@ -32,11 +32,11 @@ do_dereference_readonly_slow() const
         ASTERIA_THROW("attempt to use the result of a function call which returned no value");
 
       case index_temporary:
-        qval = &(this->m_value);
+        qval = &(this->m_stor.value);
         break;
 
       case index_variable: {
-        auto qvar = unerase_cast<Variable*>(this->m_var);
+        auto qvar = unerase_cast<Variable*>(this->m_stor.var);
         if(!qvar)
           ASTERIA_THROW("attempt to use a moved-away reference (this is probably a bug)");
 
@@ -55,8 +55,8 @@ do_dereference_readonly_slow() const
     }
 
     // Apply modifiers.
-    auto bpos = this->m_mods.begin();
-    auto epos = this->m_mods.end();
+    auto bpos = this->m_stor.mods.begin();
+    auto epos = this->m_stor.mods.end();
 
     while(bpos != epos)
       if(!(qval = bpos++->apply_read_opt(*qval)))
@@ -72,7 +72,7 @@ do_mutate_into_temporary_slow()
     // Dereference and copy the value. Don't move-assign a value into itself.
     auto val = this->dereference_readonly();
     this->set_temporary(::std::move(val));
-    return this->m_value;
+    return this->m_stor.value;
   }
 
 Reference&
@@ -88,7 +88,11 @@ do_finish_call_slow(Global_Context& global)
     ASTERIA_RUNTIME_TRY {
       // Unpack all frames recursively.
       // Note that `*this` is overwritten before the wrapped function is called.
-      while(!!(ptca = this->get_ptc_args_opt())) {
+      while(this->m_index == index_ptc_args) {
+        ROCKET_ASSERT(this->m_stor.ptca);
+        ptca.reset(static_cast<PTC_Arguments*>(this->m_stor.ptca.release()));
+        this->m_index = index_uninit;
+
         // Generate a single-step trap before unpacking arguments.
         if(auto qhooks = global.get_hooks_opt())
           qhooks->on_single_step_trap(ptca->sloc());
@@ -173,8 +177,8 @@ Variable_Callback&
 Reference::
 enumerate_variables(Variable_Callback& callback) const
   {
-    this->m_value.enumerate_variables(callback);
-    callback.process(&(this->m_var), unerase_pointer_cast<Variable>(this->m_var));
+    this->m_stor.value.enumerate_variables(callback);
+    callback.process(&(this->m_stor.var), unerase_pointer_cast<Variable>(this->m_stor.var));
     return callback;
   }
 
@@ -193,11 +197,11 @@ dereference_mutable() const
         ASTERIA_THROW("attempt to use the result of a function call which returned no value");
 
       case index_temporary:
-        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_value);
+        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_stor.value);
         break;
 
       case index_variable: {
-        auto qvar = unerase_cast<Variable*>(this->m_var);
+        auto qvar = unerase_cast<Variable*>(this->m_stor.var);
         if(!qvar)
           ASTERIA_THROW("attempt to use a moved-away reference (this is probably a bug)");
 
@@ -216,8 +220,8 @@ dereference_mutable() const
     }
 
     // Apply modifiers.
-    auto bpos = this->m_mods.begin();
-    auto epos = this->m_mods.end();
+    auto bpos = this->m_stor.mods.begin();
+    auto epos = this->m_stor.mods.end();
 
     while(bpos != epos)
       qval = &(bpos++->apply_open(*qval));
@@ -240,11 +244,11 @@ dereference_unset() const
         ASTERIA_THROW("attempt to use the result of a function call which returned no value");
 
       case index_temporary:
-        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_value);
+        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_stor.value);
         break;
 
       case index_variable: {
-        auto qvar = unerase_cast<Variable*>(this->m_var);
+        auto qvar = unerase_cast<Variable*>(this->m_stor.var);
         if(!qvar)
           ASTERIA_THROW("attempt to use a moved-away reference (this is probably a bug)");
 
@@ -263,8 +267,8 @@ dereference_unset() const
     }
 
     // Apply modifiers except the last one.
-    auto bpos = this->m_mods.begin();
-    auto epos = this->m_mods.end();
+    auto bpos = this->m_stor.mods.begin();
+    auto epos = this->m_stor.mods.end();
 
     if(bpos == epos)
       ASTERIA_THROW("root values cannot be unset");
