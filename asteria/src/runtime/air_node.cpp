@@ -1160,8 +1160,10 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
 
     // Pack arguments for this proper tail call, which will be unpacked outside this scope.
     Reference_Stack bound_args;
-    for(auto p = stack.mut_bottom();  p != stack.top();  ++p)
+    for(auto p = stack.mut_bottom();  p != stack.top();  ++p) {
+      ROCKET_ASSERT(!p->is_ptc_args());
       bound_args.emplace_back_uninit() = ::std::move(*p);
+    }
     bound_args.emplace_back_uninit() = ::std::move(self);
 
     self.set_ptc_args(
