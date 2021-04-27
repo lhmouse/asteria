@@ -23,16 +23,12 @@ class Reference
       };
 
   private:
-    Index m_index = index_uninit;
+    Value m_value;
+    rcfwdp<Variable> m_var;
+    rcfwdp<PTC_Arguments> m_ptca;
 
-    struct
-      {
-        Value value;
-        rcfwdp<Variable> var;
-        rcfwdp<PTC_Arguments> ptca;
-        cow_vector<Reference_Modifier> mods;
-      }
-      m_stor;
+    cow_vector<Reference_Modifier> m_mods;
+    Index m_index = index_uninit;
 
   public:
     // Constructors and assignment operators
@@ -41,30 +37,18 @@ class Reference
       { }
 
     Reference(const Reference& other) noexcept
-      : m_index(other.m_index),
-        m_stor(other.m_stor)
-      { }
+      { this->assign(other);  }
 
     Reference(Reference&& other) noexcept
-      : m_index(::std::exchange(other.m_index, index_uninit)),
-        m_stor(::std::move(other.m_stor))
-      { }
+      { this->assign(::std::move(other));  }
 
     Reference&
     operator=(const Reference& other) noexcept
-      {
-        this->m_index = other.m_index;
-        this->m_stor = other.m_stor;
-        return *this;
-      }
+      { return this->assign(other);  }
 
     Reference&
     operator=(Reference&& other) noexcept
-      {
-        this->m_index = ::std::exchange(other.m_index, index_uninit);
-        this->m_stor = ::std::move(other.m_stor);
-        return *this;
-      }
+      { return this->assign(::std::move(other));  }
 
   private:
     const Value&
@@ -112,8 +96,8 @@ class Reference
     Reference&
     set_temporary(XValT&& xval) noexcept
       {
-        this->m_stor.value = ::std::forward<XValT>(xval);
-        this->m_stor.mods.clear();
+        this->m_value = ::std::forward<XValT>(xval);
+        this->m_mods.clear();
         this->m_index = index_temporary;
         return *this;
       }
@@ -127,7 +111,7 @@ class Reference
     get_variable_opt() const noexcept
       {
         return this->is_variable()
-            ? unerase_pointer_cast<Variable>(this->m_stor.var)
+            ? unerase_pointer_cast<Variable>(this->m_var)
             : nullptr;
       }
 
@@ -135,8 +119,8 @@ class Reference
     Reference&
     set_variable(const rcptr<Variable>& var) noexcept
       {
-        this->m_stor.var = var;
-        this->m_stor.mods.clear();
+        this->m_var = var;
+        this->m_mods.clear();
         this->m_index = index_variable;
         return *this;
       }
@@ -150,7 +134,7 @@ class Reference
     get_ptc_args_opt() const noexcept
       {
         return this->is_ptc_args()
-            ? unerase_pointer_cast<PTC_Arguments>(this->m_stor.ptca)
+            ? unerase_pointer_cast<PTC_Arguments>(this->m_ptca)
             : nullptr;
       }
 
@@ -158,18 +142,54 @@ class Reference
     Reference&
     set_ptc_args(const rcptr<PTC_Arguments>& ptca) noexcept
       {
-        this->m_stor.ptca = ptca;
+        this->m_ptca = ptca;
         this->m_index = index_ptc_args;
+        return *this;
+      }
+
+    Reference&
+    assign(const Reference& other) noexcept
+      {
+        // Note not all fields have to be copied.
+        if(other.m_index == index_temporary) {
+          this->m_value = other.m_value;
+        }
+        else if(other.m_index == index_variable) {
+          this->m_var = other.m_var;
+        }
+        else if(other.m_index == index_ptc_args) {
+          this->m_ptca = other.m_ptca;
+        }
+        this->m_mods = other.m_mods;
+        this->m_index = other.m_index;
+        return *this;
+      }
+
+    Reference&
+    assign(Reference&& other) noexcept
+      {
+        // Note not all fields have to be moved.
+        if(other.m_index == index_temporary) {
+          this->m_value = ::std::move(other.m_value);
+        }
+        else if(other.m_index == index_variable) {
+          this->m_var = ::std::move(other.m_var);
+        }
+        else if(other.m_index == index_ptc_args) {
+          this->m_ptca = ::std::move(other.m_ptca);
+        }
+        this->m_mods = ::std::move(other.m_mods);
+        this->m_index = other.m_index;
         return *this;
       }
 
     Reference&
     swap(Reference& other) noexcept
       {
-        this->m_stor.value.swap(other.m_stor.value);
-        this->m_stor.var.swap(other.m_stor.var);
-        this->m_stor.ptca.swap(other.m_stor.ptca);
-        this->m_stor.mods.swap(other.m_stor.mods);
+        this->m_value.swap(other.m_value);
+        this->m_var.swap(other.m_var);
+        this->m_ptca.swap(other.m_ptca);
+        this->m_mods.swap(other.m_mods);
         ::std::swap(this->m_index, other.m_index);
         return *this;
       }
@@ -183,13 +203,13 @@ class Reference
     // Removing the last modifier shall yield the constant `null`.
     size_t
     count_modifiers() const noexcept
-      { return this->m_stor.mods.size();  }
+      { return this->m_mods.size();  }
 
     Reference&
     push_modifier_array_index(int64_t index)
       {
         Reference_Modifier::S_array_index xmod = { index };
-        this->m_stor.mods.emplace_back(::std::move(xmod));
+        this->m_mods.emplace_back(::std::move(xmod));
         return *this;
       }
 
@@ -197,35 +217,35 @@ class Reference
     push_modifier_object_key(const phsh_string& key)
       {
         Reference_Modifier::S_object_key xmod = { key };
-        this->m_stor.mods.emplace_back(::std::move(xmod));
+        this->m_mods.emplace_back(::std::move(xmod));
         return *this;
       }
 
     Reference&
     push_modifier_array_head()
       {
-        this->m_stor.mods.emplace_back(Reference_Modifier::S_array_head());
+        this->m_mods.emplace_back(Reference_Modifier::S_array_head());
         return *this;
       }
 
     Reference&
     push_modifier_array_tail()
       {
-        this->m_stor.mods.emplace_back(Reference_Modifier::S_array_tail());
+        this->m_mods.emplace_back(Reference_Modifier::S_array_tail());
         return *this;
       }
 
     Reference&
     pop_modifier() noexcept
       {
-        if(ROCKET_EXPECT(this->m_stor.mods.empty())) {
+        if(ROCKET_EXPECT(this->m_mods.empty())) {
           // Set to null.
-          this->m_stor.value = nullopt;
+          this->m_value = nullopt;
           this->m_index = index_temporary;
         }
         else {
           // Drop a modifier.
-          this->m_stor.mods.pop_back();
+          this->m_mods.pop_back();
         }
         return *this;
       }
@@ -235,16 +255,16 @@ class Reference
     ROCKET_FORCED_INLINE_FUNCTION const Value&
     dereference_readonly() const
       {
-        return ROCKET_EXPECT(this->is_temporary() && this->m_stor.mods.empty())
-            ? this->m_stor.value
+        return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
+            ? this->m_value
             : this->do_dereference_readonly_slow();
       }
 
     ROCKET_FORCED_INLINE_FUNCTION Value&
     open_temporary()
       {
-        return ROCKET_EXPECT(this->is_temporary() && this->m_stor.mods.empty())
-            ? this->m_stor.value
+        return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
+            ? this->m_value
             : this->do_mutate_into_temporary_slow();
       }
 
