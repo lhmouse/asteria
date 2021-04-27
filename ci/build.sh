@@ -4,13 +4,13 @@
 export CXX=${CXX:-"g++"}
 export CXXFLAGS='-O2 -g0'
 
-_fail=false
+_fail=1
 
 while test $# -gt 0
 do
   case $1 in
     --disable-make-check )
-      _fail=true
+      _fail=0
       shift 1
       ;;
 
@@ -32,6 +32,5 @@ make -j$(nproc)
 if ! make -j$(nproc) check
 then
   cat ./test-suite.log
-  ${_fail}
-  exit 3
+  exit ${_fail}
 fi
