@@ -1166,8 +1166,8 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     }
     bound_args.emplace_back_uninit() = ::std::move(self);
 
-    self.set_ptc_args(
-      ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(bound_args)));
+    self.set_ptc_args(::rocket::make_refcnt<PTC_Arguments>(
+                          sloc, ptc, target, ::std::move(bound_args)));
 
     // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can then

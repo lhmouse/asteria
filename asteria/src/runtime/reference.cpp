@@ -89,7 +89,7 @@ do_finish_call_slow(Global_Context& global)
       // Unpack all frames recursively.
       // Note that `*this` is overwritten before the wrapped function is called.
       while(this->m_index == index_ptc_args) {
-        ROCKET_ASSERT(this->m_ptca);
+        ROCKET_ASSERT(this->m_ptca.use_count() == 1);
         ptca.reset(static_cast<PTC_Arguments*>(this->m_ptca.release()));
         this->m_index = index_uninit;
 
