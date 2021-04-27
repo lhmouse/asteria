@@ -4,13 +4,13 @@
 export CXX=${CXX:-"g++"}
 export CXXFLAGS='-O2 -g0'
 
-_nocheck=
+_fail=false
 
 while test $# -gt 0
 do
   case $1 in
     --disable-make-check )
-      _nocheck=1
+      _fail=true
       shift 1
       ;;
 
@@ -29,7 +29,9 @@ autoreconf -ifv
 make -j$(nproc)
 
 # test
-if ! test -n "$_nocheck"
+if ! make -j$(nproc) check
 then
-  make -j$(nproc) check || (cat ./test-suite.log; false)
+  cat ./test-suite.log
+  ${_fail}
+  exit 3
 fi
