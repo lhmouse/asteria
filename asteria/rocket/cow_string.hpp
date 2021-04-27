@@ -322,7 +322,7 @@ class basic_cow_string
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(ptr, tlen, (slen - tlen + n) | n);  // note overflow check
+        ptr = sth.reallocate_more(ptr, tpos, (slen - tlen + n) | n);  // note overflow check
 
         // Copy [`tpos+tlen`,`size`] into the new storage.
         // Note the null terminator has to be copied as well.
