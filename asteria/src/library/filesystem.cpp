@@ -432,12 +432,11 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
                         format_errno(errno), path);
       }
       data.erase(insert_pos + nread, data.end());
-      roffset += nread;
-      rlimit -= nread;
-
-      // Check for end of file.
       if(nread == 0)
         break;
+
+      roffset += nread;
+      rlimit -= nread;
     }
     return data;
   }
@@ -489,10 +488,6 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
                         format_errno(errno), path);
       }
       data.erase(data.begin() + nread, data.end());
-      roffset += nread;
-      rlimit -= nread;
-
-      // Check for end of file.
       if(nread == 0)
         break;
 
@@ -502,6 +497,9 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
       stack.emplace_back_uninit().set_temporary(::std::move(data));
       self.set_temporary(nullopt);
       callback.invoke(self, global, ::std::move(stack));
+
+      roffset += nread;
+      rlimit -= nread;
     }
     return roffset - offset.value_or(0);
   }
