@@ -1096,7 +1096,7 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
       ktarg.emplace(jump_target_unspec, scope_xcontinue);
 
     if(!(scfl & ktarg->second))
-      throw Parser_Error(parser_status_break_no_matching_scope, tstrm);
+      throw Parser_Error(parser_status_continue_no_matching_scope, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
