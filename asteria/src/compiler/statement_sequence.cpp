@@ -893,15 +893,15 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, Scope_Flags scfl)
     if(!kpunct)
       throw Parser_Error(parser_status_comma_expected, tstrm);
 
-    auto qmname = do_accept_identifier_opt(tstrm, true);
-    if(!qmname)
+    auto qvname = do_accept_identifier_opt(tstrm, true);
+    if(!qvname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
     if(!kpunct)
       throw Parser_Error(parser_status_arrow_expected, tstrm);
 
-    auto qinit = do_accept_expression_as_rvalue_opt(tstrm);
+    auto qinit = do_accept_expression_opt(tstrm);
     if(!qinit)
       throw Parser_Error(parser_status_expression_expected, tstrm);
 
@@ -913,7 +913,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, Scope_Flags scfl)
     if(!qblock)
       throw Parser_Error(parser_status_statement_expected, tstrm);
 
-    Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qmname),
+    Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qvname),
                                     ::std::move(*qinit), ::std::move(*qblock) };
     return ::std::move(xstmt);
   }
