@@ -1228,15 +1228,11 @@ opt<Statement>
 do_accept_assert_statement_opt(Token_Stream& tstrm)
   {
     // assert-statement ::=
-    //   "assert" negation-opt expression assert-message-opt ";"
+    //   "assert" expression assert-message-opt ";"
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
     if(!qkwrd)
       return nullopt;
-
-    auto kneg = do_accept_negation_opt(tstrm);
-    if(!kneg)
-      kneg.emplace();
 
     auto kexpr = do_accept_expression_as_rvalue_opt(tstrm);
     if(!kexpr)
@@ -1250,8 +1246,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Parser_Error(parser_status_semicolon_expected, tstrm);
 
-    Statement::S_assert xstmt = { ::std::move(sloc), *kneg, ::std::move(*kexpr),
-                                  ::std::move(*kmsg) };
+    Statement::S_assert xstmt = { ::std::move(sloc), ::std::move(*kexpr), ::std::move(*kmsg) };
     return ::std::move(xstmt);
   }
 

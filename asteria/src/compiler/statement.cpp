@@ -534,7 +534,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
 
         // Encode arguments.
-        AIR_Node::S_assert_statement xnode = { altr.sloc, altr.negative, altr.msg };
+        AIR_Node::S_assert_statement xnode = { altr.sloc, altr.msg };
         code.emplace_back(::std::move(xnode));
         return code;
       }

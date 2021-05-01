@@ -189,7 +189,7 @@ reference-specifier-opt ::=
 	"ref" | "->" | ""
 
 assert-statement ::=
-	"assert" negation-opt expression assert-message-opt ";"
+	"assert" expression assert-message-opt ";"
 
 assert-message ::=
 	":" string-literal | ""

@@ -844,14 +844,6 @@ struct Traits_assert_statement
     // `up` is `negative`.
     // `sp` is the source location.
 
-    static AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.negative;
-        return up;
-      }
-
     static Sparam_sloc_text
     make_sparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
       {
@@ -862,11 +854,11 @@ struct Traits_assert_statement
       }
 
     static AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_text& sp)
+    execute(Executive_Context& ctx, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
         // When the assertion succeeds, there is nothing to do.
-        if(ROCKET_EXPECT(ctx.stack().back().dereference_readonly().test() != up.u8v[0]))
+        if(ROCKET_EXPECT(ctx.stack().back().dereference_readonly().test()))
           return air_status_next;
 
         // Throw an exception if the assertion fails.

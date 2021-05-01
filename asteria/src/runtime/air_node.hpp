@@ -96,7 +96,6 @@ class AIR_Node
     struct S_assert_statement
       {
         Source_Location sloc;
-        bool negative;
         cow_string msg;
       };
 
