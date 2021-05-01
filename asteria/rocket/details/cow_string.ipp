@@ -194,7 +194,7 @@ class storage_handle
     size_type
     round_up_capacity(size_type res_arg) const
       {
-        auto cap = this->check_size_add(0, res_arg);
+        size_type cap = this->check_size_add(0, res_arg);
         auto nblk = storage::min_nblk_for_nchar(cap);
         return storage::max_nchar_for_nblk(nblk);
       }
@@ -222,7 +222,7 @@ class storage_handle
       {
         // Calculate the combined length of string (len + add).
         // The first part is copied from `src`. The second part is left uninitialized.
-        auto cap = this->check_size_add(len, add);
+        size_type cap = this->check_size_add(len, add);
 
         // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
         auto nblk = storage::min_nblk_for_nchar(cap);

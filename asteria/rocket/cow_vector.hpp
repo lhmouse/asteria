@@ -454,7 +454,7 @@ class cow_vector
 
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(ptr && (n <= cap - this->size()))) {
           // Append new elements in place.
           for(size_type k = 0;  k < n;  ++k)
@@ -497,7 +497,7 @@ class cow_vector
 
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(dist && ptr && (dist <= cap - this->size()))) {
           // Append new elements in place.
           for(auto it = ::std::move(first);  it != last;  ++it)
@@ -546,7 +546,7 @@ class cow_vector
       {
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(ptr && (this->size() < cap))) {
           // Append the new element in place.
           auto& ref = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);

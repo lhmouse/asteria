@@ -467,7 +467,7 @@ class cow_hashmap
 
         // Check whether the storage is unique and there is enough space.
         auto bkts = this->m_sth.mut_buckets_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         size_type tpos;
         if(ROCKET_EXPECT(dist && bkts && (dist <= cap - this->size()))) {
           // Insert new elements in place.
@@ -533,7 +533,7 @@ class cow_hashmap
       {
         // Check whether the storage is unique and there is enough space.
         auto bkts = this->m_sth.mut_buckets_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         size_type tpos;
         if(ROCKET_EXPECT(bkts && (this->size() < cap))) {
           // Insert the new element in place.

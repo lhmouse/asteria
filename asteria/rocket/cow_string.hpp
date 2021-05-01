@@ -695,7 +695,7 @@ class basic_cow_string
         // If the storage is unique and there is enough space, append the string in place.
         // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(ptr && (cap >= this->size()) && (n <= cap - this->size()))) {
           ptr += this->size();
 
@@ -733,7 +733,7 @@ class basic_cow_string
         // If the storage is unique and there is enough space, append the string in place.
         // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(ptr && (cap >= this->size()) && (n <= cap - this->size()))) {
           ptr += this->size();
 
@@ -793,7 +793,7 @@ class basic_cow_string
         // If the storage is unique and there is enough space, append the string in place.
         // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(dist && ptr && (cap >= this->size()) && (dist <= cap - this->size()))) {
           ptr += this->size();
 
@@ -851,7 +851,7 @@ class basic_cow_string
         // If the storage is unique and there is enough space, append the string in place.
         // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
-        auto cap = this->capacity();
+        size_type cap = this->capacity();
         if(ROCKET_EXPECT(ptr && (cap > this->size()))) {
           ptr += this->size();
 

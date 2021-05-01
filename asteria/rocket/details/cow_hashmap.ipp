@@ -494,7 +494,7 @@ class storage_handle
     size_type
     round_up_capacity(size_type res_arg) const
       {
-        auto cap = this->check_size_add(0, res_arg);
+        size_type cap = this->check_size_add(0, res_arg);
         auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
         return storage::max_nbkt_for_nblk(nblk) / max_load_factor_reciprocal;
       }
@@ -646,7 +646,7 @@ class storage_handle
         // Calculate the combined length of hashmap (sth.size() + add).
         // The first part is copied/moved from `sth`. The second part is left uninitialized.
         auto len = sth.size();
-        auto cap = this->check_size_add(len, add);
+        size_type cap = this->check_size_add(len, add);
 
         // Allocate an array of `storage` large enough for a header + `cap` instances of `bucket_type`.
         auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);

@@ -96,7 +96,7 @@ class basic_storage
                 static_cast<long long>(nused), static_cast<long long>(nadd),
                 static_cast<long long>(nmax));
 
-          auto cap_new = (nused + nadd) | 0x1000;
+          size_type cap_new = (nused + nadd) | 0x1000;
           auto ptr_new = allocator_traits<allocator_type>::allocate(*this, cap_new);
           auto pbuf_new = noadl::unfancy(ptr_new);
 #ifdef ROCKET_DEBUG
