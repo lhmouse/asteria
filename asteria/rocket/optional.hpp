@@ -160,8 +160,7 @@ class optional
       }
 
   private:
-    [[noreturn]] ROCKET_NOINLINE
-    reference
+    [[noreturn]] ROCKET_NOINLINE reference
     do_throw_valueless() const
       {
         noadl::sprintf_and_throw<length_error>("variant: no value set");

@@ -139,8 +139,7 @@ class cow_vector
         return *this;
       }
 
-    [[noreturn]] ROCKET_NOINLINE
-    void
+    [[noreturn]] ROCKET_NOINLINE void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>("cow_vector: subscript out of range (`%llu` %s `%llu`)",
@@ -290,7 +289,6 @@ class cow_vector
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     reserve(size_type res_arg)
       {
@@ -314,7 +312,6 @@ class cow_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     shrink_to_fit()
       {
@@ -570,7 +567,6 @@ class cow_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     push_back(const value_type& value)
       {
@@ -579,7 +575,6 @@ class cow_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     push_back(value_type&& value)
       {
@@ -588,7 +583,6 @@ class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     insert(size_type tpos, const value_type& value)
       {
@@ -602,7 +596,6 @@ class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     insert(size_type tpos, value_type&& value)
       {
@@ -631,7 +624,6 @@ class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     insert(size_type tpos, initializer_list<value_type> init)
       {
@@ -659,7 +651,6 @@ class cow_vector
         return *this;
       }
 
-    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, const value_type& value)
       {
@@ -672,7 +663,6 @@ class cow_vector
         return iterator(ptr - tpos, tpos, this->size());
       }
 
-    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, value_type&& value)
       {
@@ -700,7 +690,6 @@ class cow_vector
         return iterator(ptr - tpos, tpos, this->size());
       }
 
-    ROCKET_NOINLINE
     iterator
     insert(const_iterator tins, initializer_list<value_type> init)
       {
@@ -728,7 +717,6 @@ class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    ROCKET_NOINLINE
     cow_vector&
     erase(size_type tpos, size_type tn = size_type(-1))
       {
@@ -738,7 +726,6 @@ class cow_vector
         return *this;
       }
 
-    ROCKET_NOINLINE
     iterator
     erase(const_iterator first, const_iterator last)
       {
@@ -750,7 +737,6 @@ class cow_vector
         return iterator(ptr - tpos, tpos, this->size());
       }
 
-    ROCKET_NOINLINE
     iterator
     erase(const_iterator pos)
       {

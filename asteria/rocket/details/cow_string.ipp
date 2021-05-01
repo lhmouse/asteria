@@ -217,8 +217,7 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_NOINLINE
-    value_type*
+    ROCKET_NOINLINE value_type*
     reallocate_more(const value_type* src, size_type len, size_type add)
       {
         // Calculate the combined length of string (len + add).

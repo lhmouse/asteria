@@ -196,8 +196,7 @@ class cow_hashmap
         return *this;
       }
 
-    [[noreturn]] ROCKET_NOINLINE
-    void
+    [[noreturn]] ROCKET_NOINLINE void
     do_throw_key_not_found(const details_cow_hashmap::stringified_key& skey) const
       {
         noadl::sprintf_and_throw<out_of_range>("cow_hashmap: key not found (key `%s`)",
@@ -329,7 +328,6 @@ class cow_hashmap
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_hashmap&
     reserve(size_type res_arg)
       {
@@ -354,7 +352,6 @@ class cow_hashmap
       }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_hashmap&
     shrink_to_fit()
       {
@@ -418,7 +415,6 @@ class cow_hashmap
       { return 1.0 / storage_handle::max_load_factor_reciprocal;  }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_hashmap&
     rehash(size_type n)
       {
@@ -442,20 +438,17 @@ class cow_hashmap
     // 26.5.4.4, modifiers
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename ymappedT>
-    ROCKET_NOINLINE
     pair<iterator, bool>
     insert(const pair<ykeyT, ymappedT>& value)
       { return this->try_emplace(value.first, value.second);  }
 
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename ymappedT>
-    ROCKET_NOINLINE
     pair<iterator, bool>
     insert(pair<ykeyT, ymappedT>&& value)
       { return this->try_emplace(::std::move(value.first), ::std::move(value.second));  }
 
     // N.B. The return type is a non-standard extension.
-    ROCKET_NOINLINE
     cow_hashmap&
     insert(initializer_list<value_type> init)
       { return this->insert(init.begin(), init.end());  }
@@ -615,7 +608,6 @@ class cow_hashmap
       }
 
     // N.B. This function may throw `std::bad_alloc`.
-    ROCKET_NOINLINE
     iterator
     erase(const_iterator first, const_iterator last)
       {
@@ -628,7 +620,6 @@ class cow_hashmap
       }
 
     // N.B. This function may throw `std::bad_alloc`.
-    ROCKET_NOINLINE
     iterator
     erase(const_iterator pos)
       {

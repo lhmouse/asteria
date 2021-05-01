@@ -374,8 +374,7 @@ class storage_handle
           this->pop_back_unchecked();
       }
 
-    ROCKET_NOINLINE
-    value_type*
+    ROCKET_NOINLINE value_type*
     reallocate_clone(storage_handle& sth)
       {
         // Get the number of existent elements.
@@ -406,8 +405,7 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_NOINLINE
-    value_type*
+    ROCKET_NOINLINE value_type*
     reallocate_prepare(storage_handle& sth, size_type skip, size_type add)
       {
         // Calculate the combined length of vector (sth.size() + add).

@@ -8,8 +8,7 @@
 namespace rocket {
 
 // `report_assertion_failure()` is always provided even when assertions are disabled.
-[[noreturn]]
-void
+[[noreturn]] void
 report_assertion_failure(const char* expr, const char* file, long line, const char* msg) noexcept;
 
 #ifdef ROCKET_DEBUG

@@ -255,8 +255,7 @@ class variant
       }
 
   private:
-    [[noreturn]] ROCKET_NOINLINE
-    void
+    [[noreturn]] ROCKET_NOINLINE void
     do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
         noadl::sprintf_and_throw<invalid_argument>(

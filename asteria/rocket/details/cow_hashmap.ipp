@@ -609,8 +609,7 @@ class storage_handle
           });
       }
 
-    ROCKET_NOINLINE
-    bucket_type*
+    ROCKET_NOINLINE bucket_type*
     reallocate_clone(storage_handle& sth)
       {
         // Get the number of existent elements.
@@ -641,8 +640,7 @@ class storage_handle
         return qstor->bkts;
       }
 
-    ROCKET_NOINLINE
-    bucket_type*
+    ROCKET_NOINLINE bucket_type*
     reallocate_reserve(storage_handle& sth, bool finish, size_type add)
       {
         // Calculate the combined length of hashmap (sth.size() + add).
