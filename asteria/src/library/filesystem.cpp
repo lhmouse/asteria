@@ -405,15 +405,16 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
     V_string data;
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = limit.value_or(INT64_MAX);
+    size_t nbatch = 0x100000;  // 1MiB
 
     for(;;) {
       // Don't read too many bytes at a time.
       if(rlimit <= 0)
         break;
 
-      ::ssize_t nread;
-      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
+      nbatch = ::std::min(nbatch * 15, ::rocket::clamp_cast<size_t>(rlimit, 0, INT_MAX));
       auto insert_pos = data.insert(data.end(), nbatch, '/');
+      ::ssize_t nread;
 
       if(offset) {
         // Use `roffset`. The file must be seekable in this case.
@@ -461,15 +462,16 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
     V_string data;
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = limit.value_or(INT64_MAX);
+    size_t nbatch = 0x100000;  // 1MiB
 
     for(;;) {
       // Don't read too many bytes at a time.
       if(rlimit <= 0)
         break;
 
-      ::ssize_t nread;
-      size_t nbatch = static_cast<size_t>(::rocket::min(rlimit, 0x100000));
+      nbatch = ::std::min(nbatch * 15, ::rocket::clamp_cast<size_t>(rlimit, 0, INT_MAX));
       data.resize(nbatch, '/');
+      ::ssize_t nread;
 
       if(offset) {
         // Use `roffset`. The file must be seekable in this case.
