@@ -122,8 +122,7 @@ class basic_tinybuf
     // * Synchronizes the get and put areas with the external device.
     // * Throws an exception on failure.
     virtual basic_tinybuf&
-    do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/,
-             char_type*& /*pcur*/, char_type*& /*pend*/)
+    do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/, char_type*& /*pcur*/, char_type*& /*pend*/)
       {
         // The default implementation does nothing.
         return *this;
@@ -157,10 +156,9 @@ class basic_tinybuf
     // * Throws an exception on failure.
     // This function may reallocate the put area as needed.
     virtual basic_tinybuf&
-    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
-                const char_type* /*sadd*/, size_type /*nadd*/)
+    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
       {
-       // The default implementation always fails.
+        // The default implementation always fails.
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
       }
 

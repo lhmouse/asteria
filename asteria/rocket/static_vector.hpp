@@ -136,9 +136,9 @@ class static_vector
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
-                   "static_vector: Subscript out of range (`%llu` %s `%llu`)",
-                   static_cast<unsigned long long>(pos), rel,
-                   static_cast<unsigned long long>(this->size()));
+              "static_vector: subscript out of range (`%llu` %s `%llu`)",
+              static_cast<unsigned long long>(pos), rel,
+              static_cast<unsigned long long>(this->size()));
       }
 
     // This function works the same way as `substr()`.
@@ -609,7 +609,7 @@ class static_vector
     iterator
     erase(const_iterator first, const_iterator last)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 

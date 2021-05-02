@@ -41,8 +41,8 @@ class refcnt_base
     do_throw_bad_cast(const type_info& to, const type_info& from) const
       {
         noadl::sprintf_and_throw<domain_error>(
-            "refcnt_base: Bad dynamic cast to type `%s` from type `%s`",
-            to.name(), from.name());
+              "refcnt_base: bad dynamic cast to type `%s` from type `%s`",
+              to.name(), from.name());
       }
 
   public:

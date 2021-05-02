@@ -48,9 +48,10 @@ class array
     [[noreturn]] ROCKET_NOINLINE void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
-        noadl::sprintf_and_throw<out_of_range>("array: subscript out of range (`%llu` %s `%llu`)",
-                                               static_cast<unsigned long long>(pos), rel,
-                                               static_cast<unsigned long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>(
+              "array: subscript out of range (`%llu` %s `%llu`)",
+              static_cast<unsigned long long>(pos), rel,
+              static_cast<unsigned long long>(this->size()));
       }
 
   public:

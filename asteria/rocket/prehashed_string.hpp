@@ -17,7 +17,7 @@ template<typename stringT, typename hashT, typename eqT>
 class basic_prehashed_string
   {
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const stringT&>())),
-                  "Hash operations must not throw exceptions");
+                  "hash operations must not throw exceptions");
 
   public:
     // types

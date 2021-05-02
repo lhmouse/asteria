@@ -257,9 +257,10 @@ class basic_cow_string
     [[noreturn]] ROCKET_NOINLINE void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_string: subscript out of range (`%llu` %s `%llu`)",
-                                               static_cast<unsigned long long>(pos), rel,
-                                               static_cast<unsigned long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>(
+              "cow_string: subscript out of range (`%llu` %s `%llu`)",
+              static_cast<unsigned long long>(pos), rel,
+              static_cast<unsigned long long>(this->size()));
       }
 
     // This function works the same way as `substr()`.
@@ -894,7 +895,7 @@ class basic_cow_string
     iterator
     erase(const_iterator first, const_iterator last)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -917,7 +918,7 @@ class basic_cow_string
     basic_cow_string&
     pop_back(size_type n = 1)
       {
-        ROCKET_ASSERT_MSG(n <= this->size(), "No enough characters to pop");
+        ROCKET_ASSERT_MSG(n <= this->size(), "no enough characters to pop");
         auto ptr = this->mut_data();
         this->m_len -= n;
         traits_type::assign(ptr[this->m_len], value_type());
@@ -1199,7 +1200,7 @@ class basic_cow_string
     replace(const_iterator first, const_iterator last, const basic_cow_string& other,
             size_type pos = 0, size_type n = npos)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1213,7 +1214,7 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator first, const_iterator last, const value_type* s, size_type n)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1227,7 +1228,7 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator first, const_iterator last, const value_type* s)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1241,7 +1242,7 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator first, const_iterator last, size_type n, value_type ch)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1254,7 +1255,7 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator first, const_iterator last, initializer_list<value_type> init)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1269,7 +1270,7 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator first, const_iterator last, inputT ofirst, inputT olast)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1284,7 +1285,7 @@ class basic_cow_string
     basic_cow_string&
     replace(const_iterator first, const_iterator last, value_type ch)
       {
-        ROCKET_ASSERT_MSG(first <= last, "Invalid range");
+        ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
@@ -1327,10 +1328,11 @@ class basic_cow_string
     safe_c_str() const
       {
         size_type clen = traits_type::length(this->m_ptr);
-        if(clen != this->m_len)
+        if(clen != this->m_len) {
           noadl::sprintf_and_throw<domain_error>(
-              "cow_string: Embedded null character detected (at `%llu`)",
-              static_cast<unsigned long long>(clen));
+                "cow_string: embedded null character detected (at `%llu`)",
+                static_cast<unsigned long long>(clen));
+        }
         return this->m_ptr;
       }
 

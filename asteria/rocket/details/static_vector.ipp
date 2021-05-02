@@ -94,9 +94,9 @@ class storage_handle
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add) {
           noadl::sprintf_and_throw<length_error>(
-              "static_vector: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-              static_cast<long long>(base), static_cast<long long>(add),
-              static_cast<long long>(nmax));
+                "static_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                static_cast<long long>(base), static_cast<long long>(add),
+                static_cast<long long>(nmax));
         }
         return base + add;
       }
@@ -117,7 +117,7 @@ class storage_handle
     value_type&
     emplace_back_unchecked(paramsT&&... params)
       {
-        ROCKET_ASSERT_MSG(this->m_nelem < this->capacity(), "No space for new elements");
+        ROCKET_ASSERT_MSG(this->m_nelem < this->capacity(), "no space for new elements");
 
         size_t off = this->m_nelem;
         allocator_traits<allocator_type>::construct(*this, this->m_data + off,
@@ -130,7 +130,7 @@ class storage_handle
     void
     pop_back_unchecked() noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_nelem > 0, "No element to pop");
+        ROCKET_ASSERT_MSG(this->m_nelem > 0, "no element to pop");
 
         size_t off = this->m_nelem - size_t(1);
         this->m_nelem = static_cast<nelem_type>(off);
@@ -283,9 +283,9 @@ class vector_iterator
     valueT*
     do_validate(valueT* cur, bool deref) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
-        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "iterator out of range");
+        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "past-the-end iterator not dereferenceable");
         return cur;
       }
 
@@ -357,9 +357,9 @@ class vector_iterator
     difference_type
     operator-(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
-        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "Iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "iterator not compatible");
         return this->m_cur - other.m_cur;
       }
 

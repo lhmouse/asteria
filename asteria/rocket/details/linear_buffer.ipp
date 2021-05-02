@@ -92,9 +92,9 @@ class basic_storage
           auto nmax = this->max_size();
           if(nmax - nused < nadd)
             noadl::sprintf_and_throw<length_error>(
-                "linear_buffer: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-                static_cast<long long>(nused), static_cast<long long>(nadd),
-                static_cast<long long>(nmax));
+                  "linear_buffer: Max size exceeded (`%lld` + `%lld` > `%lld`)",
+                  static_cast<long long>(nused), static_cast<long long>(nadd),
+                  static_cast<long long>(nmax));
 
           size_type cap_new = (nused + nadd) | 0x1000;
           auto ptr_new = allocator_traits<allocator_type>::allocate(*this, cap_new);

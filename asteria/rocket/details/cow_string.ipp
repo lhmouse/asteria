@@ -184,9 +184,9 @@ class storage_handle
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add) {
           noadl::sprintf_and_throw<length_error>(
-              "cow_string: Max size exceeded (`%lld` + `%lld` > `%lld`)",
-              static_cast<long long>(base), static_cast<long long>(add),
-              static_cast<long long>(nmax));
+                "cow_string: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                static_cast<long long>(base), static_cast<long long>(add),
+                static_cast<long long>(nmax));
         }
         return base + add;
       }
@@ -403,9 +403,9 @@ class string_iterator
     charT*
     do_validate(charT* cur, bool deref) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
-        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "iterator out of range");
+        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "past-the-end iterator not dereferenceable");
         return cur;
       }
 
@@ -477,9 +477,9 @@ class string_iterator
     difference_type
     operator-(const string_iterator<stringT, ycharT>& other) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
-        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "Iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "iterator not compatible");
         return this->m_cur - other.m_cur;
       }
 

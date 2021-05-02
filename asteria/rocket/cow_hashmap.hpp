@@ -42,9 +42,9 @@ class cow_hashmap
     static_assert(!is_array<keyT>::value, "invalid key type");
     static_assert(!is_array<mappedT>::value, "invalid mapped value type");
     static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
-                  "Inappropriate allocator type");
+                  "inappropriate allocator type");
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
-                  "Hash operations must not throw exceptions");
+                  "hash operations must not throw exceptions");
 
   public:
     // types
@@ -199,8 +199,9 @@ class cow_hashmap
     [[noreturn]] ROCKET_NOINLINE void
     do_throw_key_not_found(const details_cow_hashmap::stringified_key& skey) const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: key not found (key `%s`)",
-                                               skey.c_str());
+        noadl::sprintf_and_throw<out_of_range>(
+              "cow_hashmap: key not found (key `%s`)",
+              skey.c_str());
       }
 
     const bucket_type*
@@ -611,7 +612,7 @@ class cow_hashmap
     iterator
     erase(const_iterator first, const_iterator last)
       {
-        ROCKET_ASSERT_MSG(first.m_cur <= last.m_cur, "Invalid range");
+        ROCKET_ASSERT_MSG(first.m_cur <= last.m_cur, "invalid range");
         size_type tpos = static_cast<size_type>(first.do_this_pos(this->do_buckets()));
         size_type tlen = static_cast<size_type>(last.do_this_len(first));
 

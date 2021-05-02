@@ -218,7 +218,7 @@ struct basic_storage
     adopt_value_unchecked(pointer qval) noexcept
       {
         ROCKET_ASSERT(qval);
-        ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
 
         // Get table bounds.
         auto bptr = this->bkts;
@@ -241,7 +241,7 @@ struct basic_storage
       {
         ROCKET_ASSERT(!this->bkts[k]);
         ROCKET_ASSERT(qval);
-        ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
 
         // Insert the value into this bucket.
         this->bkts[k].exchange(qval);
@@ -253,7 +253,7 @@ struct basic_storage
     pointer
     extract_value_opt(size_t k) noexcept
       {
-        ROCKET_ASSERT_MSG(this->nref.unique(), "Shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
 
         // Try extracting an element.
         auto qval = this->bkts[k].exchange(nullptr);
@@ -274,8 +274,9 @@ struct storage_traits
                    bool,            // 2. cloning?
                    storage_type&, const storage_type&)
       {
-        noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` not copy-constructible",
-                                               typeid(value_type).name());
+        noadl::sprintf_and_throw<domain_error>(
+              "cow_hashmap: `%s` not copy-constructible",
+              typeid(value_type).name());
       }
 
     static void
@@ -562,9 +563,9 @@ class storage_handle
     keyed_try_emplace(size_type& tpos, const ykeyT& ykey, paramsT&&... params)
       {
         auto qstor = this->m_qstor;
-        ROCKET_ASSERT_MSG(qstor, "No storage allocated");
-        ROCKET_ASSERT_MSG(qstor->nref.unique(), "Shared storage shall not be modified");
-        ROCKET_ASSERT_MSG(qstor->nelem < this->capacity(), "No space for new elements");
+        ROCKET_ASSERT_MSG(qstor, "no storage allocated");
+        ROCKET_ASSERT_MSG(qstor->nref.unique(), "shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(qstor->nelem < this->capacity(), "no space for new elements");
 
         // Check whether the key exists already.
         if(this->find(tpos, ykey))
@@ -580,8 +581,8 @@ class storage_handle
     erase_range_unchecked(size_type tpos, size_type tlen) noexcept
       {
         auto qstor = this->m_qstor;
-        ROCKET_ASSERT_MSG(qstor, "No storage allocated");
-        ROCKET_ASSERT_MSG(qstor->nref.unique(), "Shared storage shall not be modified");
+        ROCKET_ASSERT_MSG(qstor, "no storage allocated");
+        ROCKET_ASSERT_MSG(qstor->nref.unique(), "shared storage shall not be modified");
 
         if(tlen == 0)
           return;
@@ -834,37 +835,37 @@ class hashmap_iterator
     bucketT*
     do_validate(bucketT* cur, bool deref) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "Iterator out of range");
-        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "Past-the-end iterator not dereferenceable");
-        ROCKET_ASSERT_MSG(!deref || *cur, "Iterator invalidated");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "iterator out of range");
+        ROCKET_ASSERT_MSG(!deref || (cur < this->m_end), "past-the-end iterator not dereferenceable");
+        ROCKET_ASSERT_MSG(!deref || *cur, "iterator invalidated");
         return cur;
       }
 
     difference_type
     do_this_pos(const bucketT* begin) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG(this->m_begin == begin, "Iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == begin, "iterator not compatible");
         return this->do_validate(this->m_cur, false) - begin;
       }
 
     difference_type
     do_this_len(const hashmap_iterator& other) const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
-        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "Iterator not compatible");
-        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "Iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
+        ROCKET_ASSERT_MSG(this->m_end == other.m_end, "iterator not compatible");
         return this->do_validate(this->m_cur, false) - other.m_cur;
       }
 
     hashmap_iterator
     do_next() const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         auto res = *this;
         do {
-          ROCKET_ASSERT_MSG(res.m_cur != this->m_end, "Past-the-end iterator not incrementable");
+          ROCKET_ASSERT_MSG(res.m_cur != this->m_end, "past-the-end iterator not incrementable");
           res.m_cur++;
         }
         while((res.m_cur != this->m_end) && !*(res.m_cur));
@@ -874,10 +875,10 @@ class hashmap_iterator
     hashmap_iterator
     do_prev() const noexcept
       {
-        ROCKET_ASSERT_MSG(this->m_begin, "Iterator not initialized");
+        ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         auto res = *this;
         do {
-          ROCKET_ASSERT_MSG(res.m_cur != this->m_begin, "Beginning iterator not decrementable");
+          ROCKET_ASSERT_MSG(res.m_cur != this->m_begin, "beginning iterator not decrementable");
           res.m_cur--;
         }
         while(!*(res.m_cur));

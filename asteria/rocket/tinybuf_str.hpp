@@ -100,19 +100,22 @@ class basic_tinybuf_str
         this->do_sync_areas();
 
         // Get the seek reference offset.
-        size_type ref;
+        size_type ref = this->m_goff;
+
         if(dir == tinybuf_type::seek_set)
           ref = 0;
-        else if(dir == tinybuf_type::seek_end)
+
+        if(dir == tinybuf_type::seek_end)
           ref = this->m_stor.size();
-        else
-          ref = this->m_goff;
 
         // Perform range checks.
         if(off < static_cast<off_type>(-ref))
-          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek to a negative offset");
+          noadl::sprintf_and_throw<out_of_range>(
+                "tinybuf_str: attempt to seek to a negative offset");
+
         if(off > static_cast<off_type>(this->m_stor.size() - ref))
-          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek past the end");
+          noadl::sprintf_and_throw<out_of_range>(
+                "tinybuf_str: attempt to seek past the end");
 
         // Convert the relative offset to an absolute one and set it.
         off_type abs = static_cast<off_type>(ref) + off;

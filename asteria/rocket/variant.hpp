@@ -21,7 +21,7 @@ class variant
   {
     static_assert(sizeof...(altsT) > 0, "no alternative types provided");
     static_assert(conjunction<is_nothrow_move_constructible<altsT>...>::value,
-                  "Move constructors of alternative types must not throw exceptions");
+                  "move constructors of alternative types must not throw exceptions");
 
   public:
     template<typename targetT>
@@ -259,9 +259,9 @@ class variant
     do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
         noadl::sprintf_and_throw<invalid_argument>(
-            "variant: Index mismatch (expecting `%d` [`%s`], got `%d` [`%s`]).",
-            static_cast<int>(yindex), ytype.name(),
-            static_cast<int>(this->index()), this->type().name());
+              "variant: Index mismatch (expecting `%d` [`%s`], got `%d` [`%s`]).",
+              static_cast<int>(yindex), ytype.name(),
+              static_cast<int>(this->index()), this->type().name());
       }
 
   public:

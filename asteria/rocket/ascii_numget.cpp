@@ -74,7 +74,8 @@ do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
 
       default:
         sprintf_and_throw<invalid_argument>(
-            "ascii_numget: Invalid radix (`%d` not 2, 10 or 16)", ibase);
+              "ascii_numget: invalid radix (`%d` not 2, 10 or 16)",
+              ibase);
     }
   }
 
@@ -1554,7 +1555,7 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
           }
 
           default:
-            ROCKET_ASSERT_MSG(false, "Non-decimal floating-point parsing not implemented");
+            ROCKET_ASSERT_MSG(false, "non-decimal floating-point parsing not implemented");
         }
 
         // Examine the value. Note that `ireg` is non-zero.
