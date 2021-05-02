@@ -164,30 +164,21 @@ class cow_vector
     value_type*
     do_swizzle_unchecked(size_type tpos, size_type kpos)
       {
-        // Get a pointer to mutable storage.
-        auto ptr = this->mut_data() + tpos;
-        size_type klen = kpos - tpos;
-        size_type slen = this->size() - tpos;
-
-        // Swap the intervals [`tpos`,`kpos`) and [`kpos`,`size`).
-        noadl::rotate(ptr, 0, klen, slen);
-        return ptr;
+        // Swap the intervals [`tpos+tlen`,`kpos`) and [`kpos`,`size`).
+        auto ptr = this->mut_data();
+        noadl::rotate(ptr, tpos, kpos, this->size());
+        return ptr + tpos;
       }
 
     // This function is used to implement `erase()`.
     value_type*
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        // Get a pointer to mutable storage.
-        auto ptr = this->mut_data() + tpos;
-        size_type slen = this->size() - tpos;
-
         // Swap the intervals [`tpos`,`tpos+tlen`) and [`tpos+tlen`,`size`).
-        noadl::rotate(ptr, 0, tlen, slen);
-
-        // Purge unwanted elements.
+        auto ptr = this->mut_data();
+        noadl::rotate(ptr, tpos, tpos + tlen, this->size());
         this->m_sth.pop_back_unchecked(tlen);
-        return ptr;
+        return ptr + tpos;
       }
 
   public:
