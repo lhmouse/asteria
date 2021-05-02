@@ -456,18 +456,16 @@ class cow_vector
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
-        if(ROCKET_EXPECT(ptr && (n <= cap - this->size()))) {
-          // Append new elements in place.
+        size_type len = this->size();
+        if(ROCKET_EXPECT(ptr && (n <= cap - len))) {
           for(size_type k = 0;  k < n;  ++k)
             this->m_sth.emplace_back_unchecked(params...);
-
-          // The return type aligns with `std::string::append()`.
           return *this;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_prepare(this->m_sth, this->size(), n | cap / 2);
+        ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
 
         // Append new elements to the new storage.
         for(size_type k = 0;  k < n;  ++k)
@@ -499,20 +497,18 @@ class cow_vector
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
-        if(ROCKET_EXPECT(dist && ptr && (dist <= cap - this->size()))) {
-          // Append new elements in place.
+        size_type len = this->size();
+        if(ROCKET_EXPECT(dist && (dist == n) && ptr && (dist <= cap - len))) {
           for(auto it = ::std::move(first);  it != last;  ++it)
             this->m_sth.emplace_back_unchecked(*it);
-
-          // The return type aligns with `std::string::append()`.
           return *this;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        if(ROCKET_EXPECT(n && (n == dist))) {
+        if(ROCKET_EXPECT(dist && (dist == n))) {
           // The length is known.
-          ptr = sth.reallocate_prepare(this->m_sth, this->size(), n | cap / 2);
+          ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
 
           // Append new elements to the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it)
@@ -520,14 +516,13 @@ class cow_vector
         }
         else {
           // The length is not known.
-          ptr = sth.reallocate_prepare(this->m_sth, this->size(), 17 | cap / 2);
+          ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
           cap = sth.capacity();
 
-          // Append new elements to the new storage.
+          // Reallocate the storage if necessary.
           for(auto it = ::std::move(first);  it != last;  ++it) {
-            // Reallocate the storage if necessary.
             if(ROCKET_UNEXPECT(sth.size() >= cap)) {
-              ptr = sth.reallocate_prepare(sth, this->size(), cap / 2);
+              ptr = sth.reallocate_prepare(sth, len, cap / 2);
               cap = sth.capacity();
             }
             sth.emplace_back_unchecked(*it);
@@ -548,7 +543,8 @@ class cow_vector
         // Check whether the storage is unique and there is enough space.
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
-        if(ROCKET_EXPECT(ptr && (this->size() < cap))) {
+        size_type len = this->size();
+        if(ROCKET_EXPECT(ptr && (len < cap))) {
           // Append the new element in place.
           auto& ref = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
           return ref;
@@ -556,7 +552,7 @@ class cow_vector
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_prepare(this->m_sth, this->size(), 17 | cap / 2);
+        ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
 
         // Append the new element to the new storage.
         auto& ref = sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
