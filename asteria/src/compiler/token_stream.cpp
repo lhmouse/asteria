@@ -123,7 +123,12 @@ class Line_Reader
     const phsh_string&
     cache_string(cow_string&& val)
       {
-        return this->m_csc_cache.try_emplace(::std::move(val)).first->first;
+        auto it = this->m_csc_cache.find(val);
+        if(it == this->m_csc_cache.end()) {
+          val.shrink_to_fit();
+          it = this->m_csc_cache.try_emplace(::std::move(val)).first;
+        }
+        return it->first;
       }
   };
 
