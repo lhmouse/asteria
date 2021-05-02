@@ -498,7 +498,7 @@ class cow_vector
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
         size_type len = this->size();
-        if(ROCKET_EXPECT(dist && (dist == n) && ptr && (dist <= cap - len))) {
+        if(ROCKET_EXPECT(dist && (dist == n) && ptr && (n <= cap - len))) {
           for(auto it = ::std::move(first);  it != last;  ++it)
             this->m_sth.emplace_back_unchecked(*it);
           return *this;
