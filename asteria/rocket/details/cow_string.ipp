@@ -242,7 +242,7 @@ class storage_handle
 
         // Set up the new storage.
         this->do_reset(qstor);
-        return qstor->data + len;
+        return qstor->data;
       }
 
     void

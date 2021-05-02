@@ -279,23 +279,18 @@ class basic_cow_string
     value_type*
     do_swizzle_unchecked(size_type tpos, size_type tlen, size_type kpos)
       {
-        // Get a pointer to mutable storage.
-        auto ptr = this->mut_data() + tpos;
-        size_type klen = kpos - tpos;
-        size_type slen = this->size() - tpos;
-
-        // Swap the intervals [`tpos+tlen`,`kpos`) and [`kpos`,`size`).
-        noadl::rotate(ptr, tlen, klen, slen);
-
-        // If no relocation is necessary, return.
-        if(tlen == 0)
-          return ptr;
+        // Swap the intervals [`tpos+tlen`,`kpos`) and [`kpos`,`len`).
+        auto ptr = this->mut_data();
+        size_type len = this->size();
+        noadl::rotate(ptr, tpos + tlen, kpos, len);
 
         // Erase the interval [`tpos`,`tpos+tlen`).
         // Note the null terminator has to be copied as well.
-        traits_type::move(ptr, ptr + tlen, slen + 1 - tlen);
-        this->m_len -= tlen;
-        return ptr;
+        if(tlen != 0) {
+          traits_type::move(ptr + tpos, ptr + tpos + tlen, len + 1 - tpos - tlen);
+          this->m_len -= tlen;
+        }
+        return ptr + tpos;
       }
 
     // This function is used to implement `replace()` if the replacement cannot alias `*this`.
@@ -303,35 +298,35 @@ class basic_cow_string
     value_type*
     do_reserve_divide_unchecked(size_type tpos, size_type tlen, size_type n)
       {
-        // Get a pointer to mutable storage.
-        auto ptr = this->mut_data() + tpos;
-        size_type slen = this->size() - tpos;
-
-        // If no relocation is necessary, return.
         if(tlen == n)
-          return ptr;
+          return this->mut_data() + tpos;
 
         // If there is enough space, push [`tpos+tlen`,`size`] by `n-tlen` characters.
         // Note the null terminator has to be copied as well.
-        if(n <= this->capacity() - this->size() + tlen) {
-          traits_type::move(ptr + n, ptr + tlen, slen + 1 - tlen);
-          this->m_len -= tlen - n;
-          return ptr;
+        auto ptr = this->m_sth.mut_data_opt();
+        size_type cap = this->capacity();
+        size_type len = this->size();
+        size_type slen = len - tpos - tlen;
+        if(ROCKET_EXPECT(ptr && (n <= cap - len + tlen))) {
+          traits_type::move(ptr + tpos + n, ptr + tpos + tlen, slen + 1);
+          this->m_ptr = ptr;  // note the storage might be unowned
+          this->m_len += n - tlen;
+          return ptr + tpos;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(ptr - tpos, tpos, (slen - tlen + n) | n);  // note overflow check
+        ptr = sth.reallocate_more(this->data(), tpos, (slen + n) | n | cap / 2);
 
         // Copy [`tpos+tlen`,`size`] into the new storage.
         // Note the null terminator has to be copied as well.
-        traits_type::copy(ptr + n, this->data() + tpos + tlen, slen + 1 - tlen);
+        traits_type::copy(ptr + tpos + n, this->data() + tpos + tlen, slen + 1);
 
         // Set the new storage up.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - tlen - tpos;
-        this->m_len -= tlen - n;
-        return ptr;
+        this->m_ptr = ptr;
+        this->m_len += n - tlen;
+        return ptr + tpos;
       }
 
     // These are generic implementations for `{{,r}find,find_{first,last}{,_not}_of}()` functions.
@@ -378,6 +373,7 @@ class basic_cow_string
           if(cur-- == 0)
             return npos;  // not found;
 
+        // A character has been found so don't return `npos`.
         ROCKET_ASSERT(cur != npos);
         return cur;
       }
@@ -504,7 +500,7 @@ class basic_cow_string
 
         // Set the new storage up. The length is left intact.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - this->m_len;
+        this->m_ptr = ptr;
         return *this;
       }
 
@@ -528,7 +524,7 @@ class basic_cow_string
 
         // Set the new storage up. The length is left intact.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - this->m_len;
+        this->m_ptr = ptr;
         return *this;
       }
 
@@ -694,33 +690,28 @@ class basic_cow_string
           return *this;
 
         // If the storage is unique and there is enough space, append the string in place.
-        // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
-        if(ROCKET_EXPECT(ptr && (cap >= this->size()) && (n <= cap - this->size()))) {
-          ptr += this->size();
-
-          // Copy the string in place.
-          traits_type::copy(ptr, s, n);
-          traits_type::assign(ptr[n], value_type());
-
-          // Increase the length.
-          this->m_ptr = ptr - this->m_len;
+        size_type len = this->size();
+        if(ROCKET_EXPECT(ptr && (n <= cap - len))) {
+          traits_type::copy(ptr + len, s, n);
+          traits_type::assign(*(ptr + len + n), value_type());
+          this->m_ptr = ptr;  // note the storage might be unowned
           this->m_len += n;
           return *this;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
+        ptr = sth.reallocate_more(this->data(), len, n | cap / 2);
 
         // Copy the string.
-        traits_type::copy(ptr, s, n);
-        traits_type::assign(ptr[n], value_type());
+        traits_type::copy(ptr + len, s, n);
+        traits_type::assign(*(ptr + len + n), value_type());
 
         // Set the new storage up and increase the length.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - this->m_len;
+        this->m_ptr = ptr;
         this->m_len += n;
         return *this;
       }
@@ -732,33 +723,28 @@ class basic_cow_string
           return *this;
 
         // If the storage is unique and there is enough space, append the string in place.
-        // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
-        if(ROCKET_EXPECT(ptr && (cap >= this->size()) && (n <= cap - this->size()))) {
-          ptr += this->size();
-
-          // Fill characters in place.
-          traits_type::assign(ptr, n, ch);
-          traits_type::assign(ptr[n], value_type());
-
-          // Increase the length.
-          this->m_ptr = ptr - this->m_len;
+        size_type len = this->size();
+        if(ROCKET_EXPECT(ptr && (n <= cap - len))) {
+          traits_type::assign(ptr + len, n, ch);
+          traits_type::assign(*(ptr + len + n), value_type());
+          this->m_ptr = ptr;  // note the storage might be unowned
           this->m_len += n;
           return *this;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
+        ptr = sth.reallocate_more(this->data(), len, n | cap / 2);
 
-        // Fill characters.
-        traits_type::assign(ptr, n, ch);
-        traits_type::assign(ptr[n], value_type());
+        // Copy the string.
+        traits_type::assign(ptr + len, n, ch);
+        traits_type::assign(*(ptr + len + n), value_type());
 
         // Set the new storage up and increase the length.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - this->m_len;
+        this->m_ptr = ptr;
         this->m_len += n;
         return *this;
       }
@@ -792,55 +778,50 @@ class basic_cow_string
         size_type n = static_cast<size_type>(dist);
 
         // If the storage is unique and there is enough space, append the string in place.
-        // Note the string may be unowned, where `cap` would be zero.
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
-        if(ROCKET_EXPECT(dist && ptr && (cap >= this->size()) && (dist <= cap - this->size()))) {
-          ptr += this->size();
-
-          // Append characters in place.
+        size_type len = this->size();
+        if(ROCKET_EXPECT(dist && (dist == n) && ptr && (n <= cap - len))) {
           n = 0;
           for(auto it = ::std::move(first);  it != last;  ++it)
-            traits_type::assign(ptr[n++], *it);
-          traits_type::assign(ptr[n], value_type());
-
-          // Increase the length.
-          this->m_ptr = ptr - this->m_len;
+            traits_type::assign(*(ptr + len + n++), *it);
+          traits_type::assign(*(ptr + len + n), value_type());
+          this->m_ptr = ptr;  // note the storage might be unowned
           this->m_len += n;
           return *this;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
-        if(ROCKET_EXPECT(n && (n == dist))) {
+        if(ROCKET_EXPECT(dist && (dist == n))) {
           // The length is known.
-          ptr = sth.reallocate_more(this->data(), this->size(), n | cap / 2);
+          ptr = sth.reallocate_more(this->data(), len, n | cap / 2);
 
-          // Append characters to the new storage.
+          // Copy the string into the new storage.
           n = 0;
           for(auto it = ::std::move(first);  it != last;  ++it)
-            traits_type::assign(ptr[n++], *it);
+            traits_type::assign(*(ptr + len + n++), *it);
         }
         else {
           // The length is not known.
-          ptr = sth.reallocate_more(this->data(), this->size(), 31 | cap / 2);
+          ptr = sth.reallocate_more(this->data(), len, 31 | cap / 2);
           cap = sth.capacity();
 
-          // Append characters to the new storage.
+          // Reallocate the storage if necessary.
+          n = 0;
           for(auto it = ::std::move(first);  it != last;  ++it) {
-            // Reallocate the storage if necessary.
-            if(ROCKET_UNEXPECT(n >= cap - this->size())) {
-              ptr = sth.reallocate_more(ptr - this->size(), this->size() + n, cap / 2) - n;
+            if(ROCKET_UNEXPECT(len + n >= cap)) {
+              ptr = sth.reallocate_more(ptr, len + n, cap / 2);
               cap = sth.capacity();
             }
-            traits_type::assign(ptr[n++], *it);
+            traits_type::assign(*(ptr + len + n++), *it);
           }
         }
-        traits_type::assign(ptr[n], value_type());
+        traits_type::assign(*(ptr + len + n), value_type());
 
         // Set the new storage up and increase the length.
         this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - this->m_len;
+        this->m_ptr = ptr;
         this->m_len += n;
         return *this;
       }
@@ -849,35 +830,7 @@ class basic_cow_string
     basic_cow_string&
     push_back(value_type ch)
       {
-        // If the storage is unique and there is enough space, append the string in place.
-        // Note the string may be unowned, where `cap` would be zero.
-        auto ptr = this->m_sth.mut_data_opt();
-        size_type cap = this->capacity();
-        if(ROCKET_EXPECT(ptr && (cap > this->size()))) {
-          ptr += this->size();
-
-          // Fill a character in place.
-          traits_type::assign(ptr[0], ch);
-          traits_type::assign(ptr[1], value_type());
-
-          // Increase the length.
-          this->m_ptr = ptr - this->m_len;
-          this->m_len++;
-          return *this;
-        }
-
-        // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator());
-        ptr = sth.reallocate_more(this->data(), this->size(), 31 | cap / 2);
-
-        // Fill a character.
-        traits_type::assign(ptr[0], ch);
-        traits_type::assign(ptr[1], value_type());
-
-        // Set the new storage up and increase the length.
-        this->m_sth.exchange_with(sth);
-        this->m_ptr = ptr - this->m_len;
-        this->m_len++;
+        this->append(size_type(1), ch);
         return *this;
       }
 
@@ -920,8 +873,9 @@ class basic_cow_string
       {
         ROCKET_ASSERT_MSG(n <= this->size(), "no enough characters to pop");
         auto ptr = this->mut_data();
+        size_type len = this->size();
+        traits_type::assign(*(ptr + len - n), value_type());
         this->m_len -= n;
-        traits_type::assign(ptr[this->m_len], value_type());
         return *this;
       }
 
@@ -1350,7 +1304,7 @@ class basic_cow_string
           return const_cast<value_type*>(this->data());
 
         // Reallocate the storage. The length is left intact.
-        ptr = this->m_sth.reallocate_more(this->data(), this->size(), 0) - this->size();
+        ptr = this->m_sth.reallocate_more(this->data(), this->size(), 0);
         this->m_ptr = ptr;
         return ptr;
       }
