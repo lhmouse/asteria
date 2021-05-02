@@ -467,7 +467,7 @@ class cow_vector
         storage_handle sth(this->m_sth.as_allocator());
         ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
 
-        // Append new elements to the new storage.
+        // Append elements to the new storage.
         for(size_type k = 0;  k < n;  ++k)
           sth.emplace_back_unchecked(params...);
         sth.reallocate_finish(this->m_sth);
@@ -510,7 +510,7 @@ class cow_vector
           // The length is known.
           ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
 
-          // Append new elements to the new storage.
+          // Append elements to the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it)
             sth.emplace_back_unchecked(*it);
         }
@@ -545,7 +545,7 @@ class cow_vector
         size_type cap = this->capacity();
         size_type len = this->size();
         if(ROCKET_EXPECT(ptr && (len < cap))) {
-          // Append the new element in place.
+          // Append an element in place.
           auto& ref = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
           return ref;
         }
@@ -554,7 +554,7 @@ class cow_vector
         storage_handle sth(this->m_sth.as_allocator());
         ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
 
-        // Append the new element to the new storage.
+        // Append an element to the new storage.
         auto& ref = sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         sth.reallocate_finish(this->m_sth);
 
