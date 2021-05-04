@@ -21,6 +21,7 @@ class Garbage_Collector final
 
   private:
     static constexpr size_t gMax = generation_oldest;
+    array<size_t, gMax+1> m_counts = { };
     array<size_t, gMax+1> m_thres = { 10, 70, 500 };
     array<Variable_HashSet, gMax+1> m_tracked;
 

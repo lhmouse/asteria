@@ -242,6 +242,10 @@ do_collect_generation(size_t gen)
     s4_reap.tracked = &tracked;
     s4_reap.next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
     this->m_staging.enumerate_variables(s4_reap);
+
+    // Reset the GC counter to zero, only if the operation completes normally
+    // i.e. don't reset it if an exception is thrown.
+    this->m_counts[gMax-gen] = 0;
     return s4_reap.nvars;
   }
 
@@ -251,7 +255,7 @@ create_variable(uint8_t gen_hint)
   {
     // Perform automatic garbage collection.
     for(size_t gen = 0;  gen <= gMax;  ++gen)
-      if(this->m_tracked[gMax-gen].size() >= this->m_thres[gMax-gen])
+      if(this->m_counts[gMax-gen] >= this->m_thres[gMax-gen])
         this->do_collect_generation(gen);
 
     this->m_staging.clear();
@@ -264,7 +268,9 @@ create_variable(uint8_t gen_hint)
       var = ::rocket::make_refcnt<Variable>();
 
     // Track it.
-    this->m_tracked.mut(gMax-gen_hint).insert(var);
+    size_t gen = gMax - gen_hint;
+    this->m_tracked.mut(gen).insert(var);
+    this->m_counts[gen] += 1;
     return var;
   }
 
