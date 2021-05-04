@@ -283,7 +283,9 @@ collect_variables(uint8_t gen_limit)
     for(size_t gen = 0;  (gen <= gMax) && (gen <= gen_limit);  ++gen)
       nvars += this->do_collect_generation(gen);
 
+    // Clear cached variables.
     // Return the number of variables that have been collected.
+    this->m_pool.clear();
     return nvars;
   }
 
