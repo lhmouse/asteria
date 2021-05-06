@@ -12,6 +12,7 @@
 
 namespace asteria {
 
+ROCKET_FLATTEN_FUNCTION
 Executive_Context::
 Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                   Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
@@ -49,7 +50,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
       // Nothing is set for the variadic placeholder, but the parameter
       // list terminates here.
-      variadic = (name.size() == 3) && (::std::memcmp(name.c_str(), "...", 4) == 0);
+      variadic = name == sref("...");
       if(variadic)
         break;
 
