@@ -67,10 +67,10 @@ class Value
     Variable_Callback&
     do_enumerate_variables_slow(Variable_Callback& callback) const;
 
-    ROCKET_PURE_FUNCTION bool
+    ROCKET_PURE bool
     do_test_slow() const noexcept;
 
-    ROCKET_PURE_FUNCTION static Compare
+    ROCKET_PURE static Compare
     do_compare_slow(const Value& lhs, const Value& rhs) noexcept;
 
   public:

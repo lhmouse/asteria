@@ -142,7 +142,7 @@ class storage_handle
     as_allocator() noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    ROCKET_PURE_FUNCTION bool
+    ROCKET_PURE bool
     unique() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -160,7 +160,7 @@ class storage_handle
         return qstor->nref.get();
       }
 
-    ROCKET_PURE_FUNCTION size_type
+    ROCKET_PURE size_type
     capacity() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -199,7 +199,7 @@ class storage_handle
         return storage::max_nchar_for_nblk(nblk);
       }
 
-    ROCKET_PURE_FUNCTION const value_type*
+    ROCKET_PURE const value_type*
     data() const noexcept
       {
         auto qstor = this->m_qstor;

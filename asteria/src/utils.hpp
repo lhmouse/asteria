@@ -17,7 +17,7 @@ ptrdiff_t
 write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 template<typename... ParamsT>
-ROCKET_NOINLINE ROCKET_FLATTEN_FUNCTION cow_string
+ROCKET_NOINLINE ROCKET_FLATTEN cow_string
 format_string(const char* templ, const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;
@@ -66,7 +66,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
 // Type conversion
 template<typename enumT>
-ROCKET_CONST_FUNCTION constexpr typename ::std::underlying_type<enumT>::type
+ROCKET_CONST constexpr typename ::std::underlying_type<enumT>::type
 weaken_enum(enumT value) noexcept
   { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
 
@@ -81,7 +81,7 @@ enum : uint8_t
     cctype_blank   = 0x20,  // [ \t]
   };
 
-ROCKET_CONST_FUNCTION inline uint8_t
+ROCKET_CONST inline uint8_t
 get_cctype(char c) noexcept
   {
     size_t m = static_cast<uint8_t>(c);
@@ -90,19 +90,19 @@ get_cctype(char c) noexcept
     return details_utils::cctype_table[m];
   }
 
-ROCKET_CONST_FUNCTION inline bool
+ROCKET_CONST inline bool
 is_cctype(char c, uint8_t mask) noexcept
   { return noadl::get_cctype(c) & mask;  }
 
 // Numeric conversion
-ROCKET_CONST_FUNCTION inline bool
+ROCKET_CONST inline bool
 is_convertible_to_integer(double val) noexcept
   {
     return ::std::islessequal(-0x1p63, val) &&
            ::std::isless(val, 0x1p63);
   }
 
-ROCKET_CONST_FUNCTION inline bool
+ROCKET_CONST inline bool
 is_safe_integer(double val) noexcept
   {
     double absv = ::std::abs(val);
@@ -143,7 +143,7 @@ struct Wrapped_Index
                         // `nprepend` and `nappend` are zeroes)
   };
 
-ROCKET_CONST_FUNCTION Wrapped_Index
+ROCKET_CONST Wrapped_Index
 wrap_index(int64_t index, size_t size) noexcept;
 
 // Note that all bits in the result are filled.

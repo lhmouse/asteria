@@ -39,7 +39,7 @@ class Reference_Dictionary
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `name`, but in no case
     // can a null pointer be returned.
-    ROCKET_PURE_FUNCTION Bucket*
+    ROCKET_PURE Bucket*
     do_xprobe(const phsh_string& name) const noexcept
       {
         auto bptr = this->m_bptr;

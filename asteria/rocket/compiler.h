@@ -19,13 +19,13 @@
     && defined(ROCKET_SELECTANY)  \
     && defined(ROCKET_SECTION)  \
     && defined(ROCKET_NOINLINE)  \
-    && defined(ROCKET_PURE_FUNCTION)  \
-    && defined(ROCKET_CONST_FUNCTION)  \
-    && defined(ROCKET_ARTIFICIAL_FUNCTION)  \
-    && defined(ROCKET_FLATTEN_FUNCTION)  \
-    && defined(ROCKET_FORCED_INLINE_FUNCTION)  \
-    && defined(ROCKET_COLD_FUNCTION)  \
-    && defined(ROCKET_HOT_FUNCTION)  \
+    && defined(ROCKET_PURE)  \
+    && defined(ROCKET_CONST)  \
+    && defined(ROCKET_ARTIFICIAL)  \
+    && defined(ROCKET_FLATTEN)  \
+    && defined(ROCKET_FORCED_INLINE)  \
+    && defined(ROCKET_COLD)  \
+    && defined(ROCKET_HOT)  \
     \
     && defined(ROCKET_UNREACHABLE)  \
     && defined(ROCKET_EXPECT)  \

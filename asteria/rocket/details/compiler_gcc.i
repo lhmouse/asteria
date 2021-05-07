@@ -9,13 +9,13 @@
 #define ROCKET_SELECTANY                    __attribute__((__weak__))
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NOINLINE                     __attribute__((__noinline__))
-#define ROCKET_PURE_FUNCTION                __attribute__((__pure__))
-#define ROCKET_CONST_FUNCTION               __attribute__((__const__))
-#define ROCKET_ARTIFICIAL_FUNCTION          __attribute__((__artificial__, __always_inline__))
-#define ROCKET_FLATTEN_FUNCTION             __attribute__((__flatten__))
-#define ROCKET_FORCED_INLINE_FUNCTION       __attribute__((__always_inline__)) __inline__
-#define ROCKET_COLD_FUNCTION                __attribute__((__cold__))
-#define ROCKET_HOT_FUNCTION                 __attribute__((__hot__))
+#define ROCKET_PURE                         __attribute__((__pure__))
+#define ROCKET_CONST                        __attribute__((__const__))
+#define ROCKET_ARTIFICIAL                   __attribute__((__artificial__, __always_inline__))
+#define ROCKET_FLATTEN                      __attribute__((__flatten__))
+#define ROCKET_FORCED_INLINE                __attribute__((__always_inline__)) __inline__
+#define ROCKET_COLD                         __attribute__((__cold__))
+#define ROCKET_HOT                          __attribute__((__hot__))
 
 #define ROCKET_UNREACHABLE()                __builtin_unreachable()
 #define ROCKET_EXPECT(...)                  __builtin_expect(!!(__VA_ARGS__), 1)

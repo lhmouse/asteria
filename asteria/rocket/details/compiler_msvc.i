@@ -9,13 +9,13 @@
 #define ROCKET_SELECTANY                    __declspec(selectany)
 #define ROCKET_SECTION(...)                 __declspec(allocate(__VA_ARGS__))
 #define ROCKET_NOINLINE                     __declspec(noinline)
-#define ROCKET_PURE_FUNCTION                // not implemented
-#define ROCKET_CONST_FUNCTION               // not implemented
-#define ROCKET_ARTIFICIAL_FUNCTION          // not implemented
-#define ROCKET_FLATTEN_FUNCTION             // not implemented
-#define ROCKET_FORCED_INLINE_FUNCTION       __forceinline
-#define ROCKET_COLD_FUNCTION                // not implemented
-#define ROCKET_HOT_FUNCTION                 // not implemented
+#define ROCKET_PURE                         // not implemented
+#define ROCKET_CONST                        // not implemented
+#define ROCKET_ARTIFICIAL                   // not implemented
+#define ROCKET_FLATTEN                      // not implemented
+#define ROCKET_FORCED_INLINE                __forceinline
+#define ROCKET_COLD                         // not implemented
+#define ROCKET_HOT                          // not implemented
 
 #define ROCKET_UNREACHABLE()                __assume(0)
 #define ROCKET_EXPECT(...)                  (__VA_ARGS__)  // not implemented
