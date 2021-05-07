@@ -14,6 +14,8 @@
 #define ROCKET_ARTIFICIAL_FUNCTION          // not implemented
 #define ROCKET_FLATTEN_FUNCTION             // not implemented
 #define ROCKET_FORCED_INLINE_FUNCTION       __forceinline
+#define ROCKET_COLD_FUNCTION                // not implemented
+#define ROCKET_HOT_FUNCTION                 // not implemented
 
 #define ROCKET_UNREACHABLE()                __assume(0)
 #define ROCKET_EXPECT(...)                  (__VA_ARGS__)  // not implemented

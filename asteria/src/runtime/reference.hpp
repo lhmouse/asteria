@@ -51,13 +51,13 @@ class Reference
       { return this->assign(::std::move(other));  }
 
   private:
-    const Value&
+    ROCKET_COLD_FUNCTION const Value&
     do_dereference_readonly_slow() const;
 
-    Value&
+    ROCKET_COLD_FUNCTION Value&
     do_mutate_into_temporary_slow();
 
-    Reference&
+    ROCKET_COLD_FUNCTION Reference&
     do_finish_call_slow(Global_Context& global);
 
   public:

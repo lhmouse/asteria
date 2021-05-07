@@ -24,6 +24,8 @@
     && defined(ROCKET_ARTIFICIAL_FUNCTION)  \
     && defined(ROCKET_FLATTEN_FUNCTION)  \
     && defined(ROCKET_FORCED_INLINE_FUNCTION)  \
+    && defined(ROCKET_COLD_FUNCTION)  \
+    && defined(ROCKET_HOT_FUNCTION)  \
     \
     && defined(ROCKET_UNREACHABLE)  \
     && defined(ROCKET_EXPECT)  \
