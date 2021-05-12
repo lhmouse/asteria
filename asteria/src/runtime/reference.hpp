@@ -179,7 +179,7 @@ class Reference
           this->m_ptca = ::std::move(other.m_ptca);
         }
         this->m_mods = ::std::move(other.m_mods);
-        this->m_index = other.m_index;
+        this->m_index = ::std::exchange(other.m_index, index_uninit);
         return *this;
       }
 
