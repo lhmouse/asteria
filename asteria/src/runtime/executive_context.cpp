@@ -6,6 +6,7 @@
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
+#include "variable.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
@@ -28,12 +29,14 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       // this overhead.
       const auto& val = self.dereference_readonly();
       if(!val.is_null())
-        this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
+        this->do_open_named_reference(nullptr, sref("__this")).set_temporary(val);
     }
     else if(self.is_variable()) {
       // If the self reference points to a variable, copy it because it is
       // always an lvalue.
-      this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
+      auto var = self.get_variable_opt();
+      ROCKET_ASSERT(var);
+      this->do_open_named_reference(nullptr, sref("__this")).set_variable(::std::move(var));
     }
     else
       ASTERIA_THROW("invalid `this` reference passed to `$1`", zvarg->func());
