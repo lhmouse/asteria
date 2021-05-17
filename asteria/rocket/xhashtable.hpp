@@ -19,8 +19,9 @@ get_probing_origin(bucketT* begin, bucketT* end, size_t hval) noexcept
     uint64_t dist = static_cast<uint32_t>(hval * 0x9E3779B9);
 
     // Multiply it by the number of buckets.
-    dist *= static_cast<size_t>(end - begin);
+    dist *= static_cast<size_t>((char*)end - (char*)begin);
     dist >>= 32;
+    dist /= sizeof(*begin);
 
     // Return a pointer to the origin.
     return begin + static_cast<ptrdiff_t>(dist);
