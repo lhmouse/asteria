@@ -47,14 +47,16 @@ do_reserve_more()
     size_t esold = ::std::exchange(this->m_estor, estor);
     this->m_einit = this->m_etop;
 
+    if(!bold)
+      return;
+
     for(size_t k = 0;  k != this->m_einit;  ++k)
       ::rocket::construct_at(bptr + k, ::std::move(bold[k]));
 
     for(size_t k = 0;  k != esold;  ++k)
       ::rocket::destroy_at(bold + k);
 
-    if(bold)
-      ::operator delete(bold);
+    ::operator delete(bold);
   }
 
 Variable_Callback&

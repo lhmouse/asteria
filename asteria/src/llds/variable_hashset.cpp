@@ -87,6 +87,9 @@ do_rehash_more()
     auto bold = ::std::exchange(this->m_bptr, bptr);
     this->m_eptr = eptr;
 
+    if(!bold)
+      return;
+
     // Move buckets into the new table.
     // Warning: no exception shall be thrown from the code below.
     auto sbkt = ::std::exchange(this->m_head, nullptr);
@@ -113,8 +116,7 @@ do_rehash_more()
       // Process the next bucket.
       sbkt = sbkt->next;
     }
-    if(bold)
-      ::operator delete(bold);
+    ::operator delete(bold);
   }
 
 Variable_Callback&

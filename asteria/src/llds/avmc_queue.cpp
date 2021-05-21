@@ -54,6 +54,9 @@ do_reallocate(uint32_t nadd)
     ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
     this->m_rsrv = rsrv;
 
+    if(!bold)
+      return;
+
     // Move old non-trivial nodes if any.
     // Warning: no exception shall be thrown from the code below.
     uint32_t offset = 0;
@@ -66,8 +69,7 @@ do_reallocate(uint32_t nadd)
       if(qnode->meta_ver && qnode->pv_meta->reloc_opt)
         qnode->pv_meta->reloc_opt(qnode, qfrom);
     }
-    if(bold)
-      ::operator delete(bold);
+    ::operator delete(bold);
   }
 
 details_avmc_queue::Header*
