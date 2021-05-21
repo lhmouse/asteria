@@ -1360,7 +1360,7 @@ do_icast(double value)
   {
     if(!is_convertible_to_integer(value)) {
       ASTERIA_THROW(
-          "Real value not representable as integer (value `$1`)",
+          "real value not representable as integer (value `$1`)",
           value);
     }
     return static_cast<int64_t>(value);
@@ -1406,7 +1406,7 @@ struct Traits_apply_xop_inc_post
 
           default:
             ASTERIA_THROW(
-                "Postfix increment not applicable (operand was `$1`)",
+                "postfix increment not applicable (operand was `$1`)",
                 lhs);
         }
       }
@@ -1452,7 +1452,7 @@ struct Traits_apply_xop_dec_post
 
           default:
             ASTERIA_THROW(
-                "Postfix decrement not applicable (operand was `$1`)",
+                "postfix decrement not applicable (operand was `$1`)",
                 lhs);
         }
       }
@@ -1572,7 +1572,7 @@ struct Traits_apply_xop_neg
 
           default:
             ASTERIA_THROW(
-                "Logical negation not applicable (operand was `$1`)",
+                "logical negation not applicable (operand was `$1`)",
                 rhs);
         }
       }
@@ -1629,7 +1629,7 @@ struct Traits_apply_xop_notb
 
           default:
             ASTERIA_THROW(
-                "Bitwise NOT not applicable (operand was `$1`)",
+                "bitwise NOT not applicable (operand was `$1`)",
                 rhs);
         }
       }
@@ -1706,7 +1706,7 @@ struct Traits_apply_xop_inc_pre
 
           default:
             ASTERIA_THROW(
-                "Prefix increment not applicable (operand was `$1`)",
+                "prefix increment not applicable (operand was `$1`)",
                 rhs);
         }
       }
@@ -1751,7 +1751,7 @@ struct Traits_apply_xop_dec_pre
 
           default:
             ASTERIA_THROW(
-                "Prefix decrement not applicable (operand was `$1`)",
+                "prefix decrement not applicable (operand was `$1`)",
                 rhs);
         }
       }
@@ -2820,7 +2820,7 @@ struct Traits_apply_xop_add
 
           default:
             ASTERIA_THROW(
-                "Addition not applicable (operands were `$1` and `$2`)",
+                "addition not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -2886,7 +2886,7 @@ struct Traits_apply_xop_sub
 
           default:
             ASTERIA_THROW(
-                "Subtraction not applicable (operands were `$1` and `$2`)",
+                "subtraction not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -2987,7 +2987,7 @@ struct Traits_apply_xop_mul
 
           default:
             ASTERIA_THROW(
-                "Multiplication not applicable (operands were `$1` and `$2`)",
+                "multiplication not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3050,7 +3050,7 @@ struct Traits_apply_xop_div
 
           default:
             ASTERIA_THROW(
-                "Division not applicable (operands were `$1` and `$2`)",
+                "division not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3190,7 +3190,7 @@ struct Traits_apply_xop_sll
 
           default:
             ASTERIA_THROW(
-                "Logical left shift not applicable (operands were `$1` and `$2`)",
+                "logical left shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3268,7 +3268,7 @@ struct Traits_apply_xop_srl
 
           default:
             ASTERIA_THROW(
-                "Logical right shift not applicable (operands were `$1` and `$2`)",
+                "logical right shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3355,7 +3355,7 @@ struct Traits_apply_xop_sla
 
           default:
             ASTERIA_THROW(
-                "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                "arithmetic left shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3430,7 +3430,7 @@ struct Traits_apply_xop_sra
 
           default:
             ASTERIA_THROW(
-                "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                "arithmetic right shift not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3500,7 +3500,7 @@ struct Traits_apply_xop_andb
 
           default:
             ASTERIA_THROW(
-                "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                "bitwise AND not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3571,7 +3571,7 @@ struct Traits_apply_xop_orb
 
           default:
             ASTERIA_THROW(
-                "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                "bitwise OR not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3642,7 +3642,7 @@ struct Traits_apply_xop_xorb
 
           default:
             ASTERIA_THROW(
-                "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                "bitwise XOR not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -3711,7 +3711,7 @@ struct Traits_apply_xop_fma
 
           default:
             ASTERIA_THROW(
-                "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)",
+                "fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)",
                 lhs, mid, rhs);
         }
       }
@@ -3789,7 +3789,7 @@ struct Traits_unpack_struct_array
         V_array arr;
         if(!val.is_null() && !val.is_array())
           ASTERIA_THROW(
-              "Invalid argument for structured array binding (value was `$1`)",
+              "invalid argument for structured array binding (value was `$1`)",
               val);
 
         if(val.is_array())
@@ -3849,7 +3849,7 @@ struct Traits_unpack_struct_object
         V_object obj;
         if(!val.is_null() && !val.is_object())
           ASTERIA_THROW(
-              "Invalid argument for structured object binding (value was `$1`)",
+              "invalid argument for structured object binding (value was `$1`)",
               val);
 
         if(val.is_object())
@@ -4422,7 +4422,7 @@ struct Traits_apply_xop_addm
 
           default:
             ASTERIA_THROW(
-                "Modular addition not applicable (operands were `$1` and `$2`)",
+                "modular addition not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -4468,7 +4468,7 @@ struct Traits_apply_xop_subm
 
           default:
             ASTERIA_THROW(
-                "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                "modular subtraction not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -4514,7 +4514,7 @@ struct Traits_apply_xop_mulm
 
           default:
             ASTERIA_THROW(
-                "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                "modular multiplication not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -4572,7 +4572,7 @@ struct Traits_apply_xop_adds
 
           default:
             ASTERIA_THROW(
-                "Saturation addition not applicable (operands were `$1` and `$2`)",
+                "saturation addition not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -4630,7 +4630,7 @@ struct Traits_apply_xop_subs
 
           default:
             ASTERIA_THROW(
-                "Saturation subtraction not applicable (operands were `$1` and `$2`)",
+                "saturation subtraction not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
@@ -4688,7 +4688,7 @@ struct Traits_apply_xop_muls
 
           default:
             ASTERIA_THROW(
-                "Saturation multiplication not applicable (operands were `$1` and `$2`)",
+                "saturation multiplication not applicable (operands were `$1` and `$2`)",
                 lhs, rhs);
         }
       }
