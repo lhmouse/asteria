@@ -209,7 +209,7 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
     ~Rcbase()
       = default;
 
-    void
+    virtual void
     vtable_key_function() noexcept;
   };
 
