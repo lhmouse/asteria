@@ -42,15 +42,10 @@ class Variable_HashSet
     ROCKET_PURE Bucket*
     do_xprobe(const rcptr<Variable>& var) const noexcept
       {
-        auto bptr = this->m_bptr;
-        auto eptr = this->m_eptr;
-
         // Find a bucket using linear probing.
-        // We keep the load factor below 1.0 so there will always be some empty buckets
-        // in the table.
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr,
+        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
                         reinterpret_cast<uintptr_t>(var.get()));
-        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
                         [&](const Bucket& r) { return r.kstor[0] == var;  });
 
         // The load factor is kept <= 0.5 so there must always be a bucket available.
