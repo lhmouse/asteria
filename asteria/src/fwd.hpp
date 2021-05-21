@@ -206,7 +206,11 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
       = default;
 
     virtual
-    ~Rcbase();
+    ~Rcbase()
+      = default;
+
+    void
+    vtable_key_function() noexcept;
   };
 
 template<typename RealT>

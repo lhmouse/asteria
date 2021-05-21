@@ -8,8 +8,9 @@
 
 namespace asteria {
 
+void
 Rcbase::
-~Rcbase()
+vtable_key_function() noexcept
   {
   }
 
