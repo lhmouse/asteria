@@ -3087,8 +3087,8 @@ struct Traits_apply_xop_mod
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
             if(y == 0)
@@ -4413,8 +4413,8 @@ struct Traits_apply_xop_addm
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
             ROCKET_ADD_OVERFLOW(x, y, &x);
             return air_status_next;
@@ -4459,8 +4459,8 @@ struct Traits_apply_xop_subm
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
             ROCKET_SUB_OVERFLOW(x, y, &x);
             return air_status_next;
@@ -4505,8 +4505,8 @@ struct Traits_apply_xop_mulm
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
             ROCKET_MUL_OVERFLOW(x, y, &x);
             return air_status_next;
@@ -4551,8 +4551,8 @@ struct Traits_apply_xop_adds
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
             auto s = x;
@@ -4609,8 +4609,8 @@ struct Traits_apply_xop_subs
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
             auto s = x;
@@ -4667,8 +4667,8 @@ struct Traits_apply_xop_muls
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
             auto s = x;
