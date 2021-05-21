@@ -42,17 +42,16 @@ class Reference_Dictionary
     ROCKET_PURE Bucket*
     do_xprobe(const phsh_string& name) const noexcept
       {
-        auto bptr = this->m_bptr;
-        auto eptr = this->m_eptr;
+        // Optimize the lookup for small tables.
+        using details_reference_dictionary::do_compare_eq;
+        if(this->m_head && do_compare_eq(this->m_head->kstor[0], name))
+          return this->m_head;
 
         // Find a bucket using linear probing.
-        // We keep the load factor below 1.0 so there will always be some empty buckets
-        // in the table.
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, name.rdhash());
-        auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
-               [&](const Bucket& r) {
-                 return details_reference_dictionary::do_compare_eq(r.kstor[0], name);
-               });
+        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
+                        name.rdhash());
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
+               [&](const Bucket& r) { return do_compare_eq(r.kstor[0], name);  });
 
         // The load factor is kept <= 0.5 so there must always be a bucket available.
         ROCKET_ASSERT(qbkt);
