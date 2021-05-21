@@ -1115,42 +1115,35 @@ struct Traits_coalescence
       }
   };
 
-Reference&
-do_invoke_nontail(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                  const cow_function& target, Reference_Stack&& stack)
+AIR_Status
+do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_function& target,
+                  Global_Context& global, Reference_Stack&& stack)
   {
-    // Perform plain calls if there is no hook.
-    const auto qhooks = ctx.global().get_hooks_opt();
+    const auto qhooks = global.get_hooks_opt();
     if(ROCKET_EXPECT(!qhooks)) {
-      target.invoke(self, ctx.global(), ::std::move(stack));
-      return self;
+      // Perform a plain call if there is no hook.
+      target.invoke(self, global, ::std::move(stack));
     }
+    else {
+      // Note exceptions thrown here are not caught.
+      qhooks->on_function_call(sloc, target);
 
-    // Note exceptions thrown here are not caught.
-    qhooks->on_function_call(sloc, target);
-
-    ASTERIA_RUNTIME_TRY {
-      target.invoke(self, ctx.global(), ::std::move(stack));
+      ASTERIA_RUNTIME_TRY {
+        target.invoke(self, global, ::std::move(stack));
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        qhooks->on_function_except(sloc, target, except);
+        throw;
+      }
+      qhooks->on_function_return(sloc, target, self);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-      qhooks->on_function_except(sloc, target, except);
-      throw;
-    }
-    qhooks->on_function_return(sloc, target, self);
-    return self;
+    return air_status_next;
   }
 
 AIR_Status
-do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                        const cow_function& target, PTC_Aware ptc, Reference_Stack&& stack)
+do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function& target,
+               PTC_Aware ptc, Reference_Stack&& stack)
   {
-    // Perform plain calls in non-PTC contexts.
-    if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
-      do_invoke_nontail(self, sloc, ctx, target, ::std::move(stack));
-      return air_status_next;
-    }
-
-    // Pack arguments for this proper tail call, which will be unpacked outside this scope.
     Reference_Stack bound_args;
     for(auto p = stack.mut_bottom();  p != stack.top();  ++p) {
       ROCKET_ASSERT(!p->is_ptc_args());
@@ -1158,13 +1151,23 @@ do_function_call_common(Reference& self, const Source_Location& sloc, Executive_
     }
     bound_args.emplace_back_uninit() = ::std::move(self);
 
+    // Set packed arguments for this PTC, which will be unpacked outside this scope.
     self.set_ptc_args(::rocket::make_refcnt<PTC_Arguments>(
                           sloc, ptc, target, ::std::move(bound_args)));
 
     // Force `air_status_return_ref` if control flow reaches the end of a function.
-    // Otherwise a null reference is returned instead of this PTC wrapper, which can then
-    // never be unpacked.
+    // Otherwise a null reference is returned instead of this PTC wrapper, which can
+    // then never be unpacked.
     return air_status_return_ref;
+  }
+
+AIR_Status
+do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
+                        const cow_function& target, PTC_Aware ptc, Reference_Stack&& stack)
+  {
+    return ROCKET_EXPECT(ptc == ptc_aware_none)
+             ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(stack))
+             : do_invoke_tail(self, sloc, target, ptc, ::std::move(stack));
   }
 
 Reference_Stack&
@@ -4005,7 +4008,7 @@ struct Traits_variadic_call
             ctx.stack().mut_back().pop_modifier();
             auto self = ctx.stack().back();
             ctx.stack().emplace_back_uninit() = self;
-            do_invoke_nontail(ctx.stack().mut_back(), sloc, ctx, gfunc, ::std::move(alt_stack));
+            do_invoke_nontail(ctx.stack().mut_back(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
             value = ctx.stack().back().dereference_readonly();
             ctx.stack().pop_back();
 
@@ -4031,7 +4034,7 @@ struct Traits_variadic_call
 
               // Generate an argument. Ensure it is dereferenceable.
               auto& arg = ctx.stack().mut_back(static_cast<size_t>(k));
-              do_invoke_nontail(arg, sloc, ctx, gfunc, ::std::move(alt_stack));
+              do_invoke_nontail(arg, sloc, gfunc, ctx.global(), ::std::move(alt_stack));
               arg.dereference_readonly();
             }
 
@@ -4194,7 +4197,7 @@ struct Traits_import_call
         // Invoke the script.
         // `this` is null for imported scripts.
         self.set_temporary(nullopt);
-        do_invoke_nontail(self, sp.sloc, ctx, qtarget, ::std::move(alt_stack));
+        do_invoke_nontail(self, sp.sloc, qtarget, ctx.global(), ::std::move(alt_stack));
         return air_status_next;
       }
   };
