@@ -1161,15 +1161,6 @@ do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function&
     return air_status_return_ref;
   }
 
-AIR_Status
-do_function_call_common(Reference& self, const Source_Location& sloc, Executive_Context& ctx,
-                        const cow_function& target, PTC_Aware ptc, Reference_Stack&& stack)
-  {
-    return ROCKET_EXPECT(ptc == ptc_aware_none)
-             ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(stack))
-             : do_invoke_tail(self, sloc, target, ptc, ::std::move(stack));
-  }
-
 Reference_Stack&
 do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
   {
@@ -1232,9 +1223,13 @@ struct Traits_function_call
         if(!value.is_function())
           ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
 
-        return do_function_call_common(ctx.stack().mut_back().pop_modifier(), sloc, ctx,
-                                       value.as_function(), static_cast<PTC_Aware>(up.u8v[0]),
-                                       ::std::move(alt_stack));
+        const auto& target = value.as_function();
+        auto& self = ctx.stack().mut_back().pop_modifier();
+        const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
+
+        return ROCKET_EXPECT(ptc == ptc_aware_none)
+                 ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
+                 : do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
       }
   };
 
@@ -3984,6 +3979,7 @@ struct Traits_variadic_call
         // Initialize arguments.
         auto& alt_stack = ctx.alt_stack();
         alt_stack.clear();
+
         auto value = ctx.stack().back().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
@@ -4058,9 +4054,13 @@ struct Traits_variadic_call
         if(!value.is_function())
           ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
 
-        return do_function_call_common(ctx.stack().mut_back().pop_modifier(), sloc, ctx,
-                                       value.as_function(), static_cast<PTC_Aware>(up.u8v[0]),
-                                       ::std::move(alt_stack));
+        const auto& target = value.as_function();
+        auto& self = ctx.stack().mut_back().pop_modifier();
+        const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
+
+        return ROCKET_EXPECT(ptc == ptc_aware_none)
+                 ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
+                 : do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
       }
   };
 
