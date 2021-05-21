@@ -141,6 +141,7 @@ struct S4_reap_unreachable : Variable_Callback
   {
     Variable_HashSet* pool;
     Variable_HashSet* tracked;
+    size_t* count_opt;
     Variable_HashSet* next_opt;
     size_t nvars = 0;
 
@@ -153,7 +154,7 @@ struct S4_reap_unreachable : Variable_Callback
             // Wipe the value out.
             var->uninitialize();
             bool erased = tracked->erase(var);
-            nvars++;
+            nvars += 1;
 
             // Pool the variable. This shall be the last operation due to
             // possible exceptions. If the variable cannot be pooled, it is
@@ -166,7 +167,11 @@ struct S4_reap_unreachable : Variable_Callback
             // Note exception safety.
             next_opt->insert(var);
             bool erased = tracked->erase(var);
-            if(!erased)
+
+            // Undo the operation if the variable was not in `tracked`.
+            if(erased)
+              *count_opt += 1;
+            else
               next_opt->erase(var);
           }
         }
@@ -240,6 +245,7 @@ do_collect_generation(size_t gen)
     S4_reap_unreachable s4_reap;
     s4_reap.pool = &(this->m_pool);
     s4_reap.tracked = &tracked;
+    s4_reap.count_opt = this->m_counts.mut_ptr(gMax-gen-1);
     s4_reap.next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
     this->m_staging.enumerate_variables(s4_reap);
 
