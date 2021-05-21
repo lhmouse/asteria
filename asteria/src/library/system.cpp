@@ -465,7 +465,7 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
 
     // Await its termination.
     // Note: `waitpid()` may return if the child has been stopped or continued.
-    do {
+    for(;;) {
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
         ASTERIA_THROW("error awaiting child process '$2'\n"
@@ -478,7 +478,6 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
       if(WIFSIGNALED(wstat))
         return 128 + WTERMSIG(wstat);
     }
-    while(true);
   }
 
 void

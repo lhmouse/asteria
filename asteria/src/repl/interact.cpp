@@ -28,7 +28,7 @@ read_execute_print_single()
     long line = 0;
     repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
 
-    do {
+    for(;;) {
       // Read a character. Break upon read errors.
       ch = ::fgetc(stdin);
       if(ch == EOF) {
@@ -79,7 +79,6 @@ read_execute_print_single()
       repl_source.push_back(static_cast<char>(ch));
       escape = false;
     }
-    while(1);
 
     // Discard this snippet if Ctrl-C was received.
     if(get_and_clear_last_signal() != 0) {

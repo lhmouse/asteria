@@ -237,7 +237,7 @@ main(int argc, char** argv)
     );
 
     // This the main read-execute-print loop.
-    do {
+    for(;;) {
       // Reset standard streams.
       if(!::freopen(nullptr, "r", stdin))
         exit_printf(exit_system_error,
@@ -259,7 +259,6 @@ main(int argc, char** argv)
       if(::feof(stdin))
         exit_printf(exit_success, "* have a nice day :)\n");
     }
-    while(1);
   }
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available.
