@@ -73,12 +73,14 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         // Return the reference at the top of `stack`.
         self = ::std::move(stack.mut_back());
 
-        // In case of PTCs, set up source location.
-        // This cannot be set at the call site where such information isn't available.
-        if(auto ptca = self.get_ptc_args_opt()) {
-          ROCKET_ASSERT(ptca.use_count() == 2);
-          ptca->set_caller({ this->m_zvarg->sloc(), this->m_zvarg->func() });
-        }
+        // In case of PTCs, set up source location. This cannot be set at the
+        // call site where such information isn't available.
+        auto ptca = self.get_ptc_args_opt();
+        if(!ptca)
+          break;
+
+        ROCKET_ASSERT(ptca.use_count() == 2);
+        ptca->set_caller({ this->m_zvarg->sloc(), this->m_zvarg->func() });
         break;
       }
 
