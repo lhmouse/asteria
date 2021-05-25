@@ -238,19 +238,6 @@ main(int argc, char** argv)
 
     // This the main read-execute-print loop.
     for(;;) {
-      // Reset standard streams.
-      if(!::freopen(nullptr, "r", stdin))
-        exit_printf(exit_system_error,
-              "! could not reopen standard input (errno was `%d`)\n", errno);
-
-      if(!::freopen(nullptr, "w", stdout))
-        exit_printf(exit_system_error,
-              "! could not reopen standard output (errno was `%d`)\n", errno);
-
-      // Process the next snippet.
-      ::fputc('\n', stderr);
-      read_execute_print_single();
-
       // Check for errors.
       if(::ferror(stdin))
         exit_printf(exit_system_error,
@@ -258,6 +245,12 @@ main(int argc, char** argv)
 
       if(::feof(stdin))
         exit_printf(exit_success, "* have a nice day :)\n");
+
+      // Process the next snippet.
+      const StdIO_Sentry sentry;
+      ::fputc('\n', stderr);
+      read_execute_print_single();
+
     }
   }
   catch(exception& stdex) {
