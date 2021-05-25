@@ -24,11 +24,12 @@ reload(const cow_string& name, int line, tinybuf& cbuf)
     Statement_Sequence stmtq(this->m_opts);
     stmtq.reload(tstrm);
 
-    // Instantiate the function.
-    const Source_Location sloc(name, 0, 0);
-    if(ROCKET_UNEXPECT(this->m_params.empty()))
+    // Initialize the argument list. This is done only once.
+    if(this->m_params.empty())
       this->m_params.emplace_back(sref("..."));
 
+    // Instantiate the function.
+    Source_Location sloc(name, 0, 0);
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, stmtq);
     this->m_func = optmz.create_function(sloc, sref("[file scope]"));
