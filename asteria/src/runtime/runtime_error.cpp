@@ -71,7 +71,7 @@ do_insert_frame(Backtrace_Frame&& new_frm)
       nump.put(k);
       ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
       format(fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
-      frm.value().dump(fmt, 0, 0);
+      frm.value().print(fmt, true);
       fmt << '\n';
     }
     fmt << "  -- end of backtrace frames]";
