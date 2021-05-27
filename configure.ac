@@ -16,6 +16,8 @@ AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_ERROR(`clock_gettime()` not foun
 AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR(PCRE2 library not found)])
 
 ## Set up optional features
+AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_NOTICE(libtcmalloc is recommended)])
+
 AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable assertions]))
 
 AM_CONDITIONAL([enable_debug_checks], [test "${enable_debug_checks}" == "yes"])
