@@ -2790,11 +2790,13 @@ struct Traits_apply_xop_add
             ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
+            int64_t res;
 
-            if(ROCKET_ADD_OVERFLOW(x, y, &x))
+            if(ROCKET_ADD_OVERFLOW(x, y, &res))
               ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
+            x = res;
             return air_status_next;
           }
 
@@ -2863,11 +2865,13 @@ struct Traits_apply_xop_sub
             ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
+            int64_t res;
 
-            if(ROCKET_SUB_OVERFLOW(x, y, &x))
+            if(ROCKET_SUB_OVERFLOW(x, y, &res))
               ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
+            x = res;
             return air_status_next;
           }
 
@@ -2930,11 +2934,13 @@ struct Traits_apply_xop_mul
             ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
             auto y = rhs.as_integer();
+            int64_t res;
 
-            if(ROCKET_MUL_OVERFLOW(x, y, &x))
+            if(ROCKET_MUL_OVERFLOW(x, y, &res))
               ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)",
                             lhs, rhs);
 
+            x = res;
             return air_status_next;
           }
 
