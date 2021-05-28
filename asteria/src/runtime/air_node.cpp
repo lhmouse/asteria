@@ -2787,16 +2787,14 @@ struct Traits_apply_xop_add
 
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
-            int64_t res;
 
-            if(ROCKET_ADD_OVERFLOW(x, y, &res))
-              ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)",
-                            lhs, rhs);
+            V_integer t = x;
+            if(ROCKET_ADD_OVERFLOW(t, y, &x))
+              ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", t, y);
 
-            x = res;
             return air_status_next;
           }
 
@@ -2862,16 +2860,14 @@ struct Traits_apply_xop_sub
 
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
-            int64_t res;
 
-            if(ROCKET_SUB_OVERFLOW(x, y, &res))
-              ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)",
-                            lhs, rhs);
+            V_integer t = x;
+            if(ROCKET_SUB_OVERFLOW(t, y, &x))
+              ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", t, y);
 
-            x = res;
             return air_status_next;
           }
 
@@ -2931,16 +2927,14 @@ struct Traits_apply_xop_mul
 
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
-            int64_t res;
 
-            if(ROCKET_MUL_OVERFLOW(x, y, &res))
-              ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)",
-                            lhs, rhs);
+            V_integer t = x;
+            if(ROCKET_MUL_OVERFLOW(t, y, &x))
+              ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", t, y);
 
-            x = res;
             return air_status_next;
           }
 
@@ -3025,8 +3019,8 @@ struct Traits_apply_xop_div
         switch(do_tmask_of(lhs) | do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            ROCKET_ASSERT(rhs.is_integer());
             auto& x = lhs.open_integer();
+            ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
             if(y == 0)
@@ -4422,6 +4416,7 @@ struct Traits_apply_xop_addm
             auto& x = lhs.open_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
+
             ROCKET_ADD_OVERFLOW(x, y, &x);
             return air_status_next;
           }
@@ -4468,6 +4463,7 @@ struct Traits_apply_xop_subm
             auto& x = lhs.open_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
+
             ROCKET_SUB_OVERFLOW(x, y, &x);
             return air_status_next;
           }
@@ -4514,6 +4510,7 @@ struct Traits_apply_xop_mulm
             auto& x = lhs.open_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
+
             ROCKET_MUL_OVERFLOW(x, y, &x);
             return air_status_next;
           }
@@ -4561,9 +4558,9 @@ struct Traits_apply_xop_adds
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            auto s = x;
-            if(ROCKET_ADD_OVERFLOW(x, y, &x))
-              x = (s >> 63) ^ INT64_MAX;
+            V_integer t = x;
+            if(ROCKET_ADD_OVERFLOW(t, y, &x))
+              x = (t >> 63) ^ INT64_MAX;
 
             return air_status_next;
           }
@@ -4619,9 +4616,9 @@ struct Traits_apply_xop_subs
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            auto s = x;
-            if(ROCKET_SUB_OVERFLOW(x, y, &x))
-              x = (s >> 63) ^ INT64_MAX;
+            V_integer t = x;
+            if(ROCKET_SUB_OVERFLOW(t, y, &x))
+              x = (t >> 63) ^ INT64_MAX;
 
             return air_status_next;
           }
@@ -4677,9 +4674,9 @@ struct Traits_apply_xop_muls
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            auto s = x;
-            if(ROCKET_MUL_OVERFLOW(x, y, &x))
-              x = ((s ^ y) >> 63) ^ INT64_MAX;
+            V_integer t = x;
+            if(ROCKET_MUL_OVERFLOW(t, y, &x))
+              x = ((t ^ y) >> 63) ^ INT64_MAX;
 
             return air_status_next;
           }
