@@ -50,7 +50,7 @@ class Abstract_Context
     do_open_named_reference(Reference* hint_opt, const phsh_string& name) const
       {
         auto qref = hint_opt;
-        if(ROCKET_UNEXPECT(!qref))
+        if(!qref)
           qref = this->m_named_refs.insert(name).first;
         return *qref;
       }
@@ -74,7 +74,7 @@ class Abstract_Context
     get_named_reference_opt(const phsh_string& name) const
       {
         auto qref = this->m_named_refs.find_opt(name);
-        if(ROCKET_UNEXPECT(!qref))
+        if(!qref)
           qref = this->do_create_lazy_reference(nullptr, name);
         return qref;
       }
@@ -83,7 +83,7 @@ class Abstract_Context
     open_named_reference(const phsh_string& name)
       {
         auto pair = this->m_named_refs.insert(name);
-        if(ROCKET_UNEXPECT(pair.second))
+        if(pair.second && name.rdstr().starts_with(sref("__")))
           this->do_create_lazy_reference(pair.first, name);
         return *(pair.first);
       }
