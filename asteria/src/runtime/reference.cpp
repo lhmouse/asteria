@@ -198,7 +198,6 @@ dereference_mutable() const
 
       case index_temporary:
         ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_value);
-        break;
 
       case index_variable: {
         auto qvar = unerase_cast<Variable*>(this->m_var);
@@ -245,7 +244,6 @@ dereference_unset() const
 
       case index_temporary:
         ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_value);
-        break;
 
       case index_variable: {
         auto qvar = unerase_cast<Variable*>(this->m_var);
