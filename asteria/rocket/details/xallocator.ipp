@@ -14,19 +14,11 @@ class final_wrapper
     allocT m_alloc;
 
   public:
-    constexpr
-      final_wrapper() noexcept(is_nothrow_constructible<allocT>::value)
-      : m_alloc()
-      { }
-
+    template<typename... paramsT>
     explicit constexpr
-      final_wrapper(const allocT& alloc) noexcept
-      : m_alloc(alloc)
-      { }
-
-    explicit constexpr
-      final_wrapper(allocT&& alloc) noexcept
-      : m_alloc(::std::move(alloc))
+    final_wrapper(paramsT&&... params)
+      noexcept(is_nothrow_constructible<allocT, paramsT&&...>::value)
+      : m_alloc(::std::forward<paramsT>(params)...)
       { }
 
   public:
