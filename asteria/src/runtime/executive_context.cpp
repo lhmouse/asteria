@@ -43,9 +43,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
-    auto bptr = ::std::make_move_iterator(stack.bottom());
-    auto eptr = ::std::make_move_iterator(stack.top());
-    bool variadic = false;
+    auto bptr = stack.bottom();
+    auto eptr = stack.top();
 
     for(const auto& name : params) {
       if(name.empty())
@@ -53,25 +52,23 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
       // Nothing is set for the variadic placeholder, but the parameter
       // list terminates here.
-      variadic = name == sref("...");
-      if(variadic)
+      if(name == sref("...")) {
+        this->m_lazy_args.append(::std::make_move_iterator(bptr), ::std::make_move_iterator(eptr));
+        bptr = eptr;
         break;
+      }
 
       // Try popping an argument from `stack` and assign it to this parameter.
       // If no more arguments follow, declare a constant `null`.
       if(bptr != eptr)
-        this->do_open_named_reference(nullptr, name) = *(bptr++);
+        this->do_open_named_reference(nullptr, name) = ::std::move(*(bptr++));
       else
         this->do_open_named_reference(nullptr, name).set_temporary(nullopt);
     }
 
-    // If the function is not variadic, then all arguments must have been consumed.
-    if(!variadic && (bptr != eptr))
-      ASTERIA_THROW("too many arguments passed to `$1`", zvarg->func());
-
-    // Stash variadic arguments, if any.
+    // All arguments must have been consumed.
     if(bptr != eptr)
-      this->m_lazy_args.append(bptr, eptr);
+      ASTERIA_THROW("too many arguments passed to `$1`", zvarg->func());
   }
 
 Executive_Context::
