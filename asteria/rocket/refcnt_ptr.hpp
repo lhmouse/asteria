@@ -116,32 +116,32 @@ class refcnt_ptr
       : m_sth()
       { }
 
-    explicit
+    explicit constexpr
     refcnt_ptr(pointer ptr) noexcept
-      : refcnt_ptr()
-      { this->reset(ptr);  }
+      : m_sth(ptr)
+      { }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
-      : refcnt_ptr()
-      { this->reset(other.m_sth.fork());  }
+      : m_sth(other.m_sth.fork())
+      { }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
-      : refcnt_ptr()
-      { this->reset(other.m_sth.release());  }
+      : m_sth(other.m_sth.release())
+      { }
 
     refcnt_ptr(const refcnt_ptr& other) noexcept
-      : refcnt_ptr()
-      { this->reset(other.m_sth.fork());  }
+      : m_sth(other.m_sth.fork())
+      { }
 
     refcnt_ptr(refcnt_ptr&& other) noexcept
-      : refcnt_ptr()
-      { this->reset(other.m_sth.release());  }
+      : m_sth(other.m_sth.release())
+      { }
 
     refcnt_ptr&
     operator=(nullptr_t) noexcept

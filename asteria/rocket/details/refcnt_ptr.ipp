@@ -40,14 +40,20 @@ class stored_pointer
   {
   public:
     using element_type  = elementT;
-    using pointer       = element_type*;
+    using pointer       = elementT*;
 
   private:
-    pointer m_ptr = nullptr;
+    pointer m_ptr;
 
   public:
     constexpr
     stored_pointer() noexcept
+      : m_ptr()
+      { }
+
+    explicit constexpr
+    stored_pointer(pointer ptr) noexcept
+      : m_ptr(::std::move(ptr))
       { }
 
     ~stored_pointer()
