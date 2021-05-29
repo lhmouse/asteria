@@ -119,6 +119,9 @@ class Reference_Dictionary
     void
     do_rehash_more();
 
+    void
+    do_move_storage_from(Bucket* bold) noexcept;
+
   public:
     ~Reference_Dictionary()
       {

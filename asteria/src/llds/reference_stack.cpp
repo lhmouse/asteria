@@ -44,14 +44,19 @@ do_reserve_more()
     // Move-construct references below `m_etop` into the new storage. This shall
     // not throw exceptions. `m_etop` is left unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    size_t esold = ::std::exchange(this->m_estor, estor);
+    uint32_t esold = ::std::exchange(this->m_estor, estor);
     this->m_einit = this->m_etop;
 
-    if(!bold)
-      return;
+    if(bold)
+      this->do_move_storage_from(bold, esold);
+  }
 
+ROCKET_NOINLINE void
+Reference_Stack::
+do_move_storage_from(Reference* bold, uint32_t esold) noexcept
+  {
     for(size_t k = 0;  k != this->m_einit;  ++k)
-      ::rocket::construct_at(bptr + k, ::std::move(bold[k]));
+      ::rocket::construct_at(this->m_bptr + k, ::std::move(bold[k]));
 
     for(size_t k = 0;  k != esold;  ++k)
       ::rocket::destroy_at(bold + k);

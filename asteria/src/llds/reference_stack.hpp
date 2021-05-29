@@ -36,6 +36,9 @@ class Reference_Stack
     void
     do_reserve_more();
 
+    void
+    do_move_storage_from(Reference* bold, uint32_t esold) noexcept;
+
   public:
     ~Reference_Stack()
       {

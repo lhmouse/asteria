@@ -90,9 +90,14 @@ do_rehash_more()
     auto bold = ::std::exchange(this->m_bptr, bptr);
     this->m_eptr = eptr;
 
-    if(!bold)
-      return;
+    if(bold)
+      this->do_move_storage_from(bold);
+  }
 
+ROCKET_NOINLINE void
+Reference_Dictionary::
+do_move_storage_from(Bucket* bold) noexcept
+  {
     // Move buckets into the new table.
     // Warning: no exception shall be thrown from the code below.
     auto sbkt = ::std::exchange(this->m_head, nullptr);
@@ -103,8 +108,8 @@ do_rehash_more()
       // Uniqueness has already been implied for all elements, so there is
       // no need to check for collisions.
       auto mptr = ::rocket::get_probing_origin(
-                      bptr, eptr, sbkt->kstor[0].rdhash());
-      auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+                      this->m_bptr, this->m_eptr, sbkt->kstor[0].rdhash());
+      auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
                       [&](const Bucket&) { return false;  });
 
       // Mark the new bucket non-empty.
