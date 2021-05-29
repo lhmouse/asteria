@@ -13,15 +13,13 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
   : m_parent_opt(parent_opt)
   {
     // Set parameters, which are local references.
-    bool variadic = false;
     for(const auto& name : params) {
       if(name.empty())
         continue;
 
       // Nothing is set for the variadic placeholder, but the parameter
       // list terminates here.
-      variadic = name == sref("...");
-      if(variadic)
+      if(name == sref("..."))
         break;
 
       // Its contents are out of interest.
