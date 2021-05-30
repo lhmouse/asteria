@@ -4168,15 +4168,9 @@ struct Traits_import_call
                         "[`realpath()` failed: $1]",
                         format_errno(errno), path);
 
-        // Update the first argument to `import` if it was passed by reference.
-        path.assign(abspath);
-
-        auto& self = ctx.stack().mut_back();
-        if(self.is_variable())
-          self.dereference_mutable() = path;
-
         // Compile the script file into a function object.
         Loader_Lock::Unique_Stream strm;
+        path.assign(abspath);
         strm.reset(ctx.global().loader_lock(), path.safe_c_str());
 
         // Parse source code.
@@ -4196,6 +4190,7 @@ struct Traits_import_call
 
         // Invoke the script.
         // `this` is null for imported scripts.
+        auto& self = ctx.stack().mut_back();
         self.set_temporary(nullopt);
         do_invoke_nontail(self, sp.sloc, qtarget, ctx.global(), ::std::move(alt_stack));
         return air_status_next;
