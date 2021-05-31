@@ -178,7 +178,7 @@ class Variable_HashSet
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
-        auto nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
+        size_t nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
         if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
           this->do_rehash_more();
 
