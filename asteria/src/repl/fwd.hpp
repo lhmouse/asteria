@@ -60,7 +60,7 @@ get_and_clear_last_signal() noexcept;
 void
 install_signal_and_verbose_hooks();
 
-// This functions is defined in 'single.cpp'.
+// This function is defined in 'single.cpp'.
 [[noreturn]] void
 load_and_execute_single_noreturn();
 
