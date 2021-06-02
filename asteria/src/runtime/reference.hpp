@@ -224,14 +224,16 @@ class Reference
     Reference&
     push_modifier_array_head()
       {
-        this->m_mods.emplace_back(Reference_Modifier::S_array_head());
+        Reference_Modifier::S_array_head xmod = { };
+        this->m_mods.emplace_back(::std::move(xmod));
         return *this;
       }
 
     Reference&
     push_modifier_array_tail()
       {
-        this->m_mods.emplace_back(Reference_Modifier::S_array_tail());
+        Reference_Modifier::S_array_tail xmod = { };
+        this->m_mods.emplace_back(::std::move(xmod));
         return *this;
       }
 

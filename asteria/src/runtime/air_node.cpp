@@ -3726,7 +3726,7 @@ struct Traits_apply_xop_head
     static AIR_Status
     execute(Executive_Context& ctx)
       {
-        // This operator is binary. `assign` is ignored.
+        // This operator is unary. `assign` is ignored.
         ctx.stack().mut_back().push_modifier_array_head();
         return air_status_next;
       }
@@ -3746,7 +3746,7 @@ struct Traits_apply_xop_tail
     static AIR_Status
     execute(Executive_Context& ctx)
       {
-        // This operator is binary. `assign` is ignored.
+        // This operator is unary. `assign` is ignored.
         ctx.stack().mut_back().push_modifier_array_tail();
         return air_status_next;
       }

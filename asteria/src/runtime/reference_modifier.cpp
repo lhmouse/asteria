@@ -302,7 +302,7 @@ apply_unset(Value& parent) const
         if(arr.empty())
           return nullopt;
 
-        auto val = arr.front();
+        auto val = ::std::move(arr.mut_front());
         arr.erase(arr.begin());
         return val;
       }
@@ -320,7 +320,7 @@ apply_unset(Value& parent) const
         if(arr.empty())
           return nullopt;
 
-        auto val = arr.back();
+        auto val = ::std::move(arr.mut_back());
         arr.pop_back();
         return val;
       }
