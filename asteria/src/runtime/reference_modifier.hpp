@@ -29,21 +29,28 @@ class Reference_Modifier
       {
       };
 
+    struct S_array_random
+      {
+        uint32_t seed;
+      };
+
     enum Index : uint8_t
       {
-        index_array_index  = 0,
-        index_object_key   = 1,
-        index_array_head   = 2,
-        index_array_tail   = 3,
+        index_array_index   = 0,
+        index_object_key    = 1,
+        index_array_head    = 2,
+        index_array_tail    = 3,
+        index_array_random  = 4,
       };
 
   private:
     ::rocket::variant<
       ROCKET_CDR(
-        ,S_array_index  // 0,
-        ,S_object_key   // 1,
-        ,S_array_head   // 2,
-        ,S_array_tail   // 3,
+        ,S_array_index   // 0,
+        ,S_object_key    // 1,
+        ,S_array_head    // 2,
+        ,S_array_tail    // 3,
+        ,S_array_random  // 4,
       )>
       m_stor;
 
@@ -93,6 +100,10 @@ class Reference_Modifier
     bool
     is_array_tail() const noexcept
       { return this->index() == index_array_tail;  }
+
+    bool
+    is_array_random() const noexcept
+      { return this->index() == index_array_random;  }
 
     Reference_Modifier&
     swap(Reference_Modifier& other) noexcept

@@ -238,6 +238,14 @@ class Reference
       }
 
     Reference&
+    push_modifier_array_random(uint32_t seed)
+      {
+        Reference_Modifier::S_array_random xmod = { seed };
+        this->m_mods.emplace_back(::std::move(xmod));
+        return *this;
+      }
+
+    Reference&
     pop_modifier() noexcept
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {

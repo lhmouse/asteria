@@ -2010,10 +2010,11 @@ struct Postfix_Punctuator_Xop
   }
 constexpr s_postfix_punctuator_xop[] =
   {
-    { punctuator_inc,   xop_inc_post  },
-    { punctuator_dec,   xop_dec_post  },
-    { punctuator_head,  xop_head      },
-    { punctuator_tail,  xop_tail      },
+    { punctuator_inc,     xop_inc_post  },
+    { punctuator_dec,     xop_dec_post  },
+    { punctuator_head,    xop_head      },
+    { punctuator_tail,    xop_tail      },
+    { punctuator_random,  xop_random    },
   };
 
 constexpr bool
@@ -2026,7 +2027,7 @@ bool
 do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-operator ::=
-    //   "++" | "--" | "[^]" | "[$]"
+    //   "++" | "--" | "[^]" | "[$]" | "[?]"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;

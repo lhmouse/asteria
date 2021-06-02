@@ -9,6 +9,7 @@
 #include "abstract_hooks.hpp"
 #include "analytic_context.hpp"
 #include "garbage_collector.hpp"
+#include "random_engine.hpp"
 #include "runtime_error.hpp"
 #include "variable_callback.hpp"
 #include "variable.hpp"
@@ -4692,6 +4693,27 @@ struct Traits_apply_xop_muls
       }
   };
 
+struct Traits_apply_xop_random
+  {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx)
+      {
+        // This operator is unary. `assign` is ignored.
+        const auto prng = ctx.global().random_engine();
+        ctx.stack().mut_back().push_modifier_array_random(prng->bump());
+        return air_status_next;
+      }
+  };
+
 // Finally...
 template<typename TraitsT, typename NodeT, typename = void>
 struct symbol_getter
@@ -5353,6 +5375,9 @@ solidify(AVMC_Queue& queue) const
 
           case xop_muls:
             return do_solidify<Traits_apply_xop_muls>(queue, altr);
+
+          case xop_random:
+            return do_solidify<Traits_apply_xop_random>(queue, altr);
 
           default:
             ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);

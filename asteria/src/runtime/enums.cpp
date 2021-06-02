@@ -181,6 +181,9 @@ describe_xop(Xop xop) noexcept
       case xop_muls:
         return "prefix `__muls`";
 
+      case xop_random:
+        return "postfix `[?]`";
+
       default:
         return "[unknown operator]";
     }

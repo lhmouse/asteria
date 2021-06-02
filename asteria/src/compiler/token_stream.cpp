@@ -476,6 +476,7 @@ constexpr s_punctuators[] =
     { "?\?=",  punctuator_coales_eq   },
     { "[",     punctuator_bracket_op  },
     { "[$]",   punctuator_tail        },
+    { "[?]",   punctuator_random      },
     { "[^]",   punctuator_head        },
     { "]",     punctuator_bracket_cl  },
     { "^",     punctuator_xorb        },

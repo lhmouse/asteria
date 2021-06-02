@@ -187,6 +187,9 @@ stringify_punctuator(Punctuator punct) noexcept
       case punctuator_scope:
         return "::";
 
+      case punctuator_random:
+        return "[?]";
+
       default:
         return "[unknown punctuator]";
     }

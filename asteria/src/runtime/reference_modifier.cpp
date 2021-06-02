@@ -79,6 +79,26 @@ apply_read_opt(const Value& parent) const
         return &(arr.back());
       }
 
+      case index_array_random: {
+        // Get a random element.
+        const auto& altr = this->m_stor.as<index_array_random>();
+        if(parent.is_null()) {
+          // Elements of null values are also null values.
+          return nullptr;
+        }
+        else if(!parent.is_array())
+          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+
+        const auto& arr = parent.as_array();
+        auto bptr = arr.data();
+        auto eptr = bptr + arr.size();
+        if(bptr == eptr)
+          return nullptr;
+
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
+        return mptr;
+      }
+
       default:
         ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
@@ -153,6 +173,26 @@ apply_write_opt(Value& parent) const
           return nullptr;
 
         return &(arr.mut_back());
+      }
+
+      case index_array_random: {
+        // Get a random element.
+        const auto& altr = this->m_stor.as<index_array_random>();
+        if(parent.is_null()) {
+          // Elements of null values are also null values.
+          return nullptr;
+        }
+        else if(!parent.is_array())
+          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+
+        auto& arr = parent.open_array();
+        auto bptr = arr.mut_data();
+        auto eptr = bptr + arr.size();
+        if(bptr == eptr)
+          return nullptr;
+
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
+        return mptr;
       }
 
       default:
@@ -235,6 +275,26 @@ apply_open(Value& parent) const
           arr.push_back(arr.back());
 
         return arr.mut_back();
+      }
+
+      case index_array_random: {
+        // Get a random element.
+        const auto& altr = this->m_stor.as<index_array_random>();
+        if(parent.is_null()) {
+          // Empty arrays are created if null values are encountered.
+          parent = V_array();
+        }
+        else if(!parent.is_array())
+          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+
+        auto& arr = parent.open_array();
+        auto bptr = arr.mut_data();
+        auto eptr = bptr + arr.size();
+        if(bptr == eptr)
+          ASTERIA_THROW("cannot write to random element of an empty array");
+
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
+        return *mptr;
       }
 
       default:
@@ -322,6 +382,28 @@ apply_unset(Value& parent) const
 
         auto val = ::std::move(arr.mut_back());
         arr.pop_back();
+        return val;
+      }
+
+      case index_array_random: {
+        // Get a random element.
+        const auto& altr = this->m_stor.as<index_array_random>();
+        if(parent.is_null()) {
+          // Elements of null values are also null values.
+          return nullopt;
+        }
+        else if(!parent.is_array())
+          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+
+        auto& arr = parent.open_array();
+        auto bptr = arr.mut_data();
+        auto eptr = bptr + arr.size();
+        if(bptr == eptr)
+          return nullopt;
+
+        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
+        auto val = ::std::move(*mptr);
+        arr.erase(static_cast<size_t>(mptr - bptr), 1);
         return val;
       }
 

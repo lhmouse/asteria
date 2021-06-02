@@ -68,6 +68,7 @@ enum Xop : uint8_t
     xop_adds      = 54,  // __adds
     xop_subs      = 55,  // __subs
     xop_muls      = 56,  // __muls
+    xop_random    = 57,  // [?]
   };
 
 ROCKET_CONST const char*

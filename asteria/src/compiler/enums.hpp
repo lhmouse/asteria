@@ -70,6 +70,7 @@ enum Punctuator : uint8_t
     punctuator_tail        = 56,  // [$]
     punctuator_arrow       = 57,  // ->
     punctuator_scope       = 58,  // ::
+    punctuator_random      = 59,  // [?]
   };
 
 ROCKET_CONST const char*
