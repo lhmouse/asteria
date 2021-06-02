@@ -41,7 +41,11 @@ extern Simple_Script repl_script;
 
 extern unsigned long repl_index;  // snippet index
 extern cow_string repl_source;  // snippet text
+extern cow_string repl_file;  // name of snippet
 extern cow_string repl_heredoc;  // heredoc terminator
+
+extern cow_string repl_last_source;
+extern cow_string repl_last_file;
 
 // These functions are defined in 'globals.cpp'.
 void

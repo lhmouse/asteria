@@ -17,8 +17,11 @@ read_execute_print_single()
     // Prepare for the next snippet.
     repl_script.set_options(repl_cmdline.opts);
     repl_source.clear();
-    cow_string heredoc = ::std::move(repl_heredoc);
-    repl_heredoc.clear();
+    repl_file.clear();
+
+    cow_string heredoc;
+    heredoc.swap(repl_heredoc);
+
     bool escape = false;
     ++repl_index;
 
@@ -128,26 +131,32 @@ read_execute_print_single()
     }
 
     // Name the snippet.
-    cow_string name(63, '/');
-    pos = (uint8_t)::sprintf(name.mut_data(), "snippet #%lu", repl_index);
-    name.erase(pos);
+    if(repl_file.empty()) {
+      char name[128];
+      pos = (uint32_t)::snprintf(name, sizeof(name), "snippet #%lu", repl_index);
+      repl_file.assign(name, pos);
+    }
 
     // The snippet might be an expression or a statement list.
+    // First, try parsing it as the former. We do this by complementing the
+    // expression to a return statement. As that expression is supposed to be
+    // start at 'line 1', the `return` statement should start at 'line 0'.
     try {
-      // First, try parsing it as the former. We do this by complementing the
-      // expression to a return statement. As that expression is supposed to be
-      // start at 'line 1', the `return` statement should start at 'line 0'.
       // Parentheses are required in case of embedded semicolons.
-      repl_script.reload_string(name, 0, "return ->(\n" + repl_source + "\n);");
+      repl_script.reload_string(repl_file, 0, "return ->(\n" + repl_source + "\n);");
     }
     catch(Parser_Error&) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
-      repl_script.reload_string(name, repl_source);
+      repl_script.reload_string(repl_file, repl_source);
     }
 
+    // Save the snippet.
+    repl_last_source.assign(repl_source.begin(), repl_source.end());
+    repl_last_file.assign(repl_file.begin(), repl_file.end());
+
     // Execute the script.
-    repl_printf("* running snippet #%lu...\n", repl_index);
+    repl_printf("* running '%s'...\n", repl_file.c_str());
     auto ref = repl_script.execute(repl_global);
 
     // Stringify the result.

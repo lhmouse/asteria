@@ -20,7 +20,11 @@ Simple_Script repl_script;
 
 unsigned long repl_index;  // snippet index
 cow_string repl_source;  // snippet text
+cow_string repl_file;  // name of snippet
 cow_string repl_heredoc;  // heredoc terminator
+
+cow_string repl_last_source;
+cow_string repl_last_file;
 
 void
 repl_printf(const char* fmt, ...) noexcept

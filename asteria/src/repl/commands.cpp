@@ -229,13 +229,55 @@ struct Command_source final
           repl_printf("! warning: missing new line at end of file\n");
 
         repl_printf("* finished loading file '%s'\n", args.c_str());
+
         repl_source = ::std::move(source);
+        repl_file = ::std::move(args);
+      }
+  };
+
+struct Command_again final
+  : public Command
+  {
+    const char*
+    cmd() const noexcept override
+      { return "again";  }
+
+    const char*
+    oneline() const noexcept override
+      { return "reload last snippet compiled successfully";  }
+
+    const char*
+    description() const noexcept override
+      { return
+//       1         2         3         4         5         6         7      |
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
+* again
+
+  Reload and execute the last snippet that has been compiled successfully.
+)'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1;
+// 4567890123456789012345678901234567890123456789012345678901234567890123456|
+//       1         2         3         4         5         6         7      |
+      }
+
+    void
+    handle(cow_string&& args) const override
+      {
+        if(args.size())
+          return repl_printf("! `again` takes no argument\n");
+
+        if(repl_last_source.empty())
+          return repl_printf("! no snippet has been compiled so far\n");
+
+        repl_source = repl_last_source;
+        repl_file = repl_last_file;
       }
   };
 
 const uptr<const Command> s_commands[] =
   {
     // Please keep this list in lexicographical order.
+    ::rocket::make_unique<Command_again>(),
     ::rocket::make_unique<Command_exit>(),
     ::rocket::make_unique<Command_help>(),
     ::rocket::make_unique<Command_heredoc>(),
@@ -279,7 +321,7 @@ handle_repl_command(cow_string&& cmd, cow_string&& args)
   {
     // Convert all letters in `cmd` into lowercase.
     ::std::for_each(cmd.mut_begin(), cmd.mut_end(),
-        [&](char& ch) { ch = ::rocket::ascii_to_lower(ch);  });
+             [&](char& ch) { ch = ::rocket::ascii_to_lower(ch);  });
 
     // Find a command and execute it.
     for(const auto& ptr : s_commands)
