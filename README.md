@@ -10,7 +10,8 @@
 
 |Compiler    |Category                   |Remarks          |
 |:-----------|:--------------------------|:----------------|
-|**GCC 10**  |:1st_place_medal:Primary   |                 |
+|**GCC 11**  |:1st_place_medal:Primary   |                 |
+|**GCC 10**  |:1st_place_medal:Primary   |10.3 has an internal compiler error about `constexpr`.  |
 |**GCC 9**   |:1st_place_medal:Primary   |                 |
 |**GCC 8**   |:1st_place_medal:Primary   |                 |
 |**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.    |
