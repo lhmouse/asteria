@@ -165,7 +165,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
     }
   }
 
-V_array::iterator&
+void
 do_merge_range(V_array::iterator& opos, Global_Context& global, Reference_Stack& stack,
                const Opt_function& kcomp, V_array::iterator ibegin, V_array::iterator iend,
                bool unique)
@@ -173,7 +173,6 @@ do_merge_range(V_array::iterator& opos, Global_Context& global, Reference_Stack&
     for(auto ipos = ibegin;  ipos != iend;  ++ipos)
       if(!unique || (do_compare(global, stack, kcomp, ipos[0], opos[-1]) != compare_equal))
         *(opos++) = ::std::move(*ipos);
-    return opos;
   }
 
 V_array::iterator
@@ -182,24 +181,14 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
   {
     ROCKET_ASSERT(output.size() >= input.size());
 
-    // Define the range information for a pair of contiguous blocks.
-    V_array::iterator bpos[2];
-    V_array::iterator bend[2];
-
     // Merge adjacent blocks of `bsize` elements.
     auto opos = output.mut_begin();
     auto ipos = input.mut_begin();
     auto iend = input.mut_end();
     while(iend - ipos > bsize) {
-      // Get the range of the first block to merge.
-      bpos[0] = ipos;
-      ipos += bsize;
-      bend[0] = ipos;
-
-      // Get the range of the second block to merge.
-      bpos[1] = ipos;
-      ipos += ::rocket::min(iend - ipos, bsize);
-      bend[1] = ipos;
+      // Get the ranges of the blocks to merge.
+      V_array::iterator bpos[2] = { ipos, ipos += bsize };
+      V_array::iterator bend[2] = { ipos, ipos += ::rocket::min(iend - ipos, bsize) };
 
       // Merge elements one by one, until either block has been exhausted, then store the index
       // of it here.
