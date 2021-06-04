@@ -2948,8 +2948,8 @@ struct Traits_apply_xop_mul
           }
 
           case tmask_string | tmask_integer: {
-            cow_string str = ::std::move(lhs.is_string() ? lhs : rhs).as_string();
-            int64_t n = (lhs.is_integer() ? lhs : rhs).as_integer();
+            cow_string str = lhs.is_string() ? ::std::move(lhs.open_string()) : rhs.as_string();
+            int64_t n = rhs.is_integer() ? rhs.as_integer() : lhs.as_integer();
 
             // Optimize for special cases.
             if(n < 0) {
