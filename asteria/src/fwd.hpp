@@ -248,18 +248,27 @@ Rcfwd<RealT>::
   = default;
 
 template<typename RealT>
-using rcfwdp = rcptr<Rcfwd<RealT>>;
+using rcfwdp = rcptr<typename ::rocket::copy_cv<
+          Rcfwd<typename ::std::remove_cv<RealT>::type>, RealT>::type>;
 
 template<typename TargetT, typename RealT>
 constexpr TargetT
-unerase_cast(const rcfwdp<RealT>& ptr)  // like `static_cast`
-  noexcept
+unerase_cast(const rcptr<Rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
+  { return static_cast<TargetT>(ptr.get());  }
+
+template<typename TargetT, typename RealT>
+constexpr TargetT
+unerase_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
   { return static_cast<TargetT>(ptr.get());  }
 
 template<typename TargetT, typename RealT>
 constexpr rcptr<TargetT>
-unerase_pointer_cast(const rcfwdp<RealT>& ptr)  // like `static_pointer_cast`
-  noexcept
+unerase_pointer_cast(const rcptr<Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
+  { return static_pointer_cast<TargetT>(ptr);  }
+
+template<typename TargetT, typename RealT>
+constexpr rcptr<TargetT>
+unerase_pointer_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<TargetT>(ptr);  }
 
 // Standard I/O synchronization
