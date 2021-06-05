@@ -156,7 +156,7 @@ do_finish_call_slow(Global_Context& global)
         // unpacking the last frame (i.e. the last call did not return), so the last
         // frame does not have its enclosing function set.
         if(auto qcall = ptca->caller_opt())
-          except.push_frame_func(qcall->sloc, qcall->func);
+          except.push_frame_func(qcall->sloc(), qcall->func());
       }
       throw;
     }

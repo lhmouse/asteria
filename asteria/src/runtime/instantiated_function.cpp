@@ -80,7 +80,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
           break;
 
         ROCKET_ASSERT(ptca.use_count() == 2);
-        ptca->set_caller({ this->m_zvarg->sloc(), this->m_zvarg->func() });
+        ptca->set_caller(this->m_zvarg);
         break;
       }
 
