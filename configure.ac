@@ -15,9 +15,16 @@ LT_INIT([disable-static])
 AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_ERROR(`clock_gettime()` not found)])
 AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR(PCRE2 library not found)])
 
-## Set up optional features
-AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_NOTICE(libtcmalloc is recommended)])
+## Check for tcmalloc
+AC_ARG_ENABLE([tcmalloc], AS_HELP_STRING([--disable-tcmalloc],
+  [don't attempt to link against libtcmalloc when it is available]))
 
+AM_CONDITIONAL([enable_tcmalloc], [test "${enable_tcmalloc}" != "no"])
+AM_COND_IF([enable_tcmalloc], [
+  AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_NOTICE(libtcmalloc is recommended)])
+])
+
+## Check for assertions
 AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable assertions]))
 
 AM_CONDITIONAL([enable_debug_checks], [test "${enable_debug_checks}" == "yes"])
@@ -27,6 +34,7 @@ AM_COND_IF([enable_debug_checks], [
   AC_DEFINE([_DEBUG], 1, [Define to 1 to enable debug checks of MSVC standard library.])
 ])
 
+## Check for sanitizers
 AC_ARG_ENABLE([sanitizer], AS_HELP_STRING([--enable-sanitizer=address|thread],
   [enable sanitizer (address sanitizer and thread sanitizer cannot be enabled at the same time)]))
 
