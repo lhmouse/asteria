@@ -189,11 +189,11 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
       // Get the ranges of the blocks to merge.
       V_array::iterator bpos[2] = { ipos, ipos += bsize };
       V_array::iterator bend[2] = { ipos, ipos += ::rocket::min(iend - ipos, bsize) };
-
-      // Merge elements one by one, until either block has been exhausted, then store the index
-      // of it here.
       size_t bi;
+
       for(;;) {
+        // Merge elements one by one, until either block has been exhausted, then store its index
+        // in `bi`.
         auto cmp = do_compare(global, stack, kcomp, *(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
           ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)",
@@ -205,10 +205,13 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
 
         // Move this element unless uniqueness is requested and it is equal to the previous
         // output.
-        bool discard = unique && (opos != output.begin())
-                       && (do_compare(global, stack, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
+        bool discard = false;
+        if(unique && (opos != output.begin()))
+          discard = (do_compare(global, stack, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
+
         if(!discard)
           *(opos++) = ::std::move(*(bpos[bi]));
+
         bpos[bi]++;
 
         // When uniqueness is requested, if elements from the two blocks are equal, discard the one
@@ -217,15 +220,14 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
           size_t oi = bi ^ 1;
           bpos[oi]++;
           if(bpos[oi] == bend[oi]) {
-            // `bi` is the index of the block that has been exhausted.
             bi = oi;
             break;
           }
         }
         if(bpos[bi] == bend[bi])
-          // `bi` is the index of the block that has been exhausted.
           break;
       }
+
       // Move all elements from the other block.
       ROCKET_ASSERT(opos != output.begin());
       bi ^= 1;
