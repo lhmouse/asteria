@@ -8,6 +8,15 @@
 namespace asteria {
 namespace {
 
+void
+do_lowercase_string(cow_string& str)
+  {
+    char ch;
+    for(size_t k = 0;  k != str.size();  ++k)
+      if((ch = ::rocket::ascii_to_lower(str[k])) != str[k])
+        str.mut(k) = ch;
+  }
+
 struct Command
   {
     virtual
@@ -289,11 +298,9 @@ Command_help::
 handle(cow_string&& args) const
   {
     if(!args.empty()) {
-      // Convert all letters in `args` into lowercase.
-      ::std::for_each(args.mut_begin(), args.mut_end(),
-          [&](char& ch) { ch = ::rocket::ascii_to_lower(ch);  });
-
       // Search for the argument.
+      do_lowercase_string(args);
+
       for(const auto& ptr : s_commands)
         if(ptr->cmd() == args)
           return repl_printf("%s", ptr->description());
@@ -319,11 +326,9 @@ handle(cow_string&& args) const
 void
 handle_repl_command(cow_string&& cmd, cow_string&& args)
   {
-    // Convert all letters in `cmd` into lowercase.
-    ::std::for_each(cmd.mut_begin(), cmd.mut_end(),
-             [&](char& ch) { ch = ::rocket::ascii_to_lower(ch);  });
-
     // Find a command and execute it.
+    do_lowercase_string(cmd);
+
     for(const auto& ptr : s_commands)
       if(ptr->cmd() == cmd)
         return ptr->handle(::std::move(args));
