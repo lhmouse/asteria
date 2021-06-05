@@ -90,7 +90,7 @@ do_parse_command_line(int argc, char** argv)
     opt<int8_t> optimize;
 
     opt<cow_string> path;
-    cow_vector<cow_string> args;
+    cow_vector<Value> args;
 
     // Check for some common options before calling `getopt()`.
     if(argc > 1) {
@@ -158,34 +158,34 @@ do_parse_command_line(int argc, char** argv)
     if(optind < argc) {
       // The first non-option argument is the filename to execute.
       // `-` is not special.
-      path = cow_string(argv[optind]);
+      path = V_string(argv[optind]);
 
       // All subsequent arguments are passed to the script verbatim.
-      ::std::for_each(argv + optind + 1, argv + argc,
-          [&](const char* arg) { args.emplace_back(cow_string(arg));  });
+      for(int k = optind + 1;  k != argc;  ++k)
+        args.emplace_back(V_string(argv[k]));
     }
 
     // Verbose mode is off by default.
     if(verbose)
-      repl_cmdline.verbose = *verbose;
+      repl_verbose = *verbose;
 
     // Interactive mode is enabled when no FILE is given (not even `-`) and
     // standard input is connected to a terminal.
     if(interactive)
-      repl_cmdline.interactive = *interactive;
+      repl_interactive = *interactive;
     else
-      repl_cmdline.interactive = !path && ::isatty(STDIN_FILENO);
+      repl_interactive = !path && ::isatty(STDIN_FILENO);
 
     // The default optimization level is `2`.
     // Note again that `-O` without an argument is equivalent to `-O1`, which
     // effectively decreases optimization in comparison to when it wasn't
     // specified.
     if(optimize)
-      repl_cmdline.opts.optimization_level = *optimize;
+      repl_opts.optimization_level = *optimize;
 
     // These arguments are always overwritten.
-    repl_cmdline.path = path.move_value_or(sref("-"));
-    repl_cmdline.args = ::std::move(args);
+    repl_file = path.move_value_or(sref("-"));
+    repl_args = ::std::move(args);
   }
 
 }  // namespace
@@ -208,14 +208,14 @@ main(int argc, char** argv)
     // In non-interactive mode, we would like to run as fast as possible,
     // unless verbosity is requested. In interactive mode, hooks are always
     // installed.
-    if(repl_cmdline.verbose || repl_cmdline.interactive)
+    if(repl_verbose || repl_interactive)
       install_signal_and_verbose_hooks();
 
-    if(repl_cmdline.verbose)
-      repl_cmdline.opts.verbose_single_step_traps = true;
+    if(repl_verbose)
+      repl_opts.verbose_single_step_traps = true;
 
     // In non-include mode, read the script, execute it, then exit.
-    if(!repl_cmdline.interactive)
+    if(!repl_interactive)
       load_and_execute_single_noreturn();
 
     // Print the REPL banner.

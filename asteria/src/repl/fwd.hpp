@@ -5,6 +5,7 @@
 #define ASTERIA_REPL_FWD_HPP_
 
 #include "../fwd.hpp"
+#include "../value.hpp"
 
 namespace asteria {
 
@@ -19,22 +20,11 @@ enum Exit_Status : uint8_t
     exit_non_integer        = 5,
   };
 
-// These are command-line options parsed from `argv`.
-struct Command_Line
-  {
-    // options
-    bool verbose = false;
-    bool interactive = false;
-    Compiler_Options opts;
-
-    // non-options
-    cow_string path;
-    cow_vector<cow_string> args;
-  };
-
 // These are global variables defined in 'globals.cpp'.
 extern const char repl_version[];
-extern Command_Line repl_cmdline;
+extern bool repl_verbose;
+extern bool repl_interactive;
+extern Compiler_Options repl_opts;
 
 extern Global_Context repl_global;
 extern Simple_Script repl_script;
@@ -42,6 +32,7 @@ extern Simple_Script repl_script;
 extern unsigned long repl_index;  // snippet index
 extern cow_string repl_source;  // snippet text
 extern cow_string repl_file;  // name of snippet
+extern cow_vector<Value> repl_args;  // script arguments
 extern cow_string repl_heredoc;  // heredoc terminator
 
 extern cow_string repl_last_source;

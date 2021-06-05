@@ -12,8 +12,9 @@
 namespace asteria {
 
 const char repl_version[] = PACKAGE_STRING;
-::rocket::atomic<bool> repl_interrupted;
-Command_Line repl_cmdline;
+bool repl_verbose;
+bool repl_interactive;
+Compiler_Options repl_opts;
 
 Global_Context repl_global;
 Simple_Script repl_script;
@@ -21,6 +22,7 @@ Simple_Script repl_script;
 unsigned long repl_index;  // snippet index
 cow_string repl_source;  // snippet text
 cow_string repl_file;  // name of snippet
+cow_vector<Value> repl_args;  // script arguments
 cow_string repl_heredoc;  // heredoc terminator
 
 cow_string repl_last_source;
@@ -47,7 +49,7 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
 
     // Perform normal exit if verbose mode is on.
     // This helps catching memory leaks upon exit.
-    if(repl_cmdline.verbose)
+    if(repl_verbose)
       ::exit(static_cast<int>(stat));
 
     // Perform fast exit by default.

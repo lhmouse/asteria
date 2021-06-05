@@ -30,7 +30,7 @@ class Verbose_Hooks final
     do_verbose_trace(const Source_Location& sloc, const char* templ,
                      const ParamsT&... params)
       {
-        if(ROCKET_EXPECT(!repl_cmdline.verbose))
+        if(ROCKET_EXPECT(!repl_verbose))
           return;
 
         // Compose the string to write.

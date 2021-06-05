@@ -13,23 +13,21 @@ void
 load_and_execute_single_noreturn()
   try {
     // Prepare the parser.
-    repl_script.set_options(repl_cmdline.opts);
+    repl_script.set_options(repl_opts);
 
     // Load and parse the script.
     try {
-      if(repl_cmdline.path == "-")
+      if(repl_file == "-")
         repl_script.reload_stdin();
       else
-        repl_script.reload_file(repl_cmdline.path.c_str());
+        repl_script.reload_file(repl_file.c_str());
     }
     catch(exception& stdex) {
       exit_printf(exit_parser_error, "! error: %s\n", stdex.what());
     }
 
     // Execute the script, passing all command-line arguments to it.
-    auto ref = repl_script.execute(repl_global,
-                   cow_vector<Value>(repl_cmdline.args.begin(),
-                                     repl_cmdline.args.end()));
+    auto ref = repl_script.execute(repl_global, ::std::move(repl_args));
 
     // If the script exits without returning a value, success is assumed.
     if(ref.is_void())

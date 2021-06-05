@@ -15,9 +15,10 @@ void
 read_execute_print_single()
   try {
     // Prepare for the next snippet.
-    repl_script.set_options(repl_cmdline.opts);
+    repl_script.set_options(repl_opts);
     repl_source.clear();
     repl_file.clear();
+    repl_args.clear();
 
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
@@ -157,7 +158,7 @@ read_execute_print_single()
 
     // Execute the script.
     repl_printf("* running '%s'...\n", repl_file.c_str());
-    auto ref = repl_script.execute(repl_global);
+    auto ref = repl_script.execute(repl_global, ::std::move(repl_args));
 
     // Stringify the result.
     if(ref.is_void())
