@@ -10,7 +10,7 @@ namespace asteria {
 
 void
 Rcbase::
-vtable_key_function() noexcept
+vtable_key_function_sLBHstEX() noexcept
   {
   }
 

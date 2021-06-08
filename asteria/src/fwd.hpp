@@ -210,7 +210,7 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
       = default;
 
     virtual void
-    vtable_key_function() noexcept;
+    vtable_key_function_sLBHstEX() noexcept;
   };
 
 template<typename RealT>
@@ -228,8 +228,8 @@ struct Rcfwd : virtual Rcbase
     operator=(const Rcfwd&) noexcept
       = default;
 
-    virtual
-    ~Rcfwd();
+    virtual void
+    vtable_key_function_GklPAslB() noexcept;
 
     template<typename XRealT = RealT>
     rcptr<const XRealT>
@@ -243,9 +243,11 @@ struct Rcfwd : virtual Rcbase
   };
 
 template<typename RealT>
+void
 Rcfwd<RealT>::
-~Rcfwd()
-  = default;
+vtable_key_function_GklPAslB() noexcept
+  {
+  }
 
 template<typename RealT>
 using rcfwdp = rcptr<typename ::rocket::copy_cv<
