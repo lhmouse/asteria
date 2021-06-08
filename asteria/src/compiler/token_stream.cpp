@@ -532,6 +532,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
     // Get a string literal.
     size_t tlen = 1;
     cow_string val;
+
     for(;;) {
       // Read a character.
       char next = reader.peek(tlen);
@@ -558,10 +559,11 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       if(next == 0)
         throw Parser_Error(parser_status_escape_sequence_incomplete,
                            reader.tell(), tlen);
+
       tlen += 1;
+      int xcnt = 0;
 
       // Translate it.
-      int xcnt = 0;
       switch(next) {
         case '\'':
         case '\"':
