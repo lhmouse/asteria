@@ -547,7 +547,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
         // The end of this string is encountered. Finish.
         break;
       }
-      if(!escapable || (next != '\\')) {
+      else if(!escapable || (next != '\\')) {
         // This character does not start an escape sequence. Copy it as is.
         val.push_back(next);
         continue;
