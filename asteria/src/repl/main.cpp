@@ -228,7 +228,7 @@ main(int argc, char** argv)
   Global locale is now `%s`.
 
   All REPL commands start with a `:`. Type `:help` for available commands.
-  Multiple lines may be joined together using trailing backslashes.
+  Line breaks within a single snippet shall be escaped with backslashes.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
