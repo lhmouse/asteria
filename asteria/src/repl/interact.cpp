@@ -47,20 +47,14 @@ read_execute_print_single()
           // unescaped line feed.
           if(!escape)
             break;
-
-          // REPL commands can't straddle multiple lines.
-          if(!repl_source.empty() && (repl_source.front() == ':'))
-            break;
         }
-        else {
+        else if(repl_source.ends_with(heredoc)) {
           // In heredoc mode, the current snippet is terminated by a line
           // consisting of the user-defined terminator, which is not part of
           // the snippet and must be removed.
-          if(repl_source.ends_with(heredoc)) {
-            repl_source.erase(repl_source.size() - heredoc.size());
-            heredoc.clear();
-            break;
-          }
+          repl_source.pop_back(heredoc.size());
+          heredoc.clear();
+          break;
         }
 
         // The line feed should be preserved. It'll be appended later.
@@ -73,10 +67,9 @@ read_execute_print_single()
         if(escape)
           repl_source.push_back('\\');
 
-        if(ch == '\\') {
-          escape = true;
+        escape = (ch == '\\');
+        if(escape)
           continue;
-        }
       }
 
       // Append the character.
