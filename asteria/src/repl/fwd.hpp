@@ -59,7 +59,10 @@ install_signal_and_verbose_hooks();
 [[noreturn]] void
 load_and_execute_single_noreturn();
 
-// This function is defined in 'commands.cpp'.
+// These functions are defined in 'commands.cpp'.
+void
+prepare_repl_commands();
+
 void
 handle_repl_command(cow_string&& cmdline);
 

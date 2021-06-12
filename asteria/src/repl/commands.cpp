@@ -8,15 +8,6 @@
 namespace asteria {
 namespace {
 
-void
-do_lowercase_string(cow_string& str)
-  {
-    char ch;
-    for(size_t k = 0;  k != str.size();  ++k)
-      if((ch = ::rocket::ascii_to_lower(str[k])) != str[k])
-        str.mut(k) = ch;
-  }
-
 struct Command
   {
     virtual
@@ -46,6 +37,24 @@ struct Command
 Command::
 ~Command()
   {
+  }
+
+cow_vector<uptr<const Command>> s_commands;
+
+void
+do_lowercase_string(cow_string& str)
+  {
+    char ch;
+    for(size_t k = 0;  k != str.size();  ++k)
+      if((ch = ::rocket::ascii_to_lower(str[k])) != str[k])
+        str.mut(k) = ch;
+  }
+
+template<typename CommandT>
+void
+do_add_command()
+  {
+    s_commands.emplace_back(::rocket::make_unique<CommandT>());
   }
 
 struct Command_exit final
@@ -122,7 +131,31 @@ struct Command_help final
       }
 
     void
-    handle(cow_string&& args) const override;
+    handle(cow_string&& args) const override
+      {
+        if(!args.empty()) {
+          // Search for the argument.
+          do_lowercase_string(args);
+
+          for(const auto& ptr : s_commands)
+            if(ptr->cmd() == args)
+              return repl_printf("%s", ptr->description());
+
+          // Report the failure, followed by all commands for reference.
+          repl_printf("! unknown command `%s`\n", args.c_str());
+        }
+
+        // Get the maximum length of commands.
+        size_t max_len = 8;
+        for(const auto& ptr : s_commands)
+          max_len = ::rocket::max(max_len, ::std::strlen(ptr->cmd()));
+
+        // List all commands.
+        repl_printf("* list of commands:\n");
+        for(const auto& ptr : s_commands)
+          repl_printf("  %-*s  %s\n", static_cast<int>(max_len), ptr->cmd(),
+                                      ptr->oneline());
+      }
   };
 
 struct Command_heredoc final
@@ -283,45 +316,23 @@ struct Command_again final
       }
   };
 
-const uptr<const Command> s_commands[] =
-  {
-    // Please keep this list in lexicographical order.
-    ::rocket::make_unique<Command_again>(),
-    ::rocket::make_unique<Command_exit>(),
-    ::rocket::make_unique<Command_help>(),
-    ::rocket::make_unique<Command_heredoc>(),
-    ::rocket::make_unique<Command_source>(),
-  };
+}  // namesapce
 
 void
-Command_help::
-handle(cow_string&& args) const
+prepare_repl_commands()
   {
-    if(!args.empty()) {
-      // Search for the argument.
-      do_lowercase_string(args);
+    if(s_commands.size())
+      return;
 
-      for(const auto& ptr : s_commands)
-        if(ptr->cmd() == args)
-          return repl_printf("%s", ptr->description());
-
-      // Report the failure, followed by all commands for reference.
-      repl_printf("! unknown command `%s`\n", args.c_str());
-    }
-
-    // Get the maximum length of commands.
-    size_t max_len = 8;
-    for(const auto& ptr : s_commands)
-      max_len = ::rocket::max(max_len, ::std::strlen(ptr->cmd()));
-
-    // List all commands.
-    repl_printf("* list of commands:\n");
-    for(const auto& ptr : s_commands)
-      repl_printf("  %-*s  %s\n", static_cast<int>(max_len), ptr->cmd(),
-                                  ptr->oneline());
+    // Create command interfaces. Note the list of commands is
+    // printed according to this vector, so please keep entries
+    // in lexicographical order.
+    do_add_command<Command_again>();
+    do_add_command<Command_exit>();
+    do_add_command<Command_help>();
+    do_add_command<Command_heredoc>();
+    do_add_command<Command_source>();
   }
-
-}  // namesapce
 
 void
 handle_repl_command(cow_string&& cmdline)

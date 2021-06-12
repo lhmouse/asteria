@@ -236,7 +236,8 @@ main(int argc, char** argv)
       current_locale
     );
 
-    // This the main read-execute-print loop.
+    prepare_repl_commands();
+
     for(;;) {
       // Check for errors.
       if(::ferror(stdin))
@@ -250,7 +251,6 @@ main(int argc, char** argv)
       const StdIO_Sentry sentry;
       ::fputc('\n', stderr);
       read_execute_print_single();
-
     }
   }
   catch(exception& stdex) {
