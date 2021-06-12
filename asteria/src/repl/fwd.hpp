@@ -61,7 +61,7 @@ load_and_execute_single_noreturn();
 
 // This function is defined in 'commands.cpp'.
 void
-handle_repl_command(cow_string&& cmd, cow_string&& args);
+handle_repl_command(cow_string&& cmdline);
 
 // This function is defined in 'interact.cpp'.
 void

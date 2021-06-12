@@ -324,14 +324,21 @@ handle(cow_string&& args) const
 }  // namesapce
 
 void
-handle_repl_command(cow_string&& cmd, cow_string&& args)
+handle_repl_command(cow_string&& cmdline)
   {
+    // TODO
+    size_t pos = cmdline.find_first_of(" \t");
+    auto cmd = cmdline.substr(0, pos);
+
+    pos = cmdline.find_first_not_of(pos, " \t");
+    cmdline.erase(0, pos);
+
     // Find a command and execute it.
     do_lowercase_string(cmd);
 
     for(const auto& ptr : s_commands)
       if(ptr->cmd() == cmd)
-        return ptr->handle(::std::move(args));
+        return ptr->handle(::std::move(cmdline));
 
     // Ignore this command.
     repl_printf(

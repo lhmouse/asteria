@@ -20,40 +20,38 @@ read_execute_print_single()
     repl_file.clear();
     repl_args.clear();
 
-    cow_string heredoc;
-    heredoc.swap(repl_heredoc);
-
-    bool escape = false;
+    bool escaped = false;
     ++repl_index;
 
+    cow_string heredoc;
+    heredoc.swap(repl_heredoc);
+    if(!heredoc.empty())
+      heredoc.insert(0, 1, '\n');
+
     // Prompt for the first line.
-    int ch;
-    int indent;
     long line = 0;
+    int indent;
     repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
 
     for(;;) {
       // Read a character. Break upon read errors.
-      ch = ::fgetc(stdin);
+      int ch = ::fgetc(stdin);
       if(ch == EOF) {
         ::fputc('\n', stderr);
         break;
       }
 
-      // Check for termination.
       if(ch == '\n') {
-        if(heredoc.empty()) {
-          // In line input mode, the current snippet is terminated by an
-          // unescaped line feed.
-          if(!escape)
-            break;
-        }
-        else if(repl_source.ends_with(heredoc)) {
-          // In heredoc mode, the current snippet is terminated by a line
-          // consisting of the user-defined terminator, which is not part of
-          // the snippet and must be removed.
+        // In line input mode, the current snippet is terminated by an
+        // unescaped line feed.
+        if(heredoc.empty() && !escaped)
+          break;
+
+        // In heredoc mode, it is terminated by a line consisting of the
+        // user-defined terminator, which is not part of the snippet and
+        // must be removed.
+        if(!heredoc.empty() && repl_source.ends_with(heredoc)) {
           repl_source.pop_back(heredoc.size());
-          heredoc.clear();
           break;
         }
 
@@ -62,19 +60,19 @@ read_execute_print_single()
         repl_printf("%*lu> ", indent, ++line);
       }
       else if(heredoc.empty()) {
-        // In line input mode, backslashes that precede line feeds are deleted.
-        // Those that do not precede line feeds are kept as is.
-        if(escape)
+        // In line input mode, backslashes that precede line feeds are
+        // deleted; those that do not precede line feeds are kept as is.
+        if(escaped)
           repl_source.push_back('\\');
 
-        escape = (ch == '\\');
-        if(escape)
+        escaped = (ch == '\\');
+        if(escaped)
           continue;
       }
 
       // Append the character.
       repl_source.push_back(static_cast<char>(ch));
-      escape = false;
+      escaped = false;
     }
 
     // Discard this snippet if Ctrl-C was received.
@@ -92,44 +90,25 @@ read_execute_print_single()
       return;
 
     // If user input was empty, don't do anything.
-    size_t pos = repl_source.find_first_not_of(" \f\n\r\t\v");
+    bool is_cmd = heredoc.empty() && (repl_source[0] == ':');
+    size_t pos = repl_source.find_first_not_of(is_cmd, " \f\n\r\t\v");
     if(pos == cow_string::npos)
       return;
 
-    // Check for REPL commands.
-    if(repl_source.front() == ':') {
-      repl_source.erase(0, 1);
-
-      // Remove leading spaces.
-      pos = repl_source.find_first_not_of(" \t");
-      repl_source.erase(0, pos);
-      if(repl_source.empty())
-        return;
-
-      // Get the command name, which is terminated by a space.
-      pos = repl_source.find_first_of(" \t");
-      auto cmd = repl_source.substr(0, pos);
-
-      // Erase separating space characterss, as well as trailing ones.
-      pos = repl_source.find_first_not_of(pos, " \t");
-      repl_source.erase(0, pos);
-      pos = repl_source.find_last_not_of(" \t");
-      auto args = repl_source.substr(0, pos + 1);
-
+    if(is_cmd) {
       // Process the command.
       // If the command fills something into `repl_source`, execute it.
+      auto cmdline = repl_source.substr(pos);
       repl_source.clear();
-      handle_repl_command(::std::move(cmd), ::std::move(args));
+      handle_repl_command(::std::move(cmdline));
       if(repl_source.empty())
         return;
     }
 
     // Name the snippet.
-    if(repl_file.empty()) {
-      char name[128];
-      pos = (uint32_t)::snprintf(name, sizeof(name), "snippet #%lu", repl_index);
-      repl_file.assign(name, pos);
-    }
+    if(repl_file.empty())
+      repl_file.resize(static_cast<uint32_t>(
+          ::sprintf(repl_file.resize(127).mut_data(), "snippet #%lu", repl_index)));
 
     // The snippet might be an expression or a statement list.
     // First, try parsing it as the former. We do this by complementing the
