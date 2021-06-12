@@ -78,7 +78,7 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
     return text;
   }
 
-constexpr char s_spaces[] = " \f\n\r\t\v";
+constexpr auto s_spaces = sref(" \f\n\r\t\v");
 
 }  // namespace
 
@@ -626,6 +626,7 @@ std_numeric_parse_integer(V_string text)
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW("blank string");
+
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 
@@ -649,6 +650,7 @@ std_numeric_parse_real(V_string text, Opt_boolean saturating)
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW("blank string");
+
     auto bptr = text.data() + tpos;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 

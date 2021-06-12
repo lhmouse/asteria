@@ -283,6 +283,7 @@ do_xstrchr(const char* str, char c) noexcept
     for(auto p = str;  *p != 0;  ++p)
       if(*p == c)
         return p;
+
     return nullptr;
   }
 
@@ -305,10 +306,8 @@ do_url_encode(const V_string& data, bool lcase)
         if(do_is_url_query_char(c))
           continue;
       }
-      else {
-        if(do_is_url_unreserved_char(c))
-          continue;
-      }
+      else if(do_is_url_unreserved_char(c))
+        continue;
 
       // Escape it.
       char rep[3];
@@ -983,6 +982,7 @@ std_string_hex_decode(V_string text)
       pos = do_xstrchr(s_base16_table, c);
       if(!pos)
         ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
 
       // Decode the current group if it is complete.
@@ -1071,7 +1071,6 @@ std_string_base32_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW("incomplete base32 group");
-
         continue;
       }
       reg <<= 5;
@@ -1189,7 +1188,6 @@ std_string_base64_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW("incomplete base64 group");
-
         continue;
       }
       reg <<= 6;
