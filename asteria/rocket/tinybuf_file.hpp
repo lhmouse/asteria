@@ -275,6 +275,10 @@ class basic_tinybuf_file
       {
         this->do_purge_areas();
 
+        // Disable stdio buffering, as we provide our own.
+        if(file)
+          ::setbuf(file, nullptr);
+
         // Discard the input buffer and reset the file handle, ignoring any errors.
         this->m_goff = -1;
         this->m_file = ::std::move(file);
@@ -283,14 +287,7 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     reset(handle_type fp, closer_type cl) noexcept
-      {
-        this->do_purge_areas();
-
-        // Discard the input buffer and reset the file handle, ignoring any errors.
-        this->m_goff = -1;
-        this->m_file.reset(fp, cl);
-        return *this;
-      }
+      { return this->reset(unique_posix_file(fp, cl));  }
 
     basic_tinybuf_file&
     open(const char* path, open_mode mode)
@@ -353,20 +350,12 @@ class basic_tinybuf_file
 
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
-
-        // Disable stdio buffering, as we provide our own.
-        ::setbuf(file, nullptr);
-
-        // Discard the input buffer and close the file, ignoring any errors.
         return this->reset(::std::move(file));
       }
 
     basic_tinybuf_file&
     close() noexcept
-      {
-        // Discard the input buffer and close the file, ignoring any errors.
-        return this->reset(nullptr, nullptr);
-      }
+      { return this->reset(nullptr, nullptr);  }
 
     basic_tinybuf_file&
     swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<file_buffer>::value)
