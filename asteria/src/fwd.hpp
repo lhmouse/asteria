@@ -371,9 +371,13 @@ class cow_opaque
     cow_opaque(nullptr_t = nullptr) noexcept
       { }
 
-    template<typename OpaqueT>
-    constexpr
-    cow_opaque(rcptr<OpaqueT> sptr) noexcept
+    template<typename OpaqT>
+    cow_opaque(const rcptr<OpaqT>& sptr) noexcept
+      : m_sptr(sptr)
+      { }
+
+    template<typename OpaqT>
+    cow_opaque(rcptr<OpaqT>&& sptr) noexcept
       : m_sptr(::std::move(sptr))
       { }
 
@@ -502,13 +506,17 @@ class cow_function
       { }
 
     constexpr
-    cow_function(const char* desc, simple_function& func) noexcept
+    cow_function(const char* desc, simple_function* func) noexcept
       : m_desc(desc), m_fptr(func)
       { }
 
-    template<typename FunctionT>
-    constexpr
-    cow_function(rcptr<FunctionT> sptr) noexcept
+    template<typename FuncT>
+    cow_function(const rcptr<FuncT>& sptr) noexcept
+      : m_sptr(sptr)
+      { }
+
+    template<typename FuncT>
+    cow_function(rcptr<FuncT>&& sptr) noexcept
       : m_sptr(::std::move(sptr))
       { }
 
@@ -543,8 +551,10 @@ class cow_function
 
     const type_info&
     type() const
-      { return this->m_fptr ? typeid(simple_function)
-                            : typeid(*(this->m_sptr.get()));  }  // may throw `std::bad_typeid`
+      {
+        return this->m_fptr ? typeid(simple_function)
+                            : typeid(*(this->m_sptr.get()));  // may throw `std::bad_typeid`
+      }
 
     tinyfmt&
     describe(tinyfmt& fmt) const;
