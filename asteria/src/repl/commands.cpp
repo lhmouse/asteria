@@ -324,9 +324,9 @@ prepare_repl_commands()
     if(s_commands.size())
       return;
 
-    // Create command interfaces. Note the list of commands is
-    // printed according to this vector, so please keep entries
-    // in lexicographical order.
+    // Create command interfaces. Note the list of commands is printed
+    // according to this vector, so please ensure elements are sorted
+    // lexicographically.
     do_add_command<Command_again>();
     do_add_command<Command_exit>();
     do_add_command<Command_help>();
