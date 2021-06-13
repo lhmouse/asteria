@@ -4155,17 +4155,15 @@ struct Traits_import_call
         if(path.empty())
           ASTERIA_THROW("empty path specified for `import`");
 
-        // Rewrite the path if it is not absolute.
-        if((path[0] != '/') && (sp.sloc.c_file()[0] == '/')) {
-          path.assign(sp.sloc.file());
-          path.erase(path.rfind('/') + 1);
-          path.append(value.as_string());
-        }
+        if((path[0] != '/') && (sp.sloc.file()[0] == '/'))
+          path.assign(sp.sloc.file())
+              .erase(path.rfind('/') + 1)
+              .append(value.as_string());
 
-        auto abspath = ::rocket::make_unique_handle(
-                             ::realpath(path.safe_c_str(), nullptr), ::free);
+        auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr),
+                                                    ::free);
         if(!abspath)
-          ASTERIA_THROW("could not open script file '$2'\n"
+          ASTERIA_THROW("could not open module file '$2'\n"
                         "[`realpath()` failed: $1]",
                         format_errno(errno), path);
 
