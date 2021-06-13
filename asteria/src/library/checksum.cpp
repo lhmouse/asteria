@@ -1091,10 +1091,12 @@ do_hash_file(const V_string& path)
 
     // Allocate the I/O buffer.
     size_t nbuf = static_cast<size_t>(stb.st_blksize | 0x1000);
-    auto pbuf = ::rocket::make_unique_handle(new char[nbuf], [](char* p) { delete[] p;  });
-    HasherT h;
+    auto pbuf = ::rocket::make_unique_handle(static_cast<char*>(::operator new(nbuf)),
+                                             static_cast<void (*)(void*)>(::operator delete));
 
     // Read bytes from the file and hash them.
+    HasherT h;
+
     ::ssize_t nread;
     while((nread = ::read(fd, pbuf, nbuf)) > 0)
       h.update(pbuf, static_cast<size_t>(nread));
@@ -1104,7 +1106,6 @@ do_hash_file(const V_string& path)
                     "[`read()` failed: $1]",
                     format_errno(errno), path);
 
-    // Finalize the hasher.
     return h.finish();
   }
 
