@@ -20,6 +20,7 @@ read_execute_print_single()
     repl_file.clear();
     repl_args.clear();
 
+    char strbuf[64];
     bool escaped = false;
     ++repl_index;
 
@@ -91,7 +92,7 @@ read_execute_print_single()
 
     // If user input was empty, don't do anything.
     bool is_cmd = heredoc.empty() && (repl_source[0] == ':');
-    size_t pos = repl_source.find_first_not_of(is_cmd, " \f\n\r\t\v");
+    size_t pos = repl_source.find_first_not_of(is_cmd, sref(" \f\n\r\t\v"));
     if(pos == cow_string::npos)
       return;
 
@@ -105,26 +106,40 @@ read_execute_print_single()
         return;
     }
 
-    // Name the snippet.
-    if(repl_file.empty())
-      repl_file.resize(static_cast<uint32_t>(
-          ::sprintf(repl_file.resize(127).mut_data(), "snippet #%lu", repl_index)));
-
     // The snippet might be an expression or a statement list.
     // First, try parsing it as the former. We do this by complementing the
     // expression to a return statement. As that expression is supposed to be
     // start at 'line 1', the `return` statement should start at 'line 0'.
     try {
+      cow_string compl_source;
+      compl_source.reserve(repl_source.size() + 100);
+
       // Parentheses are required in case of embedded semicolons.
-      repl_script.reload_string(repl_file, 0, "return ->(\n" + repl_source + "\n);");
+      compl_source += "return ->(\n";
+      compl_source += repl_source;
+      compl_source += "\n);";
+
+      cow_string real_name = repl_file;
+      if(real_name.empty())
+        ::sprintf(strbuf, "expression #%lu", repl_index),
+          real_name.append(strbuf);
+
+      repl_script.reload_string(real_name, 0, compl_source);
+      repl_file = ::std::move(real_name);
     }
     catch(Parser_Error&) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
-      repl_script.reload_string(repl_file, repl_source);
+      cow_string real_name = repl_file;
+      if(real_name.empty())
+        ::sprintf(strbuf, "snippet #%lu", repl_index),
+          real_name.append(strbuf);
+
+      repl_script.reload_string(real_name, repl_source);
+      repl_file = ::std::move(real_name);
     }
 
-    // Save the snippet.
+    // Save the accepted snippet.
     repl_last_source.assign(repl_source.begin(), repl_source.end());
     repl_last_file.assign(repl_file.begin(), repl_file.end());
 
