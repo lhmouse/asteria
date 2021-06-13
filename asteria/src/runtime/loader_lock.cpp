@@ -19,7 +19,7 @@ Loader_Lock::
 do_lock_stream(const char* path)
   {
     // Open the file first.
-    ::rocket::unique_posix_file file(::fopen(path, "r"), ::fclose);
+    ::rocket::unique_posix_file file(::fopen(path, "rb"), ::fclose);
     if(!file)
       ASTERIA_THROW("could not open script file '$2'\n"
                     "[`fopen()` failed: $1]",
@@ -39,6 +39,7 @@ do_lock_stream(const char* path)
     auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));
     if(!result.second)
       ASTERIA_THROW("recursive import denied (loading '$1', file ID `$2`)", path, skey);
+
     return &*(result.first);
   }
 
