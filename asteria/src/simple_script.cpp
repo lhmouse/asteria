@@ -105,9 +105,9 @@ execute(Global_Context& global, cow_vector<Value>&& vals) const
   {
     // Push all arguments backwards as temporaries.
     Reference_Stack stack;
-    for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it)
+    for(auto it = vals.mut_begin();  it != vals.end();  ++it)
       stack.emplace_back_uninit()
-        .set_temporary(::std::move(*it));
+          .set_temporary(::std::move(*it));
 
     return this->execute(global, ::std::move(stack));
   }
