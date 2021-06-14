@@ -43,6 +43,12 @@ read_execute_print_single()
       }
 
       if(ch == '\n') {
+        // REPL commands can't straddle multiple lines.
+        if(heredoc.empty() && escaped && (repl_source[0] == ':')) {
+          repl_printf("! dangling \\ at end of command\n");
+          return;
+        }
+
         // In line input mode, the current snippet is terminated by an
         // unescaped line feed.
         if(heredoc.empty() && !escaped)
