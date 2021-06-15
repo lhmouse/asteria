@@ -405,6 +405,22 @@ class cow_opaque
         return *this;
       }
 
+    template<typename OpaqT>
+    cow_opaque&
+    reset(const rcptr<OpaqT>& sptr) noexcept
+      {
+        this->m_sptr = sptr;
+        return *this;
+      }
+
+    template<typename OpaqT>
+    cow_opaque&
+    reset(rcptr<OpaqT>&& sptr) noexcept
+      {
+        this->m_sptr = ::std::move(sptr);
+        return *this;
+      }
+
     explicit operator
     bool() const noexcept
       { return bool(this->m_sptr);  }
@@ -506,8 +522,8 @@ class cow_function
       { }
 
     constexpr
-    cow_function(const char* desc, simple_function* func) noexcept
-      : m_desc(desc), m_fptr(func)
+    cow_function(const char* desc, simple_function* fptr) noexcept
+      : m_desc(desc), m_fptr(fptr)
       { }
 
     template<typename FuncT>
@@ -540,8 +556,38 @@ class cow_function
     cow_function&
     reset() noexcept
       {
+        this->m_desc = nullptr;
         this->m_fptr = nullptr;
         this->m_sptr = nullptr;
+        return *this;
+      }
+
+    cow_function&
+    reset(const char* desc, simple_function* fptr) noexcept
+      {
+        this->m_desc = desc;
+        this->m_fptr = fptr;
+        this->m_sptr = nullptr;
+        return *this;
+      }
+
+    template<typename FuncT>
+    cow_function&
+    reset(const rcptr<FuncT>& sptr) noexcept
+      {
+        this->m_desc = nullptr;
+        this->m_fptr = nullptr;
+        this->m_sptr = sptr;
+        return *this;
+      }
+
+    template<typename FuncT>
+    cow_function&
+    reset(rcptr<FuncT>&& sptr) noexcept
+      {
+        this->m_desc = nullptr;
+        this->m_fptr = nullptr;
+        this->m_sptr = ::std::move(sptr);
         return *this;
       }
 
