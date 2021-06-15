@@ -91,8 +91,7 @@ class basic_tinybuf_file
       }
 
     basic_tinybuf_file&
-    do_flush(const char_type*& gcur, const char_type*& gend,
-             char_type*& /*pcur*/, char_type*& /*pend*/) override
+    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/) override
       {
         // If no file has been opened or there is an error, don't do anything.
         if(!this->m_file)
@@ -179,10 +178,9 @@ class basic_tinybuf_file
         auto goff = this->m_goff;
         if(goff != -2) {
           // The stream looks seekable.
-          goff = ::ftello(this->m_file);
-
           // Perform a zero seek in case of interleaving reads and writes.
           // Mark the file non-seekable if the operation fails.
+          goff = ::ftello(this->m_file);
           if((goff == -1) || (::fseeko(this->m_file, 0, SEEK_CUR) != 0))
             goff = -2;
         }
@@ -274,10 +272,6 @@ class basic_tinybuf_file
     reset(unique_posix_file&& file) noexcept
       {
         this->do_purge_areas();
-
-        // Disable stdio buffering, as we provide our own.
-        if(file)
-          ::setbuf(file, nullptr);
 
         // Discard the input buffer and reset the file handle, ignoring any errors.
         this->m_goff = -1;
