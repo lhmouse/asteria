@@ -1249,14 +1249,19 @@ class basic_cow_string
         return *this;
       }
 
+    // N.B. This is a non-standard extension.
     size_type
-    copy(value_type* s, size_type tn, size_type tpos = 0) const
+    copy(size_type tpos, value_type* s, size_type tn) const
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
 
         traits_type::copy(s, this->data() + tpos, tlen);
         return tlen;
       }
+
+    size_type
+    copy(value_type* s, size_type tn) const
+      { return this->copy(0, s, tn);  }
 
     basic_cow_string&
     swap(basic_cow_string& other) noexcept

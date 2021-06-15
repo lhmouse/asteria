@@ -5,7 +5,6 @@
 #define ROCKET_TINYBUF_FILE_HPP_
 
 #include "tinybuf.hpp"
-#include "linear_buffer.hpp"
 #include "unique_posix_file.hpp"
 #include "unique_posix_fd.hpp"
 #include <fcntl.h>  // ::open()
@@ -15,20 +14,18 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+template<typename charT, typename traitsT = char_traits<charT>>
 class basic_tinybuf_file;
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename traitsT>
 class basic_tinybuf_file
   : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
     using traits_type     = traitsT;
-    using allocator_type  = allocT;
 
     using tinybuf_type  = basic_tinybuf<charT, traitsT>;
-    using file_buffer   = basic_linear_buffer<char_type, traits_type, allocator_type>;
     using handle_type   = typename posix_file_closer::handle_type;
     using closer_type   = typename posix_file_closer::closer_type;
 
@@ -39,34 +36,28 @@ class basic_tinybuf_file
     using size_type  = typename tinybuf_type::size_type;
 
   private:
-    basic_linear_buffer<char_type, traits_type, allocator_type> m_gbuf;  // input buffer
-    off_type m_goff = -1;  // file position of the beginning of the input buffer
-                           // [`-1` if the buffer is inactive; `-2` if the file is non-seekable.]
-    unique_posix_file m_file = { nullptr, nullptr };  // file handle
+    unique_posix_file m_file;
 
   public:
-    basic_tinybuf_file() noexcept(is_nothrow_constructible<file_buffer>::value)
-      : m_gbuf()
+    basic_tinybuf_file() noexcept(is_nothrow_constructible<
+                                    unique_posix_file, nullptr_t, nullptr_t>::value)
+      : m_file(nullptr, nullptr)
       { }
 
     explicit
-    basic_tinybuf_file(const allocator_type& alloc) noexcept
-      : m_gbuf(alloc)
+    basic_tinybuf_file(unique_posix_file&& file) noexcept
+      : m_file(::std::move(file))
       { }
 
-    basic_tinybuf_file(unique_posix_file&& file, const allocator_type& alloc = allocator_type()) noexcept
-      : basic_tinybuf_file(alloc)
-      { this->reset(::std::move(file));  }
+    explicit
+    basic_tinybuf_file(handle_type fp, closer_type cl) noexcept
+      : m_file(fp, cl)
+      { }
 
-    basic_tinybuf_file(handle_type fp, closer_type cl, const allocator_type& alloc = allocator_type()) noexcept
-      : basic_tinybuf_file(alloc)
-      { this->reset(fp, cl);  }
-
-    basic_tinybuf_file(const char* path, open_mode mode, const allocator_type& alloc = allocator_type())
-      : basic_tinybuf_file(alloc)
+    explicit
+    basic_tinybuf_file(const char* path, open_mode mode)
+      : m_file(nullptr, nullptr)
       { this->open(path, mode);  }
-
-    ~basic_tinybuf_file() override;
 
     basic_tinybuf_file(basic_tinybuf_file&&)
       = default;
@@ -76,186 +67,108 @@ class basic_tinybuf_file
       = default;
 
   protected:
-    off_type
-    do_fortell() const override
+    void
+    do_flush() override
       {
-        // If no file has been opened or there is an error, don't do anything.
-        if(!this->m_file)
-          return -1;
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          return;
 
-        if(::feof(this->m_file) || ::ferror(this->m_file))
-          return -1;
-
-        // TODO: Not implemented yet.
-        return 0;
-      }
-
-    basic_tinybuf_file&
-    do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/) override
-      {
-        // If no file has been opened or there is an error, don't do anything.
-        if(!this->m_file)
-          return *this;
-
-        // We don't use put areas.
-        // If there is no get area, there is nothing to do.
-        if(!gcur)
-          return *this;
-
-        // If the input buffer is inactive or the file is non-seekable, don't do anything.
-        if(this->m_goff < 0)
-          return *this;
-
-        // If the get area has been consumed partially, rewind the file position to the
-        // beginning of it, then discard characters that have been consumed so far.
-        if(gcur != gend) {
-          ROCKET_ASSERT(gend == this->m_gbuf.end());
-          if(::fseeko(this->m_file, this->m_goff, SEEK_SET) != 0) {
-            // If the seek operation fails, mark the file non-seekable and preserve the get area.
-            this->m_goff = -2;
-            return *this;
-          }
-
-          // Discard all characters preceding `*gcur`.
-          auto nbump = static_cast<size_type>(gcur - this->m_gbuf.begin());
-          if(traits_type::fgetn(this->m_file, this->m_gbuf.mut_begin(), nbump) != nbump)
-            noadl::sprintf_and_throw<runtime_error>(
-                  "tinybuf_file: read error (errno `%d`, fileno `%d`)",
-                  errno, ::fileno(this->m_file));
-        }
-
-        // Deactivate the input buffer and clear the get area.
-        this->m_goff = -1;
-        gcur = nullptr;
-        gend = nullptr;
-
-        // Although ISO C says flushing an update stream whose most recent operation is an
-        // input operation results in undefined behavior, such effects are actually specified
-        // by POSIX-2008. It should be safe to just call `fflush()` without checking.
-        ::fflush(this->m_file);
-        return *this;
+        ::fflush(fp);
       }
 
     off_type
+    do_tell() const override
+      {
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_file: no file opened");
+
+        ::off_t off = ::ftello(fp);
+        if(off == -1)
+          noadl::sprintf_and_throw<runtime_error>(
+                "tinybuf_file: could not get file position (errno `%d`, fileno `%d`)",
+                errno, ::fileno(fp));
+
+        return off;
+      }
+
+    void
     do_seek(off_type off, seek_dir dir) override
       {
-        // Invalidate the get area before doing anything else.
-        this->do_sync_areas();
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_file: no file opened");
 
-        // Normalize the `whence` argument.
-        int whence;
-        if(dir == tinybuf_type::seek_set)
-          whence = SEEK_SET;
-        else if(dir == tinybuf_type::seek_end)
-          whence = SEEK_END;
-        else
-          whence = SEEK_CUR;
-
-        // Reposition the file.
-        if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
-
-        if(::fseeko(this->m_file, off, whence) != 0)
+        if(::fseeko(fp, off, dir) == -1)
           noadl::sprintf_and_throw<runtime_error>(
-                "tinybuf_file: seek error (errno `%d`, fileno `%d`)",
-                errno, ::fileno(this->m_file));
-
-        // Return the new offset.
-        return ::ftello(this->m_file);
+                "tinybuf_file: could not set file position (errno `%d`, fileno `%d`)",
+                errno, ::fileno(fp));
       }
 
-    int_type
-    do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
+    size_type
+    do_getn(char_type* s, size_type n) override
       {
-        // If the get area exists, update the offset and clear it.
-        this->do_sync_areas();
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_file: no file opened");
 
-        // Load more characters into the input buffer.
-        if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
-
-        // Get the file position of the beginning of the new get area.
-        auto goff = this->m_goff;
-        if(goff != -2) {
-          // The stream looks seekable.
-          // Perform a zero seek in case of interleaving reads and writes.
-          // Mark the file non-seekable if the operation fails.
-          goff = ::ftello(this->m_file);
-          if((goff == -1) || (::fseeko(this->m_file, 0, SEEK_CUR) != 0))
-            goff = -2;
-        }
-
-        // Reserve storage for the read operation.
-        size_type navail;
-        if(!gcur) {
-          // The file is seekable so the buffer may be reloaded.
-          // In this case we discard the entire buffer.
-          this->m_gbuf.clear();
-          navail = this->m_gbuf.reserve(0x4000);
-        }
-        else {
-          // The file is non-seekable so the buffer cannot be cleared.
-          // In this case we discard characters that have been read so far.
-          this->m_gbuf.discard(static_cast<size_type>(gcur - this->m_gbuf.begin()));
-
-          // Reallocate the buffer as needed.
-          navail = this->m_gbuf.reserve(0x2000);
-          gcur = this->m_gbuf.begin();
-          gend = this->m_gbuf.end();
-        }
-
-        // Read some characters and append them to the buffer.
-        navail = traits_type::fgetn(this->m_file, this->m_gbuf.mut_end(), navail);
-        this->m_gbuf.accept(navail);
-        this->m_goff = goff;
-
-        // Check for read errors.
-        if((navail == 0) && ::ferror(this->m_file))
+        ::size_t nread = traits_type::fgetn(fp, s, n);
+        if((nread == 0) && ::ferror(fp))
           noadl::sprintf_and_throw<runtime_error>(
                 "tinybuf_file: read error (errno `%d`, fileno `%d`)",
                 errno, ::fileno(this->m_file));
 
-        // Get the number of characters available in total.
-        // If no more characters are available, return EOF.
-        navail = this->m_gbuf.size();
-        if(navail == 0)
-          return traits_type::eof();
-
-        // Set the new get area. Exclude the first character if `peek` is not set.
-        auto gbase = this->m_gbuf.begin();
-        gcur = gbase + !peek;
-        gend = gbase + navail;
-        return traits_type::to_int_type(gbase[0]);
+        return nread;
       }
 
-    basic_tinybuf_file&
-    do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd) override
+    int_type
+    do_getc() override
       {
-        // If the get area exists, update the offset and clear it.
-        this->do_sync_areas();
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_file: no file opened");
 
-        // Notice that we don't use put areas.
-        // Write the string directly to the file.
-        if(!this->m_file)
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
+        int_type r = traits_type::fgetc(fp);
+        if(traits_type::is_eof(r) && ::ferror(fp))
+          noadl::sprintf_and_throw<runtime_error>(
+                "tinybuf_file: read error (errno `%d`, fileno `%d`)",
+                errno, ::fileno(this->m_file));
 
-        if(nadd == 1) {
-          // Optimize the one-character case a little.
-          if(traits_type::is_eof(traits_type::fputc(this->m_file, sadd[0])))
-            noadl::sprintf_and_throw<runtime_error>(
-                  "tinybuf_file: `traits_type::fputc()` failed (errno `%d`, fileno `%d`)",
-                  errno, ::fileno(this->m_file));
-        }
-        else {
-          if(traits_type::fputn(this->m_file, sadd, nadd) != nadd)
-            noadl::sprintf_and_throw<runtime_error>(
-                  "tinybuf_file: `traits_type::fputn()` failed (errno `%d`, fileno `%d`)",
-                  errno, ::fileno(this->m_file));
-        }
-        return *this;
+        return r;
+      }
+
+    void
+    do_putn(const char_type* s, size_type n) override
+      {
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_file: no file opened");
+
+        ::size_t nwritten = traits_type::fputn(fp, s, n);
+        if(nwritten != n)
+          noadl::sprintf_and_throw<runtime_error>(
+                "tinybuf_file: write error (errno `%d`, fileno `%d`)",
+                errno, ::fileno(this->m_file));
+      }
+
+    void
+    do_putc(char_type c) override
+      {
+        ::FILE* fp = this->m_file.get();
+        if(!fp)
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_file: no file opened");
+
+        int_type r = traits_type::fputc(fp, c);
+        if(traits_type::is_eof(r))
+          noadl::sprintf_and_throw<runtime_error>(
+                "tinybuf_file: write error (errno `%d`, fileno `%d`)",
+                errno, ::fileno(this->m_file));
       }
 
   public:
+    ~basic_tinybuf_file() override;
+
     handle_type
     get_handle() const noexcept
       { return this->m_file.get();  }
@@ -269,64 +182,59 @@ class basic_tinybuf_file
       { return this->m_file.get_closer();  }
 
     basic_tinybuf_file&
-    reset(unique_posix_file&& file) noexcept
-      {
-        this->do_purge_areas();
+    reset() noexcept
+      { return this->m_file.reset(), *this;  }
 
-        // Discard the input buffer and reset the file handle, ignoring any errors.
-        this->m_goff = -1;
-        this->m_file = ::std::move(file);
-        return *this;
-      }
+    basic_tinybuf_file&
+    reset(unique_posix_file&& file) noexcept
+      { return this->m_file = ::std::move(file), *this;  }
 
     basic_tinybuf_file&
     reset(handle_type fp, closer_type cl) noexcept
-      { return this->reset(unique_posix_file(fp, cl));  }
+      { return this->m_file.reset(fp, cl), *this;  }
 
     basic_tinybuf_file&
     open(const char* path, open_mode mode)
       {
-        int flags;
-        char mstr[8];
-        unsigned mlen = 0;
+        int flags = 0;
+        char mstr[8] = { };
+        size_t mlen = 0;
 
-        // Translate read/write access flags.
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_read_write)) {
-          flags = O_RDWR;
-          mstr[mlen++] = 'r';
-          mstr[mlen++] = '+';
-        }
-        else if(tinybuf_base::has_mode(mode, tinybuf_base::open_read)) {
+        auto rwm = mode & tinybuf_base::open_read_write;
+        if(rwm == tinybuf_base::open_read) {
           flags = O_RDONLY;
           mstr[mlen++] = 'r';
         }
-        else if(tinybuf_base::has_mode(mode, tinybuf_base::open_write)) {
+        else if(rwm == tinybuf_base::open_write) {
           flags = O_WRONLY;
           mstr[mlen++] = 'w';
+        }
+        else if(rwm == tinybuf_base::open_read_write) {
+          flags = O_RDWR;
+          mstr[mlen++] = 'r';
+          mstr[mlen++] = '+';
         }
         else
           noadl::sprintf_and_throw<invalid_argument>(
                 "tinybuf_file: no desired access specified (path `%s`, mode `%u`)",
                 path, mode);
 
-        // Translate combination flags.
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_append)) {
+        if(mode & tinybuf_base::open_append) {
           flags |= O_APPEND;
           mstr[0] = 'a';  // might be "w" or "r+"
         }
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_binary)) {
+
+        if(mode & tinybuf_base::open_binary)
           mstr[mlen++] = 'b';
-        }
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_create)) {
+
+        if(mode & tinybuf_base::open_create)
           flags |= O_CREAT;
-        }
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_truncate)) {
+
+        if(mode & tinybuf_base::open_truncate)
           flags |= O_TRUNC;
-        }
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_exclusive)) {
+
+        if(mode & tinybuf_base::open_exclusive)
           flags |= O_EXCL;
-        }
-        mstr[mlen] = 0;
 
         // Open the file.
         unique_posix_fd fd(::open(path, flags, 0666), ::close);
@@ -344,33 +252,30 @@ class basic_tinybuf_file
 
         // If `fdopen()` succeeds it will have taken the ownership of `fd`.
         fd.release();
-        return this->reset(::std::move(file));
+        this->m_file = ::std::move(file);
+        return *this;
       }
 
     basic_tinybuf_file&
     close() noexcept
-      { return this->reset(nullptr, nullptr);  }
+      { return this->reset();  }
 
     basic_tinybuf_file&
-    swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<file_buffer>::value)
+    swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<unique_posix_file>::value)
       {
-        this->tinybuf_type::swap(other);
-
-        noadl::xswap(this->m_gbuf, other.m_gbuf);
-        noadl::xswap(this->m_goff, other.m_goff);
         noadl::xswap(this->m_file, other.m_file);
         return *this;
       }
   };
 
-template<typename charT, typename traitsT, typename allocT>
-basic_tinybuf_file<charT, traitsT, allocT>::
+template<typename charT, typename traitsT>
+basic_tinybuf_file<charT, traitsT>::
 ~basic_tinybuf_file()
   { }
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename traitsT>
 inline void
-swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs, basic_tinybuf_file<charT, traitsT, allocT>& rhs)
+swap(basic_tinybuf_file<charT, traitsT>& lhs, basic_tinybuf_file<charT, traitsT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 

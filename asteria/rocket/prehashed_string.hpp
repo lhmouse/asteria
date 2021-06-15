@@ -285,8 +285,12 @@ class basic_prehashed_string
       }
 
     size_type
-    copy(value_type* s, size_type tn, size_type tpos = 0) const
-      { return this->m_sth.str().copy(s, tn, tpos);  }
+    copy(size_type tpos, value_type* s, size_type tn) const
+      { return this->m_sth.str().copy(tpos, s, tn);  }
+
+    size_type
+    copy(value_type* s, size_type tn) const
+      { return this->m_sth.str().copy(s, tn);  }
 
     basic_prehashed_string&
     swap(basic_prehashed_string& other) noexcept(is_nothrow_swappable<string_type>::value)

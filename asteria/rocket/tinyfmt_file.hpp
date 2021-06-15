@@ -9,20 +9,19 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+template<typename charT, typename traitsT = char_traits<charT>>
 class basic_tinyfmt_file;
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename traitsT>
 class basic_tinyfmt_file
   : public basic_tinyfmt<charT, traitsT>
   {
   public:
     using char_type       = charT;
     using traits_type     = traitsT;
-    using allocator_type  = allocT;
 
     using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
-    using tinybuf_type  = basic_tinybuf_file<charT, traitsT, allocT>;
+    using tinybuf_type  = basic_tinybuf_file<charT, traitsT>;
     using handle_type   = typename tinybuf_type::handle_type;
     using closer_type   = typename tinybuf_type::closer_type;
 
@@ -115,14 +114,14 @@ class basic_tinyfmt_file
       }
   };
 
-template<typename charT, typename traitsT, typename allocT>
-basic_tinyfmt_file<charT, traitsT, allocT>::
+template<typename charT, typename traitsT>
+basic_tinyfmt_file<charT, traitsT>::
 ~basic_tinyfmt_file()
   { }
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename traitsT>
 inline void
-swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs, basic_tinyfmt_file<charT, traitsT, allocT>& rhs)
+swap(basic_tinyfmt_file<charT, traitsT>& lhs, basic_tinyfmt_file<charT, traitsT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
