@@ -492,23 +492,13 @@ std_system_proc_daemonize()
 V_object
 std_system_conf_load_file(V_string path)
   {
-    // Open the file denoted by `path` in text mode.
-    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "r"), ::fclose);
-    if(!fp)
-      ASTERIA_THROW("could not open configuration file '$2'\n"
-                     "[`fopen()` failed: $1]",
-                     format_errno(errno), path);
-
-    // Parse characters from the file.
-    ::setbuf(fp, nullptr);
-    ::rocket::tinybuf_file cbuf(::std::move(fp));
-
     // Initialize tokenizer options.
     // Unlike JSON5, we support _real_ integers and single-quote string literals.
     Compiler_Options opts;
     opts.keywords_as_identifiers = true;
 
     Token_Stream tstrm(opts);
+    ::rocket::tinybuf_file cbuf(path.safe_c_str(), tinybuf::open_read);
     tstrm.reload(path, 1, cbuf);
 
     // Parse a sequence of key-value pairs.

@@ -34,8 +34,6 @@ do_lock_stream(const char* path)
 
     // Mark the stream locked.
     auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
-    ::setbuf(file, nullptr);
-
     auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));
     if(!result.second)
       ASTERIA_THROW("recursive import denied (loading '$1', file ID `$2`)", path, skey);

@@ -712,7 +712,6 @@ std_json_parse_file(V_string path)
                     format_errno(errno), path);
 
     // Parse characters from the file.
-    ::setbuf(fp, nullptr);
     ::rocket::tinybuf_file cbuf(::std::move(fp));
     return do_json_parse(cbuf);
   }
