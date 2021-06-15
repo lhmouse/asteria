@@ -190,6 +190,12 @@ class Infix_Element;
 class Statement_Sequence;
 class AIR_Optimizer;
 
+// This typedef is for native bindings.
+using simple_function =
+    Reference& (Reference& self,  // `this` (in) and return (out) reference
+                Global_Context& global,
+                Reference_Stack&& stack);  // positional arguments
+
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
@@ -505,10 +511,6 @@ clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
   }
 
 // Function type support
-using simple_function = Reference& (Reference& self,  // `this` (in) and return (out) reference
-                                    Global_Context& global,
-                                    Reference_Stack&& stack);  // positional arguments
-
 class cow_function
   {
   private:
