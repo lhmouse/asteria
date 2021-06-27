@@ -16,20 +16,37 @@ class Parser_Error
   private:
     Parser_Status m_stat;
     Source_Location m_sloc;
-    size_t m_length;
 
-    cow_string m_what;  // a comprehensive string that is human-readable.
+    cow_string m_req_text;
+    Source_Location m_req_sloc;
+
+    cow_string m_what;  // a comprehensive string that is human-readable
 
   public:
     explicit
-    Parser_Error(Parser_Status xstat, const Source_Location& xsloc, size_t xlength)
-      : m_stat(xstat), m_sloc(xsloc), m_length(xlength)
+    Parser_Error(Parser_Status xstat, const Source_Location& xsloc)
+      : m_stat(xstat), m_sloc(xsloc)
+      { this->do_compose_message();  }
+
+    explicit
+    Parser_Error(Parser_Status xstat, const Source_Location& xsloc,
+                 const cow_string& req_text, const Source_Location& req_sloc)
+      : m_stat(xstat), m_sloc(xsloc),
+        m_req_text(req_text), m_req_sloc(req_sloc)
       { this->do_compose_message();  }
 
     ASTERIA_INCOMPLET(Token_Stream)
     explicit
     Parser_Error(Parser_Status xstat, const Token_Stream& xtstrm)
-      : m_stat(xstat), m_sloc(xtstrm.next_sloc()), m_length(xtstrm.next_length())
+      : m_stat(xstat), m_sloc(xtstrm.next_sloc())
+      { this->do_compose_message();  }
+
+    ASTERIA_INCOMPLET(Token_Stream)
+    explicit
+    Parser_Error(Parser_Status xstat, const Token_Stream& xtstrm,
+                 const cow_string& req_text, const Source_Location& req_sloc)
+      : m_stat(xstat), m_sloc(xtstrm.next_sloc()),
+        m_req_text(req_text), m_req_sloc(req_sloc)
       { this->do_compose_message();  }
 
   private:
@@ -66,10 +83,6 @@ class Parser_Error
     int
     column() const noexcept
       { return this->m_sloc.column();  }
-
-    size_t
-    length() const noexcept
-      { return this->m_length;  }
   };
 
 inline bool

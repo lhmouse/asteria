@@ -69,29 +69,20 @@ class Token_Stream
     shift(size_t count = 1) noexcept
       { return this->m_rtoks.pop_back(count), *this;  }
 
-    Source_Location
-    next_sloc() const noexcept
-      {
-        if(this->m_rtoks.empty())
-          return Source_Location(sref("[end of stream]"), -1, -1);
-        else
-          return this->m_rtoks.back().sloc();
-      }
-
-    size_t
-    next_length() const noexcept
-      {
-        if(this->m_rtoks.empty())
-          return 0;
-        else
-          return this->m_rtoks.back().length();
-      }
-
     Token_Stream&
     clear() noexcept
       {
         this->m_rtoks.clear();
         return *this;
+      }
+
+    Source_Location
+    next_sloc() const noexcept
+      {
+        Source_Location sloc(sref("[end]"), -1, -1);
+        if(ROCKET_EXPECT(!this->m_rtoks.empty()))
+          sloc = this->m_rtoks.back().sloc();
+        return sloc;
       }
 
     // This function parses characters from the input stream and fills tokens into

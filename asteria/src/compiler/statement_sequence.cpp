@@ -1709,14 +1709,13 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     cow_vector<phsh_string> keys;
     bool comma_allowed = false;
     for(;;) {
-      auto sloc_k = tstrm.next_sloc();
-      auto length_k = tstrm.next_length();
+      auto key_sloc = tstrm.next_sloc();
       auto qkey = do_accept_json5_key_opt(tstrm);
       if(!qkey)
         break;
 
       if(::rocket::find(keys, *qkey))
-        throw Parser_Error(parser_status_duplicate_key_in_object, sloc_k, length_k);
+        throw Parser_Error(parser_status_duplicate_key_in_object, key_sloc);
 
       keys.emplace_back(::std::move(*qkey));
 

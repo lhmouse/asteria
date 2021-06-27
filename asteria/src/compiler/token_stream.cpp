@@ -134,8 +134,7 @@ class Line_Reader
 
 template<typename XTokenT>
 bool
-do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen,
-              XTokenT&& xtoken)
+do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
   {
     tokens.emplace_back(reader.tell(), tlen, ::std::forward<XTokenT>(xtoken));
     reader.consume(tlen);
@@ -345,11 +344,10 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
     const char* bp = tstr.c_str();
     const char* ep = bp + tstr.size();
     if(!numg.parse_F(bp, ep))
-      throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
+      throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell());
 
     if(bp != ep)
-      throw Parser_Error(parser_status_numeric_literal_suffix_invalid,
-                         reader.tell(), tlen);
+      throw Parser_Error(parser_status_numeric_literal_suffix_invalid, reader.tell());
 
     // It is cast to an integer only when `integers_as_reals` is `false` and it does not
     // contain a radix point.
@@ -360,13 +358,13 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
 
       // Check for errors. Note that integer casts never underflows.
       if(numg.overflowed())
-        throw Parser_Error(parser_status_integer_literal_overflow, reader.tell(), tlen);
+        throw Parser_Error(parser_status_integer_literal_overflow, reader.tell());
 
       if(numg.inexact())
-        throw Parser_Error(parser_status_integer_literal_inexact, reader.tell(), tlen);
+        throw Parser_Error(parser_status_integer_literal_inexact, reader.tell());
 
       if(!numg)
-        throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
+        throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell());
 
       // Accept the integral value.
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
@@ -378,13 +376,13 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
 
       // Check for errors. Note that integer casts are never inexact.
       if(numg.overflowed())
-        throw Parser_Error(parser_status_real_literal_overflow, reader.tell(), tlen);
+        throw Parser_Error(parser_status_real_literal_overflow, reader.tell());
 
       if(numg.underflowed())
-        throw Parser_Error(parser_status_real_literal_underflow, reader.tell(), tlen);
+        throw Parser_Error(parser_status_real_literal_underflow, reader.tell());
 
       if(!numg)
-        throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell(), tlen);
+        throw Parser_Error(parser_status_numeric_literal_invalid, reader.tell());
 
       // Accept the real value.
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
@@ -538,7 +536,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       char next = reader.peek(tlen);
       if(next == 0)
         throw Parser_Error(parser_status_string_literal_unclosed,
-                           reader.tell(), tlen);
+                           reader.tell());
 
       tlen += 1;
 
@@ -558,7 +556,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       next = reader.peek(tlen);
       if(next == 0)
         throw Parser_Error(parser_status_escape_sequence_incomplete,
-                           reader.tell(), tlen);
+                           reader.tell());
 
       tlen += 1;
       int xcnt = 0;
@@ -630,11 +628,11 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             char c = reader.peek(tlen);
             if(c == 0)
               throw Parser_Error(parser_status_escape_sequence_incomplete,
-                                 reader.tell(), tlen);
+                                 reader.tell());
 
             if(!is_cctype(c, cctype_xdigit))
               throw Parser_Error(parser_status_escape_sequence_invalid_hex,
-                                 reader.tell(), tlen);
+                                 reader.tell());
 
             // Accumulate this digit.
             tlen += 1;
@@ -653,13 +651,13 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
             // Write a Unicode code point.
             if(!utf8_encode(val, cp))
               throw Parser_Error(parser_status_escape_utf_code_point_invalid,
-                                 reader.tell(), tlen);
+                                 reader.tell());
           }
           break;
         }
 
         default:
-          throw Parser_Error(parser_status_escape_sequence_unknown, reader.tell(), tlen);
+          throw Parser_Error(parser_status_escape_sequence_unknown, reader.tell());
       }
     }
 
@@ -789,7 +787,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     tokens.clear();
 
     // Save the position of an unterminated block comment.
-    opt<pair<Source_Location, size_t>> bcomm;
+    opt<Source_Location> bcomm;
 
     // Read source code line by line.
     Line_Reader reader(cbuf, file, line);
@@ -803,7 +801,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
          && ::rocket::is_any_of(reader.peek(), { '<', '|', '=', '>' })
          && ::std::all_of(reader.data() + 1, reader.data() + 7,
                           [&](char ch) { return ch == reader.peek();  }))
-        throw Parser_Error(parser_status_conflict_marker_detected, reader.tell(), 7);
+        throw Parser_Error(parser_status_conflict_marker_detected, reader.tell());
 
       // Ensure this line is a valid UTF-8 string.
       while(reader.navail() != 0) {
@@ -811,12 +809,11 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
         char32_t cp;
         auto tptr = reader.data();
         if(!utf8_decode(cp, tptr, reader.navail()))
-          throw Parser_Error(parser_status_utf8_sequence_invalid,
-                             reader.tell(), reader.navail());
+          throw Parser_Error(parser_status_utf8_sequence_invalid, reader.tell());
 
         // Disallow plain null characters in source data.
         if(cp == 0)
-          throw Parser_Error(parser_status_null_character_disallowed, reader.tell(), 1);
+          throw Parser_Error(parser_status_null_character_disallowed, reader.tell());
 
         // Accept this code point.
         reader.consume(static_cast<size_t>(tptr - reader.data()));
@@ -854,7 +851,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           }
           if(reader.peek(1) == '*') {
             // Start a block comment.
-            bcomm.emplace(reader.tell(), size_t(2));
+            bcomm = reader.tell();
             reader.consume(2);
             continue;
           }
@@ -869,8 +866,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
                          do_accept_identifier_or_keyword(tokens, reader,
                                         this->m_opts.keywords_as_identifiers);
         if(!token_got)
-          throw Parser_Error(parser_status_token_character_unrecognized,
-                             reader.tell(), 1);
+          throw Parser_Error(parser_status_token_character_unrecognized, reader.tell());
       }
     }
 
@@ -879,7 +875,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     // first line here.
     if(bcomm)
       throw Parser_Error(parser_status_block_comment_unclosed,
-                         bcomm->first, bcomm->second);
+                         Source_Location(sref("[end]"), -1, -1), sref("`/*`"), *bcomm);
 
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());

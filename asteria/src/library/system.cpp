@@ -79,10 +79,9 @@ Value&
 do_insert_unique(V_object& obj, Key_with_sloc&& key, Value&& value)
   {
     auto pair = obj.try_emplace(::std::move(key.name), ::std::move(value));
-    if(!pair.second) {
-      throw Parser_Error(parser_status_duplicate_key_in_object,
-                         key.sloc, key.length);
-    }
+    if(!pair.second)
+      throw Parser_Error(parser_status_duplicate_key_in_object, key.sloc);
+
     return pair.first->second;
   }
 

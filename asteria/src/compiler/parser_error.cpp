@@ -27,9 +27,14 @@ do_compose_message()
     fmt.clear_string();
 
     // Write the status code in digital form.
-    fmt << "parser error [" << this->m_stat << "]: "
-        << describe_parser_status(this->m_stat) << '\n'
-        << "[near '" << this->m_sloc << "']";
+    format(fmt,
+        "parser error [$1]: $2\n[near '$3']",
+        this->m_stat, describe_parser_status(this->m_stat), this->m_sloc);
+
+    if(!this->m_req_text.empty())
+      format(fmt,
+          "\n[required by $1 at '$2']",
+          this->m_req_text, this->m_req_sloc);
 
     // Set the new string.
     this->m_what = fmt.extract_string();
