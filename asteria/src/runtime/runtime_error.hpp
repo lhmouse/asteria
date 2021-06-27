@@ -23,7 +23,7 @@ class Runtime_Error
     cow_vector<Backtrace_Frame> m_frames;
     ptrdiff_t m_ins_at = 0;  // where to insert new frames
 
-    cow_string m_what;  // a comprehensive string that is human-readable.
+    cow_string m_what;  // a comprehensive string that is human-readable
 
   public:
     explicit
