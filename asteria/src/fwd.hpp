@@ -745,6 +745,8 @@ enum Parser_Status : uint32_t
     parser_status_reserved_identifier_not_declarable         = 3032,
     parser_status_break_no_matching_scope                    = 3033,
     parser_status_continue_no_matching_scope                 = 3034,
+    parser_status_closed_bracket_or_identifier_expected      = 3035,
+    parser_status_closed_brace_or_identifier_expected        = 3036,
   };
 
 ROCKET_CONST const char*

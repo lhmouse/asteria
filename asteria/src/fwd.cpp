@@ -317,6 +317,12 @@ describe_parser_status(Parser_Status status) noexcept
       case parser_status_continue_no_matching_scope:
         return "no matching scope found for `continue`";
 
+      case parser_status_closed_bracket_or_identifier_expected:
+        return "`]` or identifier expected";
+
+      case parser_status_closed_brace_or_identifier_expected:
+        return "`}` or identifier expected";
+
       default:
         return "[unknown parser error]";
     }
