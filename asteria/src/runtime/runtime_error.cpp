@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "runtime_error.hpp"
+#include "enums.hpp"
 
 namespace asteria {
 
