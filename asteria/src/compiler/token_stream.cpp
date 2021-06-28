@@ -875,7 +875,8 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     // first line here.
     if(bcomm)
       throw Parser_Error(parser_status_block_comment_unclosed,
-                         Source_Location(sref("[end]"), -1, -1), sref("`/*`"), *bcomm);
+                         Source_Location(sref("[end]"), -1, -1),
+                         punctuator_bcomm_ph, *bcomm);
 
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());

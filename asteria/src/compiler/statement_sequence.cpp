@@ -269,7 +269,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
         throw Parser_Error(
                   comma_allowed ? parser_status_closed_bracket_or_comma_expected
                                 : parser_status_closed_bracket_or_identifier_expected,
-                  tstrm, sref("`[`"), op_sloc);
+                  tstrm, punctuator_bracket_op, op_sloc);
 
       // Make the list different from a plain, sole one.
       names.insert(0, sref("["));
@@ -303,7 +303,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
         throw Parser_Error(
                   comma_allowed ? parser_status_closed_brace_or_comma_expected
                                 : parser_status_closed_brace_or_identifier_expected,
-                  tstrm, sref("`{`"), op_sloc);
+                  tstrm, punctuator_brace_op, op_sloc);
 
       // Make the list different from a plain, sole one.
       names.insert(0, sref("{"));
@@ -412,7 +412,7 @@ do_accept_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_brace_or_statement_expected, tstrm,
-                         sref("`{`"), op_sloc);
+                         punctuator_brace_op, op_sloc);
 
     Statement::S_block xstmt = {  ::std::move(body) };
     return ::std::move(xstmt);
@@ -639,6 +639,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
     if(!qname)
       throw Parser_Error(parser_status_identifier_expected, tstrm);
 
+    auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
       throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
@@ -650,7 +651,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qbody = do_accept_block_opt(tstrm, scope_plain);
     if(!qbody)
@@ -721,7 +722,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qbtrue = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbtrue)
@@ -765,7 +766,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     // Parse the block by hand.
     cow_vector<Statement::S_expression> labels;
@@ -808,7 +809,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_brace_or_switch_clause_expected, tstrm,
-                         sref("`{`"), op_sloc);
+                         punctuator_brace_op, op_sloc);
 
     Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
     return ::std::move(xstmt);
@@ -847,7 +848,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
@@ -882,7 +883,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_while);
     if(!qblock)
@@ -925,7 +926,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
     if(!qblock)
@@ -1004,7 +1005,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
     if(!qblock)
@@ -1304,7 +1305,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qbcatch = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbcatch)
@@ -1659,7 +1660,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_closure_body_opt(tstrm);
     if(!qblock)
@@ -1711,7 +1712,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       throw Parser_Error(
                 comma_allowed ? parser_status_closed_bracket_or_comma_expected
                               : parser_status_closed_bracket_or_expression_expected,
-                tstrm, sref("`[`"), sloc);
+                tstrm, punctuator_bracket_op, sloc);
 
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
     units.emplace_back(::std::move(xunit));
@@ -1767,7 +1768,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       throw Parser_Error(
                 comma_allowed ? parser_status_closed_brace_or_comma_expected
                               : parser_status_closed_brace_or_json5_key_expected,
-                tstrm, sref("`{`"), sloc);
+                tstrm, punctuator_brace_op, sloc);
 
     Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
     units.emplace_back(::std::move(xunit));
@@ -1791,7 +1792,7 @@ do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& ts
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), sloc);
+                         punctuator_parenth_op, sloc);
 
     return true;
   }
@@ -1834,7 +1835,7 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_fma, false };
     units.emplace_back(::std::move(xunit));
@@ -1903,7 +1904,7 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     units.emplace_back(::std::move(*qxunit));
     return true;
@@ -1939,7 +1940,7 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
-                         sref("`(`"), op_sloc);
+                         punctuator_parenth_op, op_sloc);
 
     Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
     units.emplace_back(::std::move(xunit));
@@ -1987,7 +1988,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
       throw Parser_Error(
                 comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
                               : parser_status_closed_parenthesis_or_argument_expected,
-                tstrm, sref("`(`"), op_sloc);
+                tstrm, punctuator_parenth_op, op_sloc);
 
     Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));
@@ -2121,7 +2122,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
       throw Parser_Error(
                 comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
                               : parser_status_closed_parenthesis_or_argument_expected,
-                tstrm, sref("`(`"), sloc);
+                tstrm, punctuator_parenth_op, sloc);
 
     Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
     units.emplace_back(::std::move(xunit));
@@ -2145,7 +2146,7 @@ do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& ts
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
       throw Parser_Error(parser_status_closed_bracket_expected, tstrm,
-                         sref("`[`"), sloc);
+                         punctuator_bracket_op, sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
     units.emplace_back(::std::move(xunit));
@@ -2245,8 +2246,7 @@ do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
-      throw Parser_Error(parser_status_colon_expected, tstrm,
-                         sref(assign ? "`?=`" : "`?`"), sloc);
+      throw Parser_Error(parser_status_colon_expected, tstrm, *kpunct, sloc);
 
     Infix_Element::S_ternary xelem = { ::std::move(sloc), assign, ::std::move(btrue), { } };
     return ::std::move(xelem);

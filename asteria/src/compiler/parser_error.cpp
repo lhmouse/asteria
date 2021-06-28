@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "parser_error.hpp"
+#include "enums.hpp"
 
 namespace asteria {
 
@@ -31,10 +32,10 @@ do_compose_message()
         "parser error [$1]: $2\n[near '$3']",
         this->m_stat, describe_parser_status(this->m_stat), this->m_sloc);
 
-    if(!this->m_req_text.empty())
+    if(this->m_unm_sloc.line() > 0)
       format(fmt,
-          "\n[required by $1 at '$2']",
-          this->m_req_text, this->m_req_sloc);
+          "\n[unmatched `$1` at '$2']",
+          stringify_punctuator(this->m_unm_punct), this->m_unm_sloc);
 
     // Set the new string.
     this->m_what = fmt.extract_string();

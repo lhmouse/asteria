@@ -71,6 +71,7 @@ enum Punctuator : uint8_t
     punctuator_arrow       = 57,  // ->
     punctuator_scope       = 58,  // ::
     punctuator_random      = 59,  // [?]
+    punctuator_bcomm_ph    = 60,  // placeholder for /*
   };
 
 ROCKET_CONST const char*
