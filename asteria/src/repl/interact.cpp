@@ -131,9 +131,12 @@ read_execute_print_single()
       repl_script.reload_string(real_name, 0, compl_source);
       repl_file = ::std::move(real_name);
     }
-    catch(Compiler_Error&) {
+    catch(Compiler_Error& except) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
+      if(except.status() >= compiler_status_semantic_error_base)
+        throw;
+
       cow_string real_name = repl_file;
       if(real_name.empty())
         ::sprintf(strbuf, "snippet #%lu", repl_index),

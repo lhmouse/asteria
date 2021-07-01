@@ -31,7 +31,8 @@ reload(const cow_string& name, int line, tinybuf& cbuf)
     // Instantiate the function.
     Source_Location sloc(name, 0, 0);
     AIR_Optimizer optmz(this->m_opts);
-    optmz.reload(nullptr, this->m_params, stmtq);
+    optmz.reload(nullptr, this->m_params, this->m_global, stmtq);
+
     this->m_func = optmz.create_function(sloc, sref("[file scope]"));
     return *this;
   }

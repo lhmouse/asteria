@@ -20,7 +20,7 @@ AIR_Optimizer::
 AIR_Optimizer&
 AIR_Optimizer::
 reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
-       const cow_vector<Statement>& stmts)
+       const Global_Context& global, const cow_vector<Statement>& stmts)
   {
     this->m_code.clear();
     this->m_params = params;
@@ -29,15 +29,14 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
       return *this;
 
     // Create a context of the function body.
-    Analytic_Context ctx_func(Analytic_Context::M_function(),
-                              ctx_opt, this->m_params);
+    Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
     // Generate code for all statements.
     for(size_t i = 0;  i + 1 < stmts.size();  ++i)
-      stmts.at(i).generate_code(this->m_code, nullptr, ctx_func, this->m_opts,
+      stmts.at(i).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
               stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
 
-    stmts.back().generate_code(this->m_code, nullptr, ctx_func, this->m_opts,
+    stmts.back().generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
             ptc_aware_void);
 
     // Check whether optimization is enabled during translation.

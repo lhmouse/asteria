@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#include "../runtime/global_context.hpp"
 #include "../simple_script.hpp"
 #include <stdarg.h>  // va_list, va_start(), va_end()
 #include <stdlib.h>  // exit(), quick_exit()

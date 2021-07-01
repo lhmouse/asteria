@@ -931,7 +931,7 @@ struct Traits_push_global_reference
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
         if(!qref)
-          ASTERIA_THROW("undeclared identifier `$1`", name);
+          ASTERIA_THROW("unresolvable global identifier `$1`", name);
 
         // Push a copy of it.
         ctx.stack().emplace_back_uninit() = *qref;
@@ -4184,7 +4184,7 @@ struct Traits_import_call
         const cow_vector<phsh_string> params(1, sref("..."));
 
         AIR_Optimizer optmz(sp.opts);
-        optmz.reload(nullptr, params, stmtq);
+        optmz.reload(nullptr, params, ctx.global(), stmtq);
         auto qtarget = optmz.create_function(sloc, sref("[file scope]"));
 
         // Invoke the script.

@@ -227,7 +227,8 @@ class Statement
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                  Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const;
+                  const Global_Context& global, Analytic_Context& ctx,
+                  const Compiler_Options& opts, PTC_Aware ptc) const;
   };
 
 inline void

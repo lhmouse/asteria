@@ -58,7 +58,7 @@ class AIR_Optimizer
     // `ctx_opt` is the parent context this closure.
     AIR_Optimizer&
     reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
-           const cow_vector<Statement>& stmts);
+           const Global_Context& global, const cow_vector<Statement>& stmts);
 
     // This function loads some already-generated code.
     // `ctx_opt` is the parent context this closure.

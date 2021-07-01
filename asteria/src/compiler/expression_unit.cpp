@@ -4,9 +4,11 @@
 #include "../precompiled.hpp"
 #include "expression_unit.hpp"
 #include "statement.hpp"
+#include "compiler_error.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/air_optimizer.hpp"
+#include "../runtime/global_context.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
 
@@ -14,7 +16,8 @@ namespace asteria {
 namespace {
 
 cow_vector<AIR_Node>
-do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
+do_generate_code_branch(const Compiler_Options& opts, const Global_Context& global,
+                        Analytic_Context& ctx, PTC_Aware ptc,
                         const cow_vector<Expression_Unit>& units)
   {
     cow_vector<AIR_Node> code;
@@ -23,9 +26,9 @@ do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Co
 
     // Expression units other than the last one cannot be PTC'd.
     for(size_t i = 0;  i + 1 < units.size();  ++i)
-      units.at(i).generate_code(code, opts, ctx, ptc_aware_none);
+      units.at(i).generate_code(code, opts, global, ctx, ptc_aware_none);
 
-    units.back().generate_code(code, opts, ctx, ptc);
+    units.back().generate_code(code, opts, global, ctx, ptc);
     return code;
   }
 
@@ -34,7 +37,7 @@ do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Co
 cow_vector<AIR_Node>&
 Expression_Unit::
 generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-              Analytic_Context& ctx, PTC_Aware ptc) const
+              const Global_Context& global, Analytic_Context& ctx, PTC_Aware ptc) const
   {
     switch(this->index()) {
       case index_literal: {
@@ -57,15 +60,12 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
 
-        if(altr.name.empty())
-          ASTERIA_THROW("unnamed reference\n[inside expression at '$1']", altr.sloc);
-
         for(;;) {
           // Look for the name in the current context.
           qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
-            // A reference declared later has been found. Record the context depth for
-            // later lookups.
+            // A reference declared later has been found.
+            // Record the context depth for later lookups.
             AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
@@ -74,8 +74,14 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           // Step out to its parent context.
           qctx = qctx->get_parent_opt();
           if(!qctx) {
-            // No name has been found so far. Assume that the name will be found in the
-            // global context.
+            // No name has been found so far.
+            // Assume that the name will be found in the global context.
+            if(!opts.implicit_global_names) {
+              qref = global.get_named_reference_opt(altr.name);
+              if(!qref)
+                throw Compiler_Error(compiler_status_undeclared_identifier, altr.sloc);
+            }
+
             AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
@@ -91,7 +97,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // Generate code
         AIR_Optimizer optmz(opts);
-        optmz.reload(&ctx, altr.params, altr.body);
+        optmz.reload(&ctx, altr.params, global, altr.body);
 
         // Encode arguments.
         AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params,
@@ -104,11 +110,11 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_branch>();
 
         // Both branches may be PTC'd unless this is a compound assignment operation.
-        auto real_ptc = altr.assign ? ptc_aware_none : ptc;
+        auto rptc = altr.assign ? ptc_aware_none : ptc;
 
         // Generate code for both branches.
-        auto code_true = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_false);
+        auto code_true = do_generate_code_branch(opts, global, ctx, rptc, altr.branch_true);
+        auto code_false = do_generate_code_branch(opts, global, ctx, rptc, altr.branch_false);
 
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true),
@@ -121,10 +127,10 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_function_call>();
 
         // Check whether PTC is disabled.
-        auto real_ptc = !opts.proper_tail_calls ? ptc_aware_none : ptc;
+        auto rptc = !opts.proper_tail_calls ? ptc_aware_none : ptc;
 
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, real_ptc };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, rptc };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -169,10 +175,10 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_coalescence>();
 
         // The branch may be PTC'd unless this is a compound assignment operation.
-        auto real_ptc = altr.assign ? ptc_aware_none : ptc;
+        auto rptc = altr.assign ? ptc_aware_none : ptc;
 
         // Generate code for the branch.
-        auto code_null = do_generate_code_branch(opts, real_ptc, ctx, altr.branch_null);
+        auto code_null = do_generate_code_branch(opts, global, ctx, rptc, altr.branch_null);
 
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { altr.sloc, ::std::move(code_null), altr.assign };

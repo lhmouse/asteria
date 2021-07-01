@@ -46,8 +46,9 @@ do_generate_convert_to_temporary(cow_vector<AIR_Node>& code, const Source_Locati
   }
 
 cow_vector<AIR_Node>&
-do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
-                          Analytic_Context& ctx, const Statement::S_expression& expr)
+do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                          const Global_Context& global, Analytic_Context& ctx,
+                          PTC_Aware ptc, const Statement::S_expression& expr)
   {
     // Generate a single-step trap if it is not disabled.
     if(opts.verbose_single_step_traps) {
@@ -60,33 +61,36 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
 
     // Generate code for the subexpression itself.
     for(size_t i = 0;  i + 1 < expr.units.size();  ++i)
-      expr.units.at(i).generate_code(code, opts, ctx, ptc_aware_none);
+      expr.units.at(i).generate_code(code, opts, global, ctx, ptc_aware_none);
 
-    expr.units.back().generate_code(code, opts, ctx, ptc);
+    expr.units.back().generate_code(code, opts, global, ctx, ptc);
     return code;
   }
 
 cow_vector<AIR_Node>&
-do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts, PTC_Aware ptc,
-                       Analytic_Context& ctx, const Statement::S_expression& expr)
+do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                       const Global_Context& global, Analytic_Context& ctx,
+                       PTC_Aware ptc, const Statement::S_expression& expr)
   {
     do_generate_clear_stack(code);
-    do_generate_subexpression(code, opts, ptc, ctx, expr);
+    do_generate_subexpression(code, opts, global, ctx, ptc, expr);
     return code;
   }
 
 cow_vector<AIR_Node>
-do_generate_expression(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
+do_generate_expression(const Compiler_Options& opts, const Global_Context& global,
+                       Analytic_Context& ctx, PTC_Aware ptc,
                        const Statement::S_expression& expr)
   {
     cow_vector<AIR_Node> code;
-    do_generate_expression(code, opts, ptc, ctx, expr);
+    do_generate_expression(code, opts, global, ctx, ptc, expr);
     return code;
   }
 
 cow_vector<AIR_Node>&
 do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                           Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc,
+                           const Global_Context& global, Analytic_Context& ctx,
+                           const Compiler_Options& opts, PTC_Aware ptc,
                            const Statement::S_block& block)
   {
     if(block.stmts.empty())
@@ -94,30 +98,30 @@ do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* 
 
     // Statements other than the last one cannot be the end of function.
     for(size_t i = 0;  i + 1 < block.stmts.size();  ++i)
-      block.stmts.at(i).generate_code(code, names_opt, ctx, opts,
+      block.stmts.at(i).generate_code(code, names_opt, global, ctx, opts,
               block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
 
-    block.stmts.back().generate_code(code, names_opt, ctx, opts, ptc);
+    block.stmts.back().generate_code(code, names_opt, global, ctx, opts, ptc);
     return code;
   }
 
 cow_vector<AIR_Node>
-do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                           const Compiler_Options& opts, PTC_Aware ptc,
-                           const Statement::S_block& block)
+do_generate_statement_list(cow_vector<phsh_string>* names_opt, const Global_Context& global,
+                           Analytic_Context& ctx, const Compiler_Options& opts,
+                           PTC_Aware ptc, const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
-    do_generate_statement_list(code, names_opt, ctx, opts, ptc, block);
+    do_generate_statement_list(code, names_opt, global, ctx, opts, ptc, block);
     return code;
   }
 
 cow_vector<AIR_Node>
-do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context& ctx,
-                  const Statement::S_block& block)
+do_generate_block(const Compiler_Options& opts, const Global_Context& global,
+                  Analytic_Context& ctx, PTC_Aware ptc, const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
     Analytic_Context ctx_stmts(Analytic_Context::M_plain(), ctx);
-    do_generate_statement_list(code, nullptr, ctx_stmts, opts, ptc, block);
+    do_generate_statement_list(code, nullptr, global, ctx_stmts, opts, ptc, block);
     return code;
   }
 
@@ -126,14 +130,15 @@ do_generate_block(const Compiler_Options& opts, PTC_Aware ptc, Analytic_Context&
 cow_vector<AIR_Node>&
 Statement::
 generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-              Analytic_Context& ctx, const Compiler_Options& opts, PTC_Aware ptc) const
+              const Global_Context& global, Analytic_Context& ctx,
+              const Compiler_Options& opts, PTC_Aware ptc) const
   {
     switch(this->index()) {
       case index_expression: {
         const auto& altr = this->m_stor.as<index_expression>();
 
         // Evaluate the expression. Its value is discarded.
-        do_generate_expression(code, opts, ptc, ctx, altr);
+        do_generate_expression(code, opts, global, ctx, ptc, altr);
         return code;
       }
 
@@ -141,7 +146,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         const auto& altr = this->m_stor.as<index_block>();
 
         // Generate code for the body. This can be PTC'd.
-        auto code_body = do_generate_block(opts, ptc, ctx, altr);
+        auto code_body = do_generate_block(opts, global, ctx, ptc, altr);
 
         // Encode arguments.
         AIR_Node::S_execute_block xnode = { ::std::move(code_body) };
@@ -205,7 +210,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
             // Generate code for the initializer.
             // Note: Do not destroy the stack.
-            do_generate_subexpression(code, opts, ptc_aware_none, ctx, altr.inits[i]);
+            do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, altr.inits[i]);
 
             // Initialize variables.
             if(sb_arr) {
@@ -239,7 +244,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code
         AIR_Optimizer optmz(opts);
-        optmz.reload(&ctx, altr.params, altr.body);
+        optmz.reload(&ctx, altr.params, global, altr.body);
 
         // Encode arguments.
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params,
@@ -257,13 +262,13 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
-        do_generate_expression(code, opts, ptc_aware_none, ctx, altr.cond);
+        do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.cond);
 
         // The result will have been pushed onto the top of the stack.
         // Generate code for both branches.
         // Both can be PTC'd.
-        auto code_true = do_generate_block(opts, ptc, ctx, altr.branch_true);
-        auto code_false = do_generate_block(opts, ptc, ctx, altr.branch_false);
+        auto code_true = do_generate_block(opts, global, ctx, ptc, altr.branch_true);
+        auto code_false = do_generate_block(opts, global, ctx, ptc, altr.branch_false);
 
         // Encode arguments.
         AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true),
@@ -277,7 +282,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the control expression.
         ROCKET_ASSERT(!altr.ctrl.units.empty());
-        do_generate_expression(code, opts, ptc_aware_none, ctx, altr.ctrl);
+        do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.ctrl);
 
         // Generate code for all clauses.
         cow_vector<cow_vector<AIR_Node>> code_labels;
@@ -296,12 +301,12 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         for(size_t i = 0;  i < nclauses;  ++i) {
           // Generate code for the label.
           // Note labels are not part of the body.
-          do_generate_expression(code_labels.emplace_back(), opts, ptc_aware_none, ctx,
+          do_generate_expression(code_labels.emplace_back(), opts, global, ctx, ptc_aware_none,
                                  altr.labels[i]);
 
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
-          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts,
+          do_generate_statement_list(code_bodies.emplace_back(), &names, global, ctx_body, opts,
                                      ptc_aware_none, altr.bodies[i]);
 
           names_added.emplace_back(names);
@@ -319,11 +324,11 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
-        auto code_body = do_generate_block(opts, ptc_aware_none, ctx, altr.body);
+        auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
-        auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
+        auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
         // Encode arguments.
         AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative,
@@ -337,11 +342,11 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
-        auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx, altr.cond);
+        auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
-        auto code_body = do_generate_block(opts, ptc_aware_none, ctx, altr.body);
+        auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
         // Encode arguments.
         AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond),
@@ -361,11 +366,11 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the range initializer.
         ROCKET_ASSERT(!altr.init.units.empty());
-        auto code_init = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.init);
+        auto code_init = do_generate_expression(opts, global, ctx_for, ptc_aware_none, altr.init);
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
-        auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
+        auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
         // Encode arguments.
         AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped,
@@ -382,14 +387,14 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
 
         // Generate code for the initializer, the condition and the loop increment.
-        auto code_init = do_generate_statement_list(nullptr, ctx_for, opts, ptc_aware_none,
-                                                    altr.init);
-        auto code_cond = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.cond);
-        auto code_step = do_generate_expression(opts, ptc_aware_none, ctx_for, altr.step);
+        auto code_init = do_generate_statement_list(nullptr, global, ctx_for, opts,
+                                                    ptc_aware_none, altr.init);
+        auto code_cond = do_generate_expression(opts, global, ctx_for, ptc_aware_none, altr.cond);
+        auto code_step = do_generate_expression(opts, global, ctx_for, ptc_aware_none, altr.step);
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
-        auto code_body = do_generate_block(opts, ptc_aware_none, ctx_for, altr.body);
+        auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
         // Encode arguments.
         AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
@@ -402,7 +407,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         const auto& altr = this->m_stor.as<index_try>();
 
         // Generate code for the `try` body.
-        auto code_try = do_generate_block(opts, ptc, ctx, altr.body_try);
+        auto code_try = do_generate_block(opts, global, ctx, ptc, altr.body_try);
 
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
@@ -411,7 +416,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.
-        auto code_catch = do_generate_statement_list(nullptr, ctx_catch, opts, ptc,
+        auto code_catch = do_generate_statement_list(nullptr, global, ctx_catch, opts, ptc,
                                                      altr.body_catch);
 
         // Encode arguments.
@@ -491,7 +496,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
-        do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
+        do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.expr);
 
         // Encode arguments.
         AIR_Node::S_throw_statement xnode = { altr.sloc };
@@ -512,11 +517,11 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           // Generate code for the operand.
           if(altr.by_ref) {
             // This may be PTC'd by reference.
-            do_generate_expression(code, opts, ptc_aware_by_ref, ctx, altr.expr);
+            do_generate_expression(code, opts, global, ctx, ptc_aware_by_ref, altr.expr);
           }
           else {
             // This may be PTC'd by value.
-            do_generate_expression(code, opts, ptc_aware_by_val, ctx, altr.expr);
+            do_generate_expression(code, opts, global, ctx, ptc_aware_by_val, altr.expr);
             do_generate_convert_to_temporary(code, altr.expr.sloc);
           }
           // Forward the result as is.
@@ -531,7 +536,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
-        do_generate_expression(code, opts, ptc_aware_none, ctx, altr.expr);
+        do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.expr);
 
         // Encode arguments.
         AIR_Node::S_assert_statement xnode = { altr.sloc, altr.msg };
@@ -544,7 +549,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
-        auto code_body = do_generate_expression(opts, ptc_aware_none, ctx, altr.expr);
+        auto code_body = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.expr);
 
         // Encode arguments.
         AIR_Node::S_defer_expression xnode = { altr.sloc, ::std::move(code_body) };
@@ -570,7 +575,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           code.emplace_back(::std::move(xnode_decl));
 
           // Generate code for the initializer.
-          do_generate_expression(code, opts, ptc_aware_none, ctx, altr.inits[i]);
+          do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.inits[i]);
 
           // Initialize the reference.
           AIR_Node::S_initialize_reference xnode_init = { altr.slocs[i], altr.names[i] };
