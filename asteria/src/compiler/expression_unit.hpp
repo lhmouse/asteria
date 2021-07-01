@@ -144,14 +144,16 @@ class Expression_Unit
     template<typename XUnitT,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XUnitT&&>::value)>
     constexpr
-    Expression_Unit(XUnitT&& xunit) noexcept(::std::is_nothrow_constructible<decltype(m_stor), XUnitT&&>::value)
+    Expression_Unit(XUnitT&& xunit)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XUnitT&&>::value)
       : m_stor(::std::forward<XUnitT>(xunit))
       { }
 
     template<typename XUnitT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XUnitT&&>::value)>
     Expression_Unit&
-    operator=(XUnitT&& xunit) noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
+    operator=(XUnitT&& xunit)
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
       {
         this->m_stor = ::std::forward<XUnitT>(xunit);
         return *this;
