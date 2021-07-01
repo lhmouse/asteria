@@ -84,30 +84,33 @@ class Line_Reader
     const char*
     data(size_t add = 0) const
       {
-        if(add > this->navail()) {
+        if(add > this->navail())
           ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
-        }
-        return this->m_str.data() + (this->m_off + add);
+
+        size_t off = this->m_off + add;
+        return this->m_str.data() + off;
       }
 
     char
     peek(size_t add = 0) const noexcept
       {
-        if(add > this->navail()) {
+        if(add > this->navail())
           return 0;
-        }
-        return this->m_str[this->m_off + add];
+
+        size_t off = this->m_off + add;
+        return this->m_str[off];
       }
 
     void
     consume(size_t add)
       {
-        if(add > this->navail()) {
+        if(add > this->navail())
           ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
                         this->m_off, add, this->m_str.size());
-        }
-        this->m_off += add;
+
+        size_t off = this->m_off + add;
+        this->m_off = off;
       }
 
     void
