@@ -338,7 +338,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
 
     // Accept numeric suffixes.
     // Note, at the moment we make no use of such suffixes, so any suffix will
-    // definitely cause parser errors.
+    // definitely cause lexical errors.
     do_collect_digits(tstr, tlen, reader, cctype_alpha | cctype_digit);
 
     // Convert the token to a literal.

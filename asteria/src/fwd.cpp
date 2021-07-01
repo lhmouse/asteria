@@ -336,7 +336,7 @@ describe_parser_status(Compiler_Status status) noexcept
         return "undeclared identifier";
 
       default:
-        return "[unknown parser error]";
+        return "[unknown compiler status]";
     }
   }
 
