@@ -8,7 +8,7 @@
 #include "../runtime/garbage_collector.hpp"
 #include "../runtime/random_engine.hpp"
 #include "../compiler/token_stream.hpp"
-#include "../compiler/parser_error.hpp"
+#include "../compiler/compiler_error.hpp"
 #include "../compiler/enums.hpp"
 #include "../utils.hpp"
 #include <spawn.h>  // ::posix_spawnp()
@@ -69,7 +69,7 @@ do_accept_object_key_opt(Token_Stream& tstrm)
     // Accept the value initiator.
     qtok = tstrm.peek_opt();
     if(!do_check_punctuator(qtok, { punctuator_assign, punctuator_colon }))
-      throw Parser_Error(compiler_status_equals_sign_or_colon_expected, tstrm);
+      throw Compiler_Error(compiler_status_equals_sign_or_colon_expected, tstrm);
 
     tstrm.shift();
     return ::std::move(key);
@@ -80,7 +80,7 @@ do_insert_unique(V_object& obj, Key_with_sloc&& key, Value&& value)
   {
     auto pair = obj.try_emplace(::std::move(key.name), ::std::move(value));
     if(!pair.second)
-      throw Parser_Error(compiler_status_duplicate_key_in_object, key.sloc);
+      throw Compiler_Error(compiler_status_duplicate_key_in_object, key.sloc);
 
     return pair.first->second;
   }
@@ -110,7 +110,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
       // Accept a value. No other things such as closed brackets are allowed.
       auto qtok = tstrm.peek_opt();
       if(!qtok)
-        throw Parser_Error(compiler_status_expression_expected, tstrm);
+        throw Compiler_Error(compiler_status_expression_expected, tstrm);
 
       switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
@@ -123,7 +123,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
               // Open an array.
               qtok = tstrm.peek_opt();
               if(!qtok) {
-                throw Parser_Error(compiler_status_closed_bracket_or_comma_expected,
+                throw Compiler_Error(compiler_status_closed_bracket_or_comma_expected,
                                    tstrm);
               }
               else if(!do_check_punctuator(qtok, { punctuator_bracket_cl })) {
@@ -145,14 +145,14 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
               // Open an object.
               qtok = tstrm.peek_opt();
               if(!qtok) {
-                throw Parser_Error(compiler_status_closed_brace_or_comma_expected,
+                throw Compiler_Error(compiler_status_closed_brace_or_comma_expected,
                                    tstrm);
               }
               else if(!do_check_punctuator(qtok, { punctuator_brace_cl })) {
                 // Get the first key.
                 auto qkey = do_accept_object_key_opt(tstrm);
                 if(!qkey)
-                  throw Parser_Error(compiler_status_closed_brace_or_json5_key_expected,
+                  throw Compiler_Error(compiler_status_closed_brace_or_json5_key_expected,
                                      tstrm);
 
                 // Descend into the new object.
@@ -168,7 +168,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
             }
 
             default:
-              throw Parser_Error(compiler_status_expression_expected, tstrm);
+              throw Compiler_Error(compiler_status_expression_expected, tstrm);
           }
           break;
         }
@@ -177,7 +177,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           // Accept a literal.
           const auto& name = qtok->as_identifier();
           if(::rocket::is_none_of(name, { "null", "true", "false", "infinity", "nan" }))
-            throw Parser_Error(compiler_status_expression_expected, tstrm);
+            throw Compiler_Error(compiler_status_expression_expected, tstrm);
 
           switch(name[3]) {
             case 'l':
@@ -226,7 +226,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           break;
 
         default:
-          throw Parser_Error(compiler_status_expression_expected, tstrm);
+          throw Compiler_Error(compiler_status_expression_expected, tstrm);
       }
 
       // A complete value has been accepted. Insert it into its parent array or object.
@@ -242,7 +242,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           // Check for termination.
           qtok = tstrm.peek_opt();
           if(!qtok) {
-            throw Parser_Error(compiler_status_closed_bracket_or_comma_expected, tstrm);
+            throw Compiler_Error(compiler_status_closed_bracket_or_comma_expected, tstrm);
           }
           else if(!do_check_punctuator(qtok, { punctuator_bracket_cl })) {
             // Look for the next element.
@@ -260,13 +260,13 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           // Check for termination.
           qtok = tstrm.peek_opt();
           if(!qtok) {
-            throw Parser_Error(compiler_status_closed_brace_or_comma_expected, tstrm);
+            throw Compiler_Error(compiler_status_closed_brace_or_comma_expected, tstrm);
           }
           else if(!do_check_punctuator(qtok, { punctuator_brace_cl })) {
             // Get the next key.
             auto qkey = do_accept_object_key_opt(tstrm);
             if(!qkey)
-              throw Parser_Error(compiler_status_closed_brace_or_json5_key_expected,
+              throw Compiler_Error(compiler_status_closed_brace_or_json5_key_expected,
                                  tstrm);
 
             // Look for the next value.
@@ -507,7 +507,7 @@ std_system_conf_load_file(V_string path)
 
     // Ensure all data have been consumed.
     if(!tstrm.empty())
-      throw Parser_Error(compiler_status_identifier_expected, tstrm);
+      throw Compiler_Error(compiler_status_identifier_expected, tstrm);
 
     return root;
   }

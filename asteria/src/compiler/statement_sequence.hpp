@@ -56,7 +56,7 @@ class Statement_Sequence
 
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
-    // This function throws a `Parser_Error` upon failure.
+    // This function throws a `Compiler_Error` upon failure.
     Statement_Sequence&
     reload(Token_Stream& tstrm);
   };

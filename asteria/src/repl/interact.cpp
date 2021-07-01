@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#include "../compiler/parser_error.hpp"
+#include "../compiler/compiler_error.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
 #include <stdio.h>  // fprintf(), fclearerr(), stdin, stderr
@@ -131,7 +131,7 @@ read_execute_print_single()
       repl_script.reload_string(real_name, 0, compl_source);
       repl_file = ::std::move(real_name);
     }
-    catch(Parser_Error&) {
+    catch(Compiler_Error&) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
       cow_string real_name = repl_file;

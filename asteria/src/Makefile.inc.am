@@ -57,7 +57,7 @@ include_asteria_runtime_HEADERS =  \
 include_asteria_compilerdir = ${includedir}/asteria/compiler
 include_asteria_compiler_HEADERS =  \
   %reldir%/compiler/enums.hpp  \
-  %reldir%/compiler/parser_error.hpp  \
+  %reldir%/compiler/compiler_error.hpp  \
   %reldir%/compiler/token.hpp  \
   %reldir%/compiler/token_stream.hpp  \
   %reldir%/compiler/expression_unit.hpp  \
@@ -116,7 +116,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/air_optimizer.cpp  \
   %reldir%/runtime/argument_reader.cpp  \
   %reldir%/compiler/enums.cpp  \
-  %reldir%/compiler/parser_error.cpp  \
+  %reldir%/compiler/compiler_error.cpp  \
   %reldir%/compiler/token.cpp  \
   %reldir%/compiler/token_stream.cpp  \
   %reldir%/compiler/expression_unit.cpp  \

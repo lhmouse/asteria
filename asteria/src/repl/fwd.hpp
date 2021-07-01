@@ -15,7 +15,7 @@ enum Exit_Status : uint8_t
     exit_success            = 0,
     exit_system_error       = 1,
     exit_invalid_argument   = 2,
-    exit_parser_error       = 3,
+    exit_compiler_error     = 3,
     exit_runtime_error      = 4,
     exit_non_integer        = 5,
   };

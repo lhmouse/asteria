@@ -181,7 +181,7 @@ enum Keyword : uint8_t;
 enum Jump_Target : uint8_t;
 enum Precedence : uint8_t;
 enum Xop : uint8_t;
-class Parser_Error;
+class Compiler_Error;
 class Token;
 class Token_Stream;
 class Expression_Unit;

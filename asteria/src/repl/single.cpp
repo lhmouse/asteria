@@ -19,7 +19,7 @@ load_and_execute_single_noreturn()
         repl_script.reload_file(repl_file.c_str());
     }
     catch(exception& stdex) {
-      exit_printf(exit_parser_error, "! error: %s\n", stdex.what());
+      exit_printf(exit_compiler_error, "! error: %s\n", stdex.what());
     }
 
     // Execute the script, passing all command-line arguments to it.

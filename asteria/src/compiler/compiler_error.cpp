@@ -2,24 +2,24 @@
 // Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "parser_error.hpp"
+#include "compiler_error.hpp"
 #include "enums.hpp"
 
 namespace asteria {
 
 static_assert(
-    ::std::is_nothrow_copy_constructible<Parser_Error>::value &&
-    ::std::is_nothrow_move_constructible<Parser_Error>::value &&
-    ::std::is_nothrow_copy_assignable<Parser_Error>::value &&
-    ::std::is_nothrow_move_assignable<Parser_Error>::value);
+    ::std::is_nothrow_copy_constructible<Compiler_Error>::value &&
+    ::std::is_nothrow_move_constructible<Compiler_Error>::value &&
+    ::std::is_nothrow_copy_assignable<Compiler_Error>::value &&
+    ::std::is_nothrow_move_assignable<Compiler_Error>::value);
 
-Parser_Error::
-~Parser_Error()
+Compiler_Error::
+~Compiler_Error()
   {
   }
 
 void
-Parser_Error::
+Compiler_Error::
 do_compose_message()
   {
     // Reuse the storage if any.

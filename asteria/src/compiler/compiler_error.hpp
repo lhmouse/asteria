@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_COMPILER_PARSER_ERROR_HPP_
-#define ASTERIA_COMPILER_PARSER_ERROR_HPP_
+#ifndef ASTERIA_COMPILER_COMPILER_ERROR_HPP_
+#define ASTERIA_COMPILER_COMPILER_ERROR_HPP_
 
 #include "../fwd.hpp"
 #include "../source_location.hpp"
@@ -10,7 +10,7 @@
 
 namespace asteria {
 
-class Parser_Error
+class Compiler_Error
   : public virtual exception
   {
   private:
@@ -24,27 +24,27 @@ class Parser_Error
 
   public:
     explicit
-    Parser_Error(Compiler_Status xstat, const Source_Location& xsloc)
+    Compiler_Error(Compiler_Status xstat, const Source_Location& xsloc)
       : m_stat(xstat), m_sloc(xsloc)
       { this->do_compose_message();  }
 
     explicit
-    Parser_Error(Compiler_Status xstat, const Source_Location& xsloc,
-                 Punctuator unmatched_punct, const Source_Location& unmatched_sloc)
+    Compiler_Error(Compiler_Status xstat, const Source_Location& xsloc,
+                   Punctuator unmatched_punct, const Source_Location& unmatched_sloc)
       : m_stat(xstat), m_sloc(xsloc),
         m_unm_punct(unmatched_punct), m_unm_sloc(unmatched_sloc)
       { this->do_compose_message();  }
 
     ASTERIA_INCOMPLET(Token_Stream)
     explicit
-    Parser_Error(Compiler_Status xstat, const Token_Stream& xtstrm)
+    Compiler_Error(Compiler_Status xstat, const Token_Stream& xtstrm)
       : m_stat(xstat), m_sloc(xtstrm.next_sloc())
       { this->do_compose_message();  }
 
     ASTERIA_INCOMPLET(Token_Stream)
     explicit
-    Parser_Error(Compiler_Status xstat, const Token_Stream& xtstrm,
-                 Punctuator unmatched_punct, const Source_Location& unmatched_sloc)
+    Compiler_Error(Compiler_Status xstat, const Token_Stream& xtstrm,
+                   Punctuator unmatched_punct, const Source_Location& unmatched_sloc)
       : m_stat(xstat), m_sloc(xtstrm.next_sloc()),
         m_unm_punct(unmatched_punct), m_unm_sloc(unmatched_sloc)
       { this->do_compose_message();  }
@@ -54,7 +54,7 @@ class Parser_Error
     do_compose_message();
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(Parser_Error);
+    ASTERIA_COPYABLE_DESTRUCTOR(Compiler_Error);
 
     const char*
     what() const noexcept override
@@ -86,19 +86,19 @@ class Parser_Error
   };
 
 inline bool
-operator==(const Parser_Error& lhs, Compiler_Status rhs) noexcept
+operator==(const Compiler_Error& lhs, Compiler_Status rhs) noexcept
   { return lhs.status() == rhs;  }
 
 inline bool
-operator!=(const Parser_Error& lhs, Compiler_Status rhs) noexcept
+operator!=(const Compiler_Error& lhs, Compiler_Status rhs) noexcept
   { return lhs.status() != rhs;  }
 
 inline bool
-operator==(Compiler_Status lhs, const Parser_Error& rhs) noexcept
+operator==(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
   { return lhs == rhs.status();  }
 
 inline bool
-operator!=(Compiler_Status lhs, const Parser_Error& rhs) noexcept
+operator!=(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 
 }  // namespace asteria
