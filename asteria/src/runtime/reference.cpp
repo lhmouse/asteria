@@ -98,20 +98,20 @@ do_finish_call_slow(Global_Context& global)
           qhooks->on_single_step_trap(ptca->sloc());
 
         // Get the `this` reference and all the other arguments.
-        auto& stack = ptca->open_stack();
+        auto& stack = ptca->stack();
         *this = ::std::move(stack.mut_back());
         stack.pop_back();
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_call(ptca->sloc(), ptca->get_target());
+          qhooks->on_function_call(ptca->sloc(), ptca->target());
 
         // Record this frame.
         frames.emplace_back(ptca);
         ptc_conj |= ptca->ptc_aware();
 
         // Perform a non-tail call.
-        ptca->get_target().invoke_ptc_aware(*this, global, ::std::move(stack));
+        ptca->target().invoke_ptc_aware(*this, global, ::std::move(stack));
       }
 
       // Check for deferred expressions.
@@ -121,14 +121,14 @@ do_finish_call_slow(Global_Context& global)
         frames.pop_back();
 
         // Evaluate deferred expressions if any.
-        if(ptca->get_defer().size())
-          Executive_Context(Executive_Context::M_defer(), global, ptca->open_stack(),
-                            alt_stack, ::std::move(ptca->open_defer()))
+        if(ptca->defer().size())
+          Executive_Context(Executive_Context::M_defer(), global, ptca->stack(),
+                            alt_stack, ::std::move(ptca->defer()))
             .on_scope_exit(air_status_next);
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_return(ptca->sloc(), ptca->get_target(), *this);
+          qhooks->on_function_return(ptca->sloc(), ptca->target(), *this);
       }
     }
     ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
@@ -143,12 +143,12 @@ do_finish_call_slow(Global_Context& global)
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_except(ptca->sloc(), ptca->get_target(), except);
+          qhooks->on_function_except(ptca->sloc(), ptca->target(), except);
 
         // Evaluate deferred expressions if any.
-        if(ptca->get_defer().size())
-          Executive_Context(Executive_Context::M_defer(), global, ptca->open_stack(),
-                            alt_stack, ::std::move(ptca->open_defer()))
+        if(ptca->defer().size())
+          Executive_Context(Executive_Context::M_defer(), global, ptca->stack(),
+                            alt_stack, ::std::move(ptca->defer()))
             .on_scope_exit(except);
 
         // Push the caller.

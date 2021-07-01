@@ -132,11 +132,11 @@ do_on_scope_exit_slow(AIR_Status status)
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions
       // to it. These callbacks will be unpacked later, so we just return.
-      if(ptca->get_defer().empty())
-        ptca->open_defer().swap(this->m_defer);
+      auto& defer = ptca->defer();
+      if(defer.empty())
+        defer.swap(this->m_defer);
       else
-        ptca->open_defer().append(
-                this->m_defer.move_begin(), this->m_defer.move_end());
+        defer.append(this->m_defer.move_begin(), this->m_defer.move_end());
     }
     else {
       // Execute all deferred expressions backwards.

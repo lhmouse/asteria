@@ -46,15 +46,15 @@ class PTC_Arguments final
       { return this->m_ptc;  }
 
     const cow_function&
-    get_target() const noexcept
+    target() const noexcept
       { return this->m_target;  }
 
     const Reference_Stack&
-    get_stack() const noexcept
+    stack() const noexcept
       { return this->m_stack;  }
 
     Reference_Stack&
-    open_stack() noexcept
+    stack() noexcept
       { return this->m_stack;  }
 
     ASTERIA_INCOMPLET(Variadic_Arguer)
@@ -64,15 +64,15 @@ class PTC_Arguments final
 
     template<typename ArguerT>
     PTC_Arguments&
-    set_caller(const rcptr<ArguerT>& caller_opt) noexcept
-      { return this->m_caller_opt = ::std::move(caller_opt), *this;  }
+    set_caller(const rcptr<ArguerT>& caller) noexcept
+      { return this->m_caller_opt = ::std::move(caller), *this;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
-    get_defer() const noexcept
+    defer() const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVMC_Queue>&
-    open_defer() noexcept
+    defer() noexcept
       { return this->m_defer;  }
   };
 
