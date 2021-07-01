@@ -3,8 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#include "../runtime/global_context.hpp"
 #include "../runtime/abstract_hooks.hpp"
+#include "../simple_script.hpp"
 #include "../source_location.hpp"
 #include "../utils.hpp"
 #include <signal.h>  // sig_atomic_t, sigaction()
@@ -114,7 +114,7 @@ install_signal_and_verbose_hooks()
     ::sigaction(SIGINT, &sigx, nullptr);
 
     // Set the hooks class.
-    repl_global.set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
+    repl_script.global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
   }
 
 } // namespace asteria

@@ -24,9 +24,6 @@ enum Exit_Status : uint8_t
 extern const char repl_version[];
 extern bool repl_verbose;
 extern bool repl_interactive;
-extern Compiler_Options repl_opts;
-
-extern Global_Context repl_global;
 extern Simple_Script repl_script;
 
 extern unsigned long repl_index;  // snippet index

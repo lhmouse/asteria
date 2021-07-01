@@ -3,7 +3,6 @@
 
 #include "utils.hpp"
 #include "../src/simple_script.hpp"
-#include "../src/runtime/global_context.hpp"
 
 using namespace asteria;
 
@@ -29,8 +28,7 @@ int main()
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
-    Global_Context global;
-    auto res = code.execute(global);
+    auto res = code.execute();
 
     const auto& array = res.dereference_readonly().as_array();
     ASTERIA_TEST_CHECK(array.size() == 5);
@@ -53,5 +51,5 @@ int main()
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
-    ASTERIA_TEST_CHECK_CATCH(code.execute(global));
+    ASTERIA_TEST_CHECK_CATCH(code.execute());
   }

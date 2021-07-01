@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
+#include "../simple_script.hpp"
 #include "fwd.hpp"
 #include <locale.h>  // setlocale()
 #include <unistd.h>  // isatty()
@@ -181,7 +182,7 @@ do_parse_command_line(int argc, char** argv)
     // effectively decreases optimization in comparison to when it wasn't
     // specified.
     if(optimize)
-      repl_opts.optimization_level = *optimize;
+      repl_script.options().optimization_level = *optimize;
 
     // These arguments are always overwritten.
     repl_file = path.move_value_or(sref("-"));
@@ -212,7 +213,7 @@ main(int argc, char** argv)
       install_signal_and_verbose_hooks();
 
     if(repl_verbose)
-      repl_opts.verbose_single_step_traps = true;
+      repl_script.options().verbose_single_step_traps = true;
 
     // In non-include mode, read the script, execute it, then exit.
     if(!repl_interactive)

@@ -14,9 +14,6 @@ namespace asteria {
 const char repl_version[] = PACKAGE_STRING;
 bool repl_verbose;
 bool repl_interactive;
-Compiler_Options repl_opts;
-
-Global_Context repl_global;
 Simple_Script repl_script;
 
 unsigned long repl_index;  // snippet index
@@ -60,7 +57,7 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
 void
 initialize_global_context(const void* stack_base)
   {
-    repl_global.set_recursion_base(stack_base);
+    repl_script.global().set_recursion_base(stack_base);
   }
 
 }  // namespace asteria

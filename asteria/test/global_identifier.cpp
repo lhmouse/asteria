@@ -3,7 +3,6 @@
 
 #include "utils.hpp"
 #include "../src/simple_script.hpp"
-#include "../src/runtime/global_context.hpp"
 
 using namespace asteria;
 
@@ -19,6 +18,5 @@ int main()
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
-    Global_Context global;
-    ASTERIA_TEST_CHECK(code.execute(global).dereference_readonly().as_string() == "string/object");
+    ASTERIA_TEST_CHECK(code.execute().dereference_readonly().as_string() == "string/object");
   }

@@ -88,20 +88,20 @@ reload_file(const char* path)
 
 Reference
 Simple_Script::
-execute(Global_Context& global, Reference_Stack&& stack) const
+execute(Reference_Stack&& stack)
   {
     // Execute the script as a plain function.
     Reference self;
     self.set_temporary(nullopt);
 
     const StdIO_Sentry sentry;
-    this->m_func.invoke(self, global, ::std::move(stack));
+    this->m_func.invoke(self, this->m_global, ::std::move(stack));
     return self;
   }
 
 Reference
 Simple_Script::
-execute(Global_Context& global, cow_vector<Value>&& vals) const
+execute(cow_vector<Value>&& vals)
   {
     // Push all arguments backwards as temporaries.
     Reference_Stack stack;
@@ -109,7 +109,7 @@ execute(Global_Context& global, cow_vector<Value>&& vals) const
       stack.emplace_back_uninit()
           .set_temporary(::std::move(*it));
 
-    return this->execute(global, ::std::move(stack));
+    return this->execute(::std::move(stack));
   }
 
 }  // namespace asteria

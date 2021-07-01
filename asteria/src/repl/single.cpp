@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#include "../runtime/global_context.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
 
@@ -12,9 +11,6 @@ namespace asteria {
 void
 load_and_execute_single_noreturn()
   try {
-    // Prepare the parser.
-    repl_script.set_options(repl_opts);
-
     // Load and parse the script.
     try {
       if(repl_file == "-")
@@ -27,7 +23,7 @@ load_and_execute_single_noreturn()
     }
 
     // Execute the script, passing all command-line arguments to it.
-    auto ref = repl_script.execute(repl_global, ::std::move(repl_args));
+    auto ref = repl_script.execute(::std::move(repl_args));
 
     // If the script exits without returning a value, success is assumed.
     if(ref.is_void())

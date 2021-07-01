@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
-#include "../runtime/global_context.hpp"
 #include "../compiler/parser_error.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
@@ -15,7 +14,6 @@ void
 read_execute_print_single()
   try {
     // Prepare for the next snippet.
-    repl_script.set_options(repl_opts);
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
@@ -151,7 +149,7 @@ read_execute_print_single()
 
     // Execute the script.
     repl_printf("* running '%s'...\n", repl_file.c_str());
-    auto ref = repl_script.execute(repl_global, ::std::move(repl_args));
+    auto ref = repl_script.execute(::std::move(repl_args));
 
     // Stringify the result.
     if(ref.is_void())

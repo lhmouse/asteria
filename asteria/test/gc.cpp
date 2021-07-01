@@ -3,7 +3,6 @@
 
 #include "utils.hpp"
 #include "../src/simple_script.hpp"
-#include "../src/runtime/global_context.hpp"
 #include "../src/runtime/garbage_collector.hpp"
 #include "../src/runtime/variable.hpp"
 
@@ -44,10 +43,9 @@ int main()
     auto foreign = ::rocket::make_refcnt<Variable>();
     foreign->initialize(42, false);
     {
-      Global_Context global;
-      global.open_named_reference(sref("foreign_variable")).set_variable(foreign);
-
       Simple_Script code;
+      code.global().open_named_reference(sref("foreign_variable")).set_variable(foreign);
+
       code.reload_string(
         sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,7 +73,7 @@ int main()
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
-      code.execute(global);
+      code.execute();
     }
     ASTERIA_TEST_CHECK(foreign->use_count() == 1);
     ASTERIA_TEST_CHECK(foreign->is_uninitialized() == false);

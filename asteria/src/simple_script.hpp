@@ -5,74 +5,63 @@
 #define ASTERIA_SIMPLE_SCRIPT_HPP_
 
 #include "fwd.hpp"
+#include "runtime/global_context.hpp"
 
 namespace asteria {
 
 class Simple_Script
   {
   private:
-    Compiler_Options m_opts;  // static
-    cow_vector<phsh_string> m_params;  // constant
-    cow_function m_func;  // note type erasure
+    Compiler_Options m_opts;
+    Global_Context m_global;
+
+    cow_vector<phsh_string> m_params;
+    cow_function m_func;
 
   public:
-    explicit constexpr
+    explicit
     Simple_Script() noexcept
-      : m_opts()
       { }
 
     explicit
     Simple_Script(const cow_string& name, tinybuf& cbuf)
-      : m_opts()
       { this->reload(name, 1, cbuf);  }
 
     explicit
     Simple_Script(const cow_string& name, int line, tinybuf& cbuf)
-      : m_opts()
-      { this->reload(name, line, cbuf);  }
-
-    explicit constexpr
-    Simple_Script(const Compiler_Options& opts) noexcept
-      : m_opts(opts)
-      { }
-
-    explicit
-    Simple_Script(const Compiler_Options& opts, const cow_string& name, tinybuf& cbuf)
-      : m_opts(opts)
-      { this->reload(name, 1, cbuf);  }
-
-    explicit
-    Simple_Script(const Compiler_Options& opts, const cow_string& name, int line, tinybuf& cbuf)
-      : m_opts(opts)
       { this->reload(name, line, cbuf);  }
 
   public:
     const Compiler_Options&
-    get_options() const noexcept
+    options() const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
-    open_options() noexcept
+    options() noexcept
       { return this->m_opts;  }
 
-    Simple_Script&
-    set_options(const Compiler_Options& opts) noexcept
-      { return this->m_opts = opts, *this;  }
+    const Global_Context&
+    global() const noexcept
+      { return this->m_global;  }
+
+    Global_Context&
+    global() noexcept
+      { return this->m_global;  }
 
     explicit operator
     bool() const noexcept
       { return bool(this->m_func);  }
 
+    operator
+    const cow_function&() const noexcept
+      { return this->m_func;  }
+
     Simple_Script&
-    clear() noexcept
+    reset() noexcept
       {
         this->m_func.reset();
         return *this;
       }
-
-    operator
-    const cow_function&() const noexcept
-      { return this->m_func;  }
 
     // Load a script.
     Simple_Script&
@@ -95,10 +84,10 @@ class Simple_Script
 
     // Execute the script that has been loaded.
     Reference
-    execute(Global_Context& global, Reference_Stack&& stack) const;
+    execute(Reference_Stack&& stack);
 
     Reference
-    execute(Global_Context& global, cow_vector<Value>&& args = { }) const;
+    execute(cow_vector<Value>&& args = { });
   };
 
 }  // namespace asteria
