@@ -14,7 +14,7 @@ class Parser_Error
   : public virtual exception
   {
   private:
-    Parser_Status m_stat;
+    Compiler_Status m_stat;
     Source_Location m_sloc;
 
     Punctuator m_unm_punct;
@@ -24,12 +24,12 @@ class Parser_Error
 
   public:
     explicit
-    Parser_Error(Parser_Status xstat, const Source_Location& xsloc)
+    Parser_Error(Compiler_Status xstat, const Source_Location& xsloc)
       : m_stat(xstat), m_sloc(xsloc)
       { this->do_compose_message();  }
 
     explicit
-    Parser_Error(Parser_Status xstat, const Source_Location& xsloc,
+    Parser_Error(Compiler_Status xstat, const Source_Location& xsloc,
                  Punctuator unmatched_punct, const Source_Location& unmatched_sloc)
       : m_stat(xstat), m_sloc(xsloc),
         m_unm_punct(unmatched_punct), m_unm_sloc(unmatched_sloc)
@@ -37,13 +37,13 @@ class Parser_Error
 
     ASTERIA_INCOMPLET(Token_Stream)
     explicit
-    Parser_Error(Parser_Status xstat, const Token_Stream& xtstrm)
+    Parser_Error(Compiler_Status xstat, const Token_Stream& xtstrm)
       : m_stat(xstat), m_sloc(xtstrm.next_sloc())
       { this->do_compose_message();  }
 
     ASTERIA_INCOMPLET(Token_Stream)
     explicit
-    Parser_Error(Parser_Status xstat, const Token_Stream& xtstrm,
+    Parser_Error(Compiler_Status xstat, const Token_Stream& xtstrm,
                  Punctuator unmatched_punct, const Source_Location& unmatched_sloc)
       : m_stat(xstat), m_sloc(xtstrm.next_sloc()),
         m_unm_punct(unmatched_punct), m_unm_sloc(unmatched_sloc)
@@ -60,7 +60,7 @@ class Parser_Error
     what() const noexcept override
       { return this->m_what.c_str();  }
 
-    Parser_Status
+    Compiler_Status
     status() const noexcept
       { return this->m_stat;  }
 
@@ -86,19 +86,19 @@ class Parser_Error
   };
 
 inline bool
-operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
+operator==(const Parser_Error& lhs, Compiler_Status rhs) noexcept
   { return lhs.status() == rhs;  }
 
 inline bool
-operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
+operator!=(const Parser_Error& lhs, Compiler_Status rhs) noexcept
   { return lhs.status() != rhs;  }
 
 inline bool
-operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
+operator==(Compiler_Status lhs, const Parser_Error& rhs) noexcept
   { return lhs == rhs.status();  }
 
 inline bool
-operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
+operator!=(Compiler_Status lhs, const Parser_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 
 }  // namespace asteria

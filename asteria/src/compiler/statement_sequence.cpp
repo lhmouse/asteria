@@ -69,7 +69,7 @@ do_accept_identifier_opt(Token_Stream& tstrm, bool user_decl)
 
     auto name = qtok->as_identifier();
     if(user_decl && name.starts_with("__"))
-      throw Parser_Error(parser_status_reserved_identifier_not_declarable, tstrm);
+      throw Parser_Error(compiler_status_reserved_identifier_not_declarable, tstrm);
 
     // Return the identifier and discard this token.
     tstrm.shift();
@@ -262,13 +262,13 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       }
 
       if(names.size() < 1)
-        throw Parser_Error(parser_status_identifier_expected, tstrm);
+        throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
       if(!kpunct)
         throw Parser_Error(
-                  comma_allowed ? parser_status_closed_bracket_or_comma_expected
-                                : parser_status_closed_bracket_or_identifier_expected,
+                  comma_allowed ? compiler_status_closed_bracket_or_comma_expected
+                                : compiler_status_closed_bracket_or_identifier_expected,
                   tstrm, punctuator_bracket_op, op_sloc);
 
       // Make the list different from a plain, sole one.
@@ -296,13 +296,13 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       }
 
       if(names.size() < 1)
-        throw Parser_Error(parser_status_identifier_expected, tstrm);
+        throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
       if(!kpunct)
         throw Parser_Error(
-                  comma_allowed ? parser_status_closed_brace_or_comma_expected
-                                : parser_status_closed_brace_or_identifier_expected,
+                  comma_allowed ? compiler_status_closed_brace_or_comma_expected
+                                : compiler_status_closed_brace_or_identifier_expected,
                   tstrm, punctuator_brace_op, op_sloc);
 
       // Make the list different from a plain, sole one.
@@ -411,7 +411,7 @@ do_accept_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_brace_or_statement_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_brace_or_statement_expected, tstrm,
                          punctuator_brace_op, op_sloc);
 
     Statement::S_block xstmt = {  ::std::move(body) };
@@ -487,7 +487,7 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       auto sloc = tstrm.next_sloc();
       auto qdecl = do_accept_variable_declarator_opt(tstrm);
       if(!qdecl)
-        throw Parser_Error(parser_status_identifier_expected, tstrm);
+        throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
       auto qinit = do_accept_equal_initializer_opt(tstrm);
       if(!qinit)
@@ -504,7 +504,7 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_variables xstmt = { false, ::std::move(slocs), ::std::move(decls),
                                      ::std::move(inits) };
@@ -530,11 +530,11 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       auto sloc = tstrm.next_sloc();
       auto qdecl = do_accept_variable_declarator_opt(tstrm);
       if(!qdecl)
-        throw Parser_Error(parser_status_identifier_expected, tstrm);
+        throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
       auto qinit = do_accept_equal_initializer_opt(tstrm);
       if(!qinit)
-        throw Parser_Error(parser_status_equals_sign_expected, tstrm);
+        throw Parser_Error(compiler_status_equals_sign_expected, tstrm);
 
       slocs.emplace_back(::std::move(sloc));
       decls.emplace_back(::std::move(*qdecl));
@@ -547,7 +547,7 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_variables xstmt = { true, ::std::move(slocs), ::std::move(decls),
                                      ::std::move(inits) };
@@ -572,11 +572,11 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
       auto sloc = tstrm.next_sloc();
       auto qname = do_accept_identifier_opt(tstrm, true);
       if(!qname)
-        throw Parser_Error(parser_status_identifier_expected, tstrm);
+        throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
       auto qinit = do_accept_ref_initializer_opt(tstrm);
       if(!qinit)
-        throw Parser_Error(parser_status_arrow_expected, tstrm);
+        throw Parser_Error(compiler_status_arrow_expected, tstrm);
 
       slocs.emplace_back(::std::move(sloc));
       names.emplace_back(::std::move(*qname));
@@ -589,7 +589,7 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
     }
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_references xstmt = { ::std::move(slocs), ::std::move(names),
                                       ::std::move(inits) };
@@ -637,12 +637,12 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
 
     auto qname = do_accept_identifier_opt(tstrm, true);
     if(!qname)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+      throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto kparams = do_accept_parameter_list_opt(tstrm);
     if(!kparams)
@@ -650,12 +650,12 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qbody = do_accept_block_opt(tstrm, scope_plain);
     if(!qbody)
-      throw Parser_Error(parser_status_open_brace_expected, tstrm);
+      throw Parser_Error(compiler_status_open_brace_expected, tstrm);
 
     Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname),
                                     ::std::move(*kparams), ::std::move(qbody->stmts) };
@@ -673,7 +673,7 @@ do_accept_expression_statement_opt(Token_Stream& tstrm)
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_expression xstmt = { ::std::move(*kexpr) };
     return ::std::move(xstmt);
@@ -690,7 +690,7 @@ do_accept_else_branch_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qblock)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     return ::std::move(*qblock);
   }
@@ -713,20 +713,20 @@ do_accept_if_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qbtrue = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbtrue)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     auto qbfalse = do_accept_else_branch_opt(tstrm, scfl);
     if(!qbfalse)
@@ -757,15 +757,15 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto qctrl = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qctrl)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     // Parse the block by hand.
@@ -775,7 +775,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     op_sloc = tstrm.next_sloc();
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_brace_expected, tstrm);
+      throw Parser_Error(compiler_status_open_brace_expected, tstrm);
 
     for(;;) {
       qkwrd = do_accept_keyword_opt(tstrm, { keyword_case, keyword_default });
@@ -786,7 +786,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
         // The `case` label requires an expression argument.
         auto qlabel = do_accept_expression_as_rvalue_opt(tstrm);
         if(!qlabel)
-          throw Parser_Error(parser_status_expression_expected, tstrm);
+          throw Parser_Error(compiler_status_expression_expected, tstrm);
 
         labels.emplace_back(::std::move(*qlabel));
       }
@@ -796,7 +796,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
       if(!kpunct)
-        throw Parser_Error(parser_status_colon_expected, tstrm);
+        throw Parser_Error(compiler_status_colon_expected, tstrm);
 
       cow_vector<Statement> body;
       while(auto qstmt = do_accept_statement_opt(tstrm, scfl | scope_switch))
@@ -808,7 +808,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_brace_or_switch_clause_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_brace_or_switch_clause_expected, tstrm,
                          punctuator_brace_op, op_sloc);
 
     Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
@@ -826,11 +826,11 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_while);
     if(!qblock)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
-      throw Parser_Error(parser_status_keyword_while_expected, tstrm);
+      throw Parser_Error(compiler_status_keyword_while_expected, tstrm);
 
     auto kneg = do_accept_negation_opt(tstrm);
     if(!kneg)
@@ -839,20 +839,20 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_do_while xstmt = { ::std::move(*qblock), *kneg, ::std::move(*qcond) };
     return ::std::move(xstmt);
@@ -874,20 +874,20 @@ do_accept_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto qcond = do_accept_expression_as_rvalue_opt(tstrm);
     if(!qcond)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_while);
     if(!qblock)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     Statement::S_while xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qblock) };
     return ::std::move(xstmt);
@@ -905,32 +905,32 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
 
     auto qkname = do_accept_identifier_opt(tstrm, true);
     if(!qkname)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+      throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct)
-      throw Parser_Error(parser_status_comma_expected, tstrm);
+      throw Parser_Error(compiler_status_comma_expected, tstrm);
 
     auto qvname = do_accept_identifier_opt(tstrm, true);
     if(!qvname)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+      throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
     if(!kpunct)
-      throw Parser_Error(parser_status_arrow_expected, tstrm);
+      throw Parser_Error(compiler_status_arrow_expected, tstrm);
 
     auto qinit = do_accept_expression_opt(tstrm);
     if(!qinit)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
     if(!qblock)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qvname),
                                     ::std::move(*qinit), ::std::move(*qblock) };
@@ -996,7 +996,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     auto kstep = do_accept_expression_opt(tstrm);
     if(!kstep)
@@ -1004,12 +1004,12 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
     if(!qblock)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond),
                                ::std::move(*kstep), ::std::move(*qblock) };
@@ -1043,11 +1043,11 @@ do_accept_for_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto qcompl = do_accept_for_complement_opt(tstrm, op_sloc, scfl);
     if(!qcompl)
-      throw Parser_Error(parser_status_for_statement_initializer_expected, tstrm);
+      throw Parser_Error(compiler_status_for_statement_initializer_expected, tstrm);
 
     return ::std::move(*qcompl);
   }
@@ -1092,11 +1092,11 @@ do_accept_break_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
       ktarg.emplace(jump_target_unspec, scope_xbreak);
 
     if(!(scfl & ktarg->second))
-      throw Parser_Error(parser_status_break_no_matching_scope, tstrm);
+      throw Parser_Error(compiler_status_break_no_matching_scope, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_break xstmt = { ::std::move(sloc), ktarg->first };
     return ::std::move(xstmt);
@@ -1119,11 +1119,11 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
       ktarg.emplace(jump_target_unspec, scope_xcontinue);
 
     if(!(scfl & ktarg->second))
-      throw Parser_Error(parser_status_continue_no_matching_scope, tstrm);
+      throw Parser_Error(compiler_status_continue_no_matching_scope, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_continue xstmt = { ::std::move(sloc), ktarg->first };
     return ::std::move(xstmt);
@@ -1141,11 +1141,11 @@ do_accept_throw_statement_opt(Token_Stream& tstrm)
 
     auto kexpr = do_accept_expression_as_rvalue_opt(tstrm);
     if(!kexpr)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_throw xstmt = { ::std::move(sloc), ::std::move(*kexpr) };
     return ::std::move(xstmt);
@@ -1178,7 +1178,7 @@ do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_S
       return nullopt;
 
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     return qref.value_or(false);
   }
@@ -1225,7 +1225,7 @@ do_accept_return_statement_opt(Token_Stream& tstrm)
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_return xstmt = { ::std::move(sloc), kpair->first, ::std::move(kpair->second) };
     return ::std::move(xstmt);
@@ -1242,7 +1242,7 @@ do_accept_assert_message_opt(Token_Stream& tstrm)
 
     auto kmsg = do_accept_string_literal_opt(tstrm);
     if(!kmsg)
-      throw Parser_Error(parser_status_string_literal_expected, tstrm);
+      throw Parser_Error(compiler_status_string_literal_expected, tstrm);
 
     return ::std::move(*kmsg);
   }
@@ -1259,7 +1259,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
 
     auto kexpr = do_accept_expression_as_rvalue_opt(tstrm);
     if(!kexpr)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     auto kmsg = do_accept_assert_message_opt(tstrm);
     if(!kmsg)
@@ -1267,7 +1267,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_assert xstmt = { ::std::move(sloc), ::std::move(*kexpr), ::std::move(*kmsg) };
     return ::std::move(xstmt);
@@ -1285,31 +1285,31 @@ do_accept_try_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
     auto qbtry = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbtry)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     // Note that this is the location of the `catch` block.
     auto sloc_catch = tstrm.next_sloc();
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_catch });
     if(!qkwrd)
-      throw Parser_Error(parser_status_keyword_catch_expected, tstrm);
+      throw Parser_Error(compiler_status_keyword_catch_expected, tstrm);
 
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto kexcept = do_accept_identifier_opt(tstrm, true);
     if(!kexcept)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+      throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qbcatch = do_accept_statement_as_block_opt(tstrm, scfl);
     if(!qbcatch)
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     Statement::S_try xstmt = { ::std::move(sloc), ::std::move(*qbtry), ::std::move(sloc_catch),
                                ::std::move(*kexcept), ::std::move(*qbcatch) };
@@ -1328,11 +1328,11 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
 
     auto kexpr = do_accept_expression_opt(tstrm);
     if(!kexpr)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Parser_Error(parser_status_semicolon_expected, tstrm);
+      throw Parser_Error(compiler_status_semicolon_expected, tstrm);
 
     Statement::S_defer xstmt = { ::std::move(sloc), ::std::move(*kexpr) };
     return ::std::move(xstmt);
@@ -1575,7 +1575,7 @@ do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
     auto qname = do_accept_identifier_opt(tstrm, false);
     if(!qname)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+      throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
     Expression_Unit::S_global_reference xunit = { sloc, ::std::move(*qname) };
     units.emplace_back(::std::move(xunit));
@@ -1651,7 +1651,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     auto kparams = do_accept_parameter_list_opt(tstrm);
     if(!kparams)
@@ -1659,12 +1659,12 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     auto qblock = do_accept_closure_body_opt(tstrm);
     if(!qblock)
-      throw Parser_Error(parser_status_open_brace_or_equal_initializer_expected, tstrm);
+      throw Parser_Error(compiler_status_open_brace_or_equal_initializer_expected, tstrm);
 
     auto unique_name = format_string("__closure:$1:$2", sloc.line(), sloc.column());
 
@@ -1698,7 +1698,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 
       nelems += 1;
       if(nelems >= 0x100000)
-        throw Parser_Error(parser_status_too_many_elements, tstrm);
+        throw Parser_Error(compiler_status_too_many_elements, tstrm);
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
@@ -1710,8 +1710,8 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
       throw Parser_Error(
-                comma_allowed ? parser_status_closed_bracket_or_comma_expected
-                              : parser_status_closed_bracket_or_expression_expected,
+                comma_allowed ? compiler_status_closed_bracket_or_comma_expected
+                              : compiler_status_closed_bracket_or_expression_expected,
                 tstrm, punctuator_bracket_op, sloc);
 
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
@@ -1743,18 +1743,18 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
         break;
 
       if(::rocket::find(keys, *qkey))
-        throw Parser_Error(parser_status_duplicate_key_in_object, key_sloc);
+        throw Parser_Error(compiler_status_duplicate_key_in_object, key_sloc);
 
       keys.emplace_back(::std::move(*qkey));
 
       // Look for the value with an initiator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
       if(!kpunct)
-        throw Parser_Error(parser_status_equals_sign_or_colon_expected, tstrm);
+        throw Parser_Error(compiler_status_equals_sign_or_colon_expected, tstrm);
 
       bool succ = do_accept_expression_as_rvalue(units, tstrm);
       if(!succ)
-        throw Parser_Error(parser_status_expression_expected, tstrm);
+        throw Parser_Error(compiler_status_expression_expected, tstrm);
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
@@ -1766,8 +1766,8 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Parser_Error(
-                comma_allowed ? parser_status_closed_brace_or_comma_expected
-                              : parser_status_closed_brace_or_json5_key_expected,
+                comma_allowed ? compiler_status_closed_brace_or_comma_expected
+                              : compiler_status_closed_brace_or_json5_key_expected,
                 tstrm, punctuator_brace_op, sloc);
 
     Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
@@ -1787,11 +1787,11 @@ do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& ts
 
     bool succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, sloc);
 
     return true;
@@ -1810,31 +1810,31 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     bool succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct)
-      throw Parser_Error(parser_status_comma_expected, tstrm);
+      throw Parser_Error(compiler_status_comma_expected, tstrm);
 
     succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct)
-      throw Parser_Error(parser_status_comma_expected, tstrm);
+      throw Parser_Error(compiler_status_comma_expected, tstrm);
 
     succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_fma, false };
@@ -1887,23 +1887,23 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     bool succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct)
-      throw Parser_Error(parser_status_comma_expected, tstrm);
+      throw Parser_Error(compiler_status_comma_expected, tstrm);
 
     succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     units.emplace_back(::std::move(*qxunit));
@@ -1923,23 +1923,23 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     bool succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
     if(!kpunct)
-      throw Parser_Error(parser_status_comma_expected, tstrm);
+      throw Parser_Error(compiler_status_comma_expected, tstrm);
 
     succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_parenthesis_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_parenthesis_expected, tstrm,
                          punctuator_parenth_op, op_sloc);
 
     Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
@@ -1960,7 +1960,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
-      throw Parser_Error(parser_status_open_parenthesis_expected, tstrm);
+      throw Parser_Error(compiler_status_open_parenthesis_expected, tstrm);
 
     uint32_t nargs = 0;
     bool comma_allowed = false;
@@ -1971,7 +1971,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
 
       nargs += 1;
       if(nargs >= 0x100000)
-        throw Parser_Error(parser_status_too_many_elements, tstrm);
+        throw Parser_Error(compiler_status_too_many_elements, tstrm);
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -1981,13 +1981,13 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
     }
 
     if(nargs < 1)
-      throw Parser_Error(parser_status_argument_expected, tstrm);
+      throw Parser_Error(compiler_status_argument_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(
-                comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
-                              : parser_status_closed_parenthesis_or_argument_expected,
+                comma_allowed ? compiler_status_closed_parenthesis_or_comma_expected
+                              : compiler_status_closed_parenthesis_or_argument_expected,
                 tstrm, punctuator_parenth_op, op_sloc);
 
     Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
@@ -2108,7 +2108,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
 
       nargs += 1;
       if(nargs >= 0x100000)
-        throw Parser_Error(parser_status_too_many_elements, tstrm);
+        throw Parser_Error(compiler_status_too_many_elements, tstrm);
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -2120,8 +2120,8 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Parser_Error(
-                comma_allowed ? parser_status_closed_parenthesis_or_comma_expected
-                              : parser_status_closed_parenthesis_or_argument_expected,
+                comma_allowed ? compiler_status_closed_parenthesis_or_comma_expected
+                              : compiler_status_closed_parenthesis_or_argument_expected,
                 tstrm, punctuator_parenth_op, sloc);
 
     Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
@@ -2141,11 +2141,11 @@ do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& ts
 
     bool succ = do_accept_expression(units, tstrm);
     if(!succ)
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
-      throw Parser_Error(parser_status_closed_bracket_expected, tstrm,
+      throw Parser_Error(compiler_status_closed_bracket_expected, tstrm,
                          punctuator_bracket_op, sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
@@ -2165,7 +2165,7 @@ do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream
 
     auto qkey = do_accept_json5_key_opt(tstrm);
     if(!qkey)
-      throw Parser_Error(parser_status_identifier_expected, tstrm);
+      throw Parser_Error(compiler_status_identifier_expected, tstrm);
 
     Expression_Unit::S_member_access xunit = { sloc, ::std::move(*qkey) };
     units.emplace_back(::std::move(xunit));
@@ -2198,7 +2198,7 @@ do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       if(prefixes.empty())
         return false;
 
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
     }
 
     // Collect suffixes.
@@ -2242,11 +2242,11 @@ do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
     bool assign = *kpunct == punctuator_quest_eq;
     cow_vector<Expression_Unit> btrue;
     if(!do_accept_expression(btrue, tstrm))
-      throw Parser_Error(parser_status_expression_expected, tstrm);
+      throw Parser_Error(compiler_status_expression_expected, tstrm);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
-      throw Parser_Error(parser_status_colon_expected, tstrm, *kpunct, sloc);
+      throw Parser_Error(compiler_status_colon_expected, tstrm, *kpunct, sloc);
 
     Infix_Element::S_ternary xelem = { ::std::move(sloc), assign, ::std::move(btrue), { } };
     return ::std::move(xelem);
@@ -2434,7 +2434,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 
       bool succ = do_accept_infix_element(qnext->open_junction(), tstrm);
       if(!succ)
-        throw Parser_Error(parser_status_expression_expected, tstrm);
+        throw Parser_Error(compiler_status_expression_expected, tstrm);
 
       // Assignment operations have the lowest precedence and group from right to left.
       auto preced_limit = qnext->tell_precedence();
@@ -2483,7 +2483,7 @@ reload(Token_Stream& tstrm)
 
     // If there are any non-statement tokens left in the stream, fail.
     if(!tstrm.empty())
-      throw Parser_Error(parser_status_statement_expected, tstrm);
+      throw Parser_Error(compiler_status_statement_expected, tstrm);
 
     // Succeed.
     this->m_stmts = ::std::move(stmts);
