@@ -15,9 +15,10 @@ class Executive_Context
   {
   private:
     Executive_Context* m_parent_opt;
-    friend Analytic_Context;
-    Global_Context* m_global;
 
+    // Store some references to the enclosing function,
+    // so they are not passed here and there upon each native call.
+    Global_Context* m_global;
     Reference_Stack* m_stack;
     Reference_Stack* m_alt_stack;  // for nested calls
 
@@ -30,8 +31,9 @@ class Executive_Context
     // Its parent context shall outlast itself.
     explicit
     Executive_Context(M_plain, Executive_Context& parent)
-      : m_parent_opt(&parent), m_global(parent.m_global),
-        m_stack(parent.m_stack), m_alt_stack(parent.m_alt_stack)
+      : m_parent_opt(&parent),
+        m_global(parent.m_global), m_stack(parent.m_stack),
+        m_alt_stack(parent.m_alt_stack)
       { }
 
     // A defer context is used to evaluate deferred expressions.
@@ -41,8 +43,8 @@ class Executive_Context
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
                       Reference_Stack& alt_stack,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
-      : m_parent_opt(), m_global(&global),
-        m_stack(&stack), m_alt_stack(&alt_stack),
+      : m_parent_opt(),
+        m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
         m_defer(::std::move(defer))
       { }
 

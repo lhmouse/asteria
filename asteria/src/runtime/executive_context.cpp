@@ -18,8 +18,8 @@ Executive_Context::
 Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                   Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
                   const cow_vector<phsh_string>& params, Reference&& self)
-  : m_parent_opt(), m_global(&global),
-    m_stack(&stack), m_alt_stack(&alt_stack),
+  : m_parent_opt(),
+    m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
     m_zvarg(zvarg)
   {
     // Set the `this` reference.

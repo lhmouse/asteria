@@ -20,7 +20,7 @@ class Analytic_Context
     // Its parent context shall outlast itself.
     explicit
     Analytic_Context(M_plain, Abstract_Context& parent)
-      : m_parent_opt(::std::addressof(parent))
+      : m_parent_opt(&parent)
       { }
 
     // A function context may have a parent.
@@ -40,7 +40,7 @@ class Analytic_Context
       { return this->get_parent_opt();  }
 
     Reference*
-    do_create_lazy_reference(Reference* /*hint_opt*/, const phsh_string& /*name*/) const override
+    do_create_lazy_reference(Reference*, const phsh_string&) const override
       { return nullptr;  }
 
   public:
