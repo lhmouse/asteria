@@ -259,7 +259,7 @@ class variant
     do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
         noadl::sprintf_and_throw<invalid_argument>(
-              "variant: Index mismatch (expecting `%d` [`%s`], got `%d` [`%s`]).",
+              "variant: index mismatch (expecting `%d` [`%s`], got `%d` [`%s`]).",
               static_cast<int>(yindex), ytype.name(),
               static_cast<int>(this->index()), this->type().name());
       }

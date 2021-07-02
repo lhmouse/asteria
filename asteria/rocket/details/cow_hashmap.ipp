@@ -485,7 +485,7 @@ class storage_handle
         ROCKET_ASSERT(base <= nmax);
         if(nmax - base < add) {
           noadl::sprintf_and_throw<length_error>(
-              "cow_hashmap: Max size exceeded (`%lld` + `%lld` > `%lld`)",
+              "cow_hashmap: max size exceeded (`%lld` + `%lld` > `%lld`)",
               static_cast<long long>(base), static_cast<long long>(add),
               static_cast<long long>(nmax));
         }
