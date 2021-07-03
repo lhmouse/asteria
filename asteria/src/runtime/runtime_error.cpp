@@ -24,7 +24,8 @@ do_backtrace(Backtrace_Frame&& new_frm)
   {
     // Unpack nested exceptions, if any.
     try {
-      if(auto eptr = ::std::current_exception())
+      auto eptr = ::std::current_exception();
+      if(eptr)
         ::std::rethrow_exception(eptr);
     }
     catch(Runtime_Error& nested) {
@@ -45,18 +46,15 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     ipos = this->m_frames.insert(ipos, ::std::move(new_frm));
     this->m_ins_at = ipos + 1 - this->m_frames.begin();
 
-    // Rebuild the message using new frames.
-    // The storage may be reused.
-    ::rocket::tinyfmt_str fmt;
-    fmt.set_string(::std::move(this->m_what));
-    fmt.clear_string();
-
+    // Rebuild the message using new frames. The storage may be reused.
     // Strings are written verbatim. All the others are formatted.
-    fmt << "runtime error: ";
+    this->m_fmt.clear_string();
+    this->m_fmt << "runtime error: ";
+
     if(this->m_value.is_string())
-      fmt << this->m_value.as_string();
+      this->m_fmt << this->m_value.as_string();
     else
-      fmt << this->m_value;
+      this->m_fmt << this->m_value;
 
     // Get the width of the frame number colomn.
     ::rocket::ascii_numput nump;
@@ -66,19 +64,16 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     sbuf.emplace_back();
 
     // Append stack frames.
-    fmt << "\n[backtrace frames:\n";
+    this->m_fmt << "\n[backtrace frames:\n";
     for(size_t k = 0;  k < this->m_frames.size();  ++k) {
       const auto& frm = this->m_frames[k];
       nump.put(k);
       ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
-      format(fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
-      frm.value().print(fmt, true);
-      fmt << '\n';
+      format(this->m_fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
+      frm.value().print(this->m_fmt, true);
+      this->m_fmt << '\n';
     }
-    fmt << "  -- end of backtrace frames]";
-
-    // Set the string.
-    this->m_what = fmt.extract_string();
+    this->m_fmt << "  -- end of backtrace frames]";
   }
 
 }  // namespace asteria

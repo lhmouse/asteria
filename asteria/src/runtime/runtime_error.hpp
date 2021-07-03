@@ -23,7 +23,7 @@ class Runtime_Error
     cow_vector<Backtrace_Frame> m_frames;
     ptrdiff_t m_ins_at = 0;  // where to insert new frames
 
-    cow_string m_what;  // a comprehensive string that is human-readable
+    ::rocket::tinyfmt_str m_fmt;  // human-readable message
 
   public:
     template<typename XValT>
@@ -58,7 +58,7 @@ class Runtime_Error
 
     const char*
     what() const noexcept override
-      { return this->m_what.c_str();  }
+      { return this->m_fmt.c_str();  }
 
     const Value&
     value() const noexcept
