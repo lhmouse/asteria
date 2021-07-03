@@ -52,16 +52,9 @@ class basic_tinyfmt_file
       : m_buf(path, mode)
       { }
 
+  public:
     ~basic_tinyfmt_file() override;
 
-    basic_tinyfmt_file(basic_tinyfmt_file&&)
-      = default;
-
-    basic_tinyfmt_file&
-    operator=(basic_tinyfmt_file&&)
-      = default;
-
-  public:
     tinybuf_type&
     get_tinybuf() const override
       { return this->m_buf;  }

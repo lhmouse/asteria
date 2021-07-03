@@ -56,13 +56,6 @@ class basic_tinybuf_str
       : m_str(::std::forward<xstrT>(xstr)), m_off(), m_mode(mode)
       { }
 
-    basic_tinybuf_str(basic_tinybuf_str&&)
-      = default;
-
-    basic_tinybuf_str&
-    operator=(basic_tinybuf_str&&)
-      = default;
-
   protected:
     void
     do_flush() override

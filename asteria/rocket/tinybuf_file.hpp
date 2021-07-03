@@ -39,8 +39,8 @@ class basic_tinybuf_file
     unique_posix_file m_file;
 
   public:
-    basic_tinybuf_file() noexcept(is_nothrow_constructible<
-                                    unique_posix_file, nullptr_t, nullptr_t>::value)
+    basic_tinybuf_file()
+      noexcept(is_nothrow_constructible<unique_posix_file, nullptr_t, nullptr_t>::value)
       : m_file(nullptr, nullptr)
       { }
 
@@ -58,13 +58,6 @@ class basic_tinybuf_file
     basic_tinybuf_file(const char* path, open_mode mode)
       : m_file(nullptr, nullptr)
       { this->open(path, mode);  }
-
-    basic_tinybuf_file(basic_tinybuf_file&&)
-      = default;
-
-    basic_tinybuf_file&
-    operator=(basic_tinybuf_file&&)
-      = default;
 
   protected:
     void

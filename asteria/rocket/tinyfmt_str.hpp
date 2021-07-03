@@ -50,16 +50,9 @@ class basic_tinyfmt_str
       : m_buf(::std::forward<xstrT>(xstr), mode)
       { }
 
+  public:
     ~basic_tinyfmt_str() override;
 
-    basic_tinyfmt_str(basic_tinyfmt_str&&)
-      = default;
-
-    basic_tinyfmt_str&
-    operator=(basic_tinyfmt_str&&)
-      = default;
-
-  public:
     tinybuf_type&
     get_tinybuf() const override
       { return this->m_buf;  }
