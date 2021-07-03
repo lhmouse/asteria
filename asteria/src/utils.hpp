@@ -36,7 +36,8 @@ format_string(const char* templ, const ParamsT&... params)
 #define ASTERIA_THROW(...)  \
     (::rocket::sprintf_and_throw<::std::runtime_error>(  \
        "%s: %s\n[thrown from native code at '%s:%d']", __func__,  \
-         ::asteria::format_string("" __VA_ARGS__).c_str(), __FILE__, (int)__LINE__))
+         ::asteria::format_string("" __VA_ARGS__).c_str(), __FILE__,  \
+         (int)__LINE__))
 
 // UTF-8 conversion functions
 bool
