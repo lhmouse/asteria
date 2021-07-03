@@ -688,7 +688,7 @@ enum Frame_Type : uint8_t
 ROCKET_CONST const char*
 describe_frame_type(Frame_Type type) noexcept;
 
-// Parser status codes
+// Compiler status codes
 enum Compiler_Status : uint32_t
   {
     compiler_status_success                                    =    0,
