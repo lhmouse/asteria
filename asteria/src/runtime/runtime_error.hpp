@@ -14,9 +14,9 @@ class Runtime_Error
   : public virtual exception
   {
   public:
-    struct M_native  { };
     struct M_throw   { };
     struct M_assert  { };
+    struct M_native  { };
 
   private:
     Value m_value;
@@ -26,13 +26,6 @@ class Runtime_Error
     cow_string m_what;  // a comprehensive string that is human-readable
 
   public:
-    explicit
-    Runtime_Error(M_native, const exception& stdex)
-      : m_value(cow_string(stdex.what()))
-      { this->do_backtrace({ frame_type_native,
-                             Source_Location(sref("[native code]"), -1, -1),
-                             this->m_value });  }
-
     template<typename XValT>
     explicit
     Runtime_Error(M_throw, XValT&& xval, const Source_Location& sloc)
@@ -43,6 +36,15 @@ class Runtime_Error
     Runtime_Error(M_assert, const Source_Location& sloc, const cow_string& msg)
       : m_value("assertion failure: " + msg)
       { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
+
+    explicit
+    Runtime_Error(M_native, const exception& stdex)
+      : m_value(cow_string(stdex.what()))
+      {
+        this->do_backtrace({ frame_type_native,
+                             Source_Location(sref("[native code]"), -1, -1),
+                             this->m_value });
+      }
 
   private:
     void
