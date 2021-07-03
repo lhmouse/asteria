@@ -5,6 +5,7 @@
 #include "../src/simple_script.hpp"
 #include "../src/runtime/garbage_collector.hpp"
 #include "../src/runtime/variable.hpp"
+#include <algorithm>
 
 using namespace asteria;
 
