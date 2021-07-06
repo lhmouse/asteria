@@ -142,43 +142,35 @@ class Argument_Reader
 #define ASTERIA_BINDING_BEGIN(name, self, global, reader)  \
     (::asteria::V_function(  \
       "`" name "(...)` at '" ASTERIA_NATIVE_SOURCE_LOCATION "'",  \
-      *[](::asteria::Reference& self,  \
-          ::asteria::Global_Context& global,  \
+      *[](::asteria::Reference& self, ::asteria::Global_Context& global,  \
           ::asteria::Reference_Stack&& tfiXopzY)  \
         -> Reference& \
         {  \
           (void)global;  \
           ::asteria::Argument_Reader reader(  \
                  ::rocket::sref("" name), ::std::move(tfiXopzY));  \
-          try  \
-          // Add function body here.
+          {  // Add function body here.
 
 #define ASTERIA_BINDING_END  \
-          ASTERIA_RUNTIME_CONVERT_EXCEPTION_AND_RETHROW  \
+          }  \
           reader.throw_no_matching_function_call();  \
         }  \
     ))
 
 #define ASTERIA_BINDING_RETURN(self, func, ...)  \
     do {  \
-      return ::asteria::details_argument_reader::  \
-        apply_and_set_result(self,  \
+      return ::asteria::details_argument_reader::apply_and_set_result(self,  \
           [](auto&&... jZrUeTNf) -> decltype(auto)  \
-            { return func(  \
-                static_cast<decltype(jZrUeTNf)&&>(  \
-                    jZrUeTNf)...);  },  \
+            { return func(static_cast<decltype(jZrUeTNf)&&>(jZrUeTNf)...);  },  \
           ::std::forward_as_tuple(__VA_ARGS__));  \
     }  \
     while(false)
 
 #define ASTERIA_BINDING_RETURN_MOVE(self, func, ...)  \
     do {  \
-      return ::asteria::details_argument_reader::  \
-        apply_and_set_result(self,  \
+      return ::asteria::details_argument_reader::apply_and_set_result(self,  \
           [](auto&&... jZrUeTNf) -> decltype(auto)  \
-            { return func(  \
-                ::asteria::details_argument_reader::move(  \
-                    jZrUeTNf)...);  },  \
+            { return func(::asteria::details_argument_reader::move(jZrUeTNf)...);  },  \
           ::std::forward_as_tuple(__VA_ARGS__));  \
     }  \
     while(false)
