@@ -14,14 +14,14 @@ class Runtime_Error
   : public virtual exception
   {
   public:
-    struct M_throw   { };
-    struct M_assert  { };
-    struct M_native  { };
+    enum class M_throw;
+    enum class M_assert;
+    enum class M_native;
 
   private:
     Value m_value;
     cow_vector<Backtrace_Frame> m_frames;
-    ptrdiff_t m_ins_at = 0;  // where to insert new frames
+    size_t m_ins_at = 0;  // where to insert new frames
 
     ::rocket::tinyfmt_str m_fmt;  // human-readable message
 
@@ -41,9 +41,8 @@ class Runtime_Error
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
       {
-        this->do_backtrace({ frame_type_native,
-                             Source_Location(sref("[native code]"), -1, -1),
-                             this->m_value });
+        Source_Location native(sref("[native code]"), -1, -1);
+        this->do_backtrace({ frame_type_native, ::std::move(native), this->m_value });
       }
 
   private:
@@ -94,7 +93,7 @@ class Runtime_Error
 
         // This means an exception was thrown again from a `catch` block.
         // Subsequent frames shoud be appended to its parent.
-        this->m_ins_at = this->m_frames.ssize();
+        this->m_ins_at = this->m_frames.size();
         return *this;
       }
 
@@ -122,7 +121,7 @@ class Runtime_Error
 
         // This means an exception was thrown again during execution of deferred
         // expression. Subsequent frames shoud be appended to its parent.
-        this->m_ins_at = this->m_frames.ssize();
+        this->m_ins_at = this->m_frames.size();
         return *this;
       }
 

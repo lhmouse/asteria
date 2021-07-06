@@ -42,9 +42,8 @@ Runtime_Error::
 do_insert_frame(Backtrace_Frame&& new_frm)
   {
     // Insert the frame. Note exception safety.
-    auto ipos = this->m_frames.begin() + this->m_ins_at;
-    ipos = this->m_frames.insert(ipos, ::std::move(new_frm));
-    this->m_ins_at = ipos + 1 - this->m_frames.begin();
+    this->m_frames.insert(this->m_ins_at, ::std::move(new_frm));
+    this->m_ins_at++;
 
     // Rebuild the message using new frames. The storage may be reused.
     // Strings are written verbatim. All the others are formatted.
