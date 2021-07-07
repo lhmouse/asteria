@@ -50,7 +50,8 @@ class basic_tinybuf_str
       : m_str(alloc), m_off(), m_mode(mode)
       { }
 
-    template<typename xstrT>
+    template<typename xstrT,
+    ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&>::value)>
     explicit
     basic_tinybuf_str(xstrT&& xstr, open_mode mode, const allocator_type& alloc = allocator_type())
       : m_str(::std::forward<xstrT>(xstr)), m_off(), m_mode(mode)

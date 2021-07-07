@@ -44,7 +44,8 @@ class basic_tinyfmt_str
       : m_buf(mode)
       { }
 
-    template<typename xstrT>
+    template<typename xstrT,
+    ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&>::value)>
     explicit
     basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       : m_buf(::std::forward<xstrT>(xstr), mode)
