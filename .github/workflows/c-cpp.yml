@@ -14,9 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: configure
-      run:
-      - autoreconf -ifv
-      - ./configure --enable-debug-checks
+      run: autoreconf -ifv
+      run: ./configure --enable-debug-checks
     - name: make
       run: make -j$(nproc)
     - name: make check
