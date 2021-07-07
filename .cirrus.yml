@@ -1,0 +1,5 @@
+container:
+  image: "ubuntu:focal"
+
+task:
+  tests_script: ./ci/build.sh
