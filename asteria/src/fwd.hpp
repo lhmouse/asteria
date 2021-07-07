@@ -757,7 +757,7 @@ enum Compiler_Status : uint32_t
   };
 
 ROCKET_CONST const char*
-describe_parser_status(Compiler_Status status) noexcept;
+describe_compiler_status(Compiler_Status status) noexcept;
 
 // API versioning of the standard library
 enum API_Version : uint32_t

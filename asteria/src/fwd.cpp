@@ -152,7 +152,7 @@ describe_frame_type(Frame_Type type) noexcept
   }
 
 const char*
-describe_parser_status(Compiler_Status status) noexcept
+describe_compiler_status(Compiler_Status status) noexcept
   {
     switch(status) {
       case compiler_status_success:

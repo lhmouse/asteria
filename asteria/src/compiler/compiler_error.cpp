@@ -30,7 +30,7 @@ do_compose_message()
     // Write the status code in digital form.
     format(fmt,
         "compiler error: $1\n[status $2 at '$3']",
-        describe_parser_status(this->m_stat), this->m_stat, this->m_sloc);
+        describe_compiler_status(this->m_stat), this->m_stat, this->m_sloc);
 
     if(this->m_unm_sloc.line() > 0)
       format(fmt,

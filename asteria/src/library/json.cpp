@@ -652,7 +652,7 @@ do_json_parse(tinybuf& cbuf)
   }
   catch(Compiler_Error& except) {
     ASTERIA_THROW_RUNTIME_ERROR("invalid JSON string: $3 (line $1, column $2)",
-                  except.line(), except.column(), describe_parser_status(except.status()));
+                  except.line(), except.column(), describe_compiler_status(except.status()));
   }
 
 }  // namespace

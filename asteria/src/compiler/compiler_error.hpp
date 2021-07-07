@@ -66,7 +66,7 @@ class Compiler_Error
 
     const char*
     what_status() const noexcept
-      { return describe_parser_status(this->m_stat);  }
+      { return describe_compiler_status(this->m_stat);  }
 
     const Source_Location&
     sloc() const noexcept
