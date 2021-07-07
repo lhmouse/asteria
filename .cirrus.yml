@@ -2,4 +2,9 @@ container:
   image: "ubuntu:focal"
 
 task:
-  tests_script: ./ci/build.sh
+  tests_script:
+    - "sudo aptitude update"
+    - "sudo aptitude install -y autoconf automake g++ make"
+    - "sudo aptitude install -y parallel libpcre2-dev"
+    - "./ci/build.sh"
+    - "./check_includes.sh"
