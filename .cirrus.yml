@@ -3,8 +3,9 @@ container:
 
 task:
   tests_script:
+    - "export LANG=C.UTF-8"
     - "apt-get update"
-    - "apt-get install -y autoconf automake g++ make"
+    - "apt-get install -y autoconf automake libtool g++ make"
     - "apt-get install -y parallel libpcre2-dev"
     - "./ci/build.sh"
     - "./check_includes.sh"
