@@ -20,10 +20,8 @@ class Backtrace_Frame
 
   public:
     template<typename XValT>
-    Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc,
-                    XValT&& xval)
-      : m_type(xtype), m_sloc(xsloc),
-        m_value(::std::forward<XValT>(xval))
+    Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc, XValT&& xval)
+      : m_type(xtype), m_sloc(xsloc), m_value(::std::forward<XValT>(xval))
       { }
 
   public:

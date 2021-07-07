@@ -41,20 +41,16 @@ class Runtime_Error
     explicit
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
-      {
-        Source_Location sloc(sref("[native code]"), -1, -1);
-        this->do_backtrace({ frame_type_native, ::std::move(sloc), this->m_value });
-      }
+      { this->do_backtrace({ frame_type_native, { }, this->m_value });  }
 
     template<typename... ParamsT>
     explicit
-    Runtime_Error(M_format, const cow_string& file, int line, const char* templ,
+    Runtime_Error(M_format, const Source_Location& sloc, const char* templ,
                   const ParamsT&... params)
       {
-        Source_Location sloc(file, line, 0);
         format(this->m_fmt, templ, params...);
         this->m_value = this->m_fmt.extract_string();
-        this->do_backtrace({ frame_type_native, ::std::move(sloc), this->m_value });
+        this->do_backtrace({ frame_type_native, sloc, this->m_value });
       }
 
   private:
@@ -149,7 +145,8 @@ class Runtime_Error
 // Note the format string must be a string literal.
 #define ASTERIA_THROW_RUNTIME_ERROR(...)  \
     throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_format(),  \
-              ::rocket::sref(__FILE__), (int)__LINE__, "" __VA_ARGS__)
+              ::asteria::Source_Location(::rocket::sref(__FILE__), __LINE__, 0),  \
+              "" __VA_ARGS__)
 
 // This construction translates `std::exception`s to `Runtime_Error`s.
 #define ASTERIA_RUNTIME_TRY  \
@@ -157,11 +154,13 @@ class Runtime_Error
       try
 
 #define ASTERIA_RUNTIME_CATCH(...)  \
-      catch(::asteria::Runtime_Error&)  \
-        { throw;  }  \
-      catch(::std::exception& yPb8wL9v)  \
-        { throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_native(),  \
-                    yPb8wL9v);  }  \
+      catch(::asteria::Runtime_Error&) {  \
+        throw;  \
+      }  \
+      catch(::std::exception& yPb8wL9v) {  \
+        throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_native(),  \
+                    yPb8wL9v);  \
+      }  \
     }  \
     catch(__VA_ARGS__)
 
