@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../source_location.hpp"
-#include "../rocket/tinyfmt_str.hpp"
+#include "../../rocket/tinyfmt_str.hpp"
 #include <exception>
 
 namespace asteria {
