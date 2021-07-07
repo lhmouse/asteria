@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
-      - run: autoreconf -ifv
-      - run: ./configure --enable-debug-checks
-      - run: make check -j$(nproc)
-      - run: ./check_includes.sh
+    - uses: actions/checkout@v2
+    - run: |
+      autoreconf -ifv
+      ./configure --enable-debug-checks
+      make check -j$(nproc)
+      ./check_includes.sh
