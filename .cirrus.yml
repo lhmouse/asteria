@@ -3,8 +3,8 @@ container:
 
 task:
   tests_script:
-    - "aptitude update"
-    - "aptitude install -y autoconf automake g++ make"
-    - "aptitude install -y parallel libpcre2-dev"
+    - "apt-get update"
+    - "apt-get install -y autoconf automake g++ make"
+    - "apt-get install -y parallel libpcre2-dev"
     - "./ci/build.sh"
     - "./check_includes.sh"
