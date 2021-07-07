@@ -181,7 +181,8 @@ operator>=(const unique_handle<handleT, closerT>& lhs,
 
 template<typename handleT, typename closerT>
 inline void
-swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename handleT, typename closerT>

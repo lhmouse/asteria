@@ -453,7 +453,8 @@ do_unpack_be(const V_string& text)
   {
     size_t nwords = text.size() / sizeof(WordT);
     if(nwords * sizeof(WordT) != text.size())
-      ASTERIA_THROW_RUNTIME_ERROR("string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
 
     V_array values;
     values.reserve(nwords);
@@ -471,7 +472,8 @@ do_unpack_le(const V_string& text)
   {
     size_t nwords = text.size() / sizeof(WordT);
     if(nwords * sizeof(WordT) != text.size())
-      ASTERIA_THROW_RUNTIME_ERROR("string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
 
     V_array values;
     values.reserve(nwords);
@@ -862,7 +864,9 @@ std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
       if(*limit <= 0)
-        ASTERIA_THROW_RUNTIME_ERROR("max number of segments must be positive (limit `$1`)", *limit);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "max number of segments must be positive (limit `$1`)", *limit);
+
       rlimit = static_cast<uint64_t>(*limit);
     }
 
@@ -1102,7 +1106,8 @@ std_string_base32_decode(V_string text)
       size_t m = (40 - npad * 5) / 8;
       size_t p = (m * 8 + 4) / 5;
       if(p + npad != 8)
-        ASTERIA_THROW_RUNTIME_ERROR("unexpected number of base32 padding characters (got `$1`)", npad);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "unexpected number of base32 padding characters (got `$1`)", npad);
 
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
@@ -1207,7 +1212,8 @@ std_string_base64_decode(V_string text)
           ASTERIA_THROW_RUNTIME_ERROR("invalid base64 digit (character `$1`)", c);
 
         if(npad != 0)
-          ASTERIA_THROW_RUNTIME_ERROR("unexpected base64 digit following padding character");
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "unexpected base64 digit following padding character");
 
         reg |= static_cast<uint32_t>(pos - s_base64_table);
       }
@@ -1219,7 +1225,8 @@ std_string_base64_decode(V_string text)
       size_t m = (24 - npad * 6) / 8;
       size_t p = (m * 8 + 5) / 6;
       if(p + npad != 4)
-        ASTERIA_THROW_RUNTIME_ERROR("unexpected number of base64 padding characters (got `$1`)", npad);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "unexpected number of base64 padding characters (got `$1`)", npad);
 
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;

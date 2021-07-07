@@ -256,14 +256,16 @@ class basic_prehashed_string
       { return this->m_sth.str().back();  }
 
     basic_prehashed_string&
-    assign(const basic_prehashed_string& other) noexcept(is_nothrow_copy_constructible<string_type>::value)
+    assign(const basic_prehashed_string& other)
+      noexcept(is_nothrow_copy_constructible<string_type>::value)
       {
         this->m_sth.assign(other.m_sth);
         return *this;
       }
 
     basic_prehashed_string&
-    assign(basic_prehashed_string&& other) noexcept(is_nothrow_move_constructible<string_type>::value)
+    assign(basic_prehashed_string&& other)
+      noexcept(is_nothrow_move_constructible<string_type>::value)
       {
         this->m_sth.assign(::std::move(other.m_sth));
         return *this;

@@ -1057,9 +1057,11 @@ inline rcptr<HasherT>
 do_cast_hasher(V_opaque& h)
   {
     auto hptr = h.open_opt<HasherT>();
-    if(!hptr)
-      ASTERIA_THROW_RUNTIME_ERROR("invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
+    if(!hptr) {
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
                     typeid(HasherT).name(), h.type().name());
+    }
     return hptr;
   }
 
@@ -1079,21 +1081,24 @@ do_hash_file(const V_string& path)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb;
     if(::fstat(fd, &stb) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("could not get information about source file '$2'\n"
-                    "[`fstat()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not get information about source file '$2'\n"
+          "[`fstat()` failed: $1]",
+          format_errno(errno), path);
 
     // Allocate the I/O buffer.
     size_t nbuf = static_cast<size_t>(stb.st_blksize | 0x1000);
-    auto pbuf = ::rocket::make_unique_handle(static_cast<char*>(::operator new(nbuf)),
-                                             static_cast<void (*)(void*)>(::operator delete));
+    auto pbuf = ::rocket::make_unique_handle(
+                      static_cast<char*>(::operator new(nbuf)),
+                      static_cast<void (*)(void*)>(::operator delete));
 
     // Read bytes from the file and hash them.
     HasherT h;
@@ -1103,9 +1108,10 @@ do_hash_file(const V_string& path)
       h.update(pbuf, static_cast<size_t>(nread));
 
     if(nread < 0)
-      ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
-                    "[`read()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "error reading file '$2'\n"
+          "[`read()` failed: $1]",
+          format_errno(errno), path);
 
     return h.finish();
   }

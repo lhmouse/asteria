@@ -2794,7 +2794,8 @@ struct Traits_apply_xop_add
 
             V_integer t = x;
             if(ROCKET_ADD_OVERFLOW(t, y, &x))
-              ASTERIA_THROW_RUNTIME_ERROR("integer addition overflow (operands were `$1` and `$2`)", t, y);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer addition overflow (operands were `$1` and `$2`)", t, y);
 
             return air_status_next;
           }
@@ -2867,7 +2868,8 @@ struct Traits_apply_xop_sub
 
             V_integer t = x;
             if(ROCKET_SUB_OVERFLOW(t, y, &x))
-              ASTERIA_THROW_RUNTIME_ERROR("integer subtraction overflow (operands were `$1` and `$2`)", t, y);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer subtraction overflow (operands were `$1` and `$2`)", t, y);
 
             return air_status_next;
           }
@@ -2934,7 +2936,8 @@ struct Traits_apply_xop_mul
 
             V_integer t = x;
             if(ROCKET_MUL_OVERFLOW(t, y, &x))
-              ASTERIA_THROW_RUNTIME_ERROR("integer multiplication overflow (operands were `$1` and `$2`)", t, y);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer multiplication overflow (operands were `$1` and `$2`)", t, y);
 
             return air_status_next;
           }
@@ -2953,14 +2956,15 @@ struct Traits_apply_xop_mul
 
             // Optimize for special cases.
             if(n < 0) {
-              ASTERIA_THROW_RUNTIME_ERROR("negative string duplicate count (value was `$2`)", n);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "negative string duplicate count (value was `$2`)", n);
             }
             else if((n == 0) || str.empty()) {
               str.clear();
             }
             else if(str.size() > str.max_size() / static_cast<uint64_t>(n)) {
-              ASTERIA_THROW_RUNTIME_ERROR("string length overflow (`$1` * `$2` > `$3`)",
-                            str.size(), n, str.max_size());
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "string length overflow (`$1` * `$2` > `$3`)", str.size(), n, str.max_size());
             }
             else if(str.size() == 1) {
               str.append(static_cast<size_t>(n - 1), str.front());
@@ -3025,12 +3029,12 @@ struct Traits_apply_xop_div
             auto y = rhs.as_integer();
 
             if(y == 0)
-              ASTERIA_THROW_RUNTIME_ERROR("integer division by zero (operands were `$1` and `$2`)",
-                            lhs, rhs);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer division by zero (operands were `$1` and `$2`)", lhs, rhs);
 
             if((x == INT64_MIN) && (y == -1))
-              ASTERIA_THROW_RUNTIME_ERROR("integer division overflow (operands were `$1` and `$2`)",
-                            lhs, rhs);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
 
             x /= y;
             return air_status_next;
@@ -3088,12 +3092,12 @@ struct Traits_apply_xop_mod
             auto y = rhs.as_integer();
 
             if(y == 0)
-              ASTERIA_THROW_RUNTIME_ERROR("integer division by zero (operands were `$1` and `$2`)",
-                            lhs, rhs);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer division by zero (operands were `$1` and `$2`)", lhs, rhs);
 
             if((x == INT64_MIN) && (y == -1))
-              ASTERIA_THROW_RUNTIME_ERROR("integer division overflow (operands were `$1` and `$2`)",
-                            lhs, rhs);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
 
             x %= y;
             return air_status_next;
@@ -3108,8 +3112,8 @@ struct Traits_apply_xop_mod
           }
 
           default:
-            ASTERIA_THROW_RUNTIME_ERROR("modulo not applicable (operands were `$1` and `$2`)",
-                          lhs, rhs);
+            ASTERIA_THROW_RUNTIME_ERROR(
+                "modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
         }
       }
    };
@@ -3318,8 +3322,8 @@ struct Traits_apply_xop_sla
             auto& val = lhs.open_integer();
 
             if(n >= 64) {
-              ASTERIA_THROW_RUNTIME_ERROR("integer left shift overflow (operands were `$1` and `$2`)",
-                            lhs, rhs);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
             }
             else {
               int bc = static_cast<int>(63 - n);
@@ -3327,8 +3331,8 @@ struct Traits_apply_xop_sla
               uint64_t sgn = static_cast<uint64_t>(val >> 63) << bc;
 
               if(out != sgn)
-                ASTERIA_THROW_RUNTIME_ERROR("integer left shift overflow (operands were `$1` and `$2`)",
-                              lhs, rhs);
+                ASTERIA_THROW_RUNTIME_ERROR(
+                    "integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
 
               reinterpret_cast<uint64_t&>(val) <<= n;
             }
@@ -3340,8 +3344,8 @@ struct Traits_apply_xop_sla
             auto& val = lhs.open_string();
 
             if(n >= static_cast<int64_t>(val.max_size() - val.size())) {
-              ASTERIA_THROW_RUNTIME_ERROR("string length overflow (`$1` + `$2` > `$3`)",
-                            val.size(), n, val.max_size());
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "string length overflow (`$1` + `$2` > `$3`)", val.size(), n, val.max_size());
             }
             else {
               val.append(static_cast<size_t>(n), ' ');
@@ -4011,12 +4015,13 @@ struct Traits_variadic_call
 
             // Verify the argument count.
             if(!value.is_integer())
-              ASTERIA_THROW_RUNTIME_ERROR("invalid number of variadic arguments (value `$1`)", value);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "invalid number of variadic arguments (value `$1`)", value);
 
             int64_t nvargs = value.as_integer();
             if((nvargs < 0) || (nvargs > INT32_MAX))
-              ASTERIA_THROW_RUNTIME_ERROR("number of variadic arguments not acceptable (value `$1`)",
-                            nvargs);
+              ASTERIA_THROW_RUNTIME_ERROR(
+                  "number of variadic arguments not acceptable (value `$1`)", nvargs);
 
             // Prepare `self` references for all upcoming  calls.
             for(int64_t k = 0;  k < nvargs;  ++k)
@@ -4148,8 +4153,8 @@ struct Traits_import_call
         // Copy the filename, which shall be of type `string`.
         auto value = ctx.stack().back().dereference_readonly();
         if(!value.is_string())
-          ASTERIA_THROW_RUNTIME_ERROR("invalid path specified for `import` (value `$1` not a string)",
-                        value);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "invalid path specified for `import` (value `$1` not a string)", value);
 
         auto path = value.as_string();
         if(path.empty())
@@ -4160,12 +4165,12 @@ struct Traits_import_call
               .erase(path.rfind('/') + 1)
               .append(value.as_string());
 
-        auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr),
-                                                    ::free);
+        auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
-          ASTERIA_THROW_RUNTIME_ERROR("could not open module file '$2'\n"
-                        "[`realpath()` failed: $1]",
-                        format_errno(errno), path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "could not open module file '$2'\n"
+              "[`realpath()` failed: $1]",
+              format_errno(errno), path);
 
         // Compile the script file into a function object.
         Loader_Lock::Unique_Stream strm;

@@ -131,7 +131,8 @@ class recursive_mutex::unique_lock
   };
 
 inline void
-swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
