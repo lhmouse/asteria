@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference_modifier.hpp"
+#include "runtime_error.hpp"
 #include "../value.hpp"
 #include "../utils.hpp"
 
@@ -21,7 +22,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         const auto& arr = parent.as_array();
@@ -40,7 +41,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         const auto& obj = parent.as_object();
@@ -54,7 +55,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("head operator inapplicable (parent `$1`)", parent);
 
         const auto& arr = parent.as_array();
         if(arr.empty())
@@ -70,7 +71,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("tail operator inapplicable (parent `$1`)", parent);
 
         const auto& arr = parent.as_array();
         if(arr.empty())
@@ -87,7 +88,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("random operator inapplicable (parent `$1`)", parent);
 
         const auto& arr = parent.as_array();
         auto bptr = arr.data();
@@ -117,7 +118,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         auto& arr = parent.open_array();
@@ -136,7 +137,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         auto& obj = parent.open_object();
@@ -150,7 +151,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -166,7 +167,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -183,7 +184,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("random operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         auto bptr = arr.mut_data();
@@ -213,7 +214,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         auto& arr = parent.open_array();
@@ -234,7 +235,7 @@ apply_open(Value& parent) const
           parent = V_object();
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         auto& obj = parent.open_object();
@@ -248,7 +249,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -266,7 +267,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -285,13 +286,13 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("random operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         auto bptr = arr.mut_data();
         auto eptr = bptr + arr.size();
         if(bptr == eptr)
-          ASTERIA_THROW("cannot write to random element of an empty array");
+          ASTERIA_THROW_RUNTIME_ERROR("cannot write to random element of an empty array");
 
         auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
         return *mptr;
@@ -315,7 +316,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("integer subscript inapplicable (parent `$1`, index `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("integer subscript inapplicable (parent `$1`, index `$2`)",
                         parent, altr.index);
 
         auto& arr = parent.open_array();
@@ -336,7 +337,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW("string subscript inapplicable (parent `$1`, key `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("string subscript inapplicable (parent `$1`, key `$2`)",
                         parent, altr.key);
 
         auto& obj = parent.open_object();
@@ -356,7 +357,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("head operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("head operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -374,7 +375,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("tail operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("tail operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         if(arr.empty())
@@ -393,7 +394,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW("random operator inapplicable (parent `$1`)", parent);
+          ASTERIA_THROW_RUNTIME_ERROR("random operator inapplicable (parent `$1`)", parent);
 
         auto& arr = parent.open_array();
         auto bptr = arr.mut_data();

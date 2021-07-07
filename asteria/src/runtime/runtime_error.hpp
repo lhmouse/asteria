@@ -17,6 +17,7 @@ class Runtime_Error
     enum class M_throw;
     enum class M_assert;
     enum class M_native;
+    enum class M_format;
 
   private:
     Value m_value;
@@ -41,8 +42,19 @@ class Runtime_Error
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
       {
-        Source_Location native(sref("[native code]"), -1, -1);
-        this->do_backtrace({ frame_type_native, ::std::move(native), this->m_value });
+        Source_Location xsloc(sref("[native code]"), -1, -1);
+        this->do_backtrace({ frame_type_native, ::std::move(xsloc), this->m_value });
+      }
+
+    template<typename... ParamsT>
+    explicit
+    Runtime_Error(M_format, const cow_string& file, int line, const char* templ,
+                  const ParamsT&... params)
+      {
+        Source_Location xsloc(file, line, 0);
+        format(this->m_fmt, templ, params...);
+        this->m_value = this->m_fmt.extract_string();
+        this->do_backtrace({ frame_type_native, ::std::move(xsloc), this->m_value });
       }
 
   private:
@@ -134,18 +146,22 @@ class Runtime_Error
       }
   };
 
+// Note the format string must be a string literal.
+#define ASTERIA_THROW_RUNTIME_ERROR(...)  \
+    throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_format(),  \
+              ::rocket::sref(__FILE__), (int)__LINE__, "" __VA_ARGS__)
+
+// This construction translates `std::exception`s to `Runtime_Error`s.
 #define ASTERIA_RUNTIME_TRY  \
     try {  \
-      try  \
-        // Perform operations that might throw
-        // exceptions here.
+      try
 
 #define ASTERIA_RUNTIME_CATCH(...)  \
       catch(::asteria::Runtime_Error&)  \
         { throw;  }  \
       catch(::std::exception& yPb8wL9v)  \
-        { throw ::asteria::Runtime_Error(  \
-              ::asteria::Runtime_Error::M_native(), yPb8wL9v);  }  \
+        { throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_native(),  \
+                    yPb8wL9v);  }  \
     }  \
     catch(__VA_ARGS__)
 

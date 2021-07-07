@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "json.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/compiler_error.hpp"
@@ -641,16 +642,16 @@ do_json_parse(tinybuf& cbuf)
     Token_Stream tstrm(opts);
     tstrm.reload(sref("[JSON text]"), 1, cbuf);
     if(tstrm.empty())
-      ASTERIA_THROW("empty JSON string");
+      ASTERIA_THROW_RUNTIME_ERROR("empty JSON string");
 
     // Parse a single value.
     auto value = do_json_parse_nonrecursive(tstrm);
     if(!tstrm.empty())
-      ASTERIA_THROW("excess text at end of JSON string");
+      ASTERIA_THROW_RUNTIME_ERROR("excess text at end of JSON string");
     return value;
   }
   catch(Compiler_Error& except) {
-    ASTERIA_THROW("invalid JSON string: $3 (line $1, column $2)",
+    ASTERIA_THROW_RUNTIME_ERROR("invalid JSON string: $3 (line $1, column $2)",
                   except.line(), except.column(), describe_parser_status(except.status()));
   }
 
@@ -707,7 +708,7 @@ std_json_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
     if(!fp)
-      ASTERIA_THROW("could not open file '$2'\n"
+      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
                     "[`fopen()` failed: $1]",
                     format_errno(errno), path);
 

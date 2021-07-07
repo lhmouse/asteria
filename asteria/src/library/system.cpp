@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "system.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/garbage_collector.hpp"
 #include "../runtime/random_engine.hpp"
@@ -290,7 +291,7 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
     uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW("invalid generation `$1`", generation);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
 
     // Get the current number of variables being tracked.
     const auto gcoll = global.garbage_collector();
@@ -303,7 +304,7 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
     uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW("invalid generation `$1`", generation);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
 
     // Get the current number of variables being tracked.
     const auto gcoll = global.garbage_collector();
@@ -316,7 +317,7 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
   {
     uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW("invalid generation `$1`", generation);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
 
     // Set the threshold and return its old value.
     const auto gcoll = global.garbage_collector();
@@ -332,7 +333,7 @@ std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
     if(generation_limit) {
       rglimit = ::rocket::clamp_cast<uint8_t>(*generation_limit, 0, 2);
       if(rglimit != *generation_limit)
-        ASTERIA_THROW("invalid generation limit `$1`", *generation_limit);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid generation limit `$1`", *generation_limit);
     }
 
     // Perform garbage collection up to the generation specified.
@@ -458,7 +459,7 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
-      ASTERIA_THROW("could not spawn process '$2'\n"
+      ASTERIA_THROW_RUNTIME_ERROR("could not spawn process '$2'\n"
                     "[`posix_spawnp()` failed: $1]",
                     format_errno(errno), cmd);
 
@@ -467,7 +468,7 @@ std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
     for(;;) {
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
-        ASTERIA_THROW("error awaiting child process '$2'\n"
+        ASTERIA_THROW_RUNTIME_ERROR("error awaiting child process '$2'\n"
                       "[`waitpid()` failed: $1]",
                       format_errno(errno), pid);
 
@@ -483,7 +484,7 @@ void
 std_system_proc_daemonize()
   {
     if(::daemon(1, 0) != 0)
-      ASTERIA_THROW("could not daemonize process\n"
+      ASTERIA_THROW_RUNTIME_ERROR("could not daemonize process\n"
                     "[`daemon()` failed: $1]",
                     format_errno(errno));
   }

@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "chrono.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
 #include <time.h>  // ::clock_gettime(), ::timespec
 
@@ -304,7 +305,7 @@ std_chrono_utc_parse(V_string time_str)
     // Trim leading and trailing spaces. Fail if the string becomes empty.
     size_t off = time_str.find_first_not_of(s_spaces);
     if(off == V_string::npos)
-      ASTERIA_THROW("blank time string");
+      ASTERIA_THROW_RUNTIME_ERROR("blank time string");
 
     // Get the start and end of the non-empty sequence.
     auto rpos = time_str.begin() + static_cast<ptrdiff_t>(off);
@@ -322,17 +323,17 @@ std_chrono_utc_parse(V_string time_str)
 
     // Parse the year.
     if(!do_get_integer(rpos, epos, year, 0, 9999))
-      ASTERIA_THROW("invalid date-time string (expecting year in `$1`)", time_str);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting year in `$1`)", time_str);
 
     if(!do_get_separator(rpos, epos, { '-', '/' }))
-      ASTERIA_THROW("invalid date-time string (expecting year-month separator in `$1`)", time_str);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting year-month separator in `$1`)", time_str);
 
     // Parse the month.
     if(!do_get_integer(rpos, epos, month, 1, 12))
-      ASTERIA_THROW("invalid date-time string (expecting month in `$1`)", time_str);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting month in `$1`)", time_str);
 
     if(!do_get_separator(rpos, epos, { '-', '/' }))
-      ASTERIA_THROW("invalid date-time string (expecting month-day separator in `$1`)", time_str);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting month-day separator in `$1`)", time_str);
 
     // Get the maximum value of the day of month.
     uint32_t mday_max;
@@ -347,29 +348,29 @@ std_chrono_utc_parse(V_string time_str)
     }
     // Parse the day of month as at most two digits.
     if(!do_get_integer(rpos, epos, mday, 1, mday_max))
-      ASTERIA_THROW("invalid date-time string (expecting day of month in `$1`)", time_str);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting day of month in `$1`)", time_str);
 
     // Parse the day-hour separator, which may be a space or the letter `T`.
     // The subday part is optional.
     if(do_get_separator(rpos, epos, { ' ', '\t', 'T' })) {
       // Parse the number of hours.
       if(!do_get_integer(rpos, epos, hour, 0, 23))
-        ASTERIA_THROW("invalid date-time string (expecting hours in `$1`)", time_str);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting hours in `$1`)", time_str);
 
       if(!do_get_separator(rpos, epos, { ':' }))
-        ASTERIA_THROW("invalid date-time string (expecting hour-minute separator in `$1`)", time_str);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting hour-minute separator in `$1`)", time_str);
 
       // Parse the number of minutes.
       if(!do_get_integer(rpos, epos, min, 0, 59))
-        ASTERIA_THROW("invalid date-time string (expecting minutes in `$1`)", time_str);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting minutes in `$1`)", time_str);
 
       if(!do_get_separator(rpos, epos, { ':' }))
-        ASTERIA_THROW("invalid date-time string (expecting minute-second separator in `$1`)", time_str);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting minute-second separator in `$1`)", time_str);
 
       // Parse the number of seconds.
       // Note leap seconds.
       if(!do_get_integer(rpos, epos, sec, 0, 60))
-        ASTERIA_THROW("invalid date-time string (expecting seconds in `$1`)", time_str);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (expecting seconds in `$1`)", time_str);
 
       // Parse the second-subsecond separator, which may be a point or a comma.
       // The subsecond part is optional.
@@ -388,7 +389,7 @@ std_chrono_utc_parse(V_string time_str)
           // Check for a digit.
           uint32_t dval = ch - '0';
           if(dval > 9)
-            ASTERIA_THROW("invalid date-time string (invalid subsecond digit in `$1`)", time_str);
+            ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (invalid subsecond digit in `$1`)", time_str);
 
           msec += dval * weight;
           weight /= 10;
@@ -399,7 +400,7 @@ std_chrono_utc_parse(V_string time_str)
 
     // Ensure all characters have been consumed.
     if(rpos != epos)
-      ASTERIA_THROW("invalid date-time string (excess characters in `$1`)", time_str);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid date-time string (excess characters in `$1`)", time_str);
 
     // Handle special time values.
     if(year <= 1600)

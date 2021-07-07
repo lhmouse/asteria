@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "string.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
@@ -195,7 +196,7 @@ do_get_padding(const Opt_string& padding)
       return sref(" ");
 
     if(padding->empty())
-      ASTERIA_THROW("empty padding string not valid");
+      ASTERIA_THROW_RUNTIME_ERROR("empty padding string not valid");
     return *padding;
   }
 
@@ -341,26 +342,26 @@ do_url_decode(const V_string& text)
       }
       if(c != '%') {
         if(do_is_url_invalid_char(c))
-          ASTERIA_THROW("invalid character in URL (character `$1`)", c);
+          ASTERIA_THROW_RUNTIME_ERROR("invalid character in URL (character `$1`)", c);
         continue;
       }
 
       // Two hexadecimal characters shall follow.
       if(data.size() - nread < 2)
-        ASTERIA_THROW("no enough hexadecimal digits after `%`");
+        ASTERIA_THROW_RUNTIME_ERROR("no enough hexadecimal digits after `%`");
 
       // Parse the first digit.
       c = data[nread++];
       const char* pos = do_xstrchr(s_base16_table, c);
       if(!pos)
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
       uint32_t reg = static_cast<uint32_t>(pos - s_base16_table) / 2 * 16;
 
       // Parse the second digit.
       c = data[nread++];
       pos = do_xstrchr(s_base16_table, c);
       if(!pos)
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
 
       // Replace this sequence with the decoded byte.
@@ -452,7 +453,7 @@ do_unpack_be(const V_string& text)
   {
     size_t nwords = text.size() / sizeof(WordT);
     if(nwords * sizeof(WordT) != text.size())
-      ASTERIA_THROW("string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+      ASTERIA_THROW_RUNTIME_ERROR("string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
 
     V_array values;
     values.reserve(nwords);
@@ -470,7 +471,7 @@ do_unpack_le(const V_string& text)
   {
     size_t nwords = text.size() / sizeof(WordT);
     if(nwords * sizeof(WordT) != text.size())
-      ASTERIA_THROW("string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+      ASTERIA_THROW_RUNTIME_ERROR("string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
 
     V_array values;
     values.reserve(nwords);
@@ -521,13 +522,13 @@ class PCRE2_Matcher
         if(!this->m_code.reset(::pcre2_compile(
               reinterpret_cast<const uint8_t*>(pattern.data()), pattern.size(),
               opts | PCRE2_NEVER_UTF | PCRE2_NEVER_UCP, &err, &off, nullptr)))
-          ASTERIA_THROW("invalid regular expression: $1\n"
+          ASTERIA_THROW_RUNTIME_ERROR("invalid regular expression: $1\n"
                         "[`pcre2_compile()` failed at offset `$3`: $2]",
                         pattern, PCRE2_Error(err), off);
 
         if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(
               this->m_code, nullptr)))
-          ASTERIA_THROW("could not allocate `match_data` structure: $1\n"
+          ASTERIA_THROW_RUNTIME_ERROR("could not allocate `match_data` structure: $1\n"
                         "[`pcre2_match_data_create_from_pattern()` failed]",
                         pattern);
       }
@@ -861,7 +862,7 @@ std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
       if(*limit <= 0)
-        ASTERIA_THROW("max number of segments must be positive (limit `$1`)", *limit);
+        ASTERIA_THROW_RUNTIME_ERROR("max number of segments must be positive (limit `$1`)", *limit);
       rlimit = static_cast<uint64_t>(*limit);
     }
 
@@ -973,7 +974,7 @@ std_string_hex_decode(V_string text)
       if(pos) {
         // The character is a whitespace.
         if(reg != 1)
-          ASTERIA_THROW("unpaired hexadecimal digit");
+          ASTERIA_THROW_RUNTIME_ERROR("unpaired hexadecimal digit");
         continue;
       }
       reg <<= 4;
@@ -981,7 +982,7 @@ std_string_hex_decode(V_string text)
       // Decode a digit.
       pos = do_xstrchr(s_base16_table, c);
       if(!pos)
-        ASTERIA_THROW("invalid hexadecimal digit (character `$1`)", c);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
 
       reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
 
@@ -993,7 +994,7 @@ std_string_hex_decode(V_string text)
       reg = 1;
     }
     if(reg != 1)
-      ASTERIA_THROW("unpaired hexadecimal digit");
+      ASTERIA_THROW_RUNTIME_ERROR("unpaired hexadecimal digit");
     return data;
   }
 
@@ -1070,7 +1071,7 @@ std_string_base32_decode(V_string text)
       if(pos) {
         // The character is a whitespace.
         if(reg != 1)
-          ASTERIA_THROW("incomplete base32 group");
+          ASTERIA_THROW_RUNTIME_ERROR("incomplete base32 group");
         continue;
       }
       reg <<= 5;
@@ -1078,7 +1079,7 @@ std_string_base32_decode(V_string text)
       if(c == s_base32_table[64]) {
         // The character is a padding character.
         if(reg < 0x100)
-          ASTERIA_THROW("unexpected base32 padding character");
+          ASTERIA_THROW_RUNTIME_ERROR("unexpected base32 padding character");
 
         npad += 1;
       }
@@ -1086,10 +1087,10 @@ std_string_base32_decode(V_string text)
         // Decode a digit.
         pos = do_xstrchr(s_base32_table, c);
         if(!pos)
-          ASTERIA_THROW("invalid base32 digit (character `$1`)", c);
+          ASTERIA_THROW_RUNTIME_ERROR("invalid base32 digit (character `$1`)", c);
 
         if(npad != 0)
-          ASTERIA_THROW("unexpected base32 digit following padding character");
+          ASTERIA_THROW_RUNTIME_ERROR("unexpected base32 digit following padding character");
 
         reg |= static_cast<uint32_t>(pos - s_base32_table) / 2;
       }
@@ -1101,7 +1102,7 @@ std_string_base32_decode(V_string text)
       size_t m = (40 - npad * 5) / 8;
       size_t p = (m * 8 + 4) / 5;
       if(p + npad != 8)
-        ASTERIA_THROW("unexpected number of base32 padding characters (got `$1`)", npad);
+        ASTERIA_THROW_RUNTIME_ERROR("unexpected number of base32 padding characters (got `$1`)", npad);
 
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
@@ -1111,7 +1112,7 @@ std_string_base32_decode(V_string text)
       npad = 0;
     }
     if(reg != 1)
-      ASTERIA_THROW("incomplete base32 group");
+      ASTERIA_THROW_RUNTIME_ERROR("incomplete base32 group");
     return data;
   }
 
@@ -1187,7 +1188,7 @@ std_string_base64_decode(V_string text)
       if(pos) {
         // The character is a whitespace.
         if(reg != 1)
-          ASTERIA_THROW("incomplete base64 group");
+          ASTERIA_THROW_RUNTIME_ERROR("incomplete base64 group");
         continue;
       }
       reg <<= 6;
@@ -1195,7 +1196,7 @@ std_string_base64_decode(V_string text)
       if(c == s_base64_table[64]) {
         // The character is a padding character.
         if(reg < 0x100)
-          ASTERIA_THROW("unexpected base64 padding character");
+          ASTERIA_THROW_RUNTIME_ERROR("unexpected base64 padding character");
 
         npad += 1;
       }
@@ -1203,10 +1204,10 @@ std_string_base64_decode(V_string text)
         // Decode a digit.
         pos = do_xstrchr(s_base64_table, c);
         if(!pos)
-          ASTERIA_THROW("invalid base64 digit (character `$1`)", c);
+          ASTERIA_THROW_RUNTIME_ERROR("invalid base64 digit (character `$1`)", c);
 
         if(npad != 0)
-          ASTERIA_THROW("unexpected base64 digit following padding character");
+          ASTERIA_THROW_RUNTIME_ERROR("unexpected base64 digit following padding character");
 
         reg |= static_cast<uint32_t>(pos - s_base64_table);
       }
@@ -1218,7 +1219,7 @@ std_string_base64_decode(V_string text)
       size_t m = (24 - npad * 6) / 8;
       size_t p = (m * 8 + 5) / 6;
       if(p + npad != 4)
-        ASTERIA_THROW("unexpected number of base64 padding characters (got `$1`)", npad);
+        ASTERIA_THROW_RUNTIME_ERROR("unexpected number of base64 padding characters (got `$1`)", npad);
 
       for(size_t i = 0; i < m; ++i) {
         reg <<= 8;
@@ -1228,7 +1229,7 @@ std_string_base64_decode(V_string text)
       npad = 0;
     }
     if(reg != 1)
-      ASTERIA_THROW("incomplete base64 group");
+      ASTERIA_THROW_RUNTIME_ERROR("incomplete base64 group");
     return data;
   }
 
@@ -1281,7 +1282,7 @@ std_string_utf8_encode(V_integer code_point, Opt_boolean permissive)
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true)
-        ASTERIA_THROW("invalid UTF code point (value `$1`)", code_point);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid UTF code point (value `$1`)", code_point);
       utf8_encode(text, 0xFFFD);
     }
     return text;
@@ -1299,7 +1300,7 @@ std_string_utf8_encode(V_array code_points, Opt_boolean permissive)
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
-          ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+          ASTERIA_THROW_RUNTIME_ERROR("invalid UTF code point (value `$1`)", value);
         utf8_encode(text, 0xFFFD);
       }
     }
@@ -1319,7 +1320,7 @@ std_string_utf8_decode(V_string text, Opt_boolean permissive)
       if(!utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
-          ASTERIA_THROW("invalid UTF-8 string");
+          ASTERIA_THROW_RUNTIME_ERROR("invalid UTF-8 string");
         cp = text[offset++] & 0xFF;
       }
       code_points.emplace_back(V_integer(cp));
@@ -1489,7 +1490,7 @@ std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string
       if(err == PCRE2_ERROR_NOMATCH)
         return nullopt;
 
-      ASTERIA_THROW("regular expression match failure: $1\n"
+      ASTERIA_THROW_RUNTIME_ERROR("regular expression match failure: $1\n"
                     "[`pcre2_match()` failed: $2]",
                     pattern, PCRE2_Error(err));
     }
@@ -1521,7 +1522,7 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
       if(err == PCRE2_ERROR_NOMATCH)
         return nullopt;
 
-      ASTERIA_THROW("regular expression match failure: $1\n"
+      ASTERIA_THROW_RUNTIME_ERROR("regular expression match failure: $1\n"
                     "[`pcre2_match()` failed: $2]",
                     pattern, PCRE2_Error(err));
     }
@@ -1564,7 +1565,7 @@ std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V
       if(err == PCRE2_ERROR_NOMATCH)
         return nullopt;
 
-      ASTERIA_THROW("regular expression match failure: $1\n"
+      ASTERIA_THROW_RUNTIME_ERROR("regular expression match failure: $1\n"
                     "[`pcre2_match()` failed: $2]",
                     pattern, PCRE2_Error(err));
     }
@@ -1634,7 +1635,7 @@ std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_str
       if(err == PCRE2_ERROR_NOMEMORY)
         goto r;
 
-      ASTERIA_THROW("regular expression substitution failure: $1\n"
+      ASTERIA_THROW_RUNTIME_ERROR("regular expression substitution failure: $1\n"
                     "[`pcre2_substitute()` failed: $2]",
                     pattern, PCRE2_Error(err));
     }

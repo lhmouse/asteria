@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "variable.hpp"
@@ -39,7 +40,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       this->do_open_named_reference(nullptr, sref("__this")).set_variable(::std::move(var));
     }
     else
-      ASTERIA_THROW("invalid `this` reference passed to `$1`", zvarg->func());
+      ASTERIA_THROW_RUNTIME_ERROR("invalid `this` reference passed to `$1`", zvarg->func());
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
@@ -68,7 +69,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // All arguments must have been consumed.
     if(bptr != eptr)
-      ASTERIA_THROW("too many arguments passed to `$1`", zvarg->func());
+      ASTERIA_THROW_RUNTIME_ERROR("too many arguments passed to `$1`", zvarg->func());
   }
 
 Executive_Context::

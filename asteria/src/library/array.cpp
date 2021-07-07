@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "array.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
@@ -128,7 +129,7 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
       auto mpos = bpos + dist / 2;
       auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
-        ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+        ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)", target, *mpos);
 
       if(cmp == compare_equal)
         return { ::std::move(mpos), true };
@@ -156,7 +157,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
       auto mpos = bpos + dist / 2;
       auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
-        ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+        ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)", target, *mpos);
 
       if(pred(cmp))
         epos = mpos;
@@ -196,7 +197,7 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
         // in `bi`.
         auto cmp = do_compare(global, stack, kcomp, *(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
-          ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)",
                         *(bpos[0]), *(bpos[1]));
 
         // For Merge Sort to be stable, the two elements will only be swapped if the first one

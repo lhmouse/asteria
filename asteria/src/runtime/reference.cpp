@@ -26,10 +26,10 @@ do_dereference_readonly_slow() const
     // Get the root value.
     switch(this->index()) {
       case index_uninit:
-        ASTERIA_THROW("attempt to use a bypassed variable or reference");
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to use a bypassed variable or reference");
 
       case index_void:
-        ASTERIA_THROW("attempt to use the result of a function call which returned no value");
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to use the result of a function call which returned no value");
 
       case index_temporary:
         qval = &(this->m_value);
@@ -38,17 +38,17 @@ do_dereference_readonly_slow() const
       case index_variable: {
         auto qvar = unerase_cast<Variable*>(this->m_var);
         if(!qvar)
-          ASTERIA_THROW("attempt to use a moved-away reference (this is probably a bug)");
+          ASTERIA_THROW_RUNTIME_ERROR("attempt to use a moved-away reference (this is probably a bug)");
 
         if(qvar->is_uninitialized())
-          ASTERIA_THROW("attempt to read from an uninitialized variable");
+          ASTERIA_THROW_RUNTIME_ERROR("attempt to read from an uninitialized variable");
 
         qval = &(qvar->get_value());
         break;
       }
 
       case index_ptc_args:
-        ASTERIA_THROW("tail call wrapper not dereferenceable");
+        ASTERIA_THROW_RUNTIME_ERROR("tail call wrapper not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
@@ -191,28 +191,28 @@ dereference_mutable() const
     // Get the root value.
     switch(this->index()) {
       case index_uninit:
-        ASTERIA_THROW("attempt to use a bypassed variable or reference");
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to use a bypassed variable or reference");
 
       case index_void:
-        ASTERIA_THROW("attempt to use the result of a function call which returned no value");
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to use the result of a function call which returned no value");
 
       case index_temporary:
-        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_value);
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to modify a temporary `$1`", this->m_value);
 
       case index_variable: {
         auto qvar = unerase_cast<Variable*>(this->m_var);
         if(!qvar)
-          ASTERIA_THROW("attempt to use a moved-away reference (this is probably a bug)");
+          ASTERIA_THROW_RUNTIME_ERROR("attempt to use a moved-away reference (this is probably a bug)");
 
         if(qvar->is_uninitialized())
-          ASTERIA_THROW("attempt to read from an uninitialized variable");
+          ASTERIA_THROW_RUNTIME_ERROR("attempt to read from an uninitialized variable");
 
         qval = &(qvar->open_value());
         break;
       }
 
       case index_ptc_args:
-        ASTERIA_THROW("tail call wrapper not dereferenceable");
+        ASTERIA_THROW_RUNTIME_ERROR("tail call wrapper not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
@@ -237,28 +237,28 @@ dereference_unset() const
     // Get the root value.
     switch(this->index()) {
       case index_uninit:
-        ASTERIA_THROW("attempt to use a bypassed variable or reference");
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to use a bypassed variable or reference");
 
       case index_void:
-        ASTERIA_THROW("attempt to use the result of a function call which returned no value");
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to use the result of a function call which returned no value");
 
       case index_temporary:
-        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_value);
+        ASTERIA_THROW_RUNTIME_ERROR("attempt to modify a temporary `$1`", this->m_value);
 
       case index_variable: {
         auto qvar = unerase_cast<Variable*>(this->m_var);
         if(!qvar)
-          ASTERIA_THROW("attempt to use a moved-away reference (this is probably a bug)");
+          ASTERIA_THROW_RUNTIME_ERROR("attempt to use a moved-away reference (this is probably a bug)");
 
         if(qvar->is_uninitialized())
-          ASTERIA_THROW("attempt to read from an uninitialized variable");
+          ASTERIA_THROW_RUNTIME_ERROR("attempt to read from an uninitialized variable");
 
         qval = &(qvar->open_value());
         break;
       }
 
       case index_ptc_args:
-        ASTERIA_THROW("tail call wrapper not dereferenceable");
+        ASTERIA_THROW_RUNTIME_ERROR("tail call wrapper not dereferenceable");
 
       default:
         ASTERIA_TERMINATE("invalid reference type enumeration (index `$1`)", this->index());
@@ -269,7 +269,7 @@ dereference_unset() const
     auto epos = this->m_mods.end();
 
     if(bpos == epos)
-      ASTERIA_THROW("root values cannot be unset");
+      ASTERIA_THROW_RUNTIME_ERROR("root values cannot be unset");
 
     while(bpos != epos - 1)
       if(!(qval = bpos++->apply_write_opt(*qval)))

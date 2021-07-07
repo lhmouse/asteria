@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "checksum.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utils.hpp"
 #include <sys/stat.h>
@@ -1057,7 +1058,7 @@ do_cast_hasher(V_opaque& h)
   {
     auto hptr = h.open_opt<HasherT>();
     if(!hptr)
-      ASTERIA_THROW("invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
+      ASTERIA_THROW_RUNTIME_ERROR("invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
                     typeid(HasherT).name(), h.type().name());
     return hptr;
   }
@@ -1078,14 +1079,14 @@ do_hash_file(const V_string& path)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW("could not open file '$2'\n"
+      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
                     "[`open()` failed: $1]",
                     format_errno(errno), path);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb;
     if(::fstat(fd, &stb) != 0)
-      ASTERIA_THROW("could not get information about source file '$2'\n"
+      ASTERIA_THROW_RUNTIME_ERROR("could not get information about source file '$2'\n"
                     "[`fstat()` failed: $1]",
                     format_errno(errno), path);
 
@@ -1102,7 +1103,7 @@ do_hash_file(const V_string& path)
       h.update(pbuf, static_cast<size_t>(nread));
 
     if(nread < 0)
-      ASTERIA_THROW("error reading file '$2'\n"
+      ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
                     "[`read()` failed: $1]",
                     format_errno(errno), path);
 

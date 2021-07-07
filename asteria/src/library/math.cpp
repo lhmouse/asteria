@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "math.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utils.hpp"
 

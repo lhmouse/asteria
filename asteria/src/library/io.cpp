@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "io.hpp"
 #include "../runtime/argument_reader.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
@@ -77,11 +78,11 @@ do_write_utf8_common(::FILE* fp, const cow_string& text)
       // Decode a code point from `text`.
       char32_t cp;
       if(!utf8_decode(cp, text, off))
-        ASTERIA_THROW("invalid UTF-8 string (text `$1`, byte offset `$2`)", text, off);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid UTF-8 string (text `$1`, byte offset `$2`)", text, off);
 
       // Insert it into the output stream.
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
-        ASTERIA_THROW("error writing standard output\n"
+        ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                       "[`fputwc_unlocked()` failed: $1]",
                       format_errno(errno));
 
@@ -120,10 +121,10 @@ std_io_getc()
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard input failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard input failure (error bit set)");
 
     if(!do_set_wide(fp, "r", +1))
-      ASTERIA_THROW("invalid text read from binary-oriented input");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text read from binary-oriented input");
 
     // Read a UTF code point.
     wint_t wch = ::fgetwc_unlocked(fp);
@@ -131,7 +132,7 @@ std_io_getc()
       // Throw an exception on error.
       int err = do_recover(fp);
       if(err != 0)
-        ASTERIA_THROW("error reading standard input\n"
+        ASTERIA_THROW_RUNTIME_ERROR("error reading standard input\n"
                       "[`fgetwc_unlocked()` failed: $1]",
                       format_errno(err));
 
@@ -150,10 +151,10 @@ std_io_getln()
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard input failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard input failure (error bit set)");
 
     if(!do_set_wide(fp, "r", +1))
-      ASTERIA_THROW("invalid text read from binary-oriented input");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text read from binary-oriented input");
 
     // Read a UTF-8 string.
     cow_string u8str;
@@ -167,7 +168,7 @@ std_io_getln()
         // Throw an exception on error.
         int err = do_recover(fp);
         if(err != 0)
-          ASTERIA_THROW("error reading standard input\n"
+          ASTERIA_THROW_RUNTIME_ERROR("error reading standard input\n"
                         "[`fgetwc_unlocked()` failed: $1]",
                         format_errno(err));
 
@@ -181,7 +182,7 @@ std_io_getln()
       // Append the non-LF character to the result string.
       char32_t cp = static_cast<uint32_t>(wch);
       if(!utf8_encode(u8str, cp))
-        ASTERIA_THROW("invalid UTF code point from standard input (value `$1`)", wch);
+        ASTERIA_THROW_RUNTIME_ERROR("invalid UTF code point from standard input (value `$1`)", wch);
     }
     // Return the UTF-8 string.
     return u8str;
@@ -194,26 +195,26 @@ std_io_putc(V_integer value)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard output failure (error bit set)");
 
     if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text write to binary-oriented output");
 
     // Validate the code point.
     char32_t cp = static_cast<uint32_t>(value);
     if(cp != value)
-      ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid UTF code point (value `$1`)", value);
 
     // Check whether it is valid by try encoding it.
     // The result is discarded.
     char16_t sbuf[2];
     char16_t* sp = sbuf;
     if(!utf16_encode(sp, cp))
-      ASTERIA_THROW("invalid UTF code point (value `$1`)", value);
+      ASTERIA_THROW_RUNTIME_ERROR("invalid UTF code point (value `$1`)", value);
 
     // Write a UTF code point.
     if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
-      ASTERIA_THROW("error writing standard output\n"
+      ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
                     format_errno(errno));
 
@@ -229,10 +230,10 @@ std_io_putc(V_string value)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard output failure (error bit set)");
 
     if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text write to binary-oriented output");
 
     // Write only the string.
     size_t ncps = do_write_utf8_common(fp, value);
@@ -248,17 +249,17 @@ std_io_putln(V_string value)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard output failure (error bit set)");
 
     if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text write to binary-oriented output");
 
     // Write the string itself.
     size_t ncps = do_write_utf8_common(fp, value);
 
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
-      ASTERIA_THROW("error writing standard output\n"
+      ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
                     format_errno(errno));
 
@@ -274,10 +275,10 @@ std_io_putf(V_string templ, cow_vector<Value> values)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard output failure (error bit set)");
 
     if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text write to binary-oriented output");
 
     // Write the string itself.
     size_t ncps = do_format_write_utf8_common(fp, templ, values);
@@ -293,17 +294,17 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard output failure (error bit set)");
 
     if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW("invalid text write to binary-oriented output");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid text write to binary-oriented output");
 
     // Write the string itself.
     size_t ncps = do_format_write_utf8_common(fp, templ, values);
 
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
-      ASTERIA_THROW("error writing standard output\n"
+      ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
                     format_errno(errno));
 
@@ -319,10 +320,10 @@ std_io_read(Opt_integer limit)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard input failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard input failure (error bit set)");
 
     if(!do_set_wide(fp, "r", -1))
-      ASTERIA_THROW("invalid binary read from text-oriented input");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid binary read from text-oriented input");
 
     V_string data;
     int64_t rlimit = limit.value_or(INT64_MAX);
@@ -338,7 +339,7 @@ std_io_read(Opt_integer limit)
       if(nread == 0) {
         int err = do_recover(fp);
         if(err != 0)
-          ASTERIA_THROW("error reading standard input\n"
+          ASTERIA_THROW_RUNTIME_ERROR("error reading standard input\n"
                         "[`fread_unlocked()` failed: $1]",
                         format_errno(err));
 
@@ -361,10 +362,10 @@ std_io_write(V_string data)
 
     // Check stream status.
     if(::ferror_unlocked(fp))
-      ASTERIA_THROW("standard output failure (error bit set)");
+      ASTERIA_THROW_RUNTIME_ERROR("standard output failure (error bit set)");
 
     if(!do_set_wide(fp, "w", -1))
-      ASTERIA_THROW("invalid binary write to text-oriented output");
+      ASTERIA_THROW_RUNTIME_ERROR("invalid binary write to text-oriented output");
 
     size_t ntotal = 0;
     while(ntotal < data.size()) {
@@ -374,7 +375,7 @@ std_io_write(V_string data)
       if(nwrtn == 0) {
         int err = do_recover(fp);
         if(err != 0)
-          ASTERIA_THROW("error writing standard output\n"
+          ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                         "[`fwrite_unlocked()` failed: $1]",
                         format_errno(err));
 
@@ -391,7 +392,7 @@ std_io_flush()
   {
     // Flush standard output only.
     if(::fflush(stdout) == EOF)
-      ASTERIA_THROW("error flushing standard output\n"
+      ASTERIA_THROW_RUNTIME_ERROR("error flushing standard output\n"
                     "[`fflush()` failed: $1]",
                     format_errno(errno));
   }
