@@ -407,7 +407,7 @@ std_chrono_utc_parse(V_string time_str)
           }
 
           // Check for a digit.
-          uint32_t dval = ch - '0';
+          uint64_t dval = ch - '0';
           if(dval > 9)
             ASTERIA_THROW_RUNTIME_ERROR(
                 "invalid date-time string (invalid subsecond digit in `$1`)",
