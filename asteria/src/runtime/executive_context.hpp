@@ -39,6 +39,7 @@ class Executive_Context
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
+    ASTERIA_INCOMPLET(AVMC_Queue)
     explicit
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
                       Reference_Stack& alt_stack,
