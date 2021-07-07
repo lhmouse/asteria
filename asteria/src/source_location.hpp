@@ -16,12 +16,10 @@ class Source_Location
     int m_column;
 
   public:
-    explicit
     Source_Location() noexcept
       : m_file(sref("[unknown]")), m_line(-1), m_column(-1)
       { }
 
-    explicit
     Source_Location(const cow_string& xfile, int xline, int xcolumn) noexcept
       : m_file(xfile), m_line(xline), m_column(xcolumn)
       { }
