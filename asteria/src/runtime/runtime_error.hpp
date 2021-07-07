@@ -42,8 +42,8 @@ class Runtime_Error
     Runtime_Error(M_native, const exception& stdex)
       : m_value(cow_string(stdex.what()))
       {
-        Source_Location xsloc(sref("[native code]"), -1, -1);
-        this->do_backtrace({ frame_type_native, ::std::move(xsloc), this->m_value });
+        Source_Location sloc(sref("[native code]"), -1, -1);
+        this->do_backtrace({ frame_type_native, ::std::move(sloc), this->m_value });
       }
 
     template<typename... ParamsT>
@@ -51,10 +51,10 @@ class Runtime_Error
     Runtime_Error(M_format, const cow_string& file, int line, const char* templ,
                   const ParamsT&... params)
       {
-        Source_Location xsloc(file, line, 0);
+        Source_Location sloc(file, line, 0);
         format(this->m_fmt, templ, params...);
         this->m_value = this->m_fmt.extract_string();
-        this->do_backtrace({ frame_type_native, ::std::move(xsloc), this->m_value });
+        this->do_backtrace({ frame_type_native, ::std::move(sloc), this->m_value });
       }
 
   private:
