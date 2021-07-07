@@ -14,11 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: configure
-      run: autoreconf -ifv
       run: ./configure --enable-debug-checks
     - name: make
-      run: make -j$(nproc)
+      run: make
     - name: make check
-      run: make check -j$(nproc)
+      run: make check
     - name: make distcheck
-      run: make distcheck -j$(nproc)
+      run: make distcheck
