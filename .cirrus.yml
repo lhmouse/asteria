@@ -5,7 +5,11 @@ task:
   tests_script:
     - "export LANG=C.UTF-8"
     - "apt-get update"
-    - "apt-get install -y autoconf automake libtool g++ make"
+    - "apt-get install -y autoconf automake libtool g++ make python3"
     - "apt-get install -y parallel libpcre2-dev"
     - "./ci/build.sh"
     - "./check_includes.sh"
+    - "python3 ci/appveyor_irc-notify.py mcfproj "[ lh_mouse ${CIRRUS_REPO_NAME}#${CIRRUS_CHANGE_IN_REPO}] passed on ${CIRRUS_BASE_BRANCH} (${https://cirrus-ci.com/build/${CIRRUS_TASK_ID})"
+
+  on_failure:
+    - "python3 ci/appveyor_irc-notify.py mcfproj "[ lh_mouse ${CIRRUS_REPO_NAME}#${CIRRUS_CHANGE_IN_REPO}] errored on ${CIRRUS_BASE_BRANCH} (${https://cirrus-ci.com/build/${CIRRUS_TASK_ID})"
