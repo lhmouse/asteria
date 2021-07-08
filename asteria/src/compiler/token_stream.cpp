@@ -800,10 +800,10 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
         continue;
 
       // Check for conflict markers.
-      if((reader.navail() >= 7)
-         && ::rocket::is_any_of(reader.peek(), { '<', '|', '=', '>' })
-         && ::std::all_of(reader.data() + 1, reader.data() + 7,
-                          [&](char ch) { return ch == reader.peek();  }))
+      bool found = (reader.navail() >= 7) &&
+                   ::rocket::is_any_of(reader.peek(), { '<', '|', '=', '>' }) &&
+                   ::std::all_of(reader.data() + 1, reader.data() + 7, are(reader.peek()));
+      if(found)
         throw Compiler_Error(compiler_status_conflict_marker_detected, reader.tell());
 
       // Ensure this line is a valid UTF-8 string.
@@ -860,15 +860,14 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
           }
         }
 
-        bool token_got = do_accept_numeric_literal(tokens, reader,
-                                              this->m_opts.integers_as_reals) ||
-                         do_accept_punctuator(tokens, reader) ||
-                         do_accept_string_literal(tokens, reader, '\"', true) ||
-                         do_accept_string_literal(tokens, reader, '\'',
-                                        this->m_opts.escapable_single_quotes) ||
-                         do_accept_identifier_or_keyword(tokens, reader,
-                                        this->m_opts.keywords_as_identifiers);
-        if(!token_got)
+        found = do_accept_numeric_literal(tokens, reader, this->m_opts.integers_as_reals) ||
+                do_accept_punctuator(tokens, reader) ||
+                do_accept_string_literal(tokens, reader, '\"', true) ||
+                do_accept_string_literal(tokens, reader, '\'',
+                                         this->m_opts.escapable_single_quotes) ||
+                do_accept_identifier_or_keyword(tokens, reader,
+                                                this->m_opts.keywords_as_identifiers);
+        if(!found)
           throw Compiler_Error(compiler_status_token_character_unrecognized, reader.tell());
       }
     }

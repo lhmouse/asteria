@@ -107,6 +107,10 @@ using ::rocket::dynamic_pointer_cast;
 using ::rocket::const_pointer_cast;
 using ::rocket::sref;
 using ::rocket::nullopt;
+using ::rocket::is;
+using ::rocket::isnt;
+using ::rocket::are;
+using ::rocket::arent;
 
 // Aliases
 using phsh_string = ::rocket::prehashed_string;
