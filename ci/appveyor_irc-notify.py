@@ -87,7 +87,7 @@ def appveyor_vars():
     pull_request_number = environ.get('APPVEYOR_PULL_REQUEST_NUMBER')
     repo_name = environ.get('APPVEYOR_REPO_NAME')
 
-    short_commit = commit[:7]
+    short_commit = commit[:12]
     build_url = '{appveyor_url}/project/{account_name}/{project_slug}/build/{build_version}'.format(**locals())
     commit_url = 'https://{repo_provider}.com/{repo_name}/commit/{commit}'.format(**locals())
 
