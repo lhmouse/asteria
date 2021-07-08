@@ -582,6 +582,26 @@ find_if(initializer_list<elementT> init, predictorT&& pred)
                   ::std::forward<predictorT>(pred));
   }
 
+template<typename xvalueT>
+constexpr details_fwd::binder_eq<typename decay<xvalueT>::type>
+is(xvalueT&& xval)
+  { return ::std::forward<xvalueT>(xval);  }
+
+template<typename xvalueT>
+constexpr details_fwd::binder_ne<typename decay<xvalueT>::type>
+isnt(xvalueT&& xval)
+  { return ::std::forward<xvalueT>(xval);  }
+
+template<typename xvalueT>
+constexpr details_fwd::binder_eq<typename decay<xvalueT>::type>
+are(xvalueT&& xval)
+  { return ::std::forward<xvalueT>(xval);  }
+
+template<typename xvalueT>
+constexpr details_fwd::binder_ne<typename decay<xvalueT>::type>
+arent(xvalueT&& xval)
+  { return ::std::forward<xvalueT>(xval);  }
+
 template<intmax_t valueT>
 struct lowest_signed
   : details_fwd::integer_selector<intmax_t, valueT,

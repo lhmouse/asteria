@@ -180,4 +180,46 @@ constexpr targetT
 static_or_dynamic_cast_aux(false_type, sourceT&& src)
   { return dynamic_cast<targetT>(::std::forward<sourceT>(src));  }
 
+template<typename valueT>
+struct binder_eq
+  {
+    valueT m_val;
+
+    constexpr
+    binder_eq(const valueT& xval) noexcept(is_nothrow_copy_constructible<valueT>::value)
+      : m_val(xval)
+      { }
+
+    constexpr
+    binder_eq(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
+      : m_val(::std::move(xval))
+      { }
+
+    template<typename xvalueT>
+    constexpr bool
+    operator()(const xvalueT& other) const
+      { return this->m_val == other;  }
+  };
+
+template<typename valueT>
+struct binder_ne
+  {
+    valueT m_val;
+
+    constexpr
+    binder_ne(const valueT& xval) noexcept(is_nothrow_copy_constructible<valueT>::value)
+      : m_val(xval)
+      { }
+
+    constexpr
+    binder_ne(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
+      : m_val(::std::move(xval))
+      { }
+
+    template<typename xvalueT>
+    constexpr bool
+    operator()(const xvalueT& other) const
+      { return this->m_val != other;  }
+  };
+
 }  // namespace details_fwd
