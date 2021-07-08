@@ -585,13 +585,13 @@ find_if(initializer_list<elementT> init, predictorT&& pred)
 template<intmax_t valueT>
 struct lowest_signed
   : details_fwd::integer_selector<intmax_t, valueT,
-              signed char, signed short, signed, signed long, signed long long>
+        signed char, signed short, signed, signed long, signed long long>
   { };
 
 template<uintmax_t valueT>
 struct lowest_unsigned
   : details_fwd::integer_selector<uintmax_t, valueT,
-              unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
+        unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
   { };
 
 // Fancy pointer conversion
@@ -604,9 +604,11 @@ unfancy(pointerT&& ptr)
 template<typename targetT, typename sourceT>
 constexpr targetT
 static_or_dynamic_cast(sourceT&& src)
-  { return details_fwd::static_or_dynamic_cast_aux<targetT, sourceT>(
+  {
+    return details_fwd::static_or_dynamic_cast_aux<targetT, sourceT>(
                         details_fwd::use_static_cast_aux<targetT, sourceT>(),
-                        ::std::forward<sourceT>(src));  }
+                        ::std::forward<sourceT>(src));
+  }
 
 }  // namespace rocket
 
