@@ -79,7 +79,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             if(!opts.implicit_global_names) {
               qref = global.get_named_reference_opt(altr.name);
               if(!qref)
-                throw Compiler_Error(compiler_status_undeclared_identifier, altr.sloc);
+                throw Compiler_Error(Compiler_Error::M_format(),
+                          compiler_status_undeclared_identifier, altr.sloc,
+                          "undeclared identifier `$1`", altr.name);
             }
 
             AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
