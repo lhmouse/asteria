@@ -251,9 +251,8 @@ using Xformat = ::rocket::variant<S_xformat_array, S_xformat_object>;
 V_string
 do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
   {
-    ::rocket::tinyfmt_str fmt;
-
     // Transform recursion to iteration using a handwritten stack.
+    ::rocket::tinyfmt_str fmt;
     auto qval = &value;
     cow_vector<Xformat> stack;
 
@@ -301,7 +300,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           fmt << '[';
 
           // Open an array.
-          S_xformat_array ctxa = { ::std::addressof(array), array.begin() };
+          S_xformat_array ctxa = { &array, array.begin() };
           if(ctxa.curp != array.end()) {
             indent.increment_level();
             indent.break_line(fmt);
@@ -322,7 +321,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           fmt << '{';
 
           // Open an object.
-          S_xformat_object ctxo = { ::std::addressof(object), object.begin() };
+          S_xformat_object ctxo = { &object, object.begin() };
           if(do_find_uncensored(ctxo.curp, object)) {
             indent.increment_level();
             indent.break_line(fmt);
@@ -350,7 +349,6 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
       // A complete value has been written. Advance to the next element if any.
       for(;;) {
         if(stack.empty())
-          // Finish the root value.
           return fmt.extract_string();
 
         // Advance to the next element.
@@ -471,9 +469,8 @@ do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm)
 Value
 do_json_parse_nonrecursive(Token_Stream& tstrm)
   {
-    Value value;
-
     // Implement a non-recursive descent parser.
+    Value value;
     cow_vector<Xparse> stack;
 
     for(;;) {
@@ -496,8 +493,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
               auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
               if(!kpunct) {
                 // Descend into the new array.
-                S_xparse_array ctxa = { };
-                stack.emplace_back(::std::move(ctxa));
+                stack.emplace_back(S_xparse_array());
                 continue;
               }
 
@@ -513,9 +509,8 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
               auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
               if(!kpunct) {
                 // Descend into the new object.
-                S_xparse_object ctxo = { };
-                do_accept_object_key(ctxo, tstrm);
-                stack.emplace_back(::std::move(ctxo));
+                stack.emplace_back(S_xparse_object());
+                do_accept_object_key(stack.mut_back().as<1>(), tstrm);
                 continue;
               }
 
@@ -589,7 +584,6 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
       // A complete value has been accepted. Insert it into its parent array or object.
       for(;;) {
         if(stack.empty())
-          // Accept the root value.
           return value;
 
         if(stack.back().index() == 0) {
@@ -603,7 +597,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
                       compiler_status_closed_bracket_or_comma_expected, tstrm.next_sloc());
 
           // Check for termination of this array.
-          if(*kpunct != punctuator_bracket_cl) {
+          if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
             if(!kpunct) {
               // Look for the next element.
@@ -628,7 +622,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
                       compiler_status_closed_brace_or_comma_expected, tstrm.next_sloc());
 
           // Check for termination of this array.
-          if(*kpunct != punctuator_brace_cl) {
+          if(*kpunct == punctuator_comma) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
             if(!kpunct) {
               // Look for the next element.
@@ -647,7 +641,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
 
 Value
 do_json_parse(tinybuf& cbuf)
-  try {
+  {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
     Compiler_Options opts;
@@ -664,11 +658,8 @@ do_json_parse(tinybuf& cbuf)
     auto value = do_json_parse_nonrecursive(tstrm);
     if(!tstrm.empty())
       ASTERIA_THROW_RUNTIME_ERROR("excess text at end of JSON string");
+
     return value;
-  }
-  catch(Compiler_Error& except) {
-    ASTERIA_THROW_RUNTIME_ERROR("invalid JSON string: $3 (line $1, column $2)",
-                  except.line(), except.column(), describe_compiler_status(except.status()));
   }
 
 }  // namespace
