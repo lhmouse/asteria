@@ -424,47 +424,49 @@ do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accep
     return punct;
   }
 
-phsh_string
-do_accept_object_key(Token_Stream& tstrm)
-  {
-    auto qtok = tstrm.peek_opt();
-    if(!qtok)
-      throw Compiler_Error(compiler_status_closed_brace_or_json5_key_expected, tstrm);
-
-    cow_string name;
-    switch(weaken_enum(qtok->index())) {
-      case Token::index_identifier:
-        name = qtok->as_identifier();
-        break;
-
-      case Token::index_string_literal:
-        name = qtok->as_string_literal();
-        break;
-
-      default:
-        throw Compiler_Error(compiler_status_closed_brace_or_json5_key_expected, tstrm);
-    }
-    tstrm.shift();
-
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
-    if(!kpunct)
-      throw Compiler_Error(compiler_status_colon_expected, tstrm);
-
-    return name;
-  }
-
 struct S_xparse_array
   {
-    V_array array;
+    V_array arr;
   };
 
 struct S_xparse_object
   {
-    V_object object;
+    V_object obj;
     phsh_string key;
+    Source_Location key_sloc;
   };
 
 using Xparse = ::rocket::variant<S_xparse_array, S_xparse_object>;
+
+void
+do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm)
+  {
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
+
+    switch(weaken_enum(qtok->index())) {
+      case Token::index_identifier:
+        ctxo.key = qtok->as_identifier();
+        break;
+
+      case Token::index_string_literal:
+        ctxo.key = qtok->as_string_literal();
+        break;
+
+      default:
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
+    }
+    ctxo.key_sloc = qtok->sloc();
+    tstrm.shift();
+
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
+    if(!kpunct)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_colon_expected, tstrm.next_sloc());
+  }
 
 Value
 do_json_parse_nonrecursive(Token_Stream& tstrm)
@@ -478,7 +480,9 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
       // Accept a value. No other things such as closed brackets are allowed.
       auto qtok = tstrm.peek_opt();
       if(!qtok)
-        throw Compiler_Error(compiler_status_expression_expected, tstrm);
+        throw Compiler_Error(Compiler_Error::M_format(),
+                  compiler_status_expression_expected, tstrm.next_sloc(),
+                  "value expected");
 
       switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
@@ -492,7 +496,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
               auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
               if(!kpunct) {
                 // Descend into the new array.
-                S_xparse_array ctxa = { V_array() };
+                S_xparse_array ctxa = { };
                 stack.emplace_back(::std::move(ctxa));
                 continue;
               }
@@ -509,7 +513,8 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
               auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
               if(!kpunct) {
                 // Descend into the new object.
-                S_xparse_object ctxo = { V_object(), do_accept_object_key(tstrm) };
+                S_xparse_object ctxo = { };
+                do_accept_object_key(ctxo, tstrm);
                 stack.emplace_back(::std::move(ctxo));
                 continue;
               }
@@ -520,7 +525,9 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
             }
 
             default:
-              throw Compiler_Error(compiler_status_expression_expected, tstrm);
+              throw Compiler_Error(Compiler_Error::M_format(),
+                        compiler_status_expression_expected, tstrm.next_sloc(),
+                        "value expected");
           }
           break;
         }
@@ -529,7 +536,9 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           // Accept a literal.
           const auto& name = qtok->as_identifier();
           if(::rocket::is_none_of(name, { "null", "true", "false", "Infinity", "NaN" }))
-            throw Compiler_Error(compiler_status_expression_expected, tstrm);
+            throw Compiler_Error(Compiler_Error::M_format(),
+                      compiler_status_expression_expected, tstrm.next_sloc(),
+                      "value expected");
 
           switch(name[0]) {
             case 'n':
@@ -572,7 +581,9 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           break;
 
         default:
-          throw Compiler_Error(compiler_status_expression_expected, tstrm);
+          throw Compiler_Error(Compiler_Error::M_format(),
+                    compiler_status_expression_expected, tstrm.next_sloc(),
+                    "value expected");
       }
 
       // A complete value has been accepted. Insert it into its parent array or object.
@@ -583,12 +594,13 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
 
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
-          ctxa.array.emplace_back(::std::move(value));
+          ctxa.arr.emplace_back(::std::move(value));
 
           // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct)
-            throw Compiler_Error(compiler_status_closed_bracket_or_comma_expected, tstrm);
+            throw Compiler_Error(Compiler_Error::M_status(),
+                      compiler_status_closed_bracket_or_comma_expected, tstrm.next_sloc());
 
           // Check for termination of this array.
           if(*kpunct != punctuator_bracket_cl) {
@@ -600,29 +612,33 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
           }
 
           // Close this array.
-          value = ::std::move(ctxa.array);
+          value = ::std::move(ctxa.arr);
         }
         else {
           auto& ctxo = stack.mut_back().as<1>();
-          ctxo.object.insert_or_assign(::std::move(ctxo.key), ::std::move(value));
+          auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
+          if(!pair.second)
+            throw Compiler_Error(Compiler_Error::M_status(),
+                      compiler_status_duplicate_key_in_object, ctxo.key_sloc);
 
           // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct)
-            throw Compiler_Error(compiler_status_closed_brace_or_comma_expected, tstrm);
+            throw Compiler_Error(Compiler_Error::M_status(),
+                      compiler_status_closed_brace_or_comma_expected, tstrm.next_sloc());
 
           // Check for termination of this array.
           if(*kpunct != punctuator_brace_cl) {
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
             if(!kpunct) {
               // Look for the next element.
-              ctxo.key = do_accept_object_key(tstrm);
+              do_accept_object_key(ctxo, tstrm);
               break;
             }
           }
 
           // Close this object.
-          value = ::std::move(ctxo.object);
+          value = ::std::move(ctxo.obj);
         }
         stack.pop_back();
       }
