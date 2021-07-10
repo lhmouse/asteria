@@ -144,36 +144,27 @@ class Argument_Reader
       "`" name "(...)` at '" ASTERIA_NATIVE_SOURCE_LOCATION "'",  \
       *[](::asteria::Reference& self, ::asteria::Global_Context& global,  \
           ::asteria::Reference_Stack&& tfiXopzY)  \
-        -> Reference& \
+        -> ::asteria::Reference& \
         {  \
-          (void)global;  \
-          ::asteria::Argument_Reader reader(  \
-                 ::rocket::sref("" name), ::std::move(tfiXopzY));  \
-          {  // Add function body here.
+          ::asteria::Argument_Reader reader(::rocket::sref("" name), ::std::move(tfiXopzY));  \
+          (void)global;
 
 #define ASTERIA_BINDING_END  \
-          }  \
           reader.throw_no_matching_function_call();  \
         }  \
-    ))
+      ))
 
 #define ASTERIA_BINDING_RETURN(self, func, ...)  \
-    do {  \
-      return ::asteria::details_argument_reader::apply_and_set_result(self,  \
-          [](auto&&... jZrUeTNf) -> decltype(auto)  \
-            { return func(static_cast<decltype(jZrUeTNf)&&>(jZrUeTNf)...);  },  \
-          ::std::forward_as_tuple(__VA_ARGS__));  \
-    }  \
-    while(false)
+    return ::asteria::details_argument_reader::apply_and_set_result(self,  \
+        [](auto&&... jZrUeTNf) -> decltype(auto)  \
+          { return func(static_cast<decltype(jZrUeTNf)&&>(jZrUeTNf)...);  },  \
+        ::std::forward_as_tuple(__VA_ARGS__))
 
 #define ASTERIA_BINDING_RETURN_MOVE(self, func, ...)  \
-    do {  \
-      return ::asteria::details_argument_reader::apply_and_set_result(self,  \
-          [](auto&&... jZrUeTNf) -> decltype(auto)  \
-            { return func(::asteria::details_argument_reader::move(jZrUeTNf)...);  },  \
-          ::std::forward_as_tuple(__VA_ARGS__));  \
-    }  \
-    while(false)
+    return ::asteria::details_argument_reader::apply_and_set_result(self,  \
+        [](auto&&... jZrUeTNf) -> decltype(auto)  \
+          { return func(::asteria::details_argument_reader::move(jZrUeTNf)...);  },  \
+        ::std::forward_as_tuple(__VA_ARGS__))
 
 }  // namespace asteria
 
