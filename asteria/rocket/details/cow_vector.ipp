@@ -427,7 +427,7 @@ class storage_handle
         try {
           if(skip < len)
             ROCKET_ASSERT(sth.m_qstor),
-            storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), skip);
+              storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor), skip);
         }
         catch(...) {
           this->do_destroy_storage(qstor);

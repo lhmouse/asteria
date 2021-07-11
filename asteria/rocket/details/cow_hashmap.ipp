@@ -661,7 +661,7 @@ class storage_handle
         try {
           if(finish && len)
             ROCKET_ASSERT(sth.m_qstor),
-            storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor));
+              storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor));
         }
         catch(...) {
           this->do_destroy_storage(qstor);
