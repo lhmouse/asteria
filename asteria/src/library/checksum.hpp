@@ -96,6 +96,28 @@ std_checksum_sha1(V_string data);
 V_string
 std_checksum_sha1_file(V_string path);
 
+// members of `std.checksum.SHA224`
+V_opaque
+std_checksum_SHA224_private();
+
+void
+std_checksum_SHA224_update(V_opaque& h, V_string data);
+
+V_string
+std_checksum_SHA224_finish(V_opaque& h);
+
+// `std.checksum.SHA224`
+V_object
+std_checksum_SHA224();
+
+// `std.checksum.sha224`
+V_string
+std_checksum_sha224(V_string data);
+
+// `std.checksum.sha224_file`
+V_string
+std_checksum_sha224_file(V_string path);
+
 // members of `std.checksum.SHA256`
 V_opaque
 std_checksum_SHA256_private();
@@ -117,6 +139,50 @@ std_checksum_sha256(V_string data);
 // `std.checksum.sha256_file`
 V_string
 std_checksum_sha256_file(V_string path);
+
+// members of `std.checksum.SHA384`
+V_opaque
+std_checksum_SHA384_private();
+
+void
+std_checksum_SHA384_update(V_opaque& h, V_string data);
+
+V_string
+std_checksum_SHA384_finish(V_opaque& h);
+
+// `std.checksum.SHA384`
+V_object
+std_checksum_SHA384();
+
+// `std.checksum.sha384`
+V_string
+std_checksum_sha384(V_string data);
+
+// `std.checksum.sha384_file`
+V_string
+std_checksum_sha384_file(V_string path);
+
+// members of `std.checksum.SHA512`
+V_opaque
+std_checksum_SHA512_private();
+
+void
+std_checksum_SHA512_update(V_opaque& h, V_string data);
+
+V_string
+std_checksum_SHA512_finish(V_opaque& h);
+
+// `std.checksum.SHA512`
+V_object
+std_checksum_SHA512();
+
+// `std.checksum.sha512`
+V_string
+std_checksum_sha512(V_string data);
+
+// `std.checksum.sha512_file`
+V_string
+std_checksum_sha512_file(V_string path);
 
 // Create an object that is to be referenced as `std.checksum`.
 void

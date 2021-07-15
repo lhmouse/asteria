@@ -2688,6 +2688,62 @@
 
 	* Throws an exception if a read error occurs.
 
+`std.checksum.SHA224()`
+
+	* Creates an SHA-224 hasher.
+
+	* Returns the hasher as an object consisting of the following
+	  members:
+
+	  * `update(data)`
+	  * `finish()`
+
+	  The function `update()` is used to put data into the hasher,
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as a string of 64
+	  hexadecimal digits in uppercase, then resets the hasher, making
+	  it suitable for further data as if it had just been created.
+
+`std.checksum.sha224(data)`
+
+	* Calculates the SHA-224 checksum of `data` which must be of type
+	  string, as if this function was defined as
+
+	  ```
+	  std.checksum.sha224 = func(data) {
+	    var h = this.SHA224();
+	    h.update(data);
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-224 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+`std.checksum.sha224_file(path)`
+
+	* Calculates the SHA-224 checksum of the file denoted by `path`,
+	  as if this function was defined as
+
+	  ```
+	  std.checksum.sha224_file = func(path) {
+	    var h = this.SHA224();
+	    this.file_stream(path, func(off, data) = h.update(data));
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-224 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+	* Throws an exception if a read error occurs.
+
 `std.checksum.SHA256()`
 
 	* Creates an SHA-256 hasher.
@@ -2740,6 +2796,118 @@
 	  to use.
 
 	* Returns the SHA-256 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+	* Throws an exception if a read error occurs.
+
+`std.checksum.SHA384()`
+
+	* Creates an SHA-384 hasher.
+
+	* Returns the hasher as an object consisting of the following
+	  members:
+
+	  * `update(data)`
+	  * `finish()`
+
+	  The function `update()` is used to put data into the hasher,
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as a string of 64
+	  hexadecimal digits in uppercase, then resets the hasher, making
+	  it suitable for further data as if it had just been created.
+
+`std.checksum.sha384(data)`
+
+	* Calculates the SHA-384 checksum of `data` which must be of type
+	  string, as if this function was defined as
+
+	  ```
+	  std.checksum.sha384 = func(data) {
+	    var h = this.SHA384();
+	    h.update(data);
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-384 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+`std.checksum.sha384_file(path)`
+
+	* Calculates the SHA-384 checksum of the file denoted by `path`,
+	  as if this function was defined as
+
+	  ```
+	  std.checksum.sha384_file = func(path) {
+	    var h = this.SHA384();
+	    this.file_stream(path, func(off, data) = h.update(data));
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-384 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+	* Throws an exception if a read error occurs.
+
+`std.checksum.SHA512()`
+
+	* Creates an SHA-512 hasher.
+
+	* Returns the hasher as an object consisting of the following
+	  members:
+
+	  * `update(data)`
+	  * `finish()`
+
+	  The function `update()` is used to put data into the hasher,
+	  which shall be a byte string. After all data have been put, the
+	  function `finish()` extracts the checksum as a string of 64
+	  hexadecimal digits in uppercase, then resets the hasher, making
+	  it suitable for further data as if it had just been created.
+
+`std.checksum.sha512(data)`
+
+	* Calculates the SHA-512 checksum of `data` which must be of type
+	  string, as if this function was defined as
+
+	  ```
+	  std.checksum.sha512 = func(data) {
+	    var h = this.SHA512();
+	    h.update(data);
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-512 checksum as a string of 64 hexadecimal
+	  digits in uppercase.
+
+`std.checksum.sha512_file(path)`
+
+	* Calculates the SHA-512 checksum of the file denoted by `path`,
+	  as if this function was defined as
+
+	  ```
+	  std.checksum.sha512_file = func(path) {
+	    var h = this.SHA512();
+	    this.file_stream(path, func(off, data) = h.update(data));
+	    return h.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the SHA-512 checksum as a string of 64 hexadecimal
 	  digits in uppercase.
 
 	* Throws an exception if a read error occurs.
