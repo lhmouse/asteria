@@ -9,6 +9,6 @@ task:
     - export LANG=C.UTF-8
     - apt-get update
     - apt-get install -y autoconf automake libtool g++ make python3
-    - apt-get install -y parallel libpcre2-dev
+    - apt-get install -y parallel libpcre2-dev libssl-dev zlib1g-dev
     - ./ci/build.sh
     - ./check_includes.sh
