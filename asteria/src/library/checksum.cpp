@@ -72,13 +72,16 @@ class CRC32_Hasher final
     void
     update(const void* data, size_t size) noexcept
       {
-        auto bp = static_cast<const ::Bytef*>(data);
-        auto ep = bp + size;
-        ptrdiff_t n;
-
-        while((n = ::rocket::min(ep - bp, INT_MAX)) != 0)
-          this->m_reg = ::crc32(this->m_reg, bp, static_cast<::uInt>(n)),
-            bp += n;
+        auto bptr = static_cast<const ::Bytef*>(data);
+#if ZLIB_VERNUM <= 0x1280
+        // zlib <= 1.2.8
+        const auto eptr = bptr + size;
+        while(ptrdiff_t n = ::rocket::min(eptr - bptr, INT_MAX))
+          this->m_reg = ::crc32(this->m_reg, (bptr += n) - n, static_cast<::uInt>(n));
+#else
+        // zlib >= 1.2.9
+        this->m_reg = ::crc32_z(this->m_reg, bptr, size);
+#endif
       }
 
     V_integer
@@ -149,12 +152,10 @@ class FNV1a32_Hasher final
     void
     update(const void* data, size_t size) noexcept
       {
-        auto bp = static_cast<const uint8_t*>(data);
-        auto ep = bp + size;
-
-        while(bp != ep)
-          this->m_reg = (this->m_reg ^ *bp) * 16777619,
-            bp++;
+        auto bptr = static_cast<const uint8_t*>(data);
+        auto eptr = bptr + size;
+        while(bptr != eptr)
+          this->m_reg = (this->m_reg ^ *(bptr++)) * 16777619;
       }
 
     V_integer
