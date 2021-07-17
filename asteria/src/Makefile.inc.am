@@ -135,6 +135,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/library/checksum.cpp  \
   %reldir%/library/json.cpp  \
   %reldir%/library/io.cpp  \
+  %reldir%/library/zlib.cpp  \
   ${NOTHING}
 
 lib_libasteria_la_LIBADD =  \

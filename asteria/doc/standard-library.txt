@@ -3099,3 +3099,140 @@
 	  the orientation of standard output.
 
 	* Throws an exception if a write error occurs.
+
+### `std.zlib`
+
+`std.zlib.Deflator(format, [level])`
+
+	* Creates a data compressor using the deflate algorithm according
+	  to RFC 1951. `format` must be one of `"deflate"`, `"gzip"`, or
+	  `"raw"`. `level` specifies the compression level, which must be
+	  an integer within `[1,9]`. If it is absent, a moderate level is
+	  selected.
+
+	* Returns a compressor as an object consisting of the following
+	  members:
+
+	  * `output`
+	  * `update(data)`
+	  * `flush()`
+	  * `finish()`
+	  * `clear()`
+
+	  The string `output` is where compressed data will be appended.
+	  The function `update()` puts data into the compressor, which
+	  shall be a byte string. The function `flush()` causes pending
+	  bits to be pushed into the output string and aligned on a byte
+	  boundary. The `finish()` function marks the end of input data
+	  and returns a copy of the output string. The function `clear()`
+	  discards both input and output data and resets the compressor
+	  to its initial state.
+
+	* Throws an exception if `format` is invalid or `level` is out of
+	  range.
+
+`std.zlib.deflate(data, [level])`
+
+	* Compresses `data` which must be a byte string, as if this
+	  function was defined as
+
+	  ```
+	  std.zlib.deflate = func(data, level) {
+	    var r = this.Deflator("deflate", level);
+	    r.update(data);
+	    return r.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the compressed string.
+
+	* Throws an exception if `level` is out of range.
+
+`std.zlib.gzip(data, [level])`
+
+	* Compresses `data` which must be a byte string, as if this
+	  function was defined as
+
+	  ```
+	  std.zlib.deflate = func(data, level) {
+	    var r = this.Deflator("gzip", level);
+	    r.update(data);
+	    return r.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the compressed string.
+
+	* Throws an exception if `level` is out of range.
+
+`std.zlib.Inflator(format)`
+
+	* Creates a data decompressor which uses the deflate algorithm
+	  according to RFC 1951. `format` must be one of `"deflate"`,
+	  `"gzip"`,  or `"raw"`.
+
+	* Returns a decompressor as an object consisting of the following
+	  members:
+
+	  * `output`
+	  * `update(data)`
+	  * `flush()`
+	  * `finish()`
+	  * `clear()`
+
+	  The string `output` is where decompressed data will be pushed.
+	  The function `update()` puts data into the decompressor, which
+	  shall be a byte string. The function `flush()` causes pending
+	  decompressed bytes to be appended to the output string. The
+	  `finish()` function marks the end of input data and returns a
+	  copy of the output string. The function `clear()` discards both
+	  input and output data and then resets the decompressor to its
+	  initial state.
+
+	* Throws an exception if `format` is invalid.
+
+`std.zlib.inflate(data)`
+
+	* Decompresses `data` which must be a byte string, as if this
+	  function was defined as
+
+	  ```
+	  std.zlib.inflate = func(data) {
+	    var r = this.Inflator("deflate");
+	    r.update(data);
+	    return r.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the decompressed string.
+
+	* Throws an exception in case of corrupt input data.
+
+`std.zlib.gunzip(data)`
+
+	* Decompresses `data` which must be a byte string, as if this
+	  function was defined as
+
+	  ```
+	  std.zlib.gunzip = func(data) {
+	    var r = this.Inflator("gzip");
+	    r.update(data);
+	    return r.finish();
+	  };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the decompressed string.
+
+	* Throws an exception in case of corrupt input data.
