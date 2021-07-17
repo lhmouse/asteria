@@ -79,19 +79,19 @@
 
 	  Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
 
-          * x: number of 1/30,518 seconds since UNIX Epoch
-          * M: always `4` (UUID version)
-          * y: process ID
-          * N: any of `0`-`7` (UUID variant)
-          * z: context ID
-          * w: random bytes
+	  * x: number of 1/30,518 seconds since UNIX Epoch
+	  * M: always `4` (UUID version)
+	  * y: process ID
+	  * N: any of `0`-`7` (UUID variant)
+	  * z: context ID
+	  * w: random bytes
 
-          Unlike version-1 UUIDs in RFC 4122, the timestamp is written
-          in pure big-endian order. This ensures the case-insensitive
-          lexicographical order of such UUIDs will match their order of
-          creation. If `lowercase` is set to `true`, hexadecimal digits
-          above `9` are encoded as `abcdef`; otherwise they are encoded
-          as `ABCDEF`.
+	  Unlike version-1 UUIDs in RFC 4122, the timestamp is written
+	  in pure big-endian order. This ensures the case-insensitive
+	  lexicographical order of such UUIDs will match their order of
+	  creation. If `lowercase` is set to `true`, hexadecimal digits
+	  above `9` are encoded as `abcdef`; otherwise they are encoded
+	  as `ABCDEF`.
 
 	* Returns a UUID as a string of 36 characters without braces.
 
