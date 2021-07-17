@@ -18,6 +18,9 @@ std_checksum_CRC32_update(V_opaque& h, V_string data);
 V_integer
 std_checksum_CRC32_finish(V_opaque& h);
 
+void
+std_checksum_CRC32_clear(V_opaque& h);
+
 // `std.checksum.CRC32`
 V_object
 std_checksum_CRC32();
@@ -39,6 +42,9 @@ std_checksum_FNV1a32_update(V_opaque& h, V_string data);
 
 V_integer
 std_checksum_FNV1a32_finish(V_opaque& h);
+
+void
+std_checksum_FNV1a32_clear(V_opaque& h);
 
 // `std.checksum.FNV1a32`
 V_object
@@ -62,6 +68,9 @@ std_checksum_MD5_update(V_opaque& h, V_string data);
 V_string
 std_checksum_MD5_finish(V_opaque& h);
 
+void
+std_checksum_MD5_clear(V_opaque& h);
+
 // `std.checksum.MD5`
 V_object
 std_checksum_MD5();
@@ -83,6 +92,9 @@ std_checksum_SHA1_update(V_opaque& h, V_string data);
 
 V_string
 std_checksum_SHA1_finish(V_opaque& h);
+
+void
+std_checksum_SHA1_clear(V_opaque& h);
 
 // `std.checksum.SHA1`
 V_object
@@ -106,6 +118,9 @@ std_checksum_SHA224_update(V_opaque& h, V_string data);
 V_string
 std_checksum_SHA224_finish(V_opaque& h);
 
+void
+std_checksum_SHA224_clear(V_opaque& h);
+
 // `std.checksum.SHA224`
 V_object
 std_checksum_SHA224();
@@ -127,6 +142,9 @@ std_checksum_SHA256_update(V_opaque& h, V_string data);
 
 V_string
 std_checksum_SHA256_finish(V_opaque& h);
+
+void
+std_checksum_SHA256_clear(V_opaque& h);
 
 // `std.checksum.SHA256`
 V_object
@@ -150,6 +168,9 @@ std_checksum_SHA384_update(V_opaque& h, V_string data);
 V_string
 std_checksum_SHA384_finish(V_opaque& h);
 
+void
+std_checksum_SHA384_clear(V_opaque& h);
+
 // `std.checksum.SHA384`
 V_object
 std_checksum_SHA384();
@@ -171,6 +192,9 @@ std_checksum_SHA512_update(V_opaque& h, V_string data);
 
 V_string
 std_checksum_SHA512_finish(V_opaque& h);
+
+void
+std_checksum_SHA512_clear(V_opaque& h);
 
 // `std.checksum.SHA512`
 V_object

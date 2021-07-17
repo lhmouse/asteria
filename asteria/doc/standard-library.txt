@@ -2469,13 +2469,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as an integer (whose
 	  high-order 32 bits are always zeroes), then resets the hasher,
 	  making it suitable for further data as if it had just been
-	  created.
+	  created. The function `clear()` discards input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.crc32(data)`
 
@@ -2528,13 +2530,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as an integer (whose
 	  high-order 32 bits are always zeroes), then resets the hasher,
 	  making it suitable for further data as if it had just been
-	  created.
+	  created. The function `clear()` discards input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.fnv1a32(data)`
 
@@ -2585,12 +2589,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 32
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
+	  The function `clear()` discards all input data and resets the
+	  hasher to its initial state.
 
 `std.checksum.md5(data)`
 
@@ -2641,12 +2648,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 40
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
+	  The function `clear()` discards all input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.sha1(data)`
 
@@ -2697,12 +2707,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 64
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
+	  The function `clear()` discards all input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.sha224(data)`
 
@@ -2753,12 +2766,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 64
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
+	  The function `clear()` discards all input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.sha256(data)`
 
@@ -2809,12 +2825,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 64
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
+	  The function `clear()` discards all input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.sha384(data)`
 
@@ -2865,12 +2884,15 @@
 
 	  * `update(data)`
 	  * `finish()`
+	  * `clear()`
 
 	  The function `update()` is used to put data into the hasher,
 	  which shall be a byte string. After all data have been put, the
 	  function `finish()` extracts the checksum as a string of 64
 	  hexadecimal digits in uppercase, then resets the hasher, making
 	  it suitable for further data as if it had just been created.
+	  The function `clear()` discards all input data and resets
+	  the hasher to its initial state.
 
 `std.checksum.sha512(data)`
 

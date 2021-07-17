@@ -51,10 +51,9 @@ class CRC32_Hasher final
     ::uLong m_reg;
 
   public:
+    explicit
     CRC32_Hasher() noexcept
-      {
-        this->m_reg = 0;
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -68,6 +67,12 @@ class CRC32_Hasher final
     CRC32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& output) const override
       { return clone_opaque(output, *this);  }
+
+    void
+    clear() noexcept
+      {
+        this->m_reg = 0;
+      }
 
     void
     update(const void* data, size_t size) noexcept
@@ -88,7 +93,7 @@ class CRC32_Hasher final
     finish() noexcept
       {
         V_integer ck = static_cast<uint32_t>(this->m_reg);
-        this->m_reg = 0;
+        this->clear();
         return ck;
       }
   };
@@ -122,6 +127,17 @@ do_construct_CRC32(V_object& result)
                     std_checksum_CRC32_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.CRC32::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_CRC32_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class FNV1a32_Hasher final
@@ -131,10 +147,9 @@ class FNV1a32_Hasher final
     uint32_t m_reg;
 
   public:
+    explicit
     FNV1a32_Hasher() noexcept
-      {
-        this->m_reg = 2166136261;
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -150,6 +165,12 @@ class FNV1a32_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        this->m_reg = 2166136261;
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         auto bptr = static_cast<const uint8_t*>(data);
@@ -162,7 +183,7 @@ class FNV1a32_Hasher final
     finish() noexcept
       {
         V_integer ck = static_cast<uint32_t>(this->m_reg);
-        this->m_reg = 2166136261;
+        this->clear();
         return ck;
       }
   };
@@ -196,6 +217,17 @@ do_construct_FNV1a32(V_object& result)
                     std_checksum_FNV1a32_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_FNV1a32_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class MD5_Hasher final
@@ -205,10 +237,9 @@ class MD5_Hasher final
     ::MD5_CTX m_reg[1];
 
   public:
+    explicit
     MD5_Hasher() noexcept
-      {
-        ::MD5_Init(this->m_reg);
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -224,6 +255,12 @@ class MD5_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        ::MD5_Init(this->m_reg);
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         ::MD5_Update(this->m_reg, data, size);
@@ -235,7 +272,7 @@ class MD5_Hasher final
         unsigned char bytes[MD5_DIGEST_LENGTH];
         ::MD5_Final(bytes, this->m_reg);
         V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
-        ::MD5_Init(this->m_reg);
+        this->clear();
         return ck;
       }
   };
@@ -269,6 +306,17 @@ do_construct_MD5(V_object& result)
                     std_checksum_MD5_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.MD5::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_MD5_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA1_Hasher final
@@ -278,10 +326,9 @@ class SHA1_Hasher final
     ::SHA_CTX m_reg[1];
 
   public:
+    explicit
     SHA1_Hasher() noexcept
-      {
-        ::SHA1_Init(this->m_reg);
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -297,6 +344,12 @@ class SHA1_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        ::SHA1_Init(this->m_reg);
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         ::SHA1_Update(this->m_reg, data, size);
@@ -308,7 +361,7 @@ class SHA1_Hasher final
         unsigned char bytes[SHA_DIGEST_LENGTH];
         ::SHA1_Final(bytes, this->m_reg);
         V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
-        ::SHA1_Init(this->m_reg);
+        this->clear();
         return ck;
       }
   };
@@ -342,6 +395,17 @@ do_construct_SHA1(V_object& result)
                     std_checksum_SHA1_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA1::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA1_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA224_Hasher final
@@ -351,10 +415,9 @@ class SHA224_Hasher final
     ::SHA256_CTX m_reg[1];
 
   public:
+    explicit
     SHA224_Hasher() noexcept
-      {
-        ::SHA224_Init(this->m_reg);
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -370,6 +433,12 @@ class SHA224_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        ::SHA224_Init(this->m_reg);
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         ::SHA224_Update(this->m_reg, data, size);
@@ -381,7 +450,7 @@ class SHA224_Hasher final
         unsigned char bytes[SHA224_DIGEST_LENGTH];
         ::SHA224_Final(bytes, this->m_reg);
         V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
-        ::SHA224_Init(this->m_reg);
+        this->clear();
         return ck;
       }
   };
@@ -415,6 +484,17 @@ do_construct_SHA224(V_object& result)
                     std_checksum_SHA224_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA224::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA224_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA256_Hasher final
@@ -424,10 +504,9 @@ class SHA256_Hasher final
     ::SHA256_CTX m_reg[1];
 
   public:
+    explicit
     SHA256_Hasher() noexcept
-      {
-        ::SHA256_Init(this->m_reg);
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -443,6 +522,12 @@ class SHA256_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        ::SHA256_Init(this->m_reg);
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         ::SHA256_Update(this->m_reg, data, size);
@@ -454,7 +539,7 @@ class SHA256_Hasher final
         unsigned char bytes[SHA256_DIGEST_LENGTH];
         ::SHA256_Final(bytes, this->m_reg);
         V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
-        ::SHA256_Init(this->m_reg);
+        this->clear();
         return ck;
       }
   };
@@ -488,6 +573,17 @@ do_construct_SHA256(V_object& result)
                     std_checksum_SHA256_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA256::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA256_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA384_Hasher final
@@ -497,10 +593,9 @@ class SHA384_Hasher final
     ::SHA512_CTX m_reg[1];
 
   public:
+    explicit
     SHA384_Hasher() noexcept
-      {
-        ::SHA384_Init(this->m_reg);
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -516,6 +611,12 @@ class SHA384_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        ::SHA384_Init(this->m_reg);
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         ::SHA384_Update(this->m_reg, data, size);
@@ -527,7 +628,7 @@ class SHA384_Hasher final
         unsigned char bytes[SHA384_DIGEST_LENGTH];
         ::SHA384_Final(bytes, this->m_reg);
         V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
-        ::SHA384_Init(this->m_reg);
+        this->clear();
         return ck;
       }
   };
@@ -561,6 +662,17 @@ do_construct_SHA384(V_object& result)
                     std_checksum_SHA384_finish, href);
       }
       ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA384::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA384_clear, href);
+      }
+      ASTERIA_BINDING_END);
   }
 
 class SHA512_Hasher final
@@ -570,10 +682,9 @@ class SHA512_Hasher final
     ::SHA512_CTX m_reg[1];
 
   public:
+    explicit
     SHA512_Hasher() noexcept
-      {
-        ::SHA512_Init(this->m_reg);
-      }
+      { this->clear();  }
 
   public:
     tinyfmt&
@@ -589,6 +700,12 @@ class SHA512_Hasher final
       { return clone_opaque(output, *this);  }
 
     void
+    clear() noexcept
+      {
+        ::SHA512_Init(this->m_reg);
+      }
+
+    void
     update(const void* data, size_t size) noexcept
       {
         ::SHA512_Update(this->m_reg, data, size);
@@ -600,7 +717,7 @@ class SHA512_Hasher final
         unsigned char bytes[SHA512_DIGEST_LENGTH];
         ::SHA512_Final(bytes, this->m_reg);
         V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
-        ::SHA512_Init(this->m_reg);
+        this->clear();
         return ck;
       }
   };
@@ -632,6 +749,17 @@ do_construct_SHA512(V_object& result)
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
                     std_checksum_SHA512_finish, href);
+      }
+      ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING_BEGIN("std.checksum.SHA512::clear", self, global, reader) {
+        const auto href = do_open_private(::std::move(self), uuid);
+
+        reader.start_overload();
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_checksum_SHA512_clear, href);
       }
       ASTERIA_BINDING_END);
   }
@@ -720,6 +848,12 @@ std_checksum_CRC32_finish(V_opaque& h)
     return do_cast_hasher<CRC32_Hasher>(h)->finish();
   }
 
+void
+std_checksum_CRC32_clear(V_opaque& h)
+  {
+    return do_cast_hasher<CRC32_Hasher>(h)->clear();
+  }
+
 V_object
 std_checksum_CRC32()
   {
@@ -756,6 +890,12 @@ V_integer
 std_checksum_FNV1a32_finish(V_opaque& h)
   {
     return do_cast_hasher<FNV1a32_Hasher>(h)->finish();
+  }
+
+void
+std_checksum_FNV1a32_clear(V_opaque& h)
+  {
+    return do_cast_hasher<FNV1a32_Hasher>(h)->clear();
   }
 
 V_object
@@ -796,6 +936,12 @@ std_checksum_MD5_finish(V_opaque& h)
     return do_cast_hasher<MD5_Hasher>(h)->finish();
   }
 
+void
+std_checksum_MD5_clear(V_opaque& h)
+  {
+    return do_cast_hasher<MD5_Hasher>(h)->clear();
+  }
+
 V_object
 std_checksum_MD5()
   {
@@ -832,6 +978,12 @@ V_string
 std_checksum_SHA1_finish(V_opaque& h)
   {
     return do_cast_hasher<SHA1_Hasher>(h)->finish();
+  }
+
+void
+std_checksum_SHA1_clear(V_opaque& h)
+  {
+    return do_cast_hasher<SHA1_Hasher>(h)->clear();
   }
 
 V_object
@@ -872,6 +1024,12 @@ std_checksum_SHA224_finish(V_opaque& h)
     return do_cast_hasher<SHA224_Hasher>(h)->finish();
   }
 
+void
+std_checksum_SHA224_clear(V_opaque& h)
+  {
+    return do_cast_hasher<SHA224_Hasher>(h)->clear();
+  }
+
 V_object
 std_checksum_SHA224()
   {
@@ -908,6 +1066,12 @@ V_string
 std_checksum_SHA256_finish(V_opaque& h)
   {
     return do_cast_hasher<SHA256_Hasher>(h)->finish();
+  }
+
+void
+std_checksum_SHA256_clear(V_opaque& h)
+  {
+    return do_cast_hasher<SHA256_Hasher>(h)->clear();
   }
 
 V_object
@@ -948,6 +1112,12 @@ std_checksum_SHA384_finish(V_opaque& h)
     return do_cast_hasher<SHA384_Hasher>(h)->finish();
   }
 
+void
+std_checksum_SHA384_clear(V_opaque& h)
+  {
+    return do_cast_hasher<SHA384_Hasher>(h)->clear();
+  }
+
 V_object
 std_checksum_SHA384()
   {
@@ -984,6 +1154,12 @@ V_string
 std_checksum_SHA512_finish(V_opaque& h)
   {
     return do_cast_hasher<SHA512_Hasher>(h)->finish();
+  }
+
+void
+std_checksum_SHA512_clear(V_opaque& h)
+  {
+    return do_cast_hasher<SHA512_Hasher>(h)->clear();
   }
 
 V_object
