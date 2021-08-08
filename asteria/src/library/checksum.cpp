@@ -15,35 +15,6 @@
 namespace asteria {
 namespace {
 
-::std::reference_wrapper<V_opaque>
-do_open_private(Reference&& self, const phsh_string& name)
-  {
-    self.push_modifier_object_key(name);
-    auto& value = self.dereference_mutable();
-    return value.open_opaque();
-  }
-
-void
-do_set_private(V_object& result, const phsh_string& name, V_opaque&& h)
-  {
-    result.insert_or_assign(name, ::std::move(h));
-  }
-
-V_string
-do_copy_SHA_result(const unsigned char* bytes, size_t size)
-  {
-    V_string str;
-    auto wpos = str.insert(str.end(), size * 2, '/');
-
-    for(size_t k = 0;  k != size;  ++k) {
-      uint32_t ch = (bytes[k] >> 4) & 0x0F;
-      *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
-      ch = bytes[k] & 0x0F;
-      *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
-    }
-    return str;
-  }
-
 class CRC32_Hasher final
   : public Abstract_Opaque
   {
@@ -101,41 +72,47 @@ class CRC32_Hasher final
 void
 do_construct_CRC32(V_object& result)
   {
-    static constexpr auto uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
-    do_set_private(result, uuid, std_checksum_CRC32_private());
+    static constexpr auto s_uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
+    result.insert_or_assign(s_uuid, std_checksum_CRC32_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.CRC32::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32_update, href, data);
+                    std_checksum_CRC32_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.CRC32::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32_finish, href);
+                    std_checksum_CRC32_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.CRC32::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32_clear, href);
+                    std_checksum_CRC32_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
@@ -191,43 +168,64 @@ class FNV1a32_Hasher final
 void
 do_construct_FNV1a32(V_object& result)
   {
-    static constexpr auto uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
-    do_set_private(result, uuid, std_checksum_FNV1a32_private());
+    static constexpr auto s_uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
+    result.insert_or_assign(s_uuid, std_checksum_FNV1a32_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32_update, href, data);
+                    std_checksum_FNV1a32_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32_finish, href);
+                    std_checksum_FNV1a32_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32_clear, href);
+                    std_checksum_FNV1a32_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
+  }
+
+V_string
+do_copy_SHA_result(const unsigned char* bytes, size_t size)
+  {
+    V_string str;
+    auto wpos = str.insert(str.end(), size * 2, '/');
+
+    for(size_t k = 0;  k != size;  ++k) {
+      uint32_t ch = (bytes[k] >> 4) & 0x0F;
+      *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
+      ch = bytes[k] & 0x0F;
+      *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
+    }
+    return str;
   }
 
 class MD5_Hasher final
@@ -280,41 +278,47 @@ class MD5_Hasher final
 void
 do_construct_MD5(V_object& result)
   {
-    static constexpr auto uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
-    do_set_private(result, uuid, std_checksum_MD5_private());
+    static constexpr auto s_uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
+    result.insert_or_assign(s_uuid, std_checksum_MD5_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.MD5::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5_update, href, data);
+                    std_checksum_MD5_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.MD5::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5_finish, href);
+                    std_checksum_MD5_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.MD5::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5_clear, href);
+                    std_checksum_MD5_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
@@ -369,41 +373,47 @@ class SHA1_Hasher final
 void
 do_construct_SHA1(V_object& result)
   {
-    static constexpr auto uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
-    do_set_private(result, uuid, std_checksum_SHA1_private());
+    static constexpr auto s_uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
+    result.insert_or_assign(s_uuid, std_checksum_SHA1_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA1::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1_update, href, data);
+                    std_checksum_SHA1_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA1::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1_finish, href);
+                    std_checksum_SHA1_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA1::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1_clear, href);
+                    std_checksum_SHA1_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
@@ -458,41 +468,47 @@ class SHA224_Hasher final
 void
 do_construct_SHA224(V_object& result)
   {
-    static constexpr auto uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
-    do_set_private(result, uuid, std_checksum_SHA224_private());
+    static constexpr auto s_uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
+    result.insert_or_assign(s_uuid, std_checksum_SHA224_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA224::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224_update, href, data);
+                    std_checksum_SHA224_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA224::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224_finish, href);
+                    std_checksum_SHA224_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA224::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224_clear, href);
+                    std_checksum_SHA224_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
@@ -547,41 +563,47 @@ class SHA256_Hasher final
 void
 do_construct_SHA256(V_object& result)
   {
-    static constexpr auto uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
-    do_set_private(result, uuid, std_checksum_SHA256_private());
+    static constexpr auto s_uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
+    result.insert_or_assign(s_uuid, std_checksum_SHA256_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA256::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256_update, href, data);
+                    std_checksum_SHA256_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA256::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256_finish, href);
+                    std_checksum_SHA256_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA256::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256_clear, href);
+                    std_checksum_SHA256_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
@@ -636,41 +658,47 @@ class SHA384_Hasher final
 void
 do_construct_SHA384(V_object& result)
   {
-    static constexpr auto uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
-    do_set_private(result, uuid, std_checksum_SHA384_private());
+    static constexpr auto s_uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
+    result.insert_or_assign(s_uuid, std_checksum_SHA384_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA384::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384_update, href, data);
+                    std_checksum_SHA384_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA384::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384_finish, href);
+                    std_checksum_SHA384_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA384::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384_clear, href);
+                    std_checksum_SHA384_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
@@ -725,41 +753,47 @@ class SHA512_Hasher final
 void
 do_construct_SHA512(V_object& result)
   {
-    static constexpr auto uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
-    do_set_private(result, uuid, std_checksum_SHA512_private());
+    static constexpr auto s_uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
+    result.insert_or_assign(s_uuid, std_checksum_SHA512_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA512::update", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
         reader.required(data);    // data
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512_update, href, data);
+                    std_checksum_SHA512_update, ::std::ref(hasher), data);
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("finish"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA512::finish", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512_finish, href);
+                    std_checksum_SHA512_finish, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
 
     result.insert_or_assign(sref("clear"),
       ASTERIA_BINDING_BEGIN("std.checksum.SHA512::clear", self, global, reader) {
-        const auto href = do_open_private(::std::move(self), uuid);
+        self.push_modifier_object_key(s_uuid);
+        auto& hasher = self.dereference_mutable().open_opaque();
+        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512_clear, href);
+                    std_checksum_SHA512_clear, ::std::ref(hasher));
       }
       ASTERIA_BINDING_END);
   }
