@@ -332,7 +332,7 @@ struct Abstract_Opaque
     // function returns a non-null pointer, it replaces the current value. Derived classes that
     // are not copyable should throw an exception in this function.
     virtual Abstract_Opaque*
-    clone_opt(rcptr<Abstract_Opaque>& output) const
+    clone_opt(rcptr<Abstract_Opaque>& out) const
       = 0;
   };
 
@@ -395,10 +395,6 @@ class cow_opaque
     operator=(nullptr_t)
       { return this->reset();  }
 
-  private:
-    [[noreturn]] void
-    do_throw_null_pointer() const;
-
   public:
     bool
     unique() const noexcept
@@ -445,18 +441,19 @@ class cow_opaque
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback) const
       {
-        if(auto sptr = this->m_sptr.get())
-          sptr->enumerate_variables(callback);
+        if(this->m_sptr)
+          this->m_sptr->enumerate_variables(callback);
+
         return callback;
       }
 
     template<typename OpaqueT = Abstract_Opaque>
-    rcptr<const OpaqueT>
-    get_opt() const;
+    const OpaqueT&
+    get() const;
 
     template<typename OpaqueT = Abstract_Opaque>
-    rcptr<OpaqueT>
-    open_opt();
+    OpaqueT&
+    open();
   };
 
 inline tinyfmt&
@@ -464,54 +461,58 @@ operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   { return opaq.describe(fmt);  }
 
 template<typename OpaqueT>
-inline rcptr<const OpaqueT>
+inline const OpaqueT&
 cow_opaque::
-get_opt() const
+get() const
   {
-    if(!this->m_sptr)
-      this->do_throw_null_pointer();
+    auto tptr = this->m_sptr.get();
+    if(!tptr)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "cow_opaque: invalid dynamic cast to `%s` from a null pointer",
+            typeid(OpaqueT).name());
 
-    auto tsptr = dynamic_pointer_cast<const OpaqueT>(this->m_sptr);
-    return tsptr;
+    auto toptr = dynamic_cast<const OpaqueT*>(tptr);
+    if(!toptr)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "cow_opaque: invalid dynamic cast to `%s` from `%s`",
+            typeid(OpaqueT).name(), typeid(*tptr).name());
+
+    return *toptr;
   }
 
 template<typename OpaqueT>
-inline rcptr<OpaqueT>
+inline OpaqueT&
 cow_opaque::
-open_opt()
+open()
   {
-    if(!this->m_sptr)
-      this->do_throw_null_pointer();
+    auto tptr = this->m_sptr.get();
+    if(!tptr)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "cow_opaque: invalid dynamic cast to `%s` from a null pointer",
+            typeid(OpaqueT).name());
 
-    auto tsptr = dynamic_pointer_cast<OpaqueT>(this->m_sptr);
-    if(tsptr.use_count() <= 2)
-      return tsptr;
+    auto toptr = dynamic_cast<OpaqueT*>(tptr);
+    if(!toptr)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "cow_opaque: invalid dynamic cast to `%s` from `%s`",
+            typeid(OpaqueT).name(), typeid(*tptr).name());
 
-    // Clone the existent instance if it is shared.
-    // If the overriding function returns a null pointer, the shared instance is used.
-    // Note the covariance of the return type of `clone_opt()`.
-    rcptr<Abstract_Opaque> csptr;
-    auto cptr = tsptr->clone_opt(csptr);  // `clone_opt()` is a dependent name
-    if(!cptr)
-      return tsptr;
+    if(tptr->use_count() > 1) {
+      // Clone the existent instance if it is shared. A final overrider
+      // should return a null pointer to request that the shared instance
+      // be used. Note the covariance of the return type of `clone_opt()`.
+      rcptr<Abstract_Opaque> csptr;
+      OpaqueT* coptr = toptr->clone_opt(csptr);
+      if(coptr) {
+        ROCKET_ASSERT(coptr == csptr.get());
 
-    // Take ownership of the clone.
-    ROCKET_ASSERT(cptr == csptr.get());
-    csptr->add_reference();
-    tsptr.reset(cptr);
-    this->m_sptr.swap(csptr);
-    return tsptr;
-  }
-
-// Clones an opaque object.
-template<typename OpaqueT>
-inline OpaqueT*
-clone_opaque(rcptr<Abstract_Opaque>& output, const OpaqueT& src)
-  {
-    auto sptr = ::rocket::make_refcnt<OpaqueT>(src);
-    auto ptr = sptr.get();
-    output = ::std::move(sptr);
-    return ptr;
+        // Take ownership of the clone.
+        tptr = coptr;
+        toptr = coptr;
+        this->m_sptr = ::std::move(csptr);
+      }
+    }
+    return *toptr;
   }
 
 // Function type support
@@ -545,10 +546,6 @@ class cow_function
     cow_function&
     operator=(nullptr_t)
       { return this->reset();  }
-
-  private:
-    [[noreturn]] void
-    do_throw_null_pointer() const;
 
   public:
     bool
@@ -614,8 +611,9 @@ class cow_function
     Variable_Callback&
     enumerate_variables(Variable_Callback& callback) const
       {
-        if(auto sptr = this->m_sptr.get())
-          sptr->enumerate_variables(callback);
+        if(this->m_sptr)
+          this->m_sptr->enumerate_variables(callback);
+
         return callback;
       }
 

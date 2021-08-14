@@ -258,7 +258,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
       case type_opaque: {
         const auto& altr = this->m_stor.as<V_opaque>();
-        fmt << "opaque(" << altr.get_opt() << ") [[" << altr << "]]";
+        fmt << "opaque [[" << altr << "]]";
         return fmt;
       }
 

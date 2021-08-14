@@ -36,8 +36,12 @@ class CRC32_Hasher final
       { return callback;  }
 
     CRC32_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -138,8 +142,12 @@ class FNV1a32_Hasher final
       { return callback;  }
 
     FNV1a32_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -248,8 +256,12 @@ class MD5_Hasher final
       { return callback;  }
 
     MD5_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -342,8 +354,12 @@ class SHA1_Hasher final
       { return callback;  }
 
     SHA1_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -436,8 +452,12 @@ class SHA224_Hasher final
       { return callback;  }
 
     SHA224_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -530,8 +550,12 @@ class SHA256_Hasher final
       { return callback;  }
 
     SHA256_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -624,8 +648,12 @@ class SHA384_Hasher final
       { return callback;  }
 
     SHA384_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -718,8 +746,12 @@ class SHA512_Hasher final
       { return callback;  }
 
     SHA512_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& output) const override
-      { return clone_opaque(output, *this);  }
+    clone_opt(rcptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
 
     void
     clear() noexcept
@@ -792,19 +824,6 @@ do_construct_SHA512(V_object& result)
   }
 
 template<typename HasherT>
-inline rcptr<HasherT>
-do_cast_hasher(V_opaque& h)
-  {
-    auto hptr = h.open_opt<HasherT>();
-    if(!hptr) {
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "invalid hasher type (invalid dynamic_cast to `$1` from `$2`)",
-          typeid(HasherT).name(), h.type().name());
-    }
-    return hptr;
-  }
-
-template<typename HasherT>
 decltype(::std::declval<HasherT&>().finish())
 do_hash_bytes(const V_string& data)
   {
@@ -821,8 +840,7 @@ do_hash_file(const V_string& path)
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR(
-          "could not open file '$2'\n"
-          "[`open()` failed: $1]",
+          "could not open file '$2'\n[`open()` failed: $1]",
           format_errno(errno), path);
 
     // Get the file mode and preferred I/O block size.
@@ -841,17 +859,19 @@ do_hash_file(const V_string& path)
 
     // Read bytes from the file and hash them.
     HasherT h;
+    for(;;) {
+      ::ssize_t nread = ::read(fd, pbuf, nbuf);
+      if(nread <= 0) {
+        // Check for end of file.
+        if(nread == 0)
+          break;
 
-    ::ssize_t nread;
-    while((nread = ::read(fd, pbuf, nbuf)) > 0)
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "error reading file '$2'\n[`read()` failed: $1]",
+            format_errno(errno), path);
+      }
       h.update(pbuf, static_cast<size_t>(nread));
-
-    if(nread < 0)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "error reading file '$2'\n"
-          "[`read()` failed: $1]",
-          format_errno(errno), path);
-
+    }
     return h.finish();
   }
 
@@ -866,19 +886,19 @@ std_checksum_CRC32_private()
 void
 std_checksum_CRC32_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<CRC32_Hasher>(h)->update(data.data(), data.size());
+    return h.open<CRC32_Hasher>().update(data.data(), data.size());
   }
 
 V_integer
 std_checksum_CRC32_finish(V_opaque& h)
   {
-    return do_cast_hasher<CRC32_Hasher>(h)->finish();
+    return h.open<CRC32_Hasher>().finish();
   }
 
 void
 std_checksum_CRC32_clear(V_opaque& h)
   {
-    return do_cast_hasher<CRC32_Hasher>(h)->clear();
+    return h.open<CRC32_Hasher>().clear();
   }
 
 V_object
@@ -910,19 +930,19 @@ std_checksum_FNV1a32_private()
 void
 std_checksum_FNV1a32_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<FNV1a32_Hasher>(h)->update(data.data(), data.size());
+    return h.open<FNV1a32_Hasher>().update(data.data(), data.size());
   }
 
 V_integer
 std_checksum_FNV1a32_finish(V_opaque& h)
   {
-    return do_cast_hasher<FNV1a32_Hasher>(h)->finish();
+    return h.open<FNV1a32_Hasher>().finish();
   }
 
 void
 std_checksum_FNV1a32_clear(V_opaque& h)
   {
-    return do_cast_hasher<FNV1a32_Hasher>(h)->clear();
+    return h.open<FNV1a32_Hasher>().clear();
   }
 
 V_object
@@ -954,19 +974,19 @@ std_checksum_MD5_private()
 void
 std_checksum_MD5_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<MD5_Hasher>(h)->update(data.data(), data.size());
+    return h.open<MD5_Hasher>().update(data.data(), data.size());
   }
 
 V_string
 std_checksum_MD5_finish(V_opaque& h)
   {
-    return do_cast_hasher<MD5_Hasher>(h)->finish();
+    return h.open<MD5_Hasher>().finish();
   }
 
 void
 std_checksum_MD5_clear(V_opaque& h)
   {
-    return do_cast_hasher<MD5_Hasher>(h)->clear();
+    return h.open<MD5_Hasher>().clear();
   }
 
 V_object
@@ -998,19 +1018,19 @@ std_checksum_SHA1_private()
 void
 std_checksum_SHA1_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA1_Hasher>(h)->update(data.data(), data.size());
+    return h.open<SHA1_Hasher>().update(data.data(), data.size());
   }
 
 V_string
 std_checksum_SHA1_finish(V_opaque& h)
   {
-    return do_cast_hasher<SHA1_Hasher>(h)->finish();
+    return h.open<SHA1_Hasher>().finish();
   }
 
 void
 std_checksum_SHA1_clear(V_opaque& h)
   {
-    return do_cast_hasher<SHA1_Hasher>(h)->clear();
+    return h.open<SHA1_Hasher>().clear();
   }
 
 V_object
@@ -1042,19 +1062,19 @@ std_checksum_SHA224_private()
 void
 std_checksum_SHA224_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA224_Hasher>(h)->update(data.data(), data.size());
+    return h.open<SHA224_Hasher>().update(data.data(), data.size());
   }
 
 V_string
 std_checksum_SHA224_finish(V_opaque& h)
   {
-    return do_cast_hasher<SHA224_Hasher>(h)->finish();
+    return h.open<SHA224_Hasher>().finish();
   }
 
 void
 std_checksum_SHA224_clear(V_opaque& h)
   {
-    return do_cast_hasher<SHA224_Hasher>(h)->clear();
+    return h.open<SHA224_Hasher>().clear();
   }
 
 V_object
@@ -1086,19 +1106,19 @@ std_checksum_SHA256_private()
 void
 std_checksum_SHA256_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA256_Hasher>(h)->update(data.data(), data.size());
+    return h.open<SHA256_Hasher>().update(data.data(), data.size());
   }
 
 V_string
 std_checksum_SHA256_finish(V_opaque& h)
   {
-    return do_cast_hasher<SHA256_Hasher>(h)->finish();
+    return h.open<SHA256_Hasher>().finish();
   }
 
 void
 std_checksum_SHA256_clear(V_opaque& h)
   {
-    return do_cast_hasher<SHA256_Hasher>(h)->clear();
+    return h.open<SHA256_Hasher>().clear();
   }
 
 V_object
@@ -1130,19 +1150,19 @@ std_checksum_SHA384_private()
 void
 std_checksum_SHA384_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA384_Hasher>(h)->update(data.data(), data.size());
+    return h.open<SHA384_Hasher>().update(data.data(), data.size());
   }
 
 V_string
 std_checksum_SHA384_finish(V_opaque& h)
   {
-    return do_cast_hasher<SHA384_Hasher>(h)->finish();
+    return h.open<SHA384_Hasher>().finish();
   }
 
 void
 std_checksum_SHA384_clear(V_opaque& h)
   {
-    return do_cast_hasher<SHA384_Hasher>(h)->clear();
+    return h.open<SHA384_Hasher>().clear();
   }
 
 V_object
@@ -1174,19 +1194,19 @@ std_checksum_SHA512_private()
 void
 std_checksum_SHA512_update(V_opaque& h, V_string data)
   {
-    return do_cast_hasher<SHA512_Hasher>(h)->update(data.data(), data.size());
+    return h.open<SHA512_Hasher>().update(data.data(), data.size());
   }
 
 V_string
 std_checksum_SHA512_finish(V_opaque& h)
   {
-    return do_cast_hasher<SHA512_Hasher>(h)->finish();
+    return h.open<SHA512_Hasher>().finish();
   }
 
 void
 std_checksum_SHA512_clear(V_opaque& h)
   {
-    return do_cast_hasher<SHA512_Hasher>(h)->clear();
+    return h.open<SHA512_Hasher>().clear();
   }
 
 V_object

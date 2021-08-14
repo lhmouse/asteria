@@ -24,13 +24,6 @@ Abstract_Function::
   {
   }
 
-void
-cow_opaque::
-do_throw_null_pointer() const
-  {
-    ASTERIA_THROW("attempt to dereference a null opaque pointer");
-  }
-
 tinyfmt&
 cow_opaque::
 describe(tinyfmt& fmt) const
@@ -39,13 +32,6 @@ describe(tinyfmt& fmt) const
       return ptr->describe(fmt);
 
     return fmt << "[null opaque pointer]";
-  }
-
-void
-cow_function::
-do_throw_null_pointer() const
-  {
-    ASTERIA_THROW("attempt to dereference a null function pointer");
   }
 
 tinyfmt&
@@ -71,7 +57,8 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     if(auto ptr = this->m_sptr.get())
       return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
 
-    this->do_throw_null_pointer();
+    ::rocket::sprintf_and_throw<::std::invalid_argument>(
+                  "cow_function: attempt to call a null function");
   }
 
 Reference&
