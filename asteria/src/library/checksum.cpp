@@ -52,7 +52,7 @@ class CRC32_Hasher final
     void
     update(const void* data, size_t size) noexcept
       {
-        auto bptr = static_cast<const ::Bytef*>(data);
+        auto bptr = static_cast<const ::Byte*>(data);
 #if ZLIB_VERNUM < 0x1290
         // XXX: Why do we have to maintain this stupid piece of code for compatibility?
         const auto eptr = bptr + size;
