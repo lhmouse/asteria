@@ -8,7 +8,10 @@
 
 namespace asteria {
 
-// members of `std.checksum.CRC32`
+// `std.checksum.CRC32`
+V_object
+std_checksum_CRC32();
+
 V_opaque
 std_checksum_CRC32_private();
 
@@ -21,10 +24,6 @@ std_checksum_CRC32_finish(V_opaque& h);
 void
 std_checksum_CRC32_clear(V_opaque& h);
 
-// `std.checksum.CRC32`
-V_object
-std_checksum_CRC32();
-
 // `std.checksum.crc32`
 V_integer
 std_checksum_crc32(V_string data);
@@ -33,7 +32,10 @@ std_checksum_crc32(V_string data);
 V_integer
 std_checksum_crc32_file(V_string path);
 
-// members of `std.checksum.FNV1a32`
+// `std.checksum.FNV1a32`
+V_object
+std_checksum_FNV1a32();
+
 V_opaque
 std_checksum_FNV1a32_private();
 
@@ -46,10 +48,6 @@ std_checksum_FNV1a32_finish(V_opaque& h);
 void
 std_checksum_FNV1a32_clear(V_opaque& h);
 
-// `std.checksum.FNV1a32`
-V_object
-std_checksum_FNV1a32();
-
 // `std.checksum.fnv1a32`
 V_integer
 std_checksum_fnv1a32(V_string data);
@@ -58,7 +56,10 @@ std_checksum_fnv1a32(V_string data);
 V_integer
 std_checksum_fnv1a32_file(V_string path);
 
-// members of `std.checksum.MD5`
+// `std.checksum.MD5`
+V_object
+std_checksum_MD5();
+
 V_opaque
 std_checksum_MD5_private();
 
@@ -71,10 +72,6 @@ std_checksum_MD5_finish(V_opaque& h);
 void
 std_checksum_MD5_clear(V_opaque& h);
 
-// `std.checksum.MD5`
-V_object
-std_checksum_MD5();
-
 // `std.checksum.md5`
 V_string
 std_checksum_md5(V_string data);
@@ -83,7 +80,10 @@ std_checksum_md5(V_string data);
 V_string
 std_checksum_md5_file(V_string path);
 
-// members of `std.checksum.SHA1`
+// `std.checksum.SHA1`
+V_object
+std_checksum_SHA1();
+
 V_opaque
 std_checksum_SHA1_private();
 
@@ -96,10 +96,6 @@ std_checksum_SHA1_finish(V_opaque& h);
 void
 std_checksum_SHA1_clear(V_opaque& h);
 
-// `std.checksum.SHA1`
-V_object
-std_checksum_SHA1();
-
 // `std.checksum.sha1`
 V_string
 std_checksum_sha1(V_string data);
@@ -108,7 +104,10 @@ std_checksum_sha1(V_string data);
 V_string
 std_checksum_sha1_file(V_string path);
 
-// members of `std.checksum.SHA224`
+// `std.checksum.SHA224`
+V_object
+std_checksum_SHA224();
+
 V_opaque
 std_checksum_SHA224_private();
 
@@ -121,10 +120,6 @@ std_checksum_SHA224_finish(V_opaque& h);
 void
 std_checksum_SHA224_clear(V_opaque& h);
 
-// `std.checksum.SHA224`
-V_object
-std_checksum_SHA224();
-
 // `std.checksum.sha224`
 V_string
 std_checksum_sha224(V_string data);
@@ -133,7 +128,10 @@ std_checksum_sha224(V_string data);
 V_string
 std_checksum_sha224_file(V_string path);
 
-// members of `std.checksum.SHA256`
+// `std.checksum.SHA256`
+V_object
+std_checksum_SHA256();
+
 V_opaque
 std_checksum_SHA256_private();
 
@@ -146,10 +144,6 @@ std_checksum_SHA256_finish(V_opaque& h);
 void
 std_checksum_SHA256_clear(V_opaque& h);
 
-// `std.checksum.SHA256`
-V_object
-std_checksum_SHA256();
-
 // `std.checksum.sha256`
 V_string
 std_checksum_sha256(V_string data);
@@ -158,7 +152,10 @@ std_checksum_sha256(V_string data);
 V_string
 std_checksum_sha256_file(V_string path);
 
-// members of `std.checksum.SHA384`
+// `std.checksum.SHA384`
+V_object
+std_checksum_SHA384();
+
 V_opaque
 std_checksum_SHA384_private();
 
@@ -171,10 +168,6 @@ std_checksum_SHA384_finish(V_opaque& h);
 void
 std_checksum_SHA384_clear(V_opaque& h);
 
-// `std.checksum.SHA384`
-V_object
-std_checksum_SHA384();
-
 // `std.checksum.sha384`
 V_string
 std_checksum_sha384(V_string data);
@@ -183,7 +176,10 @@ std_checksum_sha384(V_string data);
 V_string
 std_checksum_sha384_file(V_string path);
 
-// members of `std.checksum.SHA512`
+// `std.checksum.SHA512`
+V_object
+std_checksum_SHA512();
+
 V_opaque
 std_checksum_SHA512_private();
 
@@ -195,10 +191,6 @@ std_checksum_SHA512_finish(V_opaque& h);
 
 void
 std_checksum_SHA512_clear(V_opaque& h);
-
-// `std.checksum.SHA512`
-V_object
-std_checksum_SHA512();
 
 // `std.checksum.sha512`
 V_string

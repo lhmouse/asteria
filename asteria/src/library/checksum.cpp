@@ -877,6 +877,14 @@ do_hash_file(const V_string& path)
 
 }  // namespace
 
+V_object
+std_checksum_CRC32()
+  {
+    V_object result;
+    do_construct_CRC32(result);
+    return result;
+  }
+
 V_opaque
 std_checksum_CRC32_private()
   {
@@ -901,14 +909,6 @@ std_checksum_CRC32_clear(V_opaque& h)
     return h.open<CRC32_Hasher>().clear();
   }
 
-V_object
-std_checksum_CRC32()
-  {
-    V_object result;
-    do_construct_CRC32(result);
-    return result;
-  }
-
 V_integer
 std_checksum_crc32(V_string data)
   {
@@ -919,6 +919,14 @@ V_integer
 std_checksum_crc32_file(V_string path)
   {
     return do_hash_file<CRC32_Hasher>(path);
+  }
+
+V_object
+std_checksum_FNV1a32()
+  {
+    V_object result;
+    do_construct_FNV1a32(result);
+    return result;
   }
 
 V_opaque
@@ -945,14 +953,6 @@ std_checksum_FNV1a32_clear(V_opaque& h)
     return h.open<FNV1a32_Hasher>().clear();
   }
 
-V_object
-std_checksum_FNV1a32()
-  {
-    V_object result;
-    do_construct_FNV1a32(result);
-    return result;
-  }
-
 V_integer
 std_checksum_fnv1a32(V_string data)
   {
@@ -963,6 +963,14 @@ V_integer
 std_checksum_fnv1a32_file(V_string path)
   {
     return do_hash_file<FNV1a32_Hasher>(path);
+  }
+
+V_object
+std_checksum_MD5()
+  {
+    V_object result;
+    do_construct_MD5(result);
+    return result;
   }
 
 V_opaque
@@ -989,14 +997,6 @@ std_checksum_MD5_clear(V_opaque& h)
     return h.open<MD5_Hasher>().clear();
   }
 
-V_object
-std_checksum_MD5()
-  {
-    V_object result;
-    do_construct_MD5(result);
-    return result;
-  }
-
 V_string
 std_checksum_md5(V_string data)
   {
@@ -1007,6 +1007,14 @@ V_string
 std_checksum_md5_file(V_string path)
   {
     return do_hash_file<MD5_Hasher>(path);
+  }
+
+V_object
+std_checksum_SHA1()
+  {
+    V_object result;
+    do_construct_SHA1(result);
+    return result;
   }
 
 V_opaque
@@ -1033,14 +1041,6 @@ std_checksum_SHA1_clear(V_opaque& h)
     return h.open<SHA1_Hasher>().clear();
   }
 
-V_object
-std_checksum_SHA1()
-  {
-    V_object result;
-    do_construct_SHA1(result);
-    return result;
-  }
-
 V_string
 std_checksum_sha1(V_string data)
   {
@@ -1051,6 +1051,14 @@ V_string
 std_checksum_sha1_file(V_string path)
   {
     return do_hash_file<SHA1_Hasher>(path);
+  }
+
+V_object
+std_checksum_SHA224()
+  {
+    V_object result;
+    do_construct_SHA224(result);
+    return result;
   }
 
 V_opaque
@@ -1077,14 +1085,6 @@ std_checksum_SHA224_clear(V_opaque& h)
     return h.open<SHA224_Hasher>().clear();
   }
 
-V_object
-std_checksum_SHA224()
-  {
-    V_object result;
-    do_construct_SHA224(result);
-    return result;
-  }
-
 V_string
 std_checksum_sha224(V_string data)
   {
@@ -1095,6 +1095,14 @@ V_string
 std_checksum_sha224_file(V_string path)
   {
     return do_hash_file<SHA224_Hasher>(path);
+  }
+
+V_object
+std_checksum_SHA256()
+  {
+    V_object result;
+    do_construct_SHA256(result);
+    return result;
   }
 
 V_opaque
@@ -1121,14 +1129,6 @@ std_checksum_SHA256_clear(V_opaque& h)
     return h.open<SHA256_Hasher>().clear();
   }
 
-V_object
-std_checksum_SHA256()
-  {
-    V_object result;
-    do_construct_SHA256(result);
-    return result;
-  }
-
 V_string
 std_checksum_sha256(V_string data)
   {
@@ -1139,6 +1139,14 @@ V_string
 std_checksum_sha256_file(V_string path)
   {
     return do_hash_file<SHA256_Hasher>(path);
+  }
+
+V_object
+std_checksum_SHA384()
+  {
+    V_object result;
+    do_construct_SHA384(result);
+    return result;
   }
 
 V_opaque
@@ -1165,14 +1173,6 @@ std_checksum_SHA384_clear(V_opaque& h)
     return h.open<SHA384_Hasher>().clear();
   }
 
-V_object
-std_checksum_SHA384()
-  {
-    V_object result;
-    do_construct_SHA384(result);
-    return result;
-  }
-
 V_string
 std_checksum_sha384(V_string data)
   {
@@ -1183,6 +1183,14 @@ V_string
 std_checksum_sha384_file(V_string path)
   {
     return do_hash_file<SHA384_Hasher>(path);
+  }
+
+V_object
+std_checksum_SHA512()
+  {
+    V_object result;
+    do_construct_SHA512(result);
+    return result;
   }
 
 V_opaque
@@ -1207,14 +1215,6 @@ void
 std_checksum_SHA512_clear(V_opaque& h)
   {
     return h.open<SHA512_Hasher>().clear();
-  }
-
-V_object
-std_checksum_SHA512()
-  {
-    V_object result;
-    do_construct_SHA512(result);
-    return result;
   }
 
 V_string
