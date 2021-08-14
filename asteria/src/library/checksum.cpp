@@ -63,9 +63,9 @@ class CRC32_Hasher final
     V_integer
     finish() noexcept
       {
-        V_integer ck = static_cast<uint32_t>(this->m_reg);
+        uint32_t val = static_cast<uint32_t>(this->m_reg);
         this->clear();
-        return ck;
+        return val;
       }
   };
 
@@ -159,9 +159,9 @@ class FNV1a32_Hasher final
     V_integer
     finish() noexcept
       {
-        V_integer ck = static_cast<uint32_t>(this->m_reg);
+        uint32_t val = static_cast<uint32_t>(this->m_reg);
         this->clear();
-        return ck;
+        return val;
       }
   };
 
@@ -213,19 +213,18 @@ do_construct_FNV1a32(V_object& result)
       ASTERIA_BINDING_END);
   }
 
+template<size_t N>
 V_string
-do_copy_SHA_result(const unsigned char* bytes, size_t size)
+do_copy_SHA_result(const ::std::array<unsigned char, N>& bytes)
   {
-    V_string str;
-    auto wpos = str.insert(str.end(), size * 2, '/');
-
-    for(size_t k = 0;  k != size;  ++k) {
+    ::std::array<char, N*2> chars;
+    for(size_t k = 0;  k != N; ++k) {
       uint32_t ch = (bytes[k] >> 4) & 0x0F;
-      *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
+      chars[k*2] = static_cast<char>('0' + ch + ((9 - ch) >> 29));
       ch = bytes[k] & 0x0F;
-      *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
+      chars[k*2+1] = static_cast<char>('0' + ch + ((9 - ch) >> 29));
     }
-    return str;
+    return V_string(chars.data(), chars.size());
   }
 
 class MD5_Hasher final
@@ -267,11 +266,10 @@ class MD5_Hasher final
     V_string
     finish() noexcept
       {
-        unsigned char bytes[MD5_DIGEST_LENGTH];
-        ::MD5_Final(bytes, this->m_reg);
-        V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
+        ::std::array<unsigned char, MD5_DIGEST_LENGTH> val;
+        ::MD5_Final(val.data(), this->m_reg);
         this->clear();
-        return ck;
+        return do_copy_SHA_result(val);
       }
   };
 
@@ -362,11 +360,10 @@ class SHA1_Hasher final
     V_string
     finish() noexcept
       {
-        unsigned char bytes[SHA_DIGEST_LENGTH];
-        ::SHA1_Final(bytes, this->m_reg);
-        V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
+        ::std::array<unsigned char, SHA_DIGEST_LENGTH> val;
+        ::SHA1_Final(val.data(), this->m_reg);
         this->clear();
-        return ck;
+        return do_copy_SHA_result(val);
       }
   };
 
@@ -457,11 +454,10 @@ class SHA224_Hasher final
     V_string
     finish() noexcept
       {
-        unsigned char bytes[SHA224_DIGEST_LENGTH];
-        ::SHA224_Final(bytes, this->m_reg);
-        V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
+        ::std::array<unsigned char, SHA224_DIGEST_LENGTH> val;
+        ::SHA224_Final(val.data(), this->m_reg);
         this->clear();
-        return ck;
+        return do_copy_SHA_result(val);
       }
   };
 
@@ -552,11 +548,10 @@ class SHA256_Hasher final
     V_string
     finish() noexcept
       {
-        unsigned char bytes[SHA256_DIGEST_LENGTH];
-        ::SHA256_Final(bytes, this->m_reg);
-        V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
+        ::std::array<unsigned char, SHA256_DIGEST_LENGTH> val;
+        ::SHA256_Final(val.data(), this->m_reg);
         this->clear();
-        return ck;
+        return do_copy_SHA_result(val);
       }
   };
 
@@ -647,11 +642,10 @@ class SHA384_Hasher final
     V_string
     finish() noexcept
       {
-        unsigned char bytes[SHA384_DIGEST_LENGTH];
-        ::SHA384_Final(bytes, this->m_reg);
-        V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
+        ::std::array<unsigned char, SHA384_DIGEST_LENGTH> val;
+        ::SHA384_Final(val.data(), this->m_reg);
         this->clear();
-        return ck;
+        return do_copy_SHA_result(val);
       }
   };
 
@@ -742,11 +736,10 @@ class SHA512_Hasher final
     V_string
     finish() noexcept
       {
-        unsigned char bytes[SHA512_DIGEST_LENGTH];
-        ::SHA512_Final(bytes, this->m_reg);
-        V_string ck = do_copy_SHA_result(bytes, sizeof(bytes));
+        ::std::array<unsigned char, SHA512_DIGEST_LENGTH> val;
+        ::SHA512_Final(val.data(), this->m_reg);
         this->clear();
-        return ck;
+        return do_copy_SHA_result(val);
       }
   };
 
