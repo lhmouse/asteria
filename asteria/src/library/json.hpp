@@ -10,14 +10,14 @@ namespace asteria {
 
 // `std.json.format`
 V_string
-std_json_format(Value value, Opt_string indent);
+std_json_format(Value value, optV_string indent);
 
 V_string
 std_json_format(Value value, V_integer indent);
 
 // `std.json.format5`
 V_string
-std_json_format5(Value value, Opt_string indent);
+std_json_format5(Value value, optV_string indent);
 
 V_string
 std_json_format5(Value value, V_integer indent);

@@ -10,16 +10,16 @@ namespace asteria {
 
 // `std.string.slice`
 V_string
-std_string_slice(V_string text, V_integer from, Opt_integer length);
+std_string_slice(V_string text, V_integer from, optV_integer length);
 
 // `std.string.replace_slice`
 V_string
-std_string_replace_slice(V_string text, V_integer from, Opt_integer length,
-                         V_string replacement, Opt_integer rfrom, Opt_integer rlength);
+std_string_replace_slice(V_string text, V_integer from, optV_integer length,
+                         V_string replacement, optV_integer rfrom, optV_integer rlength);
 
 // `std.string.compare`
 V_integer
-std_string_compare(V_string text1, V_string text2, Opt_integer length);
+std_string_compare(V_string text1, V_string text2, optV_integer length);
 
 // `std.string.starts_with`
 V_boolean
@@ -30,33 +30,33 @@ V_boolean
 std_string_ends_with(V_string text, V_string suffix);
 
 // `std.string.find`
-Opt_integer
-std_string_find(V_string text, V_integer from, Opt_integer length, V_string pattern);
+optV_integer
+std_string_find(V_string text, V_integer from, optV_integer length, V_string pattern);
 
 // `std.string.rfind`
-Opt_integer
-std_string_rfind(V_string text, V_integer from, Opt_integer length, V_string pattern);
+optV_integer
+std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pattern);
 
 // `std.string.find_and_replace`
 V_string
-std_string_find_and_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
+std_string_find_and_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
                             V_string replacement);
 
 // `std.string.find_any_of`
-Opt_integer
-std_string_find_any_of(V_string text, V_integer from, Opt_integer length, V_string accept);
+optV_integer
+std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_string accept);
 
 // `std.string.find_not_of`
-Opt_integer
-std_string_find_not_of(V_string text, V_integer from, Opt_integer length, V_string reject);
+optV_integer
+std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_string reject);
 
 // `std.string.rfind_any_of`
-Opt_integer
-std_string_rfind_any_of(V_string text, V_integer from, Opt_integer length, V_string accept);
+optV_integer
+std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_string accept);
 
 // `std.string.rfind_not_of`
-Opt_integer
-std_string_rfind_not_of(V_string text, V_integer from, Opt_integer length, V_string reject);
+optV_integer
+std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_string reject);
 
 // `std.string.reverse`
 V_string
@@ -64,23 +64,23 @@ std_string_reverse(V_string text);
 
 // `std.string.trim`
 V_string
-std_string_trim(V_string text, Opt_string reject);
+std_string_trim(V_string text, optV_string reject);
 
 // `std.string.triml`
 V_string
-std_string_triml(V_string text, Opt_string reject);
+std_string_triml(V_string text, optV_string reject);
 
 // `std.string.trimr`
 V_string
-std_string_trimr(V_string text, Opt_string reject);
+std_string_trimr(V_string text, optV_string reject);
 
 // `std.string.padl`
 V_string
-std_string_padl(V_string text, V_integer length, Opt_string padding);
+std_string_padl(V_string text, V_integer length, optV_string padding);
 
 // `std.string.padr`
 V_string
-std_string_padr(V_string text, V_integer length, Opt_string padding);
+std_string_padr(V_string text, V_integer length, optV_string padding);
 
 // `std.string.to_upper`
 V_string
@@ -92,19 +92,19 @@ std_string_to_lower(V_string text);
 
 // `std.string.translate`
 V_string
-std_string_translate(V_string text, V_string inputs, Opt_string outputs);
+std_string_translate(V_string text, V_string inputs, optV_string outputs);
 
 // `std.string.explode`
 V_array
-std_string_explode(V_string text, Opt_string delim, Opt_integer limit);
+std_string_explode(V_string text, optV_string delim, optV_integer limit);
 
 // `std.string.implode`
 V_string
-std_string_implode(V_array segments, Opt_string delim);
+std_string_implode(V_array segments, optV_string delim);
 
 // `std.string.hex_encode`
 V_string
-std_string_hex_encode(V_string data, Opt_boolean lowercase, Opt_string delim);
+std_string_hex_encode(V_string data, optV_boolean lowercase, optV_string delim);
 
 // `std.string.hex_decode`
 V_string
@@ -112,7 +112,7 @@ std_string_hex_decode(V_string text);
 
 // `std.string.base32_encode`
 V_string
-std_string_base32_encode(V_string data, Opt_boolean lowercase);
+std_string_base32_encode(V_string data, optV_boolean lowercase);
 
 // `std.string.base32_decode`
 V_string
@@ -128,7 +128,7 @@ std_string_base64_decode(V_string text);
 
 // `std.string.url_encode`
 V_string
-std_string_url_encode(V_string data, Opt_boolean lowercase);
+std_string_url_encode(V_string data, optV_boolean lowercase);
 
 // `std.string.url_decode`
 V_string
@@ -136,7 +136,7 @@ std_string_url_decode(V_string text);
 
 // `std.string.url_encode_query`
 V_string
-std_string_url_encode_query(V_string data, Opt_boolean lowercase);
+std_string_url_encode_query(V_string data, optV_boolean lowercase);
 
 // `std.string.url_decode_query`
 V_string
@@ -148,15 +148,15 @@ std_string_utf8_validate(V_string text);
 
 // `std.string.utf8_encode`
 V_string
-std_string_utf8_encode(V_integer code_point, Opt_boolean permissive);
+std_string_utf8_encode(V_integer code_point, optV_boolean permissive);
 
 // `std.string.utf8_encode`
 V_string
-std_string_utf8_encode(V_array code_points, Opt_boolean permissive);
+std_string_utf8_encode(V_array code_points, optV_boolean permissive);
 
 // `std.string.utf8_decode`
 V_array
-std_string_utf8_decode(V_string text, Opt_boolean permissive);
+std_string_utf8_decode(V_string text, optV_boolean permissive);
 
 // `std.string.pack_8`
 V_string
@@ -248,19 +248,19 @@ std_string_format(V_string templ, cow_vector<Value> values);
 
 // `std.string.pcre_find`.
 opt<pair<V_integer, V_integer>>
-std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string pattern);
+std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern);
 
 // `std.string.pcre_match`
-Opt_array
-std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_string pattern);
+optV_array
+std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern);
 
 // `std.string.pcre_named_match`
-Opt_object
-std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V_string pattern);
+optV_object
+std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern);
 
 // `std.string.pcre_replace`
 V_string
-std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
+std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
                         V_string replacement);
 
 // Create an object that is to be referenced as `std.string`.

@@ -665,7 +665,7 @@ do_json_parse(tinybuf& cbuf)
 }  // namespace
 
 V_string
-std_json_format(Value value, Opt_string indent)
+std_json_format(Value value, optV_string indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty())
@@ -683,7 +683,7 @@ std_json_format(Value value, V_integer indent)
   }
 
 V_string
-std_json_format5(Value value, Opt_string indent)
+std_json_format5(Value value, optV_string indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty())
@@ -730,7 +730,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("format"),
       ASTERIA_BINDING_BEGIN("std.json.format", self, global, reader) {
         Value value;
-        Opt_string sind;
+        optV_string sind;
         V_integer iind;
 
         reader.start_overload();
@@ -751,7 +751,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("format5"),
       ASTERIA_BINDING_BEGIN("std.json.format5", self, global, reader) {
         Value value;
-        Opt_string sind;
+        optV_string sind;
         V_integer iind;
 
         reader.start_overload();

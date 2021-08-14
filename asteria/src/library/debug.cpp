@@ -10,7 +10,7 @@
 namespace asteria {
 namespace {
 
-Opt_integer
+optV_integer
 do_write_stderr_common(::rocket::tinyfmt_str&& fmt)
   {
     // Try writing standard output. Errors are ignored.
@@ -24,7 +24,7 @@ do_write_stderr_common(::rocket::tinyfmt_str&& fmt)
 
 }  // namespace
 
-Opt_integer
+optV_integer
 std_debug_logf(V_string templ, cow_vector<Value> values)
   {
     // Prepare inserters.
@@ -43,8 +43,8 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
     return do_write_stderr_common(::std::move(fmt));
   }
 
-Opt_integer
-std_debug_dump(Value value, Opt_integer indent)
+optV_integer
+std_debug_dump(Value value, optV_integer indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
     size_t rindent = ::rocket::clamp_cast<size_t>(indent.value_or(2), 0, 10);
@@ -74,7 +74,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("dump"),
       ASTERIA_BINDING_BEGIN("std.debug.dump", self, global, reader) {
         Value value;
-        Opt_integer indent;
+        optV_integer indent;
 
         reader.start_overload();
         reader.optional(value);     // [value]

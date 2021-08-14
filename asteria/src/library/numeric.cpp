@@ -301,7 +301,7 @@ std_numeric_itrunc(V_real value)
   }
 
 V_real
-std_numeric_random(Global_Context& global, Opt_real limit)
+std_numeric_random(Global_Context& global, optV_real limit)
   {
     auto prng = global.random_engine();
 
@@ -499,7 +499,7 @@ std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   }
 
 V_string
-std_numeric_format(V_integer value, Opt_integer base, Opt_integer ebase)
+std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
   {
     V_string text;
     ::rocket::ascii_numput nump;
@@ -570,7 +570,7 @@ std_numeric_format(V_integer value, Opt_integer base, Opt_integer ebase)
   }
 
 V_string
-std_numeric_format(V_real value, Opt_integer base, Opt_integer ebase)
+std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
   {
     V_string text;
     ::rocket::ascii_numput nump;
@@ -661,7 +661,7 @@ std_numeric_parse_integer(V_string text)
   }
 
 V_real
-std_numeric_parse_real(V_string text, Opt_boolean saturating)
+std_numeric_parse_real(V_string text, optV_boolean saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
@@ -1021,7 +1021,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(sref("random"),
       ASTERIA_BINDING_BEGIN("std.numeric.random", self, global, reader) {
-        Opt_real lim;
+        optV_real lim;
 
         reader.start_overload();
         reader.optional(lim);     // [limit]
@@ -1282,8 +1282,8 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.numeric.format", self, global, reader) {
         V_integer ival;
         V_real fval;
-        Opt_integer base;
-        Opt_integer ebase;
+        optV_integer base;
+        optV_integer ebase;
 
         reader.start_overload();
         reader.required(ival);    // value
@@ -1318,7 +1318,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("parse_real"),
       ASTERIA_BINDING_BEGIN("std.numeric.parse_real", self, global, reader) {
         V_string text;
-        Opt_boolean satur;
+        optV_boolean satur;
 
         reader.start_overload();
         reader.required(text);    // text

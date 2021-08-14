@@ -116,7 +116,7 @@ std_numeric_itrunc(V_real value);
 
 // `std.numeric.random`
 V_real
-std_numeric_random(Global_Context& global, Opt_real limit);
+std_numeric_random(Global_Context& global, optV_real limit);
 
 // `std.numeric.sqrt`
 V_real
@@ -193,11 +193,11 @@ std_numeric_rotr(V_integer m, V_integer x, V_integer n);
 
 // `std.numeric.format`
 V_string
-std_numeric_format(V_integer value, Opt_integer base, Opt_integer ebase);
+std_numeric_format(V_integer value, optV_integer base, optV_integer ebase);
 
 // `std.numeric.format`
 V_string
-std_numeric_format(V_real value, Opt_integer base, Opt_integer ebase);
+std_numeric_format(V_real value, optV_integer base, optV_integer ebase);
 
 // `std.numeric.parse_integer`
 V_integer
@@ -205,7 +205,7 @@ std_numeric_parse_integer(V_string text);
 
 // `std.numeric.parse_real`
 V_real
-std_numeric_parse_real(V_string text, Opt_boolean saturating);
+std_numeric_parse_real(V_string text, optV_boolean saturating);
 
 // Create an object that is to be referenced as `std.numeric`.
 void

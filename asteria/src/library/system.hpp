@@ -22,10 +22,10 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
 
 // `std.system.gc_collect`
 V_integer
-std_system_gc_collect(Global_Context& global, Opt_integer generation_limit);
+std_system_gc_collect(Global_Context& global, optV_integer generation_limit);
 
 // `std.system.env_get_variable`
-Opt_string
+optV_string
 std_system_env_get_variable(V_string name);
 
 // `std.system.env_get_variables`
@@ -34,7 +34,7 @@ std_system_env_get_variables();
 
 // `std.system.uuid`
 V_string
-std_system_uuid(Global_Context& global, Opt_boolean lowercase);
+std_system_uuid(Global_Context& global, optV_boolean lowercase);
 
 // `std.system.proc_get_pid()`
 V_integer
@@ -54,7 +54,7 @@ std_system_proc_get_euid();
 
 // `std.system.proc_invoke`
 V_integer
-std_system_proc_invoke(V_string path, Opt_array argv, Opt_array envp);
+std_system_proc_invoke(V_string path, optV_array argv, optV_array envp);
 
 // `std.system.proc_daemonize`
 void

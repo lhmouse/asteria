@@ -13,7 +13,7 @@ namespace asteria {
 namespace {
 
 pair<V_array::const_iterator, V_array::const_iterator>
-do_slice(const V_array& data, V_array::const_iterator tbegin, const Opt_integer& length)
+do_slice(const V_array& data, V_array::const_iterator tbegin, const optV_integer& length)
   {
     if(!length || (*length >= data.end() - tbegin))
       return ::std::make_pair(tbegin, data.end());
@@ -26,7 +26,7 @@ do_slice(const V_array& data, V_array::const_iterator tbegin, const Opt_integer&
   }
 
 pair<V_array::const_iterator, V_array::const_iterator>
-do_slice(const V_array& data, const V_integer& from, const Opt_integer& length)
+do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
   {
     auto slen = static_cast<int64_t>(data.size());
     if(from >= 0) {
@@ -95,7 +95,7 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
 
 Compare
 do_compare(Global_Context& global, Reference_Stack& stack,
-           const Opt_function& kcomp, const Value& lhs, const Value& rhs)
+           const optV_function& kcomp, const Value& lhs, const Value& rhs)
   {
     // Use the builtin 3-way comparison operator if no comparator is provided.
     if(ROCKET_EXPECT(!kcomp))
@@ -116,7 +116,7 @@ do_compare(Global_Context& global, Reference_Stack& stack,
 template<typename IterT>
 pair<IterT, bool>
 do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
-           const Opt_function& kcomp, const Value& target)
+           const optV_function& kcomp, const Value& target)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -144,7 +144,7 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
 template<typename IterT, typename PredT>
 IterT
 do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
-         const Opt_function& kcomp, const Value& target, PredT&& pred)
+         const optV_function& kcomp, const Value& target, PredT&& pred)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -168,7 +168,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
 
 void
 do_merge_range(V_array::iterator& opos, Global_Context& global, Reference_Stack& stack,
-               const Opt_function& kcomp, V_array::iterator ibegin, V_array::iterator iend,
+               const optV_function& kcomp, V_array::iterator ibegin, V_array::iterator iend,
                bool unique)
   {
     for(auto ipos = ibegin;  ipos != iend;  ++ipos)
@@ -178,7 +178,7 @@ do_merge_range(V_array::iterator& opos, Global_Context& global, Reference_Stack&
 
 V_array::iterator
 do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
-                const Opt_function& kcomp, V_array&& input, ptrdiff_t bsize, bool unique)
+                const optV_function& kcomp, V_array&& input, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
 
@@ -243,7 +243,7 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
 }  // namespace
 
 V_array
-std_array_slice(V_array data, V_integer from, Opt_integer length)
+std_array_slice(V_array data, V_integer from, optV_integer length)
   {
     // Use reference counting as our advantage.
     V_array res = data;
@@ -254,8 +254,8 @@ std_array_slice(V_array data, V_integer from, Opt_integer length)
   }
 
 V_array
-std_array_replace_slice(V_array data, V_integer from, Opt_integer length,
-                        V_array replacement, Opt_integer rfrom, Opt_integer rlength)
+std_array_replace_slice(V_array data, V_integer from, optV_integer length,
+                        V_array replacement, optV_integer rfrom, optV_integer rlength)
   {
     V_array res = data;
     auto range = do_slice(res, from, length);
@@ -287,8 +287,8 @@ std_array_replace_slice(V_array data, V_integer from, Opt_integer length,
     return res;
   }
 
-Opt_integer
-std_array_find(V_array data, V_integer from, Opt_integer length, Value target)
+optV_integer
+std_array_find(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
@@ -297,8 +297,8 @@ std_array_find(V_array data, V_integer from, Opt_integer length, Value target)
     return *qit - data.begin();
   }
 
-Opt_integer
-std_array_find_if(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+optV_integer
+std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
                   V_function predictor)
   {
     auto range = do_slice(data, from, length);
@@ -308,8 +308,8 @@ std_array_find_if(Global_Context& global, V_array data, V_integer from, Opt_inte
     return *qit - data.begin();
   }
 
-Opt_integer
-std_array_find_if_not(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+optV_integer
+std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
                       V_function predictor)
   {
     auto range = do_slice(data, from, length);
@@ -319,8 +319,8 @@ std_array_find_if_not(Global_Context& global, V_array data, V_integer from, Opt_
     return *qit - data.begin();
   }
 
-Opt_integer
-std_array_rfind(V_array data, V_integer from, Opt_integer length, Value target)
+optV_integer
+std_array_rfind(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -330,8 +330,8 @@ std_array_rfind(V_array data, V_integer from, Opt_integer length, Value target)
     return data.rend() - *qit - 1;
   }
 
-Opt_integer
-std_array_rfind_if(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+optV_integer
+std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
                    V_function predictor)
   {
     auto range = do_slice(data, from, length);
@@ -342,8 +342,8 @@ std_array_rfind_if(Global_Context& global, V_array data, V_integer from, Opt_int
     return data.rend() - *qit - 1;
   }
 
-Opt_integer
-std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+optV_integer
+std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
                        V_function predictor)
   {
     auto range = do_slice(data, from, length);
@@ -355,7 +355,7 @@ std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, Opt
   }
 
 V_integer
-std_array_count(V_array data, V_integer from, Opt_integer length, Value target)
+std_array_count(V_array data, V_integer from, optV_integer length, Value target)
   {
     int64_t count = 0;
     auto range = do_slice(data, from, length);
@@ -367,7 +367,7 @@ std_array_count(V_array data, V_integer from, Opt_integer length, Value target)
   }
 
 V_integer
-std_array_count_if(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
                    V_function predictor)
   {
     int64_t count = 0;
@@ -380,7 +380,7 @@ std_array_count_if(Global_Context& global, V_array data, V_integer from, Opt_int
   }
 
 V_integer
-std_array_count_if_not(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+std_array_count_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
                        V_function predictor)
   {
     int64_t count = 0;
@@ -393,7 +393,7 @@ std_array_count_if_not(Global_Context& global, V_array data, V_integer from, Opt
   }
 
 V_array
-std_array_exclude(V_array data, V_integer from, Opt_integer length, Value target)
+std_array_exclude(V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -405,7 +405,7 @@ std_array_exclude(V_array data, V_integer from, Opt_integer length, Value target
   }
 
 V_array
-std_array_exclude_if(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
                      V_function predictor)
   {
     auto range = do_slice(data, from, length);
@@ -418,7 +418,7 @@ std_array_exclude_if(Global_Context& global, V_array data, V_integer from, Opt_i
   }
 
 V_array
-std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, Opt_integer length,
+std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
                          V_function predictor)
   {
     auto range = do_slice(data, from, length);
@@ -431,7 +431,7 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, O
   }
 
 V_boolean
-std_array_is_sorted(Global_Context& global, V_array data, Opt_function comparator)
+std_array_is_sorted(Global_Context& global, V_array data, optV_function comparator)
   {
     if(data.size() <= 1)
       // If `data` contains no more than 2 elements, it is considered sorted.
@@ -447,8 +447,8 @@ std_array_is_sorted(Global_Context& global, V_array data, Opt_function comparato
     return true;
   }
 
-Opt_integer
-std_array_binary_search(Global_Context& global, V_array data, Value target, Opt_function comparator)
+optV_integer
+std_array_binary_search(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     Reference_Stack stack;
     auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
@@ -458,7 +458,7 @@ std_array_binary_search(Global_Context& global, V_array data, Value target, Opt_
   }
 
 V_integer
-std_array_lower_bound(Global_Context& global, V_array data, Value target, Opt_function comparator)
+std_array_lower_bound(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     Reference_Stack stack;
     auto lpos = do_bound(global, stack, data.begin(), data.end(), comparator, target,
@@ -467,7 +467,7 @@ std_array_lower_bound(Global_Context& global, V_array data, Value target, Opt_fu
   }
 
 V_integer
-std_array_upper_bound(Global_Context& global, V_array data, Value target, Opt_function comparator)
+std_array_upper_bound(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     Reference_Stack stack;
     auto upos = do_bound(global, stack, data.begin(), data.end(), comparator, target,
@@ -476,7 +476,7 @@ std_array_upper_bound(Global_Context& global, V_array data, Value target, Opt_fu
   }
 
 pair<V_integer, V_integer>
-std_array_equal_range(Global_Context& global, V_array data, Value target, Opt_function comparator)
+std_array_equal_range(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
     Reference_Stack stack;
     auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
@@ -488,7 +488,7 @@ std_array_equal_range(Global_Context& global, V_array data, Value target, Opt_fu
   }
 
 V_array
-std_array_sort(Global_Context& global, V_array data, Opt_function comparator)
+std_array_sort(Global_Context& global, V_array data, optV_function comparator)
   {
     if(data.size() <= 1)
       // Use reference counting as our advantage.
@@ -507,7 +507,7 @@ std_array_sort(Global_Context& global, V_array data, Opt_function comparator)
   }
 
 V_array
-std_array_sortu(Global_Context& global, V_array data, Opt_function comparator)
+std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
   {
     if(data.size() <= 1)
       // Use reference counting as our advantage.
@@ -529,7 +529,7 @@ std_array_sortu(Global_Context& global, V_array data, Opt_function comparator)
   }
 
 Value
-std_array_max_of(Global_Context& global, V_array data, Opt_function comparator)
+std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
     auto qmax = data.begin();
     if(qmax == data.end())
@@ -545,7 +545,7 @@ std_array_max_of(Global_Context& global, V_array data, Opt_function comparator)
   }
 
 Value
-std_array_min_of(Global_Context& global, V_array data, Opt_function comparator)
+std_array_min_of(Global_Context& global, V_array data, optV_function comparator)
   {
     auto qmin = data.begin();
     if(qmin == data.end())
@@ -592,7 +592,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
   }
 
 V_array
-std_array_shuffle(V_array data, Opt_integer seed)
+std_array_shuffle(V_array data, optV_integer seed)
   {
     if(data.size() <= 1)
       // Use reference counting as our advantage.
@@ -663,7 +663,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.slice", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
 
         reader.start_overload();
         reader.required(data);    // data
@@ -679,10 +679,10 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.replace_slice", self, global, reader) {
         V_array text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_array rep;
-        Opt_integer rfrom;
-        Opt_integer rlen;
+        optV_integer rfrom;
+        optV_integer rlen;
 
         reader.start_overload();
         reader.required(text);      // text
@@ -710,7 +710,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.find", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         Value targ;
 
         reader.start_overload();
@@ -742,7 +742,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.find_if", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -774,7 +774,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.find_if_not", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -806,7 +806,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.rfind", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         Value targ;
 
         reader.start_overload();
@@ -838,7 +838,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.rfind_if", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -870,7 +870,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.rfind_if_not", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -902,7 +902,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.count", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         Value targ;
 
         reader.start_overload();
@@ -934,7 +934,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.count_if", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -966,7 +966,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.count_if_not", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -998,7 +998,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.exclude", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         Value targ;
 
         reader.start_overload();
@@ -1030,7 +1030,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.exclude_if", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -1062,7 +1062,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.exclude_if_not", self, global, reader) {
         V_array data;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_function pred;
 
         reader.start_overload();
@@ -1093,7 +1093,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("is_sorted"),
       ASTERIA_BINDING_BEGIN("std.array.is_sorted", self, global, reader) {
         V_array data;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1108,7 +1108,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.binary_search", self, global, reader) {
         V_array data;
         Value targ;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1124,7 +1124,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.lower_bound", self, global, reader) {
         V_array data;
         Value targ;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1140,7 +1140,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.upper_bound", self, global, reader) {
         V_array data;
         Value targ;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1156,7 +1156,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.array.equal_range", self, global, reader) {
         V_array data;
         Value targ;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1171,7 +1171,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("sort"),
       ASTERIA_BINDING_BEGIN("std.array.sort", self, global, reader) {
         V_array data;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1185,7 +1185,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("sortu"),
       ASTERIA_BINDING_BEGIN("std.array.sortu", self, global, reader) {
         V_array data;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1199,7 +1199,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("max_of"),
       ASTERIA_BINDING_BEGIN("std.array.max_of", self, global, reader) {
         V_array data;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1213,7 +1213,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("min_of"),
       ASTERIA_BINDING_BEGIN("std.array.min_of", self, global, reader) {
         V_array data;
-        Opt_function comp;
+        optV_function comp;
 
         reader.start_overload();
         reader.required(data);     // data
@@ -1253,7 +1253,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("shuffle"),
       ASTERIA_BINDING_BEGIN("std.array.shuffle", self, global, reader) {
         V_array data;
-        Opt_integer seed;
+        optV_integer seed;
 
         reader.start_overload();
         reader.required(data);     // data

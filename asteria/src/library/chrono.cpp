@@ -210,7 +210,7 @@ std_chrono_utc_from_local(V_integer time_local)
   }
 
 V_string
-std_chrono_utc_format(V_integer time_point, Opt_boolean with_ms)
+std_chrono_utc_format(V_integer time_point, optV_boolean with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -542,7 +542,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("utc_format"),
       ASTERIA_BINDING_BEGIN("std.chrono.utc_format", self, global, reader) {
         V_integer utc;
-        Opt_boolean with_ms;
+        optV_boolean with_ms;
 
         reader.start_overload();
         reader.required(utc);      // time_point

@@ -73,28 +73,28 @@ class Argument_Reader
     optional(Value& out);
 
     Argument_Reader&
-    optional(Opt_boolean& out);
+    optional(optV_boolean& out);
 
     Argument_Reader&
-    optional(Opt_integer& out);
+    optional(optV_integer& out);
 
     Argument_Reader&
-    optional(Opt_real& out);
+    optional(optV_real& out);
 
     Argument_Reader&
-    optional(Opt_string& out);
+    optional(optV_string& out);
 
     Argument_Reader&
-    optional(Opt_opaque& out);
+    optional(optV_opaque& out);
 
     Argument_Reader&
-    optional(Opt_function& out);
+    optional(optV_function& out);
 
     Argument_Reader&
-    optional(Opt_array& out);
+    optional(optV_array& out);
 
     Argument_Reader&
-    optional(Opt_object& out);
+    optional(optV_object& out);
 
     // Gets a required argument. The argument must be of the desired type.
     Argument_Reader&

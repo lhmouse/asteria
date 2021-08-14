@@ -183,7 +183,7 @@ std_filesystem_get_real_path(V_string path)
     return V_string(abspath);
   }
 
-Opt_object
+optV_object
 std_filesystem_get_information(V_string path)
   {
     struct ::stat stb;
@@ -390,7 +390,7 @@ std_filesystem_dir_remove(V_string path)
   }
 
 V_string
-std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
+std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW_RUNTIME_ERROR("negative file offset (offset `$1`)", *offset);
@@ -445,7 +445,7 @@ std_filesystem_file_read(V_string path, Opt_integer offset, Opt_integer limit)
 
 V_integer
 std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
-                           Opt_integer offset, Opt_integer limit)
+                           optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW_RUNTIME_ERROR("negative file offset (offset `$1`)", *offset);
@@ -508,7 +508,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
   }
 
 void
-std_filesystem_file_write(V_string path, Opt_integer offset, V_string data)
+std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW_RUNTIME_ERROR("negative file offset (offset `$1`)", *offset);
@@ -541,7 +541,7 @@ std_filesystem_file_write(V_string path, Opt_integer offset, V_string data)
   }
 
 void
-std_filesystem_file_append(V_string path, V_string data, Opt_boolean exclusive)
+std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
   {
     // Calculate the `flags` argument.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
@@ -733,8 +733,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("file_read"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_read", self, global, reader) {
         V_string path;
-        Opt_integer off;
-        Opt_integer lim;
+        optV_integer off;
+        optV_integer lim;
 
         reader.start_overload();
         reader.required(path);     // path
@@ -750,8 +750,8 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.filesystem.file_stream", self, global, reader) {
         V_string path;
         V_function func;
-        Opt_integer off;
-        Opt_integer lim;
+        optV_integer off;
+        optV_integer lim;
 
         reader.start_overload();
         reader.required(path);     // path
@@ -767,7 +767,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("file_write"),
       ASTERIA_BINDING_BEGIN("std.filesystem.file_write", self, global, reader) {
         V_string path;
-        Opt_integer off;
+        optV_integer off;
         V_string data;
 
         reader.start_overload();
@@ -791,7 +791,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.filesystem.file_append", self, global, reader) {
         V_string path;
         V_string data;
-        Opt_boolean excl;
+        optV_boolean excl;
 
         reader.start_overload();
         reader.required(path);     // path

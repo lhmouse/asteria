@@ -641,14 +641,14 @@ using V_function  = cow_function;
 using V_array     = cow_vector<Value>;
 using V_object    = cow_dictionary<Value>;
 
-using Opt_boolean   = opt<V_boolean>;
-using Opt_integer   = opt<V_integer>;
-using Opt_real      = opt<V_real>;
-using Opt_string    = opt<V_string>;
-using Opt_opaque    = V_opaque;
-using Opt_function  = V_function;
-using Opt_array     = opt<V_array>;
-using Opt_object    = opt<V_object>;
+using optV_boolean   = opt<V_boolean>;
+using optV_integer   = opt<V_integer>;
+using optV_real      = opt<V_real>;
+using optV_string    = opt<V_string>;
+using optV_opaque    = V_opaque;
+using optV_function  = V_function;
+using optV_array     = opt<V_array>;
+using optV_object    = opt<V_object>;
 
 // Indices of fundamental types
 enum Type : uint8_t

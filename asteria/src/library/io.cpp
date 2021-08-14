@@ -114,7 +114,7 @@ do_format_write_utf8_common(::FILE* fp, const V_string& templ,
 
 }  // namespace
 
-Opt_integer
+optV_integer
 std_io_getc()
   {
     const IOF_Sentry fp(stdin);
@@ -144,7 +144,7 @@ std_io_getc()
     return static_cast<uint32_t>(wch);
   }
 
-Opt_string
+optV_string
 std_io_getln()
   {
     const IOF_Sentry fp(stdin);
@@ -188,7 +188,7 @@ std_io_getln()
     return u8str;
   }
 
-Opt_integer
+optV_integer
 std_io_putc(V_integer value)
   {
     const IOF_Sentry fp(stdout);
@@ -223,7 +223,7 @@ std_io_putc(V_integer value)
     return 1;
   }
 
-Opt_integer
+optV_integer
 std_io_putc(V_string value)
   {
     const IOF_Sentry fp(stdout);
@@ -242,7 +242,7 @@ std_io_putc(V_string value)
     return static_cast<int64_t>(ncps);
   }
 
-Opt_integer
+optV_integer
 std_io_putln(V_string value)
   {
     const IOF_Sentry fp(stdout);
@@ -268,7 +268,7 @@ std_io_putln(V_string value)
     return static_cast<int64_t>(ncps + 1);
   }
 
-Opt_integer
+optV_integer
 std_io_putf(V_string templ, cow_vector<Value> values)
   {
     const IOF_Sentry fp(stdout);
@@ -287,7 +287,7 @@ std_io_putf(V_string templ, cow_vector<Value> values)
     return static_cast<int64_t>(ncps);
   }
 
-Opt_integer
+optV_integer
 std_io_putfln(V_string templ, cow_vector<Value> values)
   {
     const IOF_Sentry fp(stdout);
@@ -313,8 +313,8 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
     return static_cast<int64_t>(ncps + 1);
   }
 
-Opt_string
-std_io_read(Opt_integer limit)
+optV_string
+std_io_read(optV_integer limit)
   {
     const IOF_Sentry fp(stdin);
 
@@ -355,7 +355,7 @@ std_io_read(Opt_integer limit)
     return ::std::move(data);
   }
 
-Opt_integer
+optV_integer
 std_io_write(V_string data)
   {
     const IOF_Sentry fp(stdout);
@@ -477,7 +477,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(sref("read"),
       ASTERIA_BINDING_BEGIN("std.io.read", self, global, reader) {
-        Opt_integer limit;
+        optV_integer limit;
 
         reader.start_overload();
         reader.optional(limit);     // [limit]

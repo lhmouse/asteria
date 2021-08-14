@@ -132,7 +132,7 @@ optional(Value& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_boolean& out)
+optional(optV_boolean& out)
   {
     out = nullopt;
     this->do_prepare_parameter("[boolean]");
@@ -155,7 +155,7 @@ optional(Opt_boolean& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_integer& out)
+optional(optV_integer& out)
   {
     out = nullopt;
     this->do_prepare_parameter("[integer]");
@@ -178,7 +178,7 @@ optional(Opt_integer& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_real& out)
+optional(optV_real& out)
   {
     out = nullopt;
     this->do_prepare_parameter("[real]");
@@ -201,7 +201,7 @@ optional(Opt_real& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_string& out)
+optional(optV_string& out)
   {
     out = nullopt;
     this->do_prepare_parameter("[string]");
@@ -224,7 +224,7 @@ optional(Opt_string& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_opaque& out)
+optional(optV_opaque& out)
   {
     out = nullptr;
     this->do_prepare_parameter("[opaque]");
@@ -247,7 +247,7 @@ optional(Opt_opaque& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_function& out)
+optional(optV_function& out)
   {
     out = nullptr;
     this->do_prepare_parameter("[function]");
@@ -270,7 +270,7 @@ optional(Opt_function& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_array& out)
+optional(optV_array& out)
   {
     out = nullopt;
     this->do_prepare_parameter("[array]");
@@ -293,7 +293,7 @@ optional(Opt_array& out)
 
 Argument_Reader&
 Argument_Reader::
-optional(Opt_object& out)
+optional(optV_object& out)
   {
     out = nullopt;
     this->do_prepare_parameter("[object]");

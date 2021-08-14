@@ -13,7 +13,7 @@ namespace asteria {
 namespace {
 
 pair<V_string::const_iterator, V_string::const_iterator>
-do_slice(const V_string& text, V_string::const_iterator tbegin, const Opt_integer& length)
+do_slice(const V_string& text, V_string::const_iterator tbegin, const optV_integer& length)
   {
     if(!length || (*length >= text.end() - tbegin))
       return ::std::make_pair(tbegin, text.end());
@@ -26,7 +26,7 @@ do_slice(const V_string& text, V_string::const_iterator tbegin, const Opt_intege
   }
 
 pair<V_string::const_iterator, V_string::const_iterator>
-do_slice(const V_string& text, const V_integer& from, const Opt_integer& length)
+do_slice(const V_string& text, const V_integer& from, const optV_integer& length)
   {
     auto slen = static_cast<int64_t>(text.size());
     if(from >= 0) {
@@ -182,7 +182,7 @@ do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
   }
 
 V_string
-do_get_reject(const Opt_string& reject)
+do_get_reject(const optV_string& reject)
   {
     if(!reject)
       return sref(" \t");
@@ -190,7 +190,7 @@ do_get_reject(const Opt_string& reject)
   }
 
 V_string
-do_get_padding(const Opt_string& padding)
+do_get_padding(const optV_string& padding)
   {
     if(!padding)
       return sref(" ");
@@ -554,7 +554,7 @@ struct PCRE2_Name
 }  // namespace
 
 V_string
-std_string_slice(V_string text, V_integer from, Opt_integer length)
+std_string_slice(V_string text, V_integer from, optV_integer length)
   {
     // Use reference counting as our advantage.
     V_string res = text;
@@ -565,8 +565,8 @@ std_string_slice(V_string text, V_integer from, Opt_integer length)
   }
 
 V_string
-std_string_replace_slice(V_string text, V_integer from, Opt_integer length,
-                         V_string replacement, Opt_integer rfrom, Opt_integer rlength)
+std_string_replace_slice(V_string text, V_integer from, optV_integer length,
+                         V_string replacement, optV_integer rfrom, optV_integer rlength)
   {
     V_string res = text;
     auto range = do_slice(res, from, length);
@@ -578,7 +578,7 @@ std_string_replace_slice(V_string text, V_integer from, Opt_integer length,
   }
 
 V_integer
-std_string_compare(V_string text1, V_string text2, Opt_integer length)
+std_string_compare(V_string text1, V_string text2, optV_integer length)
   {
     if(!length || (*length >= PTRDIFF_MAX))
       // Compare the entire strings.
@@ -604,8 +604,8 @@ std_string_ends_with(V_string text, V_string suffix)
     return text.ends_with(suffix);
   }
 
-Opt_integer
-std_string_find(V_string text, V_integer from, Opt_integer length, V_string pattern)
+optV_integer
+std_string_find(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -614,8 +614,8 @@ std_string_find(V_string text, V_integer from, Opt_integer length, V_string patt
     return *qit - text.begin();
   }
 
-Opt_integer
-std_string_rfind(V_string text, V_integer from, Opt_integer length, V_string pattern)
+optV_integer
+std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -627,7 +627,7 @@ std_string_rfind(V_string text, V_integer from, Opt_integer length, V_string pat
   }
 
 V_string
-std_string_find_and_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
+std_string_find_and_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
                             V_string replacement)
   {
     V_string res;
@@ -639,8 +639,8 @@ std_string_find_and_replace(V_string text, V_integer from, Opt_integer length, V
     return res;
   }
 
-Opt_integer
-std_string_find_any_of(V_string text, V_integer from, Opt_integer length, V_string accept)
+optV_integer
+std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -649,8 +649,8 @@ std_string_find_any_of(V_string text, V_integer from, Opt_integer length, V_stri
     return *qit - text.begin();
   }
 
-Opt_integer
-std_string_find_not_of(V_string text, V_integer from, Opt_integer length, V_string reject)
+optV_integer
+std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -659,8 +659,8 @@ std_string_find_not_of(V_string text, V_integer from, Opt_integer length, V_stri
     return *qit - text.begin();
   }
 
-Opt_integer
-std_string_rfind_any_of(V_string text, V_integer from, Opt_integer length, V_string accept)
+optV_integer
+std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
@@ -670,8 +670,8 @@ std_string_rfind_any_of(V_string text, V_integer from, Opt_integer length, V_str
     return text.rend() - *qit - 1;
   }
 
-Opt_integer
-std_string_rfind_not_of(V_string text, V_integer from, Opt_integer length, V_string reject)
+optV_integer
+std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
@@ -689,7 +689,7 @@ std_string_reverse(V_string text)
   }
 
 V_string
-std_string_trim(V_string text, Opt_string reject)
+std_string_trim(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
@@ -713,7 +713,7 @@ std_string_trim(V_string text, Opt_string reject)
   }
 
 V_string
-std_string_triml(V_string text, Opt_string reject)
+std_string_triml(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
@@ -735,7 +735,7 @@ std_string_triml(V_string text, Opt_string reject)
   }
 
 V_string
-std_string_trimr(V_string text, Opt_string reject)
+std_string_trimr(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
@@ -757,7 +757,7 @@ std_string_trimr(V_string text, Opt_string reject)
   }
 
 V_string
-std_string_padl(V_string text, V_integer length, Opt_string padding)
+std_string_padl(V_string text, V_integer length, optV_string padding)
   {
     V_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -772,7 +772,7 @@ std_string_padl(V_string text, V_integer length, Opt_string padding)
   }
 
 V_string
-std_string_padr(V_string text, V_integer length, Opt_string padding)
+std_string_padr(V_string text, V_integer length, optV_string padding)
   {
     V_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -830,7 +830,7 @@ std_string_to_lower(V_string text)
   }
 
 V_string
-std_string_translate(V_string text, V_string inputs, Opt_string outputs)
+std_string_translate(V_string text, V_string inputs, optV_string outputs)
   {
     // Use reference counting as our advantage.
     V_string res = text;
@@ -859,7 +859,7 @@ std_string_translate(V_string text, V_string inputs, Opt_string outputs)
   }
 
 V_array
-std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
+std_string_explode(V_string text, optV_string delim, optV_integer limit)
   {
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
@@ -909,7 +909,7 @@ std_string_explode(V_string text, Opt_string delim, Opt_integer limit)
   }
 
 V_string
-std_string_implode(V_array segments, Opt_string delim)
+std_string_implode(V_array segments, optV_string delim)
   {
     V_string text;
 
@@ -930,7 +930,7 @@ std_string_implode(V_array segments, Opt_string delim)
   }
 
 V_string
-std_string_hex_encode(V_string data, Opt_boolean lowercase, Opt_string delim)
+std_string_hex_encode(V_string data, optV_boolean lowercase, optV_string delim)
   {
     V_string text;
     auto rdelim = delim ? sref(*delim) : sref("");
@@ -1003,7 +1003,7 @@ std_string_hex_decode(V_string text)
   }
 
 V_string
-std_string_base32_encode(V_string data, Opt_boolean lowercase)
+std_string_base32_encode(V_string data, optV_boolean lowercase)
   {
     V_string text;
     bool rlowerc = lowercase.value_or(false);
@@ -1241,7 +1241,7 @@ std_string_base64_decode(V_string text)
   }
 
 V_string
-std_string_url_encode(V_string data, Opt_boolean lowercase)
+std_string_url_encode(V_string data, optV_boolean lowercase)
   {
     return do_url_encode<0>(data, lowercase.value_or(false));
   }
@@ -1253,7 +1253,7 @@ std_string_url_decode(V_string text)
   }
 
 V_string
-std_string_url_encode_query(V_string data, Opt_boolean lowercase)
+std_string_url_encode_query(V_string data, optV_boolean lowercase)
   {
     return do_url_encode<1>(data, lowercase.value_or(false));
   }
@@ -1279,7 +1279,7 @@ std_string_utf8_validate(V_string text)
   }
 
 V_string
-std_string_utf8_encode(V_integer code_point, Opt_boolean permissive)
+std_string_utf8_encode(V_integer code_point, optV_boolean permissive)
   {
     V_string text;
     text.reserve(4);
@@ -1296,7 +1296,7 @@ std_string_utf8_encode(V_integer code_point, Opt_boolean permissive)
   }
 
 V_string
-std_string_utf8_encode(V_array code_points, Opt_boolean permissive)
+std_string_utf8_encode(V_array code_points, optV_boolean permissive)
   {
     V_string text;
     text.reserve(code_points.size() * 3);
@@ -1315,7 +1315,7 @@ std_string_utf8_encode(V_array code_points, Opt_boolean permissive)
   }
 
 V_array
-std_string_utf8_decode(V_string text, Opt_boolean permissive)
+std_string_utf8_decode(V_string text, optV_boolean permissive)
   {
     V_array code_points;
     code_points.reserve(text.size());
@@ -1481,7 +1481,7 @@ std_string_format(V_string templ, cow_vector<Value> values)
   }
 
 opt<pair<V_integer, V_integer>>
-std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string pattern)
+std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
 
@@ -1512,8 +1512,8 @@ std_string_pcre_find(V_string text, V_integer from, Opt_integer length, V_string
                             static_cast<int64_t>(::std::max(ovec[0], ovec[1]) - ovec[0]));
   }
 
-Opt_array
-std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_string pattern)
+optV_array
+std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
 
@@ -1555,8 +1555,8 @@ std_string_pcre_match(V_string text, V_integer from, Opt_integer length, V_strin
     return ::std::move(matches);
   }
 
-Opt_object
-std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V_string pattern)
+optV_object
+std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
 
@@ -1608,7 +1608,7 @@ std_string_pcre_named_match(V_string text, V_integer from, Opt_integer length, V
   }
 
 V_string
-std_string_pcre_replace(V_string text, V_integer from, Opt_integer length, V_string pattern,
+std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
                         V_string replacement)
   {
     auto range = do_slice(text, from, length);
@@ -1664,7 +1664,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.slice", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
 
         reader.start_overload();
         reader.required(text);      // text
@@ -1680,10 +1680,10 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.replace_slice", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string rep;
-        Opt_integer rfrom;
-        Opt_integer rlen;
+        optV_integer rfrom;
+        optV_integer rlen;
 
         reader.start_overload();
         reader.required(text);      // text
@@ -1711,7 +1711,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.compare", self, global, reader) {
         V_string text1;
         V_string text2;
-        Opt_integer len;
+        optV_integer len;
 
         reader.start_overload();
         reader.required(text1);     // text1
@@ -1755,7 +1755,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.find", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
 
         reader.start_overload();
@@ -1787,7 +1787,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.rfind", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
 
         reader.start_overload();
@@ -1819,7 +1819,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.find_and_replace", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
         V_string rep;
 
@@ -1855,7 +1855,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.find_any_of", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string acc;
 
         reader.start_overload();
@@ -1887,7 +1887,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.rfind_any_of", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string acc;
 
         reader.start_overload();
@@ -1919,7 +1919,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.find_not_of", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string rej;
 
         reader.start_overload();
@@ -1951,7 +1951,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.rfind_not_of", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string rej;
 
         reader.start_overload();
@@ -1994,7 +1994,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("trim"),
       ASTERIA_BINDING_BEGIN("std.string.trim", self, global, reader) {
         V_string text;
-        Opt_string rej;
+        optV_string rej;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2008,7 +2008,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("triml"),
       ASTERIA_BINDING_BEGIN("std.string.triml", self, global, reader) {
         V_string text;
-        Opt_string rej;
+        optV_string rej;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2022,7 +2022,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("trimr"),
       ASTERIA_BINDING_BEGIN("std.string.trimr", self, global, reader) {
         V_string text;
-        Opt_string rej;
+        optV_string rej;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2037,7 +2037,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.padl", self, global, reader) {
         V_string text;
         V_integer len;
-        Opt_string pad;
+        optV_string pad;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2053,7 +2053,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.padr", self, global, reader) {
         V_string text;
         V_integer len;
-        Opt_string pad;
+        optV_string pad;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2093,7 +2093,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.translate", self, global, reader) {
         V_string text;
         V_string in;
-        Opt_string out;
+        optV_string out;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2108,8 +2108,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("explode"),
       ASTERIA_BINDING_BEGIN("std.string.explode", self, global, reader) {
         V_string text;
-        Opt_string delim;
-        Opt_integer limit;
+        optV_string delim;
+        optV_integer limit;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2124,7 +2124,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("implode"),
       ASTERIA_BINDING_BEGIN("std.string.implode", self, global, reader) {
         V_array segs;
-        Opt_string delim;
+        optV_string delim;
 
         reader.start_overload();
         reader.required(segs);    // segments
@@ -2138,8 +2138,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("hex_encode"),
       ASTERIA_BINDING_BEGIN("std.string.hex_encode", self, global, reader) {
         V_string data;
-        Opt_boolean lowc;
-        Opt_string delim;
+        optV_boolean lowc;
+        optV_string delim;
 
         reader.start_overload();
         reader.required(data);    // data
@@ -2166,7 +2166,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("base32_encode"),
       ASTERIA_BINDING_BEGIN("std.string.base32_encode", self, global, reader) {
         V_string data;
-        Opt_boolean lowc;
+        optV_boolean lowc;
 
         reader.start_overload();
         reader.required(data);    // data
@@ -2216,7 +2216,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("url_encode"),
       ASTERIA_BINDING_BEGIN("std.string.url_encode", self, global, reader) {
         V_string data;
-        Opt_boolean lowc;
+        optV_boolean lowc;
 
         reader.start_overload();
         reader.required(data);    // data
@@ -2242,7 +2242,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("url_encode_query"),
       ASTERIA_BINDING_BEGIN("std.string.url_encode_query", self, global, reader) {
         V_string data;
-        Opt_boolean lowc;
+        optV_boolean lowc;
 
         reader.start_overload();
         reader.required(data);    // data
@@ -2281,7 +2281,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.utf8_encode", self, global, reader) {
         V_integer cp;
         V_array cps;
-        Opt_boolean perm;
+        optV_boolean perm;
 
         reader.start_overload();
         reader.required(cp);      // code_point
@@ -2302,7 +2302,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("utf8_decode"),
       ASTERIA_BINDING_BEGIN("std.string.utf8_decode", self, global, reader) {
         V_string text;
-        Opt_boolean perm;
+        optV_boolean perm;
 
         reader.start_overload();
         reader.required(text);    // text
@@ -2547,7 +2547,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.pcre_find", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
 
         reader.start_overload();
@@ -2579,7 +2579,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.pcre_match", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
 
         reader.start_overload();
@@ -2611,7 +2611,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.pcre_named_match", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
 
         reader.start_overload();
@@ -2643,7 +2643,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       ASTERIA_BINDING_BEGIN("std.string.pcre_replace", self, global, reader) {
         V_string text;
         V_integer from;
-        Opt_integer len;
+        optV_integer len;
         V_string patt;
         V_string rep;
 

@@ -304,7 +304,7 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
   }
 
 V_integer
-std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
+std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
   {
     uint8_t rglimit = 2;
     if(generation_limit) {
@@ -319,7 +319,7 @@ std_system_gc_collect(Global_Context& global, Opt_integer generation_limit)
     return static_cast<int64_t>(nvars);
   }
 
-Opt_string
+optV_string
 std_system_env_get_variable(V_string name)
   {
     const char* val = ::getenv(name.safe_c_str());
@@ -347,7 +347,7 @@ std_system_env_get_variables()
   }
 
 V_string
-std_system_uuid(Global_Context& global, Opt_boolean lowercase)
+std_system_uuid(Global_Context& global, optV_boolean lowercase)
   {
     bool rlowerc = lowercase.value_or(false);
 
@@ -412,7 +412,7 @@ std_system_proc_get_euid()
   }
 
 V_integer
-std_system_proc_invoke(V_string cmd, Opt_array argv, Opt_array envp)
+std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
   {
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
@@ -535,7 +535,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(sref("gc_collect"),
       ASTERIA_BINDING_BEGIN("std.system.collect", self, global, reader) {
-        Opt_integer glim;
+        optV_integer glim;
 
         reader.start_overload();
         reader.optional(glim);     // [generation_limit]
@@ -568,7 +568,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(sref("uuid"),
       ASTERIA_BINDING_BEGIN("std.system.uuid", self, global, reader) {
-        Opt_boolean lowc;
+        optV_boolean lowc;
 
         reader.start_overload();
         reader.optional(lowc);     // [lowercase]
@@ -617,8 +617,8 @@ create_bindings_system(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("proc_invoke"),
       ASTERIA_BINDING_BEGIN("std.system.proc_invoke", self, global, reader) {
         V_string cmd;
-        Opt_array argv;
-        Opt_array envp;
+        optV_array argv;
+        optV_array envp;
 
         reader.start_overload();
         reader.required(cmd);      // cmd

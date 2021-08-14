@@ -9,38 +9,38 @@
 namespace asteria {
 
 // `std.io.getc`
-Opt_integer
+optV_integer
 std_io_getc();
 
 // `std.io.getln`
-Opt_string
+optV_string
 std_io_getln();
 
 // `std.io.putc`
-Opt_integer
+optV_integer
 std_io_putc(V_integer value);
 
-Opt_integer
+optV_integer
 std_io_putc(V_string value);
 
 // `std.io.putln`
-Opt_integer
+optV_integer
 std_io_putln(V_string value);
 
 // `std.io.putf`
-Opt_integer
+optV_integer
 std_io_putf(V_string templ, cow_vector<Value> values);
 
 // `std.io.putfln`
-Opt_integer
+optV_integer
 std_io_putfln(V_string templ, cow_vector<Value> values);
 
 // `std.io.read`
-Opt_string
-std_io_read(Opt_integer limit);
+optV_string
+std_io_read(optV_integer limit);
 
 // `std.io.write`
-Opt_integer
+optV_integer
 std_io_write(V_string data);
 
 // `std.io.flush`
