@@ -104,7 +104,7 @@ std_string_implode(V_array segments, optV_string delim);
 
 // `std.string.hex_encode`
 V_string
-std_string_hex_encode(V_string data, optV_boolean lowercase, optV_string delim);
+std_string_hex_encode(V_string data, optV_string delim, optV_boolean lowercase);
 
 // `std.string.hex_decode`
 V_string

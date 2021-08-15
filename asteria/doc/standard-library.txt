@@ -611,13 +611,13 @@
 	* Returns a string containing all segments. If `segments` is
 	  empty, an empty string is returned.
 
-`std.string.hex_encode(data, [lowercase], [delim])`
+`std.string.hex_encode(data, [delim], [lowercase])`
 
 	* Encodes all bytes in `data` as 2-digit hexadecimal numbers and
-	  concatenates them. If `lowercase` is set to `true`, hexadecimal
-	  digits above `9` are encoded as `abcdef`; otherwise they are
-	  encoded as `ABCDEF`. If `delim` is specified, it is inserted
-	  between adjacent bytes.
+	  concatenates them. If `delim` is set to a string, it is
+	  inserted between adjacent bytes. If `lowercase` is set to
+	  `true`, hexadecimal digits above `9` are encoded as `abcdef`;
+	  otherwise they are encoded as `ABCDEF`.
 
 	* Returns the encoded string. If `data` is empty, an empty
 	  string is returned.

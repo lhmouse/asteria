@@ -206,10 +206,10 @@ int main()
         assert std.string.implode([ "aa", "bb", "cc" ], "``") == "aa``bb``cc";
 
         assert std.string.hex_encode("hello") == "68656C6C6F";
-        assert std.string.hex_encode("hello", true) == "68656c6c6f";
-        assert std.string.hex_encode("hello", null, "|") == "68|65|6C|6C|6F";
-        assert std.string.hex_encode("hello", true, "|") == "68|65|6c|6c|6f";
-        assert std.string.hex_encode("", null, "|") == "";
+        assert std.string.hex_encode("hello", null, true) == "68656c6c6f";
+        assert std.string.hex_encode("hello", "|") == "68|65|6C|6C|6F";
+        assert std.string.hex_encode("hello", "|", true) == "68|65|6c|6c|6f";
+        assert std.string.hex_encode("", "|") == "";
 
         assert std.string.hex_decode("68656c6c6f") == "hello";
         assert std.string.hex_decode("68 65 6c 6c 6f") == "hello";

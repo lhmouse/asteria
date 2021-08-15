@@ -930,7 +930,7 @@ std_string_implode(V_array segments, optV_string delim)
   }
 
 V_string
-std_string_hex_encode(V_string data, optV_boolean lowercase, optV_string delim)
+std_string_hex_encode(V_string data, optV_string delim, optV_boolean lowercase)
   {
     V_string text;
     auto rdelim = delim ? sref(*delim) : sref("");
@@ -2138,16 +2138,16 @@ create_bindings_string(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("hex_encode"),
       ASTERIA_BINDING_BEGIN("std.string.hex_encode", self, global, reader) {
         V_string data;
-        optV_boolean lowc;
         optV_string delim;
+        optV_boolean lowc;
 
         reader.start_overload();
         reader.required(data);    // data
-        reader.optional(lowc);    // [lowercase]
         reader.optional(delim);   // [delim]
+        reader.optional(lowc);    // [lowercase]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_hex_encode, data, lowc, delim);
+                    std_string_hex_encode, data, delim, lowc);
       }
       ASTERIA_BINDING_END);
 
