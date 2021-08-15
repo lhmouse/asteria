@@ -894,7 +894,7 @@ std_checksum_CRC32_private()
 void
 std_checksum_CRC32_update(V_opaque& h, V_string data)
   {
-    return h.open<CRC32_Hasher>().update(data.data(), data.size());
+    h.open<CRC32_Hasher>().update(data.data(), data.size());
   }
 
 V_integer
@@ -906,7 +906,7 @@ std_checksum_CRC32_finish(V_opaque& h)
 void
 std_checksum_CRC32_clear(V_opaque& h)
   {
-    return h.open<CRC32_Hasher>().clear();
+    h.open<CRC32_Hasher>().clear();
   }
 
 V_integer
@@ -938,7 +938,7 @@ std_checksum_FNV1a32_private()
 void
 std_checksum_FNV1a32_update(V_opaque& h, V_string data)
   {
-    return h.open<FNV1a32_Hasher>().update(data.data(), data.size());
+    h.open<FNV1a32_Hasher>().update(data.data(), data.size());
   }
 
 V_integer
@@ -950,7 +950,7 @@ std_checksum_FNV1a32_finish(V_opaque& h)
 void
 std_checksum_FNV1a32_clear(V_opaque& h)
   {
-    return h.open<FNV1a32_Hasher>().clear();
+    h.open<FNV1a32_Hasher>().clear();
   }
 
 V_integer
@@ -982,7 +982,7 @@ std_checksum_MD5_private()
 void
 std_checksum_MD5_update(V_opaque& h, V_string data)
   {
-    return h.open<MD5_Hasher>().update(data.data(), data.size());
+    h.open<MD5_Hasher>().update(data.data(), data.size());
   }
 
 V_string
@@ -994,7 +994,7 @@ std_checksum_MD5_finish(V_opaque& h)
 void
 std_checksum_MD5_clear(V_opaque& h)
   {
-    return h.open<MD5_Hasher>().clear();
+    h.open<MD5_Hasher>().clear();
   }
 
 V_string
@@ -1026,7 +1026,7 @@ std_checksum_SHA1_private()
 void
 std_checksum_SHA1_update(V_opaque& h, V_string data)
   {
-    return h.open<SHA1_Hasher>().update(data.data(), data.size());
+    h.open<SHA1_Hasher>().update(data.data(), data.size());
   }
 
 V_string
@@ -1038,7 +1038,7 @@ std_checksum_SHA1_finish(V_opaque& h)
 void
 std_checksum_SHA1_clear(V_opaque& h)
   {
-    return h.open<SHA1_Hasher>().clear();
+    h.open<SHA1_Hasher>().clear();
   }
 
 V_string
@@ -1070,7 +1070,7 @@ std_checksum_SHA224_private()
 void
 std_checksum_SHA224_update(V_opaque& h, V_string data)
   {
-    return h.open<SHA224_Hasher>().update(data.data(), data.size());
+    h.open<SHA224_Hasher>().update(data.data(), data.size());
   }
 
 V_string
@@ -1082,7 +1082,7 @@ std_checksum_SHA224_finish(V_opaque& h)
 void
 std_checksum_SHA224_clear(V_opaque& h)
   {
-    return h.open<SHA224_Hasher>().clear();
+    h.open<SHA224_Hasher>().clear();
   }
 
 V_string
@@ -1114,7 +1114,7 @@ std_checksum_SHA256_private()
 void
 std_checksum_SHA256_update(V_opaque& h, V_string data)
   {
-    return h.open<SHA256_Hasher>().update(data.data(), data.size());
+    h.open<SHA256_Hasher>().update(data.data(), data.size());
   }
 
 V_string
@@ -1126,7 +1126,7 @@ std_checksum_SHA256_finish(V_opaque& h)
 void
 std_checksum_SHA256_clear(V_opaque& h)
   {
-    return h.open<SHA256_Hasher>().clear();
+    h.open<SHA256_Hasher>().clear();
   }
 
 V_string
@@ -1158,7 +1158,7 @@ std_checksum_SHA384_private()
 void
 std_checksum_SHA384_update(V_opaque& h, V_string data)
   {
-    return h.open<SHA384_Hasher>().update(data.data(), data.size());
+    h.open<SHA384_Hasher>().update(data.data(), data.size());
   }
 
 V_string
@@ -1170,7 +1170,7 @@ std_checksum_SHA384_finish(V_opaque& h)
 void
 std_checksum_SHA384_clear(V_opaque& h)
   {
-    return h.open<SHA384_Hasher>().clear();
+    h.open<SHA384_Hasher>().clear();
   }
 
 V_string
@@ -1202,7 +1202,7 @@ std_checksum_SHA512_private()
 void
 std_checksum_SHA512_update(V_opaque& h, V_string data)
   {
-    return h.open<SHA512_Hasher>().update(data.data(), data.size());
+    h.open<SHA512_Hasher>().update(data.data(), data.size());
   }
 
 V_string
@@ -1214,7 +1214,7 @@ std_checksum_SHA512_finish(V_opaque& h)
 void
 std_checksum_SHA512_clear(V_opaque& h)
   {
-    return h.open<SHA512_Hasher>().clear();
+    h.open<SHA512_Hasher>().clear();
   }
 
 V_string
