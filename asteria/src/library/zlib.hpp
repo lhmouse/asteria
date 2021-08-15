@@ -8,7 +8,7 @@
 
 namespace asteria {
 
-// `std.zlib.Deflator(format, [level])`
+// `std.zlib.Deflator`
 V_object
 std_zlib_Deflator(V_string format, optV_integer level);
 
@@ -27,15 +27,15 @@ std_zlib_Deflator_finish(V_opaque& r, V_string& output);
 void
 std_zlib_Deflator_clear(V_opaque& r);
 
-// `std.zlib.deflate(data, [level])`
+// `std.zlib.deflate`
 V_string
 std_zlib_deflate(V_string data, optV_integer level);
 
-// `std.zlib.gzip(data, [level])`
+// `std.zlib.gzip`
 V_string
 std_zlib_gzip(V_string data, optV_integer level);
 
-// `std.zlib.Inflator(format)`
+// `std.zlib.Inflator`
 V_object
 std_zlib_Inflator(V_string format);
 
@@ -54,11 +54,11 @@ std_zlib_Inflator_finish(V_opaque& r, V_string& output);
 void
 std_zlib_Inflator_clear(V_opaque& r);
 
-// `std.zlib.inflate(data)`
+// `std.zlib.inflate`
 V_string
 std_zlib_inflate(V_string data);
 
-// `std.zlib.gunzip(data)`
+// `std.zlib.gunzip`
 V_string
 std_zlib_gunzip(V_string data);
 
