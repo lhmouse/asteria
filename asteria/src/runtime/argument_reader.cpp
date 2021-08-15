@@ -166,11 +166,11 @@ optional(optV_integer& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_integer())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_integer())
+      return this->do_mark_match_failure();
 
     out = val.as_integer();
     return *this;
@@ -189,11 +189,11 @@ optional(optV_real& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_real())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_real())
+      return this->do_mark_match_failure();
 
     out = val.as_real();
     return *this;
@@ -212,11 +212,11 @@ optional(optV_string& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_string())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_string())
+      return this->do_mark_match_failure();
 
     out = val.as_string();
     return *this;
@@ -235,11 +235,11 @@ optional(optV_opaque& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_opaque())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_opaque())
+      return this->do_mark_match_failure();
 
     out = val.as_opaque();
     return *this;
@@ -258,11 +258,11 @@ optional(optV_function& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_function())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_function())
+      return this->do_mark_match_failure();
 
     out = val.as_function();
     return *this;
@@ -281,11 +281,11 @@ optional(optV_array& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_array())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_array())
+      return this->do_mark_match_failure();
 
     out = val.as_array();
     return *this;
@@ -304,11 +304,11 @@ optional(optV_object& out)
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
-    if(!val.is_object())
-      return this->do_mark_match_failure();
-
     if(val.is_null())
       return *this;
+
+    if(!val.is_object())
+      return this->do_mark_match_failure();
 
     out = val.as_object();
     return *this;
