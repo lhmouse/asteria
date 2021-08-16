@@ -249,7 +249,7 @@ constexpr char s_url_chars[256] =
   {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 3, 0, 1, 3, 0, 3, 3, 3, 3, 3, 1, 3, 2, 2, 3,
+    0, 3, 0, 1, 3, 1, 3, 3, 3, 3, 3, 1, 3, 2, 2, 3,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 0, 1, 0, 3,
     3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 1, 0, 2,
@@ -286,89 +286,6 @@ do_xstrchr(const char* str, char c) noexcept
         return p;
 
     return nullptr;
-  }
-
-template<bool queryT>
-V_string
-do_url_encode(const V_string& data, bool lcase)
-  {
-    V_string text = data;
-    // Only modify the string as needed, without causing copies on write.
-    size_t nread = 0;
-    while(nread != text.size()) {
-      // Check whether this character has no special meaning.
-      char c = text[nread++];
-      if(queryT) {
-        // This is the only special case.
-        if(c == ' ') {
-          text.mut(nread - 1) = '+';
-          continue;
-        }
-        if(do_is_url_query_char(c))
-          continue;
-      }
-      else if(do_is_url_unreserved_char(c))
-        continue;
-
-      // Escape it.
-      char rep[3];
-      rep[0] = '%';
-      rep[1] = s_base16_table[((c >> 3) & 0x1E) + lcase];
-      rep[2] = s_base16_table[((c << 1) & 0x1E) + lcase];
-
-      // Replace this character with the escape string.
-      text.replace(nread - 1, 1, rep, 3);
-      nread += 2;
-    }
-    return text;
-  }
-
-template<bool queryT>
-V_string
-do_url_decode(const V_string& text)
-  {
-    V_string data = text;
-    // Only modify the string as needed, without causing copies on write.
-    size_t nread = 0;
-    while(nread != data.size()) {
-      // Look for a character.
-      char c = data[nread++];
-      if(queryT) {
-        // This is the only special case.
-        if(c == '+') {
-          data.mut(nread - 1) = ' ';
-          continue;
-        }
-      }
-      if(c != '%') {
-        if(do_is_url_invalid_char(c))
-          ASTERIA_THROW_RUNTIME_ERROR("invalid character in URL (character `$1`)", c);
-        continue;
-      }
-
-      // Two hexadecimal characters shall follow.
-      if(data.size() - nread < 2)
-        ASTERIA_THROW_RUNTIME_ERROR("no enough hexadecimal digits after `%`");
-
-      // Parse the first digit.
-      c = data[nread++];
-      const char* pos = do_xstrchr(s_base16_table, c);
-      if(!pos)
-        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
-      uint32_t reg = static_cast<uint32_t>(pos - s_base16_table) / 2 * 16;
-
-      // Parse the second digit.
-      c = data[nread++];
-      pos = do_xstrchr(s_base16_table, c);
-      if(!pos)
-        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
-      reg |= static_cast<uint32_t>(pos - s_base16_table) / 2;
-
-      // Replace this sequence with the decoded byte.
-      data.replace(nread - 3, 3, 1, static_cast<char>(reg));
-      nread -= 2;
-    }
-    return data;
   }
 
 ROCKET_CONST inline int64_t
@@ -930,11 +847,10 @@ std_string_implode(V_array segments, optV_string delim)
   }
 
 V_string
-std_string_hex_encode(V_string data, optV_string delim, optV_boolean lowercase)
+std_string_hex_encode(V_string data, optV_string delim)
   {
     V_string text;
     auto rdelim = delim ? sref(*delim) : sref("");
-    bool rlowerc = lowercase.value_or(false);
     text.reserve(data.size() * (2 + rdelim.length()));
 
     // These shall be operated in big-endian order.
@@ -953,7 +869,7 @@ std_string_hex_encode(V_string data, optV_string delim, optV_boolean lowercase)
 
       // Encode it.
       for(size_t i = 0;  i < 2;  ++i) {
-        uint32_t b = ((reg >> 28) * 2 + rlowerc) & 0xFF;
+        uint32_t b = (reg >> 27) & 0xFE;
         reg <<= 4;
         text += s_base16_table[b];
       }
@@ -1003,10 +919,9 @@ std_string_hex_decode(V_string text)
   }
 
 V_string
-std_string_base32_encode(V_string data, optV_boolean lowercase)
+std_string_base32_encode(V_string data)
   {
     V_string text;
-    bool rlowerc = lowercase.value_or(false);
     text.reserve((data.size() + 4) / 5 * 8);
 
     // These shall be operated in big-endian order.
@@ -1025,7 +940,7 @@ std_string_base32_encode(V_string data, optV_boolean lowercase)
 
       // Encode them.
       for(size_t i = 0;  i < 8;  ++i) {
-        uint32_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
+        uint32_t b = (reg >> 58) & 0xFE;
         reg <<= 5;
         text += s_base32_table[b];
       }
@@ -1045,7 +960,7 @@ std_string_base32_encode(V_string data, optV_boolean lowercase)
 
       // Encode them.
       for(size_t i = 0;  i < p;  ++i) {
-        uint32_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
+        uint32_t b = (reg >> 58) & 0xFE;
         reg <<= 5;
         text += s_base32_table[b];
       }
@@ -1241,27 +1156,145 @@ std_string_base64_decode(V_string text)
   }
 
 V_string
-std_string_url_encode(V_string data, optV_boolean lowercase)
+std_string_url_encode(V_string data)
   {
-    return do_url_encode<0>(data, lowercase.value_or(false));
+    // Only modify the string as needed, without causing copies on write.
+    V_string text = data;
+    size_t nread = 0;
+    while(nread != text.size()) {
+      // Check whether this character has no special meaning.
+      char c = text[nread++];
+      if(do_is_url_unreserved_char(c))
+        continue;
+
+      // Escape it.
+      char pseq[3];
+      pseq[0] = '%';
+      pseq[1] = s_base16_table[(c >> 3) & 0x1E];
+      pseq[2] = s_base16_table[(c << 1) & 0x1E];
+
+      // Replace this character with the escape string.
+      text.replace(nread - 1, 1, pseq, 3);
+      nread += 2;
+    }
+    return text;
   }
 
 V_string
 std_string_url_decode(V_string text)
   {
-    return do_url_decode<0>(text);
+    // Only modify the string as needed, without causing copies on write.
+    V_string data = text;
+    size_t nread = 0;
+    while(nread != data.size()) {
+      // Look for a character.
+      char c = data[nread++];
+      if(do_is_url_invalid_char(c)) {
+        ASTERIA_THROW_RUNTIME_ERROR("invalid character in URL (character `$1`)", c);
+      }
+      else if(c != '%')
+        continue;
+
+      // Two hexadecimal characters shall follow.
+      if(data.size() - nread < 2)
+        ASTERIA_THROW_RUNTIME_ERROR("no enough hexadecimal digits after `%`");
+
+      // Parse the first digit.
+      c = data[nread++];
+      const char* pos_hi = do_xstrchr(s_base16_table, c);
+      if(!pos_hi)
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
+
+      // Parse the second digit.
+      c = data[nread++];
+      auto pos_lo = do_xstrchr(s_base16_table, c);
+      if(!pos_lo)
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
+
+      // Compose the byte.
+      ptrdiff_t value = (pos_hi - s_base16_table) / 2 * 16;
+      value += (pos_lo - s_base16_table) / 2;
+
+      // Replace this sequence with the decoded byte.
+      nread -= 2;
+      data.replace(nread - 1, 3, 1, static_cast<char>(value));
+    }
+    return data;
   }
 
 V_string
-std_string_url_encode_query(V_string data, optV_boolean lowercase)
+std_string_url_encode_query(V_string data)
   {
-    return do_url_encode<1>(data, lowercase.value_or(false));
+    // Only modify the string as needed, without causing copies on write.
+    V_string text = data;
+    size_t nread = 0;
+    while(nread != text.size()) {
+      // Check whether this character has no special meaning.
+      char c = text[nread++];
+      if(c == ' ') {
+        text.mut(nread - 1) = '+';
+        continue;
+      }
+      else if(do_is_url_query_char(c))
+        continue;
+
+      // Escape it.
+      char rep[3];
+      rep[0] = '%';
+      rep[1] = s_base16_table[(c >> 3) & 0x1E];
+      rep[2] = s_base16_table[(c << 1) & 0x1E];
+
+      // Replace this character with the escape string.
+      text.replace(nread - 1, 1, rep, 3);
+      nread += 2;
+    }
+    return text;
   }
 
 V_string
 std_string_url_decode_query(V_string text)
   {
-    return do_url_decode<1>(text);
+    // Only modify the string as needed, without causing copies on write.
+    V_string data = text;
+    size_t nread = 0;
+    while(nread != data.size()) {
+      // Look for a character.
+      char c = data[nread++];
+      if(c == '+') {
+        data.mut(nread - 1) = ' ';
+        continue;
+      }
+      else if(do_is_url_invalid_char(c)) {
+        ASTERIA_THROW_RUNTIME_ERROR("invalid character in URL (character `$1`)", c);
+      }
+      else if(c != '%')
+        continue;
+
+      // Two hexadecimal characters shall follow.
+      if(data.size() - nread < 2)
+        ASTERIA_THROW_RUNTIME_ERROR("no enough hexadecimal digits after `%`");
+
+      // Parse the first digit.
+      c = data[nread++];
+      const char* pos_hi = do_xstrchr(s_base16_table, c);
+      if(!pos_hi)
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
+
+      // Parse the second digit.
+      c = data[nread++];
+      auto pos_lo = do_xstrchr(s_base16_table, c);
+      if(!pos_lo)
+        ASTERIA_THROW_RUNTIME_ERROR("invalid hexadecimal digit (character `$1`)", c);
+
+      // Compose the byte.
+      ptrdiff_t value = (pos_hi - s_base16_table) / 2 * 16;
+      value += (pos_lo - s_base16_table) / 2;
+
+      // Replace this sequence with the decoded byte.
+      nread -= 2;
+      data.replace(nread - 1, 3, 1, static_cast<char>(value));
+    }
+    return data;
   }
 
 V_boolean
@@ -2144,10 +2177,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);    // data
         reader.optional(delim);   // [delim]
-        reader.optional(lowc);    // [lowercase]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_hex_encode, data, delim, lowc);
+                    std_string_hex_encode, data, delim);
       }
       ASTERIA_BINDING_END);
 
@@ -2170,10 +2202,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
         reader.start_overload();
         reader.required(data);    // data
-        reader.optional(lowc);    // [lowercase]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_base32_encode, data, lowc);
+                    std_string_base32_encode, data);
       }
       ASTERIA_BINDING_END);
 
@@ -2220,10 +2251,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
         reader.start_overload();
         reader.required(data);    // data
-        reader.optional(lowc);    // [lowercase]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_url_encode, data, lowc);
+                    std_string_url_encode, data);
       }
       ASTERIA_BINDING_END);
 
@@ -2246,10 +2276,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
         reader.start_overload();
         reader.required(data);    // data
-        reader.optional(lowc);    // [lowercase]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_url_encode_query, data, lowc);
+                    std_string_url_encode_query, data);
       }
       ASTERIA_BINDING_END);
 

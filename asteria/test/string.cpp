@@ -206,9 +206,7 @@ int main()
         assert std.string.implode([ "aa", "bb", "cc" ], "``") == "aa``bb``cc";
 
         assert std.string.hex_encode("hello") == "68656C6C6F";
-        assert std.string.hex_encode("hello", null, true) == "68656c6c6f";
         assert std.string.hex_encode("hello", "|") == "68|65|6C|6C|6F";
-        assert std.string.hex_encode("hello", "|", true) == "68|65|6c|6c|6f";
         assert std.string.hex_encode("", "|") == "";
 
         assert std.string.hex_decode("68656c6c6f") == "hello";
@@ -223,9 +221,6 @@ int main()
         assert std.string.base32_encode("hello") == "NBSWY3DP";
         assert std.string.base32_encode("hello!") == "NBSWY3DPEE======";
         assert std.string.base32_encode("hello?!") == "NBSWY3DPH4QQ====";
-        assert std.string.base32_encode("hello", true) == "nbswy3dp";
-        assert std.string.base32_encode("hello!", true) == "nbswy3dpee======";
-        assert std.string.base32_encode("hello?!", true) == "nbswy3dph4qq====";
         assert std.string.base32_encode("") == "";
 
         assert std.string.base32_decode("NBSWY3DP") == "hello";
@@ -265,7 +260,6 @@ int main()
         assert std.string.url_encode("") == "";
         assert std.string.url_encode("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
         assert std.string.url_encode(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "%20%09%60~%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F";
-        assert std.string.url_encode(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./", true) == "%20%09%60~%21%40%23%24%25%5e%26%2a%28%29_%2b-%3d%7b%7d%7c%5b%5d%5c%3a%22%3b%27%3c%3e%3f%2c.%2f";
 
         assert std.string.url_decode("") == "";
         assert std.string.url_decode("abcd1234%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcd1234АВГД甲乙丙丁";
@@ -278,7 +272,6 @@ int main()
         assert std.string.url_encode_query("") == "";
         assert std.string.url_encode_query("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
         assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "+%09%60~!@%23$%25%5E&*()_%2B-%3D%7B%7D%7C%5B%5D%5C:%22;\'%3C%3E?,./";
-        assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./", true) == "+%09%60~!@%23$%25%5e&*()_%2b-%3d%7b%7d%7c%5b%5d%5c:%22;\'%3c%3e?,./";
 
         assert std.string.url_decode_query("") == "";
         assert std.string.url_decode_query("abcd1234%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcd1234АВГД甲乙丙丁";

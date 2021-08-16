@@ -21,11 +21,11 @@ namespace asteria {
 namespace {
 
 inline void
-do_put_FFFF(cow_string::iterator wpos, bool rlowerc, uint64_t value)
+do_put_FFFF(cow_string::iterator wpos, uint64_t value)
   {
-    static constexpr char xdigits[] = "00112233445566778899AaBbCcDdEeFf";
+    static constexpr char s_xdigits[] = "0123456789ABCDEF";
     for(long k = 0;  k != 4;  ++k)
-      wpos[k] = xdigits[(value >> (12 - 4 * k)) % 16 * 2 + rlowerc];
+      wpos[k] = s_xdigits[(value >> (12 - 4 * k)) % 16];
   }
 
 opt<Punctuator>
@@ -347,10 +347,8 @@ std_system_env_get_variables()
   }
 
 V_string
-std_system_uuid(Global_Context& global, optV_boolean lowercase)
+std_system_uuid(Global_Context& global)
   {
-    bool rlowerc = lowercase.value_or(false);
-
     // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
     //  * x: number of 1/10,000 seconds since UNIX Epoch
     //  * M: always `4` (UUID version)
@@ -376,14 +374,14 @@ std_system_uuid(Global_Context& global, optV_boolean lowercase)
     cow_string uuid_str;
     auto wpos = uuid_str.insert(uuid_str.begin(), 36, '-');
 
-    do_put_FFFF(wpos +  0, rlowerc, x >> 32);
-    do_put_FFFF(wpos +  4, rlowerc, x >> 16);
-    do_put_FFFF(wpos +  9, rlowerc, x >>  0);
-    do_put_FFFF(wpos + 14, rlowerc, y);
-    do_put_FFFF(wpos + 19, rlowerc, z);
-    do_put_FFFF(wpos + 24, rlowerc, w >> 32);
-    do_put_FFFF(wpos + 28, rlowerc, w >> 32);
-    do_put_FFFF(wpos + 32, rlowerc, w >>  0);
+    do_put_FFFF(wpos +  0, x >> 32);
+    do_put_FFFF(wpos +  4, x >> 16);
+    do_put_FFFF(wpos +  9, x >>  0);
+    do_put_FFFF(wpos + 14, y);
+    do_put_FFFF(wpos + 19, z);
+    do_put_FFFF(wpos + 24, w >> 32);
+    do_put_FFFF(wpos + 28, w >> 32);
+    do_put_FFFF(wpos + 32, w >>  0);
     return uuid_str;
   }
 
@@ -571,10 +569,9 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         optV_boolean lowc;
 
         reader.start_overload();
-        reader.optional(lowc);     // [lowercase]
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_system_uuid, global, lowc);
+                    std_system_uuid, global);
       }
       ASTERIA_BINDING_END);
 

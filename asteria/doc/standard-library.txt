@@ -73,7 +73,7 @@
 	* Returns an object of strings which consists of copies of all
 	  environment variables.
 
-`std.system.uuid([lowercase])`
+`std.system.uuid()`
 
 	* Generates a UUID according to the following specification:
 
@@ -89,9 +89,8 @@
 	  Unlike version-1 UUIDs in RFC 4122, the timestamp is written
 	  in pure big-endian order. This ensures the case-insensitive
 	  lexicographical order of such UUIDs will match their order of
-	  creation. If `lowercase` is set to `true`, hexadecimal digits
-	  above `9` are encoded as `abcdef`; otherwise they are encoded
-	  as `ABCDEF`.
+	  creation. Hexadecimal digits above nine are encoded as capital
+	  letters.
 
 	* Returns a UUID as a string of 36 characters without braces.
 
@@ -611,13 +610,12 @@
 	* Returns a string containing all segments. If `segments` is
 	  empty, an empty string is returned.
 
-`std.string.hex_encode(data, [delim], [lowercase])`
+`std.string.hex_encode(data, [delim])`
 
 	* Encodes all bytes in `data` as 2-digit hexadecimal numbers and
 	  concatenates them. If `delim` is set to a string, it is
-	  inserted between adjacent bytes. If `lowercase` is set to
-	  `true`, hexadecimal digits above `9` are encoded as `abcdef`;
-	  otherwise they are encoded as `ABCDEF`.
+	  inserted between adjacent bytes. Hexadecimal digits above nine
+	  are encoded as capital letters.
 
 	* Returns the encoded string. If `data` is empty, an empty
 	  string is returned.
@@ -635,14 +633,12 @@
 
 	* Throws an exception if the string is invalid.
 
-`std.string.base32_encode(data, [lowercase])`
+`std.string.base32_encode(data)`
 
 	* Encodes all bytes in `data` according to the base32 encoding
-	  specified by IETF RFC 4648. If `lowercase` is set to `true`,
-	  lowercase letters are used to represent values through `0` to
-	  `25`; otherwise, uppercase letters are used. The length of
-	  encoded data is always a multiple of 8; padding characters are
-	  mandatory.
+	  specified by IETF RFC 4648. Hexadecimal digits above nine are
+	  encoded as capital letters. The length of encoded data is
+	  always a multiple of 8; padding characters are mandatory.
 
 	* Returns the encoded string.
 
@@ -680,13 +676,12 @@
 
 	* Throws an exception if the string is invalid.
 
-`std.string.url_encode(data, [lowercase])`
+`std.string.url_encode(data)`
 
 	* Encodes bytes in `data` according to IETF RFC 3986. Every byte
 	  that is not a letter, digit, `-`, `.`, `_` or `~` is encoded as
-	  a `%` followed by two hexadecimal digits. If `lowercase` is set
-	  to `true`, lowercase letters are used to represent values
-	  through `10` to `15`; otherwise, uppercase letters are used.
+	  a `%` followed by two hexadecimal digits. Hexadecimal digits
+	  above nine are encoded as capital letters.
 
 	* Returns the encoded string. If `data` is empty, an empty
 	  string is returned.
@@ -704,7 +699,7 @@
 
 	* Throws an exception if the string contains invalid characters.
 
-`std.string.url_encode_query(data, [lowercase])`
+`std.string.url_encode_query(data)`
 
 	* Encodes bytes in `data` according to IETF RFC 3986. This
 	  function behaves like `url_encode()`, except that characters

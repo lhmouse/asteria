@@ -34,7 +34,7 @@ std_system_env_get_variables();
 
 // `std.system.uuid`
 V_string
-std_system_uuid(Global_Context& global, optV_boolean lowercase);
+std_system_uuid(Global_Context& global);
 
 // `std.system.proc_get_pid()`
 V_integer

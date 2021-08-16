@@ -104,7 +104,7 @@ std_string_implode(V_array segments, optV_string delim);
 
 // `std.string.hex_encode`
 V_string
-std_string_hex_encode(V_string data, optV_string delim, optV_boolean lowercase);
+std_string_hex_encode(V_string data, optV_string delim);
 
 // `std.string.hex_decode`
 V_string
@@ -112,7 +112,7 @@ std_string_hex_decode(V_string text);
 
 // `std.string.base32_encode`
 V_string
-std_string_base32_encode(V_string data, optV_boolean lowercase);
+std_string_base32_encode(V_string data);
 
 // `std.string.base32_decode`
 V_string
@@ -128,7 +128,7 @@ std_string_base64_decode(V_string text);
 
 // `std.string.url_encode`
 V_string
-std_string_url_encode(V_string data, optV_boolean lowercase);
+std_string_url_encode(V_string data);
 
 // `std.string.url_decode`
 V_string
@@ -136,7 +136,7 @@ std_string_url_decode(V_string text);
 
 // `std.string.url_encode_query`
 V_string
-std_string_url_encode_query(V_string data, optV_boolean lowercase);
+std_string_url_encode_query(V_string data);
 
 // `std.string.url_decode_query`
 V_string
