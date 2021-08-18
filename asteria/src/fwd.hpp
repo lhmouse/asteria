@@ -126,7 +126,7 @@ using cow_vector = ::rocket::cow_vector<E>;
 
 template<typename E>
 using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
-                                   ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
+                           ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
 
 template<typename E, size_t k>
 using sso_vector = ::rocket::static_vector<E, k>;
@@ -195,10 +195,9 @@ class Statement_Sequence;
 class AIR_Optimizer;
 
 // This typedef is for native bindings.
-using simple_function =
-    Reference& (Reference& self,  // `this` (in) and return (out) reference
-                Global_Context& global,
-                Reference_Stack&& stack);  // positional arguments
+using simple_function = Reference& (Reference& self,  // `this` (in) and return (out)
+                                    Global_Context& global,
+                                    Reference_Stack&& stack);  // positional arguments
 
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
