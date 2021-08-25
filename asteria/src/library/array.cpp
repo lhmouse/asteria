@@ -490,8 +490,8 @@ std_array_equal_range(Global_Context& global, V_array data, Value target, optV_f
 V_array
 std_array_sort(Global_Context& global, V_array data, optV_function comparator)
   {
+    // Use reference counting as our advantage.
     if(data.size() <= 1)
-      // Use reference counting as our advantage.
       return ::std::move(data);
 
     // Merge blocks of exponential sizes.
@@ -509,8 +509,8 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
 V_array
 std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
   {
+    // Use reference counting as our advantage.
     if(data.size() <= 1)
-      // Use reference counting as our advantage.
       return ::std::move(data);
 
     // Merge blocks of exponential sizes.
@@ -531,9 +531,9 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
 Value
 std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
+    // Return `null` if `data` is empty.
     auto qmax = data.begin();
     if(qmax == data.end())
-      // Return `null` if `data` is empty.
       return nullopt;
 
     // Compare `*qmax` with the other elements, ignoring unordered elements.
@@ -547,9 +547,9 @@ std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
 Value
 std_array_min_of(Global_Context& global, V_array data, optV_function comparator)
   {
+    // Return `null` if `data` is empty.
     auto qmin = data.begin();
     if(qmin == data.end())
-      // Return `null` if `data` is empty.
       return nullopt;
 
     // Compare `*qmin` with the other elements, ignoring unordered elements.
@@ -594,8 +594,8 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
 V_array
 std_array_shuffle(V_array data, optV_integer seed)
   {
+    // Use reference counting as our advantage.
     if(data.size() <= 1)
-      // Use reference counting as our advantage.
       return ::std::move(data);
 
     // Create a linear congruential generator.
@@ -623,13 +623,12 @@ std_array_shuffle(V_array data, optV_integer seed)
 V_array
 std_array_rotate(V_array data, V_integer shift)
   {
+    // Use reference counting as our advantage.
     if(data.size() <= 1)
-      // Use reference counting as our advantage.
       return ::std::move(data);
 
     int64_t seek = shift % data.ssize();
     if(seek == 0)
-      // Use reference counting as our advantage.
       return ::std::move(data);
 
     // Rotate it.
