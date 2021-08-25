@@ -401,7 +401,7 @@ std_array_exclude(V_array data, V_integer from, optV_integer length, Value targe
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::std::move(data);
+    return data;
   }
 
 V_array
@@ -414,7 +414,7 @@ std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::std::move(data);
+    return data;
   }
 
 V_array
@@ -427,7 +427,7 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, o
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
-    return ::std::move(data);
+    return data;
   }
 
 V_boolean
@@ -492,7 +492,7 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
   {
     // Use reference counting as our advantage.
     if(data.size() <= 1)
-      return ::std::move(data);
+      return data;
 
     // Merge blocks of exponential sizes.
     Reference_Stack stack;
@@ -506,7 +506,7 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
       data.swap(temp);
       bsize *= 2;
     }
-    return ::std::move(data);
+    return data;
   }
 
 V_array
@@ -514,7 +514,7 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
   {
     // Use reference counting as our advantage.
     if(data.size() <= 1)
-      return ::std::move(data);
+      return data;
 
     // Merge blocks of exponential sizes.
     Reference_Stack stack;
@@ -601,7 +601,7 @@ std_array_shuffle(V_array data, optV_integer seed)
   {
     // Use reference counting as our advantage.
     if(data.size() <= 1)
-      return ::std::move(data);
+      return data;
 
     // Create a linear congruential generator.
     uint64_t lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
@@ -622,7 +622,7 @@ std_array_shuffle(V_array data, optV_integer seed)
       if(ps != pd)
         swap(*ps, *pd);
     }
-    return ::std::move(data);
+    return data;
   }
 
 V_array
@@ -630,16 +630,16 @@ std_array_rotate(V_array data, V_integer shift)
   {
     // Use reference counting as our advantage.
     if(data.size() <= 1)
-      return ::std::move(data);
+      return data;
 
     int64_t seek = shift % data.ssize();
     if(seek == 0)
-      return ::std::move(data);
+      return data;
 
     // Rotate it.
     seek = ((~seek >> 63) & data.ssize()) - seek;
     ::rocket::rotate(data.mut_data(), 0, static_cast<size_t>(seek), data.size());
-    return ::std::move(data);
+    return data;
   }
 
 V_array
