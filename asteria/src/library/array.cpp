@@ -166,19 +166,19 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
     }
   }
 
+template<typename ComparatorT>
 void
-do_merge_range(V_array::iterator& opos, Global_Context& global, Reference_Stack& stack,
-               const optV_function& kcomp, V_array::iterator ibegin, V_array::iterator iend,
-               bool unique)
+do_merge_range(V_array::iterator& opos, ComparatorT&& compare, V_array::iterator ibegin,
+               V_array::iterator iend, bool unique)
   {
     for(auto ipos = ibegin;  ipos != iend;  ++ipos)
-      if(!unique || (do_compare(global, stack, kcomp, ipos[0], opos[-1]) != compare_equal))
+      if(!unique || (compare(ipos[0], opos[-1]) != compare_equal))
         *(opos++) = ::std::move(*ipos);
   }
 
+template<typename ComparatorT>
 V_array::iterator
-do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
-                const optV_function& kcomp, V_array&& input, ptrdiff_t bsize, bool unique)
+do_merge_blocks(V_array& output, V_array& input, ComparatorT&& compare, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
 
@@ -195,7 +195,7 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
       for(;;) {
         // Merge elements one by one, until either block has been exhausted, then store its index
         // in `bi`.
-        auto cmp = do_compare(global, stack, kcomp, *(bpos[0]), *(bpos[1]));
+        auto cmp = compare(*(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)",
                         *(bpos[0]), *(bpos[1]));
@@ -208,7 +208,7 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
         // output.
         bool discard = false;
         if(unique && (opos != output.begin()))
-          discard = (do_compare(global, stack, kcomp, *(bpos[bi]), opos[-1]) == compare_equal);
+          discard = (compare(*(bpos[bi]), opos[-1]) == compare_equal);
 
         if(!discard)
           *(opos++) = ::std::move(*(bpos[bi]));
@@ -232,11 +232,11 @@ do_merge_blocks(V_array& output, Global_Context& global, Reference_Stack& stack,
       // Move all elements from the other block.
       ROCKET_ASSERT(opos != output.begin());
       bi ^= 1;
-      do_merge_range(opos, global, stack, kcomp, bpos[bi], bend[bi], unique);
+      do_merge_range(opos, compare, bpos[bi], bend[bi], unique);
     }
     // Copy all remaining elements.
     ROCKET_ASSERT(opos != output.begin());
-    do_merge_range(opos, global, stack, kcomp, ipos, iend, unique);
+    do_merge_range(opos, compare, ipos, iend, unique);
     return opos;
   }
 
@@ -495,11 +495,14 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
       return ::std::move(data);
 
     // Merge blocks of exponential sizes.
-    V_array temp(data.size());
     Reference_Stack stack;
+    auto compare = [&](const Value& lhs, const Value& rhs)
+        { return do_compare(global, stack, comparator, lhs, rhs);  };
+
+    V_array temp(data.size());
     ptrdiff_t bsize = 1;
     while(bsize < data.ssize()) {
-      do_merge_blocks(temp, global, stack, comparator, ::std::move(data), bsize, false);
+      do_merge_blocks(temp, data, compare, bsize, false);
       data.swap(temp);
       bsize *= 2;
     }
@@ -514,18 +517,20 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
       return ::std::move(data);
 
     // Merge blocks of exponential sizes.
-    V_array temp(data.size());
     Reference_Stack stack;
+    auto compare = [&](const Value& lhs, const Value& rhs)
+        { return do_compare(global, stack, comparator, lhs, rhs);  };
+
+    V_array temp(data.size());
     ptrdiff_t bsize = 1;
     while(bsize * 2 < data.ssize()) {
-      do_merge_blocks(temp, global, stack, comparator, ::std::move(data), bsize, false);
+      do_merge_blocks(temp, data, compare, bsize, false);
       data.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, global, stack, comparator, ::std::move(data), bsize, true);
+    auto epos = do_merge_blocks(temp, data, compare, bsize, true);
     temp.erase(epos, temp.end());
-    data.swap(temp);
-    return ::std::move(data);
+    return temp;
   }
 
 Value
