@@ -42,7 +42,7 @@ int main()
     delete new int;
 
     auto foreign = ::rocket::make_refcnt<Variable>();
-    foreign->initialize(42, false);
+    foreign->initialize(42);
     {
       Simple_Script code;
       code.global().open_named_reference(sref("foreign_variable")).set_variable(foreign);

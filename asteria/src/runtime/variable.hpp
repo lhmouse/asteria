@@ -35,7 +35,7 @@ class Variable final
 
     // Accessors
     State
-    get_state() const noexcept
+    state() const noexcept
       { return this->m_state;  }
 
     bool
@@ -57,10 +57,10 @@ class Variable final
     // Modifiers
     template<typename XValT>
     Variable&
-    initialize(XValT&& xval, bool immut)
+    initialize(XValT&& xval, State xstat = state_mutable)
       {
         this->m_value = ::std::forward<XValT>(xval);
-        this->m_state = immut ? state_immutable : state_mutable;
+        this->m_state = xstat;
         return *this;
       }
 

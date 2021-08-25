@@ -364,7 +364,8 @@ struct Traits_initialize_variable
         ctx.stack().pop_back();
 
         // Initialize it.
-        var->initialize(::std::move(val), up.u8v[0]);
+        const auto vstat = up.u8v[0] ? Variable::state_immutable : Variable::state_mutable;
+        var->initialize(::std::move(val), vstat);
         return air_status_next;
       }
   };
@@ -633,7 +634,7 @@ struct Traits_for_each_statement
             const auto& arr = range.as_array();
             for(int64_t i = 0;  i < arr.ssize();  ++i) {
               // Set the key which is the subscript of the mapped element in the array.
-              vkey->initialize(i, true);
+              vkey->initialize(i, Variable::state_immutable);
               mapped.push_modifier_array_index(i);
 
               // Execute the loop body.
@@ -656,7 +657,7 @@ struct Traits_for_each_statement
             const auto& obj = range.as_object();
             for(auto it = obj.begin();  it != obj.end();  ++it) {
               // Set the key which is the key of this element in the object.
-              vkey->initialize(it->first.rdstr(), true);
+              vkey->initialize(it->first.rdstr(), Variable::state_immutable);
               mapped.push_modifier_object_key(it->first);
 
               // Execute the loop body.
@@ -3802,11 +3803,12 @@ struct Traits_unpack_struct_array
 
           // Initialize it.
           ROCKET_ASSERT(var && var->is_uninitialized());
+          const auto vstat = up.u8v[0] ? Variable::state_immutable : Variable::state_mutable;
           auto qinit = arr.mut_ptr(i);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.u8v[0]);
+            var->initialize(::std::move(*qinit), vstat);
           else
-            var->initialize(nullopt, up.u8v[0]);
+            var->initialize(nullopt, vstat);
         }
         return air_status_next;
       }
@@ -3862,11 +3864,12 @@ struct Traits_unpack_struct_object
 
           // Initialize it.
           ROCKET_ASSERT(var && var->is_uninitialized());
+          const auto vstat = up.u8v[0] ? Variable::state_immutable : Variable::state_mutable;
           auto qinit = obj.mut_ptr(*it);
           if(qinit)
-            var->initialize(::std::move(*qinit), up.u8v[0]);
+            var->initialize(::std::move(*qinit), vstat);
           else
-            var->initialize(nullopt, up.u8v[0]);
+            var->initialize(nullopt, vstat);
         }
         return air_status_next;
       }
@@ -3914,7 +3917,8 @@ struct Traits_define_null_variable
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Initialize the variable to `null`.
-        var->initialize(nullopt, up.u8v[0]);
+        const auto vstat = up.u8v[0] ? Variable::state_immutable : Variable::state_mutable;
+        var->initialize(nullopt, vstat);
         return air_status_next;
       }
   };

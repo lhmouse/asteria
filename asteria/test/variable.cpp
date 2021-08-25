@@ -11,7 +11,7 @@ int main()
     auto var = ::rocket::make_refcnt<Variable>();
     ASTERIA_TEST_CHECK(var->is_uninitialized());
 
-    var->initialize(V_real(123.456), false);
+    var->initialize(V_real(123.456));
     ASTERIA_TEST_CHECK(!var->is_uninitialized());
     ASTERIA_TEST_CHECK(var->get_value().is_real());
 

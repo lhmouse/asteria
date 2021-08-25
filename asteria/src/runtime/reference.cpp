@@ -216,7 +216,11 @@ dereference_mutable() const
 
         if(qvar->is_uninitialized())
           ASTERIA_THROW_RUNTIME_ERROR(
-              "attempt to read from an uninitialized variable");
+              "attempt to modify an uninitialized variable");
+
+        if(!qvar->is_mutable())
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "attempt to modify an immutable variable");
 
         qval = &(qvar->open_value());
         break;
