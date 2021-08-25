@@ -101,6 +101,10 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator);
 V_array
 std_array_sortu(Global_Context& global, V_array data, optV_function comparator);
 
+// `std.array.ksort`
+V_array
+std_array_ksort(Global_Context& global, V_object object, optV_function comparator);
+
 // `std.array.max_of`
 Value
 std_array_max_of(Global_Context& global, V_array data, optV_function comparator);

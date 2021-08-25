@@ -533,6 +533,40 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
     return temp;
   }
 
+V_array
+std_array_ksort(Global_Context& global, V_object object, optV_function comparator)
+  {
+    // Collect key-value pairs.
+    V_array data;
+    data.reserve(object.size());
+
+    for(const auto& r : object) {
+      V_array pair(2);
+      pair.mut(0) = r.first.rdstr();
+      pair.mut(1) = r.second;
+      data.emplace_back(::std::move(pair));
+    }
+
+    // Use reference counting as our advantage.
+    if(data.size() <= 1)
+      return data;
+
+    // Merge blocks of exponential sizes. Keys are known to be unique.
+    Reference_Stack stack;
+    auto compare = [&](const Value& lhs, const Value& rhs)
+        { return do_compare(global, stack, comparator,
+                            lhs.as_array().at(0), rhs.as_array().at(0));  };
+
+    V_array temp(data.size());
+    ptrdiff_t bsize = 1;
+    while(bsize < data.ssize()) {
+      do_merge_blocks(temp, data, compare, bsize, false);
+      data.swap(temp);
+      bsize *= 2;
+    }
+    return data;
+  }
+
 Value
 std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
@@ -1197,6 +1231,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         if(reader.end_overload())
           ASTERIA_BINDING_RETURN_MOVE(self,
                     std_array_sortu, global, data, comp);
+      }
+      ASTERIA_BINDING_END);
+
+    result.insert_or_assign(sref("ksort"),
+      ASTERIA_BINDING_BEGIN("std.array.ksort", self, global, reader) {
+        V_object object;
+        optV_function comp;
+
+        reader.start_overload();
+        reader.required(object);     // object
+        reader.optional(comp);     // [comparator]
+        if(reader.end_overload())
+          ASTERIA_BINDING_RETURN_MOVE(self,
+                    std_array_ksort, global, object, comp);
       }
       ASTERIA_BINDING_END);
 

@@ -1558,6 +1558,28 @@
 	  that in this case there is no guarantee whether an exception
 	  will be thrown or not.
 
+`std.array.ksort(object, [comparator])`
+
+	* Creates an array by sorting elements in `object` by key, as if
+	  this function was defined as
+
+	  ```
+	  std.array.ksort = func(object, comparator) {
+	    var pairs = [];
+	    for(each k, v -> object)
+	      pairs[$] = [k, v];
+	    return this.sort(pairs,
+	      func(x, y) {
+	        return (comparator == null)
+	          ? x[0] <=> y[0]
+	          : comparator(x[0], y[0]);
+	      });
+	  };
+	  ```
+
+	* Returns a new array of sorted key-value pairs as nested arrays
+	  of two elements.
+
 `std.array.max_of(data, [comparator])`
 
 	* Finds the maximum element in `data`. The principle of

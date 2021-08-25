@@ -248,6 +248,11 @@ int main()
         assert std.array.sort(std.array.copy_keys({a:1,b:2,c:3,d:4})) == ['a','b','c','d'];
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
 
+        assert std.array.ksort({}) == [];
+        assert std.array.ksort({foo:1}) == [['foo',1]];
+        assert std.array.ksort({foo:1,bar:2}) == [['bar',2],['foo',1]];
+        assert std.array.ksort({foo:1,bar:2,def:false}) == [['bar',2],['def',false],['foo',1]];
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     code.execute();
