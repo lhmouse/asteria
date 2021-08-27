@@ -36,7 +36,7 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;  }
 
     size_type nblk;
-    value_type data[0];
+    union { value_type data[1];  };
 
     basic_storage(const allocator_type& xalloc, size_type xnblk) noexcept
       : allocator_wrapper_base_for<allocT>::type(xalloc),

@@ -46,7 +46,7 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
 
     size_type nblk;
-    value_type data[0];
+    union { value_type data[1];  };
 
     basic_storage(unknown_function* xdtor, size_t xnskip,
                   const allocator_type& xalloc, size_type xnblk) noexcept

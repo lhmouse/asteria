@@ -132,7 +132,7 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type);  }
 
     size_type nblk;
-    bucket_type bkts[0];
+    union { bucket_type bkts[1];  };
 
     basic_storage(unknown_function* xdtor, const allocator_type& xalloc,
                   const hasher& hf, size_type xnblk) noexcept
