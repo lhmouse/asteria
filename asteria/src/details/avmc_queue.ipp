@@ -70,8 +70,7 @@ struct Header
       Metadata* pv_meta;
     };
 
-    max_align_t align[0];
-    char sparam[0];
+    alignas(max_align_t) char sparam[];
   };
 
 template<typename SparamT>
