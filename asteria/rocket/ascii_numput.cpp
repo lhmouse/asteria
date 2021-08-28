@@ -31,7 +31,9 @@ void
 do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
   {
     // Write digits backwards.
+    ROCKET_ASSERT(precision <= 64);
     char* fp = bp - precision;
+
     uint64_t ireg = value;
     while(ireg != 0) {
       // Shift a digit out.
