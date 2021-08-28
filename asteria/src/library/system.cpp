@@ -20,14 +20,6 @@
 namespace asteria {
 namespace {
 
-inline void
-do_put_FFFF(cow_string::iterator wpos, uint64_t value)
-  {
-    static constexpr char s_xdigits[] = "0123456789ABCDEF";
-    for(long k = 0;  k != 4;  ++k)
-      wpos[k] = s_xdigits[(value >> (12 - 4 * k)) % 16];
-  }
-
 opt<Punctuator>
 do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
   {
@@ -362,7 +354,7 @@ std_system_uuid(Global_Context& global)
 
     uint64_t x = uint64_t(ts.tv_sec) * 30518 + uint64_t(ts.tv_nsec) / 32768;
     uint64_t y = uint32_t(::getpid());
-    uint64_t z = uintptr_t((void*)&global) >> 12;
+    uint64_t z = uint64_t((void*)&global) >> 12;
     uint64_t w = uint64_t(prng->bump()) << 32 | prng->bump();
 
     // Set version and variant.
@@ -371,18 +363,29 @@ std_system_uuid(Global_Context& global)
     z &= 0x7FFF;
 
     // Compose the UUID string.
-    cow_string uuid_str;
-    auto wpos = uuid_str.insert(uuid_str.begin(), 36, '-');
+    cow_string str;
+    auto wpos = str.insert(str.begin(), 36, '-');
 
-    do_put_FFFF(wpos +  0, x >> 32);
-    do_put_FFFF(wpos +  4, x >> 16);
-    do_put_FFFF(wpos +  9, x >>  0);
-    do_put_FFFF(wpos + 14, y);
-    do_put_FFFF(wpos + 19, z);
-    do_put_FFFF(wpos + 24, w >> 32);
-    do_put_FFFF(wpos + 28, w >> 32);
-    do_put_FFFF(wpos + 32, w >>  0);
-    return uuid_str;
+    auto put_hex_uint16 = [&](uint64_t value)
+      {
+        static constexpr char s_xdigits[] = "0123456789ABCDEF";
+        for(size_t k = 12;  k < 16;  ++k)
+          *(wpos++) = s_xdigits[value << (k * 4) >> 60];
+      };
+
+    put_hex_uint16(x >> 32);
+    put_hex_uint16(x >> 16);
+    ++wpos;
+    put_hex_uint16(x);
+    ++wpos;
+    put_hex_uint16(y);
+    ++wpos;
+    put_hex_uint16(z);
+    ++wpos;
+    put_hex_uint16(w >> 32);
+    put_hex_uint16(w >> 32);
+    put_hex_uint16(w);
+    return str;
   }
 
 V_integer
