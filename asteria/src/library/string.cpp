@@ -178,6 +178,7 @@ do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
     for(auto it = begin;  it != end;  ++it)
       if(table[uint8_t(*it)] == match)
         return ::std::move(it);
+
     return nullopt;
   }
 
@@ -186,6 +187,7 @@ do_get_reject(const optV_string& reject)
   {
     if(!reject)
       return sref(" \t");
+
     return *reject;
   }
 
@@ -197,7 +199,14 @@ do_get_padding(const optV_string& padding)
 
     if(padding->empty())
       ASTERIA_THROW_RUNTIME_ERROR("empty padding string not valid");
+
     return *padding;
+  }
+
+void
+do_print_value(tinyfmt& fmt, const void* ptr)
+  {
+    static_cast<const Value*>(ptr)->print(fmt);
   }
 
 // These are strings of single characters.
@@ -1500,12 +1509,8 @@ std_string_format(V_string templ, cow_vector<Value> values)
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i)
-      insts.push_back({
-        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
-          { return static_cast<const Value*>(ptr)->print(fmt);  },
-        values.data() + i
-      });
+    for(const auto& val : values)
+      insts.push_back({ do_print_value, &val });
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;

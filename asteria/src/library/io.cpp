@@ -92,6 +92,12 @@ do_write_utf8_common(::FILE* fp, const cow_string& text)
     return ncps;
   }
 
+void
+do_print_value(tinyfmt& fmt, const void* ptr)
+  {
+    static_cast<const Value*>(ptr)->print(fmt);
+  }
+
 size_t
 do_format_write_utf8_common(::FILE* fp, const V_string& templ,
                             const cow_vector<Value>& values)
@@ -99,12 +105,8 @@ do_format_write_utf8_common(::FILE* fp, const V_string& templ,
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i)
-      insts.push_back({
-        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
-          { return static_cast<const Value*>(ptr)->print(fmt);  },
-        values.data() + i
-      });
+    for(const auto& val : values)
+      insts.push_back({ do_print_value, &val });
 
     // Compose the string into a stream and write it.
     ::rocket::tinyfmt_str fmt;

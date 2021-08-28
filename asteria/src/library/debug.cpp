@@ -10,6 +10,12 @@
 namespace asteria {
 namespace {
 
+void
+do_print_value(tinyfmt& fmt, const void* ptr)
+  {
+    static_cast<const Value*>(ptr)->print(fmt);
+  }
+
 optV_integer
 do_write_stderr_common(::rocket::tinyfmt_str&& fmt)
   {
@@ -30,12 +36,8 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
-    for(size_t i = 0;  i < values.size();  ++i)
-      insts.push_back({
-        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
-          { return static_cast<const Value*>(ptr)->print(fmt);  },
-        values.data() + i
-      });
+    for(const auto& val : values)
+      insts.push_back({ do_print_value, &val });
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
