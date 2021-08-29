@@ -573,30 +573,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_ref_global_self_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_ref_global_self_reader>
       {
-        Factory cfact;
-        F_ref_global_self_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_ref_global_self_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto res = this->m_func(global, ::std::move(self), ::std::move(reader));
             return self.assign(::std::move(res));
           }
       };
@@ -608,30 +594,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_ref_global_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_ref_global_reader>
       {
-        Factory cfact;
-        F_ref_global_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_ref_global_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(global, ::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto res = this->m_func(global, ::std::move(reader));
             return self.assign(::std::move(res));
           }
       };
@@ -643,30 +615,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_ref_self_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_ref_self_reader>
       {
-        Factory cfact;
-        F_ref_self_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_ref_self_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto res = this->m_func(::std::move(self), ::std::move(reader));
             return self.assign(::std::move(res));
           }
       };
@@ -678,30 +636,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_ref_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_ref_reader>
       {
-        Factory cfact;
-        F_ref_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_ref_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto res = this->m_func(::std::move(reader));
             return self.assign(::std::move(res));
           }
       };
@@ -713,31 +657,17 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_val_global_self_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_val_global_self_reader>
       {
-        Factory cfact;
-        F_val_global_self_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_val_global_self_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(global, ::std::move(self), ::std::move(reader));
-            return self.set_temporary(::std::move(res));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto val = this->m_func(global, ::std::move(self), ::std::move(reader));
+            return self.set_temporary(::std::move(val));
           }
       };
 
@@ -748,31 +678,17 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_val_global_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_val_global_reader>
       {
-        Factory cfact;
-        F_val_global_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_val_global_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(global, ::std::move(reader));
-            return self.set_temporary(::std::move(res));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto val = this->m_func(global, ::std::move(reader));
+            return self.set_temporary(::std::move(val));
           }
       };
 
@@ -783,31 +699,17 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_val_self_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_val_self_reader>
       {
-        Factory cfact;
-        F_val_self_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_val_self_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(::std::move(self), ::std::move(reader));
-            return self.set_temporary(::std::move(res));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto val = this->m_func(::std::move(self), ::std::move(reader));
+            return self.set_temporary(::std::move(val));
           }
       };
 
@@ -818,31 +720,17 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_val_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_val_reader>
       {
-        Factory cfact;
-        F_val_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_val_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            auto res = this->cfunc(::std::move(reader));
-            return self.set_temporary(::std::move(res));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            auto val = this->m_func(::std::move(reader));
+            return self.set_temporary(::std::move(val));
           }
       };
 
@@ -853,30 +741,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_void_global_self_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_void_global_self_reader>
       {
-        Factory cfact;
-        F_void_global_self_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_void_global_self_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            this->cfunc(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            this->m_func(global, ::std::move(self), ::std::move(reader));
             return self.set_void();
           }
       };
@@ -888,30 +762,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_void_global_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_void_global_reader>
       {
-        Factory cfact;
-        F_void_global_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_void_global_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            this->cfunc(global, ::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            this->m_func(global, ::std::move(reader));
             return self.set_void();
           }
       };
@@ -923,30 +783,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_void_self_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_void_self_reader>
       {
-        Factory cfact;
-        F_void_self_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_void_self_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            this->cfunc(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            this->m_func(::std::move(self), ::std::move(reader));
             return self.set_void();
           }
       };
@@ -958,30 +804,16 @@ cow_function
 details_argument_reader::
 operator%(const Factory& fact, F_void_reader func)
   {
-    struct Thunk : Abstract_Function
+    struct Thunk : Thunk_Base<F_void_reader>
       {
-        Factory cfact;
-        F_void_reader* cfunc;
-
-        explicit
-        Thunk(const Factory& xfact, F_void_reader xfunc)
-          : cfact(xfact), cfunc(xfunc)
-          { }
-
-        tinyfmt&
-        describe(tinyfmt& fmt) const override
-          { return fmt << this->cfact.desc.c_str();  }
-
-        Variable_Callback&
-        enumerate_variables(Variable_Callback& callback) const override
-          { return callback;  }
+        using Thunk_Base::Thunk_Base;
 
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
                          Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->cfact.name, ::std::move(args));
-            this->cfunc(::std::move(reader));
+            Argument_Reader reader(this->m_name, ::std::move(args));
+            this->m_func(::std::move(reader));
             return self.set_void();
           }
       };

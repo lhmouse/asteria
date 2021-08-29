@@ -26,6 +26,32 @@ struct Factory
     cow_string::shallow_type desc;
   };
 
+template<typename FunctionT>
+class Thunk_Base
+  : public Abstract_Function
+  {
+  protected:
+    cow_string::shallow_type m_name;
+    cow_string::shallow_type m_desc;
+    FunctionT* m_func;
+
+  public:
+    explicit
+    Thunk_Base(const Factory& fact, FunctionT func)
+      : Abstract_Function(),
+        m_name(fact.name), m_desc(fact.desc), m_func(func)
+      { }
+
+  public:
+    tinyfmt&
+    describe(tinyfmt& fmt) const override
+      { return fmt << this->m_desc.c_str();  }
+
+    Variable_Callback&
+    enumerate_variables(Variable_Callback& callback) const override
+      { return callback;  }
+  };
+
 using F_ref_global_self_reader   = Reference (Global_Context&, Reference&&, Argument_Reader&&);
 using F_ref_global_reader        = Reference (Global_Context&, Argument_Reader&&);
 using F_ref_self_reader          = Reference (Reference&&, Argument_Reader&&);
