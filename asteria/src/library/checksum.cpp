@@ -226,7 +226,7 @@ V_string
 do_copy_SHA_result(const ::std::array<unsigned char, N>& bytes)
   {
     ::std::array<char, N*2> chars;
-    for(size_t k = 0;  k != N; ++k) {
+    for(size_t k = 0;  k != N;  ++k) {
       uint32_t ch = (bytes[k] >> 4) & 0x0F;
       chars[k*2] = static_cast<char>('0' + ch + ((9 - ch) >> 29));
       ch = bytes[k] & 0x0F;

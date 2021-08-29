@@ -368,9 +368,10 @@ std_system_uuid(Global_Context& global)
 
     auto put_hex_uint16 = [&](uint64_t value)
       {
-        static constexpr char s_xdigits[] = "0123456789ABCDEF";
-        for(size_t k = 12;  k < 16;  ++k)
-          *(wpos++) = s_xdigits[value << (k * 4) >> 60];
+        uint32_t ch;
+        for(int k = 3;  k >= 0;  --k)
+          ch = (value >> k * 4) & 0x0F,
+            *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
       };
 
     put_hex_uint16(x >> 32);
