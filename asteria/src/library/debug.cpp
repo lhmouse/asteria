@@ -61,31 +61,37 @@ void
 create_bindings_debug(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("logf"),
-      ASTERIA_BINDING_BEGIN("std.debug.logf", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.debug.logf", "templ, ...",
+        Argument_Reader&& reader)
+      {
         V_string templ;
         cow_vector<Value> values;
 
         reader.start_overload();
-        reader.required(templ);          // template
-        if(reader.end_overload(values))  // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_debug_logf, templ, values);
-      }
-      ASTERIA_BINDING_END);
+        reader.required(templ);
+        if(reader.end_overload(values))
+          return (Value)std_debug_logf(templ, values);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("dump"),
-      ASTERIA_BINDING_BEGIN("std.debug.dump", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.debug.dump", "[value], [indent]",
+        Argument_Reader&& reader)
+      {
         Value value;
         optV_integer indent;
 
         reader.start_overload();
-        reader.optional(value);     // [value]
-        reader.optional(indent);    // [indent]
+        reader.optional(value);
+        reader.optional(indent);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_debug_dump, value, indent);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_debug_dump(value, indent);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

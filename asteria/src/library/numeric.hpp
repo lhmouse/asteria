@@ -118,14 +118,6 @@ std_numeric_itrunc(V_real value);
 V_real
 std_numeric_random(Global_Context& global, optV_real limit);
 
-// `std.numeric.sqrt`
-V_real
-std_numeric_sqrt(V_real x);
-
-// `std.numeric.fma`
-V_real
-std_numeric_fma(V_real x, V_real y, V_real z);
-
 // `std.numeric.remainder`
 V_real
 std_numeric_remainder(V_real x, V_real y);
@@ -137,51 +129,6 @@ std_numeric_frexp(V_real x);
 // `std.numeric.ldexp`
 V_real
 std_numeric_ldexp(V_real frac, V_integer exp);
-
-// `std.numeric.addm`
-V_integer
-std_numeric_addm(V_integer x, V_integer y);
-
-// `std.numeric.subm`
-V_integer
-std_numeric_subm(V_integer x, V_integer y);
-
-// `std.numeric.mulm`
-V_integer
-std_numeric_mulm(V_integer x, V_integer y);
-
-// `std.numeric.adds`
-V_integer
-std_numeric_adds(V_integer x, V_integer y);
-
-V_real
-std_numeric_adds(V_real x, V_real y);
-
-// `std.numeric.subs`
-V_integer
-std_numeric_subs(V_integer x, V_integer y);
-
-V_real
-std_numeric_subs(V_real x, V_real y);
-
-// `std.numeric.muls`
-V_integer
-std_numeric_muls(V_integer x, V_integer y);
-
-V_real
-std_numeric_muls(V_real x, V_real y);
-
-// `std.numeric.lzcnt`
-V_integer
-std_numeric_lzcnt(V_integer x);
-
-// `std.numeric.tzcnt`
-V_integer
-std_numeric_tzcnt(V_integer x);
-
-// `std.numeric.popcnt`
-V_integer
-std_numeric_popcnt(V_integer x);
 
 // `std.numeric.rotl`
 V_integer

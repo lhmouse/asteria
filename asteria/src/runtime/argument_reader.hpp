@@ -139,32 +139,13 @@ class Argument_Reader
     throw_no_matching_function_call() const;
   };
 
-#define ASTERIA_BINDING_BEGIN(name, self, global, reader)  \
-    (::asteria::V_function(  \
-      "`" name "(...)` at '" ASTERIA_NATIVE_SOURCE_LOCATION "'",  \
-      *[](::asteria::Reference& self, ::asteria::Global_Context& global,  \
-          ::asteria::Reference_Stack&& tfiXopzY)  \
-        -> ::asteria::Reference& \
-        {  \
-          ::asteria::Argument_Reader reader(::rocket::sref("" name), ::std::move(tfiXopzY));  \
-          (void)global;
-
-#define ASTERIA_BINDING_END  \
-          reader.throw_no_matching_function_call();  \
-        }  \
-      ))
-
-#define ASTERIA_BINDING_RETURN(self, func, ...)  \
-    return ::asteria::details_argument_reader::apply_and_set_result(self,  \
-        [](auto&&... jZrUeTNf) -> decltype(auto)  \
-          { return func(static_cast<decltype(jZrUeTNf)&&>(jZrUeTNf)...);  },  \
-        ::std::forward_as_tuple(__VA_ARGS__))
-
-#define ASTERIA_BINDING_RETURN_MOVE(self, func, ...)  \
-    return ::asteria::details_argument_reader::apply_and_set_result(self,  \
-        [](auto&&... jZrUeTNf) -> decltype(auto)  \
-          { return func(::asteria::details_argument_reader::move(jZrUeTNf)...);  },  \
-        ::std::forward_as_tuple(__VA_ARGS__))
+// See '../library/string.cpp' for how to use this macro.
+#define ASTERIA_BINDING(name, params, ...)  \
+    ::asteria::details_argument_reader::Factory{  \
+        ::rocket::sref("" name ""),  \
+        ::rocket::sref("" name "(" params ") at "  \
+            "'" __FILE__ ":" ROCKET_LAZY(ROCKET_QUOTE, __LINE__) "'")  \
+      }%*[](__VA_ARGS__)
 
 }  // namespace asteria
 

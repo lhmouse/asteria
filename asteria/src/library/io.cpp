@@ -403,112 +403,138 @@ void
 create_bindings_io(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("getc"),
-      ASTERIA_BINDING_BEGIN("std.io.getc", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.getc", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_getc);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_io_getc();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("getln"),
-      ASTERIA_BINDING_BEGIN("std.io.getln", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.getln", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_getln);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_io_getln();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("putc"),
-      ASTERIA_BINDING_BEGIN("std.io.putc", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.putc", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ch;
         V_string str;
 
         reader.start_overload();
-        reader.required(ch);       // value
+        reader.required(ch);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_putc, ch);
+          return (Value)std_io_putc(ch);
 
         reader.start_overload();
-        reader.required(str);      // value
+        reader.required(str);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_putc, str);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_io_putc(str);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("putln"),
-      ASTERIA_BINDING_BEGIN("std.io.putln", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.putln", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);      // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_putln, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_io_putln(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("putf"),
-      ASTERIA_BINDING_BEGIN("std.io.putf", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.putf", "templ, ...",
+        Argument_Reader&& reader)
+      {
         V_string templ;
         cow_vector<Value> values;
 
         reader.start_overload();
-        reader.required(templ);          // template
-        if(reader.end_overload(values))  // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_putf, templ, values);
-      }
-      ASTERIA_BINDING_END);
+        reader.required(templ);
+        if(reader.end_overload(values))
+          return (Value)std_io_putf(templ, values);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("putfln"),
-      ASTERIA_BINDING_BEGIN("std.io.putfln", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.putfln", "templ, ...",
+        Argument_Reader&& reader)
+      {
         V_string templ;
         cow_vector<Value> values;
 
         reader.start_overload();
-        reader.required(templ);          // template
-        if(reader.end_overload(values))  // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_putfln, templ, values);
-      }
-      ASTERIA_BINDING_END);
+        reader.required(templ);
+        if(reader.end_overload(values))
+          return (Value)std_io_putfln(templ, values);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("read"),
-      ASTERIA_BINDING_BEGIN("std.io.read", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.read", "[limit]",
+        Argument_Reader&& reader)
+      {
         optV_integer limit;
 
         reader.start_overload();
-        reader.optional(limit);     // [limit]
+        reader.optional(limit);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_read, limit);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_io_read(limit);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("write"),
-      ASTERIA_BINDING_BEGIN("std.io.write", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.write", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);      // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_write, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_io_write(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("flush"),
-      ASTERIA_BINDING_BEGIN("std.io.flush", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.io.flush", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_io_flush);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_io_flush();
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

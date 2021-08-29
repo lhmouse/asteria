@@ -636,198 +636,233 @@ void
 create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("get_working_directory"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.get_working_directory", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.get_working_directory", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_get_working_directory);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_get_working_directory();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("get_real_path"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.get_real_path", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.get_real_path", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);      // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_get_real_path, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_get_real_path(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("get_information"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.get_information", self, global, reader) {
+      ASTERIA_BINDING(
+        "`std.filesystem.get_information", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);      // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_get_information, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_get_information(path);
 
-    result.insert_or_assign(sref("remove_recursive"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.remove_recursive", self, global, reader) {
-        V_string path;
-
-        reader.start_overload();
-        reader.required(path);      // path
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_remove_recursive, path);
-      }
-      ASTERIA_BINDING_END);
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("move_from"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.move_from", self, global, reader) {
-        V_string to;
-        V_string from;
+      ASTERIA_BINDING(
+        "std.filesystem.move_from", "path_new, path_old",
+        Argument_Reader&& reader)
+      {
+        V_string to, from;
 
         reader.start_overload();
-        reader.required(to);       // path_new
-        reader.required(from);     // path_old
+        reader.required(to);
+        reader.required(from);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_move_from, to, from);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_filesystem_move_from(to, from);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("remove_recursive"),
+      ASTERIA_BINDING(
+        "std.filesystem.remove_recursive", "path",
+        Argument_Reader&& reader)
+      {
+        V_string path;
+
+        reader.start_overload();
+        reader.required(path);
+        if(reader.end_overload())
+          return (Value)std_filesystem_remove_recursive(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("dir_list"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.dir_list", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.dir_list", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);      // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_dir_list, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_dir_list(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("dir_create"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.dir_create", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.dir_create", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);      // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_dir_create, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_dir_create(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("dir_remove"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.dir_remove", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.dir_remove", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);      // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_dir_remove, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_dir_remove(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("file_read"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.file_read", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.file_read", "path, [offset, [limit]]",
+        Argument_Reader&& reader)
+      {
         V_string path;
-        optV_integer off;
-        optV_integer lim;
+        optV_integer off, lim;
 
         reader.start_overload();
-        reader.required(path);     // path
-        reader.optional(off);      // [offset]
-        reader.optional(lim);      // [limit]
+        reader.required(path);
+        reader.optional(off);
+        reader.optional(lim);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_read, path, off, lim);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_file_read(path, off, lim);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("file_stream"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.file_stream", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.file_stream", "path, callback, [offset, [limit]]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_string path;
         V_function func;
-        optV_integer off;
-        optV_integer lim;
+        optV_integer off, lim;
 
         reader.start_overload();
-        reader.required(path);     // path
-        reader.required(func);     // callback
-        reader.optional(off);      // [offset]
-        reader.optional(lim);      // [limit]
+        reader.required(path);
+        reader.required(func);
+        reader.optional(off);
+        reader.optional(lim);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_stream, global, path, func, off, lim);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_file_stream(global, path, func, off, lim);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("file_write"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.file_write", self, global, reader) {
-        V_string path;
+      ASTERIA_BINDING(
+        "std.filesystem.file_write", "path, data",
+        Argument_Reader&& reader)
+      {
+        V_string path, data;
         optV_integer off;
-        V_string data;
 
         reader.start_overload();
-        reader.required(path);     // path
+        reader.required(path);
         reader.save_state(0);
-        reader.required(data);     // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_write, path, nullopt, data);
+          return (void)std_filesystem_file_write(path, nullopt, data);
 
-        reader.load_state(0);      // path
-        reader.optional(off);      // [offset]
-        reader.required(data);     // data
+        reader.load_state(0);
+        reader.optional(off);
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_write, path, off, data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_filesystem_file_write(path, off, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("file_append"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.file_append", self, global, reader) {
-        V_string path;
-        V_string data;
+      ASTERIA_BINDING(
+        "std.filesystem.file_append", "path, data, [exclusive]",
+        Argument_Reader&& reader)
+      {
+        V_string path, data;
         optV_boolean excl;
 
         reader.start_overload();
-        reader.required(path);     // path
-        reader.required(data);     // data
-        reader.optional(excl);      // [exclusive]
+        reader.required(path);
+        reader.required(data);
+        reader.optional(excl);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_append, path, data, excl);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_filesystem_file_append(path, data, excl);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("file_copy_from"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.file_copy_from", self, global, reader) {
-        V_string to;
-        V_string from;
+      ASTERIA_BINDING(
+        "std.filesystem.file_copy_from", "path_new, path_old",
+        Argument_Reader&& reader)
+      {
+        V_string to, from;
 
         reader.start_overload();
-        reader.required(to);       // path_new
-        reader.required(from);     // path_old
+        reader.required(to);
+        reader.required(from);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_copy_from, to, from);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_filesystem_file_copy_from(to, from);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("file_remove"),
-      ASTERIA_BINDING_BEGIN("std.filesystem.file_remove", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.filesystem.file_remove", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);      // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_filesystem_file_remove, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_filesystem_file_remove(path);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

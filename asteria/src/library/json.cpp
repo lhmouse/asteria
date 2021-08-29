@@ -728,70 +728,80 @@ void
 create_bindings_json(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("format"),
-      ASTERIA_BINDING_BEGIN("std.json.format", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.json.format", "[value], [indent]",
+        Argument_Reader&& reader)
+      {
         Value value;
         optV_string sind;
         V_integer iind;
 
         reader.start_overload();
-        reader.optional(value);   // [value]
+        reader.optional(value);
         reader.save_state(0);
-        reader.optional(sind);    // [indent]
+        reader.optional(sind);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_json_format, value, sind);
+          return (Value)std_json_format(value, sind);
 
-        reader.load_state(0);     // [value]
-        reader.required(iind);    // indent
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_json_format, value, iind);
-      }
-      ASTERIA_BINDING_END);
+        reader.load_state(0);
+        reader.required(iind);
+          return (Value)std_json_format(value, iind);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("format5"),
-      ASTERIA_BINDING_BEGIN("std.json.format5", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.json.format5", "[value], [indent]",
+        Argument_Reader&& reader)
+      {
         Value value;
         optV_string sind;
         V_integer iind;
 
         reader.start_overload();
-        reader.optional(value);   // [value]
+        reader.optional(value);
         reader.save_state(0);
-        reader.optional(sind);    // [indent]
+        reader.optional(sind);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_json_format5, value, sind);
+          return (Value)std_json_format5(value, sind);
 
-        reader.load_state(0);     // [value]
-        reader.required(iind);    // indent
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_json_format5, value, iind);
-      }
-      ASTERIA_BINDING_END);
+        reader.load_state(0);
+        reader.required(iind);
+          return (Value)std_json_format5(value, iind);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("parse"),
-      ASTERIA_BINDING_BEGIN("std.json.parse", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.json.parse", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_json_parse, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_json_parse(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("parse_file"),
-      ASTERIA_BINDING_BEGIN("std.json.parse_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.json.parse_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_json_parse_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_json_parse_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

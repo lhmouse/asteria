@@ -266,28 +266,15 @@
 
 	* Returns the specified substring of `text`.
 
-`std.string.replace_slice(text, from, replacement, [rfrom], [rlength])`
-
-	* Replaces all bytes from `from` to the end of `text` with
-	  `replacement` and returns the new byte string. If `from` is
-	  negative, it specifies an offset from the end of `text`. If
-	  `rfrom` is specified, the replacement string is determined as
-	  `slice(replacement, rfrom, rlength)`. This function returns a
-	  new string without modifying `text`.
-
-	* Returns a string with the subrange replaced.
-
-`std.string.replace_slice(text, from, [length], replacement, [rfrom], [rlength])`
-
+`std.string.replace_slice(text, from, [length], replacement, [rfrom, [rlength]])`
 	* Replaces a subrange of `text` with `replacement` to create a
 	  new byte string. `from` specifies the start of the subrange to
 	  replace. If `from` is negative, it specifies an offset from the
 	  end of `text`. `length` specifies the maximum number of bytes
-	  to replace. If it is set to `null`, this function is equivalent
-	  to `replace_slice(text, from, replacement, rfrom, rlength)`. If
-	  `rfrom` is specified, the replacement string is determined as
-	  `slice(replacement, rfrom, rlength)`. This function returns a
-	  new string without modifying `text`.
+	  to replace. If it is set to `null`, all bytes up to the end of
+	  `text` are replaced. If `rfrom` is specified, the replacement
+	  string is determined as `slice(replacement, rfrom, rlength)`.
+	  This function returns a new string without modifying `text`.
 
 	* Returns a string with the subrange replaced.
 
@@ -319,25 +306,7 @@
 	* Returns `true` if `suffix` is a suffix of `text`, or `false`
 	  otherwise.
 
-`std.string.find(text, pattern)`
-
-	* Searches `text` for the first occurrence of `pattern`.
-
-	* Returns the subscript of the first byte of the first match of
-	  `pattern` in `text` if one is found, which is always
-	  non-negative, or `null` otherwise.
-
-`std.string.find(text, from, pattern)`
-
-	* Searches `text` for the first occurrence of `pattern`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from)`.
-
-	* Returns the subscript of the first byte of the first match of
-	  `pattern` in `text` if one is found, which is always
-	  non-negative, or `null` otherwise.
-
-`std.string.find(text, from, [length], pattern)`
+`std.string.find(text, [from, [length]], pattern)`
 
 	* Searches `text` for the first occurrence of `pattern`. The
 	  search operation is performed on the same subrange that would
@@ -347,7 +316,7 @@
 	  `pattern` in `text` if one is found, which is always
 	  non-negative, or `null` otherwise.
 
-`std.string.rfind(text, pattern)`
+`std.string.rfind(text, [from, [length]], pattern)`
 
 	* Searches `text` for the last occurrence of `pattern`.
 
@@ -355,44 +324,7 @@
 	  `pattern` in `text` if one is found, which is always
 	  non-negative, or `null` otherwise.
 
-`std.string.rfind(text, from, pattern)`
-
-	* Searches `text` for the last occurrence of `pattern`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from)`.
-
-	* Returns the subscript of the first byte of the last match of
-	  `pattern` in `text` if one is found, which is always
-	  non-negative, or `null` otherwise.
-
-`std.string.rfind(text, from, [length], pattern)`
-
-	* Searches `text` for the last occurrence of `pattern`.
-
-	* Returns the subscript of the first byte of the last match of
-	  `pattern` in `text` if one is found, which is always
-	  non-negative, or `null` otherwise.
-
-`std.string.find_and_replace(text, pattern, replacement)`
-
-	* Searches `text` and replaces all occurrences of `pattern` with
-	  `replacement`. This function returns a new string without
-	  modifying `text`.
-
-	* Returns the string with `pattern` replaced. If `text` does not
-	  contain `pattern`, it is returned intact.
-
-`std.string.find_and_replace(text, from, pattern, replacement)`
-
-	* Searches `text` and replaces all occurrences of `pattern` with
-	  `replacement`. The search operation is performed on the same
-	  subrange that would be returned by `slice(text, from)`. This
-	  function returns a new string without modifying `text`.
-
-	* Returns the string with `pattern` replaced. If `text` does not
-	  contain `pattern`, it is returned intact.
-
-`std.string.find_and_replace(text, from, [length], pattern, replacement)`
+`std.string.find_and_replace(text, [from, [length]], pattern, replacement)`
 
 	* Searches `text` and replaces all occurrences of `pattern` with
 	  `replacement`. The search operation is performed on the same
@@ -402,23 +334,7 @@
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-`std.string.find_any_of(text, accept)`
-
-	* Searches `text` for bytes that exist in `accept`.
-
-	* Returns the subscript of the first byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.find_any_of(text, from, accept)`
-
-	* Searches `text` for bytes that exist in `accept`. The search
-	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from)`.
-
-	* Returns the subscript of the first byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.find_any_of(text, from, [length], accept)`
+`std.string.find_any_of(text, [from, [length]], accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
@@ -427,23 +343,7 @@
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.rfind_any_of(text, accept)`
-
-	* Searches `text` for bytes that exist in `accept`.
-
-	* Returns the subscript of the last byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.rfind_any_of(text, from, accept)`
-
-	* Searches `text` for bytes that exist in `accept`. The search
-	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from)`.
-
-	* Returns the subscript of the last byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.rfind_any_of(text, from, [length], accept)`
+`std.string.rfind_any_of(text, [from, [length]], accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
@@ -452,23 +352,7 @@
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.find_not_of(text, reject)`
-
-	* Searches `text` for bytes that does not exist in `reject`.
-
-	* Returns the subscript of the first byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.find_not_of(text, from, reject)`
-
-	* Searches `text` for bytes that does not exist in `reject`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from)`.
-
-	* Returns the subscript of the first byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.find_not_of(text, from, [length], reject)`
+`std.string.find_not_of(text, [from, [length]], reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
@@ -477,23 +361,7 @@
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.rfind_not_of(text, reject)`
-
-	* Searches `text` for bytes that does not exist in `reject`.
-
-	* Returns the subscript of the last byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.rfind_not_of(text, from, reject)`
-
-	* Searches `text` for bytes that does not exist in `reject`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from)`.
-
-	* Returns the subscript of the last byte found, which is always
-	  non-negative; or `null` if no such byte exists.
-
-`std.string.rfind_not_of(text, from, [length], reject)`
+`std.string.rfind_not_of(text, [from, [length]], reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
@@ -588,7 +456,7 @@
 
 	* Returns the translated string.
 
-`std.string.explode(text, [delim], [limit])`
+`std.string.explode(text, [delim, [limit]])`
 
 	* Breaks `text` down into segments, separated by `delim`. If
 	  `delim` is `null` or an empty string, every byte becomes a
@@ -909,33 +777,7 @@
 	  sequences, or when a placeholder sequence has no corresponding
 	  argument.
 
-`std.string.pcre_find(text, pattern)`
-
-	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`.
-
-	* Returns an array of two integers. The first integer specifies
-	  the subscript of the matching sequence and the second integer
-	  specifies its length. If `pattern` is not found, this function
-	  returns `null`.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_find(text, from, pattern)`
-
-	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(text, from)`.
-
-	* Returns an array of two integers. The first integer specifies
-	  the subscript of the matching sequence and the second integer
-	  specifies its length. If `pattern` is not found, this function
-	  returns `null`.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_find(text, from, [length], pattern)`
+`std.string.pcre_find(text, [from, [length]], pattern)`
 
 	* Searches `text` for the first match of the Perl-compatible
 	  regular expressions (PCRE) `pattern`. The search operation is
@@ -949,35 +791,7 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.pcre_match(text, pattern)`
-
-	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`.
-
-	* Returns an array of strings. The first element is a copy of the
-	  substring that matches `pattern`. The remaining elements are
-	  substrings that match positional capturing groups. If a group
-	  fails to match, its corresponding element is `null`. If `text`
-	  does not match `pattern`, `null` is returned.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_match(text, from, pattern)`
-
-	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(text, from)`.
-
-	* Returns an array of strings. The first element is a copy of the
-	  substring that matches `pattern`. The remaining elements are
-	  substrings that match positional capturing groups. If a group
-	  fails to match, its corresponding element is `null`. If `text`
-	  does not match `pattern`, `null` is returned.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_match(text, from, [length], pattern)`
+`std.string.pcre_match(text, [from, [length]], pattern)`
 
 	* Searches `text` for the first match of the Perl-compatible
 	  regular expressions (PCRE) `pattern`. The search operation is
@@ -992,35 +806,7 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.pcre_named_match(text, pattern)`
-
-	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`.
-
-	* Returns an object of all named groups. Each key is the name of
-	  a group and its value is the matched substring. If there are no
-	  named groups in `pattern`, an empty object is returned. If a
-	  group fails to match, its corresponding value is an explicit
-	  `null`. If `text` does not match `pattern`, `null` is returned.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_named_match(text, from, pattern)`
-
-	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(text, from)`.
-
-	* Returns an object of all named groups. Each key is the name of
-	  a group and its value is the matched substring. If there are no
-	  named groups in `pattern`, an empty object is returned. If a
-	  group fails to match, its corresponding value is an explicit
-	  `null`. If `text` does not match `pattern`, `null` is returned.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_named_match(text, from, [length], pattern)`
+`std.string.pcre_named_match(text, [from, [length]], pattern)`
 
 	* Searches `text` for the first match of the Perl-compatible
 	  regular expressions (PCRE) `pattern`. The search operation is
@@ -1035,31 +821,7 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.pcre_replace(text, pattern, replacement)`
-
-	* Searches `text` and replaces all matches of the Perl-compatible
-	  regular expressions (PCRE) `pattern` with `replacement`. This
-	  function returns a new string without modifying `text`.
-
-	* Returns the string with `pattern` replaced. If `text` does not
-	  contain `pattern`, it is returned intact.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_replace(text, from, pattern, replacement)`
-
-	* Searches `text` and replaces all matches of the Perl-compatible
-	  regular expressions (PCRE) `pattern` with `replacement`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from)`. This function returns a new
-	  string without modifying `text`.
-
-	* Returns the string with `pattern` replaced. If `text` does not
-	  contain `pattern`, it is returned intact.
-
-	* Throws an exception if `pattern` is not a valid PCRE.
-
-`std.string.pcre_replace(text, from, [length], pattern, replacement)`
+`std.string.pcre_replace(text, [from, [length]], pattern, replacement)`
 
 	* Searches `text` and replaces all matches of the Perl-compatible
 	  regular expressions (PCRE) `pattern` with `replacement`. The
@@ -1086,50 +848,20 @@
 
 	* Returns the specified subarray of `data`.
 
-`std.array.replace_slice(data, from, replacement, [rfrom], [rlength])`
-
-	* Replaces all elements from `from` to the end of `data` with
-	  `replacement` and returns the new array. If `from` is negative,
-	  it specifies an offset from the end of `data`. If `rfrom` is
-	  specified, the replacement array is determined as `slice(
-	  replacement, rfrom, rlength)`. This function returns a new
-	  array without modifying `data`.
-
-	* Returns a new array with the subrange replaced.
-
-`std.array.replace_slice(data, from, [length], replacement, [rfrom], [rlength])`
+`std.array.replace_slice(data, from, [length], replacement, [rfrom, [rlength]])`
 
 	* Replaces a subrange of `data` with `replacement` to create a
 	  new array. `from` specifies the start of the subrange to
 	  replace. If `from` is negative, it specifies an offset from the
 	  end of `data`. `length` denotes the maximum number of elements
-	  to replace. If it is set to `null`, this function is equivalent
-	  to `replace_slice(data, from, replacement, rfrom, rlength)`. If
-	  `rfrom` is specified, the replacement array is determined as
-	  `slice(replacement, rfrom, rlength)`. This function returns a
-	  new array without modifying `data`.
+	  to replace. If it is set to `null`, all elements up to the end
+	  are replaced. If `rfrom` is specified, the replacement array is
+	  determined as `slice(replacement, rfrom, rlength)`. This
+	  function returns a new array without modifying `data`.
 
 	* Returns a new array with the subrange replaced.
 
-`std.array.find(data, [target])`
-
-	* Searches `data` for the first occurrence of `target`.
-
-	* Returns the subscript of the first match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.find(data, from, [target])`
-
-	* Searches `data` for the first occurrence of `target`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(data, from)`.
-
-	* Returns the subscript of the first match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.find(data, from, [length], [target])`
+`std.array.find(data, [from, [length]], [target])`
 
 	* Searches `data` for the first occurrence of `target`. The
 	  search operation is performed on the same subrange that would
@@ -1139,25 +871,7 @@
 	  if one is found, which is always non-negative, or `null`
 	  otherwise.
 
-`std.array.find_if(data, predictor)`
-
-	* Finds the first element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically true.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.find_if(data, from, predictor)`
-
-	* Finds the first element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically true. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(data, from)`.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.find_if(data, from, [length], predictor)`
+`std.array.find_if(data, [from, [length]], predictor)`
 
 	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true. The search operation is
@@ -1167,25 +881,7 @@
 	* Returns the subscript of such an element as an integer, if one
 	  is found, or `null` otherwise.
 
-`std.array.find_if_not(data, predictor)`
-
-	* Finds the first element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically false.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.find_if_not(data, from, predictor)`
-
-	* Finds the first element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically false. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(data, from)`.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.find_if_not(data, from, [length], predictor)`
+`std.array.find_if_not(data, [from, [length]], predictor)`
 
 	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false. The search operation is
@@ -1195,25 +891,7 @@
 	* Returns the subscript of such an element as an integer, if one
 	  is found, or `null` otherwise.
 
-`std.array.rfind(data, [target])`
-
-	* Searches `data` for the last occurrence of `target`.
-
-	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.rfind(data, from, [target])`
-
-	* Searches `data` for the last occurrence of `target`. The search
-	  operation is performed on the same subrange that would be
-	  returned by `slice(data, from)`.
-
-	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.rfind(data, from, [length], [target])`
+`std.array.rfind(data, [from, [length]], [target])`
 
 	* Searches `data` for the last occurrence of `target`. The search
 	  operation is performed on the same subrange that would be
@@ -1223,25 +901,7 @@
 	  if one is found, which is always non-negative, or `null`
 	  otherwise.
 
-`std.array.rfind_if(data, predictor)`
-
-	* Finds the last element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically true.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.rfind_if(data, from, predictor)`
-
-	* Finds the last element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically true. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(data, from)`.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.rfind_if(data, from, [length], predictor)`
+`std.array.rfind_if(data, [from, [length]], predictor)`
 
 	* Finds the last element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true. The search operation is
@@ -1251,25 +911,7 @@
 	* Returns the subscript of such an element as an integer, if one
 	  is found, or `null` otherwise.
 
-`std.array.rfind_if_not(data, predictor)`
-
-	* Finds the last element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically false.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.rfind_if_not(data, from, predictor)`
-
-	* Finds the last element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically false. The search operation is
-	  performed on the same subrange that would be returned by
-	  `slice(data, from)`.
-
-	* Returns the subscript of such an element as an integer, if one
-	  is found, or `null` otherwise.
-
-`std.array.rfind_if_not(data, from, [length], predictor)`
+`std.array.rfind_if_not(data, [from, [length]], predictor)`
 
 	* Finds the last element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false. The search operation is
@@ -1279,24 +921,7 @@
 	* Returns the subscript of such an element as an integer, if one
 	  is found, or `null` otherwise.
 
-`std.array.count(data, [target])`
-
-	* Searches `data` for `target` and figures the total number of
-	  occurrences.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count(data, from, [target])`
-
-	* Searches `data` for `target` and figures the total number of
-	  occurrences. The search operation is performed on the same
-	  subrange that would be returned by `slice(data, from)`.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count(data, from, [length], [target])`
+`std.array.count(data, [from, [length]], [target])`
 
 	* Searches `data` for `target` and figures the total number of
 	  occurrences. The search operation is performed on the same
@@ -1305,26 +930,7 @@
 	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
-`std.array.count_if(data, [target], predictor)`
-
-	* Searches `data` for every element, namely `x`, such that
-	  `predictor(x)` yields logically true, and figures the total
-	  number of such occurrences.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count_if(data, from, [target], predictor)`
-
-	* Searches `data` for every element, namely `x`, such that
-	  `predictor(x)` yields logically true, and figures the total
-	  number of elements. The search operation is performed on the
-	  same subrange that would be returned by `slice(data, from)`.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count_if(data, from, [length], [target], predictor)`
+`std.array.count_if(data, [from, [length]], predictor)`
 
 	* Searches `data` for every element, namely `x`, such that
 	  `predictor(x)` yields logically true, and figures the total
@@ -1335,26 +941,7 @@
 	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
-`std.array.count_if_not(data, [target], predictor)`
-
-	* Searches on every element, namely `x`, in `data`, such that
-	  `predictor(x)` yields logically false, and figures the total
-	  number of such occurrences.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count_if_not(data, from, [target], predictor)`
-
-	* Searches on every element, namely `x`, in `data`, such that
-	  `predictor(x)` yields logically false, and figures the total
-	  number of elements. The search operation is performed on the
-	  same subrange that would be returned by `slice(data, from)`.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count_if_not(data, from, [length], [target], predictor)`
+`std.array.count_if_not(data, [from, [length]], predictor)`
 
 	* Searches on every element, namely `x`, in `data`, such that
 	  `predictor(x)` yields logically false, and figures the total
@@ -1365,24 +952,7 @@
 	* Returns the number of occurrences as an integer, which is
 	  always non-negative.
 
-`std.array.exclude(data, [target])`
-
-	* Removes every element from `data` which compares equal to
-	  `target` to create a new array. This function returns a new
-	  array without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude(data, from, [target])`
-
-	* Removes every element from `data` which both compares equal
-	  to `target` and is within the same subrange that would be
-	  returned by `slice(data, from)` to create a new array. This
-	  function returns a new array without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude(data, from, [length], [target])`
+`std.array.exclude(data, [from, [length]], [target])`
 
 	* Removes every element from `data` which both compares equal
 	  to `target` and is within the same subrange that would be
@@ -1391,25 +961,7 @@
 
 	* Returns a new array with all occurrences removed.
 
-`std.array.exclude_if(data, [target], predictor)`
-
-	* Removes every element from `data`, namely `x`, such that
-	  `predictor(x)` yields logically false, to create a new array.
-	  This function returns a new array without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude_if(data, from, [target], predictor)`
-
-	* Removes every element from `data`, namely `x`, such that
-	  both `predictor(x)` yields logically false and `x` is within
-	  the subrange that would be returned by `slice(data, from)`,
-	  to create a new array. This function returns a new array
-	  without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude_if(data, from, [length], [target], predictor)`
+`std.array.exclude_if(data, [from, [length]], predictor)`
 
 	* Removes every element from `data`, namely `x`, such that
 	  both `predictor(x)` yields logically false and `x` is within
@@ -1419,25 +971,7 @@
 
 	* Returns a new array with all occurrences removed.
 
-`std.array.exclude_if_not(data, [target], predictor)`
-
-	* Removes every element from `data`, namely `x`, such that
-	  `predictor(x)` yields logically true, to create a new array.
-	  This function returns a new array without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude_if_not(data, from, [target], predictor)`
-
-	* Removes every element from `data`, namely `x`, such that
-	  both `predictor(x)` yields logically true and `x` is within
-	  the subrange that would be returned by `slice(data, from)`,
-	  to create a new array. This function returns a new array
-	  without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude_if_not(data, from, [length], [target], predictor)`
+`std.array.exclude_if_not(data, [from, [length]], predictor)`
 
 	* Removes every element from `data`, namely `x`, such that
 	  both `predictor(x)` yields logically true and `x` is within
@@ -1854,12 +1388,12 @@
 
 	* Throws an exception if `limit` is zero or non-finite.
 
-`std.numeric.sqrt(x)`
+`std.numeric.sqrt(value)`
 
-	* Calculates the square root of `x` which may be of either the
-	  integer or the real type. The result is always a real.
+	* Calculates the square root of `value` which may be either an
+	  integer or a real number. The result is always a real.
 
-	* Returns the square root of `x` as a real.
+	* Returns the square root of `value` as a real.
 
 `std.numeric.fma(x, y, z)`
 
@@ -1897,91 +1431,6 @@
 
 	* Returns the product as a real.
 
-`std.numeric.addm(x, y)`
-
-	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be
-	  of the integer type. The result is reduced to be congruent to
-	  the sum of `x` and `y` modulo `0x1p64` in infinite precision.
-	  This function will not cause overflow exceptions to be thrown.
-
-	* Returns the reduced sum of `x` and `y`.
-
-`std.numeric.subm(x, y)`
-
-	* Subtracts `y` from `x` using modular arithmetic. `x` and `y`
-	  must be of the integer type. The result is reduced to be
-	  congruent to the difference of `x` and `y` modulo `0x1p64` in
-	  infinite precision. This function will not cause overflow
-	  exceptions to be thrown.
-
-	* Returns the reduced difference of `x` and `y`.
-
-`std.numeric.mulm(x, y)`
-
-	* Multiplies `x` by `y` using modular arithmetic. `x` and `y`
-	  must be of the integer type. The result is reduced to be
-	  congruent to the product of `x` and `y` modulo `0x1p64` in
-	  infinite precision. This function will not cause overflow
-	  exceptions to be thrown.
-
-	* Returns the reduced product of `x` and `y`.
-
-`std.numeric.adds(x, y)`
-
-	* Adds `y` to `x` using saturating arithmetic. `x` and `y` may be
-	  integer or real values. The result is limited within the
-	  range of representable values of its type, hence will not cause
-	  overflow exceptions to be thrown. When either argument is of
-	  type real which supports infinities, this function is
-	  equivalent to the built-in addition operator.
-
-	* Returns the saturated sum of `x` and `y`.
-
-`std.numeric.subs(x, y)`
-
-	* Subtracts `y` from `x` using saturating arithmetic. `x` and `y`
-	  may be integer or real values. The result is limited within the
-	  range of representable values of its type, hence will not cause
-	  overflow exceptions to be thrown. When either argument is of
-	  type real which supports infinities, this function is
-	  equivalent to the built-in subtraction operator.
-
-	* Returns the saturated difference of `x` and `y`.
-
-`std.numeric.muls(x, y)`
-
-	* Multiplies `x` by `y` using saturating arithmetic. `x` and `y`
-	  may be integer or real values. The result is limited within the
-	  range of representable values of its type, hence will not cause
-	  overflow exceptions to be thrown. When either argument is of
-	  type real which supports infinities, this function is
-	  equivalent to the built-in multiplication operator.
-
-	* Returns the saturated product of `x` and `y`.
-
-`std.numeric.lzcnt(x)`
-
-	* Counts the number of leading zero bits in `x`, which shall be
-	  of type integer.
-
-	* Returns the bit count as an integer. If `x` is zero, `64` is
-	  returned.
-
-`std.numeric.tzcnt(x)`
-
-	* Counts the number of trailing zero bits in `x`, which shall be
-	  of type integer.
-
-	* Returns the bit count as an integer. If `x` is zero, `64` is
-	  returned.
-
-`std.numeric.popcnt(x)`
-
-	* Counts the number of one bits in `x`, which shall be of type
-	  integer.
-
-	* Returns the bit count as an integer.
-
 `std.numeric.rotl(m, x, n)`
 
 	* Rotates the rightmost `m` bits of `x` to the left by `n`; all
@@ -2012,7 +1461,7 @@
 
 	* Throws an exception if `m` is negative or greater than `64`.
 
-`std.numeric.format(value, [base], [ebase])`
+`std.numeric.format(value, [base, [ebase]])`
 
 	* Converts an integer or real number to a string in `base`. This
 	  function writes as many digits as possible to ensure precision.
@@ -2129,27 +1578,17 @@
 	* Denotes the binary logarithm of 10 as a real number. The value
 	  is `3.3219280948873623478703194294894`.
 
-`std.math.exp(y)`
+`std.math.exp([base], y)`
 
-	* Calculates the constant `e` raised to the `y`-th power.
-
-	* Returns the power as a real.
-
-`std.math.exp(base, y)`
-
-	* Calculates `base` raised to the `y`-th power.
+	* Calculates `base` raised to the `y`-th power. The default value
+	  of `base` is the constant `e`.
 
 	* Returns the power as a real.
 
-`std.math.log(x)`
+`std.math.log([base], x)`
 
-	* Calculates the natural logarithm of `x`.
-
-	* Returns the logarithm as a real.
-
-`std.math.log(base, x)`
-
-	* Calculates the logarithm base `base` of `x`.
+	* Calculates the logarithm base `base` of `x`. The default value
+	  of `base` is the constant `e`.
 
 	* Returns the logarithm as a real.
 
@@ -2389,7 +1828,7 @@
 	* Throws an exception if `path` designates a non-directory, or
 	  some other errors occur.
 
-`std.filesystem.file_read(path, [offset], [limit])`
+`std.filesystem.file_read(path, [offset, [limit]])`
 
 	* Reads the file at `path` in binary mode. The read operation
 	  starts from the byte offset that is denoted by `offset` if it
@@ -2402,7 +1841,7 @@
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
 
-`std.filesystem.file_stream(path, callback, [offset], [limit])`
+`std.filesystem.file_stream(path, callback, [offset, [limit]])`
 
 	* Reads the file at `path` in binary mode and invokes `callback`
 	  with the data read repeatedly. `callback` shall be a binary
@@ -2421,14 +1860,6 @@
 	  as an integer.
 
 	* Throws an exception if `offset` is negative, or a read error
-	  occurs.
-
-`std.filesystem.file_write(path, data)`
-
-	* Writes the file at `path` in binary mode. Any existent contents
-	  are discarded. This function fails in case of partial writes.
-
-	* Throws an exception if `offset` is negative, or a write error
 	  occurs.
 
 `std.filesystem.file_write(path, [offset], data)`

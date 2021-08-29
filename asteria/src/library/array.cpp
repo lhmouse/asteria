@@ -698,23 +698,29 @@ void
 create_bindings_array(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("slice"),
-      ASTERIA_BINDING_BEGIN("std.array.slice", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.slice", "data, from, [length]",
+        Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
 
         reader.start_overload();
-        reader.required(data);    // data
-        reader.required(from);    // from
-        reader.optional(len);     // [length]
+        reader.required(data);
+        reader.required(from);
+        reader.optional(len);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_slice, data, from, len);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_slice(data, from, len);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("replace_slice"),
-      ASTERIA_BINDING_BEGIN("std.array.replace_slice", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.replace_slice", "data, from, [length], replacement, [rfrom, [rlength]]",
+        Argument_Reader&& reader)
+      {
         V_array text;
         V_integer from;
         optV_integer len;
@@ -723,636 +729,695 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         optV_integer rlen;
 
         reader.start_overload();
-        reader.required(text);      // text
-        reader.required(from);      // from
+        reader.required(text);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(rep);       // replacement
-        reader.optional(rfrom);     // rep_from
-        reader.optional(rlen);      // rep_length
+        reader.required(rep);
+        reader.optional(rfrom);
+        reader.optional(rlen);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_replace_slice, text, from, nullopt, rep, rfrom, rlen);
+          return (Value)std_array_replace_slice(text, from, nullopt, rep, rfrom, rlen);
 
-        reader.load_state(0);       // text, from
-        reader.optional(len);       // [length]
-        reader.required(rep);       // replacement
-        reader.optional(rfrom);     // rep_from
-        reader.optional(rlen);      // rep_length
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(rep);
+        reader.optional(rfrom);
+        reader.optional(rlen);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_replace_slice, text, from, len, rep, rfrom, rlen);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_replace_slice(text, from, len, rep, rfrom, rlen);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find"),
-      ASTERIA_BINDING_BEGIN("std.array.find", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.find", "data, [from, [length]], [target]",
+        Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         Value targ;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find, data, 0, nullopt, targ);
+          return (Value)std_array_find(data, 0, nullopt, targ);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find, data, from, nullopt, targ);
+          return (Value)std_array_find(data, from, nullopt, targ);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.optional(targ);     // [target]
+        reader.load_state(0);
+        reader.optional(len);
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find, data, from, len, targ);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_find(data, from, len, targ);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find_if"),
-      ASTERIA_BINDING_BEGIN("std.array.find_if", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.find_if", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find_if, global, data, 0, nullopt, pred);
+          return (Value)std_array_find_if(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find_if, global, data, from, nullopt, pred);
+          return (Value)std_array_find_if(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find_if, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_find_if(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find_if_not"),
-      ASTERIA_BINDING_BEGIN("std.array.find_if_not", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.find_if_not", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find_if_not, global, data, 0, nullopt, pred);
+          return (Value)std_array_find_if_not(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find_if_not, global, data, from, nullopt, pred);
+          return (Value)std_array_find_if_not(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_find_if_not, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_find_if_not(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rfind"),
-      ASTERIA_BINDING_BEGIN("std.array.rfind", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.rfind", "data, [from, [length]], [target]",
+        Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         Value targ;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind, data, 0, nullopt, targ);
+          return (Value)std_array_rfind(data, 0, nullopt, targ);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind, data, from, nullopt, targ);
+          return (Value)std_array_rfind(data, from, nullopt, targ);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.optional(targ);     // [target]
+        reader.load_state(0);
+        reader.optional(len);
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind, data, from, len, targ);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_rfind(data, from, len, targ);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rfind_if"),
-      ASTERIA_BINDING_BEGIN("std.array.rfind_if", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.rfind_if", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind_if, global, data, 0, nullopt, pred);
+          return (Value)std_array_rfind_if(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind_if, global, data, from, nullopt, pred);
+          return (Value)std_array_rfind_if(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind_if, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_rfind_if(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rfind_if_not"),
-      ASTERIA_BINDING_BEGIN("std.array.rfind_if_not", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.rfind_if_not", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind_if_not, global, data, 0, nullopt, pred);
+          return (Value)std_array_rfind_if_not(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind_if_not, global, data, from, nullopt, pred);
+          return (Value)std_array_rfind_if_not(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rfind_if_not, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_rfind_if_not(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("count"),
-      ASTERIA_BINDING_BEGIN("std.array.count", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.count", "data, [from, [length]], [target]",
+        Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         Value targ;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count, data, 0, nullopt, targ);
+          return (Value)std_array_count(data, 0, nullopt, targ);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count, data, from, nullopt, targ);
+          return (Value)std_array_count(data, from, nullopt, targ);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.optional(targ);     // [target]
+        reader.load_state(0);
+        reader.optional(len);
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count, data, from, len, targ);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_count(data, from, len, targ);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("count_if"),
-      ASTERIA_BINDING_BEGIN("std.array.count_if", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.count_if", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count_if, global, data, 0, nullopt, pred);
+          return (Value)std_array_count_if(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count_if, global, data, from, nullopt, pred);
+          return (Value)std_array_count_if(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count_if, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_count_if(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("count_if_not"),
-      ASTERIA_BINDING_BEGIN("std.array.count_if_not", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.count_if_not", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count_if_not, global, data, 0, nullopt, pred);
+          return (Value)std_array_count_if_not(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count_if_not, global, data, from, nullopt, pred);
+          return (Value)std_array_count_if_not(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_count_if_not, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_count_if_not(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("exclude"),
-      ASTERIA_BINDING_BEGIN("std.array.exclude", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.exclude", "data, [from, [length]], [target]",
+        Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         Value targ;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude, data, 0, nullopt, targ);
+          return (Value)std_array_exclude(data, 0, nullopt, targ);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.optional(targ);     // [target]
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude, data, from, nullopt, targ);
+          return (Value)std_array_exclude(data, from, nullopt, targ);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.optional(targ);     // [target]
+        reader.load_state(0);
+        reader.optional(len);
+        reader.optional(targ);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude, data, from, len, targ);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_exclude(data, from, len, targ);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("exclude_if"),
-      ASTERIA_BINDING_BEGIN("std.array.exclude_if", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.exclude_if", "data, [from, [length]], predictor",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude_if, global, data, 0, nullopt, pred);
+          return (Value)std_array_exclude_if(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude_if, global, data, from, nullopt, pred);
+          return (Value)std_array_exclude_if(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude_if, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_exclude_if(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("exclude_if_not"),
-      ASTERIA_BINDING_BEGIN("std.array.exclude_if_not", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.exclude_if_not", "data, [from, [length]], predicto",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         V_integer from;
         optV_integer len;
         V_function pred;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude_if_not, global, data, 0, nullopt, pred);
+          return (Value)std_array_exclude_if_not(global, data, 0, nullopt, pred);
 
-        reader.load_state(0);      // data
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(pred);     // predictor
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude_if_not, global, data, from, nullopt, pred);
+          return (Value)std_array_exclude_if_not(global, data, from, nullopt, pred);
 
-        reader.load_state(0);      // data, from
-        reader.optional(len);      // [length]
-        reader.required(pred);     // predictor
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(pred);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_exclude_if_not, global, data, from, len, pred);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_exclude_if_not(global, data, from, len, pred);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("is_sorted"),
-      ASTERIA_BINDING_BEGIN("std.array.is_sorted", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.is_sorted", "data, [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_is_sorted, global, data, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_is_sorted(global, data, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("binary_search"),
-      ASTERIA_BINDING_BEGIN("std.array.binary_search", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.binary_search", "data, [target], [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         Value targ;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(targ);     // [target]
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(targ);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_binary_search, global, data, targ, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_binary_search(global, data, targ, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("lower_bound"),
-      ASTERIA_BINDING_BEGIN("std.array.lower_bound", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.lower_bound", "data, [target], [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         Value targ;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(targ);     // [target]
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(targ);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_lower_bound, global, data, targ, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_lower_bound(global, data, targ, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("upper_bound"),
-      ASTERIA_BINDING_BEGIN("std.array.upper_bound", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.upper_bound", "data, [target], [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         Value targ;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(targ);     // [target]
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(targ);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_upper_bound, global, data, targ, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_upper_bound(global, data, targ, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("equal_range"),
-      ASTERIA_BINDING_BEGIN("std.array.equal_range", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.equal_range", "data, [target], [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         Value targ;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(targ);     // [target]
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(targ);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_equal_range, global, data, targ, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_equal_range(global, data, targ, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sort"),
-      ASTERIA_BINDING_BEGIN("std.array.sort", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.sort", "data, [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_sort, global, data, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_sort(global, data, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sortu"),
-      ASTERIA_BINDING_BEGIN("std.array.sortu", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.sortu", "data, [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_sortu, global, data, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_sortu(global, data, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("ksort"),
-      ASTERIA_BINDING_BEGIN("std.array.ksort", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.ksort", "object, [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_object object;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(object);     // object
-        reader.optional(comp);     // [comparator]
+        reader.required(object);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_ksort, global, object, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_ksort(global, object, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("max_of"),
-      ASTERIA_BINDING_BEGIN("std.array.max_of", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.max_of", "data, [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_max_of, global, data, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_max_of(global, data, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("min_of"),
-      ASTERIA_BINDING_BEGIN("std.array.min_of", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.min_of", "data, [comparator]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_array data;
         optV_function comp;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(comp);     // [comparator]
+        reader.required(data);
+        reader.optional(comp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_min_of, global, data, comp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_min_of(global, data, comp);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("reverse"),
-      ASTERIA_BINDING_BEGIN("std.array.reverse", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.reverse", "data",
+        Argument_Reader&& reader)
+      {
         V_array data;
 
         reader.start_overload();
-        reader.required(data);     // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_reverse, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_reverse(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("generate"),
-      ASTERIA_BINDING_BEGIN("std.array.generate", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.generate", "generator, length",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         V_function gen;
         V_integer len;
 
         reader.start_overload();
-        reader.required(gen);      // generator
-        reader.required(len);      // length
+        reader.required(gen);
+        reader.required(len);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_generate, global, gen, len);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_generate(global, gen, len);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("shuffle"),
-      ASTERIA_BINDING_BEGIN("std.array.shuffle", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.shuffle", "data, [seed]",
+        Argument_Reader&& reader)
+      {
         V_array data;
         optV_integer seed;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.optional(seed);     // [seed]
+        reader.required(data);
+        reader.optional(seed);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_shuffle, data, seed);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_shuffle(data, seed);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rotate"),
-      ASTERIA_BINDING_BEGIN("std.array.rotate", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.rotate", "data, shift",
+        Argument_Reader&& reader)
+      {
         V_array data;
         V_integer shift;
 
         reader.start_overload();
-        reader.required(data);     // data
-        reader.required(shift);    // shift
+        reader.required(data);
+        reader.required(shift);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_rotate, data, shift);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_rotate(data, shift);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("copy_keys"),
-      ASTERIA_BINDING_BEGIN("std.array.copy_keys", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.copy_keys", "source",
+        Argument_Reader&& reader)
+      {
         V_object obj;
 
         reader.start_overload();
-        reader.required(obj);    // source
+        reader.required(obj);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_copy_keys, obj);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_copy_keys(obj);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("copy_values"),
-      ASTERIA_BINDING_BEGIN("std.array.copy_values", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.array.copy_values", "source",
+        Argument_Reader&& reader)
+      {
         V_object obj;
 
         reader.start_overload();
-        reader.required(obj);    // source
+        reader.required(obj);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_array_copy_values, obj);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_array_copy_values(obj);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

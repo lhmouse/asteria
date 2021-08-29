@@ -60,9 +60,6 @@
 #define ASTERIA_INCOMPLET(T)  \
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
 
-#define ASTERIA_NATIVE_SOURCE_LOCATION  \
-    "" __FILE__ ":" ROCKET_LAZY(ROCKET_QUOTE, __LINE__) ""
-
 namespace asteria {
 namespace noadl = asteria;
 

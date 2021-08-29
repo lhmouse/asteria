@@ -15,30 +15,33 @@ namespace {
 int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
-    if(!(lower <= upper)) {
+    if(!(lower <= upper))
       ASTERIA_THROW_RUNTIME_ERROR(
-          "bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
-    }
+          "bounds not valid (`$1` is not less than or equal to `$2`)",
+          lower, upper);
+
     return upper;
   }
 
 double
 do_verify_bounds(double lower, double upper)
   {
-    if(!::std::islessequal(lower, upper)) {
+    if(!::std::islessequal(lower, upper))
       ASTERIA_THROW_RUNTIME_ERROR(
-          "bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
-    }
+          "bounds not valid (`$1` is not less than or equal to `$2`)",
+          lower, upper);
+
     return upper;
   }
 
 int64_t
 do_cast_to_integer(double value)
   {
-    if(!is_convertible_to_integer(value)) {
+    if(!is_convertible_to_integer(value))
       ASTERIA_THROW_RUNTIME_ERROR(
-          "real value not representable as integer (value `$1`)", value);
-    }
+          "real value not representable as integer (value `$1`)",
+          value);
+
     return static_cast<int64_t>(value);
   }
 
@@ -87,10 +90,11 @@ constexpr auto s_spaces = sref(" \f\n\r\t\v");
 V_integer
 std_numeric_abs(V_integer value)
   {
-    if(value == INT64_MIN) {
-      ASTERIA_THROW_RUNTIME_ERROR("integer absolute value overflow (value `$1`)",
-                    value);
-    }
+    if(value == INT64_MIN)
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "integer absolute value overflow (value `$1`)",
+          value);
+
     return ::std::abs(value);
   }
 
@@ -160,7 +164,8 @@ std_numeric_max(cow_vector<Value> values)
         auto cmp = res.compare(val);
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR(
-              "values not comparable (operands were `$1` and `$2`)", cmp, val);
+              "values not comparable (operands were `$1` and `$2`)",
+              cmp, val);
 
         if(cmp != compare_less)
           continue;
@@ -332,18 +337,6 @@ std_numeric_random(Global_Context& global, optV_real limit)
   }
 
 V_real
-std_numeric_sqrt(V_real x)
-  {
-    return ::std::sqrt(x);
-  }
-
-V_real
-std_numeric_fma(V_real x, V_real y, V_real z)
-  {
-    return ::std::fma(x, y, z);
-  }
-
-V_real
 std_numeric_remainder(V_real x, V_real y)
   {
     return ::std::remainder(x, y);
@@ -361,93 +354,6 @@ V_real
 std_numeric_ldexp(V_real frac, V_integer exp)
   {
     return ::std::ldexp(frac, ::rocket::clamp_cast<int>(exp, INT_MIN, INT_MAX));
-  }
-
-V_integer
-std_numeric_addm(V_integer x, V_integer y)
-  {
-    V_integer r;
-    ROCKET_ADD_OVERFLOW(x, y, &r);
-    return r;
-  }
-
-V_integer
-std_numeric_subm(V_integer x, V_integer y)
-  {
-    V_integer r;
-    ROCKET_SUB_OVERFLOW(x, y, &r);
-    return r;
-  }
-
-V_integer
-std_numeric_mulm(V_integer x, V_integer y)
-  {
-    V_integer r;
-    ROCKET_MUL_OVERFLOW(x, y, &r);
-    return r;
-  }
-
-V_integer
-std_numeric_adds(V_integer x, V_integer y)
-  {
-    V_integer r;
-    if(ROCKET_ADD_OVERFLOW(x, y, &r))
-      r = (x >> 63) ^ INT64_MAX;
-    return r;
-  }
-
-V_real
-std_numeric_adds(V_real x, V_real y)
-  {
-    return x + y;
-  }
-
-V_integer
-std_numeric_subs(V_integer x, V_integer y)
-  {
-    V_integer r;
-    if(ROCKET_SUB_OVERFLOW(x, y, &r))
-      r = (x >> 63) ^ INT64_MAX;
-    return r;
-  }
-
-V_real
-std_numeric_subs(V_real x, V_real y)
-  {
-    return x - y;
-  }
-
-V_integer
-std_numeric_muls(V_integer x, V_integer y)
-  {
-    V_integer r;
-    if(ROCKET_MUL_OVERFLOW(x, y, &r))
-      r = ((x ^ y) >> 63) ^ INT64_MAX;
-    return r;
-  }
-
-V_real
-std_numeric_muls(V_real x, V_real y)
-  {
-    return x * y;
-  }
-
-V_integer
-std_numeric_lzcnt(V_integer x)
-  {
-    return ROCKET_LZCNT64(static_cast<uint64_t>(x));
-  }
-
-V_integer
-std_numeric_tzcnt(V_integer x)
-  {
-    return ROCKET_TZCNT64(static_cast<uint64_t>(x));
-  }
-
-V_integer
-std_numeric_popcnt(V_integer x)
-  {
-    return ROCKET_POPCNT64(static_cast<uint64_t>(x));
   }
 
 V_integer
@@ -724,610 +630,490 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
       ));
 
     result.insert_or_assign(sref("abs"),
-      ASTERIA_BINDING_BEGIN("std.numeric.abs", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.abs", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_abs, ival);
+          return (Value)std_numeric_abs(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_abs, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_abs(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sign"),
-      ASTERIA_BINDING_BEGIN("std.numeric.sign", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.sign", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_sign, ival);
+          return (Value)std_numeric_sign(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_sign, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_sign(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("is_finite"),
-      ASTERIA_BINDING_BEGIN("std.numeric.is_finite", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.is_finite", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_is_finite, ival);
+          return (Value)std_numeric_is_finite(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_is_finite, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_is_finite(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("is_infinity"),
-      ASTERIA_BINDING_BEGIN("std.numeric.is_infinity", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.is_finite", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_is_infinity, ival);
+          return (Value)std_numeric_is_infinity(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_is_infinity, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_is_infinity(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("is_nan"),
-      ASTERIA_BINDING_BEGIN("std.numeric.is_nan", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.is_nan", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_is_nan, ival);
+          return (Value)std_numeric_is_nan(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_is_nan, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_is_nan(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("max"),
-      ASTERIA_BINDING_BEGIN("std.numeric.max", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.max", "...",
+        Argument_Reader&& reader)
+      {
         cow_vector<Value> vals;
 
         reader.start_overload();
-        if(reader.end_overload(vals))   // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_max, vals);
-      }
-      ASTERIA_BINDING_END);
+        if(reader.end_overload(vals))
+          return (Value)std_numeric_max(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("min"),
-      ASTERIA_BINDING_BEGIN("std.numeric.min", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.min", "...",
+        Argument_Reader&& reader)
+      {
         cow_vector<Value> vals;
 
         reader.start_overload();
-        if(reader.end_overload(vals))   // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_min, vals);
-      }
-      ASTERIA_BINDING_END);
+        if(reader.end_overload(vals))
+          return (Value)std_numeric_min(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clamp"),
-      ASTERIA_BINDING_BEGIN("std.numeric.clamp", self, global, reader) {
-        V_integer ival;
-        V_integer ilo;
-        V_integer iup;
-        V_real fval;
-        V_real flo;
-        V_real fup;
+      ASTERIA_BINDING(
+        "std.numeric.clamp", "value, lower, upper",
+        Argument_Reader&& reader)
+      {
+        V_integer ival, ilo, iup;
+        V_real fval, flo, fup;
 
         reader.start_overload();
-        reader.required(ival);     // value
-        reader.required(ilo);      // lower
-        reader.required(iup);      // upper
+        reader.required(ival);
+        reader.required(ilo);
+        reader.required(iup);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_clamp, ival, ilo, iup);
+          return (Value)std_numeric_clamp(ival, ilo, iup);
 
         reader.start_overload();
-        reader.required(fval);     // value
-        reader.required(flo);      // lower
-        reader.required(fup);      // upper
+        reader.required(fval);
+        reader.required(flo);
+        reader.required(fup);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_clamp, fval, flo, fup);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_clamp(fval, flo, fup);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("round"),
-      ASTERIA_BINDING_BEGIN("std.numeric.round", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.round", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_round, ival);
+          return (Value)std_numeric_round(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_round, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_round(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("iround"),
-      ASTERIA_BINDING_BEGIN("std.numeric.iround", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.iround", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_iround, ival);
+          return (Value)std_numeric_iround(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_iround, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_iround(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("floor"),
-      ASTERIA_BINDING_BEGIN("std.numeric.floor", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.floor", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_floor, ival);
+          return (Value)std_numeric_floor(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_floor, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_floor(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("ifloor"),
-      ASTERIA_BINDING_BEGIN("std.numeric.ifloor", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.floor", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_ifloor, ival);
+          return (Value)std_numeric_ifloor(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_ifloor, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_ifloor(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("ceil"),
-      ASTERIA_BINDING_BEGIN("std.numeric.ceil", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.ceil", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_ceil, ival);
+          return (Value)std_numeric_ceil(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_ceil, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_ceil(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("iceil"),
-      ASTERIA_BINDING_BEGIN("std.numeric.iceil", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.iceil", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_iceil, ival);
+          return (Value)std_numeric_iceil(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_iceil, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_iceil(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("trunc"),
-      ASTERIA_BINDING_BEGIN("std.numeric.trunc", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.trunc", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_trunc, ival);
+          return (Value)std_numeric_trunc(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_trunc, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_trunc(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("itrunc"),
-      ASTERIA_BINDING_BEGIN("std.numeric.itrunc", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.itrunc", "value",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
 
         reader.start_overload();
-        reader.required(ival);     // value
+        reader.required(ival);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_itrunc, ival);
+          return (Value)std_numeric_itrunc(ival);
 
         reader.start_overload();
-        reader.required(fval);     // value
+        reader.required(fval);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_itrunc, fval);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_itrunc(fval);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("random"),
-      ASTERIA_BINDING_BEGIN("std.numeric.random", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.random", "[limit]",
+        Global_Context& global, Argument_Reader&& reader)
+      {
         optV_real lim;
 
         reader.start_overload();
-        reader.optional(lim);     // [limit]
+        reader.optional(lim);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_random, global, lim);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_random(global, lim);
 
-    result.insert_or_assign(sref("sqrt"),
-      ASTERIA_BINDING_BEGIN("std.numeric.sqrt", self, global, reader) {
-        V_real val;
-
-        reader.start_overload();
-        reader.required(val);     // value
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_sqrt, val);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("fma"),
-      ASTERIA_BINDING_BEGIN("std.numeric.fma", self, global, reader) {
-        V_real x;
-        V_real y;
-        V_real z;
-
-        reader.start_overload();
-        reader.required(x);     // x
-        reader.required(y);     // y
-        reader.required(z);     // z
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_fma, x, y, z);
-      }
-      ASTERIA_BINDING_END);
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("remainder"),
-      ASTERIA_BINDING_BEGIN("std.numeric.remainder", self, global, reader) {
-        V_real x;
-        V_real y;
+      ASTERIA_BINDING(
+        "std.numeric.remainder", "x, y",
+        Argument_Reader&& reader)
+      {
+        V_real x, y;
 
         reader.start_overload();
-        reader.required(x);     // x
-        reader.required(y);     // y
+        reader.required(x);
+        reader.required(y);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_remainder, x, y);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_remainder(x, y);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("frexp"),
-      ASTERIA_BINDING_BEGIN("std.numeric.frexp", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.frexp", "x",
+        Argument_Reader&& reader)
+      {
         V_real val;
 
         reader.start_overload();
-        reader.required(val);     // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_frexp, val);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_frexp(val);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("ldexp"),
-      ASTERIA_BINDING_BEGIN("std.numeric.ldexp", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.ldexp", "frac, exp",
+        Argument_Reader&& reader)
+      {
         V_real frac;
         V_integer exp;
 
         reader.start_overload();
-        reader.required(frac);    // frac
-        reader.required(exp);     // exp
+        reader.required(frac);
+        reader.required(exp);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_ldexp, frac, exp);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_ldexp(frac, exp);
 
-    result.insert_or_assign(sref("addm"),
-      ASTERIA_BINDING_BEGIN("std.numeric.addm", self, global, reader) {
-        V_integer x;
-        V_integer y;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        reader.required(y);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_addm, x, y);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("subm"),
-      ASTERIA_BINDING_BEGIN("std.numeric.subm", self, global, reader) {
-        V_integer x;
-        V_integer y;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        reader.required(y);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_subm, x, y);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("mulm"),
-      ASTERIA_BINDING_BEGIN("std.numeric.mulm", self, global, reader) {
-        V_integer x;
-        V_integer y;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        reader.required(y);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_mulm, x, y);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("adds"),
-      ASTERIA_BINDING_BEGIN("std.numeric.adds", self, global, reader) {
-        V_integer ix;
-        V_integer iy;
-        V_real fx;
-        V_real fy;
-
-        reader.start_overload();
-        reader.required(ix);    // x
-        reader.required(iy);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_adds, ix, iy);
-
-        reader.start_overload();
-        reader.required(fx);    // x
-        reader.required(fy);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_adds, fx, fy);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("subs"),
-      ASTERIA_BINDING_BEGIN("std.numeric.subs", self, global, reader) {
-        V_integer ix;
-        V_integer iy;
-        V_real fx;
-        V_real fy;
-
-        reader.start_overload();
-        reader.required(ix);    // x
-        reader.required(iy);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_subs, ix, iy);
-
-        reader.start_overload();
-        reader.required(fx);    // x
-        reader.required(fy);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_subs, fx, fy);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("muls"),
-      ASTERIA_BINDING_BEGIN("std.numeric.muls", self, global, reader) {
-        V_integer ix;
-        V_integer iy;
-        V_real fx;
-        V_real fy;
-
-        reader.start_overload();
-        reader.required(ix);    // x
-        reader.required(iy);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_muls, ix, iy);
-
-        reader.start_overload();
-        reader.required(fx);    // x
-        reader.required(fy);    // y
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_muls, fx, fy);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("lzcnt"),
-      ASTERIA_BINDING_BEGIN("std.numeric.lzcnt", self, global, reader) {
-        V_integer x;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_lzcnt, x);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("tzcnt"),
-      ASTERIA_BINDING_BEGIN("std.numeric.tzcnt", self, global, reader) {
-        V_integer x;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_tzcnt, x);
-      }
-      ASTERIA_BINDING_END);
-
-    result.insert_or_assign(sref("popcnt"),
-      ASTERIA_BINDING_BEGIN("std.numeric.popcnt", self, global, reader) {
-        V_integer x;
-
-        reader.start_overload();
-        reader.required(x);    // x
-        if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_popcnt, x);
-      }
-      ASTERIA_BINDING_END);
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rotl"),
-      ASTERIA_BINDING_BEGIN("std.numeric.rotl", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.rotl", "m, x, n",
+        Argument_Reader&& reader)
+      {
         V_integer m;
         V_integer x;
         V_integer sh;
 
         reader.start_overload();
-        reader.required(m);    // m
-        reader.required(x);    // x
-        reader.required(sh);   // shift
+        reader.required(m);
+        reader.required(x);
+        reader.required(sh);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_rotl, m, x, sh);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_rotl(m, x, sh);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rotr"),
-      ASTERIA_BINDING_BEGIN("std.numeric.rotr", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.rotr", "m, x, n",
+        Argument_Reader&& reader)
+      {
         V_integer m;
         V_integer x;
         V_integer sh;
 
         reader.start_overload();
-        reader.required(m);    // m
-        reader.required(x);    // x
-        reader.required(sh);   // shift
+        reader.required(m);
+        reader.required(x);
+        reader.required(sh);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_rotr, m, x, sh);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_rotr(m, x, sh);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("format"),
-      ASTERIA_BINDING_BEGIN("std.numeric.format", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.format", "value, [base, [ebase]]",
+        Argument_Reader&& reader)
+      {
         V_integer ival;
         V_real fval;
         optV_integer base;
         optV_integer ebase;
 
         reader.start_overload();
-        reader.required(ival);    // value
-        reader.optional(base);    // [base]
-        reader.optional(ebase);   // [ebase]
+        reader.required(ival);
+        reader.optional(base);
+        reader.optional(ebase);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_format, ival, base, ebase);
+          return (Value)std_numeric_format(ival, base, ebase);
 
         reader.start_overload();
-        reader.required(fval);    // value
-        reader.optional(base);    // [base]
-        reader.optional(ebase);   // [ebase]
+        reader.required(fval);
+        reader.optional(base);
+        reader.optional(ebase);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_format, fval, base, ebase);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_format(fval, base, ebase);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("parse_integer"),
-      ASTERIA_BINDING_BEGIN("std.numeric.parse_integer", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.parse_integer", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_parse_integer, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_parse_integer(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("parse_real"),
-      ASTERIA_BINDING_BEGIN("std.numeric.parse_real", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.numeric.parse_real", "text, [saturating]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         optV_boolean satur;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.optional(satur);   // [saturating]
+        reader.required(text);
+        reader.optional(satur);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_numeric_parse_real, text, satur);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_numeric_parse_real(text, satur);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

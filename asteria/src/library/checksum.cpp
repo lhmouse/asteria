@@ -80,45 +80,51 @@ do_construct_CRC32(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_CRC32_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.CRC32::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.CRC32::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_CRC32_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.CRC32::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.CRC32::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_CRC32_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.CRC32::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.CRC32::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_CRC32_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class FNV1a32_Hasher final
@@ -180,59 +186,67 @@ do_construct_FNV1a32(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_FNV1a32_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.FNV1a32::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_FNV1a32_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.FNV1a32::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_FNV1a32_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.FNV1a32::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_FNV1a32_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 template<size_t N>
 V_string
 do_copy_SHA_result(const ::std::array<unsigned char, N>& bytes)
   {
-    ::std::array<char, N*2> chars;
-    for(size_t k = 0;  k != N;  ++k) {
-      uint32_t ch = (bytes[k] >> 4) & 0x0F;
-      chars[k*2] = static_cast<char>('0' + ch + ((9 - ch) >> 29));
-      ch = bytes[k] & 0x0F;
-      chars[k*2+1] = static_cast<char>('0' + ch + ((9 - ch) >> 29));
-    }
-    return V_string(chars.data(), chars.size());
+    V_string str;
+    auto wpos = str.insert(str.begin(), N * 2, '-');
+
+    uint32_t ch;
+    for(uint32_t value : bytes)
+      for(int k = 1;  k >= 0;  --k)
+        ch = (value >> k * 4) & 0x0F,
+          *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
+
+    return str;
   }
 
 class MD5_Hasher final
@@ -292,45 +306,51 @@ do_construct_MD5(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_MD5_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.MD5::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.MD5::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_MD5_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.MD5::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.MD5::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_MD5_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.MD5::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.MD5::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_MD5_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class SHA1_Hasher final
@@ -390,45 +410,51 @@ do_construct_SHA1(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_SHA1_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA1::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA1::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA1_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA1::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA1::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA1_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA1::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA1::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA1_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class SHA224_Hasher final
@@ -488,45 +514,51 @@ do_construct_SHA224(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_SHA224_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA224::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA224::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA224_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA224::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA224::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA224_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA224::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA224::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA224_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class SHA256_Hasher final
@@ -586,45 +618,51 @@ do_construct_SHA256(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_SHA256_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA256::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA256::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA256_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA256::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA256::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA256_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA256::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA256::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA256_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class SHA384_Hasher final
@@ -684,45 +722,51 @@ do_construct_SHA384(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_SHA384_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA384::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA384::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA384_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA384::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA384::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA384_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA384::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA384::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA384_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class SHA512_Hasher final
@@ -782,45 +826,51 @@ do_construct_SHA512(V_object& result)
     result.insert_or_assign(s_uuid, std_checksum_SHA512_private());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA512::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA512::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512_update, ::std::ref(hasher), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA512_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA512::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA512::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512_finish, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA512_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA512::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA512::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& hasher = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512_clear, ::std::ref(hasher));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_checksum_SHA512_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 template<typename HasherT>
@@ -1233,268 +1283,340 @@ void
 create_bindings_checksum(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("CRC32"),
-      ASTERIA_BINDING_BEGIN("std.checksum.CRC32", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.CRC32", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_CRC32);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_CRC32();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("crc32"),
-      ASTERIA_BINDING_BEGIN("std.checksum.crc32", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.crc32", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_crc32, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_crc32(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("crc32_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.crc32_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.crc32_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_crc32_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_crc32_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("FNV1a32"),
-      ASTERIA_BINDING_BEGIN("std.checksum.FNV1a32", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.FNV1a32", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_FNV1a32);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_FNV1a32();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("fnv1a32"),
-      ASTERIA_BINDING_BEGIN("std.checksum.fnv1a32", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.fnv1a32", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_fnv1a32, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_fnv1a32(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("fnv1a32_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.fnv1a32_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.fnv1a32_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_fnv1a32_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_fnv1a32_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("MD5"),
-      ASTERIA_BINDING_BEGIN("std.checksum.MD5", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.MD5", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_MD5);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_MD5();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("md5"),
-      ASTERIA_BINDING_BEGIN("std.checksum.md5", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.md5", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_md5, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_md5(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("md5_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.md5_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.md5_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_md5_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_md5_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("SHA1"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA1", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA1", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA1);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA1();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha1"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha1", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha1", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha1, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha1(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha1_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha1_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha1_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha1_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha1_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("SHA224"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA224", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA224", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA224);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA224();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha224"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha224", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha224", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha224, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha224(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha224_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha224_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha224_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha224_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha224_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("SHA256"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA256", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA256", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA256);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA256();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha256"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha256", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha256", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha256, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha256(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha256_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha256_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha256_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha256_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha256_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("SHA384"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA384", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA384", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA384);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA384();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha384"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha384", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha384", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha384, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha384(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha384_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha384_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha384_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha384_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha384_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("SHA512"),
-      ASTERIA_BINDING_BEGIN("std.checksum.SHA512", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.SHA512", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_SHA512);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_SHA512();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha512"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha512", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.checksum.sha512", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha512, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha512(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sha512_file"),
-      ASTERIA_BINDING_BEGIN("std.checksum.sha512_file", self, global, reader) {
+      ASTERIA_BINDING(
+        "td.checksum.sha512_file", "path",
+        Argument_Reader&& reader)
+      {
         V_string path;
 
         reader.start_overload();
-        reader.required(path);    // path
+        reader.required(path);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_checksum_sha512_file, path);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_checksum_sha512_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

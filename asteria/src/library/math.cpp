@@ -235,297 +235,362 @@ create_bindings_math(V_object& result, API_Version /*version*/)
       ));
 
     result.insert_or_assign(sref("exp"),
-      ASTERIA_BINDING_BEGIN("std.math.exp", self, global, reader) {
-        V_real base;
-        V_real y;
+      ASTERIA_BINDING(
+        "std.math.exp", "[base], y",
+        Argument_Reader&& reader)
+      {
+        V_real base, y;
 
         reader.start_overload();
-        reader.required(y);      // y
+        reader.required(y);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_exp, y);
+          return (Value)std_math_exp(y);
 
         reader.start_overload();
-        reader.required(base);   // base
-        reader.required(y);      // y
+        reader.required(base);
+        reader.required(y);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_exp, base, y);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_exp(base, y);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("log"),
-      ASTERIA_BINDING_BEGIN("std.math.log", self, global, reader) {
-        V_real base;
-        V_real x;
+      ASTERIA_BINDING(
+        "std.math.log", "[base], x",
+        Argument_Reader&& reader)
+      {
+        V_real base, x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_log, x);
+          return (Value)std_math_log(x);
 
         reader.start_overload();
-        reader.required(base);   // base
-        reader.required(x);      // x
+        reader.required(base);
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_log, base, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_log(base, x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("expm1"),
-      ASTERIA_BINDING_BEGIN("std.math.expm1", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.expm1", "",
+        Argument_Reader&& reader)
+      {
         V_real y;
 
         reader.start_overload();
-        reader.required(y);      // y
+        reader.required(y);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_expm1, y);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_expm1(y);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("log1p"),
-      ASTERIA_BINDING_BEGIN("std.math.log1p", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.log1p", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_log1p, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_log1p(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sin"),
-      ASTERIA_BINDING_BEGIN("std.math.sin", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.sin", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_sin, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_sin(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("cos"),
-      ASTERIA_BINDING_BEGIN("std.math.cos", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.cos", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_cos, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_cos(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sincos"),
-      ASTERIA_BINDING_BEGIN("std.math.sincos", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.sincos", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_sincos, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_sincos(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("tan"),
-      ASTERIA_BINDING_BEGIN("std.math.tan", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.tan", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_tan, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_tan(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("asin"),
-      ASTERIA_BINDING_BEGIN("std.math.asin", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.asin", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_asin, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_asin(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("acos"),
-      ASTERIA_BINDING_BEGIN("std.math.acos", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.acos", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_acos, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_acos(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("atan"),
-      ASTERIA_BINDING_BEGIN("std.math.atan", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.atan", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_atan, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_atan(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("atan2"),
-      ASTERIA_BINDING_BEGIN("std.math.atan2", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.atan2", "y, x",
+        Argument_Reader&& reader)
+      {
         V_real y;
         V_real x;
 
         reader.start_overload();
-        reader.required(y);      // x
-        reader.required(x);      // x
+        reader.required(y);
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_atan2, y, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_atan2(y, x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("hypot"),
-      ASTERIA_BINDING_BEGIN("std.math.hypot", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.hypot", "...",
+        Argument_Reader&& reader)
+      {
         cow_vector<Value> vals;
 
         reader.start_overload();
-        if(reader.end_overload(vals))   // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_hypot, vals);
-      }
-      ASTERIA_BINDING_END);
+        if(reader.end_overload(vals))
+          return (Value)std_math_hypot(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("sinh"),
-      ASTERIA_BINDING_BEGIN("std.math.sinh", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.sinh", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_sinh, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_sinh(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("cosh"),
-      ASTERIA_BINDING_BEGIN("std.math.cosh", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.cosh", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_cosh, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_cosh(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("tanh"),
-      ASTERIA_BINDING_BEGIN("std.math.tanh", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.tanh", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_tanh, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_tanh(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("asinh"),
-      ASTERIA_BINDING_BEGIN("std.math.asinh", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.asinh", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_asinh, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_asinh(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("acosh"),
-      ASTERIA_BINDING_BEGIN("std.math.acosh", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.acosh", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_acosh, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_acosh(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("atanh"),
-      ASTERIA_BINDING_BEGIN("std.math.atanh", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.atanh", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_atanh, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_atanh(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("erf"),
-      ASTERIA_BINDING_BEGIN("std.math.erf", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.erf", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_erf, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_erf(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("cerf"),
-      ASTERIA_BINDING_BEGIN("std.math.cerf", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.cerf", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_cerf, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_cerf(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("gamma"),
-      ASTERIA_BINDING_BEGIN("std.math.gamma", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.gamma", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_gamma, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_gamma(x);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("lgamma"),
-      ASTERIA_BINDING_BEGIN("std.math.lgamma", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.math.lgamma", "x",
+        Argument_Reader&& reader)
+      {
         V_real x;
 
         reader.start_overload();
-        reader.required(x);      // x
+        reader.required(x);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_math_lgamma, x);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_math_lgamma(x);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

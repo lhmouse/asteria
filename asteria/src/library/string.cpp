@@ -1699,23 +1699,29 @@ void
 create_bindings_string(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("slice"),
-      ASTERIA_BINDING_BEGIN("std.string.slice", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.slice", "text, from, [length]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
 
         reader.start_overload();
-        reader.required(text);      // text
-        reader.required(from);      // from
-        reader.optional(len);       // [length]
+        reader.required(text);
+        reader.required(from);
+        reader.optional(len);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_slice, text, from, len);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_slice(text, from, len);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("replace_slice"),
-      ASTERIA_BINDING_BEGIN("std.string.replace_slice", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.replace_slice", "text, from, [length], replacement, [rfrom, [rlength]]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
@@ -1724,137 +1730,150 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         optV_integer rlen;
 
         reader.start_overload();
-        reader.required(text);      // text
-        reader.required(from);      // from
+        reader.required(text);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(rep);       // replacement
-        reader.optional(rfrom);     // rep_from
-        reader.optional(rlen);      // rep_length
+        reader.required(rep);
+        reader.optional(rfrom);
+        reader.optional(rlen);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_replace_slice, text, from, nullopt, rep, rfrom, rlen);
+          return (Value)std_string_replace_slice(text, from, nullopt, rep, rfrom, rlen);
 
-        reader.load_state(0);       // text, from
-        reader.optional(len);       // [length]
-        reader.required(rep);       // replacement
-        reader.optional(rfrom);     // rep_from
-        reader.optional(rlen);      // rep_length
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(rep);
+        reader.optional(rfrom);
+        reader.optional(rlen);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_replace_slice, text, from, len, rep, rfrom, rlen);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_replace_slice(text, from, len, rep, rfrom, rlen);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("compare"),
-      ASTERIA_BINDING_BEGIN("std.string.compare", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.compare", "text1, text2, [length]",
+        Argument_Reader&& reader)
+      {
         V_string text1;
         V_string text2;
         optV_integer len;
 
         reader.start_overload();
-        reader.required(text1);     // text1
-        reader.required(text2);     // text2
-        reader.optional(len);       // [length]
+        reader.required(text1);
+        reader.required(text2);
+        reader.optional(len);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_compare, text1, text2, len);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_compare(text1, text2, len);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("starts_with"),
-      ASTERIA_BINDING_BEGIN("std.string.starts_with", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.starts_with", "text, prefix",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_string prfx;
 
         reader.start_overload();
-        reader.required(text);     // text
-        reader.required(prfx);     // prefix
+        reader.required(text);
+        reader.required(prfx);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_starts_with, text, prfx);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_starts_with(text, prfx);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("ends_with"),
-      ASTERIA_BINDING_BEGIN("std.string.ends_with", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.ends_with", "text, suffix",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_string sufx;
 
         reader.start_overload();
-        reader.required(text);     // text
-        reader.required(sufx);     // suffix
+        reader.required(text);
+        reader.required(sufx);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_ends_with, text, sufx);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_ends_with(text, sufx);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find"),
-      ASTERIA_BINDING_BEGIN("std.string.find", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.find", "text, [from, [length]], pattern",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string patt;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find, text, 0, nullopt, patt);
+          return (Value)std_string_find(text, 0, nullopt, patt);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find, text, from, nullopt, patt);
+          return (Value)std_string_find(text, from, nullopt, patt);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find, text, from, len, patt);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_find(text, from, len, patt);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rfind"),
-      ASTERIA_BINDING_BEGIN("std.string.rfind", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.rfind", "text, [from, [length]], pattern",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string patt;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind, text, 0, nullopt, patt);
+          return (Value)std_string_rfind(text, 0, nullopt, patt);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind, text, from, nullopt, patt);
+          return (Value)std_string_rfind(text, from, nullopt, patt);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind, text, from, len, patt);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_rfind(text, from, len, patt);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find_and_replace"),
-      ASTERIA_BINDING_BEGIN("std.string.find_and_replace", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.find_and_replace", "text, [from, [length]], pattern, replacement",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
@@ -1862,819 +1881,936 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         V_string rep;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
-        reader.required(rep);     // replacement
+        reader.required(patt);
+        reader.required(rep);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_and_replace, text, 0, nullopt, patt, rep);
+          return (Value)std_string_find_and_replace(text, 0, nullopt, patt, rep);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
-        reader.required(rep);     // replacement
+        reader.required(patt);
+        reader.required(rep);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_and_replace, text, from, nullopt, patt, rep);
+          return (Value)std_string_find_and_replace(text, from, nullopt, patt, rep);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
-        reader.required(rep);     // replacement
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
+        reader.required(rep);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_and_replace, text, from, len, patt, rep);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_find_and_replace(text, from, len, patt, rep);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find_any_of"),
-      ASTERIA_BINDING_BEGIN("std.string.find_any_of", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.find_any_of", "text, [from, [length]], accept",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string acc;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(acc);      // accept
+        reader.required(acc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_any_of, text, 0, nullopt, acc);
+          return (Value)std_string_find_any_of(text, 0, nullopt, acc);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(acc);      // accept
+        reader.required(acc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_any_of, text, from, nullopt, acc);
+          return (Value)std_string_find_any_of(text, from, nullopt, acc);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(acc);      // accept
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(acc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_any_of, text, from, len, acc);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_find_any_of(text, from, len, acc);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rfind_any_of"),
-      ASTERIA_BINDING_BEGIN("std.string.rfind_any_of", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.rfind_any_of", "text, [from, [length]], accept",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string acc;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(acc);      // accept
+        reader.required(acc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind_any_of, text, 0, nullopt, acc);
+          return (Value)std_string_rfind_any_of(text, 0, nullopt, acc);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(acc);      // accept
+        reader.required(acc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind_any_of, text, from, nullopt, acc);
+          return (Value)std_string_rfind_any_of(text, from, nullopt, acc);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(acc);      // accept
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(acc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind_any_of, text, from, len, acc);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_rfind_any_of(text, from, len, acc);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("find_not_of"),
-      ASTERIA_BINDING_BEGIN("std.string.find_not_of", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.find_not_of", "text, [from, [length]], reject",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string rej;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(rej);      // reject
+        reader.required(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_not_of, text, 0, nullopt, rej);
+          return (Value)std_string_find_not_of(text, 0, nullopt, rej);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(rej);      // reject
+        reader.required(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_not_of, text, from, nullopt, rej);
+          return (Value)std_string_find_not_of(text, from, nullopt, rej);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(rej);      // reject
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_find_not_of, text, from, len, rej);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_find_not_of(text, from, len, rej);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("rfind_not_of"),
-      ASTERIA_BINDING_BEGIN("std.string.rfind_not_of", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.rfind_not_of", "text, [from, [length]], reject",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string rej;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(rej);      // reject
+        reader.required(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind_not_of, text, 0, nullopt, rej);
+          return (Value)std_string_rfind_not_of(text, 0, nullopt, rej);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(rej);      // reject
+        reader.required(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind_not_of, text, from, nullopt, rej);
+          return (Value)std_string_rfind_not_of(text, from, nullopt, rej);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(rej);      // reject
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_rfind_not_of, text, from, len, rej);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_rfind_not_of(text, from, len, rej);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("reverse"),
-      ASTERIA_BINDING_BEGIN("std.string.reverse", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.reverse", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_reverse, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_reverse(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("trim"),
-      ASTERIA_BINDING_BEGIN("std.string.trim", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.trim", "text, [reject]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         optV_string rej;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.optional(rej);    // [reject]
+        reader.required(text);
+        reader.optional(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_trim, text, rej);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_trim(text, rej);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("triml"),
-      ASTERIA_BINDING_BEGIN("std.string.triml", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.triml", "text, [reject]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         optV_string rej;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.optional(rej);     // [reject]
+        reader.required(text);
+        reader.optional(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_triml, text, rej);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_triml(text, rej);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("trimr"),
-      ASTERIA_BINDING_BEGIN("std.string.trimr", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.trimr", "text, [reject]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         optV_string rej;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.optional(rej);     // [reject]
+        reader.required(text);
+        reader.optional(rej);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_trimr, text, rej);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_trimr(text, rej);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("padl"),
-      ASTERIA_BINDING_BEGIN("std.string.padl", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.padl", "text, length, [padding]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer len;
         optV_string pad;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.required(len);     // length
-        reader.optional(pad);     // [padding]
+        reader.required(text);
+        reader.required(len);
+        reader.optional(pad);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_padl, text, len, pad);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_padl(text, len, pad);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("padr"),
-      ASTERIA_BINDING_BEGIN("std.string.padr", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.padr", "text, length, [padding]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer len;
         optV_string pad;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.required(len);     // length
-        reader.optional(pad);     // [padding]
+        reader.required(text);
+        reader.required(len);
+        reader.optional(pad);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_padr, text, len, pad);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_padr(text, len, pad);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("to_upper"),
-      ASTERIA_BINDING_BEGIN("std.string.to_upper", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.to_upper", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_to_upper, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_to_upper(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("to_lower"),
-      ASTERIA_BINDING_BEGIN("std.string.to_lower", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.to_lower", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_to_lower, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_to_lower(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("translate"),
-      ASTERIA_BINDING_BEGIN("std.string.translate", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.translate", "text, inputs, [outputs]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_string in;
         optV_string out;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.required(in);      // input
-        reader.optional(out);     // [output]
+        reader.required(text);
+        reader.required(in);
+        reader.optional(out);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_translate, text, in, out);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_translate(text, in, out);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("explode"),
-      ASTERIA_BINDING_BEGIN("std.string.explode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.explode", "text, [delim, [limit]]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         optV_string delim;
         optV_integer limit;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.optional(delim);   // [delim]
-        reader.optional(limit);   // [limit]
+        reader.required(text);
+        reader.optional(delim);
+        reader.optional(limit);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_explode, text, delim, limit);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_explode(text, delim, limit);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("implode"),
-      ASTERIA_BINDING_BEGIN("std.string.implode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.implode", "segments, [delim]",
+        Argument_Reader&& reader)
+      {
         V_array segs;
         optV_string delim;
 
         reader.start_overload();
-        reader.required(segs);    // segments
-        reader.optional(delim);   // [delim]
+        reader.required(segs);
+        reader.optional(delim);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_implode, segs, delim);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_implode(segs, delim);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("hex_encode"),
-      ASTERIA_BINDING_BEGIN("std.string.hex_encode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.hex_encode", "data, [delim]",
+        Argument_Reader&& reader)
+      {
         V_string data;
         optV_string delim;
         optV_boolean lowc;
 
         reader.start_overload();
-        reader.required(data);    // data
-        reader.optional(delim);   // [delim]
+        reader.required(data);
+        reader.optional(delim);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_hex_encode, data, delim);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_hex_encode(data, delim);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("hex_decode"),
-      ASTERIA_BINDING_BEGIN("std.string.hex_decode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.hex_decode", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_hex_decode, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_hex_decode(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("base32_encode"),
-      ASTERIA_BINDING_BEGIN("std.string.base32_encode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.base32_encode", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
         optV_boolean lowc;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_base32_encode, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_base32_encode(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("base32_decode"),
-      ASTERIA_BINDING_BEGIN("std.string.base32_decode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.base32_decode", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_base32_decode, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_base32_decode(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("base64_encode"),
-      ASTERIA_BINDING_BEGIN("std.string.base64_encode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.base64_encode", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_base64_encode, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_base64_encode(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("base64_decode"),
-      ASTERIA_BINDING_BEGIN("std.string.base64_decode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.base64_decode", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_base64_decode, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_base64_decode(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("url_encode"),
-      ASTERIA_BINDING_BEGIN("std.string.url_encode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.url_encode", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
         optV_boolean lowc;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_url_encode, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_url_encode(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("url_decode"),
-      ASTERIA_BINDING_BEGIN("std.string.url_decode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.url_decode", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_url_decode, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_url_decode(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("url_encode_query"),
-      ASTERIA_BINDING_BEGIN("std.string.url_encode_query", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.url_encode_query", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
         optV_boolean lowc;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_url_encode_query, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_url_encode_query(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("url_decode_query"),
-      ASTERIA_BINDING_BEGIN("std.string.url_decode_query", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.url_decode_query", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_url_decode_query, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_url_decode_query(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("utf8_validate"),
-      ASTERIA_BINDING_BEGIN("std.string.utf8_validate", self, global, reader) {
+     ASTERIA_BINDING(
+       "std.string.utf8_validate", "text",
+       Argument_Reader&& reader)
+     {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // text
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_utf8_validate, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_utf8_validate(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("utf8_encode"),
-      ASTERIA_BINDING_BEGIN("std.string.utf8_encode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.utf8_encode", "code_points, [permissive]",
+        Argument_Reader&& reader)
+      {
         V_integer cp;
         V_array cps;
         optV_boolean perm;
 
         reader.start_overload();
-        reader.required(cp);      // code_point
-        reader.optional(perm);    // [permissive]
+        reader.required(cp);
+        reader.optional(perm);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_utf8_encode, cp, perm);
+          return (Value)std_string_utf8_encode(cp, perm);
 
         reader.start_overload();
-        reader.required(cps);     // code_points
-        reader.optional(perm);    // [permissive]
+        reader.required(cps);
+        reader.optional(perm);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_utf8_encode, cps, perm);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_utf8_encode(cps, perm);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("utf8_decode"),
-      ASTERIA_BINDING_BEGIN("std.string.utf8_decode", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.utf8_decode", "text, [permissive]",
+        Argument_Reader&& reader)
+      {
         V_string text;
         optV_boolean perm;
 
         reader.start_overload();
-        reader.required(text);    // text
-        reader.optional(perm);    // [permissive]
+        reader.required(text);
+        reader.optional(perm);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_utf8_decode, text, perm);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_utf8_decode(text, perm);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_8"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_8", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_8", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_8, val);
+          return (Value)std_string_pack_8(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_8, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_8(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_8"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_8", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_8", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_8, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_8(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_16be"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_16be", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_16be", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_16be, val);
+          return (Value)std_string_pack_16be(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_16be, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_16be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_16be"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_16be", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_16be", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_16be, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_16be(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_16le"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_16le", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_16le", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_16le, val);
+          return (Value)std_string_pack_16le(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_16le, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_16le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_16le"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_16le", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_16le", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_16le, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_16le(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_32be"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_32be", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_32be", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_32be, val);
+          return (Value)std_string_pack_32be(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_32be, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_32be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_32be"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_32be", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_32be", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_32be, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_32be(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_32le"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_32le", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_32le", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_32le, val);
+          return (Value)std_string_pack_32le(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_32le, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_32le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_32le"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_32le", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_32le", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_32le, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_32le(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_64be"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_64be", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_64be", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_64be, val);
+          return (Value)std_string_pack_64be(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_64be, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_64be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_64be"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_64be", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_64be", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_64be, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_64be(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pack_64le"),
-      ASTERIA_BINDING_BEGIN("std.string.pack_64le", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pack_64le", "values",
+        Argument_Reader&& reader)
+      {
         V_integer val;
         V_array vals;
 
         reader.start_overload();
-        reader.required(val);    // value
+        reader.required(val);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_64le, val);
+          return (Value)std_string_pack_64le(val);
 
         reader.start_overload();
-        reader.required(vals);    // values
+        reader.required(vals);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pack_64le, vals);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pack_64le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("unpack_64le"),
-      ASTERIA_BINDING_BEGIN("std.string.unpack_64le", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.unpack_64le", "text",
+        Argument_Reader&& reader)
+      {
         V_string text;
 
         reader.start_overload();
-        reader.required(text);    // value
+        reader.required(text);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_unpack_64le, text);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_unpack_64le(text);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("format"),
-      ASTERIA_BINDING_BEGIN("std.string.format", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.format", "templ, ...",
+        Argument_Reader&& reader)
+      {
         V_string templ;
         cow_vector<Value> args;
 
         reader.start_overload();
-        reader.required(templ);         // template
-        if(reader.end_overload(args))   // ...
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_format, templ, args);
-      }
-      ASTERIA_BINDING_END);
+        reader.required(templ);
+        if(reader.end_overload(args))
+          return (Value)std_string_format(templ, args);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pcre_find"),
-      ASTERIA_BINDING_BEGIN("std.string.pcre_find", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pcre_find", "text, [from, [length]], pattern",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string patt;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_find, text, 0, nullopt, patt);
+          return (Value)std_string_pcre_find(text, 0, nullopt, patt);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_find, text, from, nullopt, patt);
+          return (Value)std_string_pcre_find(text, from, nullopt, patt);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_find, text, from, len, patt);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pcre_find(text, from, len, patt);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pcre_match"),
-      ASTERIA_BINDING_BEGIN("std.string.pcre_match", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pcre_match", "text, [from, [length]], pattern",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string patt;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_match, text, 0, nullopt, patt);
+          return (Value)std_string_pcre_match(text, 0, nullopt, patt);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_match, text, from, nullopt, patt);
+          return (Value)std_string_pcre_match(text, from, nullopt, patt);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_match, text, from, len, patt);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pcre_match(text, from, len, patt);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pcre_named_match"),
-      ASTERIA_BINDING_BEGIN("std.string.pcre_named_match", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pcre_named_match", "text, [from, [length]], pattern",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
         V_string patt;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_named_match, text, 0, nullopt, patt);
+          return (Value)std_string_pcre_named_match(text, 0, nullopt, patt);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_named_match, text, from, nullopt, patt);
+          return (Value)std_string_pcre_named_match(text, from, nullopt, patt);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_named_match, text, from, len, patt);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pcre_named_match(text, from, len, patt);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("pcre_replace"),
-      ASTERIA_BINDING_BEGIN("std.string.pcre_replace", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.string.pcre_replace", "text, [from, [length]], pattern, replacement",
+        Argument_Reader&& reader)
+      {
         V_string text;
         V_integer from;
         optV_integer len;
@@ -2682,32 +2818,30 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         V_string rep;
 
         reader.start_overload();
-        reader.required(text);     // text
+        reader.required(text);
         reader.save_state(0);
-        reader.required(patt);     // pattern
-        reader.required(rep);     // replacement
+        reader.required(patt);
+        reader.required(rep);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_replace, text, 0, nullopt, patt, rep);
+          return (Value)std_string_pcre_replace(text, 0, nullopt, patt, rep);
 
-        reader.load_state(0);      // text
-        reader.required(from);     // from
+        reader.load_state(0);
+        reader.required(from);
         reader.save_state(0);
-        reader.required(patt);     // pattern
-        reader.required(rep);     // replacement
+        reader.required(patt);
+        reader.required(rep);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_replace, text, from, nullopt, patt, rep);
+          return (Value)std_string_pcre_replace(text, from, nullopt, patt, rep);
 
-        reader.load_state(0);      // text, from
-        reader.optional(len);      // [length]
-        reader.required(patt);     // pattern
-        reader.required(rep);     // replacement
+        reader.load_state(0);
+        reader.optional(len);
+        reader.required(patt);
+        reader.required(rep);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_string_pcre_replace, text, from, len, patt, rep);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_string_pcre_replace(text, from, len, patt, rep);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

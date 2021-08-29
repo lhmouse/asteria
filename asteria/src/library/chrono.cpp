@@ -480,90 +480,114 @@ void
 create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("utc_now"),
-      ASTERIA_BINDING_BEGIN("std.chrono.utc_now", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.chrono.utc_now", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_utc_now);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_utc_now();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("local_now"),
-      ASTERIA_BINDING_BEGIN("std.chrono.local_now", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.chrono.local_now", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_local_now);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_local_now();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("hires_now"),
-      ASTERIA_BINDING_BEGIN("std.chrono.hires_now", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.chrono.hires_now", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_hires_now);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_hires_now();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("steady_now"),
-      ASTERIA_BINDING_BEGIN("std.chrono.steady_now", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.chrono.steady_now", "",
+        Argument_Reader&& reader)
+      {
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_steady_now);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_steady_now();
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("local_from_utc"),
-      ASTERIA_BINDING_BEGIN("std.chrono.local_from_utc", self, global, reader) {
-        V_integer utc;
+      ASTERIA_BINDING(
+        "std.chrono.local_from_utc", "time_utc",
+        Argument_Reader&& reader)
+      {
+        V_integer time_utc;
 
         reader.start_overload();
-        reader.required(utc);     // time_utc
+        reader.required(time_utc);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_local_from_utc, utc);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_local_from_utc(time_utc);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("utc_from_local"),
-      ASTERIA_BINDING_BEGIN("std.chrono.utc_from_local", self, global, reader) {
-        V_integer local;
+      ASTERIA_BINDING(
+        "std.chrono.utc_from_local", "time_local",
+        Argument_Reader&& reader)
+      {
+        V_integer time_local;
 
         reader.start_overload();
-        reader.required(local);     // time_local
+        reader.required(time_local);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_utc_from_local, local);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_utc_from_local(time_local);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("utc_format"),
-      ASTERIA_BINDING_BEGIN("std.chrono.utc_format", self, global, reader) {
-        V_integer utc;
+      ASTERIA_BINDING(
+        "std.chrono.utc_format", "time_point, [with_ms]",
+        Argument_Reader&& reader)
+      {
+        V_integer time_point;
         optV_boolean with_ms;
 
         reader.start_overload();
-        reader.required(utc);      // time_point
-        reader.optional(with_ms);  // with_ms
+        reader.required(time_point);
+        reader.optional(with_ms);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_utc_format, utc, with_ms);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_utc_format(time_point, with_ms);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("utc_parse"),
-      ASTERIA_BINDING_BEGIN("std.chrono.utc_parse", self, global, reader) {
-        V_string str;
+      ASTERIA_BINDING(
+        "std.chrono.utc_parse", "time_str",
+        Argument_Reader&& reader)
+      {
+        V_string time_str;
 
         reader.start_overload();
-        reader.required(str);      // time_str
+        reader.required(time_str);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_chrono_utc_parse, str);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_chrono_utc_parse(time_str);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria

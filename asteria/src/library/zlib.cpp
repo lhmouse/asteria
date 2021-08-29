@@ -151,67 +151,78 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
     result.insert_or_assign(sref("output"), V_string());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Deflator::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Deflator::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto output_ref = self;
+        output_ref.push_modifier_object_key(sref("output"));
+        auto& output = output_ref.dereference_mutable().open_string();
+
         self.push_modifier_object_key(s_uuid);
         auto& defl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
-        self.push_modifier_object_key(sref("output"));
-        auto& output = self.dereference_mutable().open_string();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Deflator_update, ::std::ref(defl), ::std::ref(output), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_zlib_Deflator_update(defl, output, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("flush"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Deflator::flush", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Deflator::flush", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto output_ref = self;
+        output_ref.push_modifier_object_key(sref("output"));
+        auto& output = output_ref.dereference_mutable().open_string();
+
         self.push_modifier_object_key(s_uuid);
         auto& defl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
-        self.push_modifier_object_key(sref("output"));
-        auto& output = self.dereference_mutable().open_string();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Deflator_flush, ::std::ref(defl), ::std::ref(output));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_zlib_Deflator_flush(defl, output);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Deflator::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Deflator::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto output_ref = self;
+        output_ref.push_modifier_object_key(sref("output"));
+        auto& output = output_ref.dereference_mutable().open_string();
+
         self.push_modifier_object_key(s_uuid);
         auto& defl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
-        self.push_modifier_object_key(sref("output"));
-        auto& output = self.dereference_mutable().open_string();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Deflator_finish, ::std::ref(defl), ::std::ref(output));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_Deflator_finish(defl, output);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Deflator::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Deflator::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& defl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Deflator_clear, ::std::ref(defl));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_zlib_Deflator_clear(defl);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 class Inflator final
@@ -340,67 +351,78 @@ do_construct_Inflator(V_object& result, V_string format)
     result.insert_or_assign(sref("output"), V_string());
 
     result.insert_or_assign(sref("update"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Inflator::update", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Inflator::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto output_ref = self;
+        output_ref.push_modifier_object_key(sref("output"));
+        auto& output = output_ref.dereference_mutable().open_string();
+
         self.push_modifier_object_key(s_uuid);
         auto& infl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
-        self.push_modifier_object_key(sref("output"));
-        auto& output = self.dereference_mutable().open_string();
-        self.pop_modifier();
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Inflator_update, ::std::ref(infl), ::std::ref(output), data);
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_zlib_Inflator_update(infl, output, data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("flush"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Inflator::flush", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Inflator::flush", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto output_ref = self;
+        output_ref.push_modifier_object_key(sref("output"));
+        auto& output = output_ref.dereference_mutable().open_string();
+
         self.push_modifier_object_key(s_uuid);
         auto& infl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
-        self.push_modifier_object_key(sref("output"));
-        auto& output = self.dereference_mutable().open_string();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Inflator_flush, ::std::ref(infl), ::std::ref(output));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_zlib_Inflator_flush(infl, output);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("finish"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Inflator::finish", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Inflator::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto output_ref = self;
+        output_ref.push_modifier_object_key(sref("output"));
+        auto& output = output_ref.dereference_mutable().open_string();
+
         self.push_modifier_object_key(s_uuid);
         auto& infl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
-        self.push_modifier_object_key(sref("output"));
-        auto& output = self.dereference_mutable().open_string();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Inflator_finish, ::std::ref(infl), ::std::ref(output));
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_Inflator_finish(infl, output);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("clear"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Inflator::clear", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Inflator::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
         self.push_modifier_object_key(s_uuid);
         auto& infl = self.dereference_mutable().open_opaque();
-        self.pop_modifier();
 
         reader.start_overload();
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Inflator_clear, ::std::ref(infl));
-      }
-      ASTERIA_BINDING_END);
+          return (void)std_zlib_Inflator_clear(infl);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 bool
@@ -570,82 +592,100 @@ void
 create_bindings_zlib(V_object& result, API_Version /*version*/)
   {
     result.insert_or_assign(sref("Deflator"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Deflator", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Deflator", "format, [level]",
+        Argument_Reader&& reader)
+      {
         V_string format;
         optV_integer level;
 
         reader.start_overload();
-        reader.required(format);  // format
-        reader.optional(level);   // [level]
+        reader.required(format);
+        reader.optional(level);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Deflator, format, level);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_Deflator(format, level);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("deflate"),
-      ASTERIA_BINDING_BEGIN("std.zlib.deflate", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.deflate", "data, [level]",
+        Argument_Reader&& reader)
+      {
         V_string data;
         optV_integer level;
 
         reader.start_overload();
-        reader.required(data);    // data
-        reader.optional(level);   // [level]
+        reader.required(data);
+        reader.optional(level);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_deflate, data, level);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_deflate(data, level);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("gzip"),
-      ASTERIA_BINDING_BEGIN("std.zlib.gzip", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.gzip", "data, [level]",
+        Argument_Reader&& reader)
+      {
         V_string data;
         optV_integer level;
 
         reader.start_overload();
-        reader.required(data);    // data
-        reader.optional(level);   // [level]
+        reader.required(data);
+        reader.optional(level);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_gzip, data, level);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_gzip(data, level);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("Inflator"),
-      ASTERIA_BINDING_BEGIN("std.zlib.Inflator", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.Inflator", "format",
+        Argument_Reader&& reader)
+      {
         V_string format;
 
         reader.start_overload();
-        reader.required(format);  // format
+        reader.required(format);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_Inflator, format);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_Inflator(format);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("inflate"),
-      ASTERIA_BINDING_BEGIN("std.zlib.inflate", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.inflate", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_inflate, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_inflate(data);
+
+        reader.throw_no_matching_function_call();
+      });
 
     result.insert_or_assign(sref("gunzip"),
-      ASTERIA_BINDING_BEGIN("std.zlib.gunzip", self, global, reader) {
+      ASTERIA_BINDING(
+        "std.zlib.gunzip", "data",
+        Argument_Reader&& reader)
+      {
         V_string data;
 
         reader.start_overload();
-        reader.required(data);    // data
+        reader.required(data);
         if(reader.end_overload())
-          ASTERIA_BINDING_RETURN_MOVE(self,
-                    std_zlib_gunzip, data);
-      }
-      ASTERIA_BINDING_END);
+          return (Value)std_zlib_gunzip(data);
+
+        reader.throw_no_matching_function_call();
+      });
   }
 
 }  // namespace asteria
