@@ -81,17 +81,15 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
               "format: incomplete placeholder (dangling `$`)");
 
       typename traitsT::int_type ch = traitsT::to_int_type(*++pp);
+      size_t index = 0;
       bp = ++pp;
 
-      // Replace the placeholder.
       if(ch == '$') {
         // Write a plain dollar sign.
         fmt.putc(traitsT::to_char_type('$'));
         continue;
       }
 
-      // The placeholder shall contain a valid index.
-      size_t index = 0;
       switch(ch) {
         case '{': {
           // Look for the terminator.
@@ -99,7 +97,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
                              traitsT::to_char_type('}'));
           if(!bp)
             noadl::sprintf_and_throw<invalid_argument>(
-                  "format: incomplete placeholder (no matching `}`)");
+                  "format: incomplete placeholder (missing `}`)");
 
           // Parse the argument index.
           ptrdiff_t ndigs = bp++ - pp;
