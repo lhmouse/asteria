@@ -638,16 +638,16 @@
 `std.string.pack_16be(values)`
 
 	* Packs a series of 16-bit integers into a string. `values` can
-	  be either an integer or an array of `integers`, all of which
-	  are truncated to 16 bits then copied into a string in the
-	  big-endian byte order.
+	  be either an integer or an array of integers, all of which are
+	  truncated to 16 bits then copied into a string big-endian byte
+	  order.
 
 	* Returns the packed string.
 
 `std.string.unpack_16be(text)`
 
 	* Unpacks 16-bit integers from a string. The contents of `text`
-	  are re-interpreted as contiguous signed 16-bit integers in the
+	  are re-interpreted as contiguous signed 16-bit integers in
 	  big-endian byte order, all of which are sign-extended to 64
 	  bits then copied into an array.
 
@@ -659,16 +659,16 @@
 `std.string.pack_16le(values)`
 
 	* Packs a series of 16-bit integers into a string. `values` can
-	  be either an integer or an array of `integers`, all of which
-	  are truncated to 16 bits then copied into a string in the
-	  little-endian byte order.
+	  be either an integer or an array of integers, all of which are
+	  truncated to 16 bits then copied into a string in little-endian
+	  byte order.
 
 	* Returns the packed string.
 
 `std.string.unpack_16le(text)`
 
 	* Unpacks 16-bit integers from a string. The contents of `text`
-	  are re-interpreted as contiguous signed 16-bit integers in the
+	  are re-interpreted as contiguous signed 16-bit integers in
 	  little-endian byte order, all of which are sign-extended to 64
 	  bits then copied into an array.
 
@@ -680,16 +680,16 @@
 `std.string.pack_32be(values)`
 
 	* Packs a series of 32-bit integers into a string. `values` can
-	  be either an integer or an array of `integers`, all of which
-	  are truncated to 32 bits then copied into a string in the
-	  big-endian byte order.
+	  be either an integer or an array of integers, all of which are
+	  truncated to 32 bits then copied into a string in big-endian
+	  byte order.
 
 	* Returns the packed string.
 
 `std.string.unpack_32be(text)`
 
 	* Unpacks 32-bit integers from a string. The contents of `text`
-	  are re-interpreted as contiguous signed 32-bit integers in the
+	  are re-interpreted as contiguous signed 32-bit integers in
 	  big-endian byte order, all of which are sign-extended to 64
 	  bits then copied into an array.
 
@@ -701,16 +701,16 @@
 `std.string.pack_32le(values)`
 
 	* Packs a series of 32-bit integers into a string. `values` can
-	  be either an integer or an array of `integers`, all of which
-	  are truncated to 32 bits then copied into a string in the
-	  little-endian byte order.
+	  be either an integer or an array of integers, all of which are
+	  truncated to 32 bits then copied into a string in little-endian
+	  byte order.
 
 	* Returns the packed string.
 
 `std.string.unpack_32le(text)`
 
 	* Unpacks 32-bit integers from a string. The contents of `text`
-	  are re-interpreted as contiguous signed 32-bit integers in the
+	  are re-interpreted as contiguous signed 32-bit integers in
 	  little-endian byte order, all of which are sign-extended to 64
 	  bits then copied into an array.
 
@@ -722,15 +722,15 @@
 `std.string.pack_64be(values)`
 
 	* Packs a series of 64-bit integers into a string. `values` can
-	  be either an integer or an array of `integers`, all of which
-	  are copied into a string in the big-endian byte order.
+	  be either an integer or an array of integers, all of which are
+	  copied into a string in big-endian byte order.
 
 	* Returns the packed string.
 
 `std.string.unpack_64be(text)`
 
 	* Unpacks 64-bit integers from a string. The contents of `text`
-	  are re-interpreted as contiguous signed 64-bit integers in the
+	  are re-interpreted as contiguous signed 64-bit integers in
 	  big-endian byte order, all of which are copied into an array.
 
 	* Returns an array containing unpacked integers.
@@ -741,15 +741,15 @@
 `std.string.pack_64le(values)`
 
 	* Packs a series of 64-bit integers into a string. `values` can
-	  be either an integer or an array of `integers`, all of which
-	  are copied into a string in the little-endian byte order.
+	  be either an integer or an array of integer, all of which
+	  are copied into a string in little-endian byte order.
 
 	* Returns the packed string.
 
 `std.string.unpack_64le(text)`
 
 	* Unpacks 64-bit integers from a string. The contents of `text`
-	  are re-interpreted as contiguous signed 64-bit integers in the
+	  are re-interpreted as contiguous signed 64-bit integers in
 	  little-endian byte order, all of which are copied into an
 	  array.
 
