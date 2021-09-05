@@ -146,13 +146,9 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase);
 V_string
 std_numeric_format(V_real value, optV_integer base, optV_integer ebase);
 
-// `std.numeric.parse_integer`
-V_integer
-std_numeric_parse_integer(V_string text);
-
-// `std.numeric.parse_real`
-V_real
-std_numeric_parse_real(V_string text, optV_boolean saturating);
+// `std.numeric.parse`
+Value
+std_numeric_parse(V_string text);
 
 // `std.numeric.pack_8`
 V_string

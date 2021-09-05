@@ -1342,34 +1342,13 @@
 	  or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
 	  but `ebase` is `10`.
 
-`std.numeric.parse_integer(text)`
+`std.numeric.parse(text)`
 
-	* Parses `text` for an integer. `text` shall be a string. All
-	  leading and trailing blank characters are stripped from `text`.
-	  If it becomes empty, this function fails; otherwise, it shall
-	  match one of the following extended regular expressions:
-
-	  * Binary (base-2):
-	    `[+-]?0[bB][01]+`
-	  * Hexadecimal (base-16):
-	    `[+-]?0[xX][0-9a-fA-F]+`
-	  * Decimal (base-10):
-	    `[+-]?[0-9]+`
-
-	  If the string does not match any of the above, this function
-	  fails. If the result is outside the range of representable
-	  values of type integer, this function fails.
-
-	* Returns the integer value converted from `text`.
-
-	* Throws an exception on failure.
-
-`std.numeric.parse_real(text, [saturating])`
-
-	* Parses `text` for a real number. `text` shall be a string. All
-	  leading and trailing blank characters are stripped from `text`.
-	  If it becomes empty, this function fails; otherwise, it shall
-	  match any of the following extended regular expressions:
+	* Parses `text` for a number. `text` shall be a string. Leading
+	  and trailing blank characters are stripped before parsing. If
+	  the string becomes empty thereafter, this function fails;
+	  otherwise, it shall match one of the following extended
+	  regular expressions:
 
 	  * Infinities:
 	    `[+-]?infinity`
@@ -1383,12 +1362,12 @@
 	    `[+-]?[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?`
 
 	  If the string does not match any of the above, this function
-	  fails. If the absolute value of the result is too small to fit
-	  in a real, a signed zero is returned. When the absolute value
-	  is too large, if `saturating` is set to `true`, a signed
-	  infinity is returned; otherwise this function fails.
+	  fails. The result is an integer if `text` contains no decimal
+	  point and the value is representable as an integer, and is a
+	  real otherwise. If the value is outside the range of reals,
+	  this function may return signed zeroes or infinities.
 
-	* Returns the real value converted from `text`.
+	* Returns the numeric value converted from `text`.
 
 	* Throws an exception on failure.
 

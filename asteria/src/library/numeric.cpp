@@ -679,63 +679,40 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
     return text;
   }
 
-V_integer
-std_numeric_parse_integer(V_string text)
+Value
+std_numeric_parse(V_string text)
   {
     static constexpr char s_spaces[] = " \f\n\r\t\v";
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR("blank string");
 
-    auto bptr = text.data() + tpos;
+    auto fbptr = text.data() + tpos;
+    auto ibptr = fbptr;
     auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
 
-    V_integer value;
+    // Try parsing the string as a real number first.
     ::rocket::ascii_numget numg;
-    if(!numg.parse_I(bptr, eptr))
+    if(!numg.parse_F(fbptr, eptr))
       ASTERIA_THROW_RUNTIME_ERROR(
-          "string not convertible to integer (text `$1`)", text);
+          "string not convertible to a number (text `$1`)", text);
 
-    if(bptr != eptr)
+    if(fbptr != eptr)
       ASTERIA_THROW_RUNTIME_ERROR(
-          "non-integer character in string (character `$1`)", *bptr);
+          "non-numeric character in string (character `$1`)", *fbptr);
 
-    if(!numg.cast_I(value, INT64_MIN, INT64_MAX))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "integer overflow (text `$1`)", text);
+    V_real fval;
+    numg.cast_F(fval, -HUGE_VAL, HUGE_VAL);
 
-    return value;
-  }
+    // Check whether the value fits in an integer.
+    V_integer ival;
+    if(numg.parse_I(ibptr, eptr)  // accepted?
+       && (ibptr == eptr)         // no junk character?
+       && numg.cast_I(ival, INT64_MIN, INT64_MAX))  // within range?
+      return ival;
 
-V_real
-std_numeric_parse_real(V_string text, optV_boolean saturating)
-  {
-    static constexpr char s_spaces[] = " \f\n\r\t\v";
-    auto tpos = text.find_first_not_of(s_spaces);
-    if(tpos == V_string::npos)
-      ASTERIA_THROW_RUNTIME_ERROR("blank string");
-
-    auto bptr = text.data() + tpos;
-    auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
-
-    V_real value;
-    ::rocket::ascii_numget numg;
-    if(!numg.parse_F(bptr, eptr))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "string not convertible to real number (text `$1`)", text);
-
-    if(bptr != eptr)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "non-real-number character in string (character `$1`)", *bptr);
-
-    if(!numg.cast_F(value, -HUGE_VAL, HUGE_VAL)) {
-      // The value is out of range.
-      // Unlike integers, underflows are accepted unconditionally.
-      // Overflows are accepted unless `saturating` is `false` or absent.
-      if(numg.overflowed() && (saturating != true))
-        ASTERIA_THROW_RUNTIME_ERROR("real number overflow (text `$1`)", text);
-    }
-    return value;
+    // Accept any underflowed or overflowed result as a real.
+    return fval;
   }
 
 V_string
@@ -1351,9 +1328,9 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse_integer"),
+    result.insert_or_assign(sref("parse"),
       ASTERIA_BINDING(
-        "std.numeric.parse_integer", "text",
+        "std.numeric.parse", "text",
         Argument_Reader&& reader)
       {
         V_string text;
@@ -1361,24 +1338,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_parse_integer(text);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("parse_real"),
-      ASTERIA_BINDING(
-        "std.numeric.parse_real", "text, [saturating]",
-        Argument_Reader&& reader)
-      {
-        V_string text;
-        optV_boolean satur;
-
-        reader.start_overload();
-        reader.required(text);
-        reader.optional(satur);
-        if(reader.end_overload())
-          return (Value)std_numeric_parse_real(text, satur);
+          return (Value)std_numeric_parse(text);
 
         reader.throw_no_matching_function_call();
       });

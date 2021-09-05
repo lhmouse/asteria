@@ -338,95 +338,89 @@ int main()
         assert std.numeric.format(+0x123.C, 10, 10) == "2.9175e+02";
         assert std.numeric.format(-0x123.C, 10, 10) == "-2.9175e+02";
 
-        assert std.numeric.parse_integer(" 1234") == +1234;
-        assert std.numeric.parse_integer("+1234") == +1234;
-        assert std.numeric.parse_integer("-1234") == -1234;
-        assert std.numeric.parse_integer(" 0") == 0;
-        assert std.numeric.parse_integer("+0") == 0;
-        assert std.numeric.parse_integer("-0") == 0;
-        assert std.numeric.parse_integer(" 0b0100001100100001") == +17185;
-        assert std.numeric.parse_integer("+0b0100001100100001") == +17185;
-        assert std.numeric.parse_integer("-0b0100001100100001") == -17185;
-        assert std.numeric.parse_integer(" 0x4321") == +17185;
-        assert std.numeric.parse_integer("+0x4321") == +17185;
-        assert std.numeric.parse_integer("-0x4321") == -17185;
-        try { std.numeric.parse_integer(" 999999999999999999999999999999");  assert false;  }
+        assert std.numeric.parse(" 1234") == +1234;
+        assert typeof std.numeric.parse(" 1234") == "integer";
+        assert std.numeric.parse("+1234") == +1234;
+        assert typeof std.numeric.parse("+1234") == "integer";
+        assert std.numeric.parse("-1234") == -1234;
+        assert typeof std.numeric.parse("-1234") == "integer";
+        assert std.numeric.parse(" 0") == 0;
+        assert typeof std.numeric.parse(" 0") == "integer";
+        assert std.numeric.parse("+0") == 0;
+        assert typeof std.numeric.parse("+0") == "integer";
+        assert std.numeric.parse("-0") == 0;
+        assert typeof std.numeric.parse("-0") == "integer";
+        assert std.numeric.parse(" 0b0100001100100001") == +17185;
+        assert typeof std.numeric.parse(" 0b0100001100100001") == "integer";
+        assert std.numeric.parse("+0b0100001100100001") == +17185;
+        assert typeof std.numeric.parse("+0b0100001100100001") == "integer";
+        assert std.numeric.parse("-0b0100001100100001") == -17185;
+        assert typeof std.numeric.parse("-0b0100001100100001") == "integer";
+        assert std.numeric.parse(" 0x4321") == +17185;
+        assert typeof std.numeric.parse(" 0x4321") == "integer";
+        assert std.numeric.parse("+0x4321") == +17185;
+        assert typeof std.numeric.parse("+0x4321") == "integer";
+        assert std.numeric.parse("-0x4321") == -17185;
+        assert typeof std.numeric.parse("-0x4321") == "integer";
+        assert typeof std.numeric.parse(" 999999999999999999999999999999") == "real";
+        assert typeof std.numeric.parse("+999999999999999999999999999999") == "real";
+        assert typeof std.numeric.parse("-999999999999999999999999999999") == "real";
+        assert typeof std.numeric.parse(" 1e100") == "real";
+        assert typeof std.numeric.parse("+1e100") == "real";
+        assert typeof std.numeric.parse("-1e100") == "real";
+        assert std.numeric.parse(" 1234.5") == +1234.5;
+        assert typeof std.numeric.parse(" 1234.5") == "real";
+        assert std.numeric.parse("+1234.5") == +1234.5;
+        assert typeof std.numeric.parse("+1234.5") == "real";
+        assert std.numeric.parse("-1234.5") == -1234.5;
+        assert typeof std.numeric.parse("-1234.5") == "real";
+        assert std.numeric.parse(" 0b0100001100100001.11") == +17185.75;
+        assert typeof std.numeric.parse(" 0b0100001100100001.11") == "real";
+        assert std.numeric.parse("+0b0100001100100001.11") == +17185.75;
+        assert typeof std.numeric.parse("+0b0100001100100001.11") == "real";
+        assert std.numeric.parse("-0b0100001100100001.11") == -17185.75;
+        assert typeof std.numeric.parse("-0b0100001100100001.11") == "real";
+        assert std.numeric.parse(" 0x4321.4") == +17185.25;
+        assert typeof std.numeric.parse(" 0x4321.4") == "real";
+        assert std.numeric.parse("+0x4321.4") == +17185.25;
+        assert typeof std.numeric.parse("+0x4321.4") == "real";
+        assert std.numeric.parse("-0x4321.4") == -17185.25;
+        assert typeof std.numeric.parse("-0x4321.4") == "real";
+        assert __sign std.numeric.parse(" 1e-10000") ==  0;
+        assert __sign std.numeric.parse("+1e-10000") ==  0;
+        assert __sign std.numeric.parse("-1e-10000") == -1;
+        assert __sign std.numeric.parse(" 0.0") ==  0;
+        assert __sign std.numeric.parse("+0.0") ==  0;
+        assert __sign std.numeric.parse("-0.0") == -1;
+        assert std.numeric.parse(" infinity") == +infinity;
+        assert std.numeric.parse("+infinity") == +infinity;
+        assert std.numeric.parse("-infinity") == -infinity;
+        assert __isnan std.numeric.parse(" nan") == true;
+        assert __isnan std.numeric.parse("+nan") == true;
+        assert __isnan std.numeric.parse("-nan") == true;
+        try { std.numeric.parse(" NaN");  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_integer("+999999999999999999999999999999");  assert false;  }
+        try { std.numeric.parse("+NaN");  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_integer("-999999999999999999999999999999");  assert false;  }
+        try { std.numeric.parse("-NaN");  assert false;  }
           catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_integer(" 1e100");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_integer("+1e100");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_integer("-1e100");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-
-        assert std.numeric.parse_real(" 1234") == +1234;
-        assert std.numeric.parse_real("+1234") == +1234;
-        assert std.numeric.parse_real("-1234") == -1234;
-        assert std.numeric.parse_real(" 0b101") == +5;
-        assert std.numeric.parse_real("+0b101") == +5;
-        assert std.numeric.parse_real("-0b101") == -5;
-        assert std.numeric.parse_real(" 0x101") == +257;
-        assert std.numeric.parse_real("+0x101") == +257;
-        assert std.numeric.parse_real("-0x101") == -257;
-        assert std.numeric.parse_real(" 123.75") == +123.75;
-        assert std.numeric.parse_real("+123.75") == +123.75;
-        assert std.numeric.parse_real("-123.75") == -123.75;
-        assert std.numeric.parse_real(" 0") == 0;
-        assert std.numeric.parse_real("+0") == 0;
-        assert __sign std.numeric.parse_real("+0") ==  0;
-        assert std.numeric.parse_real("-0") == 0;
-        assert __sign std.numeric.parse_real("-0") == -1;
-        assert std.numeric.parse_real(" infinity") == +infinity;
-        assert std.numeric.parse_real("+infinity") == +infinity;
-        assert std.numeric.parse_real("-infinity") == -infinity;
-        try { std.numeric.parse_real(" Infinity");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_real("+Infinity");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_real("-Infinity");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        assert __isnan std.numeric.parse_real(" nan");
-        assert __isnan std.numeric.parse_real("+nan");
-        assert __isnan std.numeric.parse_real("-nan");
-        try { std.numeric.parse_real(" NaN");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_real("+NaN");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_real("-NaN");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        assert std.numeric.parse_real(" 0b01000011.00100001  ") == +67.12890625;
-        assert std.numeric.parse_real("+0b01000011.00100001  ") == +67.12890625;
-        assert std.numeric.parse_real("-0b01000011.00100001  ") == -67.12890625;
-        assert std.numeric.parse_real(" 0b01000011.00100001p3") == +537.03125;
-        assert std.numeric.parse_real("+0b01000011.00100001p3") == +537.03125;
-        assert std.numeric.parse_real("-0b01000011.00100001p3") == -537.03125;
-        assert std.numeric.parse_real(" 0x43.21  ") == +67.12890625;
-        assert std.numeric.parse_real("+0x43.21  ") == +67.12890625;
-        assert std.numeric.parse_real("-0x43.21  ") == -67.12890625;
-        assert std.numeric.parse_real(" 0x43.21p3") == +537.03125;
-        assert std.numeric.parse_real("+0x43.21p3") == +537.03125;
-        assert std.numeric.parse_real("-0x43.21p3") == -537.03125;
-        try { std.numeric.parse_real(" 1e1000000");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_real("+1e1000000");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        try { std.numeric.parse_real("-1e1000000");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
-        assert std.numeric.parse_real(" 1e1000000", true) ==  +infinity;
-        assert std.numeric.parse_real("+1e1000000", true) ==  +infinity;
-        assert std.numeric.parse_real("-1e1000000", true) ==  -infinity;
-        assert std.numeric.parse_real(" 0e1000000") == 0;
-        assert std.numeric.parse_real("+0e1000000") == 0;
-        assert std.numeric.parse_real("-0e1000000") == 0;
-        assert std.numeric.parse_real("0x10000000000000C000000") == 0x1.0p80 + 0x1.0p28;
-        assert std.numeric.parse_real("0x10000000000000A000000") == 0x1.0p80 + 0x1.0p28;
-        assert std.numeric.parse_real("0x100000000000009000000") == 0x1.0p80 + 0x1.0p28;
-        assert std.numeric.parse_real("0x100000000000008000001") == 0x1.0p80 + 0x1.0p28;
-        assert std.numeric.parse_real("0x100000000000008000000") == 0x1.0p80;
+        assert std.numeric.parse(" 0x43.21  ") == +67.12890625;
+        assert std.numeric.parse("+0x43.21  ") == +67.12890625;
+        assert std.numeric.parse("-0x43.21  ") == -67.12890625;
+        assert std.numeric.parse(" 0x43.21p3") == +537.03125;
+        assert std.numeric.parse("+0x43.21p3") == +537.03125;
+        assert std.numeric.parse("-0x43.21p3") == -537.03125;
+        assert std.numeric.parse(" 1e1000000") ==  +infinity;
+        assert std.numeric.parse("+1e1000000") ==  +infinity;
+        assert std.numeric.parse("-1e1000000") ==  -infinity;
+        assert std.numeric.parse(" 0e1000000") == 0;
+        assert std.numeric.parse("+0e1000000") == 0;
+        assert std.numeric.parse("-0e1000000") == 0;
+        assert std.numeric.parse("0x10000000000000C000000") == 0x1.0p80 + 0x1.0p28;
+        assert std.numeric.parse("0x10000000000000A000000") == 0x1.0p80 + 0x1.0p28;
+        assert std.numeric.parse("0x100000000000009000000") == 0x1.0p80 + 0x1.0p28;
+        assert std.numeric.parse("0x100000000000008000001") == 0x1.0p80 + 0x1.0p28;
+        assert std.numeric.parse("0x100000000000008000000") == 0x1.0p80;
 
         assert std.numeric.pack_8(0x1234) == "\x34";
         assert std.numeric.pack_8([ 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";
