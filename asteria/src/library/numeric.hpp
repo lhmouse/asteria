@@ -154,6 +154,83 @@ std_numeric_parse_integer(V_string text);
 V_real
 std_numeric_parse_real(V_string text, optV_boolean saturating);
 
+// `std.numeric.pack_8`
+V_string
+std_numeric_pack_8(V_integer value);
+
+V_string
+std_numeric_pack_8(V_array values);
+
+// `std.numeric.unpack_8`
+V_array
+std_numeric_unpack_8(V_string text);
+
+// `std.numeric.pack_16be`
+V_string
+std_numeric_pack_16be(V_integer value);
+
+V_string
+std_numeric_pack_16be(V_array values);
+
+// `std.numeric.unpack_16be`
+V_array
+std_numeric_unpack_16be(V_string text);
+
+// `std.numeric.pack_16le`
+V_string
+std_numeric_pack_16le(V_integer value);
+
+V_string
+std_numeric_pack_16le(V_array values);
+
+// `std.numeric.unpack_16le`
+V_array
+std_numeric_unpack_16le(V_string text);
+
+// `std.numeric.pack_32be`
+V_string
+std_numeric_pack_32be(V_integer value);
+
+V_string
+std_numeric_pack_32be(V_array values);
+
+// `std.numeric.unpack_32be`
+V_array
+std_numeric_unpack_32be(V_string text);
+
+// `std.numeric.pack_32le`
+V_string
+std_numeric_pack_32le(V_integer value);
+
+V_string
+std_numeric_pack_32le(V_array values);
+
+// `std.numeric.unpack_32le`
+V_array
+std_numeric_unpack_32le(V_string text);
+
+// `std.numeric.pack_64be`
+V_string
+std_numeric_pack_64be(V_integer value);
+
+V_string
+std_numeric_pack_64be(V_array values);
+
+// `std.numeric.unpack_64be`
+V_array
+std_numeric_unpack_64be(V_string text);
+
+// `std.numeric.pack_64le`
+V_string
+std_numeric_pack_64le(V_integer value);
+
+V_string
+std_numeric_pack_64le(V_array values);
+
+// `std.numeric.unpack_64le`
+V_array
+std_numeric_unpack_64le(V_string text);
+
 // Create an object that is to be referenced as `std.numeric`.
 void
 create_bindings_numeric(V_object& result, API_Version version);

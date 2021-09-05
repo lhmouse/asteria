@@ -85,6 +85,120 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
 
 constexpr auto s_spaces = sref(" \f\n\r\t\v");
 
+ROCKET_CONST inline int64_t
+bswap_be(int64_t value) noexcept
+  { return static_cast<int64_t>(be64toh(static_cast<uint64_t>(value)));  }
+
+ROCKET_CONST inline int32_t
+bswap_be(int32_t value) noexcept
+  { return static_cast<int32_t>(be32toh(static_cast<uint32_t>(value)));  }
+
+ROCKET_CONST inline int16_t
+bswap_be(int16_t value) noexcept
+  { return static_cast<int16_t>(be16toh(static_cast<uint16_t>(value)));  }
+
+ROCKET_CONST inline int8_t
+bswap_be(int8_t value) noexcept
+  { return value;  }
+
+ROCKET_CONST inline int64_t
+bswap_le(int64_t value) noexcept
+  { return static_cast<int64_t>(le64toh(static_cast<uint64_t>(value)));  }
+
+ROCKET_CONST inline int32_t
+bswap_le(int32_t value) noexcept
+  { return static_cast<int32_t>(le32toh(static_cast<uint32_t>(value)));  }
+
+ROCKET_CONST inline int16_t
+bswap_le(int16_t value) noexcept
+  { return static_cast<int16_t>(le16toh(static_cast<uint16_t>(value)));  }
+
+ROCKET_CONST inline int8_t
+bswap_le(int8_t value) noexcept
+  { return value;  }
+
+template<typename WordT>
+V_string
+do_pack_be(const V_integer& value)
+  {
+    WordT word = bswap_be(static_cast<WordT>(value));
+    V_string text(reinterpret_cast<char*>(&word), sizeof(WordT));
+    return text;
+  }
+
+template<typename WordT>
+V_string
+do_pack_be(const V_array& values)
+  {
+    V_string text;
+    text.reserve(values.size() * sizeof(WordT));
+    for(const auto& value : values) {
+      WordT word = bswap_be(static_cast<WordT>(value.as_integer()));
+      text.append(reinterpret_cast<char*>(&word), sizeof(WordT));
+    }
+    return text;
+  }
+
+template<typename WordT>
+V_string
+do_pack_le(const V_integer& value)
+  {
+    WordT word = bswap_le(static_cast<WordT>(value));
+    V_string text(reinterpret_cast<char*>(&word), sizeof(WordT));
+    return text;
+  }
+
+template<typename WordT>
+V_string
+do_pack_le(const V_array& values)
+  {
+    V_string text;
+    text.reserve(values.size() * sizeof(WordT));
+    for(const auto& value : values) {
+      WordT word = bswap_le(static_cast<WordT>(value.as_integer()));
+      text.append(reinterpret_cast<char*>(&word), sizeof(WordT));
+    }
+    return text;
+  }
+
+template<typename WordT>
+V_array
+do_unpack_be(const V_string& text)
+  {
+    size_t nwords = text.size() / sizeof(WordT);
+    if(nwords * sizeof(WordT) != text.size())
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+
+    V_array values;
+    values.reserve(nwords);
+    for(size_t k = 0;  k != nwords;  ++k) {
+      WordT word;
+      ::std::memcpy(&word, text.data() + k * sizeof(WordT), sizeof(WordT));
+      values.emplace_back(V_integer(bswap_be(word)));
+    }
+    return values;
+  }
+
+template<typename WordT>
+V_array
+do_unpack_le(const V_string& text)
+  {
+    size_t nwords = text.size() / sizeof(WordT);
+    if(nwords * sizeof(WordT) != text.size())
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+
+    V_array values;
+    values.reserve(nwords);
+    for(size_t k = 0;  k != nwords;  ++k) {
+      WordT word;
+      ::std::memcpy(&word, text.data() + k * sizeof(WordT), sizeof(WordT));
+      values.emplace_back(V_integer(bswap_le(word)));
+    }
+    return values;
+  }
+
 }  // namespace
 
 V_integer
@@ -594,6 +708,132 @@ std_numeric_parse_real(V_string text, optV_boolean saturating)
         ASTERIA_THROW_RUNTIME_ERROR("real number overflow (text `$1`)", text);
     }
     return value;
+  }
+
+V_string
+std_numeric_pack_8(V_integer value)
+  {
+    return do_pack_be<int8_t>(value);
+  }
+
+V_string
+std_numeric_pack_8(V_array values)
+  {
+    return do_pack_be<int8_t>(values);
+  }
+
+V_array
+std_numeric_unpack_8(V_string text)
+  {
+    return do_unpack_be<int8_t>(text);
+  }
+
+V_string
+std_numeric_pack_16be(V_integer value)
+  {
+    return do_pack_be<int16_t>(value);
+  }
+
+V_string
+std_numeric_pack_16be(V_array values)
+  {
+    return do_pack_be<int16_t>(values);
+  }
+
+V_array
+std_numeric_unpack_16be(V_string text)
+  {
+    return do_unpack_be<int16_t>(text);
+  }
+
+V_string
+std_numeric_pack_16le(V_integer value)
+  {
+    return do_pack_le<int16_t>(value);
+  }
+
+V_string
+std_numeric_pack_16le(V_array values)
+  {
+    return do_pack_le<int16_t>(values);
+  }
+
+V_array
+std_numeric_unpack_16le(V_string text)
+  {
+    return do_unpack_le<int16_t>(text);
+  }
+
+V_string
+std_numeric_pack_32be(V_integer value)
+  {
+    return do_pack_be<int32_t>(value);
+  }
+
+V_string
+std_numeric_pack_32be(V_array values)
+  {
+    return do_pack_be<int32_t>(values);
+  }
+
+V_array
+std_numeric_unpack_32be(V_string text)
+  {
+    return do_unpack_be<int32_t>(text);
+  }
+
+V_string
+std_numeric_pack_32le(V_integer value)
+  {
+    return do_pack_le<int32_t>(value);
+  }
+
+V_string
+std_numeric_pack_32le(V_array values)
+  {
+    return do_pack_le<int32_t>(values);
+  }
+
+V_array
+std_numeric_unpack_32le(V_string text)
+  {
+    return do_unpack_le<int32_t>(text);
+  }
+
+V_string
+std_numeric_pack_64be(V_integer value)
+  {
+    return do_pack_be<int64_t>(value);
+  }
+
+V_string
+std_numeric_pack_64be(V_array values)
+  {
+    return do_pack_be<int64_t>(values);
+  }
+
+V_array
+std_numeric_unpack_64be(V_string text)
+  {
+    return do_unpack_be<int64_t>(text);
+  }
+
+V_string
+std_numeric_pack_64le(V_integer value)
+  {
+    return do_pack_le<int64_t>(value);
+  }
+
+V_string
+std_numeric_pack_64le(V_array values)
+  {
+    return do_pack_le<int64_t>(values);
+  }
+
+V_array
+std_numeric_unpack_64le(V_string text)
+  {
+    return do_unpack_le<int64_t>(text);
   }
 
 void
@@ -1111,6 +1351,258 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.optional(satur);
         if(reader.end_overload())
           return (Value)std_numeric_parse_real(text, satur);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_8"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_8", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_8(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_8(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_8"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_8", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_8(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_16be"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_16be", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_16be(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_16be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_16be"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_16be", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_16be(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_16le"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_16le", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_16le(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_16le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_16le"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_16le", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_16le(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_32be"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_32be", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_32be(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_32be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_32be"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_32be", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_32be(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_32le"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_32le", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_32le(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_32le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_32le"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_32le", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_32le(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_64be"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_64be", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_64be(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_64be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_64be"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_64be", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_64be(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_64le"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_64le", "values",
+        Argument_Reader&& reader)
+      {
+        V_integer val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_64le(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_64le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_64le"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_64le", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_64le(text);
 
         reader.throw_no_matching_function_call();
       });
