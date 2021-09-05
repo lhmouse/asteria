@@ -19,7 +19,7 @@ constexpr char s_strings_max[][24] = { "9999-01-01 00:00:00", "9999-01-01 00:00:
 
 constexpr int64_t s_timestamp_1600_03_01 = -11670912000'000;
 constexpr uint8_t s_month_days[] = { 31,30,31,30,31,31,30,31,30,31,31,29 };  // from March
-constexpr auto s_spaces = sref(" \f\n\r\t\v");
+constexpr char s_spaces[] = " \f\n\r\t\v";
 
 constexpr char s_nums_00_99[100][2] =
   {
