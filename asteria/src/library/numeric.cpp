@@ -83,39 +83,65 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
     return text;
   }
 
-constexpr auto s_spaces = sref(" \f\n\r\t\v");
-
-ROCKET_CONST inline int64_t
-bswap_be(int64_t value) noexcept
-  { return static_cast<int64_t>(be64toh(static_cast<uint64_t>(value)));  }
+ROCKET_CONST inline int16_t
+bswap_be(int16_t value) noexcept
+  {
+    auto& buf = reinterpret_cast<uint16_t&>(value);
+    buf = be16toh(buf);
+    return value;
+  }
 
 ROCKET_CONST inline int32_t
 bswap_be(int32_t value) noexcept
-  { return static_cast<int32_t>(be32toh(static_cast<uint32_t>(value)));  }
+  {
+    auto& buf = reinterpret_cast<uint32_t&>(value);
+    buf = be32toh(buf);
+    return value;
+  }
 
-ROCKET_CONST inline int16_t
-bswap_be(int16_t value) noexcept
-  { return static_cast<int16_t>(be16toh(static_cast<uint16_t>(value)));  }
+ROCKET_CONST inline int64_t
+bswap_be(int64_t value) noexcept
+  {
+    auto& buf = reinterpret_cast<uint64_t&>(value);
+    buf = be64toh(buf);
+    return value;
+  }
 
 ROCKET_CONST inline int8_t
 bswap_be(int8_t value) noexcept
-  { return value;  }
-
-ROCKET_CONST inline int64_t
-bswap_le(int64_t value) noexcept
-  { return static_cast<int64_t>(le64toh(static_cast<uint64_t>(value)));  }
-
-ROCKET_CONST inline int32_t
-bswap_le(int32_t value) noexcept
-  { return static_cast<int32_t>(le32toh(static_cast<uint32_t>(value)));  }
+  {
+    return value;
+  }
 
 ROCKET_CONST inline int16_t
 bswap_le(int16_t value) noexcept
-  { return static_cast<int16_t>(le16toh(static_cast<uint16_t>(value)));  }
+  {
+    auto& buf = reinterpret_cast<uint16_t&>(value);
+    buf = le16toh(buf);
+    return value;
+  }
+
+ROCKET_CONST inline int32_t
+bswap_le(int32_t value) noexcept
+  {
+    auto& buf = reinterpret_cast<uint32_t&>(value);
+    buf = le32toh(buf);
+    return value;
+  }
+
+ROCKET_CONST inline int64_t
+bswap_le(int64_t value) noexcept
+  {
+    auto& buf = reinterpret_cast<uint64_t&>(value);
+    buf = le64toh(buf);
+    return value;
+  }
 
 ROCKET_CONST inline int8_t
 bswap_le(int8_t value) noexcept
-  { return value;  }
+  {
+    return value;
+  }
 
 template<typename WordT>
 V_string
@@ -656,6 +682,7 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
 V_integer
 std_numeric_parse_integer(V_string text)
   {
+    static constexpr char s_spaces[] = " \f\n\r\t\v";
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR("blank string");
@@ -683,6 +710,7 @@ std_numeric_parse_integer(V_string text)
 V_real
 std_numeric_parse_real(V_string text, optV_boolean saturating)
   {
+    static constexpr char s_spaces[] = " \f\n\r\t\v";
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR("blank string");
