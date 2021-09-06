@@ -1349,11 +1349,7 @@ cast_U(uint64_t& value, uint64_t lower, uint64_t upper) noexcept
       value = upper;
       this->m_ovfl = true;
     }
-    if(this->m_stat != 0)
-      return *this;
-
-    // Report success if no error occurred.
-    this->m_succ = true;
+    this->m_succ = !this->m_stat;
     return *this;
   }
 
@@ -1471,11 +1467,7 @@ cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept
       value = upper;
       this->m_ovfl = true;
     }
-    if(this->m_stat != 0)
-      return *this;
-
-    // Report success if no error occurred.
-    this->m_succ = true;
+    this->m_succ = !this->m_stat;
     return *this;
   }
 
@@ -1605,11 +1597,7 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
       value = upper;
       this->m_ovfl = true;
     }
-    if(this->m_stat != 0)
-      return *this;
-
-    // Report success if no error occurred.
-    this->m_succ = true;
+    this->m_succ = !this->m_stat;
     return *this;
   }
 
