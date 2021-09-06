@@ -284,7 +284,7 @@ struct is_any_type_of<targetT, firstT, restT...>
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
-ranged_for(firstT first, lastT last, funcT&& func, const paramsT&... params)
+for_range(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
     for(auto qit = ::std::move(first); qit != last; ++qit)
       ::std::forward<funcT>(func)(qit, params...);

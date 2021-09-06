@@ -170,7 +170,7 @@ do_xput_I_exp(char*& ep, const int& exp)
     do_xput_U_bkwd(tbp, do_cast_U(::std::abs(exp)), 10, 2);
 
     // Append the exponent.
-    ranged_for(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
+    for_range(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
     return ep;
   }
 
@@ -1334,7 +1334,7 @@ put_BF(double value, bool single) noexcept
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
+        for_range(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_bin(ep, mant, nullptr);
       }
       else {
@@ -1452,7 +1452,7 @@ put_XF(double value, bool single) noexcept
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
+        for_range(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_hex(ep, mant, nullptr);
       }
       else
@@ -1565,7 +1565,7 @@ put_DF(double value, bool single) noexcept
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
+        for_range(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_dec(ep, mant, nullptr);
       }
       else
