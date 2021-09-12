@@ -10,7 +10,11 @@
 
 namespace asteria {
 
-const char repl_version[] = PACKAGE_STRING;
+const char repl_package_version[] = PACKAGE_STRING;
+const char repl_version[] = VERSION;
+const char repl_url[] = PACKAGE_URL;
+const char repl_bug_report[] = PACKAGE_BUGREPORT;
+
 bool repl_verbose;
 bool repl_interactive;
 Simple_Script repl_script;

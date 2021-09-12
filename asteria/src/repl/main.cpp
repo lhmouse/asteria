@@ -53,8 +53,8 @@ Report bugs to <%s>.
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
       self,
-      PACKAGE_URL,
-      PACKAGE_BUGREPORT);
+      repl_url,
+      repl_bug_report);
 
     ::quick_exit(0);
   }
@@ -73,9 +73,9 @@ Report bugs to <%s>.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
-      PACKAGE_STRING,
-      PACKAGE_URL,
-      PACKAGE_BUGREPORT);
+      repl_package_version,
+      repl_url,
+      repl_bug_report);
 
     ::quick_exit(0);
   }
@@ -233,9 +233,8 @@ main(int argc, char** argv)
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
-      PACKAGE_STRING,
-      current_locale
-    );
+      repl_package_version,
+      current_locale);
 
     prepare_repl_commands();
 
