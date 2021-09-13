@@ -695,6 +695,18 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
+`std.string.iconv(to_encoding, text, [from_encoding])`
+
+	* Converts `text` from `from_encoding` to `to_encoding`. This
+	  function is a wrapper for the operating system's iconv library,
+	  and accepts the same set of encoding names. If `from_encoding`
+	  is absent, `"UTF-8"` is assumed.
+
+	* Returns the converted text as a bytes string.
+
+	* Throws an exception in case of invalid encodings or invalid
+	  input string.
+
 ### `std.array`
 
 `std.array.slice(data, from, [length])`

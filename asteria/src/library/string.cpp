@@ -6,6 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
+#include <iconv.h>
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
 
@@ -362,6 +363,28 @@ struct PCRE2_Name
   {
     uint16_t index_be;
     char name[];
+  };
+
+struct iconv_closer
+  {
+    using handle_type  = ::iconv_t;
+    using closer_type  = decltype(::iconv_close)*;
+
+    constexpr operator
+    closer_type() const noexcept
+      { return ::iconv_close;  }
+
+    handle_type
+    null() const noexcept
+      { return (::iconv_t)-1;  }
+
+    bool
+    is_null(handle_type cd) const noexcept
+      { return cd == (::iconv_t)-1;  }
+
+    int
+    close(handle_type cd) const noexcept
+      { return ::iconv_close(cd);  }
   };
 
 }  // namespace
@@ -1469,6 +1492,46 @@ std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_st
     return output_str;
   }
 
+V_string
+std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
+  {
+    const char* to_enc = to_encoding.safe_c_str();
+    const char* from_enc = "UTF-8";
+    if(from_encoding)
+      from_enc = from_encoding->safe_c_str();
+
+    // Create the descriptor.
+    ::rocket::unique_handle<::iconv_t, iconv_closer> qcd;
+    if(!qcd.reset(::iconv_open(to_enc, from_enc)))
+      ASTERIA_THROW_RUNTIME_ERROR(
+             "could not create iconv context\n"
+             "[`iconv_open()` failed: $1]\n"
+             "[converting to encoding `$2` from `$3`]",
+             format_errno(errno), to_enc, from_enc);
+
+    // Perform bytewise conversion.
+    V_string output;
+    char temp[64];
+    const char* inp = text.c_str();
+    size_t inc = text.size();
+
+    while(inc != 0) {
+      char* outp = temp;
+      size_t outc = sizeof(temp);
+
+      size_t r = ::iconv(qcd, const_cast<char**>(&inp), &inc, &outp, &outc);
+      output.append(temp, outp);
+      if((r == (size_t)-1) && (errno != E2BIG))
+        ASTERIA_THROW_RUNTIME_ERROR(
+               "invalid input byte at offset `$4`\n"
+               "[`iconv()` failed: $1]\n"
+               "[converting to encoding `$2` from `$3`]",
+               format_errno(errno), to_enc, from_enc,
+               inp - text.c_str());
+    }
+    return output;
+  }
+
 void
 create_bindings_string(V_object& result, API_Version /*version*/)
   {
@@ -2352,6 +2415,24 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(rep);
         if(reader.end_overload())
           return (Value)std_string_pcre_replace(text, from, len, patt, rep);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("iconv"),
+      ASTERIA_BINDING(
+        "std.string.iconv", "to_encoding, text, [from_encoding]",
+        Argument_Reader&& reader)
+      {
+        V_string to_encoding, text;
+        optV_string from_encoding;
+
+        reader.start_overload();
+        reader.required(to_encoding);
+        reader.required(text);
+        reader.optional(from_encoding);
+        if(reader.end_overload())
+          return (Value)std_string_iconv(to_encoding, text, from_encoding);
 
         reader.throw_no_matching_function_call();
       });

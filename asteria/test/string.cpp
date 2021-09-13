@@ -345,6 +345,16 @@ int main()
         assert std.string.pcre_replace("a11b2c333d4e555", '(\d{3})(\w)', '$2$1') == "a11b2cd3334e555";
         assert std.string.pcre_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";
 
+        assert std.string.iconv("UTF-16", "") == "";
+        try { std.string.iconv("invalid encoding", "");  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        try { std.string.iconv("UTF-8", "", "invalid encoding");  assert false;  }
+          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        assert std.string.iconv("GB18030", "CAT猫") == "\x43\x41\x54\xC3\xA8";
+        assert std.string.iconv("SHIFT-JIS", "CAT猫") == "\x43\x41\x54\x94\x4C";
+        assert std.string.iconv("UTF-8", "\x43\x41\x54\xC3\xA8", "GB18030") == "CAT猫";
+        assert std.string.iconv("UTF-8", "\x43\x41\x54\x94\x4C", "SHIFT-JIS") == "CAT猫";
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     code.execute();

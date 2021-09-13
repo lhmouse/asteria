@@ -176,6 +176,10 @@ std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, 
 V_string
 std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement);
 
+// `std.string.iconv`
+V_string
+std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding);
+
 // Create an object that is to be referenced as `std.string`.
 void
 create_bindings_string(V_object& result, API_Version version);
