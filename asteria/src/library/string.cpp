@@ -336,15 +336,16 @@ class PCRE2_Matcher
         if(!this->m_code.reset(::pcre2_compile(
               reinterpret_cast<const uint8_t*>(pattern.data()), pattern.size(),
               opts | PCRE2_NEVER_UTF | PCRE2_NEVER_UCP, &err, &off, nullptr)))
-          ASTERIA_THROW_RUNTIME_ERROR("invalid regular expression: $1\n"
-                        "[`pcre2_compile()` failed at offset `$3`: $2]",
-                        pattern, PCRE2_Error(err), off);
+          ASTERIA_THROW_RUNTIME_ERROR(
+                 "invalid regular expression: $1\n"
+                 "[`pcre2_compile()` failed at offset `$3`: $2]",
+                 pattern, PCRE2_Error(err), off);
 
-        if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(
-              this->m_code, nullptr)))
-          ASTERIA_THROW_RUNTIME_ERROR("could not allocate `match_data` structure: $1\n"
-                        "[`pcre2_match_data_create_from_pattern()` failed]",
-                        pattern);
+        if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(this->m_code, nullptr)))
+          ASTERIA_THROW_RUNTIME_ERROR(
+                 "could not allocate `match_data` structure: $1\n"
+                 "[`pcre2_match_data_create_from_pattern()` failed]",
+                 pattern);
       }
 
   public:
@@ -790,6 +791,7 @@ std_string_hex_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW_RUNTIME_ERROR("unpaired hexadecimal digit");
+
         continue;
       }
       reg <<= 4;
@@ -810,6 +812,7 @@ std_string_hex_decode(V_string text)
     }
     if(reg != 1)
       ASTERIA_THROW_RUNTIME_ERROR("unpaired hexadecimal digit");
+
     return data;
   }
 
@@ -886,6 +889,7 @@ std_string_base32_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW_RUNTIME_ERROR("incomplete base32 group");
+
         continue;
       }
       reg <<= 5;
@@ -928,6 +932,7 @@ std_string_base32_decode(V_string text)
     }
     if(reg != 1)
       ASTERIA_THROW_RUNTIME_ERROR("incomplete base32 group");
+
     return data;
   }
 
@@ -1004,6 +1009,7 @@ std_string_base64_decode(V_string text)
         // The character is a whitespace.
         if(reg != 1)
           ASTERIA_THROW_RUNTIME_ERROR("incomplete base64 group");
+
         continue;
       }
       reg <<= 6;
@@ -1047,6 +1053,7 @@ std_string_base64_decode(V_string text)
     }
     if(reg != 1)
       ASTERIA_THROW_RUNTIME_ERROR("incomplete base64 group");
+
     return data;
   }
 
@@ -1236,6 +1243,7 @@ std_string_utf8_encode(V_array code_points, optV_boolean permissive)
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
           ASTERIA_THROW_RUNTIME_ERROR("invalid UTF code point (value `$1`)", value);
+
         utf8_encode(text, 0xFFFD);
       }
     }
@@ -1256,6 +1264,7 @@ std_string_utf8_decode(V_string text, optV_boolean permissive)
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true)
           ASTERIA_THROW_RUNTIME_ERROR("invalid UTF-8 string");
+
         cp = text[offset++] & 0xFF;
       }
       code_points.emplace_back(V_integer(cp));
@@ -1295,9 +1304,10 @@ std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_strin
       if(err == PCRE2_ERROR_NOMATCH)
         return nullopt;
 
-      ASTERIA_THROW_RUNTIME_ERROR("regular expression match failure: $1\n"
-                    "[`pcre2_match()` failed: $2]",
-                    pattern, PCRE2_Error(err));
+      ASTERIA_THROW_RUNTIME_ERROR(
+             "regular expression match failure: $1\n"
+             "[`pcre2_match()` failed: $2]",
+             pattern, PCRE2_Error(err));
     }
     auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
 
@@ -1306,8 +1316,9 @@ std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_strin
     //   start of a successful match can be greater than the end of the match. For example,
     //   if the pattern (?=ab\K) is matched against "ab", the start and end offset values
     //   for the match are 2 and 0.
-    return ::std::make_pair(static_cast<int64_t>(sub_off + ovec[0]),
-                            static_cast<int64_t>(::std::max(ovec[0], ovec[1]) - ovec[0]));
+    return ::std::make_pair(
+               static_cast<int64_t>(sub_off + ovec[0]),
+               static_cast<int64_t>(::std::max(ovec[0], ovec[1]) - ovec[0]));
   }
 
 optV_array
@@ -1327,9 +1338,10 @@ std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_stri
       if(err == PCRE2_ERROR_NOMATCH)
         return nullopt;
 
-      ASTERIA_THROW_RUNTIME_ERROR("regular expression match failure: $1\n"
-                    "[`pcre2_match()` failed: $2]",
-                    pattern, PCRE2_Error(err));
+      ASTERIA_THROW_RUNTIME_ERROR(
+             "regular expression match failure: $1\n"
+             "[`pcre2_match()` failed: $2]",
+             pattern, PCRE2_Error(err));
     }
     auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
     size_t npairs = ::pcre2_get_ovector_count(pcre.match());
@@ -1370,9 +1382,10 @@ std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, 
       if(err == PCRE2_ERROR_NOMATCH)
         return nullopt;
 
-      ASTERIA_THROW_RUNTIME_ERROR("regular expression match failure: $1\n"
-                    "[`pcre2_match()` failed: $2]",
-                    pattern, PCRE2_Error(err));
+      ASTERIA_THROW_RUNTIME_ERROR(
+             "regular expression match failure: $1\n"
+             "[`pcre2_match()` failed: $2]",
+             pattern, PCRE2_Error(err));
     }
     auto ovec = ::pcre2_get_ovector_pointer(pcre.match());
 
@@ -1440,9 +1453,10 @@ std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_st
       if(err == PCRE2_ERROR_NOMEMORY)
         goto r;
 
-      ASTERIA_THROW_RUNTIME_ERROR("regular expression substitution failure: $1\n"
-                    "[`pcre2_substitute()` failed: $2]",
-                    pattern, PCRE2_Error(err));
+      ASTERIA_THROW_RUNTIME_ERROR(
+             "regular expression substitution failure: $1\n"
+             "[`pcre2_substitute()` failed: $2]",
+             pattern, PCRE2_Error(err));
     }
 
     // Discard excess characters.
@@ -1568,10 +1582,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.find", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt;
         V_integer from;
         optV_integer len;
-        V_string patt;
 
         reader.start_overload();
         reader.required(text);
@@ -1601,10 +1614,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.rfind", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt;
         V_integer from;
         optV_integer len;
-        V_string patt;
 
         reader.start_overload();
         reader.required(text);
@@ -1634,11 +1646,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.find_and_replace", "text, [from, [length]], pattern, replacement",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt, rep;
         V_integer from;
         optV_integer len;
-        V_string patt;
-        V_string rep;
 
         reader.start_overload();
         reader.required(text);
@@ -2220,10 +2230,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.pcre_find", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt;
         V_integer from;
         optV_integer len;
-        V_string patt;
 
         reader.start_overload();
         reader.required(text);
@@ -2253,10 +2262,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.pcre_match", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt;
         V_integer from;
         optV_integer len;
-        V_string patt;
 
         reader.start_overload();
         reader.required(text);
@@ -2286,10 +2294,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.pcre_named_match", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt;
         V_integer from;
         optV_integer len;
-        V_string patt;
 
         reader.start_overload();
         reader.required(text);
@@ -2319,11 +2326,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         "std.string.pcre_replace", "text, [from, [length]], pattern, replacement",
         Argument_Reader&& reader)
       {
-        V_string text;
+        V_string text, patt, rep;
         V_integer from;
         optV_integer len;
-        V_string patt;
-        V_string rep;
 
         reader.start_overload();
         reader.required(text);
