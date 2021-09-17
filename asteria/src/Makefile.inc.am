@@ -139,7 +139,7 @@ lib_libasteria_la_SOURCES =  \
   ${NOTHING}
 
 lib_libasteria_la_LIBADD =  \
-  lib/librocket.la
+  lib/librocket.la ${LTLIBICONV}
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
