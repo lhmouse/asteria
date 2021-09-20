@@ -2,6 +2,7 @@
 AC_INIT([Asteria], [master], [lh_mouse@126.com], [asteria], [https://github.com/lhmouse/asteria])
 AC_CONFIG_SRCDIR([asteria/src/simple_script.cpp])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_CXX
