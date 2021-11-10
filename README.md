@@ -84,7 +84,7 @@ There are 9 data types:
 
 |**Asteria**  |**JavaScript**  |**Java**   |**C++**                       |**Remarks**                                        |
 |:------------|:---------------|:----------|:-----------------------------|:--------------------------------------------------|
-|`null`       |`undefined`     |N/A        |`std::nullptr_t`              |                                                   |
+|`null`       |[Undefined](https://262.ecma-international.org/12.0/#sec-ecmascript-data-types-and-values)     |the [*null type*](https://docs.oracle.com/javase/specs/jls/se16/html/jls-4.html#jls-4.1)|[`std::nullptr_t`](http://www.eel.is/c++draft/lex.nullptr#1)| |
 |`boolean`    |`Boolean`       |`boolean`  |`bool`                        |                                                   |
 |`integer`    |N/A             |`long`     |`std::int64_t`                |signed 64-bit integer in two's complement          |
 |`real`       |`Number`        |`double`   |`double`                      |IEEE-754 double-precision floating-point number    |
