@@ -102,10 +102,20 @@ class variant
         ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         auto index_new = other.m_index;
-        // Move-construct the active alternative in place.
-        details_variant::dispatch_move_construct<altsT...>(
-                    index_new, this->m_stor, other.m_stor);
-        this->m_index = index_new;
+        if(is_trivial<typename alternative_at<0>::type>::value) {
+          // Destroy the moved value so we don't have to invoke its destructor
+          // later, which is an indirect call.
+          details_variant::dispatch_move_then_destroy<altsT...>(
+                      index_new, this->m_stor, other.m_stor);
+          this->m_index = index_new;
+          other.m_index = 0;
+        }
+        else {
+          // Move-construct the active alternative in place.
+          details_variant::dispatch_move_construct<altsT...>(
+                      index_new, this->m_stor, other.m_stor);
+          this->m_index = index_new;
+        }
       }
 
     // 23.7.3.3, assignment
@@ -229,6 +239,16 @@ class variant
           details_variant::dispatch_move_assign<altsT...>(
                     index_new, this->m_stor, other.m_stor);
           ROCKET_ASSERT(this->m_index == index_new);
+        }
+        else if(is_trivial<typename alternative_at<0>::type>::value) {
+          // Destroy the moved value so we don't have to call its destructor
+          // later, which is indirect.
+          details_variant::dispatch_destroy<altsT...>(
+                    index_old, this->m_stor);
+          details_variant::dispatch_move_then_destroy<altsT...>(
+                    index_new, this->m_stor, other.m_stor);
+          this->m_index = index_new;
+          other.m_index = 0;
         }
         else {
           // Move-construct the alternative in place.
