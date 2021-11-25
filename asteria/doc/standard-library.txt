@@ -1383,7 +1383,7 @@
 
 	* Throws an exception on failure.
 
-`std.numeric.pack_8(values)`
+`std.numeric.pack_i8(values)`
 
 	* Packs a series of 8-bit integers into a string. `values` can be
 	  either an integer or an array of integers, all of which are
@@ -1391,7 +1391,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_8(text)`
+`std.numeric.unpack_i8(text)`
 
 	* Unpacks 8-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 8-bit integers, all of
@@ -1399,7 +1399,7 @@
 
 	* Returns an array containing unpacked integers.
 
-`std.numeric.pack_16be(values)`
+`std.numeric.pack_i16be(values)`
 
 	* Packs a series of 16-bit integers into a string. `values` can
 	  be either an integer or an array of integers, all of which are
@@ -1408,7 +1408,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_16be(text)`
+`std.numeric.unpack_i16be(text)`
 
 	* Unpacks 16-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 16-bit integers in
@@ -1420,7 +1420,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
-`std.numeric.pack_16le(values)`
+`std.numeric.pack_i16le(values)`
 
 	* Packs a series of 16-bit integers into a string. `values` can
 	  be either an integer or an array of integers, all of which are
@@ -1429,7 +1429,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_16le(text)`
+`std.numeric.unpack_i16le(text)`
 
 	* Unpacks 16-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 16-bit integers in
@@ -1441,7 +1441,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
-`std.numeric.pack_32be(values)`
+`std.numeric.pack_i32be(values)`
 
 	* Packs a series of 32-bit integers into a string. `values` can
 	  be either an integer or an array of integers, all of which are
@@ -1450,7 +1450,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_32be(text)`
+`std.numeric.unpack_i32be(text)`
 
 	* Unpacks 32-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 32-bit integers in
@@ -1462,7 +1462,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
-`std.numeric.pack_32le(values)`
+`std.numeric.pack_i32le(values)`
 
 	* Packs a series of 32-bit integers into a string. `values` can
 	  be either an integer or an array of integers, all of which are
@@ -1471,7 +1471,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_32le(text)`
+`std.numeric.unpack_i32le(text)`
 
 	* Unpacks 32-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 32-bit integers in
@@ -1483,7 +1483,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
-`std.numeric.pack_64be(values)`
+`std.numeric.pack_i64be(values)`
 
 	* Packs a series of 64-bit integers into a string. `values` can
 	  be either an integer or an array of integers, all of which are
@@ -1491,7 +1491,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_64be(text)`
+`std.numeric.unpack_i64be(text)`
 
 	* Unpacks 64-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 64-bit integers in
@@ -1502,7 +1502,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
-`std.numeric.pack_64le(values)`
+`std.numeric.pack_i64le(values)`
 
 	* Packs a series of 64-bit integers into a string. `values` can
 	  be either an integer or an array of integer, all of which
@@ -1510,7 +1510,7 @@
 
 	* Returns the packed string.
 
-`std.numeric.unpack_64le(text)`
+`std.numeric.unpack_i64le(text)`
 
 	* Unpacks 64-bit integers from a string. The contents of `text`
 	  are re-interpreted as contiguous signed 64-bit integers in

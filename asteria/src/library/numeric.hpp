@@ -150,80 +150,80 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase);
 Value
 std_numeric_parse(V_string text);
 
-// `std.numeric.pack_8`
+// `std.numeric.pack_i8`
 V_string
 std_numeric_pack_8(V_integer value);
 
 V_string
 std_numeric_pack_8(V_array values);
 
-// `std.numeric.unpack_8`
+// `std.numeric.unpack_i8`
 V_array
 std_numeric_unpack_8(V_string text);
 
-// `std.numeric.pack_16be`
+// `std.numeric.pack_i16be`
 V_string
 std_numeric_pack_16be(V_integer value);
 
 V_string
 std_numeric_pack_16be(V_array values);
 
-// `std.numeric.unpack_16be`
+// `std.numeric.unpack_i16be`
 V_array
 std_numeric_unpack_16be(V_string text);
 
-// `std.numeric.pack_16le`
+// `std.numeric.pack_i16le`
 V_string
 std_numeric_pack_16le(V_integer value);
 
 V_string
 std_numeric_pack_16le(V_array values);
 
-// `std.numeric.unpack_16le`
+// `std.numeric.unpack_i16le`
 V_array
 std_numeric_unpack_16le(V_string text);
 
-// `std.numeric.pack_32be`
+// `std.numeric.pack_i32be`
 V_string
 std_numeric_pack_32be(V_integer value);
 
 V_string
 std_numeric_pack_32be(V_array values);
 
-// `std.numeric.unpack_32be`
+// `std.numeric.unpack_i32be`
 V_array
 std_numeric_unpack_32be(V_string text);
 
-// `std.numeric.pack_32le`
+// `std.numeric.pack_i32le`
 V_string
 std_numeric_pack_32le(V_integer value);
 
 V_string
 std_numeric_pack_32le(V_array values);
 
-// `std.numeric.unpack_32le`
+// `std.numeric.unpack_i32le`
 V_array
 std_numeric_unpack_32le(V_string text);
 
-// `std.numeric.pack_64be`
+// `std.numeric.pack_i64be`
 V_string
 std_numeric_pack_64be(V_integer value);
 
 V_string
 std_numeric_pack_64be(V_array values);
 
-// `std.numeric.unpack_64be`
+// `std.numeric.unpack_i64be`
 V_array
 std_numeric_unpack_64be(V_string text);
 
-// `std.numeric.pack_64le`
+// `std.numeric.pack_i64le`
 V_string
 std_numeric_pack_64le(V_integer value);
 
 V_string
 std_numeric_pack_64le(V_array values);
 
-// `std.numeric.unpack_64le`
+// `std.numeric.unpack_i64le`
 V_array
 std_numeric_unpack_64le(V_string text);
 
