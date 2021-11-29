@@ -83,144 +83,155 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
     return text;
   }
 
-ROCKET_CONST inline int16_t
-bswap_be(int16_t value) noexcept
+inline void
+bswap_be(int8_t& value) noexcept
   {
-    auto& buf = reinterpret_cast<uint16_t&>(value);
+    (void)value;
+  }
+
+inline void
+bswap_le(int8_t& value) noexcept
+  {
+    (void)value;
+  }
+
+inline void
+bswap_be(int16_t& value) noexcept
+  {
+    uint16_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
     buf = be16toh(buf);
-    return value;
+    ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-ROCKET_CONST inline int32_t
-bswap_be(int32_t value) noexcept
+inline void
+bswap_le(int16_t& value) noexcept
   {
-    auto& buf = reinterpret_cast<uint32_t&>(value);
-    buf = be32toh(buf);
-    return value;
-  }
-
-ROCKET_CONST inline int64_t
-bswap_be(int64_t value) noexcept
-  {
-    auto& buf = reinterpret_cast<uint64_t&>(value);
-    buf = be64toh(buf);
-    return value;
-  }
-
-ROCKET_CONST inline int8_t
-bswap_be(int8_t value) noexcept
-  {
-    return value;
-  }
-
-ROCKET_CONST inline int16_t
-bswap_le(int16_t value) noexcept
-  {
-    auto& buf = reinterpret_cast<uint16_t&>(value);
+    uint16_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
     buf = le16toh(buf);
-    return value;
+    ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-ROCKET_CONST inline int32_t
-bswap_le(int32_t value) noexcept
+inline void
+bswap_be(int32_t& value) noexcept
   {
-    auto& buf = reinterpret_cast<uint32_t&>(value);
+    uint32_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
+    buf = be32toh(buf);
+    ::std::memcpy(&value, &buf, sizeof(value));
+  }
+
+inline void
+bswap_le(int32_t& value) noexcept
+  {
+    uint32_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
     buf = le32toh(buf);
-    return value;
+    ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-ROCKET_CONST inline int64_t
-bswap_le(int64_t value) noexcept
+inline void
+bswap_be(int64_t& value) noexcept
   {
-    auto& buf = reinterpret_cast<uint64_t&>(value);
+    uint64_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
+    buf = be64toh(buf);
+    ::std::memcpy(&value, &buf, sizeof(value));
+  }
+
+inline void
+bswap_le(int64_t& value) noexcept
+  {
+    uint64_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
     buf = le64toh(buf);
-    return value;
+    ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-ROCKET_CONST inline int8_t
-bswap_le(int8_t value) noexcept
+inline void
+bswap_be(float& value) noexcept
   {
-    return value;
+    uint32_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
+    buf = be32toh(buf);
+    ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-template<typename WordT>
+inline void
+bswap_le(float& value) noexcept
+  {
+    uint32_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
+    buf = le32toh(buf);
+    ::std::memcpy(&value, &buf, sizeof(value));
+  }
+
+inline void
+bswap_be(double& value) noexcept
+  {
+    uint64_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
+    buf = be64toh(buf);
+    ::std::memcpy(&value, &buf, sizeof(value));
+  }
+
+inline void
+bswap_le(double& value) noexcept
+  {
+    uint64_t buf;
+    ::std::memcpy(&buf, &value, sizeof(value));
+    buf = le64toh(buf);
+    ::std::memcpy(&value, &buf, sizeof(value));
+  }
+
+template<typename WordT, typename ValueT>
 V_string
-do_pack_be(const V_integer& value)
+do_pack(void bswap(WordT&), const ValueT& value)
   {
-    WordT word = bswap_be(static_cast<WordT>(value));
-    V_string text(reinterpret_cast<char*>(&word), sizeof(WordT));
-    return text;
-  }
-
-template<typename WordT>
-V_string
-do_pack_be(const V_array& values)
-  {
+    union { WordT word;  char bytes[1];  } un;
     V_string text;
-    text.reserve(values.size() * sizeof(WordT));
-    for(const auto& value : values) {
-      WordT word = bswap_be(static_cast<WordT>(value.as_integer()));
-      text.append(reinterpret_cast<char*>(&word), sizeof(WordT));
-    }
+
+    un.word = static_cast<WordT>(value);
+    (*bswap)(un.word);
+    text.append(un.bytes, sizeof(un));
     return text;
   }
 
-template<typename WordT>
+template<typename WordT, typename ValueT>
 V_string
-do_pack_le(const V_integer& value)
+do_pack(void bswap(WordT&), ValueT (Value::*access)() const, const V_array& values)
   {
-    WordT word = bswap_le(static_cast<WordT>(value));
-    V_string text(reinterpret_cast<char*>(&word), sizeof(WordT));
-    return text;
-  }
-
-template<typename WordT>
-V_string
-do_pack_le(const V_array& values)
-  {
+    union { WordT word;  char bytes[1];  } un;
     V_string text;
-    text.reserve(values.size() * sizeof(WordT));
-    for(const auto& value : values) {
-      WordT word = bswap_le(static_cast<WordT>(value.as_integer()));
-      text.append(reinterpret_cast<char*>(&word), sizeof(WordT));
+
+    text.reserve(values.size() * sizeof(un));
+    for(const auto& val : values) {
+      un.word = static_cast<WordT>((val.*access)());
+      (*bswap)(un.word);
+      text.append(un.bytes, sizeof(un));
     }
     return text;
   }
 
-template<typename WordT>
+template<typename WordT, typename ValueT>
 V_array
-do_unpack_be(const V_string& text)
+do_unpack(void bswap(WordT&), const V_string& text)
   {
-    size_t nwords = text.size() / sizeof(WordT);
-    if(nwords * sizeof(WordT) != text.size())
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
-
+    union { WordT word;  char bytes[1];  } un;
     V_array values;
-    values.reserve(nwords);
-    for(size_t k = 0;  k != nwords;  ++k) {
-      WordT word;
-      ::std::memcpy(&word, text.data() + k * sizeof(WordT), sizeof(WordT));
-      values.emplace_back(V_integer(bswap_be(word)));
-    }
-    return values;
-  }
 
-template<typename WordT>
-V_array
-do_unpack_le(const V_string& text)
-  {
-    size_t nwords = text.size() / sizeof(WordT);
-    if(nwords * sizeof(WordT) != text.size())
+    if(text.size() / sizeof(un) * sizeof(un) != text.size())
       ASTERIA_THROW_RUNTIME_ERROR(
-          "string length `$1` not divisible by `$2`", text.size(), sizeof(WordT));
+            "string length `$1` not divisible by `$2`",
+            text.size(), sizeof(un));
 
-    V_array values;
-    values.reserve(nwords);
-    for(size_t k = 0;  k != nwords;  ++k) {
-      WordT word;
-      ::std::memcpy(&word, text.data() + k * sizeof(WordT), sizeof(WordT));
-      values.emplace_back(V_integer(bswap_le(word)));
+    values.reserve(text.size() / sizeof(un));
+    size_t offset = 0;
+    while(text.copy(offset, un.bytes, sizeof(un)) != 0) {
+      offset += sizeof(un);
+      (*bswap)(un.word);
+      values.emplace_back(static_cast<ValueT>(un.word));
     }
     return values;
   }
@@ -718,127 +729,199 @@ std_numeric_parse(V_string text)
 V_string
 std_numeric_pack_i8(V_integer value)
   {
-    return do_pack_be<int8_t>(value);
+    return do_pack<int8_t, V_integer>(bswap_be, value);
   }
 
 V_string
 std_numeric_pack_i8(V_array values)
   {
-    return do_pack_be<int8_t>(values);
+    return do_pack<int8_t, V_integer>(bswap_be, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i8(V_string text)
   {
-    return do_unpack_be<int8_t>(text);
+    return do_unpack<int8_t, V_integer>(bswap_be, text);
   }
 
 V_string
 std_numeric_pack_i16be(V_integer value)
   {
-    return do_pack_be<int16_t>(value);
+    return do_pack<int16_t, V_integer>(bswap_be, value);
   }
 
 V_string
 std_numeric_pack_i16be(V_array values)
   {
-    return do_pack_be<int16_t>(values);
+    return do_pack<int16_t, V_integer>(bswap_be, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i16be(V_string text)
   {
-    return do_unpack_be<int16_t>(text);
+    return do_unpack<int16_t, V_integer>(bswap_be, text);
   }
 
 V_string
 std_numeric_pack_i16le(V_integer value)
   {
-    return do_pack_le<int16_t>(value);
+    return do_pack<int16_t, V_integer>(bswap_le, value);
   }
 
 V_string
 std_numeric_pack_i16le(V_array values)
   {
-    return do_pack_le<int16_t>(values);
+    return do_pack<int16_t, V_integer>(bswap_le, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i16le(V_string text)
   {
-    return do_unpack_le<int16_t>(text);
+    return do_unpack<int16_t, V_integer>(bswap_le, text);
   }
 
 V_string
 std_numeric_pack_i32be(V_integer value)
   {
-    return do_pack_be<int32_t>(value);
+    return do_pack<int32_t, V_integer>(bswap_be, value);
   }
 
 V_string
 std_numeric_pack_i32be(V_array values)
   {
-    return do_pack_be<int32_t>(values);
+    return do_pack<int32_t, V_integer>(bswap_be, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i32be(V_string text)
   {
-    return do_unpack_be<int32_t>(text);
+    return do_unpack<int32_t, V_integer>(bswap_be, text);
   }
 
 V_string
 std_numeric_pack_i32le(V_integer value)
   {
-    return do_pack_le<int32_t>(value);
+    return do_pack<int32_t, V_integer>(bswap_le, value);
   }
 
 V_string
 std_numeric_pack_i32le(V_array values)
   {
-    return do_pack_le<int32_t>(values);
+    return do_pack<int32_t, V_integer>(bswap_le, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i32le(V_string text)
   {
-    return do_unpack_le<int32_t>(text);
+    return do_unpack<int32_t, V_integer>(bswap_le, text);
   }
 
 V_string
 std_numeric_pack_i64be(V_integer value)
   {
-    return do_pack_be<int64_t>(value);
+    return do_pack<int64_t, V_integer>(bswap_be, value);
   }
 
 V_string
 std_numeric_pack_i64be(V_array values)
   {
-    return do_pack_be<int64_t>(values);
+    return do_pack<int64_t, V_integer>(bswap_be, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i64be(V_string text)
   {
-    return do_unpack_be<int64_t>(text);
+    return do_unpack<int64_t, V_integer>(bswap_be, text);
   }
 
 V_string
 std_numeric_pack_i64le(V_integer value)
   {
-    return do_pack_le<int64_t>(value);
+    return do_pack<int64_t, V_integer>(bswap_le, value);
   }
 
 V_string
 std_numeric_pack_i64le(V_array values)
   {
-    return do_pack_le<int64_t>(values);
+    return do_pack<int64_t, V_integer>(bswap_le, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i64le(V_string text)
   {
-    return do_unpack_le<int64_t>(text);
+    return do_unpack<int64_t, V_integer>(bswap_le, text);
+  }
+
+V_string
+std_numeric_pack_f32be(V_real value)
+  {
+    return do_pack<float, V_real>(bswap_be, value);
+  }
+
+V_string
+std_numeric_pack_f32be(V_array values)
+  {
+    return do_pack<float, V_real>(bswap_be, &Value::as_real, values);
+  }
+
+V_array
+std_numeric_unpack_f32be(V_string text)
+  {
+    return do_unpack<float, V_real>(bswap_be, text);
+  }
+
+V_string
+std_numeric_pack_f32le(V_real value)
+  {
+    return do_pack<float, V_real>(bswap_le, value);
+  }
+
+V_string
+std_numeric_pack_f32le(V_array values)
+  {
+    return do_pack<float, V_real>(bswap_le, &Value::as_real, values);
+  }
+
+V_array
+std_numeric_unpack_f32le(V_string text)
+  {
+    return do_unpack<float, V_real>(bswap_le, text);
+  }
+
+V_string
+std_numeric_pack_f64be(V_real value)
+  {
+    return do_pack<double, V_real>(bswap_be, value);
+  }
+
+V_string
+std_numeric_pack_f64be(V_array values)
+  {
+    return do_pack<double, V_real>(bswap_be, &Value::as_real, values);
+  }
+
+V_array
+std_numeric_unpack_f64be(V_string text)
+  {
+    return do_unpack<double, V_real>(bswap_be, text);
+  }
+
+V_string
+std_numeric_pack_f64le(V_real value)
+  {
+    return do_pack<double, V_real>(bswap_le, value);
+  }
+
+V_string
+std_numeric_pack_f64le(V_array values)
+  {
+    return do_pack<double, V_real>(bswap_le, &Value::as_real, values);
+  }
+
+V_array
+std_numeric_unpack_f64le(V_string text)
+  {
+    return do_unpack<double, V_real>(bswap_le, text);
   }
 
 void
@@ -1591,6 +1674,150 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.required(text);
         if(reader.end_overload())
           return (Value)std_numeric_unpack_i64le(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_f32be"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_f32be", "values",
+        Argument_Reader&& reader)
+      {
+        V_real val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f32be(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f32be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_f32be"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_f32be", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_f32be(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_f32le"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_f32le", "values",
+        Argument_Reader&& reader)
+      {
+        V_real val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f32le(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f32le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_f32le"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_f32le", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_f32le(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_f64be"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_f64be", "values",
+        Argument_Reader&& reader)
+      {
+        V_real val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f64be(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f64be(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_f64be"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_f64be", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_f64be(text);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("pack_f64le"),
+      ASTERIA_BINDING(
+        "std.numeric.pack_f64le", "values",
+        Argument_Reader&& reader)
+      {
+        V_real val;
+        V_array vals;
+
+        reader.start_overload();
+        reader.required(val);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f64le(val);
+
+        reader.start_overload();
+        reader.required(vals);
+        if(reader.end_overload())
+          return (Value)std_numeric_pack_f64le(vals);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("unpack_f64le"),
+      ASTERIA_BINDING(
+        "std.numeric.unpack_f64le", "text",
+        Argument_Reader&& reader)
+      {
+        V_string text;
+
+        reader.start_overload();
+        reader.required(text);
+        if(reader.end_overload())
+          return (Value)std_numeric_unpack_f64le(text);
 
         reader.throw_no_matching_function_call();
       });

@@ -1522,6 +1522,88 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
+`std.numeric.pack_f32be(values)`
+
+	* Packs a series of single-precision floating-point numbers into
+	  a string. `values` can be either a real or an array of reals,
+	  all of which are copied into a string in big-endian byte order.
+
+	* Returns the packed string.
+
+`std.numeric.unpack_f32be(text)`
+
+	* Unpacks single-precision floating-point numbers from a string.
+	  The contents of `text` are re-interpreted as contiguous single-
+	  precision floating-point numbers in big-endian byte order, all
+	  of which are copied into an array.
+
+	* Returns an array containing unpacked reals.
+
+	* Throws an exception if the length of `text` is not a multiple
+	  of 4.
+
+`std.numeric.pack_f32le(values)`
+
+	* Packs a series of single-precision floating-point numbers into
+	  a string. `values` can be either a real or an array of reals,
+	  all of which are copied into a string in little-endian byte
+	  order.
+
+	* Returns the packed string.
+
+`std.numeric.unpack_f32le(text)`
+
+	* Unpacks single-precision floating-point numbers from a string.
+	  The contents of `text` are re-interpreted as contiguous single-
+	  precision floating-point numbers in little-endian byte order,
+	  all of which are copied into an array.
+
+	* Returns an array containing unpacked reals.
+
+	* Throws an exception if the length of `text` is not a multiple
+	  of 4.
+
+`std.numeric.pack_f64be(values)`
+
+	* Packs a series of double-precision floating-point numbers into
+	  a string. `values` can be either a real or an array of reals,
+	  all of which are copied into a string in big-endian byte order.
+
+	* Returns the packed string.
+
+`std.numeric.unpack_f64be(text)`
+
+	* Unpacks double-precision floating-point numbers from a string.
+	  The contents of `text` are re-interpreted as contiguous double-
+	  precision floating-point numbers in big-endian byte order, all
+	  of which are copied into an array.
+
+	* Returns an array containing unpacked reals.
+
+	* Throws an exception if the length of `text` is not a multiple
+	  of 8.
+
+`std.numeric.pack_f64le(values)`
+
+	* Packs a series of double-precision floating-point numbers into
+	  a string. `values` can be either a real or an array of reals,
+	  all of which are copied into a string in little-endian byte
+	  order.
+
+	* Returns the packed string.
+
+`std.numeric.unpack_f64le(text)`
+
+	* Unpacks double-precision floating-point numbers from a string.
+	  The contents of `text` are re-interpreted as contiguous double-
+	  precision floating-point numbers in little-endian byte order,
+	  all of which are copied into an array.
+
+	* Returns an array containing unpacked reals.
+
+	* Throws an exception if the length of `text` is not a multiple
+	  of 8.
+
 ### `std.math`
 
 `std.math.pi`

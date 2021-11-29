@@ -227,6 +227,50 @@ std_numeric_pack_i64le(V_array values);
 V_array
 std_numeric_unpack_i64le(V_string text);
 
+// `std.numeric.pack_f32be`
+V_string
+std_numeric_pack_f32be(V_real value);
+
+V_string
+std_numeric_pack_f32be(V_array values);
+
+// `std.numeric.unpack_f32be`
+V_array
+std_numeric_unpack_f32be(V_string text);
+
+// `std.numeric.pack_f32le`
+V_string
+std_numeric_pack_f32le(V_real value);
+
+V_string
+std_numeric_pack_f32le(V_array values);
+
+// `std.numeric.unpack_f32le`
+V_array
+std_numeric_unpack_f32le(V_string text);
+
+// `std.numeric.pack_f64be`
+V_string
+std_numeric_pack_f64be(V_real value);
+
+V_string
+std_numeric_pack_f64be(V_array values);
+
+// `std.numeric.unpack_f64be`
+V_array
+std_numeric_unpack_f64be(V_string text);
+
+// `std.numeric.pack_f64le`
+V_string
+std_numeric_pack_f64le(V_real value);
+
+V_string
+std_numeric_pack_f64le(V_array values);
+
+// `std.numeric.unpack_f64le`
+V_array
+std_numeric_unpack_f64le(V_string text);
+
 // Create an object that is to be referenced as `std.numeric`.
 void
 create_bindings_numeric(V_object& result, API_Version version);

@@ -450,6 +450,22 @@ int main()
         assert std.numeric.pack_i64le([ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ]) == "\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E";
         assert std.numeric.unpack_i64le("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
 
+        assert std.numeric.pack_f32be(1.1) == "\x3F\x8C\xCC\xCD";
+        assert std.numeric.pack_f32be([ 1.1, 1.3 ]) == "\x3F\x8C\xCC\xCD\x3F\xA6\x66\x66";
+        assert std.numeric.unpack_f32be("\x3F\x8C\xCC\xCD\x3F\xA6\x66\x66") == [ 1.1000000238418579, 1.2999999523162842 ];
+
+        assert std.numeric.pack_f32le(1.1) == "\xCD\xCC\x8C\x3F";
+        assert std.numeric.pack_f32le([ 1.1, 1.3 ]) == "\xCD\xCC\x8C\x3F\x66\x66\xA6\x3F";
+        assert std.numeric.unpack_f32le("\xCD\xCC\x8C\x3F\x66\x66\xA6\x3F") == [ 1.1000000238418579, 1.2999999523162842 ];
+
+        assert std.numeric.pack_f64be(1.1) == "\x3F\xF1\x99\x99\x99\x99\x99\x9A";
+        assert std.numeric.pack_f64be([ 1.1, 1.3 ]) == "\x3F\xF1\x99\x99\x99\x99\x99\x9A\x3F\xF4\xCC\xCC\xCC\xCC\xCC\xCD";
+        assert std.numeric.unpack_f64be("\x3F\xF1\x99\x99\x99\x99\x99\x9A\x3F\xF4\xCC\xCC\xCC\xCC\xCC\xCD") == [ 1.1, 1.3 ];
+
+        assert std.numeric.pack_f64le(1.1) == "\x9A\x99\x99\x99\x99\x99\xF1\x3F";
+        assert std.numeric.pack_f64le([ 1.1, 1.3 ]) == "\x9A\x99\x99\x99\x99\x99\xF1\x3F\xCD\xCC\xCC\xCC\xCC\xCC\xF4\x3F";
+        assert std.numeric.unpack_f64le("\x9A\x99\x99\x99\x99\x99\xF1\x3F\xCD\xCC\xCC\xCC\xCC\xCC\xF4\x3F") == [ 1.1, 1.3 ];
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     code.execute();
