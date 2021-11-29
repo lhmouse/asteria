@@ -1505,7 +1505,7 @@
 `std.numeric.pack_i64le(values)`
 
 	* Packs a series of 64-bit integers into a string. `values` can
-	  be either an integer or an array of integer, all of which
+	  be either an integer or an array of integers, all of which
 	  are copied into a string in little-endian byte order.
 
 	* Returns the packed string.
