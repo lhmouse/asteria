@@ -152,80 +152,80 @@ std_numeric_parse(V_string text);
 
 // `std.numeric.pack_i8`
 V_string
-std_numeric_pack_8(V_integer value);
+std_numeric_pack_i8(V_integer value);
 
 V_string
-std_numeric_pack_8(V_array values);
+std_numeric_pack_i8(V_array values);
 
 // `std.numeric.unpack_i8`
 V_array
-std_numeric_unpack_8(V_string text);
+std_numeric_unpack_i8(V_string text);
 
 // `std.numeric.pack_i16be`
 V_string
-std_numeric_pack_16be(V_integer value);
+std_numeric_pack_i16be(V_integer value);
 
 V_string
-std_numeric_pack_16be(V_array values);
+std_numeric_pack_i16be(V_array values);
 
 // `std.numeric.unpack_i16be`
 V_array
-std_numeric_unpack_16be(V_string text);
+std_numeric_unpack_i16be(V_string text);
 
 // `std.numeric.pack_i16le`
 V_string
-std_numeric_pack_16le(V_integer value);
+std_numeric_pack_i16le(V_integer value);
 
 V_string
-std_numeric_pack_16le(V_array values);
+std_numeric_pack_i16le(V_array values);
 
 // `std.numeric.unpack_i16le`
 V_array
-std_numeric_unpack_16le(V_string text);
+std_numeric_unpack_i16le(V_string text);
 
 // `std.numeric.pack_i32be`
 V_string
-std_numeric_pack_32be(V_integer value);
+std_numeric_pack_i32be(V_integer value);
 
 V_string
-std_numeric_pack_32be(V_array values);
+std_numeric_pack_i32be(V_array values);
 
 // `std.numeric.unpack_i32be`
 V_array
-std_numeric_unpack_32be(V_string text);
+std_numeric_unpack_i32be(V_string text);
 
 // `std.numeric.pack_i32le`
 V_string
-std_numeric_pack_32le(V_integer value);
+std_numeric_pack_i32le(V_integer value);
 
 V_string
-std_numeric_pack_32le(V_array values);
+std_numeric_pack_i32le(V_array values);
 
 // `std.numeric.unpack_i32le`
 V_array
-std_numeric_unpack_32le(V_string text);
+std_numeric_unpack_i32le(V_string text);
 
 // `std.numeric.pack_i64be`
 V_string
-std_numeric_pack_64be(V_integer value);
+std_numeric_pack_i64be(V_integer value);
 
 V_string
-std_numeric_pack_64be(V_array values);
+std_numeric_pack_i64be(V_array values);
 
 // `std.numeric.unpack_i64be`
 V_array
-std_numeric_unpack_64be(V_string text);
+std_numeric_unpack_i64be(V_string text);
 
 // `std.numeric.pack_i64le`
 V_string
-std_numeric_pack_64le(V_integer value);
+std_numeric_pack_i64le(V_integer value);
 
 V_string
-std_numeric_pack_64le(V_array values);
+std_numeric_pack_i64le(V_array values);
 
 // `std.numeric.unpack_i64le`
 V_array
-std_numeric_unpack_64le(V_string text);
+std_numeric_unpack_i64le(V_string text);
 
 // Create an object that is to be referenced as `std.numeric`.
 void

@@ -716,127 +716,127 @@ std_numeric_parse(V_string text)
   }
 
 V_string
-std_numeric_pack_8(V_integer value)
+std_numeric_pack_i8(V_integer value)
   {
     return do_pack_be<int8_t>(value);
   }
 
 V_string
-std_numeric_pack_8(V_array values)
+std_numeric_pack_i8(V_array values)
   {
     return do_pack_be<int8_t>(values);
   }
 
 V_array
-std_numeric_unpack_8(V_string text)
+std_numeric_unpack_i8(V_string text)
   {
     return do_unpack_be<int8_t>(text);
   }
 
 V_string
-std_numeric_pack_16be(V_integer value)
+std_numeric_pack_i16be(V_integer value)
   {
     return do_pack_be<int16_t>(value);
   }
 
 V_string
-std_numeric_pack_16be(V_array values)
+std_numeric_pack_i16be(V_array values)
   {
     return do_pack_be<int16_t>(values);
   }
 
 V_array
-std_numeric_unpack_16be(V_string text)
+std_numeric_unpack_i16be(V_string text)
   {
     return do_unpack_be<int16_t>(text);
   }
 
 V_string
-std_numeric_pack_16le(V_integer value)
+std_numeric_pack_i16le(V_integer value)
   {
     return do_pack_le<int16_t>(value);
   }
 
 V_string
-std_numeric_pack_16le(V_array values)
+std_numeric_pack_i16le(V_array values)
   {
     return do_pack_le<int16_t>(values);
   }
 
 V_array
-std_numeric_unpack_16le(V_string text)
+std_numeric_unpack_i16le(V_string text)
   {
     return do_unpack_le<int16_t>(text);
   }
 
 V_string
-std_numeric_pack_32be(V_integer value)
+std_numeric_pack_i32be(V_integer value)
   {
     return do_pack_be<int32_t>(value);
   }
 
 V_string
-std_numeric_pack_32be(V_array values)
+std_numeric_pack_i32be(V_array values)
   {
     return do_pack_be<int32_t>(values);
   }
 
 V_array
-std_numeric_unpack_32be(V_string text)
+std_numeric_unpack_i32be(V_string text)
   {
     return do_unpack_be<int32_t>(text);
   }
 
 V_string
-std_numeric_pack_32le(V_integer value)
+std_numeric_pack_i32le(V_integer value)
   {
     return do_pack_le<int32_t>(value);
   }
 
 V_string
-std_numeric_pack_32le(V_array values)
+std_numeric_pack_i32le(V_array values)
   {
     return do_pack_le<int32_t>(values);
   }
 
 V_array
-std_numeric_unpack_32le(V_string text)
+std_numeric_unpack_i32le(V_string text)
   {
     return do_unpack_le<int32_t>(text);
   }
 
 V_string
-std_numeric_pack_64be(V_integer value)
+std_numeric_pack_i64be(V_integer value)
   {
     return do_pack_be<int64_t>(value);
   }
 
 V_string
-std_numeric_pack_64be(V_array values)
+std_numeric_pack_i64be(V_array values)
   {
     return do_pack_be<int64_t>(values);
   }
 
 V_array
-std_numeric_unpack_64be(V_string text)
+std_numeric_unpack_i64be(V_string text)
   {
     return do_unpack_be<int64_t>(text);
   }
 
 V_string
-std_numeric_pack_64le(V_integer value)
+std_numeric_pack_i64le(V_integer value)
   {
     return do_pack_le<int64_t>(value);
   }
 
 V_string
-std_numeric_pack_64le(V_array values)
+std_numeric_pack_i64le(V_array values)
   {
     return do_pack_le<int64_t>(values);
   }
 
 V_array
-std_numeric_unpack_64le(V_string text)
+std_numeric_unpack_i64le(V_string text)
   {
     return do_unpack_le<int64_t>(text);
   }
@@ -1354,12 +1354,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_8(val);
+          return (Value)std_numeric_pack_i8(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_8(vals);
+          return (Value)std_numeric_pack_i8(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1374,7 +1374,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_8(text);
+          return (Value)std_numeric_unpack_i8(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -1390,12 +1390,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_16be(val);
+          return (Value)std_numeric_pack_i16be(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_16be(vals);
+          return (Value)std_numeric_pack_i16be(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1410,7 +1410,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_16be(text);
+          return (Value)std_numeric_unpack_i16be(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -1426,12 +1426,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_16le(val);
+          return (Value)std_numeric_pack_i16le(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_16le(vals);
+          return (Value)std_numeric_pack_i16le(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1446,7 +1446,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_16le(text);
+          return (Value)std_numeric_unpack_i16le(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -1462,12 +1462,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_32be(val);
+          return (Value)std_numeric_pack_i32be(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_32be(vals);
+          return (Value)std_numeric_pack_i32be(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1482,7 +1482,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_32be(text);
+          return (Value)std_numeric_unpack_i32be(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -1498,12 +1498,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_32le(val);
+          return (Value)std_numeric_pack_i32le(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_32le(vals);
+          return (Value)std_numeric_pack_i32le(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1518,7 +1518,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_32le(text);
+          return (Value)std_numeric_unpack_i32le(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -1534,12 +1534,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_64be(val);
+          return (Value)std_numeric_pack_i64be(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_64be(vals);
+          return (Value)std_numeric_pack_i64be(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1554,7 +1554,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_64be(text);
+          return (Value)std_numeric_unpack_i64be(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -1570,12 +1570,12 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(val);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_64le(val);
+          return (Value)std_numeric_pack_i64le(val);
 
         reader.start_overload();
         reader.required(vals);
         if(reader.end_overload())
-          return (Value)std_numeric_pack_64le(vals);
+          return (Value)std_numeric_pack_i64le(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -1590,7 +1590,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_numeric_unpack_64le(text);
+          return (Value)std_numeric_unpack_i64le(text);
 
         reader.throw_no_matching_function_call();
       });
