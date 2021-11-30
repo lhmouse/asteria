@@ -74,6 +74,9 @@ class Value
     ROCKET_PURE static Compare
     do_compare_slow(const Value& lhs, const Value& rhs) noexcept;
 
+    [[noreturn]] void
+    do_throw_type_mismatch(const char* desc) const;
+
   public:
     // Accessors
     Type
@@ -94,9 +97,7 @@ class Value
         if(this->type() == type_boolean)
           return this->m_stor.as<V_boolean>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting a `boolean`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`boolean`");
       }
 
     V_boolean&
@@ -105,9 +106,7 @@ class Value
         if(this->type() == type_boolean)
           return this->m_stor.as<V_boolean>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting a `boolean`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`boolean`");
       }
 
     bool
@@ -120,9 +119,7 @@ class Value
         if(this->type() == type_integer)
           return this->m_stor.as<V_integer>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `integer`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`integer`");
       }
 
     V_integer&
@@ -131,9 +128,7 @@ class Value
         if(this->type() == type_integer)
           return this->m_stor.as<V_integer>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `integer`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`integer`");
       }
 
     bool
@@ -157,9 +152,7 @@ class Value
         if(this->type() == type_integer)
           return static_cast<V_real>(this->m_stor.as<V_integer>());
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `integer` or `real`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`integer` or `real`");
       }
 
     V_real&
@@ -170,11 +163,9 @@ class Value
 
         if(this->type() == type_integer)
           return this->m_stor.emplace<V_real>(
-                          static_cast<V_real>(this->m_stor.as<V_integer>()));
+                static_cast<V_real>(this->m_stor.as<V_integer>()));
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `integer` or `real`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`integer` or `real`");
       }
 
     bool
@@ -187,9 +178,7 @@ class Value
         if(this->type() == type_string)
           return this->m_stor.as<V_string>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting a `string`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`string`");
       }
 
     V_string&
@@ -198,9 +187,7 @@ class Value
         if(this->type() == type_string)
           return this->m_stor.as<V_string>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting a `string`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`string`");
       }
 
     bool
@@ -213,9 +200,7 @@ class Value
         if(this->type() == type_function)
           return this->m_stor.as<V_function>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting a `function`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`function`");
       }
 
     V_function&
@@ -224,9 +209,7 @@ class Value
         if(this->type() == type_function)
           return this->m_stor.as<V_function>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting a `string`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`function`");
       }
 
     bool
@@ -239,9 +222,7 @@ class Value
         if(this->type() == type_opaque)
           return this->m_stor.as<V_opaque>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `opaque`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`opaque`");
       }
 
     V_opaque&
@@ -250,9 +231,7 @@ class Value
         if(this->type() == type_opaque)
           return this->m_stor.as<V_opaque>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `opaque`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`opaque`");
       }
 
     bool
@@ -265,9 +244,7 @@ class Value
         if(this->type() == type_array)
           return this->m_stor.as<V_array>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `array`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`array`");
       }
 
     V_array&
@@ -276,9 +253,7 @@ class Value
         if(this->type() == type_array)
           return this->m_stor.as<V_array>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `array`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`array`");
       }
 
     bool
@@ -291,9 +266,7 @@ class Value
         if(this->type() == type_object)
           return this->m_stor.as<V_object>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `object`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`object`");
       }
 
     V_object&
@@ -302,9 +275,7 @@ class Value
         if(this->type() == type_object)
           return this->m_stor.as<V_object>();
 
-        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-              "Value: type mismatch (expecting an `object`, but got `%s`)",
-              describe_type(this->type()));
+        this->do_throw_type_mismatch("`object`");
       }
 
     bool

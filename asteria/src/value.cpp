@@ -164,6 +164,15 @@ do_compare_slow(const Value& lhs, const Value& rhs) noexcept
     }
   }
 
+void
+Value::
+do_throw_type_mismatch(const char* desc) const
+  {
+    ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          "Value: type mismatch (expecting %s, but value had type `%s`)",
+          desc, describe_type(this->type()));
+  }
+
 tinyfmt&
 Value::
 print(tinyfmt& fmt, bool escape) const
