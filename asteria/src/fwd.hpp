@@ -147,7 +147,7 @@ class Recursion_Sentry;
 class Simple_Script;
 
 // Low-level data structures
-class Variable_HashSet;
+class Variable_HashMap;
 class Reference_Dictionary;
 class Reference_Stack;
 class AVMC_Queue;
