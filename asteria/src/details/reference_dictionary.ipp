@@ -10,8 +10,11 @@ namespace details_reference_dictionary {
 
 struct Bucket
   {
-    Bucket* next;  // the next bucket in the [non-circular] list
-    Bucket* prev;  // the previous bucket in the [circular] list
+    Bucket* next;  // the next bucket in the [non-circular] list;
+                   // used for iteration
+    Bucket* prev;  // the previous bucket in the [circular] list;
+                   // used to mark whether this bucket is empty or not
+
     union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
     union { Reference vstor[1];  };  // initialized iff `prev` is non-null
 
