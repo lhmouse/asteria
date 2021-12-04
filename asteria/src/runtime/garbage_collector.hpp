@@ -5,6 +5,7 @@
 #define ASTERIA_RUNTIME_GARBAGE_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
+#include "../llds/variable_hashmap.hpp"
 #include "../llds/variable_hashset.hpp"
 #include "../llds/pointer_hashset.hpp"
 
@@ -20,7 +21,7 @@ class Garbage_Collector final
     array<Variable_HashSet, gMax+1> m_tracked;
 
     long m_recur = 0;
-    Variable_HashSet m_pool;
+    Variable_HashMap m_pool;  // key is variable itself
     Variable_HashSet m_staging;
     Pointer_HashSet m_id_ptrs;
 

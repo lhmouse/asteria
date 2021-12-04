@@ -139,7 +139,7 @@ struct S3_mark_reachable : Variable_Callback
 
 struct S4_reap_unreachable : Variable_Callback
   {
-    Variable_HashSet* pool;
+    Variable_HashMap* pool;
     Variable_HashSet* tracked;
     size_t* count_opt;
     Variable_HashSet* next_opt;
@@ -160,7 +160,7 @@ struct S4_reap_unreachable : Variable_Callback
             // possible exceptions. If the variable cannot be pooled, it is
             // deallocated immediately.
             if(erased)
-              pool->insert(var);
+              pool->insert(var.get(), var);
           }
           else if(next_opt) {
             // Transfer this reachable variable to the next generation.
@@ -269,7 +269,8 @@ create_variable(GC_Generation gen_hint)
 
     // Get a cached variable.
     // If the pool has been exhausted, allocate a new one.
-    auto var = this->m_pool.erase_random_opt();
+    rcptr<Variable> var;
+    this->m_pool.erase_random(nullptr, &var);
     if(!var)
       var = ::rocket::make_refcnt<Variable>();
 
