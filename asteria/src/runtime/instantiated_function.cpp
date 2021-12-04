@@ -34,11 +34,11 @@ describe(tinyfmt& fmt) const
     return fmt << "`" << this->m_zvarg->func() << "` at '" << this->m_zvarg->sloc() << "'";
   }
 
-Variable_Callback&
+void
 Instantiated_Function::
-enumerate_variables(Variable_Callback& callback) const
+get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    return this->m_queue.enumerate_variables(callback);
+    this->m_queue.get_variables(staged, temp);
   }
 
 Reference&

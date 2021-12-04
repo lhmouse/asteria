@@ -4,7 +4,6 @@
 #include "../precompiled.hpp"
 #include "garbage_collector.hpp"
 #include "variable.hpp"
-#include "variable_callback.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
@@ -31,174 +30,6 @@ class Sentry
       { return this->m_old == 0;  }
   };
 
-struct S1_init_gc_ref_1 : Variable_Callback
-  {
-    Variable_HashSet* staging;
-
-    bool
-    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
-      {
-        // Add the variable. Do nothing if it has already been added.
-        bool added = staging->insert(var);
-        if(!added)
-          return false;
-
-        // Initialize `gc_ref` to one. This can be overwritten later if
-        // the variable is reached again from `m_tracked`. All variables
-        // reachable indirectly are collected via this callback.
-        var->set_gc_ref(1);
-        return true;
-      }
-  };
-
-struct S1_init_gc_ref_2_NR : Variable_Callback
-  {
-    Variable_HashSet* staging;
-
-    bool
-    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
-      {
-        // If `var` is a unique reference, mark the variable for collection
-        // immediately. It is however not safe to erase it when iterating.
-        if(var.unique())
-          var->uninitialize();
-
-        // Try adding the variable first.
-        bool added = staging->insert(var);
-
-        // No matter whether it succeeds or not, there shall be at least
-        // two references to `var` (one is from `m_tracked` and the other
-        // is from `m_staging`), so initialize `gc_ref` to two.
-        var->set_gc_ref(2);
-
-        // If the variable had been added already, do nothing.
-        if(!added)
-          return false;
-
-        // Collect indirectly reachable variables with another recursive
-        // function. The current one is not recursive.
-        S1_init_gc_ref_1 s1_init;
-        s1_init.staging = staging;
-        var->get_value().enumerate_variables(s1_init);
-        return false;
-      }
-  };
-
-struct S2_add_gc_ref_frac_NR : Variable_Callback
-  {
-    Pointer_HashSet* id_ptrs;
-
-    bool
-    do_process_one(const void* id_ptr, const rcptr<Variable>& var) final
-      {
-        // Ensure each reference pointer is added only once.
-        bool added = id_ptrs->insert(id_ptr);
-        if(!added)
-          return false;
-
-        // Drop the reference count from this pointer.
-        var->set_gc_ref(var->get_gc_ref() + 1);
-        return false;
-      }
-  };
-
-struct S2_iref_internal_NR : Variable_Callback
-  {
-    Pointer_HashSet* id_ptrs;
-
-    bool
-    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
-      {
-        // Drop indirect references from `m_staging`.
-        S2_add_gc_ref_frac_NR s2_gcadd;
-        s2_gcadd.id_ptrs = id_ptrs;
-        var->get_value().enumerate_variables(s2_gcadd);
-        return false;
-      }
-  };
-
-struct S3_mark_reachable : Variable_Callback
-  {
-    bool
-    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
-      {
-        // Skip unrachable variables.
-        if(var->get_gc_ref() >= var->use_count())
-          return false;
-
-        // Skip marked variables.
-        if(var->get_gc_ref() == 0)
-          return false;
-
-        // Mark this variable reachable, as well as all children.
-        // This is recursive.
-        var->set_gc_ref(0);
-        return true;
-      }
-  };
-
-struct S4_reap_unreachable : Variable_Callback
-  {
-    Variable_HashMap* pool;
-    Variable_HashSet* tracked;
-    size_t* count_opt;
-    Variable_HashSet* next_opt;
-    size_t nvars = 0;
-
-    bool
-    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
-      {
-        try {
-          // Reachable variables shall have `gc_ref` counters set to zero.
-          if(var->get_gc_ref() != 0) {
-            // Wipe the value out.
-            var->uninitialize();
-            bool erased = tracked->erase(var);
-            nvars += 1;
-
-            // Pool the variable. This shall be the last operation due to
-            // possible exceptions. If the variable cannot be pooled, it is
-            // deallocated immediately.
-            if(erased)
-              pool->insert(var.get(), var);
-          }
-          else if(next_opt) {
-            // Transfer this reachable variable to the next generation.
-            // Note exception safety.
-            next_opt->insert(var);
-            bool erased = tracked->erase(var);
-
-            // Undo the operation if the variable was not in `tracked`.
-            if(erased)
-              *count_opt += 1;
-            else
-              next_opt->erase(var);
-          }
-        }
-        catch(exception& stdex) {
-          ::fprintf(stderr,
-              "WARNING: an exception was thrown during garbage collection. "
-              "If this problem persists, please file a bug report.\n"
-              "\n"
-              "  exception class: %s\n"
-              "  what(): %s\n",
-              typeid(stdex).name(), stdex.what());
-        }
-        return false;
-      }
-  };
-
-struct Sz_wipe_variable_NR : Variable_Callback
-  {
-    bool
-    do_process_one(const void* /*id_ptr*/, const rcptr<Variable>& var) final
-      {
-        // Destroy the value. This shall not be recursive.
-        var->uninitialize();
-        return false;
-      }
-  };
-
 }  // namespace
 
 Garbage_Collector::
@@ -215,44 +46,121 @@ do_collect_generation(size_t gen)
     if(!sentry)
       return 0;
 
+    size_t nvars = 0;
+    rcptr<Variable> var;
+
     auto& tracked = this->m_tracked.mut(gMax-gen);
-    this->m_staging.clear();
-    this->m_id_ptrs.clear();
+    const auto next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
+    const auto count_opt = this->m_counts.mut_ptr(gMax-gen-1);
+
+    this->m_staged.clear();
+    this->m_temp.clear();
+    this->m_unreachable.clear();
+    this->m_reachable.clear();
 
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
 
-    // Collect all variables from `tracked` into `m_staging`, recursively.
-    // The references from `tracked` and `m_staging` shall be excluded, so the
-    // `gc_ref` counter is initialized to two if a variable is reached from
-    // `tracked`, and to one if it is reached indirectly.
-    S1_init_gc_ref_2_NR s1_init;
-    s1_init.staging = &(this->m_staging);
-    tracked.enumerate_variables(s1_init);
+    // Collect all variables from `tracked` into `m_staged`. Each variable that
+    // is encountered in the loop shall have a direct reference from either
+    // `tracked` or `m_staging`, so its `gc_ref` counter is initialized to one.
+    this->m_temp.merge(tracked);
 
-    // For each variable that is exactly one-level indirectly reachable from
-    // those in `m_staging`, the `gc_ref` counter is incremented by one.
-    S2_iref_internal_NR s2_iref;
-    s2_iref.id_ptrs = &(this->m_id_ptrs);
-    this->m_staging.enumerate_variables(s2_iref);
+    while(this->m_temp.erase_random(nullptr, &var)) {
+      ROCKET_ASSERT(var);
+      var->set_gc_ref(1);
+      ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
 
-    // A variable whose `gc_ref` counter is less than its reference count is
-    // reachable. Variables that are reachable from it are reachable, too.
-    S3_mark_reachable s3_mark;
-    this->m_staging.enumerate_variables(s3_mark);
+      var->get_value().get_variables(this->m_staged, this->m_temp);
+    }
 
-    // Collect each variable whose `gc_ref` counter is zero.
-    S4_reap_unreachable s4_reap;
-    s4_reap.pool = &(this->m_pool);
-    s4_reap.tracked = &tracked;
-    s4_reap.count_opt = this->m_counts.mut_ptr(gMax-gen-1);
-    s4_reap.next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
-    this->m_staging.enumerate_variables(s4_reap);
+    // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
+    // counter shall be incremented.
+    this->m_temp.swap(this->m_staged);
 
-    // Reset the GC counter to zero, only if the operation completes normally
-    // i.e. don't reset it if an exception is thrown.
+    while(this->m_temp.erase_random(nullptr, &var)) {
+      ROCKET_ASSERT(var);
+      var->set_gc_ref(var->get_gc_ref() + 1);
+      ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
+
+      this->m_staged.insert(var.get(), var);
+    }
+
+    // Mark all variables that have been collected so far.
+    this->m_staged.merge(tracked);
+
+    while(this->m_staged.erase_random(nullptr, &var)) {
+      ROCKET_ASSERT(var);
+      if(var->get_gc_ref() == var->use_count() - 1) {
+        // Mark it as possibly unreachable.
+        this->m_unreachable.insert(var.get(), var);
+        continue;
+      }
+
+      // This variable is reachable.
+      // Mark variables that are indirectly reachable.
+      var->get_value().get_variables(this->m_reachable, this->m_temp);
+
+      while(this->m_temp.erase_random(nullptr, &var)) {
+        ROCKET_ASSERT(var);
+        var->set_gc_ref(0);
+        this->m_staged.erase(var.get());
+        this->m_unreachable.erase(var.get());
+
+        var->get_value().get_variables(this->m_reachable, this->m_temp);
+      }
+    }
+
+    // Collect all variables from `m_unreachable`.
+    ROCKET_ASSERT(this->m_staged.empty());
+    ROCKET_ASSERT(this->m_temp.empty());
+    this->m_reachable.clear();
+
+    while(this->m_unreachable.erase_random(nullptr, &var)) {
+      ROCKET_ASSERT(var);
+      try {
+        if(var->get_gc_ref() != 0) {
+          // Wipe the value out.
+          var->uninitialize();
+          bool erased = tracked.erase(var);
+          nvars += 1;
+
+          // Pool the variable. This shall be the last operation due to
+          // possible exceptions. If the variable cannot be pooled, it is
+          // deallocated immediately.
+          if(erased)
+            this->m_pool.insert(var.get(), var);
+        }
+        else if(next_opt) {
+          // Transfer this reachable variable to the next generation.
+          // Note exception safety.
+          next_opt->insert(var.get(), var);
+          bool erased = tracked.erase(var);
+
+          // Undo the operation if the variable was not in `tracked`.
+          if(erased)
+            *count_opt += 1;
+          else
+            next_opt->erase(var);
+        }
+      }
+      catch(exception& stdex) {
+        ::fprintf(stderr,
+            "WARNING: an exception was thrown during garbage collection. "
+            "If this problem persists, please file a bug report.\n"
+            "\n"
+            "  exception class: %s\n"
+            "  what(): %s\n",
+            typeid(stdex).name(), stdex.what());
+      }
+    }
+
+    // Reset the GC counter to zero only if the operation completes
+    // normally i.e. don't reset it if an exception is thrown.
     this->m_counts[gMax-gen] = 0;
-    return s4_reap.nvars;
+
+    // Return the number of variables that have been collected.
+    return nvars;
   }
 
 rcptr<Variable>
@@ -264,9 +172,6 @@ create_variable(GC_Generation gen_hint)
       if(this->m_counts[gMax-gen] >= this->m_thres[gMax-gen])
         this->do_collect_generation(gen);
 
-    this->m_staging.clear();
-    this->m_id_ptrs.clear();
-
     // Get a cached variable.
     // If the pool has been exhausted, allocate a new one.
     rcptr<Variable> var;
@@ -276,7 +181,7 @@ create_variable(GC_Generation gen_hint)
 
     // Track it.
     size_t gen = gMax - gen_hint;
-    this->m_tracked.mut(gen).insert(var);
+    this->m_tracked.mut(gen).insert(var.get(), var);
     this->m_counts[gen] += 1;
     return var;
   }
@@ -305,22 +210,23 @@ finalize() noexcept
     if(!sentry)
       ASTERIA_TERMINATE("garbage collector not finalizable while in use");
 
-    // Wipe out all tracked variables.
     size_t nvars = 0;
+    rcptr<Variable> var;
+
+    this->m_staged.clear();
+    this->m_temp.clear();
+    this->m_unreachable.clear();
+    this->m_reachable.clear();
+
+    // Wipe out all tracked variables. Indirect ones may be foreign so they
+    // must not be wiped.
     for(size_t gen = 0;  gen <= gMax;  ++gen) {
       auto& tracked = this->m_tracked.mut(gMax-gen);
-
-      // Wipe variables that are reachable directly. Indirect ones may
-      // be foreign so they must not be wiped.
-      Sz_wipe_variable_NR wipe;
-      tracked.enumerate_variables(wipe);
-
       nvars += tracked.size();
-      tracked.clear();
-    }
 
-    this->m_staging.clear();
-    this->m_id_ptrs.clear();
+      while(tracked.erase_random(nullptr, &var))
+        var->uninitialize();
+    }
 
     // Clear cached variables.
     nvars += this->m_pool.size();

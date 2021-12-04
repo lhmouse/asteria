@@ -33,6 +33,15 @@ class Variable final
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
 
+    // GC interfaces
+    long
+    get_gc_ref() const noexcept
+      { return this->m_gc_ref;  }
+
+    Variable&
+    set_gc_ref(long ref) noexcept
+      { return this->m_gc_ref = ref, *this;  }
+
     // Accessors
     State
     state() const noexcept
@@ -69,19 +78,6 @@ class Variable final
       {
         this->m_value = ::rocket::sref("[[`dead value`]]");
         this->m_state = state_uninit;
-        return *this;
-      }
-
-    // GC interfaces
-    long
-    get_gc_ref() const noexcept
-      { return this->m_gc_ref;  }
-
-    Variable&
-    set_gc_ref(long ref) noexcept
-      {
-        ROCKET_ASSERT(ref <= this->use_count());
-        this->m_gc_ref = ref;
         return *this;
       }
   };

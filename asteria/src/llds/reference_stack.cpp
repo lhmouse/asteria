@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "reference_stack.hpp"
-#include "../runtime/variable_callback.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
@@ -62,20 +61,20 @@ do_reserve_more()
     ::operator delete(bold);
   }
 
-Variable_Callback&
+int
 Reference_Stack::
-enumerate_variables(Variable_Callback& callback) const
+do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     auto next = this->m_bptr;
-    const auto eptr = this->m_bptr + this->m_einit;
+    const auto eptr = next + this->m_einit;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qref = next;
       next += 1;
 
       // Enumerate variables in this reference.
-      qref->enumerate_variables(callback);
+      qref->get_variables(staged, temp);
     }
-    return callback;
+    return 0;
   }
 
 }  // namespace asteria

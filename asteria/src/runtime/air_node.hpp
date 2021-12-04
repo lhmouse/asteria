@@ -363,9 +363,10 @@ class AIR_Node
     bool
     solidify(AVMC_Queue& queue) const;
 
-    // This is needed because the body of a closure should not be solidified.
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const;
+    // This is necessary because the body of a closure shall not have been
+    // solidified.
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
 inline void

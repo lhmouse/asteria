@@ -160,7 +160,6 @@ class Runtime_Error;
 class Reference;
 class Reference_Modifier;
 class Variable;
-class Variable_Callback;
 class PTC_Arguments;
 class Collector;
 class Abstract_Context;
@@ -319,8 +318,8 @@ struct Abstract_Opaque
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    virtual void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       = 0;
 
     // This function is called when a mutable reference is requested and the current instance
@@ -353,8 +352,8 @@ struct Abstract_Function
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    virtual void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       = 0;
 
     // This function may return a proper tail call wrapper.
@@ -434,13 +433,11 @@ class cow_opaque
     tinyfmt&
     describe(tinyfmt& fmt) const;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
         if(this->m_sptr)
-          this->m_sptr->enumerate_variables(callback);
-
-        return callback;
+          this->m_sptr->get_variables(staged, temp);
       }
 
     template<typename OpaqueT = Abstract_Opaque>
@@ -604,13 +601,11 @@ class cow_function
     tinyfmt&
     describe(tinyfmt& fmt) const;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
         if(this->m_sptr)
-          this->m_sptr->enumerate_variables(callback);
-
-        return callback;
+          this->m_sptr->get_variables(staged, temp);
       }
 
     Reference&

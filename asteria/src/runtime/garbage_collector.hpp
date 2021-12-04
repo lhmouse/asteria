@@ -6,8 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../llds/variable_hashmap.hpp"
-#include "../llds/variable_hashset.hpp"
-#include "../llds/pointer_hashset.hpp"
 
 namespace asteria {
 
@@ -15,15 +13,19 @@ class Garbage_Collector final
   : public Rcfwd<Garbage_Collector>
   {
   private:
+    long m_recur = 0;
+    Variable_HashMap m_pool;  // key is a pointer to the `Variable` itself
+
     static constexpr size_t gMax = gc_generation_oldest;
     array<size_t, gMax+1> m_counts = { };
     array<size_t, gMax+1> m_thres = { 10, 70, 500 };
-    array<Variable_HashSet, gMax+1> m_tracked;
+    array<Variable_HashMap, gMax+1> m_tracked;
 
-    long m_recur = 0;
-    Variable_HashMap m_pool;  // key is variable itself
-    Variable_HashSet m_staging;
-    Pointer_HashSet m_id_ptrs;
+    Variable_HashMap m_staged;  // key is address of the owner of a `Variable`
+    Variable_HashMap m_temp;  // the same with `m_staged`
+
+    Variable_HashMap m_unreachable;
+    Variable_HashMap m_reachable;
 
   public:
     explicit

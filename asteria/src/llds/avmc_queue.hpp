@@ -16,7 +16,7 @@ class AVMC_Queue
     using Uparam      = details_avmc_queue::Uparam;
     using Header      = details_avmc_queue::Header;
     using Executor    = details_avmc_queue::Executor;
-    using Enumerator  = details_avmc_queue::Enumerator;
+    using Var_Getter  = details_avmc_queue::Var_Getter;
 
   private:
     using Metadata     = details_avmc_queue::Metadata;
@@ -62,7 +62,7 @@ class AVMC_Queue
     // `sparam` is filled with zeroes.
     AVMC_Queue&
     do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
-                         Enumerator* enum_opt, Relocator* reloc_opt, Destructor* dtor_opt,
+                         Var_Getter* vget_opt, Relocator* reloc_opt, Destructor* dtor_opt,
                          size_t size, Constructor* ctor_opt, intptr_t ctor_arg);
 
   public:
@@ -139,11 +139,11 @@ class AVMC_Queue
         static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
         using Traits = details_avmc_queue::Sparam_traits<Sparam>;
 
-        if(::std::is_trivial<Sparam>::value && !Traits::enum_opt && !sloc_opt)
+        if(::std::is_trivial<Sparam>::value && !Traits::vget_opt && !sloc_opt)
           return this->do_append_trivial(up, exec, sizeof(sp), ::std::addressof(sp));
 
         return this->do_append_nontrivial(up, exec, sloc_opt,
-                          Traits::enum_opt, Traits::reloc_opt, Traits::dtor_opt,
+                          Traits::vget_opt, Traits::reloc_opt, Traits::dtor_opt,
                           sizeof(sp), details_avmc_queue::do_forward_ctor<XSparamT>,
                           reinterpret_cast<intptr_t>(::std::addressof(sp)));
       }
@@ -152,8 +152,8 @@ class AVMC_Queue
     AIR_Status
     execute(Executive_Context& ctx) const;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const;
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
 inline void

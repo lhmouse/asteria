@@ -47,9 +47,9 @@ class Thunk_Base
     describe(tinyfmt& fmt) const override
       { return fmt << this->m_desc.c_str();  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
   };
 
 using F_ref_global_self_reader   = Reference (Global_Context&, Reference&&, Argument_Reader&&);

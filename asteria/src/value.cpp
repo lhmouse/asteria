@@ -31,9 +31,9 @@ do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
 
 }  // namespace
 
-Variable_Callback&
+int
 Value::
-do_enumerate_variables_slow(Variable_Callback& callback) const
+do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     switch(this->type()) {
       case type_null:
@@ -41,23 +41,25 @@ do_enumerate_variables_slow(Variable_Callback& callback) const
       case type_integer:
       case type_real:
       case type_string:
-        return callback;
+        return 0;
 
       case type_opaque:
-        return this->m_stor.as<V_opaque>().enumerate_variables(callback);
+        this->m_stor.as<V_opaque>().get_variables(staged, temp);
+        return 0;
 
       case type_function:
-        return this->m_stor.as<V_function>().enumerate_variables(callback);
+        this->m_stor.as<V_function>().get_variables(staged, temp);
+        return 0;
 
       case type_array:
         ::rocket::for_each(this->m_stor.as<V_array>(),
-            [&](const auto& val) { val.enumerate_variables(callback);  });
-        return callback;
+            [&](const auto& val) { val.get_variables(staged, temp);  });
+        return 0;
 
       case type_object:
         ::rocket::for_each(this->m_stor.as<V_object>(),
-            [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
-        return callback;
+            [&](const auto& pair) { pair.second.get_variables(staged, temp);  });
+        return 0;
 
       default:
         ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());

@@ -34,8 +34,8 @@ class Instantiated_Function final
     tinyfmt&
     describe(tinyfmt& fmt) const override;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override;
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
     Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override;

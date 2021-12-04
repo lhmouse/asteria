@@ -4,7 +4,6 @@
 #include "../precompiled.hpp"
 #include "avmc_queue.hpp"
 #include "../runtime/air_node.hpp"
-#include "../runtime/variable_callback.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
@@ -127,7 +126,7 @@ do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_o
 AVMC_Queue&
 AVMC_Queue::
 do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
-                     Enumerator* enum_opt, Relocator* reloc_opt, Destructor* dtor_opt,
+                     Var_Getter* vget_opt, Relocator* reloc_opt, Destructor* dtor_opt,
                      size_t size, Constructor* ctor_opt, intptr_t ctor_arg)
   {
     auto qnode = this->do_reserve_one(uparam, size);
@@ -138,7 +137,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
 
     meta->reloc_opt = reloc_opt;
     meta->dtor_opt = dtor_opt;
-    meta->enum_opt = enum_opt;
+    meta->vget_opt = vget_opt;
     meta->exec = exec;
 
     if(sloc_opt) {
@@ -195,9 +194,9 @@ execute(Executive_Context& ctx) const
     return status;
   }
 
-Variable_Callback&
+void
 AVMC_Queue::
-enumerate_variables(Variable_Callback& callback) const
+get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
@@ -205,11 +204,10 @@ enumerate_variables(Variable_Callback& callback) const
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      // Enumerate variables from this node.
-      if(qnode->meta_ver && qnode->pv_meta->enum_opt)
-        qnode->pv_meta->enum_opt(callback, qnode);
+      // Get all variables from this node.
+      if((qnode->meta_ver >= 1) && qnode->pv_meta->vget_opt)
+        qnode->pv_meta->vget_opt(staged, temp, qnode);
     }
-    return callback;
   }
 
 }  // namespace asteria

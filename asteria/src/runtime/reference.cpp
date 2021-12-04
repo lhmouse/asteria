@@ -8,11 +8,11 @@
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
 #include "variable.hpp"
-#include "variable_callback.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../llds/reference_stack.hpp"
+#include "../llds/variable_hashmap.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
@@ -179,13 +179,15 @@ do_finish_call_slow(Global_Context& global)
     return *this;
   }
 
-Variable_Callback&
+void
 Reference::
-enumerate_variables(Variable_Callback& callback) const
+get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    this->m_value.enumerate_variables(callback);
-    callback.process(&(this->m_var), unerase_pointer_cast<Variable>(this->m_var));
-    return callback;
+    this->m_value.get_variables(staged, temp);
+
+    auto var = unerase_pointer_cast<Variable>(this->m_var);
+    if(var && staged.insert(&(this->m_var), var))
+      temp.insert(var.get(), var);
   }
 
 Value&

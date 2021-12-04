@@ -38,14 +38,15 @@ using Constructor  = void (Header* head, intptr_t arg);
 using Relocator    = void (Header* head, Header* from);
 using Destructor   = void (Header* head);
 using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
-using Enumerator   = void (Variable_Callback& callback, const Header* head);
+using Var_Getter   = void (Variable_HashMap& staged, Variable_HashMap& temp,
+                           const Header* head);
 
 struct Metadata
   {
     // Version 1
     Relocator* reloc_opt;  // if null then bitwise copy is performed
     Destructor* dtor_opt;  // if null then no cleanup is performed
-    Enumerator* enum_opt;  // if null then no variable shall exist
+    Var_Getter* vget_opt;  // if null then no variable shall exist
     Executor* exec;        // executor function, must not be null
 
     // Version 2
@@ -93,29 +94,32 @@ do_nontrivial_dtor(Header* head)
 
 template<typename SparamT>
 inline void
-do_call_enumerate_variables(Variable_Callback& callback, const Header* head)
+do_call_get_variables(Variable_HashMap& staged, Variable_HashMap& temp,
+                      const Header* head)
   {
-    reinterpret_cast<const SparamT*>(head->sparam)->
-                             enumerate_variables(callback);
+    auto ptr = reinterpret_cast<const SparamT*>(head->sparam);
+    ptr->get_variables(staged, temp);
   }
 
 template<typename SparamT, typename = void>
-struct select_enumerate_variables
+struct select_get_variables
   {
     constexpr operator
-    Enumerator*() const noexcept
+    Var_Getter*() const noexcept
       { return nullptr;  }
   };
 
 template<typename SparamT>
-struct select_enumerate_variables<SparamT,
+struct select_get_variables<SparamT,
     ROCKET_VOID_T(decltype(
-        ::std::declval<const SparamT&>().enumerate_variables(
-            ::std::declval<Variable_Callback&>())))>
+      ::std::declval<const SparamT&>().get_variables(
+          ::std::declval<Variable_HashMap&>(),  // staged
+          ::std::declval<Variable_HashMap&>()   // temp
+        )))>
   {
     constexpr operator
-    Enumerator*() const noexcept
-      { return do_call_enumerate_variables<SparamT>;  }
+    Var_Getter*() const noexcept
+      { return do_call_get_variables<SparamT>;  }
   };
 
 template<typename SparamT>
@@ -131,8 +135,8 @@ struct Sparam_traits
             ? nullptr
             : do_nontrivial_dtor<SparamT>;
 
-    static constexpr Enumerator* enum_opt =
-        select_enumerate_variables<SparamT>();
+    static constexpr Var_Getter* vget_opt =
+        select_get_variables<SparamT>();
   };
 
 template<typename XSparamT>

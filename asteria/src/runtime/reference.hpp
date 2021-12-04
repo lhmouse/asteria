@@ -194,8 +194,9 @@ class Reference
         return *this;
       }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const;
+    // This is used by garbage collection.
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
     // A modifier is created by a dot or bracket operator.
     // For instance, the expression `obj.x[42]` results in a reference having two

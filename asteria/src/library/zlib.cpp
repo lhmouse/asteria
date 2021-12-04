@@ -75,9 +75,9 @@ class Deflator final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.zlib.Deflator` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     Deflator*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -273,9 +273,9 @@ class Inflator final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.zlib.Inflator` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     Inflator*
     clone_opt(rcptr<Abstract_Opaque>& out) const override

@@ -11,7 +11,6 @@
 #include "garbage_collector.hpp"
 #include "random_engine.hpp"
 #include "runtime_error.hpp"
-#include "variable_callback.hpp"
 #include "variable.hpp"
 #include "ptc_arguments.hpp"
 #include "loader_lock.hpp"
@@ -161,16 +160,24 @@ struct Sparam_import
     Source_Location sloc;
   };
 
+template<typename ContainerT>
+inline void
+do_for_each_get_variables(ContainerT& cont, Variable_HashMap& staged,
+                          Variable_HashMap& temp)
+  {
+    for(const auto& r : cont)
+      r.get_variables(staged, temp);
+  }
+
 template<size_t sizeT>
 struct Sparam_queues
   {
     array<AVMC_Queue, sizeT> queues;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        ::rocket::for_each(this->queues, callback);
-        return callback;
+        do_for_each_get_variables(this->queues, staged, temp);
       }
   };
 
@@ -184,12 +191,11 @@ struct Sparam_switch
     cow_vector<AVMC_Queue> queues_bodies;
     cow_vector<cow_vector<phsh_string>> names_added;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        ::rocket::for_each(this->queues_labels, callback);
-        ::rocket::for_each(this->queues_bodies, callback);
-        return callback;
+        do_for_each_get_variables(this->queues_labels, staged, temp);
+        do_for_each_get_variables(this->queues_bodies, staged, temp);
       }
   };
 
@@ -200,12 +206,11 @@ struct Sparam_for_each
     AVMC_Queue queue_init;
     AVMC_Queue queue_body;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        this->queue_init.enumerate_variables(callback);
-        this->queue_body.enumerate_variables(callback);
-        return callback;
+        this->queue_init.get_variables(staged, temp);
+        this->queue_body.get_variables(staged, temp);
       }
   };
 
@@ -217,12 +222,11 @@ struct Sparam_try_catch
     phsh_string name_except;
     AVMC_Queue queue_catch;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        this->queue_try.enumerate_variables(callback);
-        this->queue_catch.enumerate_variables(callback);
-        return callback;
+        this->queue_try.get_variables(staged, temp);
+        this->queue_catch.get_variables(staged, temp);
       }
   };
 
@@ -234,11 +238,10 @@ struct Sparam_func
     cow_vector<phsh_string> params;
     cow_vector<AIR_Node> code_body;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        ::rocket::for_each(this->code_body, callback);
-        return callback;
+        do_for_each_get_variables(this->code_body, staged, temp);
       }
   };
 
@@ -247,11 +250,10 @@ struct Sparam_defer
     Source_Location sloc;
     cow_vector<AIR_Node> code_body;
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        ::rocket::for_each(this->code_body, callback);
-        return callback;
+        do_for_each_get_variables(this->code_body, staged, temp);
       }
   };
 
@@ -5432,75 +5434,75 @@ solidify(AVMC_Queue& queue) const
     }
   }
 
-Variable_Callback&
+void
 AIR_Node::
-enumerate_variables(Variable_Callback& callback) const
+get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     switch(this->index()) {
       case index_clear_stack:
-        return callback;
+        return;
 
       case index_execute_block: {
         const auto& altr = this->m_stor.as<index_execute_block>();
-        ::rocket::for_each(altr.code_body, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
       }
 
       case index_declare_variable:
       case index_initialize_variable:
-        return callback;
+        return;
 
       case index_if_statement: {
         const auto& altr = this->m_stor.as<index_if_statement>();
-        ::rocket::for_each(altr.code_true, callback);
-        ::rocket::for_each(altr.code_false, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_true, staged, temp);
+        do_for_each_get_variables(altr.code_false, staged, temp);
+        return;
       }
 
       case index_switch_statement: {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         for(size_t i = 0;  i < altr.code_labels.size();  ++i) {
-          ::rocket::for_each(altr.code_labels.at(i), callback);
-          ::rocket::for_each(altr.code_bodies.at(i), callback);
+          do_for_each_get_variables(altr.code_labels.at(i), staged, temp);
+          do_for_each_get_variables(altr.code_bodies.at(i), staged, temp);
         }
-        return callback;
+        return;
       }
 
       case index_do_while_statement: {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
-        ::rocket::for_each(altr.code_body, callback);
-        ::rocket::for_each(altr.code_cond, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        do_for_each_get_variables(altr.code_cond, staged, temp);
+        return;
       }
 
       case index_while_statement: {
         const auto& altr = this->m_stor.as<index_while_statement>();
-        ::rocket::for_each(altr.code_cond, callback);
-        ::rocket::for_each(altr.code_body, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_cond, staged, temp);
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
       }
 
       case index_for_each_statement: {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
-        ::rocket::for_each(altr.code_init, callback);
-        ::rocket::for_each(altr.code_body, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_init, staged, temp);
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
       }
 
       case index_for_statement: {
         const auto& altr = this->m_stor.as<index_for_statement>();
-        ::rocket::for_each(altr.code_init, callback);
-        ::rocket::for_each(altr.code_cond, callback);
-        ::rocket::for_each(altr.code_step, callback);
-        ::rocket::for_each(altr.code_body, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_init, staged, temp);
+        do_for_each_get_variables(altr.code_cond, staged, temp);
+        do_for_each_get_variables(altr.code_step, staged, temp);
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
       }
 
       case index_try_statement: {
         const auto& altr = this->m_stor.as<index_try_statement>();
-        ::rocket::for_each(altr.code_try, callback);
-        ::rocket::for_each(altr.code_catch, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_try, staged, temp);
+        do_for_each_get_variables(altr.code_catch, staged, temp);
+        return;
       }
 
       case index_throw_statement:
@@ -5509,31 +5511,31 @@ enumerate_variables(Variable_Callback& callback) const
       case index_convert_to_temporary:
       case index_push_global_reference:
       case index_push_local_reference:
-        return callback;
+        return;
 
       case index_push_bound_reference: {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
-        altr.ref.enumerate_variables(callback);
-        return callback;
+        altr.ref.get_variables(staged, temp);
+        return;
       }
 
       case index_define_function: {
         const auto& altr = this->m_stor.as<index_define_function>();
-        ::rocket::for_each(altr.code_body, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
       }
 
       case index_branch_expression: {
         const auto& altr = this->m_stor.as<index_branch_expression>();
-        ::rocket::for_each(altr.code_true, callback);
-        ::rocket::for_each(altr.code_false, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_true, staged, temp);
+        do_for_each_get_variables(altr.code_false, staged, temp);
+        return;
       }
 
       case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
-        ::rocket::for_each(altr.code_null, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_null, staged, temp);
+        return;
       }
 
       case index_function_call:
@@ -5546,18 +5548,18 @@ enumerate_variables(Variable_Callback& callback) const
       case index_define_null_variable:
       case index_single_step_trap:
       case index_variadic_call:
-        return callback;
+        return;
 
       case index_defer_expression: {
         const auto& altr = this->m_stor.as<index_defer_expression>();
-        ::rocket::for_each(altr.code_body, callback);
-        return callback;
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
       }
 
       case index_import_call:
       case index_declare_reference:
       case index_initialize_reference:
-        return callback;
+        return;
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());

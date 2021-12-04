@@ -31,9 +31,9 @@ class CRC32_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.CRC32` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     CRC32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -143,9 +143,9 @@ class FNV1a32_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.FNV1a32` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     FNV1a32_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -265,9 +265,9 @@ class MD5_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.MD5` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     MD5_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -369,9 +369,9 @@ class SHA1_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.SHA1` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     SHA1_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -473,9 +473,9 @@ class SHA224_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.SHA224` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     SHA224_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -577,9 +577,9 @@ class SHA256_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.SHA256` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     SHA256_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -681,9 +681,9 @@ class SHA384_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.SHA384` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     SHA384_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override
@@ -785,9 +785,9 @@ class SHA512_Hasher final
     describe(tinyfmt& fmt) const override
       { return fmt << "instance of `std.checksum.SHA512` at `" << this << "`";  }
 
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const override
-      { return callback;  }
+    void
+    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+      { }
 
     SHA512_Hasher*
     clone_opt(rcptr<Abstract_Opaque>& out) const override

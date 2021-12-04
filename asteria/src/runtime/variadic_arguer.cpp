@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "variadic_arguer.hpp"
-#include "variable_callback.hpp"
 #include "argument_reader.hpp"
 #include "../utils.hpp"
 
@@ -16,11 +15,12 @@ describe(tinyfmt& fmt) const
     return fmt << "`__varg([index])` at '" << this->m_sloc << "'";
   }
 
-Variable_Callback&
+void
 Variadic_Arguer::
-enumerate_variables(Variable_Callback& callback) const
+get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    return ::rocket::for_each(this->m_vargs, callback), callback;
+    for(const auto& arg : this->m_vargs)
+      arg.get_variables(staged, temp);
   }
 
 Reference&

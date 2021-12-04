@@ -65,8 +65,8 @@ class Value
       }
 
   private:
-    Variable_Callback&
-    do_enumerate_variables_slow(Variable_Callback& callback) const;
+    int
+    do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
     ROCKET_PURE bool
     do_test_slow() const noexcept;
@@ -294,12 +294,11 @@ class Value
       }
 
     // This is used by garbage collection.
-    Variable_Callback&
-    enumerate_variables(Variable_Callback& callback) const
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        return this->is_scalar()
-            ? callback
-            : this->do_enumerate_variables_slow(callback);
+        if(!this->is_scalar())
+          this->do_get_variables_slow(staged, temp);
       }
 
     // This performs the builtin conversion to boolean values.
