@@ -96,7 +96,7 @@ Global_Context(API_Version version)
     // Allocate the global variable `std`.
     const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
-    auto vstd = gcoll->create_variable(2);
+    auto vstd = gcoll->create_variable(gc_generation_oldest);
     vstd->initialize(::std::move(ostd), Variable::state_immutable);
     this->do_open_named_reference(nullptr, sref("std")).set_variable(vstd);
     this->m_vstd = ::std::move(vstd);

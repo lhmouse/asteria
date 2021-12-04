@@ -258,7 +258,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 V_integer
 std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
-    uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
+    auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
       ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
 
@@ -271,7 +271,7 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
 V_integer
 std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
-    uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
+    auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
       ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
 
@@ -284,7 +284,7 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
 V_integer
 std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
   {
-    uint8_t rgen = ::rocket::clamp_cast<uint8_t>(generation, 0, 2);
+    auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
       ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
 
@@ -298,9 +298,9 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
 V_integer
 std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
   {
-    uint8_t rglimit = 2;
+    auto rglimit = gc_generation_oldest;
     if(generation_limit) {
-      rglimit = ::rocket::clamp_cast<uint8_t>(*generation_limit, 0, 2);
+      rglimit = ::rocket::clamp_cast<GC_Generation>(*generation_limit, 0, 2);
       if(rglimit != *generation_limit)
         ASTERIA_THROW_RUNTIME_ERROR("invalid generation limit `$1`", *generation_limit);
     }

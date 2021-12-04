@@ -13,14 +13,8 @@ namespace asteria {
 class Garbage_Collector final
   : public Rcfwd<Garbage_Collector>
   {
-  public:
-    enum : uint8_t {
-      generation_youngest  = 0,
-      generation_oldest    = 2,
-    };
-
   private:
-    static constexpr size_t gMax = generation_oldest;
+    static constexpr size_t gMax = gc_generation_oldest;
     array<size_t, gMax+1> m_counts = { };
     array<size_t, gMax+1> m_thres = { 10, 70, 500 };
     array<Variable_HashSet, gMax+1> m_tracked;
@@ -44,15 +38,15 @@ class Garbage_Collector final
 
     // Properties
     size_t
-    get_threshold(uint8_t gen) const
+    get_threshold(GC_Generation gen) const
       { return this->m_thres.at(gMax-gen);  }
 
     Garbage_Collector&
-    set_threshold(uint8_t gen, size_t thres)
+    set_threshold(GC_Generation gen, size_t thres)
       { return this->m_thres.mut(gMax-gen) = thres, *this;  }
 
     size_t
-    count_tracked_variables(uint8_t gen) const
+    count_tracked_variables(GC_Generation gen) const
       { return this->m_tracked.at(gMax-gen).size();  }
 
     size_t
@@ -65,10 +59,10 @@ class Garbage_Collector final
 
     // Allocation and collection
     rcptr<Variable>
-    create_variable(uint8_t gen_hint = generation_youngest);
+    create_variable(GC_Generation gen_hint = gc_generation_newest);
 
     size_t
-    collect_variables(uint8_t gen_limit = generation_oldest);
+    collect_variables(GC_Generation gen_limit = gc_generation_oldest);
 
     size_t
     finalize() noexcept;

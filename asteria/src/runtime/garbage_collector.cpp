@@ -257,7 +257,7 @@ do_collect_generation(size_t gen)
 
 rcptr<Variable>
 Garbage_Collector::
-create_variable(uint8_t gen_hint)
+create_variable(GC_Generation gen_hint)
   {
     // Perform automatic garbage collection.
     for(size_t gen = 0;  gen <= gMax;  ++gen)
@@ -282,7 +282,7 @@ create_variable(uint8_t gen_hint)
 
 size_t
 Garbage_Collector::
-collect_variables(uint8_t gen_limit)
+collect_variables(GC_Generation gen_limit)
   {
     // Collect all variables up to generation `gen_limit`.
     size_t nvars = 0;

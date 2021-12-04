@@ -766,6 +766,14 @@ enum API_Version : uint32_t
     api_version_latest     = 0xFFFFFFFF,  // everything
   };
 
+// Garbage collection generations
+enum GC_Generation : uint8_t
+  {
+    gc_generation_newest  = 0,
+    gc_generation_middle  = 1,
+    gc_generation_oldest  = 2,
+  };
+
 // Options for source parsing and code generation
 template<uint32_t... paramsT>
 struct Compiler_Options_template;
