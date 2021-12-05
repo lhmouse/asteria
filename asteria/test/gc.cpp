@@ -9,8 +9,8 @@
 
 using namespace asteria;
 
-sso_vector<void*, 1000> alloc_list;
-sso_vector<void*, 1000> free_list;
+sso_vector<void*, 10000> alloc_list;
+sso_vector<void*, 10000> free_list;
 
 void* operator new(size_t cb)
   {
@@ -53,24 +53,24 @@ int main()
 
           ref gr -> __global foreign_variable;
 
-          func test() {
-            var x,y,z;
+          (func() {
+            (func() {
+              var x,y,z;
 
-            func foo() { return [x,y,z,gr];  }
-            func bar() { return [z,y,x,gr];  }
+              func foo() { return [x,y,z,gr];  }
+              func bar() { return [z,y,x,gr];  }
 
-            x = [foo,bar,foo,bar,foo];
-            y = [x,[bar,foo,bar]];
-            z = x;
-            y = x;
-            gr = y;
-          }
+              x = [foo,bar,foo,bar,foo];
+              y = [x,[bar,foo,bar]];
+              z = x;
+              y = x;
+              gr = y;
+            }());
+          }());
 
-          test();
-          assert std.system.gc_collect() == 0;  // nothing
-
+          assert std.system.gc_collect() == 2;  // foo,bar
           gr = "meow";
-          assert std.system.gc_collect() == 5;  // x,y,z,foo,bar
+          assert std.system.gc_collect() == 3;  // x,y,z
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
