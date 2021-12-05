@@ -13,7 +13,7 @@ Reference_Stack::
 do_destroy_elements() noexcept
   {
     auto next = this->m_bptr;
-    const auto eptr = this->m_bptr + this->m_einit;
+    const auto eptr = next + this->m_einit;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qref = next;
       next += 1;
@@ -44,18 +44,21 @@ do_reserve_more()
     // Move-construct references below `m_etop` into the new storage. This shall
     // not throw exceptions. `m_etop` is left unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    size_t esold = ::std::exchange(this->m_estor, estor);
-    this->m_einit = this->m_etop;
+    const uint32_t eiold = ::std::exchange(this->m_einit, this->m_etop);
+    this->m_estor = estor;
 
     if(!bold)
       return;
 
-    for(size_t k = 0;  k != this->m_einit;  ++k)
-      ::rocket::construct_at(bptr + k, ::std::move(bold[k]));
+    // Move references into the new storage.
+    for(uint32_t k = 0;  k < eiold;  ++k) {
+      // Note again, only references below `m_etop` will be moved.
+      if(ROCKET_EXPECT(k < this->m_einit))
+        ::rocket::construct_at(bptr + k, ::std::move(bold[k]));
 
-    for(size_t k = 0;  k != esold;  ++k)
+      // Destroy the old reference, always.
       ::rocket::destroy_at(bold + k);
-
+    }
     ::operator delete(bold);
   }
 
