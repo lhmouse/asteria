@@ -11,6 +11,7 @@ check_PROGRAMS +=  \
   %reldir%/statement_sequence.test  \
   %reldir%/simple_script.test  \
   %reldir%/gc.test  \
+  %reldir%/gc2.test  \
   %reldir%/gc_loop.test  \
   %reldir%/varg.test  \
   %reldir%/operators.test  \
