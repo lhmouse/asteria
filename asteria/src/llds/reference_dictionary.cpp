@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "reference_dictionary.hpp"
-#include "../runtime/variable_callback.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
@@ -122,22 +121,6 @@ do_rehash_more()
       sbkt = sbkt->next;
     }
     ::operator delete(bold);
-  }
-
-Variable_Callback&
-Reference_Dictionary::
-enumerate_variables(Variable_Callback& callback) const
-  {
-    auto next = this->m_head;
-    while(ROCKET_EXPECT(next)) {
-      auto qbkt = next;
-      next = qbkt->next;
-
-      // Enumerate child variables.
-      ROCKET_ASSERT(*qbkt);
-      qbkt->vstor[0].enumerate_variables(callback);
-    }
-    return callback;
   }
 
 }  // namespace asteria
