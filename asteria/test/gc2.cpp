@@ -49,12 +49,14 @@ int main()
 
           (func(){
             (func(){
-              func foo() { }
-              var x = foo;
+              var x;
+              func f() { return x;  }
+              func g() { return f;  }
+              x = g;
             }());
           }());
 
-          assert std.system.gc_collect() == 2;  // foo, x
+          assert std.system.gc_collect() == 3;  // x, f, g
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));
