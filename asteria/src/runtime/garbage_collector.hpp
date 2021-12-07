@@ -22,8 +22,8 @@ class Garbage_Collector final
     array<Variable_HashMap, gMax+1> m_tracked;
 
     Variable_HashMap m_staged;  // key is address of the owner of a `Variable`
-    Variable_HashMap m_temp;  // the same with `m_staged`
-
+    Variable_HashMap m_temp_1;  // key is address to a `Variable`
+    Variable_HashMap m_temp_2;
     Variable_HashMap m_unreachable;
     Variable_HashMap m_reachable;
 
