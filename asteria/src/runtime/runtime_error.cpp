@@ -29,7 +29,7 @@ do_backtrace(Backtrace_Frame&& new_frm)
         ::std::rethrow_exception(eptr);
     }
     catch(Runtime_Error& nested) {
-      this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
+      this->m_frames.append(nested.m_frames.move_begin(), nested.m_frames.move_end());
     }
     catch(...) { }
 

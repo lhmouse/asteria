@@ -146,8 +146,8 @@ class Runtime_Error
 // Note the format string must be a string literal.
 #define ASTERIA_THROW_RUNTIME_ERROR(...)  \
     throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_format(),  \
-              ::asteria::Source_Location(::rocket::sref(__FILE__), __LINE__, 0),  \
-              "" __VA_ARGS__)
+        ::asteria::Source_Location(::rocket::sref(__FILE__),  \
+           __LINE__, 0), "" __VA_ARGS__)
 
 // This construction translates `std::exception`s to `Runtime_Error`s.
 #define ASTERIA_RUNTIME_TRY  \
@@ -156,12 +156,10 @@ class Runtime_Error
 
 #define ASTERIA_RUNTIME_CATCH(...)  \
       catch(::asteria::Runtime_Error&) {  \
-        throw;  \
-      }  \
+        throw;  }  \
       catch(::std::exception& yPb8wL9v) {  \
-        throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_native(),  \
-                    yPb8wL9v);  \
-      }  \
+        throw ::asteria::Runtime_Error(  \
+          ::asteria::Runtime_Error::M_native(), yPb8wL9v);  }  \
     }  \
     catch(__VA_ARGS__)
 
