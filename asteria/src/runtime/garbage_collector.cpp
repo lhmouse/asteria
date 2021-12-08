@@ -91,7 +91,7 @@ do_collect_generation(size_t gen)
     while(this->m_temp_1.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
       if(var->get_gc_ref() == var->use_count() - 1) {
-        // This variable is possibly reachable.
+        // This variable is possibly unreachable.
         this->m_unreachable.insert(var.get(), var);
         continue;
       }
