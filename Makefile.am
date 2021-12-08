@@ -15,6 +15,7 @@ AM_CXXFLAGS = -include precompiled.w.hpp -std=gnu++14 -Wp,-std=c++11  \
   -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
 
+AM_LDFLAGS = -pthread
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
