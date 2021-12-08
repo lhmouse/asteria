@@ -69,7 +69,6 @@ do_collect_generation(size_t gen)
 
     while(this->m_temp_1.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
-
       var->set_gc_ref(1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
 
@@ -80,7 +79,6 @@ do_collect_generation(size_t gen)
     // counter shall be incremented.
     while(this->m_staged.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
-
       var->set_gc_ref(var->get_gc_ref() + 1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
 
@@ -92,7 +90,6 @@ do_collect_generation(size_t gen)
 
     while(this->m_temp_1.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
-
       if(var->get_gc_ref() == var->use_count() - 1) {
         // This variable is possibly reachable.
         this->m_unreachable.insert(var.get(), var);
@@ -100,33 +97,36 @@ do_collect_generation(size_t gen)
       }
 
       // This variable is reachable.
-      // Mark variables that are indirectly reachable, too.
-      do {
-        ROCKET_ASSERT(var);
+      var->set_gc_ref(0);
+      this->m_unreachable.erase(var.get());
+      this->m_reachable.insert(var.get(), var);
 
+      // Mark variables that are indirectly reachable, too.
+      var->get_value().get_variables(this->m_staged, this->m_temp_2);
+
+      while(this->m_temp_2.erase_random(nullptr, &var)) {
+        ROCKET_ASSERT(var);
         var->set_gc_ref(0);
+        this->m_temp_1.erase(var.get());
         this->m_unreachable.erase(var.get());
         this->m_reachable.insert(var.get(), var);
 
         var->get_value().get_variables(this->m_staged, this->m_temp_2);
       }
-      while(this->m_temp_2.erase_random(nullptr, &var));
     }
 
     // Collect all variables from `m_unreachable`.
     while(this->m_unreachable.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
-
       ROCKET_ASSERT(var->get_gc_ref() != 0);
-      var->uninitialize();
-      bool erased = tracked.erase(var);
-      nvars += 1;
 
-      // Pool the variable. This shall be the last operation due to
-      // possible exceptions. If the variable cannot be pooled, it is
-      // deallocated immediately.
-      if(erased)
-        this->m_pool.insert(var.get(), var);
+      if(!tracked.erase(var.get()))
+        continue;
+
+      // Cache the variable for later use.
+      var->uninitialize();
+      nvars += 1;
+      this->m_pool.insert(var.get(), var);
     }
 
     if(next_opt) {
@@ -134,18 +134,27 @@ do_collect_generation(size_t gen)
       // Note exception safety.
       while(this->m_reachable.erase_random(nullptr, &var)) {
         ROCKET_ASSERT(var);
-
         ROCKET_ASSERT(var->get_gc_ref() == 0);
-        next_opt->insert(var.get(), var);
-        bool erased = tracked.erase(var);
 
-        // Undo the operation if the variable was not in `tracked`.
-        if(erased)
+        if(!tracked.erase(var.get()))
+          continue;
+
+        // Transfer this variable to the next generation with regard
+        // to exception safety.
+        try {
+          next_opt->insert(var.get(), var);
           *count_opt += 1;
-        else
-          next_opt->erase(var);
+        }
+        catch(...) {
+          tracked.insert(var.get(), var);  }
       }
     }
+
+    this->m_staged.clear();
+    this->m_temp_1.clear();
+    this->m_temp_2.clear();
+    this->m_unreachable.clear();
+    this->m_reachable.clear();
 
     // Reset the GC counter to zero only if the operation completes
     // normally i.e. don't reset it if an exception is thrown.
