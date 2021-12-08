@@ -23,10 +23,11 @@ ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
 constexpr Compare
 do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
   {
-    return ::std::isless(lhs, rhs)      ? compare_less
-         : ::std::isgreater(lhs, rhs)   ? compare_greater
-         : ::std::isunordered(lhs, rhs) ? compare_unordered
-                                        : compare_equal;
+    return ::std::islessequal(lhs, rhs)
+         ? (::std::isless(lhs, rhs)    ? compare_less
+                                       : compare_equal)
+         : (::std::isgreater(lhs, rhs) ? compare_greater
+                                       : compare_unordered);
   }
 
 }  // namespace
