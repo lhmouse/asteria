@@ -13,7 +13,7 @@ struct pointer_of
   { };
 
 template<typename elementT, typename deleterT>
-struct pointer_of<elementT, deleterT, typename identity<typename deleterT::pointer>::type>
+struct pointer_of<elementT, deleterT, ROCKET_VOID_T(typename deleterT::pointer)>
   : identity<typename deleterT::pointer>
   { };
 
