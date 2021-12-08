@@ -65,7 +65,7 @@ class Value
       }
 
   private:
-    int
+    void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
     ROCKET_PURE bool

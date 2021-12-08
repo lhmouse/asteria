@@ -31,7 +31,7 @@ do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
 
 }  // namespace
 
-int
+void
 Value::
 do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
@@ -41,25 +41,25 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
       case type_integer:
       case type_real:
       case type_string:
-        return 0;
+        return;
 
       case type_opaque:
         this->m_stor.as<V_opaque>().get_variables(staged, temp);
-        return 0;
+        return;
 
       case type_function:
         this->m_stor.as<V_function>().get_variables(staged, temp);
-        return 0;
+        return;
 
       case type_array:
         ::rocket::for_each(this->m_stor.as<V_array>(),
             [&](const auto& val) { val.get_variables(staged, temp);  });
-        return 0;
+        return;
 
       case type_object:
         ::rocket::for_each(this->m_stor.as<V_object>(),
             [&](const auto& pair) { pair.second.get_variables(staged, temp);  });
-        return 0;
+        return;
 
       default:
         ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
