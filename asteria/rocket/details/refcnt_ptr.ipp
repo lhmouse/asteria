@@ -15,19 +15,19 @@ class refcnt_cJveMKH5bI7L
   public:
     bool
     unique() const noexcept
-      { return this->m_nref.get() == 1;  }
+      { return this->m_nref == 1;  }
 
     long
     use_count() const noexcept
-      { return this->m_nref.get();  }
+      { return this->m_nref;  }
 
     long
     add_reference() const noexcept
-      { return this->m_nref.increment();  }
+      { return ++(this->m_nref);  }
 
     long
     drop_reference() const noexcept
-      { return this->m_nref.decrement();  }
+      { return --(this->m_nref);  }
   };
 
 template<typename elementT, typename deleterT>
