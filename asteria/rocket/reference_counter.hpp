@@ -17,8 +17,7 @@ class reference_counter;
 template<typename valueT>
 class reference_counter
   {
-    static_assert(
-        is_integral<valueT>::value && !is_same<valueT, bool>::value,
+    static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,
         "invalid reference counter value type");
 
   public:
@@ -70,8 +69,8 @@ class reference_counter
         for(;;)
           if(old == 0)
             return false;
-          else if(this->m_nref.compare_exchange_weak(old, old + 1,
-                           ::std::memory_order_relaxed))
+          else if(this->m_nref.compare_exchange_weak(
+                            old, old + 1, ::std::memory_order_relaxed))
             return true;
       }
 
