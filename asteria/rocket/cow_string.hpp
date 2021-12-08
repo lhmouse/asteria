@@ -13,13 +13,13 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT>
-class basic_tinyfmt;
-
-template<typename charT, typename traitsT = char_traits<charT>>
+template<typename charT,
+         typename traitsT = char_traits<charT>>
 class basic_shallow_string;
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+template<typename charT,
+         typename traitsT = char_traits<charT>,
+         typename allocT = allocator<charT>>
 class basic_cow_string;
 
 #include "details/cow_string.ipp"
@@ -118,6 +118,9 @@ template<typename charT, typename traitsT, typename allocT>
 constexpr basic_shallow_string<charT, traitsT>
 sref(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
   { return basic_shallow_string<charT, traitsT>(str);  }
+
+template<typename charT, typename traitsT>
+class basic_tinyfmt;
 
 template<typename charT, typename traitsT>
 inline basic_tinyfmt<charT, traitsT>&

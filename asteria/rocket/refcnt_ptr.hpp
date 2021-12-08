@@ -12,7 +12,9 @@
 
 namespace rocket {
 
-template<typename elementT, typename deleterT = default_delete<const elementT>>
+template<typename elementT,
+         typename deleterT = default_delete<const elementT>,
+         typename counterT = reference_counter<long>>
 class refcnt_base;
 
 template<typename elementT>
