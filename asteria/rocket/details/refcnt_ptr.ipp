@@ -15,17 +15,17 @@ class reference_counter_base
   public:
     bool
     unique() const noexcept
-      { return this->m_nref.unique();  }
+      { return this->m_nref.get() == 1;  }
 
     long
     use_count() const noexcept
       { return this->m_nref.get();  }
 
-    void
+    long
     add_reference() const noexcept
       { return this->m_nref.increment();  }
 
-    bool
+    long
     drop_reference() const noexcept
       { return this->m_nref.decrement();  }
   };
@@ -107,7 +107,7 @@ class stored_pointer
       {
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ptr)
-          if(ROCKET_UNEXPECT(ptr->reference_counter_base::drop_reference()))
+          if(ROCKET_UNEXPECT(ptr->reference_counter_base::drop_reference() == 0))
             (copy_deleter)(*ptr)(ptr);
       }
 

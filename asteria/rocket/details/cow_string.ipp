@@ -116,7 +116,7 @@ class storage_handle
         if(ROCKET_EXPECT(!qstor))
           return;
 
-        if(ROCKET_EXPECT(!qstor->nref.decrement()))
+        if(ROCKET_EXPECT(qstor->nref.decrement() != 0))
           return;
 
         // Unlike vectors, strings require value types to be complete.

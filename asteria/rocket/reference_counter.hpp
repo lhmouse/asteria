@@ -62,32 +62,60 @@ class reference_counter
     get() const noexcept
       { return this->m_nref.load(::std::memory_order_relaxed);  }
 
-    bool
+    // Increment the counter only if it is non-zero, and return its new value.
+    long
     try_increment() noexcept
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
         for(;;)
           if(old == 0)
-            return false;
+            return old;
           else if(this->m_nref.compare_exchange_weak(
-                            old, old + 1, ::std::memory_order_relaxed))
-            return true;
+                               old, old + 1, ::std::memory_order_relaxed))
+            return old + 1;
       }
 
-    void
+    // Increment the counter and return its new value.
+    value_type
     increment() noexcept
       {
         auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
         ROCKET_ASSERT(old >= 1);
+        return old + 1;
       }
 
-    bool
+    // Decrement the counter and return its new value.
+    // This has to be done with acquire-release semantics, because the
+    // operation which has decremented the counter to zero shall synchronize
+    // with other write operations to associated shared resources.
+    value_type
     decrement() noexcept
       {
         auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
         ROCKET_ASSERT(old >= 1);
-        return old == 1;
+        return old - 1;
       }
+
+    // Provide some convenient operators.
+    operator
+    value_type() const noexcept
+      { return this->get();  }
+
+    value_type
+    operator++() noexcept
+      { return this->increment();  }
+
+    value_type
+    operator--() noexcept
+      { return this->decrement();  }
+
+    value_type
+    operator++(int) noexcept
+      { return this->increment() - 1;  }
+
+    value_type
+    operator--(int) noexcept
+      { return this->decrement() + 1;  }
   };
 
 template

@@ -64,11 +64,11 @@ class refcnt_base
     use_count() const noexcept
       { return this->reference_counter_base::use_count();  }
 
-    void
+    long
     add_reference() const noexcept
       { return this->reference_counter_base::add_reference();  }
 
-    bool
+    long
     drop_reference() const noexcept
       { return this->reference_counter_base::drop_reference();  }
 

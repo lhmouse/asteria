@@ -243,7 +243,7 @@ class storage_handle
           return;
 
         auto qhead = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
-        if(ROCKET_EXPECT(!qhead->nref.decrement()))
+        if(ROCKET_EXPECT(qhead->nref.decrement() != 0))
           return;
 
         // This indirect call is paramount for incomplete type support.
