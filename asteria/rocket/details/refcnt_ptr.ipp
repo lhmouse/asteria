@@ -7,7 +7,7 @@
 
 namespace details_refcnt_ptr {
 
-class reference_counter_base
+class refcnt_cJveMKH5bI7L
   {
   private:
     mutable reference_counter<long> m_nref;
@@ -73,7 +73,7 @@ class stored_pointer
         auto ptr = this->m_ptr;
         if(!ptr)
           return false;
-        return ptr->reference_counter_base::unique();
+        return ptr->refcnt_cJveMKH5bI7L::unique();
       }
 
     long
@@ -82,7 +82,7 @@ class stored_pointer
         auto ptr = this->m_ptr;
         if(!ptr)
           return 0;
-        return ptr->reference_counter_base::use_count();
+        return ptr->refcnt_cJveMKH5bI7L::use_count();
       }
 
     constexpr pointer
@@ -98,7 +98,7 @@ class stored_pointer
       {
         auto ptr = this->m_ptr;
         if(ptr)
-          ptr->reference_counter_base::add_reference();
+          ptr->refcnt_cJveMKH5bI7L::add_reference();
         return ptr;
       }
 
@@ -107,7 +107,7 @@ class stored_pointer
       {
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ptr)
-          if(ROCKET_UNEXPECT(ptr->reference_counter_base::drop_reference() == 0))
+          if(ROCKET_UNEXPECT(ptr->refcnt_cJveMKH5bI7L::drop_reference() == 0))
             (copy_deleter)(*ptr)(ptr);
       }
 
@@ -122,7 +122,7 @@ pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
   {
     refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
     if(dptr)
-      dptr.get()->reference_counter_base::add_reference();
+      dptr.get()->refcnt_cJveMKH5bI7L::add_reference();
     return dptr;
   }
 

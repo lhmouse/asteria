@@ -13,8 +13,7 @@
 namespace rocket {
 
 template<typename elementT,
-         typename deleterT = default_delete<const elementT>,
-         typename counterT = reference_counter<long>>
+         typename deleterT = default_delete<const elementT>>
 class refcnt_base;
 
 template<typename elementT>
@@ -27,7 +26,7 @@ class basic_tinyfmt;
 
 template<typename elementT, typename deleterT>
 class refcnt_base
-  : public virtual details_refcnt_ptr::reference_counter_base,
+  : public virtual details_refcnt_ptr::refcnt_cJveMKH5bI7L,
     private virtual allocator_wrapper_base_for<deleterT>::type
   {
   public:
@@ -58,19 +57,19 @@ class refcnt_base
 
     bool
     unique() const noexcept
-      { return this->reference_counter_base::unique();  }
+      { return this->refcnt_cJveMKH5bI7L::unique();  }
 
     long
     use_count() const noexcept
-      { return this->reference_counter_base::use_count();  }
+      { return this->refcnt_cJveMKH5bI7L::use_count();  }
 
     long
     add_reference() const noexcept
-      { return this->reference_counter_base::add_reference();  }
+      { return this->refcnt_cJveMKH5bI7L::add_reference();  }
 
     long
     drop_reference() const noexcept
-      { return this->reference_counter_base::drop_reference();  }
+      { return this->refcnt_cJveMKH5bI7L::drop_reference();  }
 
     template<typename yelementT = elementT, typename selfT = refcnt_base>
     refcnt_ptr<const yelementT>
@@ -80,7 +79,7 @@ class refcnt_base
         if(!yptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
 
-        yptr->reference_counter_base::add_reference();
+        yptr->refcnt_cJveMKH5bI7L::add_reference();
         return refcnt_ptr<const yelementT>(yptr);
       }
 
@@ -92,7 +91,7 @@ class refcnt_base
         if(!yptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
 
-        yptr->reference_counter_base::add_reference();
+        yptr->refcnt_cJveMKH5bI7L::add_reference();
         return refcnt_ptr<yelementT>(yptr);
       }
   };
