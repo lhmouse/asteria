@@ -36,9 +36,6 @@ class Reference_Stack
     void
     do_reserve_more();
 
-    int
-    do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
-
   public:
     ~Reference_Stack()
       {
@@ -97,8 +94,9 @@ class Reference_Stack
     void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        if(this->m_etop != 0)
-          this->do_get_variables_slow(staged, temp);
+        auto eptr = this->m_bptr + this->m_einit;
+        while(eptr != this->m_bptr)
+          (--eptr)->get_variables(staged, temp);
       }
 
     const Reference&

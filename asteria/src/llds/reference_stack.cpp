@@ -61,20 +61,4 @@ do_reserve_more()
     ::operator delete(bold);
   }
 
-int
-Reference_Stack::
-do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
-  {
-    auto next = this->m_bptr;
-    const auto eptr = next + this->m_einit;
-    while(ROCKET_EXPECT(next != eptr)) {
-      auto qref = next;
-      next += 1;
-
-      // Enumerate variables in this reference.
-      qref->get_variables(staged, temp);
-    }
-    return 0;
-  }
-
 }  // namespace asteria
