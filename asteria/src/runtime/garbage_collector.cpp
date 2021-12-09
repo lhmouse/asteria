@@ -87,6 +87,9 @@ do_collect_generation(size_t gen)
     // Mark all variables that have been collected so far.
     this->m_temp_1.merge(tracked);
 
+    if(next_opt)
+      next_opt->reserve_more(this->m_temp_1.size());
+
     while(this->m_temp_1.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
 
@@ -100,7 +103,9 @@ do_collect_generation(size_t gen)
 
       // This variable is reachable.
       // Mark variables that are indirectly reachable, too.
-      do {
+      this->m_temp_2.insert(var.get(), var);
+
+      while(this->m_temp_2.erase_random(nullptr, &var)) {
         ROCKET_ASSERT(var);
         var->get_value().get_variables(this->m_staged, this->m_temp_2);
 
@@ -108,20 +113,20 @@ do_collect_generation(size_t gen)
         this->m_temp_1.erase(var.get());
         this->m_unreach.erase(var.get());
 
-        if(!next_opt || !tracked.erase(var.get()))
+        if(!next_opt)
           continue;
 
-        // Transfer this variable to the next generation with regard
-        // to exception safety.
-        try {
-          next_opt->insert(var.get(), var);
-          *count_opt += 1;
-        }
-        catch(...) {
-          tracked.insert(var.get(), var);
-        }
+        // Foreign variables must not be transferred.
+        if(!tracked.erase(var.get()))
+          continue;
+
+        // Transfer this variable to the next generation.
+        // Note that storage has been reserved so this shall not cause
+        // exceptions.
+        ROCKET_ASSERT(next_opt->size() < next_opt->capacity());
+        next_opt->insert(var.get(), var);
+        *count_opt += 1;
       }
-      while(this->m_temp_2.erase_random(nullptr, &var));
     }
 
     // Collect all variables from `m_unreach`.
@@ -129,13 +134,28 @@ do_collect_generation(size_t gen)
       ROCKET_ASSERT(var);
       ROCKET_ASSERT(var->get_gc_ref() != 0);
 
+      // Foreign variables must not be collected.
       if(!tracked.erase(var.get()))
         continue;
 
       // Cache the variable for later use.
-      var->uninitialize();
-      nvars += 1;
-      this->m_pool.insert(var.get(), var);
+      // If an exception is thrown during uninitialization, the variable
+      // shall be collected immediately.
+      try {
+        var->uninitialize();
+        nvars += 1;
+        this->m_pool.insert(var.get(), var);
+      }
+      catch(exception& stdex) {
+        ::fprintf(stderr,
+            "WARNING: An unusual exception that was thrown during garbage "
+            "collection has been caught and ignored. If this issue persists, "
+            "please file a bug report.\n"
+            "\n"
+            "  exception class: %s\n"
+            "  what(): %s\n",
+            typeid(stdex).name(), stdex.what());
+      }
     }
 
     this->m_staged.clear();
