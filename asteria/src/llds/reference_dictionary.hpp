@@ -117,7 +117,7 @@ class Reference_Dictionary
       }
 
     void
-    do_rehash_more();
+    do_rehash_more(size_t nadd);
 
   public:
     ~Reference_Dictionary()
@@ -140,6 +140,10 @@ class Reference_Dictionary
     size_t
     size() const noexcept
       { return this->m_size;  }
+
+    size_t
+    capacity() const noexcept
+      { return static_cast<size_t>(this->m_eptr - this->m_bptr) / 2;  }
 
     Reference_Dictionary&
     clear() noexcept
@@ -197,14 +201,20 @@ class Reference_Dictionary
         return qbkt->vstor;
       }
 
+    Reference_Dictionary&
+    reserve_more(size_t nadd)
+      {
+        this->do_rehash_more(nadd);
+        return *this;
+      }
+
     pair<Reference*, bool>
     insert(const phsh_string& name)
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
-        size_t nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
-        if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
-          this->do_rehash_more();
+        if(ROCKET_UNEXPECT(this->m_size >= this->capacity()))
+          this->do_rehash_more(1);
 
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(name);

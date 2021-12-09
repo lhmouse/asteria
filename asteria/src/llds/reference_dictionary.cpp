@@ -74,12 +74,14 @@ do_xrelocate_but(Bucket* qxcld) noexcept
 
 void
 Reference_Dictionary::
-do_rehash_more()
+do_rehash_more(size_t nadd)
   {
     // Allocate a new table.
-    size_t nbkt = (this->m_size * 3 + 2) | 7;
+    size_t nbkt = (this->m_size * 3 + nadd * 2) | 7;
     if(nbkt / 2 <= this->m_size)
-      throw ::std::bad_alloc();
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          "Reference_Dictionary: rehash size not valid (`%zd` + `%zd`)",
+          this->m_size, nadd);
 
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
