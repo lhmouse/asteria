@@ -115,7 +115,7 @@ class Variable_HashMap
       }
 
     void
-    do_rehash_more();
+    do_rehash_more(size_t nadd);
 
     size_t
     do_merge_into(Variable_HashMap& other) const;
@@ -141,6 +141,10 @@ class Variable_HashMap
     size_t
     size() const noexcept
       { return this->m_size;  }
+
+    size_t
+    capacity() const noexcept
+      { return static_cast<size_t>(this->m_eptr - this->m_bptr) / 2;  }
 
     Variable_HashMap&
     clear() noexcept
@@ -181,14 +185,20 @@ class Variable_HashMap
         return qbkt->vstor;
       }
 
+    Variable_HashMap&
+    reserve_more(size_t nadd)
+      {
+        this->do_rehash_more(nadd);
+        return *this;
+      }
+
     bool
     insert(const void* key_p, const rcptr<Variable>& var_opt)
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
-        size_t nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
-        if(ROCKET_UNEXPECT(this->m_size >= nbkt / 2))
-          this->do_rehash_more();
+        if(ROCKET_UNEXPECT(this->m_size >= this->capacity()))
+          this->do_rehash_more(1);
 
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(key_p);

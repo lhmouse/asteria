@@ -72,12 +72,14 @@ do_xrelocate_but(Bucket* qxcld) noexcept
 
 void
 Variable_HashMap::
-do_rehash_more()
+do_rehash_more(size_t nadd)
   {
     // Allocate a new table.
-    size_t nbkt = (this->m_size * 3 + 2) | 7;
+    size_t nbkt = (this->m_size * 3 + nadd * 2) | 97;
     if(nbkt / 2 <= this->m_size)
-      throw ::std::bad_alloc();
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          "Variable_HashMap: rehash size not valid (`%zd` + `%zd`)",
+          this->m_size, nadd);
 
     auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
