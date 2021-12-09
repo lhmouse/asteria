@@ -6,7 +6,7 @@ environment:
   CXX: g++
 
 install:
-  - cmd: pacman -S --noconfirm parallel pcre2-devel openssl-devel zlib-devel
+  - cmd: pacman -S --noconfirm base-devel parallel pcre2-devel openssl-devel zlib-devel
 
 build:
   parallel: true
