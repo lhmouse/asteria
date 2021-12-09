@@ -24,8 +24,7 @@ class Garbage_Collector final
     Variable_HashMap m_staged;  // key is address of the owner of a `Variable`
     Variable_HashMap m_temp_1;  // key is address to a `Variable`
     Variable_HashMap m_temp_2;
-    Variable_HashMap m_unreachable;
-    Variable_HashMap m_reachable;
+    Variable_HashMap m_unreach;
 
   public:
     explicit

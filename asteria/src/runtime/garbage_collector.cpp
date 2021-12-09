@@ -56,8 +56,7 @@ do_collect_generation(size_t gen)
     this->m_staged.clear();
     this->m_temp_1.clear();
     this->m_temp_2.clear();
-    this->m_unreachable.clear();
-    this->m_reachable.clear();
+    this->m_unreach.clear();
 
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
@@ -69,19 +68,19 @@ do_collect_generation(size_t gen)
 
     while(this->m_temp_1.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
+      var->get_value().get_variables(this->m_staged, this->m_temp_1);
+
       var->set_gc_ref(1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
-
-      var->get_value().get_variables(this->m_staged, this->m_temp_1);
     }
 
     // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
     // counter shall be incremented.
     while(this->m_staged.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
+
       var->set_gc_ref(var->get_gc_ref() + 1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
-
       this->m_temp_1.insert(var.get(), var);
     }
 
@@ -90,33 +89,43 @@ do_collect_generation(size_t gen)
 
     while(this->m_temp_1.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
-      if(var->get_gc_ref() == var->use_count() - 1) {
-        // This variable is possibly unreachable.
-        this->m_unreachable.insert(var.get(), var);
+
+      // Each variable whose `gc_ref` counter equals its reference count is
+      // marked as possibly unreachable. Note `var` here owns a reference
+      // which must be excluded.
+      if(ROCKET_EXPECT(var->get_gc_ref() == var->use_count() - 1)) {
+        this->m_unreach.insert(var.get(), var);
         continue;
       }
 
       // This variable is reachable.
-      var->set_gc_ref(0);
-      this->m_unreachable.erase(var.get());
-      this->m_reachable.insert(var.get(), var);
-
       // Mark variables that are indirectly reachable, too.
-      var->get_value().get_variables(this->m_staged, this->m_temp_2);
-
-      while(this->m_temp_2.erase_random(nullptr, &var)) {
+      do {
         ROCKET_ASSERT(var);
+        var->get_value().get_variables(this->m_staged, this->m_temp_2);
+
         var->set_gc_ref(0);
         this->m_temp_1.erase(var.get());
-        this->m_unreachable.erase(var.get());
-        this->m_reachable.insert(var.get(), var);
+        this->m_unreach.erase(var.get());
 
-        var->get_value().get_variables(this->m_staged, this->m_temp_2);
+        if(!next_opt || !tracked.erase(var.get()))
+          continue;
+
+        // Transfer this variable to the next generation with regard
+        // to exception safety.
+        try {
+          next_opt->insert(var.get(), var);
+          *count_opt += 1;
+        }
+        catch(...) {
+          tracked.insert(var.get(), var);
+        }
       }
+      while(this->m_temp_2.erase_random(nullptr, &var));
     }
 
-    // Collect all variables from `m_unreachable`.
-    while(this->m_unreachable.erase_random(nullptr, &var)) {
+    // Collect all variables from `m_unreach`.
+    while(this->m_unreach.erase_random(nullptr, &var)) {
       ROCKET_ASSERT(var);
       ROCKET_ASSERT(var->get_gc_ref() != 0);
 
@@ -129,32 +138,10 @@ do_collect_generation(size_t gen)
       this->m_pool.insert(var.get(), var);
     }
 
-    if(next_opt) {
-      // Push reachable variables to the next generation, if any.
-      // Note exception safety.
-      while(this->m_reachable.erase_random(nullptr, &var)) {
-        ROCKET_ASSERT(var);
-        ROCKET_ASSERT(var->get_gc_ref() == 0);
-
-        if(!tracked.erase(var.get()))
-          continue;
-
-        // Transfer this variable to the next generation with regard
-        // to exception safety.
-        try {
-          next_opt->insert(var.get(), var);
-          *count_opt += 1;
-        }
-        catch(...) {
-          tracked.insert(var.get(), var);  }
-      }
-    }
-
     this->m_staged.clear();
     this->m_temp_1.clear();
     this->m_temp_2.clear();
-    this->m_unreachable.clear();
-    this->m_reachable.clear();
+    this->m_unreach.clear();
 
     // Reset the GC counter to zero only if the operation completes
     // normally i.e. don't reset it if an exception is thrown.
@@ -217,8 +204,7 @@ finalize() noexcept
     this->m_staged.clear();
     this->m_temp_1.clear();
     this->m_temp_2.clear();
-    this->m_unreachable.clear();
-    this->m_reachable.clear();
+    this->m_unreach.clear();
 
     // Wipe out all tracked variables. Indirect ones may be foreign so they
     // must not be wiped.
