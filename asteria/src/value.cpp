@@ -309,6 +309,15 @@ print(tinyfmt& fmt, bool escape) const
     return fmt;
   }
 
+bool
+Value::
+print_to_stderr(bool escape) const
+  {
+    ::rocket::tinyfmt_file fmt(stderr, nullptr);
+    this->print(fmt, escape);
+    return ::ferror(fmt.get_handle());
+  }
+
 tinyfmt&
 Value::
 dump(tinyfmt& fmt, size_t indent, size_t hanging) const
@@ -434,6 +443,16 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
     while(stack.size());
 
     return fmt;
+  }
+
+
+bool
+Value::
+dump_to_stderr(size_t indent, size_t hanging) const
+  {
+    ::rocket::tinyfmt_file fmt(stderr, nullptr);
+    this->dump(fmt, indent, hanging);
+    return ::ferror(fmt.get_handle());
   }
 
 }  // namespace asteria

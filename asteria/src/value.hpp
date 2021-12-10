@@ -319,8 +319,14 @@ class Value
     tinyfmt&
     print(tinyfmt& fmt, bool escape = false) const;
 
+    bool
+    print_to_stderr(bool escape = false) const;
+
     tinyfmt&
     dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0) const;
+
+    bool
+    dump_to_stderr(size_t indent = 2, size_t hanging = 0) const;
   };
 
 inline void
