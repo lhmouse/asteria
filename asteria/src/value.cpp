@@ -211,6 +211,7 @@ Value::
       while(bytes.getn(reinterpret_cast<char*>(this), N) == N);
 
       ROCKET_ASSERT(bytes.empty());
+      ::std::memset(static_cast<void*>(this), 0, N);
     }
     catch(exception& stdex) {
       ::fprintf(stderr,
