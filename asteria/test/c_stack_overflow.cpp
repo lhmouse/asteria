@@ -15,10 +15,8 @@ static void* thread_proc(void*)
 ///////////////////////////////////////////////////////////////////////////////
 
         var a;
-        for(var k = 0; k < 30000; ++k) {
-          var b = [ a, a ];
-          a = func() { return b;  };
-        }
+        for(var k = 0; k < 100000; ++k)
+          a = [ a ];
 
         std.io.putln("meow");
         std.io.flush();
