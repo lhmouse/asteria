@@ -306,7 +306,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             indent.break_line(fmt);
 
             // Descend into the array.
-            qval = &(ctxa.curp[0]);
+            qval = &*(ctxa.curp);
             stack.emplace_back(::std::move(ctxa));
             continue;
           }
@@ -359,11 +359,13 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
             indent.break_line(fmt);
 
             // Format the next element.
-            qval = &(ctxa.curp[0]);
+            qval = &*(ctxa.curp);
             break;
           }
 
           // Close this array.
+          stack.pop_back();
+
           if(json5 && indent.has_indention())
             fmt << ',';
 
@@ -386,6 +388,8 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           }
 
           // Close this object.
+          stack.pop_back();
+
           if(json5 && indent.has_indention())
             fmt << ',';
 
@@ -393,7 +397,6 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           indent.break_line(fmt);
           fmt << '}';
         }
-        stack.pop_back();
       }
     }
   }
