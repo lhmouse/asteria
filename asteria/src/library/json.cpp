@@ -256,7 +256,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     auto qval = &value;
     cow_vector<Xformat> stack;
 
-    for(;;) {
+    do {
       // Format a value. `qval` must always point to a valid value here.
       switch(weaken_enum(qval->type())) {
         case type_boolean:
@@ -346,11 +346,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           break;
       }
 
-      // A complete value has been written. Advance to the next element if any.
-      for(;;) {
-        if(stack.empty())
-          return fmt.extract_string();
-
+      while(stack.size()) {
         // Advance to the next element.
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
@@ -399,6 +395,9 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         }
       }
     }
+    while(stack.size());
+
+    return fmt.extract_string();
   }
 
 V_string

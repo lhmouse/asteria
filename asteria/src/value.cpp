@@ -199,7 +199,7 @@ print(tinyfmt& fmt, bool escape) const
     auto qval = this;
     cow_vector<Rbr_Element> stack;
 
-    for(;;) {
+    do {
       switch(qval->type()) {
         case type_null:
           fmt << "null";
@@ -276,10 +276,7 @@ print(tinyfmt& fmt, bool escape) const
           ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      for(;;) {
-        if(stack.empty())
-          return fmt;
-
+      while(stack.size()) {
         // Advance to the next element.
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
@@ -307,6 +304,9 @@ print(tinyfmt& fmt, bool escape) const
         }
       }
     }
+    while(stack.size());
+
+    return fmt;
   }
 
 tinyfmt&
@@ -317,7 +317,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
     auto qval = this;
     cow_vector<Rbr_Element> stack;
 
-    for(;;) {
+    do {
       switch(qval->type()) {
         case type_null:
           fmt << "null;";
@@ -399,10 +399,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      for(;;) {
-        if(stack.empty())
-          return fmt;
-
+      while(stack.size()) {
         // Advance to the next element.
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
@@ -434,6 +431,9 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         }
       }
     }
+    while(stack.size());
+
+    return fmt;
   }
 
 }  // namespace asteria
