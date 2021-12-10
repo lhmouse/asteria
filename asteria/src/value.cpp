@@ -290,6 +290,7 @@ print(tinyfmt& fmt, bool escape) const
           }
 
           // Close this array.
+          stack.pop_back();
           fmt << " ]";
         }
         else if(stack.back().index() == 1) {
@@ -301,10 +302,9 @@ print(tinyfmt& fmt, bool escape) const
           }
 
           // Close this object.
+          stack.pop_back();
           fmt << " }";
         }
-
-        stack.pop_back();
       }
     }
   }
@@ -313,61 +313,126 @@ tinyfmt&
 Value::
 dump(tinyfmt& fmt, size_t indent, size_t hanging) const
   {
-    switch(this->type()) {
-      case type_null:
-        return fmt << "null";
+    // Expand recursion by hand with a stack.
+    auto qval = this;
+    cow_vector<Rbr_Element> stack;
 
-      case type_boolean:
-        return fmt << "boolean " << this->as_boolean();
+    for(;;) {
+      switch(qval->type()) {
+        case type_null:
+          fmt << "null;";
+          break;
 
-      case type_integer:
-        return fmt << "integer " << this->as_integer();
+        case type_boolean:
+          fmt << "boolean " << qval->as_boolean() << ';';
+          break;
 
-      case type_real:
-        return fmt << "real " << this->as_real();
+        case type_integer:
+          fmt << "integer " << qval->as_integer() << ';';
+          break;
 
-      case type_string: {
-        const auto& altr = this->as_string();
-        fmt << "string(" << altr.size() << ") " << quote(altr);
-        return fmt;
-      }
+        case type_real:
+          fmt << "real " << qval->as_real() << ';';
+          break;
 
-      case type_opaque: {
-        const auto& altr = this->as_opaque();
-        fmt << "opaque [[" << altr << "]]";
-        return fmt;
-      }
-
-      case type_function: {
-        const auto& altr = this->as_function();
-        fmt << "function [[" << altr << "]]";
-        return fmt;
-      }
-
-      case type_array: {
-        const auto& altr = this->as_array();
-        fmt << "array(" << altr.size() << ") [";
-        for(size_t i = 0;  i < altr.size();  ++i) {
-          fmt << pwrap(indent, hanging + indent) << i << " = ";
-          altr[i].dump(fmt, indent, hanging + indent) << ';';
+        case type_string: {
+          const auto& altr = qval->as_string();
+          fmt << "string(" << altr.size() << ") " << quote(altr) << ';';
+          break;
         }
-        fmt << pwrap(indent, hanging) << ']';
-        return fmt;
-      }
 
-      case type_object: {
-        const auto& altr = this->as_object();
-        fmt << "object(" << altr.size() << ") {";
-        for(auto q = altr.begin();  q != altr.end();  ++q) {
-          fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
-          q->second.dump(fmt, indent, hanging + indent) << ';';
+        case type_opaque: {
+          const auto& altr = this->as_opaque();
+          fmt << "opaque [[" << altr << "]];";
+          break;
         }
-        fmt << pwrap(indent, hanging) << '}';
-        return fmt;
+
+        case type_function: {
+          const auto& altr = this->as_function();
+          fmt << "function [[" << altr << "]];";
+          break;
+        }
+
+        case type_array: {
+          const auto& altr = qval->as_array();
+          fmt << "array(" << altr.size() << ") ";
+
+          // Open an array.
+          if(altr.size()) {
+            Rbr_array elem = { &altr, altr.begin() };
+            stack.emplace_back(::std::move(elem));
+
+            fmt << '[';
+            fmt << pwrap(indent, hanging + indent * stack.size());
+            fmt << (elem.curp - altr.begin()) << " = ";
+            qval = &*(elem.curp);
+            continue;
+          }
+
+          // Write an empty array.
+          fmt << "[ ];";
+          break;
+        }
+
+        case type_object: {
+          const auto& altr = qval->as_object();
+          fmt << "object(" << altr.size() << ") ";
+
+          // Open an object.
+          if(altr.size()) {
+            Rbr_object elem = { &altr, altr.begin() };
+            stack.emplace_back(::std::move(elem));
+
+            fmt << '{';
+            fmt << pwrap(indent, hanging + indent * stack.size());
+            fmt << quote(elem.curp->first) << " = ";
+            qval = &(elem.curp->second);
+            continue;
+          }
+
+          // Write an empty object.
+          fmt << "{ };";
+          break;
+        }
+
+        default:
+          ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+      for(;;) {
+        if(stack.empty())
+          return fmt;
+
+        // Advance to the next element.
+        if(stack.back().index() == 0) {
+          auto& elem = stack.mut_back().as<0>();
+          if(++(elem.curp) != elem.refa->end()) {
+            fmt << pwrap(indent, hanging + indent * stack.size());
+            fmt << (elem.curp - elem.refa->begin()) << " = ";
+            qval = &*(elem.curp);
+            break;
+          }
+
+          // Close this array.
+          stack.pop_back();
+          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << "];";
+        }
+        else if(stack.back().index() == 1) {
+          auto& elem = stack.mut_back().as<1>();
+          if(++(elem.curp) != elem.refo->end()) {
+            fmt << pwrap(indent, hanging + indent * stack.size());
+            fmt << quote(elem.curp->first) << " = ";
+            qval = &(elem.curp->second);
+            break;
+          }
+
+          // Close this object.
+          stack.pop_back();
+          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << "};";
+        }
+      }
     }
   }
 
