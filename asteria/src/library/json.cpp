@@ -226,12 +226,12 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
     for(;;)
       if(curp == object.end())
         return false;
-      else if(::rocket::is_any_of(curp->second.type(),
+      else if(::rocket::is_none_of(curp->second.type(),
                      { type_null, type_boolean, type_integer, type_real, type_string,
                        type_array, type_object }))
-        return true;
-      else
         ++curp;
+      else
+        return true;
   }
 
 struct S_xformat_array
@@ -301,19 +301,18 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
           // Open an array.
           S_xformat_array ctxa = { &array, array.begin() };
-          if(ctxa.curp != array.end()) {
-            indent.increment_level();
-            indent.break_line(fmt);
-
-            // Descend into the array.
-            qval = &*(ctxa.curp);
-            stack.emplace_back(::std::move(ctxa));
-            continue;
+          if(ctxa.curp == array.end()) {
+            fmt << ']';
+            break;
           }
 
-          // Write an empty array.
-          fmt << ']';
-          break;
+          indent.increment_level();
+          indent.break_line(fmt);
+
+          // Descend into the array.
+          qval = &*(ctxa.curp);
+          stack.emplace_back(::std::move(ctxa));
+          continue;
         }
 
         case type_object: {
@@ -322,22 +321,21 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
           // Open an object.
           S_xformat_object ctxo = { &object, object.begin() };
-          if(do_find_uncensored(ctxo.curp, object)) {
-            indent.increment_level();
-            indent.break_line(fmt);
-
-            // Write the key followed by a colon.
-            do_format_object_key(fmt, json5, indent, ctxo.curp->first);
-
-            // Descend into the object.
-            qval = &(ctxo.curp->second);
-            stack.emplace_back(::std::move(ctxo));
-            continue;
+          if(!do_find_uncensored(ctxo.curp, object)) {
+            fmt << '}';
+            break;
           }
 
-          // Write an empty object.
-          fmt << '}';
-          break;
+          indent.increment_level();
+          indent.break_line(fmt);
+
+          // Write the key followed by a colon.
+          do_format_object_key(fmt, json5, indent, ctxo.curp->first);
+
+          // Descend into the object.
+          qval = &(ctxo.curp->second);
+          stack.emplace_back(::std::move(ctxo));
+          continue;
         }
 
         default:
