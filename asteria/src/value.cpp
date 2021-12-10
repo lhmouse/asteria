@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "value.hpp"
 #include "utils.hpp"
+#include <rocket/linear_buffer.hpp>
 
 namespace asteria {
 namespace {
@@ -51,34 +52,174 @@ void
 Value::
 do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real:
-      case type_string:
-        return;
+    // Expand recursion by hand with a stack.
+    auto qval = this;
+    cow_vector<Rbr_Element> stack;
 
-      case type_opaque:
-        this->as_opaque().get_variables(staged, temp);
-        return;
+    do {
+      switch(qval->type()) {
+        case type_null:
+        case type_boolean:
+        case type_integer:
+        case type_real:
+        case type_string:
+          break;
 
-      case type_function:
-        this->as_function().get_variables(staged, temp);
-        return;
+        case type_opaque:
+          qval->as_opaque().get_variables(staged, temp);
+          break;
 
-      case type_array:
-        ::rocket::for_each(this->as_array(),
-            [&](const auto& val) { val.get_variables(staged, temp);  });
-        return;
+        case type_function:
+          qval->as_function().get_variables(staged, temp);
+          break;
 
-      case type_object:
-        ::rocket::for_each(this->as_object(),
-            [&](const auto& pair) { pair.second.get_variables(staged, temp);  });
-        return;
+        case type_array: {
+          const auto& altr = qval->as_array();
+          if(altr.empty())
+            break;
 
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+          // Open an array.
+          Rbr_array elem = { &altr, altr.begin() };
+          stack.emplace_back(::std::move(elem));
+
+          qval = &*(elem.curp);
+          continue;
+        }
+
+        case type_object: {
+          const auto& altr = qval->as_object();
+          if(altr.empty())
+            break;
+
+          // Open an object.
+          Rbr_object elem = { &altr, altr.begin() };
+          stack.emplace_back(::std::move(elem));
+
+          qval = &(elem.curp->second);
+          continue;
+        }
+
+        default:
+          ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+      }
+
+      while(stack.size()) {
+        // Advance to the next element.
+        if(stack.back().index() == 0) {
+          auto& elem = stack.mut_back().as<0>();
+          if(++(elem.curp) != elem.refa->end()) {
+            qval = &*(elem.curp);
+            break;
+          }
+
+          // Close this array.
+          stack.pop_back();
+        }
+        else if(stack.back().index() == 1) {
+          auto& elem = stack.mut_back().as<1>();
+          if(++(elem.curp) != elem.refo->end()) {
+            qval = &(elem.curp->second);
+            break;
+          }
+
+          // Close this object.
+          stack.pop_back();
+        }
+      }
+    }
+    while(stack.size());
+  }
+
+Value::
+~Value()
+  {
+#ifdef ROCKET_DEBUG
+    // Attempt to run out of stack in a rather stupid way.
+    static char* volatile s_stupid_begin;
+    static char* volatile s_stupid_end;
+
+    char stupid[1000] = { };
+    s_stupid_begin = stupid;
+    s_stupid_end = stupid + sizeof(s_stupid_end);
+
+    s_stupid_begin[0] = 1;
+    s_stupid_end[-1] = 2;
+#endif
+
+    if(ROCKET_EXPECT(this->is_null()))
+      return;
+
+    // Expand arrays and objects by hand.
+    // This blows the entire C++ object model up. Don't play with this at home!
+    ::rocket::linear_buffer bytes;
+    constexpr size_t N = sizeof(Value);
+
+    try {
+      do {
+        switch(this->type()) {
+          case type_null:
+          case type_boolean:
+          case type_integer:
+          case type_real:
+            break;
+
+          case type_string:
+            this->m_stor.as<type_string>().~V_string();
+            break;
+
+          case type_opaque:
+            this->m_stor.as<type_opaque>().~V_opaque();
+            break;
+
+          case type_function:
+            this->m_stor.as<type_function>().~V_function();
+            break;
+
+          case type_array: {
+            auto& altr = this->m_stor.as<type_array>();
+            if(altr.unique()) {
+              // Move raw bytes into `bytes`.
+              for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
+                char* src = reinterpret_cast<char(&)[]>(*it);
+                bytes.putn(src, N);
+                ::std::memset(src, 0, N);
+              }
+            }
+            altr.~V_array();
+            break;
+          }
+
+          case type_object: {
+            auto& altr = this->m_stor.as<type_object>();
+            if(altr.unique()) {
+              // Move raw bytes into `bytes`.
+              for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
+                char* src = reinterpret_cast<char(&)[]>(it->second);
+                bytes.putn(src, N);
+                ::std::memset(src, 0, N);
+              }
+            }
+            altr.~V_object();
+            break;
+          }
+
+          default:
+            ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+        }
+      }
+      while(bytes.getn(reinterpret_cast<char*>(this), N) == N);
+
+      ROCKET_ASSERT(bytes.empty());
+    }
+    catch(exception& stdex) {
+      ::fprintf(stderr,
+          "WARNING: An unusual exception that was thrown from the destructor "
+          "of a value has been caught and ignored. Some resources might have "
+          "leaked. If this issue persists, please file a bug report.\n"
+          "\n"
+          "  exception class: %s\n"
+          "  what(): %s\n",
+          typeid(stdex).name(), stdex.what());
     }
   }
 
@@ -238,38 +379,34 @@ print(tinyfmt& fmt, bool escape) const
 
         case type_array: {
           const auto& altr = qval->as_array();
-
-          // Open an array.
-          if(altr.size()) {
-            Rbr_array elem = { &altr, altr.begin() };
-            stack.emplace_back(::std::move(elem));
-
-            fmt << "[ ";
-            qval = &*(elem.curp);
-            continue;
+          if(altr.empty()) {
+            fmt << "[ ]";
+            break;
           }
 
-          // Write an empty array.
-          fmt << "[ ]";
-          break;
+          // Open an array.
+          Rbr_array elem = { &altr, altr.begin() };
+          stack.emplace_back(::std::move(elem));
+
+          fmt << "[ ";
+          qval = &*(elem.curp);
+          continue;
         }
 
         case type_object: {
           const auto& altr = qval->as_object();
-
-          // Open an object.
-          if(altr.size()) {
-            Rbr_object elem = { &altr, altr.begin() };
-            stack.emplace_back(::std::move(elem));
-
-            fmt << "{ " << quote(elem.curp->first) << ": ";
-            qval = &(elem.curp->second);
-            continue;
+          if(altr.empty()) {
+            fmt << "{ }";
+            break;
           }
 
-          // Write an empty object.
-          fmt << "{ }";
-          break;
+          // Open an object.
+          Rbr_object elem = { &altr, altr.begin() };
+          stack.emplace_back(::std::move(elem));
+
+          fmt << "{ " << quote(elem.curp->first) << ": ";
+          qval = &(elem.curp->second);
+          continue;
         }
 
         default:
@@ -365,43 +502,39 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         case type_array: {
           const auto& altr = qval->as_array();
           fmt << "array(" << altr.size() << ") ";
-
-          // Open an array.
-          if(altr.size()) {
-            Rbr_array elem = { &altr, altr.begin() };
-            stack.emplace_back(::std::move(elem));
-
-            fmt << '[';
-            fmt << pwrap(indent, hanging + indent * stack.size());
-            fmt << (elem.curp - altr.begin()) << " = ";
-            qval = &*(elem.curp);
-            continue;
+          if(altr.empty()) {
+            fmt << "[ ];";
+            break;
           }
 
-          // Write an empty array.
-          fmt << "[ ];";
-          break;
+          // Open an array.
+          Rbr_array elem = { &altr, altr.begin() };
+          stack.emplace_back(::std::move(elem));
+
+          fmt << '[';
+          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << (elem.curp - altr.begin()) << " = ";
+          qval = &*(elem.curp);
+          continue;
         }
 
         case type_object: {
           const auto& altr = qval->as_object();
           fmt << "object(" << altr.size() << ") ";
-
-          // Open an object.
-          if(altr.size()) {
-            Rbr_object elem = { &altr, altr.begin() };
-            stack.emplace_back(::std::move(elem));
-
-            fmt << '{';
-            fmt << pwrap(indent, hanging + indent * stack.size());
-            fmt << quote(elem.curp->first) << " = ";
-            qval = &(elem.curp->second);
-            continue;
+          if(altr.empty()) {
+            fmt << "{ };";
+            break;
           }
 
-          // Write an empty object.
-          fmt << "{ };";
-          break;
+          // Open an object.
+          Rbr_object elem = { &altr, altr.begin() };
+          stack.emplace_back(::std::move(elem));
+
+          fmt << '{';
+          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << quote(elem.curp->first) << " = ";
+          qval = &(elem.curp->second);
+          continue;
         }
 
         default:

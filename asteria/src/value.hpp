@@ -78,6 +78,8 @@ class Value
     do_throw_type_mismatch(const char* desc) const;
 
   public:
+    ~Value();
+
     // Accessors
     Type
     type() const noexcept
