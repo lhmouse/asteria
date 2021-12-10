@@ -30,6 +30,21 @@ do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
                                        : compare_unordered);
   }
 
+// Recursion breaker
+struct Rbr_array
+  {
+    const V_array* refa;
+    V_array::const_iterator curp;
+  };
+
+struct Rbr_object
+  {
+    const V_object* refo;
+    V_object::const_iterator curp;
+  };
+
+using Rbr_Element = ::rocket::variant<Rbr_array, Rbr_object>;
+
 }  // namespace
 
 void
@@ -180,68 +195,117 @@ tinyfmt&
 Value::
 print(tinyfmt& fmt, bool escape) const
   {
-    switch(this->type()) {
-      case type_null:
-        return fmt << "null";
+    // Expand recursion by hand with a stack.
+    auto qval = this;
+    cow_vector<Rbr_Element> stack;
 
-      case type_boolean:
-        return fmt << this->as_boolean();
+    for(;;) {
+      switch(qval->type()) {
+        case type_null:
+          fmt << "null";
+          break;
 
-      case type_integer:
-        return fmt << this->as_integer();
+        case type_boolean:
+          fmt << qval->as_boolean();
+          break;
 
-      case type_real:
-        return fmt << this->as_real();
+        case type_integer:
+          fmt << qval->as_integer();
+          break;
 
-      case type_string:
-        if(!escape)
-          return fmt << this->as_string();
-        else
-          return fmt << quote(this->as_string());
+        case type_real:
+          fmt << qval->as_real();
+          break;
 
-      case type_opaque:
-        return fmt << "(opaque) [[" << this->as_opaque() << "]]";
-
-      case type_function:
-        return fmt << "(function) [[" << this->as_function() << "]]";
-
-      case type_array: {
-        const auto& altr = this->as_array();
-        fmt << "[";
-        auto it = altr.begin();
-        if(it != altr.end()) {
-          for(;;) {
-            fmt << ' ';
-            it->print(fmt, true);
-            if(++it == altr.end())
-              break;
-            fmt << ',';
+        case type_string:
+          if(escape) {
+            // Escape the string.
+            fmt << quote(qval->as_string());
           }
+          else {
+            // Write the string verbatim.
+            fmt << qval->as_string();
+          }
+          break;
+
+        case type_opaque:
+          fmt << "(opaque) [[" << qval->as_opaque() << "]]";
+          break;
+
+        case type_function:
+          fmt << "(function) [[" << qval->as_function() << "]]";
+          break;
+
+        case type_array: {
+          const auto& altr = qval->as_array();
+
+          // Open an array.
+          if(altr.size()) {
+            Rbr_array elem = { &altr, altr.begin() };
+            stack.emplace_back(::std::move(elem));
+
+            fmt << "[ ";
+            qval = &*(elem.curp);
+            continue;
+          }
+
+          // Write an empty array.
+          fmt << "[ ]";
+          break;
         }
-        fmt << " ]";
-        return fmt;
+
+        case type_object: {
+          const auto& altr = qval->as_object();
+
+          // Open an object.
+          if(altr.size()) {
+            Rbr_object elem = { &altr, altr.begin() };
+            stack.emplace_back(::std::move(elem));
+
+            fmt << "{ " << quote(elem.curp->first) << ": ";
+            qval = &(elem.curp->second);
+            continue;
+          }
+
+          // Write an empty object.
+          fmt << "{ }";
+          break;
+        }
+
+        default:
+          ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      case type_object: {
-        const auto& altr = this->as_object();
-        fmt << "{";
-        auto it = altr.begin();
-        if(it != altr.end()) {
-          for(;;) {
-            fmt << ' ';
-            fmt << quote(it->first) << " = ";
-            it->second.print(fmt, true);
-            if(++it == altr.end())
-              break;
-            fmt << ',';
-          }
-        }
-        fmt << " }";
-        return fmt;
-      }
+      for(;;) {
+        if(stack.empty())
+          return fmt;
 
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+        // Advance to the next element.
+        if(stack.back().index() == 0) {
+          auto& elem = stack.mut_back().as<0>();
+          if(++(elem.curp) != elem.refa->end()) {
+            fmt << ", ";
+            qval = &*(elem.curp);
+            break;
+          }
+
+          // Close this array.
+          fmt << " ]";
+        }
+        else if(stack.back().index() == 1) {
+          auto& elem = stack.mut_back().as<1>();
+          if(++(elem.curp) != elem.refo->end()) {
+            fmt << ", " << quote(elem.curp->first) << ": ";
+            qval = &(elem.curp->second);
+            break;
+          }
+
+          // Close this object.
+          fmt << " }";
+        }
+
+        stack.pop_back();
+      }
     }
   }
 
