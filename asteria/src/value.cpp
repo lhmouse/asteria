@@ -45,20 +45,20 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
 
       case type_opaque:
-        this->m_stor.as<V_opaque>().get_variables(staged, temp);
+        this->as_opaque().get_variables(staged, temp);
         return;
 
       case type_function:
-        this->m_stor.as<V_function>().get_variables(staged, temp);
+        this->as_function().get_variables(staged, temp);
         return;
 
       case type_array:
-        ::rocket::for_each(this->m_stor.as<V_array>(),
+        ::rocket::for_each(this->as_array(),
             [&](const auto& val) { val.get_variables(staged, temp);  });
         return;
 
       case type_object:
-        ::rocket::for_each(this->m_stor.as<V_object>(),
+        ::rocket::for_each(this->as_object(),
             [&](const auto& pair) { pair.second.get_variables(staged, temp);  });
         return;
 
@@ -76,23 +76,23 @@ do_test_slow() const noexcept
         return false;
 
       case type_boolean:
-        return this->m_stor.as<V_boolean>();
+        return this->as_boolean();
 
       case type_integer:
-        return this->m_stor.as<V_integer>() != 0;
+        return this->as_integer() != 0;
 
       case type_real:
-        return this->m_stor.as<V_real>() != 0;
+        return this->as_real() != 0;
 
       case type_string:
-        return this->m_stor.as<V_string>().empty() == false;
+        return this->as_string().empty() == false;
 
       case type_opaque:
       case type_function:
         return true;
 
       case type_array:
-        return this->m_stor.as<V_array>().empty() == false;
+        return this->as_array().empty() == false;
 
       case type_object:
         return true;
@@ -123,19 +123,19 @@ do_compare_slow(const Value& lhs, const Value& rhs) noexcept
 
       case type_boolean:
         return do_3way_compare_scalar(
-                  lhs.m_stor.as<V_boolean>(), rhs.m_stor.as<V_boolean>());
+                  lhs.as_boolean(), rhs.as_boolean());
 
       case type_integer:
         return do_3way_compare_scalar(
-                  lhs.m_stor.as<V_integer>(), rhs.m_stor.as<V_integer>());
+                  lhs.as_integer(), rhs.as_integer());
 
       case type_real:
         return do_3way_compare_scalar(
-                  lhs.m_stor.as<V_real>(), rhs.m_stor.as<V_real>());
+                  lhs.as_real(), rhs.as_real());
 
       case type_string:
         return do_3way_compare_scalar(
-            lhs.m_stor.as<V_string>().compare(rhs.m_stor.as<V_string>()), 0);
+            lhs.as_string().compare(rhs.as_string()), 0);
 
       case type_opaque:
       case type_function:
@@ -144,8 +144,8 @@ do_compare_slow(const Value& lhs, const Value& rhs) noexcept
       case type_array: {
         // Perform lexicographical comparison on the longest initial sequences
         // of the same length.
-        const auto& la = lhs.m_stor.as<V_array>();
-        const auto& ra = rhs.m_stor.as<V_array>();
+        const auto& la = lhs.as_array();
+        const auto& ra = rhs.as_array();
         size_t rlen = ::rocket::min(la.size(), ra.size());
 
         Compare comp;
@@ -185,28 +185,28 @@ print(tinyfmt& fmt, bool escape) const
         return fmt << "null";
 
       case type_boolean:
-        return fmt << this->m_stor.as<V_boolean>();
+        return fmt << this->as_boolean();
 
       case type_integer:
-        return fmt << this->m_stor.as<V_integer>();
+        return fmt << this->as_integer();
 
       case type_real:
-        return fmt << this->m_stor.as<V_real>();
+        return fmt << this->as_real();
 
       case type_string:
         if(!escape)
-          return fmt << this->m_stor.as<V_string>();
+          return fmt << this->as_string();
         else
-          return fmt << quote(this->m_stor.as<V_string>());
+          return fmt << quote(this->as_string());
 
       case type_opaque:
-        return fmt << "(opaque) [[" << this->m_stor.as<V_opaque>() << "]]";
+        return fmt << "(opaque) [[" << this->as_opaque() << "]]";
 
       case type_function:
-        return fmt << "(function) [[" << this->m_stor.as<V_function>() << "]]";
+        return fmt << "(function) [[" << this->as_function() << "]]";
 
       case type_array: {
-        const auto& altr = this->m_stor.as<V_array>();
+        const auto& altr = this->as_array();
         fmt << "[";
         auto it = altr.begin();
         if(it != altr.end()) {
@@ -223,7 +223,7 @@ print(tinyfmt& fmt, bool escape) const
       }
 
       case type_object: {
-        const auto& altr = this->m_stor.as<V_object>();
+        const auto& altr = this->as_object();
         fmt << "{";
         auto it = altr.begin();
         if(it != altr.end()) {
@@ -254,34 +254,34 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         return fmt << "null";
 
       case type_boolean:
-        return fmt << "boolean " << this->m_stor.as<V_boolean>();
+        return fmt << "boolean " << this->as_boolean();
 
       case type_integer:
-        return fmt << "integer " << this->m_stor.as<V_integer>();
+        return fmt << "integer " << this->as_integer();
 
       case type_real:
-        return fmt << "real " << this->m_stor.as<V_real>();
+        return fmt << "real " << this->as_real();
 
       case type_string: {
-        const auto& altr = this->m_stor.as<V_string>();
+        const auto& altr = this->as_string();
         fmt << "string(" << altr.size() << ") " << quote(altr);
         return fmt;
       }
 
       case type_opaque: {
-        const auto& altr = this->m_stor.as<V_opaque>();
+        const auto& altr = this->as_opaque();
         fmt << "opaque [[" << altr << "]]";
         return fmt;
       }
 
       case type_function: {
-        const auto& altr = this->m_stor.as<V_function>();
+        const auto& altr = this->as_function();
         fmt << "function [[" << altr << "]]";
         return fmt;
       }
 
       case type_array: {
-        const auto& altr = this->m_stor.as<V_array>();
+        const auto& altr = this->as_array();
         fmt << "array(" << altr.size() << ") [";
         for(size_t i = 0;  i < altr.size();  ++i) {
           fmt << pwrap(indent, hanging + indent) << i << " = ";
@@ -292,7 +292,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       case type_object: {
-        const auto& altr = this->m_stor.as<V_object>();
+        const auto& altr = this->as_object();
         fmt << "object(" << altr.size() << ") {";
         for(auto q = altr.begin();  q != altr.end();  ++q) {
           fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
