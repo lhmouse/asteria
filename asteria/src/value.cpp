@@ -68,10 +68,16 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           break;
 
         case type_opaque:
+          if(!staged.insert(qval, nullptr))
+            break;
+
           qval->as_opaque().get_variables(staged, temp);
           break;
 
         case type_function:
+          if(!staged.insert(qval, nullptr))
+            break;
+
           qval->as_function().get_variables(staged, temp);
           break;
 
@@ -80,7 +86,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           if(altr.empty())
             break;
 
-          if(!staged.insert(&altr, nullptr))
+          if(!staged.insert(qval, nullptr))
             break;
 
           // Open an array.
@@ -96,7 +102,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           if(altr.empty())
             break;
 
-          if(!staged.insert(&altr, nullptr))
+          if(!staged.insert(qval, nullptr))
             break;
 
           // Open an object.
