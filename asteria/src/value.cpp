@@ -490,13 +490,13 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         }
 
         case type_opaque: {
-          const auto& altr = this->as_opaque();
+          const auto& altr = qval->as_opaque();
           fmt << "opaque [[" << altr << "]];";
           break;
         }
 
         case type_function: {
-          const auto& altr = this->as_function();
+          const auto& altr = qval->as_function();
           fmt << "function [[" << altr << "]];";
           break;
         }
