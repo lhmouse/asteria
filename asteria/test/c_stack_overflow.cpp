@@ -14,7 +14,7 @@ static void* thread_proc(void*)
       sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-        var a;
+        var a = "meow";
         for(var k = 0; k < 100000; ++k)
           a = [ a ];
 
