@@ -73,15 +73,13 @@ int main()
         assert std.json.format5({a:1,bcd:2}, 2) == "{\n  a: 1,\n  bcd: 2,\n}" ||
                std.json.format5({a:1,bcd:2}, 2) == "{\n  bcd: 2,\n  a: 1,\n}";
 
-        try { std.json.parse("");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        assert catch( std.json.parse("") ) != null;
         assert std.json.parse("null") == null;
         assert std.json.parse("true  ") == true;
         assert std.json.parse("  false") == false;
         assert std.json.parse("  42  ") == 42;
         assert std.json.parse("  76.5") == 76.5;
-        try { std.json.parse("2 1");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        assert catch( std.json.parse("2 1") ) != null;
         assert std.json.parse("'hello'") == "hello";
         assert std.json.parse("\"\u55B5\"") == "喵";
         assert std.json.parse("\"\u55b5\"") == "喵";

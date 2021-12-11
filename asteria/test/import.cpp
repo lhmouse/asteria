@@ -20,11 +20,14 @@ int main()
         assert import("import_sub.txt", 3, 5) == -2;
         assert import("import_sub.txt", 3, 5,) == -2;
 
-        try { import("nonexistent file");  assert false;  }
-          catch(e) { assert std.string.find(e, "assertion failure") == null;  }
+        assert catch( import("nonexistent file") ) != null;
 
-        try { import("import_recursive.txt");  assert false;  }
-          catch(e) { assert std.string.find(e, "recursive import") != null;  }
+        try {
+          import("import_recursive.txt");
+          assert false;
+        }
+        catch(e)
+          assert std.string.find(e, "recursive import") != null;
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
