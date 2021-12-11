@@ -344,8 +344,8 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           break;
       }
 
-      while(stack.size()) {
-        // Advance to the next element.
+      // Advance to the next element.
+      while(stack.size())
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
           if(++(ctxa.curp) != ctxa.refa->end()) {
@@ -367,7 +367,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           indent.break_line(fmt);
           fmt << ']';
         }
-        else {
+        else if(stack.back().index() == 1) {
           auto& ctxo = stack.mut_back().as<1>();
           if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
             fmt << ',';
@@ -391,7 +391,8 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           indent.break_line(fmt);
           fmt << '}';
         }
-      }
+        else
+          ROCKET_ASSERT(false);
     }
     while(stack.size());
 
