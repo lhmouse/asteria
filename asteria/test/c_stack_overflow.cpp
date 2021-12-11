@@ -16,7 +16,7 @@ static void* thread_proc(void*)
 
         var a = "meow";
         for(var k = 0; k < 100000; ++k)
-          a = [ a ];
+          a = [ a, a ];
 
         std.io.putln("meow");
         std.io.flush();

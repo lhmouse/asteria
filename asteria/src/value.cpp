@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "value.hpp"
 #include "utils.hpp"
+#include "llds/variable_hashmap.hpp"
 #include "../rocket/linear_buffer.hpp"
 #include "../rocket/tinyfmt_file.hpp"
 
@@ -79,6 +80,9 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           if(altr.empty())
             break;
 
+          if(!staged.insert(&altr, nullptr))
+            break;
+
           // Open an array.
           Rbr_array elem = { &altr, altr.begin() };
           stack.emplace_back(::std::move(elem));
@@ -90,6 +94,9 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         case type_object: {
           const auto& altr = qval->as_object();
           if(altr.empty())
+            break;
+
+          if(!staged.insert(&altr, nullptr))
             break;
 
           // Open an object.
@@ -104,8 +111,8 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      while(stack.size()) {
-        // Advance to the next element.
+      // Advance to the next element.
+      while(stack.size())
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
           if(++(elem.curp) != elem.refa->end()) {
@@ -126,7 +133,8 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           // Close this object.
           stack.pop_back();
         }
-      }
+        else
+          ROCKET_ASSERT(false);
     }
     while(stack.size());
   }
@@ -415,8 +423,8 @@ print(tinyfmt& fmt, bool escape) const
           ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      while(stack.size()) {
-        // Advance to the next element.
+      // Advance to the next element.
+      while(stack.size())
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
           if(++(elem.curp) != elem.refa->end()) {
@@ -441,7 +449,8 @@ print(tinyfmt& fmt, bool escape) const
           stack.pop_back();
           fmt << " }";
         }
-      }
+        else
+          ROCKET_ASSERT(false);
     }
     while(stack.size());
 
@@ -543,8 +552,8 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
       }
 
-      while(stack.size()) {
-        // Advance to the next element.
+      // Advance to the next element.
+      while(stack.size())
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
           if(++(elem.curp) != elem.refa->end()) {
@@ -573,7 +582,8 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << "};";
         }
-      }
+        else
+          ROCKET_ASSERT(false);
     }
     while(stack.size());
 

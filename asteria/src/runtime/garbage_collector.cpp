@@ -30,6 +30,16 @@ class Sentry
       { return this->m_old == 0;  }
   };
 
+bool
+do_pop_variable(rcptr<Variable>& var, Variable_HashMap& map)
+  {
+    for(;;)
+      if(!map.erase_random(nullptr, &var))
+        return false;
+      else if(var)
+        return true;
+  }
+
 }  // namespace
 
 Garbage_Collector::
@@ -61,24 +71,21 @@ do_collect_generation(size_t gen)
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
 
-    // Collect all variables from `tracked` into `m_staged`. Each variable
-    // that is encountered in the loop shall have a direct reference from either
-    // `tracked` or `m_staged`, so its `gc_ref` counter is initialized to one.
+    // Collect all variables from `tracked` into `m_staged`.
     this->m_temp_1.merge(tracked);
 
-    while(this->m_temp_1.erase_random(nullptr, &var)) {
-      ROCKET_ASSERT(var);
-      var->get_value().get_variables(this->m_staged, this->m_temp_1);
-
+    while(do_pop_variable(var, this->m_temp_1)) {
+      // Each variable that is encountered here shall have a direct reference
+      // from either `tracked` or `m_staged`, so its `gc_ref` counter is
+      // initialized to one.
       var->set_gc_ref(1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
+      var->get_value().get_variables(this->m_staged, this->m_temp_1);
     }
 
-    // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
-    // counter shall be incremented.
-    while(this->m_staged.erase_random(nullptr, &var)) {
-      ROCKET_ASSERT(var);
-
+    while(do_pop_variable(var, this->m_staged)) {
+      // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
+      // counter shall be incremented.
       var->set_gc_ref(var->get_gc_ref() + 1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
       this->m_temp_1.insert(var.get(), var);
@@ -90,9 +97,7 @@ do_collect_generation(size_t gen)
     if(next_opt)
       next_opt->reserve_more(this->m_temp_1.size());
 
-    while(this->m_temp_1.erase_random(nullptr, &var)) {
-      ROCKET_ASSERT(var);
-
+    while(do_pop_variable(var, this->m_temp_1)) {
       // Each variable whose `gc_ref` counter equals its reference count is
       // marked as possibly unreachable. Note `var` here owns a reference
       // which must be excluded.
@@ -102,16 +107,15 @@ do_collect_generation(size_t gen)
       }
 
       // This variable is reachable.
-      // Mark variables that are indirectly reachable, too.
       this->m_temp_2.insert(var.get(), var);
 
-      while(this->m_temp_2.erase_random(nullptr, &var)) {
-        ROCKET_ASSERT(var);
-        var->get_value().get_variables(this->m_staged, this->m_temp_2);
-
+      while(do_pop_variable(var, this->m_temp_2)) {
+        // Mark this indirectly reachable variable, too.
         var->set_gc_ref(0);
         this->m_temp_1.erase(var.get());
         this->m_unreach.erase(var.get());
+
+        var->get_value().get_variables(this->m_staged, this->m_temp_2);
 
         if(!next_opt)
           continue;
@@ -130,10 +134,7 @@ do_collect_generation(size_t gen)
     }
 
     // Collect all variables from `m_unreach`.
-    while(this->m_unreach.erase_random(nullptr, &var)) {
-      ROCKET_ASSERT(var);
-      ROCKET_ASSERT(var->get_gc_ref() != 0);
-
+    while(do_pop_variable(var, this->m_unreach)) {
       // Foreign variables must not be collected.
       if(!tracked.erase(var.get()))
         continue;
@@ -142,6 +143,7 @@ do_collect_generation(size_t gen)
       // If an exception is thrown during uninitialization, the variable
       // shall be collected immediately.
       try {
+        ROCKET_ASSERT(var->get_gc_ref() != 0);
         var->uninitialize();
         nvars += 1;
         this->m_pool.insert(var.get(), var);
