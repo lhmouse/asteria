@@ -638,6 +638,7 @@ struct Traits_for_each_statement
               // Set the key which is the subscript of the mapped element in the array.
               vkey->initialize(i, Variable::state_immutable);
               mapped.push_modifier_array_index(i);
+              mapped.dereference_readonly();
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
@@ -661,6 +662,7 @@ struct Traits_for_each_statement
               // Set the key which is the key of this element in the object.
               vkey->initialize(it->first.rdstr(), Variable::state_immutable);
               mapped.push_modifier_object_key(it->first);
+              mapped.dereference_readonly();
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
@@ -1257,7 +1259,9 @@ struct Traits_member_access
     static AIR_Status
     execute(Executive_Context& ctx, const phsh_string& name)
       {
-        ctx.stack().mut_back().push_modifier_object_key(name);
+        auto& ref = ctx.stack().mut_back();
+        ref.push_modifier_object_key(name);
+        ref.dereference_readonly();
         return air_status_next;
       }
   };
@@ -1479,13 +1483,17 @@ struct Traits_apply_xop_subscr
         switch(do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            ctx.stack().mut_back().push_modifier_array_index(rhs.as_integer());
+            auto& ref = ctx.stack().mut_back();
+            ref.push_modifier_array_index(rhs.as_integer());
+            ref.dereference_readonly();
             return air_status_next;
           }
 
           case tmask_string: {
             ROCKET_ASSERT(rhs.is_string());
-            ctx.stack().mut_back().push_modifier_object_key(rhs.as_string());
+            auto& ref = ctx.stack().mut_back();
+            ref.push_modifier_object_key(rhs.as_string());
+            ref.dereference_readonly();
             return air_status_next;
           }
 
@@ -3735,7 +3743,9 @@ struct Traits_apply_xop_head
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        ctx.stack().mut_back().push_modifier_array_head();
+        auto& ref = ctx.stack().mut_back();
+        ref.push_modifier_array_head();
+        ref.dereference_readonly();
         return air_status_next;
       }
   };
@@ -3755,7 +3765,9 @@ struct Traits_apply_xop_tail
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        ctx.stack().mut_back().push_modifier_array_tail();
+        auto& ref = ctx.stack().mut_back();
+        ref.push_modifier_array_tail();
+        ref.dereference_readonly();
         return air_status_next;
       }
   };
@@ -4755,8 +4767,9 @@ struct Traits_apply_xop_random
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        const auto prng = ctx.global().random_engine();
-        ctx.stack().mut_back().push_modifier_array_random(prng->bump());
+        auto& ref = ctx.stack().mut_back();
+        ref.push_modifier_array_random(ctx.global().random_engine()->bump());
+        ref.dereference_readonly();
         return air_status_next;
       }
   };

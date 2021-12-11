@@ -35,10 +35,12 @@ int main()
         assert a[-2] == 2;
         assert a[-3] == 1;
         assert a[-4] == null;
+        assert catch( a["meow"] );
         assert o["one"] == 1;
         assert o["two"] == 2;
         assert o["three"] == 3;
         assert o["nonexistent"] == null;
+        assert catch( o[1] );
 
         assert o.one == 1;
         assert o.two == 2;
