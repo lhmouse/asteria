@@ -4261,6 +4261,44 @@ struct Traits_initialize_reference
       }
   };
 
+struct Traits_catch_expression
+  {
+    // `up` is unused.
+    // `sp` is the body expression.
+
+    static AVMC_Queue
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_catch_expression& altr)
+      {
+        AVMC_Queue queue;
+        do_solidify_nodes(queue, altr.code_body);
+        return queue;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, const AVMC_Queue& queue)
+      {
+        // Evaluate the body expression. If it effects an exception,
+        // the exception is returned; otherwise `null` is returned.
+        size_t old_size = ctx.stack().size();
+        Value val;
+
+        ASTERIA_RUNTIME_TRY {
+          auto status = queue.execute(ctx);
+          ROCKET_ASSERT(status == air_status_next);
+        }
+        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+          val = except.value();
+        }
+
+        while(ctx.stack().size() > old_size)
+          ctx.stack().pop_back();
+
+        ROCKET_ASSERT(ctx.stack().size() == old_size);
+        ctx.stack().emplace_back_uninit().set_temporary(::std::move(val));
+        return air_status_next;
+      }
+  };
+
 struct Traits_apply_xop_lzcnt
   {
     // `up` is `assign`.
@@ -5101,6 +5139,18 @@ rebind_opt(Abstract_Context& ctx) const
         // There is nothing to rebind.
         return nullopt;
 
+      case index_catch_expression: {
+        const auto& altr = this->m_stor.as<index_catch_expression>();
+
+        // Rebind the expression.
+        bool dirty = false;
+        auto bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_body, ctx);
+
+        return do_return_rebound_opt(dirty, ::std::move(bound));
+      }
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -5429,6 +5479,10 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_initialize_reference>(queue,
                        this->m_stor.as<index_initialize_reference>());
 
+      case index_catch_expression:
+        return do_solidify<Traits_catch_expression>(queue,
+                       this->m_stor.as<index_catch_expression>());
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -5560,6 +5614,12 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_declare_reference:
       case index_initialize_reference:
         return;
+
+      case index_catch_expression: {
+        const auto& altr = this->m_stor.as<index_catch_expression>();
+        do_for_each_get_variables(altr.code_body, staged, temp);
+        return;
+      }
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());

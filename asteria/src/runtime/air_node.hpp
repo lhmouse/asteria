@@ -239,6 +239,11 @@ class AIR_Node
         phsh_string name;
       };
 
+    struct S_catch_expression
+      {
+        cow_vector<AIR_Node> code_body;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -276,6 +281,7 @@ class AIR_Node
         index_import_call            = 32,
         index_declare_reference      = 33,
         index_initialize_reference   = 34,
+        index_catch_expression       = 35,
       };
 
   private:
@@ -316,6 +322,7 @@ class AIR_Node
         ,S_import_call            // 32,
         ,S_declare_reference      // 33,
         ,S_initialize_reference   // 34,
+        ,S_catch_expression       // 35,
       )>
       m_stor;
 

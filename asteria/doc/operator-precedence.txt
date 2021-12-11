@@ -40,7 +40,7 @@ Conditional operator          | *=    /=    %=    +=    -=    |
 Assignment operators          | &=    ^=    |=                |
                               | &&=   ||=   ??=   =           |
 ==============================#===============================#===============
-                              | __addm    __subm    __mulm    |
-Special operators             | __adds    __subs    __muls    | N/A
-                              | __fma                         |
+                              | catch     __addm    __subm    |
+Special operators             | __mulm    __adds    __subs    | N/A
+                              | __muls    __fma               |
 ==============================#===============================#===============

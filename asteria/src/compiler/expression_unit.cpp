@@ -229,6 +229,19 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         return code;
       }
 
+      case index_catch: {
+        const auto& altr = this->m_stor.as<index_catch>();
+
+        // Generate code for the operand, which shall be evaluated on a separate
+        // context and shall not be PTC'd.
+        auto code_op = do_generate_code_branch(opts, global, ctx, ptc_aware_none, altr.operand);
+
+        // Encode arguments.
+        AIR_Node::S_catch_expression xnode = { ::std::move(code_op) };
+        code.emplace_back(::std::move(xnode));
+        return code;
+      }
+
       default:
         ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
     }

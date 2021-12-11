@@ -101,6 +101,11 @@ class Expression_Unit
         uint32_t nargs;
       };
 
+    struct S_catch
+      {
+        cow_vector<Expression_Unit> operand;
+      };
+
     enum Index : uint8_t
       {
         index_literal           =  0,
@@ -117,6 +122,7 @@ class Expression_Unit
         index_variadic_call     = 11,
         index_argument_finish   = 12,
         index_import_call       = 13,
+        index_catch             = 14,
       };
 
   private:
@@ -136,6 +142,7 @@ class Expression_Unit
         ,S_variadic_call     // 11,
         ,S_argument_finish   // 12,
         ,S_import_call       // 13,
+        ,S_catch             // 14,
       )>
       m_stor;
 

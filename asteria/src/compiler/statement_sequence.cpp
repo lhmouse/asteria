@@ -2004,6 +2004,37 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
   }
 
 bool
+do_accept_catch_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    // catch-expression ::=
+    //   "catch" "(" expression ")"
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_catch });
+    if(!qkwrd)
+      return false;
+
+    auto op_sloc = tstrm.next_sloc();
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
+    if(!kpunct)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_open_parenthesis_expected, tstrm.next_sloc());
+
+    Expression_Unit::S_catch xunit;
+    bool succ = do_accept_expression(xunit.operand, tstrm);
+    if(!succ)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_expression_expected, tstrm.next_sloc());
+
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
+    if(!kpunct)
+      throw Compiler_Error(Compiler_Error::M_add_format(),
+                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                "[unmatched `(` at '$1']", op_sloc);
+
+    units.emplace_back(::std::move(xunit));
+    return true;
+  }
+
+bool
 do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // variadic-function-call ::=
@@ -2102,7 +2133,7 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
     // primary-expression ::=
     //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array |
     //   unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
-    //   variadic-function-call | import-function-call
+    //   catch-expression | variadic-function-call | import-function-call
     if(do_accept_local_reference(units, tstrm))
       return true;
 
@@ -2131,6 +2162,9 @@ do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& t
       return true;
 
     if(do_accept_prefix_binary_expression(units, tstrm))
+      return true;
+
+    if(do_accept_catch_expression(units, tstrm))
       return true;
 
     if(do_accept_variadic_function_call(units, tstrm))
