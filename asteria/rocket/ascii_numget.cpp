@@ -1534,7 +1534,7 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
             int exp2 = mult.exp2 - sh;
 
             // Multiply two 64-bit values and get the high-order half.
-#if 0 // def __SIZEOF_INT128__
+#ifdef __SIZEOF_INT128__
             {
               ireg = (uint64_t)(((unsigned __int128)ireg * mult.mant) >> 64);
             }
