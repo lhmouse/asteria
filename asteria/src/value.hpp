@@ -64,15 +64,15 @@ class Value
         return *this;
       }
 
+    Value(const Value&) noexcept
+      = default;
+
     Value(Value&& other) noexcept
       {
         // Don't play with this at home!
         ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(other));
         ::std::memset(static_cast<void*>(&other), 0, sizeof(other));
       }
-
-    Value(const Value&) noexcept
-      = default;
 
     Value&
     operator=(const Value&) noexcept
