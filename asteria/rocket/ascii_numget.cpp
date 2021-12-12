@@ -1534,13 +1534,24 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
             int exp2 = mult.exp2 - sh;
 
             // Multiply two 64-bit values and get the high-order half.
-            // TODO: Modern CPUs have intrinsics for this.
-            uint64_t xhi = ireg >> 32;
-            uint64_t xlo = ireg << 32 >> 32;
-            uint64_t yhi = mult.mant >> 32;
-            uint64_t ylo = mult.mant << 32 >> 32;
-            ireg = xhi * yhi;
-            ireg += ((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2;
+#if 0 // def __SIZEOF_INT128__
+            {
+              ireg = (uint64_t)(((unsigned __int128)ireg * mult.mant) >> 64);
+            }
+#else  // __SIZEOF_INT128__
+            {
+              // This is inspired by `Emulate64x64to128` from
+              //   https://github.com/catid/fp61/blob/master/fp61.h
+              uint64_t xhi = ireg >> 32;
+              uint64_t xlo = ireg << 32 >> 32;
+              uint64_t yhi = mult.mant >> 32;
+              uint64_t ylo = mult.mant << 32 >> 32;
+
+              ireg = (((xlo * ylo >> 32) + xhi * ylo + (xlo * yhi >> 32)) >> 32)
+                   +   (xlo * yhi >> 32)
+                   +    xhi * yhi;
+            }
+#endif  // __SIZEOF_INT128__
 
             // Convert the mantissa to a floating-point number.
             freg = do_xldexp_I(ireg, exp2, single);

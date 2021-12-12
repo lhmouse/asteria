@@ -983,13 +983,24 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
 
     // Multiply two 64-bit values and get the high-order half.
     // This produces 18 significant figures.
-    // TODO: Modern CPUs have intrinsics for this.
-    uint64_t xhi = ireg >> 32;
-    uint64_t xlo = ireg << 32 >> 32;
-    uint64_t yhi = mult.mant >> 32;
-    uint64_t ylo = mult.mant << 32 >> 32;
-    ireg = xhi * yhi;
-    ireg += (((xlo * yhi >> 30) + (xhi * ylo >> 30) + (xlo * ylo >> 62)) >> 2);
+#ifdef __SIZEOF_INT128__
+    {
+      ireg = (uint64_t)(((unsigned __int128)ireg * mult.mant) >> 64);
+    }
+#else  // __SIZEOF_INT128__
+    {
+      // This is inspired by `Emulate64x64to128` from
+      //   https://github.com/catid/fp61/blob/master/fp61.h
+      uint64_t xhi = ireg >> 32;
+      uint64_t xlo = ireg << 32 >> 32;
+      uint64_t yhi = mult.mant >> 32;
+      uint64_t ylo = mult.mant << 32 >> 32;
+
+      ireg = (((xlo * ylo >> 32) + xhi * ylo + (xlo * yhi >> 32)) >> 32)
+           +   (xlo * yhi >> 32)
+           +    xhi * yhi;
+    }
+#endif  // __SIZEOF_INT128__
 
     // Round the mantissa. We now have 18 digits.
     uint64_t tz_mult = single ? UINT64_C(1000000000) : UINT64_C(10);
