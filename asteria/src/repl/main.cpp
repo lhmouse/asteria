@@ -248,7 +248,7 @@ main(int argc, char** argv)
         exit_printf(exit_success, "* have a nice day :)\n");
 
       // Process the next snippet.
-      const StdIO_Sentry sentry;
+      const STDIO_Sentry sentry;
       ::fputc('\n', stderr);
       read_execute_print_single();
     }

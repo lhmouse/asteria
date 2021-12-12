@@ -95,7 +95,7 @@ execute(Reference_Stack&& stack)
     Reference self;
     self.set_temporary(nullopt);
 
-    const StdIO_Sentry sentry;
+    const STDIO_Sentry sentry;
     this->m_func.invoke(self, this->m_global, ::std::move(stack));
     return self;
   }

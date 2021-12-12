@@ -279,10 +279,10 @@ unerase_pointer_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `st
   { return static_pointer_cast<TargetT>(ptr);  }
 
 // Standard I/O synchronization
-struct StdIO_Sentry
+struct STDIO_Sentry
   {
     explicit
-    StdIO_Sentry() noexcept
+    STDIO_Sentry() noexcept
       {
         // Discard unread data. Clear EOF and error bits. Clear orientation.
         if(!::freopen(nullptr, "r", stdin))
@@ -293,7 +293,7 @@ struct StdIO_Sentry
           ::abort();
       }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(StdIO_Sentry)
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(STDIO_Sentry)
       {
         // Flush all standard streams, ignoring any errors.
         ::fflush(nullptr);
