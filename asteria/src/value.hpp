@@ -64,6 +64,24 @@ class Value
         return *this;
       }
 
+    Value(Value&& other) noexcept
+      {
+        // Don't play with this at home!
+        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(other));
+        ::std::memset(static_cast<void*>(&other), 0, sizeof(other));
+      }
+
+    Value(const Value&) noexcept
+      = default;
+
+    Value&
+    operator=(const Value&) noexcept
+      = default;
+
+    Value&
+    operator=(Value&&) noexcept
+      = default;
+
   private:
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;

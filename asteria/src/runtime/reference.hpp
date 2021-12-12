@@ -40,7 +40,11 @@ class Reference
       { this->assign(other);  }
 
     Reference(Reference&& other) noexcept
-      { this->assign(::std::move(other));  }
+      {
+        // Don't play with this at home!
+        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(other));
+        ::std::memset(static_cast<void*>(&other), 0, sizeof(other));
+      }
 
     Reference&
     operator=(const Reference& other) noexcept
