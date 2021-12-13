@@ -95,6 +95,9 @@ class Value
     [[noreturn]] void
     do_throw_type_mismatch(const char* desc) const;
 
+    void
+    do_destroy_variant_slow() noexcept;
+
   public:
     ~Value();
 
