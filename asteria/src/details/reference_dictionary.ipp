@@ -21,13 +21,6 @@ struct Bucket
     Bucket() noexcept { }
     ~Bucket() noexcept { }
 
-   void
-   debug_clear() noexcept
-     {
-       ::std::memset(static_cast<void*>(this), 0xD3, sizeof(*this));
-       this->prev = nullptr;
-     }
-
     explicit operator
     bool() const noexcept
       { return this->prev != nullptr;  }
