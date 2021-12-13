@@ -19,12 +19,11 @@ do_destroy_buckets() noexcept
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
       ::rocket::destroy_at(qbkt->vstor);
+#ifdef ROCKET_DEBUG
+      ::std::memset(static_cast<void*>(qbkt), 0xD2, sizeof(Bucket));
+#endif
       qbkt->prev = nullptr;
     }
-#ifdef ROCKET_DEBUG
-    ::std::for_each(this->m_bptr, this->m_eptr,
-        [&](Bucket& r) { ::std::memset(static_cast<void*>(&r), 0, sizeof(r));  });
-#endif
     this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
   }
 
