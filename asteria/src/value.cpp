@@ -365,6 +365,7 @@ Value::
       case type_object:
         // These types may be recursive and subject to stack overflows.
         this->do_destroy_variant_slow();
+        ROCKET_ASSERT(this->m_stor.index() == 0);
         return;
 
       default:
