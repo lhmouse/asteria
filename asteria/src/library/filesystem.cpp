@@ -56,9 +56,10 @@ do_remove_recursive(const char* path)
           if(errno == ENOENT)
             break;
 
-          ASTERIA_THROW_RUNTIME_ERROR("could not remove directory '$2'\n"
-                        "[`rmdir()` failed: $1]",
-                        format_errno(errno), elem.path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "could not remove directory '$2'\n"
+              "[`rmdir()` failed: $1]",
+              format_errno(errno), elem.path);
         }
 
         case rm_disp_unlink: {
@@ -72,9 +73,10 @@ do_remove_recursive(const char* path)
           if(errno == ENOENT)
             break;
 
-          ASTERIA_THROW_RUNTIME_ERROR("could not remove file '$2'\n"
-                        "[`unlink()` failed: $1]",
-                        format_errno(errno), elem.path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "could not remove file '$2'\n"
+              "[`unlink()` failed: $1]",
+              format_errno(errno), elem.path);
         }
 
         case rm_disp_expand: {
@@ -87,9 +89,10 @@ do_remove_recursive(const char* path)
           // Open the directory for listing.
           ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()), ::closedir);
           if(!dp)
-            ASTERIA_THROW_RUNTIME_ERROR("could not open directory '$2'\n"
-                          "[`opendir()` failed: $1]",
-                          format_errno(errno), elem.path);
+            ASTERIA_THROW_RUNTIME_ERROR(
+                "could not open directory '$2'\n"
+                "[`opendir()` failed: $1]",
+                format_errno(errno), elem.path);
 
           // Append all entries.
           while(auto next = ::readdir(dp)) {
@@ -115,9 +118,10 @@ do_remove_recursive(const char* path)
               // If the file type is unknown, ask for it.
               struct ::stat stb;
               if(::lstat(child.c_str(), &stb) != 0)
-                ASTERIA_THROW_RUNTIME_ERROR("could not get information about '$2'\n"
-                              "[`lstat()` failed: $1]",
-                              format_errno(errno), child);
+                ASTERIA_THROW_RUNTIME_ERROR(
+                    "could not get information about '$2'\n"
+                    "[`lstat()` failed: $1]",
+                    format_errno(errno), child);
 
               // Check whether the child path denotes a directory.
               is_dir = S_ISDIR(stb.st_mode);
@@ -145,9 +149,10 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
     while(bp < ep) {
       ::ssize_t nwrtn = ::write(fd, bp, static_cast<size_t>(ep - bp));
       if(nwrtn < 0) {
-        ASTERIA_THROW_RUNTIME_ERROR("error writing file '$2'\n"
-                      "[`write()` failed: $1]",
-                      format_errno(errno), path);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "error writing file '$2'\n"
+            "[`write()` failed: $1]",
+            format_errno(errno), path);
       }
       bp += nwrtn;
     }
@@ -163,9 +168,10 @@ std_filesystem_get_working_directory()
     // Note this behavior is an extension that exists almost everywhere.
     auto qcwd = ::rocket::make_unique_handle(::getcwd(nullptr, 0), ::free);
     if(!qcwd) {
-      ASTERIA_THROW_RUNTIME_ERROR("could not get current working directory\n"
-                    "[`getcwd()` failed: $1]",
-                    format_errno(errno));
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not get current working directory\n"
+          "[`getcwd()` failed: $1]",
+          format_errno(errno));
     }
     return V_string(qcwd);
   }
@@ -176,15 +182,16 @@ std_filesystem_get_real_path(V_string path)
     // Pass a null pointer to request dynamic allocation.
     auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!abspath) {
-      ASTERIA_THROW_RUNTIME_ERROR("could not resolve path '$2'\n"
-                    "[`realpath()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not resolve path '$2'\n"
+          "[`realpath()` failed: $1]",
+          format_errno(errno), path);
     }
     return V_string(abspath);
   }
 
 optV_object
-std_filesystem_get_information(V_string path)
+std_filesystem_get_properties(V_string path)
   {
     struct ::stat stb;
     if(::lstat(path.safe_c_str(), &stb) != 0)
@@ -237,9 +244,10 @@ void
 std_filesystem_move_from(V_string path_new, V_string path_old)
   {
     if(::rename(path_old.safe_c_str(), path_new.safe_c_str()) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("could not move file '$2' to '$3'\n"
-                    "[`rename()` failed: $1]",
-                    format_errno(errno), path_old, path_new);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not move file '$2' to '$3'\n"
+          "[`rename()` failed: $1]",
+          format_errno(errno), path_old, path_new);
   }
 
 V_integer
@@ -264,9 +272,10 @@ std_filesystem_remove_recursive(V_string path)
         if(errno == ENOENT)
           return 0;
 
-        ASTERIA_THROW_RUNTIME_ERROR("could not remove file '$2'\n"
-                      "[`unlink()` failed: $1]",
-                      format_errno(errno), path);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "could not remove file '$2'\n"
+            "[`unlink()` failed: $1]",
+            format_errno(errno), path);
       }
 
       case EEXIST:
@@ -276,9 +285,10 @@ std_filesystem_remove_recursive(V_string path)
     }
 
     // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR("could not remove directory '$2'\n"
-                  "[`rmdir()` failed: $1]",
-                  format_errno(errno), path);
+    ASTERIA_THROW_RUNTIME_ERROR(
+        "could not remove directory '$2'\n"
+        "[`rmdir()` failed: $1]",
+        format_errno(errno), path);
   }
 
 V_object
@@ -287,9 +297,10 @@ std_filesystem_dir_list(V_string path)
     // Try opening t he directory.
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), ::closedir);
     if(!dp)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open directory '$2'\n"
-                    "[`opendir()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open directory '$2'\n"
+          "[`opendir()` failed: $1]",
+          format_errno(errno), path);
 
     // Append all entries.
     V_object entries;
@@ -318,9 +329,10 @@ std_filesystem_dir_list(V_string path)
         // If the file type is unknown, ask for it.
         struct ::stat stb;
         if(::lstat(child.c_str(), &stb) != 0)
-          ASTERIA_THROW_RUNTIME_ERROR("could not get information about '$2'\n"
-                        "[`lstat()` failed: $1]",
-                        format_errno(errno), child);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "could not get information about '$2'\n"
+              "[`lstat()` failed: $1]",
+              format_errno(errno), child);
 
         // Check whether the child path denotes a directory.
         is_dir = S_ISDIR(stb.st_mode);
@@ -353,23 +365,26 @@ std_filesystem_dir_create(V_string path)
     if(errno == EEXIST) {
       struct ::stat stb;
       if(::stat(path.c_str(), &stb) != 0)
-        ASTERIA_THROW_RUNTIME_ERROR("could not get information about '$2'\n"
-                      "[`stat()` failed: $1]",
-                      format_errno(errno), path);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "could not get information about '$2'\n"
+            "[`stat()` failed: $1]",
+            format_errno(errno), path);
 
       if(S_ISDIR(stb.st_mode))
         return 0;
 
       // Throw an exception about the previous error.
-      ASTERIA_THROW_RUNTIME_ERROR("could not create directory '$2'\n"
-                    "[`mkdir()` failed: $1]",
-                    format_errno(EEXIST), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not create directory '$2'\n"
+          "[`mkdir()` failed: $1]",
+          format_errno(EEXIST), path);
     }
 
     // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR("could not create directory '$2'\n"
-                  "[`mkdir()` failed: $1]",
-                  format_errno(errno), path);
+    ASTERIA_THROW_RUNTIME_ERROR(
+        "could not create directory '$2'\n"
+        "[`mkdir()` failed: $1]",
+        format_errno(errno), path);
   }
 
 V_integer
@@ -384,23 +399,26 @@ std_filesystem_dir_remove(V_string path)
       return 0;
 
     // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR("could remove directory '$2'\n"
-                  "[`rmdir()` failed: $1]",
-                  format_errno(errno), path);
+    ASTERIA_THROW_RUNTIME_ERROR(
+        "could remove directory '$2'\n"
+        "[`rmdir()` failed: $1]",
+        format_errno(errno), path);
   }
 
 V_string
 std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
-      ASTERIA_THROW_RUNTIME_ERROR("negative file offset (offset `$1`)", *offset);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "negative file offset (offset `$1`)", *offset);
 
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path);
 
     // We return data that have been read as a byte string.
     V_string data;
@@ -421,17 +439,19 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
         // Use `roffset`. The file must be seekable in this case.
         nread = ::pread(fd, &*insert_pos, nbatch, roffset);
         if(nread < 0)
-          ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
-                        "[`pread()` failed: $1]",
-                        format_errno(errno), path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "error reading file '$2'\n"
+              "[`pread()` failed: $1]",
+              format_errno(errno), path);
       }
       else {
         // Use the internal file pointer.
         nread = ::read(fd, &*insert_pos, nbatch);
         if(nread < 0)
-          ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
-                        "[`read()` failed: $1]",
-                        format_errno(errno), path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "error reading file '$2'\n"
+              "[`read()` failed: $1]",
+              format_errno(errno), path);
       }
       data.erase(insert_pos + nread, data.end());
       if(nread == 0)
@@ -448,14 +468,16 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
                            optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
-      ASTERIA_THROW_RUNTIME_ERROR("negative file offset (offset `$1`)", *offset);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "negative file offset (offset `$1`)", *offset);
 
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path);
 
     // We return data that have been read as a byte string.
     Reference self;
@@ -478,17 +500,19 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
         // Use `roffset`. The file must be seekable in this case.
         nread = ::pread(fd, data.mut_data(), nbatch, roffset);
         if(nread < 0)
-          ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
-                        "[`pread()` failed: $1]",
-                        format_errno(errno), path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "error reading file '$2'\n"
+              "[`pread()` failed: $1]",
+              format_errno(errno), path);
       }
       else {
         // Use the internal file pointer.
         nread = ::read(fd, data.mut_data(), nbatch);
         if(nread < 0)
-          ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
-                        "[`read()` failed: $1]",
-                        format_errno(errno), path);
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "error reading file '$2'\n"
+              "[`read()` failed: $1]",
+              format_errno(errno), path);
       }
       data.erase(data.begin() + nread, data.end());
       if(nread == 0)
@@ -511,7 +535,8 @@ void
 std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
   {
     if(offset && (*offset < 0))
-      ASTERIA_THROW_RUNTIME_ERROR("negative file offset (offset `$1`)", *offset);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "negative file offset (offset `$1`)", *offset);
 
     // Calculate the `flags` argument.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
@@ -524,17 +549,19 @@ std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
     // Open the file for writing.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path);
 
     // Set the file pointer when an offset is specified, even when it is an explicit
     // zero. This ensures that the file is actually seekable (not a pipe or socket
     // whatsoever).
     if(offset && (::ftruncate(fd, roffset) != 0))
-      ASTERIA_THROW_RUNTIME_ERROR("could not truncate file '$2'\n"
-                    "[`ftruncate()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not truncate file '$2'\n"
+          "[`ftruncate()` failed: $1]",
+          format_errno(errno), path);
 
     // Write all data.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -553,9 +580,10 @@ std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
     // Open the file for appending.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path);
 
     // Append all data to the end.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -567,26 +595,28 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY), ::close);
     if(!fd_old)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open source file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path_old);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open source file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path_old);
 
     // Create the new file, discarding its contents.
     // The file is initially write-only.
-    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(),
-                                            O_WRONLY | O_CREAT | O_TRUNC | O_APPEND,
-                                            0200), ::close);
+    int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
+    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(), flags, 0200), ::close);
     if(!fd_new)
-      ASTERIA_THROW_RUNTIME_ERROR("could not create destination file '$2'\n"
-                    "[`open()` failed: $1]",
-                    format_errno(errno), path_new);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not create destination file '$2'\n"
+          "[`open()` failed: $1]",
+          format_errno(errno), path_new);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
     if(::fstat(fd_old, &stb_old) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("could not get information about source file '$2'\n"
-                    "[`fstat()` failed: $1]",
-                    format_errno(errno), path_old);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not get information about source file '$2'\n"
+          "[`fstat()` failed: $1]",
+          format_errno(errno), path_old);
 
     // Allocate the I/O buffer.
     size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x1000);
@@ -597,9 +627,10 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     for(;;) {
       ::ssize_t nread = ::read(fd_old, pbuf, nbuf);
       if(nread < 0)
-        ASTERIA_THROW_RUNTIME_ERROR("error reading file '$2'\n"
-                      "[`read()` failed: $1]",
-                      format_errno(errno), path_old);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "error reading file '$2'\n"
+            "[`read()` failed: $1]",
+            format_errno(errno), path_old);
 
       if(nread == 0)
         break;
@@ -610,9 +641,10 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
 
     // Set the file mode. This must be the last operation.
     if(::fchmod(fd_new, stb_old.st_mode) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("could not set permission of '$2'\n"
-                    "[`fchmod()` failed: $1]",
-                    format_errno(errno), path_new);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not set permission of '$2'\n"
+          "[`fchmod()` failed: $1]",
+          format_errno(errno), path_new);
   }
 
 V_integer
@@ -627,9 +659,10 @@ std_filesystem_file_remove(V_string path)
       return 0;
 
     // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR("could not remove file '$2'\n"
-                  "[`unlink()` failed: $1]",
-                  format_errno(errno), path);
+    ASTERIA_THROW_RUNTIME_ERROR(
+        "could not remove file '$2'\n"
+        "[`unlink()` failed: $1]",
+        format_errno(errno), path);
   }
 
 void
@@ -662,9 +695,9 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_information"),
+    result.insert_or_assign(sref("get_properties"),
       ASTERIA_BINDING(
-        "`std.filesystem.get_information", "path",
+        "`std.filesystem.get_properties", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -672,7 +705,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_get_information(path);
+          return (Value)std_filesystem_get_properties(path);
 
         reader.throw_no_matching_function_call();
       });
