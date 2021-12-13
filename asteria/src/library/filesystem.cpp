@@ -199,44 +199,54 @@ std_filesystem_get_properties(V_string path)
 
     // Convert the result to an `object`.
     V_object stat;
-    stat.try_emplace(sref("i_dev"),
+
+    stat.try_emplace(sref("device"),
       V_integer(
-        stb.st_dev  // unique device id on this machine
+        stb.st_dev  // unique device ID on this machine
       ));
-    stat.try_emplace(sref("i_file"),
+
+    stat.try_emplace(sref("inode"),
       V_integer(
-        stb.st_ino  // unique file id on this device
+        stb.st_ino  // unique file ID on this device
       ));
-    stat.try_emplace(sref("n_ref"),
+
+    stat.try_emplace(sref("link_count"),
       V_integer(
-        stb.st_nlink  // number of hard links to this file
+        stb.st_nlink  // number of hard links
       ));
-    stat.try_emplace(sref("b_dir"),
+
+    stat.try_emplace(sref("is_directory"),
       V_boolean(
         S_ISDIR(stb.st_mode)  // whether this is a directory
       ));
-    stat.try_emplace(sref("b_sym"),
+
+    stat.try_emplace(sref("is_symbolic"),
       V_boolean(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link
       ));
-    stat.try_emplace(sref("n_size"),
+
+    stat.try_emplace(sref("size"),
       V_integer(
-        stb.st_size  // number of bytes this file contains
+        stb.st_size  // size of contents in bytes
       ));
-    stat.try_emplace(sref("n_ocup"),
+
+    stat.try_emplace(sref("size_on_disk"),
       V_integer(
-        int64_t(stb.st_blocks) * 512  // number of bytes this file occupies
+        int64_t(stb.st_blocks) * 512  // size of storage on disk in bytes
       ));
-    stat.try_emplace(sref("t_accs"),
+
+    stat.try_emplace(sref("time_accessed"),
       V_integer(
-        int64_t(stb.st_atim.tv_sec) * 1000
-        + stb.st_atim.tv_nsec / 1000000  // timestamp of last access
+        int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000
+                                      // timestamp of creation
       ));
-    stat.try_emplace(sref("t_mod"),
+
+    stat.try_emplace(sref("time_modified"),
       V_integer(
-        int64_t(stb.st_mtim.tv_sec) * 1000
-        + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
+        int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000
+                                      // timestamp of last modification
       ));
+
     return ::std::move(stat);
   }
 
@@ -341,14 +351,22 @@ std_filesystem_dir_list(V_string path)
 
       // Append this entry, assuming the name is in UTF-8.
       V_object entry;
-      entry.try_emplace(sref("b_dir"),
-        V_boolean(
-          is_dir
+
+      entry.try_emplace(sref("inode"),
+        V_integer(
+          next->d_ino  // unique file ID on this device
         ));
-      entry.try_emplace(sref("b_sym"),
+
+      entry.try_emplace(sref("is_directory"),
         V_boolean(
-          is_sym
+          is_dir  // whether this is a directory
         ));
+
+      entry.try_emplace(sref("is_symbolic"),
+        V_boolean(
+          is_sym  // whether this is a symbolic link
+        ));
+
       entries.try_emplace(cow_string(next->d_name), ::std::move(entry));
     }
     return entries;

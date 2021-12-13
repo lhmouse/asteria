@@ -16,9 +16,9 @@ std_filesystem_get_working_directory();
 V_string
 std_filesystem_get_real_path(V_string path);
 
-// `std.filesystem.get_information`
+// `std.filesystem.get_properties`
 optV_object
-std_filesystem_get_information(V_string path);
+std_filesystem_get_properties(V_string path);
 
 // `std.filesystem.move_from`
 void
