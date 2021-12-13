@@ -353,20 +353,20 @@ Value::
       case type_integer:
       case type_real:
         // These types are trivial.
-        return;
+        break;
 
       case type_string:
       case type_opaque:
       case type_function:
         // These types are non-trivial, but we can't do much.
-        return;
+        break;
 
       case type_array:
       case type_object:
         // These types may be recursive and subject to stack overflows.
         this->do_destroy_variant_slow();
         ROCKET_ASSERT(this->m_stor.index() == 0);
-        return;
+        break;
 
       default:
         ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
