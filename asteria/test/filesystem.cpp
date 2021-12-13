@@ -18,11 +18,11 @@ int main()
         var dname = ".filesystem-test_dir_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
         var fname = ".filesystem-test_file_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
 
-        assert std.filesystem.get_information(dname) == null;
-        assert std.filesystem.get_information(fname) == null;
+        assert std.filesystem.get_properties(dname) == null;
+        assert std.filesystem.get_properties(fname) == null;
 
         assert std.filesystem.dir_create(dname) == 1;
-        assert std.filesystem.get_information(dname).b_dir == true;
+        assert std.filesystem.get_properties(dname).is_directory == true;
         assert std.filesystem.dir_create(dname) == 0;
 
         std.filesystem.file_append(dname + "/f1", "1");
@@ -49,19 +49,19 @@ int main()
 
         assert catch( std.filesystem.file_read("/nonexistent") == null ) != null;
         std.filesystem.file_append(fname, "@@@@$$", true);  // "@@@@$$"
-        assert std.filesystem.get_information(fname).b_dir == false;
-        assert std.filesystem.get_information(fname).n_size == 6;
+        assert std.filesystem.get_properties(fname).is_directory == false;
+        assert std.filesystem.get_properties(fname).size == 6;
         std.filesystem.file_write(fname, "hello");  // "hello"
-        assert std.filesystem.get_information(fname).n_size == 5;
+        assert std.filesystem.get_properties(fname).size == 5;
         std.filesystem.file_write(fname, 3, "HELLO");  // "helHELLO"
-        assert std.filesystem.get_information(fname).n_size == 8;
+        assert std.filesystem.get_properties(fname).size == 8;
         std.filesystem.file_write(fname, 5, "#");  // "helHE#"
-        assert std.filesystem.get_information(fname).n_size == 6;
+        assert std.filesystem.get_properties(fname).size == 6;
 
         std.filesystem.file_append(fname, "??");  // "helHE#??"
-        assert std.filesystem.get_information(fname).n_size == 8;
+        assert std.filesystem.get_properties(fname).size == 8;
         std.filesystem.file_append(fname, "!!");  // "helHE#??!!"
-        assert std.filesystem.get_information(fname).n_size == 10;
+        assert std.filesystem.get_properties(fname).size == 10;
         assert catch( std.filesystem.file_append(fname, "!!", true) ) != null;
 
         assert std.filesystem.file_read(fname) == "helHE#??!!";
