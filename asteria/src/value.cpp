@@ -258,6 +258,19 @@ ROCKET_NOINLINE void
 Value::
 do_destroy_variant_slow() noexcept
   try {
+#ifdef ROCKET_DEBUG
+    // Attempt to run out of stack in a rather stupid way.
+    static char* volatile s_stupid_begin;
+    static char* volatile s_stupid_end;
+
+    char stupid[1000] = { };
+    s_stupid_begin = stupid;
+    s_stupid_end = stupid + sizeof(s_stupid_end);
+
+    s_stupid_begin[0] = 1;
+    s_stupid_end[-1] = 2;
+#endif
+
     // Expand arrays and objects by hand.
     // This blows the entire C++ object model up. Don't play with this at home!
     constexpr size_t N = sizeof(Value);
@@ -329,48 +342,6 @@ do_destroy_variant_slow() noexcept
         "  exception class: %s\n"
         "  what(): %s\n",
         typeid(stdex).name(), stdex.what());
-  }
-
-Value::
-~Value()
-  {
-#ifdef ROCKET_DEBUG
-    // Attempt to run out of stack in a rather stupid way.
-    static char* volatile s_stupid_begin;
-    static char* volatile s_stupid_end;
-
-    char stupid[1000] = { };
-    s_stupid_begin = stupid;
-    s_stupid_end = stupid + sizeof(s_stupid_end);
-
-    s_stupid_begin[0] = 1;
-    s_stupid_end[-1] = 2;
-#endif
-
-    switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real:
-        // These types are trivial.
-        break;
-
-      case type_string:
-      case type_opaque:
-      case type_function:
-        // These types are non-trivial, but we can't do much.
-        break;
-
-      case type_array:
-      case type_object:
-        // These types may be recursive and subject to stack overflows.
-        this->do_destroy_variant_slow();
-        ROCKET_ASSERT(this->m_stor.index() == 0);
-        break;
-
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
-    }
   }
 
 tinyfmt&

@@ -99,7 +99,11 @@ class Value
     do_destroy_variant_slow() noexcept;
 
   public:
-    ~Value();
+    ~Value()
+      {
+        if((1 << this->type()) & (1 << type_array | 1 << type_object))
+          this->do_destroy_variant_slow();
+      }
 
     // Accessors
     Type
