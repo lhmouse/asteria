@@ -313,7 +313,7 @@ class Value
     swap(Value& other) noexcept
       {
         // Don't play with this at home!
-        alignas(Value) char temp[sizeof(*this)];
+        char temp[sizeof(*this)];
         ::std::memcpy(temp, (void*)this, sizeof(*this));
         ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
         ::std::memcpy((void*)&other, temp, sizeof(*this));
