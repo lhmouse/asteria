@@ -70,8 +70,8 @@ class Value
     Value(Value&& other) noexcept
       {
         // Don't play with this at home!
-        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
-        ::std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+        ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
+        ::std::memset((void*)&other, 0, sizeof(*this));
       }
 
     Value&
@@ -314,9 +314,9 @@ class Value
       {
         // Don't play with this at home!
         alignas(Value) char temp[sizeof(*this)];
-        ::std::memcpy(temp, static_cast<void*>(this), sizeof(*this));
-        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
-        ::std::memcpy(static_cast<void*>(&other), temp, sizeof(*this));
+        ::std::memcpy(temp, (void*)this, sizeof(*this));
+        ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
+        ::std::memcpy((void*)&other, temp, sizeof(*this));
         return *this;
       }
 

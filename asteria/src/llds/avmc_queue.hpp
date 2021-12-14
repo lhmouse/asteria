@@ -75,7 +75,7 @@ class AVMC_Queue
           ::operator delete(this->m_bptr);
 
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this), 0xCA, sizeof(*this));
+        ::std::memset((void*)this, 0xCA, sizeof(*this));
 #endif
       }
 

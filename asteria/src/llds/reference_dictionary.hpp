@@ -129,7 +129,7 @@ class Reference_Dictionary
           ::operator delete(this->m_bptr);
 
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(this), 0xA6, sizeof(*this));
+        ::std::memset((void*)this, 0xA6, sizeof(*this));
 #endif
       }
 
