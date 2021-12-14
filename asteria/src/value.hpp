@@ -70,8 +70,8 @@ class Value
     Value(Value&& other) noexcept
       {
         // Don't play with this at home!
-        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(other));
-        ::std::memset(static_cast<void*>(&other), 0, sizeof(other));
+        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+        ::std::memset(static_cast<void*>(&other), 0, sizeof(*this));
       }
 
     Value&
@@ -79,8 +79,8 @@ class Value
       = default;
 
     Value&
-    operator=(Value&&) noexcept
-      = default;
+    operator=(Value&& other) noexcept
+      { return this->swap(other);  }
 
   private:
     void
@@ -312,7 +312,11 @@ class Value
     Value&
     swap(Value& other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        // Don't play with this at home!
+        alignas(Value) char temp[sizeof(*this)];
+        ::std::memcpy(temp, static_cast<void*>(this), sizeof(*this));
+        ::std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+        ::std::memcpy(static_cast<void*>(&other), temp, sizeof(*this));
         return *this;
       }
 
