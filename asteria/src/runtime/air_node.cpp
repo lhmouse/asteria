@@ -1167,6 +1167,16 @@ do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function&
     return air_status_return_ref;
   }
 
+inline void
+do_check_and_set_reference(Reference& out, Reference&& src)
+  {
+    const auto& val = src.dereference_readonly();
+    if(src.is_temporary())
+      out.set_temporary(val);
+    else
+      out = ::std::move(src);
+  }
+
 Reference_Stack&
 do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
   {
@@ -1177,8 +1187,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
       // Get an argument. Ensure it is dereferenceable.
       ROCKET_ASSERT(k < ctx.stack().size());
       auto& arg = ctx.stack().mut_back(k);
-      arg.dereference_readonly();
-      alt_stack.emplace_back_uninit() = ::std::move(arg);
+      do_check_and_set_reference(alt_stack.emplace_back_uninit(), ::std::move(arg));
     }
     ctx.stack().pop_back(nargs);
     return alt_stack;
@@ -4280,10 +4289,7 @@ struct Traits_initialize_reference
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
         auto& top = ctx.stack().mut_back();
-        top.dereference_readonly();
-
-        // Move it into the context.
-        ctx.open_named_reference(sp.name) = ::std::move(top);
+        do_check_and_set_reference(ctx.open_named_reference(sp.name), ::std::move(top));
         ctx.stack().pop_back();
         return air_status_next;
       }
