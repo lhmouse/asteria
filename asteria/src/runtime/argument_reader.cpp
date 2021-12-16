@@ -102,7 +102,7 @@ Argument_Reader&
 Argument_Reader::
 optional(Reference& out)
   {
-    out.set_uninit();
+    out.set_invalid();
     this->do_prepare_parameter("[reference]");
 
     auto qref = this->do_peek_argument();

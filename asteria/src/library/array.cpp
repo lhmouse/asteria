@@ -81,7 +81,7 @@ do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function&
     for(auto it = ::std::move(begin);  it != end;  ++it) {
       // Set up arguments for the user-defined predictor.
       stack.clear();
-      stack.emplace_back_uninit().set_temporary(*it);
+      stack.push().set_temporary(*it);
 
       // Call the predictor function and check the return value.
       self.set_temporary(nullopt);
@@ -103,8 +103,8 @@ do_compare(Global_Context& global, Reference_Stack& stack,
 
     // Set up arguments for the user-defined comparator.
     stack.clear();
-    stack.emplace_back_uninit().set_temporary(lhs);
-    stack.emplace_back_uninit().set_temporary(rhs);
+    stack.push().set_temporary(lhs);
+    stack.push().set_temporary(rhs);
 
     // Call the predictor function and compare the result with `0`.
     Reference self;
@@ -616,11 +616,11 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
     for(int64_t i = 0;  i < length;  ++i) {
       // Set up arguments for the user-defined generator.
       stack.clear();
-      stack.emplace_back_uninit().set_temporary(i);
+      stack.push().set_temporary(i);
       if(data.empty())
-        stack.emplace_back_uninit().set_temporary(nullopt);
+        stack.push().set_temporary(nullopt);
       else
-        stack.emplace_back_uninit().set_temporary(data.back());
+        stack.push().set_temporary(data.back());
 
       // Call the generator function and push the return value.
       self.set_temporary(nullopt);

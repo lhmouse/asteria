@@ -25,7 +25,7 @@ do_dereference_readonly_slow() const
 
     // Get the root value.
     switch(this->index()) {
-      case index_uninit:
+      case index_invalid:
         ASTERIA_THROW_RUNTIME_ERROR(
             "attempt to use a bypassed variable or reference");
 
@@ -97,7 +97,7 @@ do_finish_call_slow(Global_Context& global)
       while(this->m_index == index_ptc_args) {
         ROCKET_ASSERT(this->m_ptca.use_count() == 1);
         ptca.reset(static_cast<PTC_Arguments*>(this->m_ptca.release()));
-        this->m_index = index_uninit;
+        this->m_index = index_invalid;
 
         // Generate a single-step trap before unpacking arguments.
         if(auto qhooks = global.get_hooks_opt())
@@ -198,7 +198,7 @@ dereference_mutable() const
 
     // Get the root value.
     switch(this->index()) {
-      case index_uninit:
+      case index_invalid:
         ASTERIA_THROW_RUNTIME_ERROR(
             "attempt to use a bypassed variable or reference");
 
@@ -255,7 +255,7 @@ dereference_unset() const
 
     // Get the root value.
     switch(this->index()) {
-      case index_uninit:
+      case index_invalid:
         ASTERIA_THROW_RUNTIME_ERROR(
             "attempt to use a bypassed variable or reference");
 

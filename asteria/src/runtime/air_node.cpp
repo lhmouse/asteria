@@ -113,7 +113,7 @@ do_get_first_operand(Reference_Stack& stack, bool assign)
 Reference&
 do_declare(Executive_Context& ctx, const phsh_string& name)
   {
-    return ctx.open_named_reference(name).set_uninit();
+    return ctx.open_named_reference(name).set_invalid();
   }
 
 AIR_Status
@@ -328,7 +328,7 @@ struct Traits_declare_variable
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
         // Push a copy of the reference onto the stack.
-        ctx.stack().emplace_back_uninit().set_variable(var);
+        ctx.stack().push().set_variable(var);
         return air_status_next;
       }
   };
@@ -939,7 +939,7 @@ struct Traits_push_global_reference
           ASTERIA_THROW_RUNTIME_ERROR("unresolvable global identifier `$1`", name);
 
         // Push a copy of it.
-        ctx.stack().emplace_back_uninit() = *qref;
+        ctx.stack().push() = *qref;
         return air_status_next;
       }
   };
@@ -984,11 +984,11 @@ struct Traits_push_local_reference
           ASTERIA_THROW_RUNTIME_ERROR("undeclared identifier `$1`", name);
 
         // Check if control flow has bypassed its initialization.
-        if(qref->is_uninit())
+        if(qref->is_invalid())
           ASTERIA_THROW_RUNTIME_ERROR("use of bypassed variable or reference `$1`", name);
 
         // Push a copy of it.
-        ctx.stack().emplace_back_uninit() = *qref;
+        ctx.stack().push() = *qref;
         return air_status_next;
       }
   };
@@ -1007,7 +1007,7 @@ struct Traits_push_bound_reference
     static AIR_Status
     execute(Executive_Context& ctx, const Reference& ref)
       {
-        ctx.stack().emplace_back_uninit() = ref;
+        ctx.stack().push() = ref;
         return air_status_next;
       }
   };
@@ -1038,7 +1038,7 @@ struct Traits_define_function
         auto qtarget = optmz.create_function(sp.sloc, sp.func);
 
         // Push the function as a temporary.
-        ctx.stack().emplace_back_uninit().set_temporary(::std::move(qtarget));
+        ctx.stack().push().set_temporary(::std::move(qtarget));
         return air_status_next;
       }
   };
@@ -1153,9 +1153,9 @@ do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function&
     Reference_Stack bound_args;
     for(auto p = stack.mut_bottom();  p != stack.top();  ++p) {
       ROCKET_ASSERT(!p->is_ptc_args());
-      bound_args.emplace_back_uninit() = ::std::move(*p);
+      bound_args.push() = ::std::move(*p);
     }
-    bound_args.emplace_back_uninit() = ::std::move(self);
+    bound_args.push() = ::std::move(self);
 
     // Set packed arguments for this PTC, which will be unpacked outside this scope.
     self.set_ptc_args(::rocket::make_refcnt<PTC_Arguments>(
@@ -1187,7 +1187,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
       // Get an argument. Ensure it is dereferenceable.
       ROCKET_ASSERT(k < ctx.stack().size());
       auto& arg = ctx.stack().mut_back(k);
-      do_check_and_set_reference(alt_stack.emplace_back_uninit(), ::std::move(arg));
+      do_check_and_set_reference(alt_stack.push(), ::std::move(arg));
     }
     ctx.stack().pop_back(nargs);
     return alt_stack;
@@ -1307,7 +1307,7 @@ struct Traits_push_unnamed_array
         }
 
         // Push the array as a temporary.
-        ctx.stack().emplace_back_uninit().set_temporary(::std::move(array));
+        ctx.stack().push().set_temporary(::std::move(array));
         return air_status_next;
       }
   };
@@ -1343,7 +1343,7 @@ struct Traits_push_unnamed_object
         }
 
         // Push the object as a temporary.
-        ctx.stack().emplace_back_uninit().set_temporary(::std::move(object));
+        ctx.stack().push().set_temporary(::std::move(object));
         return air_status_next;
       }
   };
@@ -4037,7 +4037,7 @@ struct Traits_variadic_call
 
             // Push all arguments backwards as temporaries.
             for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
-              alt_stack.emplace_back_uninit().set_temporary(::std::move(*it));
+              alt_stack.push().set_temporary(::std::move(*it));
             }
             break;
           }
@@ -4049,7 +4049,7 @@ struct Traits_variadic_call
             // This destroys the `self` reference so we have to copy it first.
             ctx.stack().mut_back().pop_modifier();
             auto self = ctx.stack().back();
-            ctx.stack().emplace_back_uninit() = self;
+            ctx.stack().push() = self;
             do_invoke_nontail(ctx.stack().mut_back(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
             value = ctx.stack().back().dereference_readonly();
             ctx.stack().pop_back();
@@ -4066,14 +4066,14 @@ struct Traits_variadic_call
 
             // Prepare `self` references for all upcoming  calls.
             for(int64_t k = 0;  k < nvargs;  ++k)
-              ctx.stack().emplace_back_uninit() = self;
+              ctx.stack().push() = self;
 
             // Generate arguments and push them onto `ctx.stack()`.
             // The top is the first argument.
             for(int64_t k = 0;  k < nvargs;  ++k) {
               // Initialize arguments for the generator function.
               alt_stack.clear();
-              alt_stack.emplace_back_uninit().set_temporary(k);
+              alt_stack.push().set_temporary(k);
 
               // Generate an argument. Ensure it is dereferenceable.
               auto& arg = ctx.stack().mut_back(static_cast<size_t>(k));
@@ -4085,7 +4085,7 @@ struct Traits_variadic_call
             // This reverses all arguments so the top will be the last argument.
             alt_stack.clear();
             for(int64_t k = 0;  k < nvargs;  ++k) {
-              alt_stack.emplace_back_uninit() = ::std::move(ctx.stack().mut_back());
+              alt_stack.push() = ::std::move(ctx.stack().mut_back());
               ctx.stack().pop_back();
             }
             break;
@@ -4260,7 +4260,7 @@ struct Traits_declare_reference
     static AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
-        ctx.open_named_reference(sp.name).set_uninit();
+        ctx.open_named_reference(sp.name).set_invalid();
         return air_status_next;
       }
   };
@@ -4328,7 +4328,7 @@ struct Traits_catch_expression
           ctx.stack().pop_back();
 
         ROCKET_ASSERT(ctx.stack().size() == old_size);
-        ctx.stack().emplace_back_uninit().set_temporary(::std::move(val));
+        ctx.stack().push().set_temporary(::std::move(val));
         return air_status_next;
       }
   };

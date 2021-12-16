@@ -15,13 +15,13 @@ class Variable final
   public:
     enum State : uint8_t
       {
-        state_uninit     = 0,
+        state_invalid     = 0,
         state_immutable  = 1,
         state_mutable    = 2,
       };
 
   private:
-    State m_state = state_uninit;
+    State m_state = state_invalid;
     Value m_value;
     long m_gc_ref;  // uninitialized by default
 
@@ -49,7 +49,7 @@ class Variable final
 
     bool
     is_uninitialized() const noexcept
-      { return this->m_state == state_uninit;  }
+      { return this->m_state == state_invalid;  }
 
     bool
     is_mutable() const noexcept
@@ -77,7 +77,7 @@ class Variable final
     uninitialize() noexcept
       {
         this->m_value = ::rocket::sref("[[`dead value`]]");
-        this->m_state = state_uninit;
+        this->m_state = state_invalid;
         return *this;
       }
   };

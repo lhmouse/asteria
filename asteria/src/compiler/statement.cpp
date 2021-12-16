@@ -26,7 +26,7 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
       names_opt->emplace_back(name);
 
     // Just ensure the name exists.
-    ctx.open_named_reference(name).set_uninit();
+    ctx.open_named_reference(name).set_invalid();
   }
 
 cow_vector<AIR_Node>&

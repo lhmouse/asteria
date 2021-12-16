@@ -157,10 +157,10 @@ do_on_scope_exit_slow(AIR_Status status)
           throw;
         }
       }
-      if(self.is_uninit())
+      if(self.is_invalid())
         return status;
     }
-    ROCKET_ASSERT(!self.is_uninit());
+    ROCKET_ASSERT(!self.is_invalid());
 
     // Restore the returned reference.
     this->m_stack->mut_back() = ::std::move(self);

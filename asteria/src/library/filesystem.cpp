@@ -538,8 +538,8 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 
       // Call the function but discard its return value.
       stack.clear();
-      stack.emplace_back_uninit().set_temporary(roffset);
-      stack.emplace_back_uninit().set_temporary(::std::move(data));
+      stack.push().set_temporary(roffset);
+      stack.push().set_temporary(::std::move(data));
       self.set_temporary(nullopt);
       callback.invoke(self, global, ::std::move(stack));
 

@@ -15,7 +15,7 @@ class Reference
   public:
     enum Index : uint8_t
       {
-        index_uninit     = 0,
+        index_invalid    = 0,
         index_void       = 1,
         index_temporary  = 2,
         index_variable   = 3,
@@ -28,7 +28,7 @@ class Reference
     rcfwdp<PTC_Arguments> m_ptca;
 
     cow_vector<Reference_Modifier> m_mods;
-    Index m_index = index_uninit;
+    Index m_index = index_invalid;
 
   public:
     // Constructors and assignment operators
@@ -67,13 +67,13 @@ class Reference
       { return this->m_index;  }
 
     bool
-    is_uninit() const noexcept
-      { return this->index() == index_uninit;  }
+    is_invalid() const noexcept
+      { return this->index() == index_invalid;  }
 
     Reference&
-    set_uninit() noexcept
+    set_invalid() noexcept
       {
-        this->m_index = index_uninit;
+        this->m_index = index_invalid;
         return *this;
       }
 
@@ -179,7 +179,7 @@ class Reference
           this->m_ptca = ::std::move(other.m_ptca);
         }
         this->m_mods = ::std::move(other.m_mods);
-        this->m_index = ::std::exchange(other.m_index, index_uninit);
+        this->m_index = ::std::exchange(other.m_index, index_invalid);
         return *this;
       }
 

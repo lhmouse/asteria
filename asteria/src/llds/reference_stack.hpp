@@ -114,7 +114,7 @@ class Reference_Stack
       }
 
     Reference&
-    emplace_back_uninit()
+    push()
       {
         if(ROCKET_UNEXPECT(this->m_etop == this->m_einit)) {
           // Construct a new reference.
