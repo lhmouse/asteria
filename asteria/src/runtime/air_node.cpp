@@ -1150,16 +1150,19 @@ AIR_Status
 do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function& target,
                PTC_Aware ptc, Reference_Stack&& stack)
   {
-    Reference_Stack bound_args;
-    for(auto p = stack.obsolete_mut_bottom();  p != stack.obsolete_top();  ++p) {
-      ROCKET_ASSERT(!p->is_ptc_args());
-      bound_args.push() = ::std::move(*p);
-    }
-    bound_args.push() = ::std::move(self);
+    Reference_Stack xargs;
 
-    // Set packed arguments for this PTC, which will be unpacked outside this scope.
+    // Copy positional arguments from left to right.
+    size_t nargs = stack.size();
+    while(nargs != 0)
+      xargs.push() = ::std::move(stack.mut_top(--nargs));
+
+    // And don't forget the `this` argument.
+    xargs.push() = ::std::move(self);
+
+    // Set packed arguments for this PTC, which will be unpacked outside.
     self.set_ptc_args(::rocket::make_refcnt<PTC_Arguments>(
-                          sloc, ptc, target, ::std::move(bound_args)));
+                           sloc, ptc, target, ::std::move(xargs)));
 
     // Force `air_status_return_ref` if control flow reaches the end of a function.
     // Otherwise a null reference is returned instead of this PTC wrapper, which can

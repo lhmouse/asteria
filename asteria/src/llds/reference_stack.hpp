@@ -58,22 +58,6 @@ class Reference_Stack
     size() const noexcept
       { return this->m_etop;  }
 
-    const Reference*
-    obsolete_bottom() const noexcept
-      { return this->m_bptr;  }
-
-    const Reference*
-    obsolete_top() const noexcept
-      { return this->m_bptr + this->m_etop;  }
-
-    Reference*
-    obsolete_mut_bottom() noexcept
-      { return this->m_bptr;  }
-
-    Reference*
-    obsolete_mut_top() noexcept
-      { return this->m_bptr + this->m_etop;  }
-
     Reference_Stack&
     clear() noexcept
       {

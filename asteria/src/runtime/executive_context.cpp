@@ -44,31 +44,32 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
-    auto bptr = stack.obsolete_bottom();
-    auto eptr = stack.obsolete_top();
+    size_t nargs = stack.size();
 
     for(const auto& name : params) {
       if(name.empty())
         continue;
 
-      // Nothing is set for the variadic placeholder, but the parameter
-      // list terminates here.
       if(name == sref("...")) {
-        this->m_lazy_args.append(::std::make_move_iterator(bptr), ::std::make_move_iterator(eptr));
-        bptr = eptr;
+        // Move all arguments into the variadic argument getter.
+        while(nargs != 0)
+          this->m_lazy_args.emplace_back(::std::move(stack.mut_top(--nargs)));
+
+        // Nothing is set for the variadic placeholder, but the parameter
+        // list terminates here.
         break;
       }
 
       // Try popping an argument from `stack` and assign it to this parameter.
       // If no more arguments follow, declare a constant `null`.
-      if(bptr != eptr)
-        this->do_open_named_reference(nullptr, name) = ::std::move(*(bptr++));
+      if(nargs != 0)
+        this->do_open_named_reference(nullptr, name) = ::std::move(stack.mut_top(--nargs));
       else
         this->do_open_named_reference(nullptr, name).set_temporary(nullopt);
     }
 
     // All arguments must have been consumed.
-    if(bptr != eptr)
+    if(nargs != 0)
       ASTERIA_THROW_RUNTIME_ERROR("too many arguments passed to `$1`", zvarg->func());
   }
 
@@ -102,11 +103,10 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
     if(name == "__varg") {
       // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
-      ref.set_temporary(
-            this->m_lazy_args.empty()
+      ref.set_temporary(this->m_lazy_args.empty()
               ? this->m_zvarg
               : ::rocket::make_refcnt<Variadic_Arguer>(
-                          *(this->m_zvarg), this->m_lazy_args));
+                              *(this->m_zvarg), this->m_lazy_args));
       return &ref;
     }
 

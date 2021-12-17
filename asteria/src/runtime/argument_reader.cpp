@@ -41,7 +41,7 @@ do_terminate_parameter_list()
     this->m_state.ended = true;
 
     this->m_overloads.append(this->m_state.params.data(),
-               this->m_state.params.size() + 1);  // null terminator included
+            this->m_state.params.size() + 1);  // null terminator included
   }
 
 Argument_Reader&
@@ -62,11 +62,11 @@ do_peek_argument() const
     if(!this->m_state.matched)
       return nullptr;
 
-    size_t index = this->m_state.nparams - 1;
-    if(index >= this->m_stack.size())
+    size_t rindex = this->m_stack.size() - this->m_state.nparams;
+    if(rindex >= this->m_stack.size())
       return nullptr;
 
-    return this->m_stack.obsolete_bottom() + index;
+    return &(this->m_stack.top(rindex));
   }
 
 Argument_Reader&
@@ -480,15 +480,16 @@ end_overload()
   {
     this->do_terminate_parameter_list();
 
-    // Ensure no more arguments follow. Note there may be fewer.
     if(!this->m_state.matched)
       return false;
 
-    size_t index = this->m_state.nparams;
-    if(index < this->m_stack.size()) {
+    // Ensure no more arguments follow. Note there may be fewer.
+    if(this->m_stack.size() > this->m_state.nparams) {
       this->do_mark_match_failure();
       return false;
     }
+
+    // Accept all arguments.
     return true;
   }
 
@@ -500,14 +501,18 @@ end_overload(cow_vector<Reference>& vargs)
     this->do_prepare_parameter("...");
     this->do_terminate_parameter_list();
 
-    // Check for variadic arguments. Note the `...` is not a parameter.
     if(!this->m_state.matched)
       return false;
 
-    size_t index = this->m_state.nparams - 1;
-    if(index < this->m_stack.size()) {
-      vargs.append(this->m_stack.obsolete_bottom() + index, this->m_stack.obsolete_top());
+    // Check for variadic arguments. Note the `...` is not a parameter.
+    if(this->m_stack.size() > this->m_state.nparams - 1) {
+      size_t nargs = this->m_stack.size() - (this->m_state.nparams - 1);
+      vargs.reserve(nargs);
+      while(nargs != 0)
+        vargs.emplace_back(this->m_stack.top(--nargs));
     }
+
+    // Accept all arguments.
     return true;
   }
 
@@ -519,17 +524,18 @@ end_overload(cow_vector<Value>& vargs)
     this->do_prepare_parameter("...");
     this->do_terminate_parameter_list();
 
-    // Check for variadic arguments. Note the `...` is not a parameter.
     if(!this->m_state.matched)
       return false;
 
-    size_t index = this->m_state.nparams - 1;
-    if(index < this->m_stack.size()) {
-      vargs.reserve(this->m_stack.size() - index);
-      ::std::transform(this->m_stack.obsolete_bottom() + index, this->m_stack.obsolete_top(),
-                       ::std::back_inserter(vargs),
-                       ::std::mem_fn(&Reference::dereference_readonly));
+    // Check for variadic arguments. Note the `...` is not a parameter.
+    if(this->m_stack.size() > this->m_state.nparams - 1) {
+      size_t nargs = this->m_stack.size() - (this->m_state.nparams - 1);
+      vargs.reserve(nargs);
+      while(nargs != 0)
+        vargs.emplace_back(this->m_stack.top(--nargs).dereference_readonly());
     }
+
+    // Accept all arguments.
     return true;
   }
 
@@ -539,15 +545,15 @@ throw_no_matching_function_call() const
   {
     // Compose the list of types of arguments.
     cow_string arguments;
-    size_t index = 0;
-    switch(this->m_stack.size()) {
+    size_t index = this->m_stack.size();
+    switch(index) {
         do {
           arguments += ", ";  // fallthrough
       default:
           arguments += describe_type(
-              this->m_stack.obsolete_bottom()[index].dereference_readonly().type());
+                this->m_stack.top(--index).dereference_readonly().type());
         }
-        while(++index != this->m_stack.size());  // fallthrough
+        while(index != 0);  // fallthrough
       case 0:
         break;
     }
@@ -562,10 +568,11 @@ throw_no_matching_function_call() const
     }
 
     // Throw the exception now.
-    ASTERIA_THROW_RUNTIME_ERROR("no matching function call for `$1($2)`\n"
-                  "[list of overloads:\n"
-                  "$3  -- end of list of overloads]",
-                  this->m_name, arguments, overloads.get_string());
+    ASTERIA_THROW_RUNTIME_ERROR(
+           "no matching function call for `$1($2)`\n"
+           "[list of overloads:\n"
+           "$3  -- end of list of overloads]",
+           this->m_name, arguments, overloads.get_string());
   }
 
 // Binding factory operators
