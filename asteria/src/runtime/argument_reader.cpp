@@ -23,10 +23,11 @@ do_prepare_parameter(const char* param)
 
     // Append the parameter.
     // If it is not the first one, insert a comma before it.
-    if(this->m_state.nparams++)
+    if(this->m_state.nparams == 0)
       this->m_state.params += ", ";
 
     this->m_state.params += param;
+    this->m_state.nparams += 1;
   }
 
 void
@@ -80,9 +81,7 @@ Argument_Reader&
 Argument_Reader::
 save_state(size_t index)
   {
-    if(index >= this->m_saved_states.size())
-      this->m_saved_states.append(index - this->m_saved_states.size() + 1);
-
+    this->m_saved_states.append(subsat(index + 1, this->m_saved_states.size()));
     this->m_saved_states.mut(index) = this->m_state;
     return *this;
   }
@@ -484,7 +483,9 @@ end_overload()
       return false;
 
     // Ensure no more arguments follow. Note there may be fewer.
-    if(this->m_stack.size() > this->m_state.nparams) {
+    size_t nargs = this->m_state.nparams;
+    nargs = subsat(this->m_stack.size(), nargs);
+    if(nargs != 0) {
       this->do_mark_match_failure();
       return false;
     }
@@ -505,8 +506,9 @@ end_overload(cow_vector<Reference>& vargs)
       return false;
 
     // Check for variadic arguments. Note the `...` is not a parameter.
-    if(this->m_stack.size() > this->m_state.nparams - 1) {
-      size_t nargs = this->m_stack.size() - (this->m_state.nparams - 1);
+    size_t nargs = this->m_state.nparams;
+    nargs = subsat(this->m_stack.size(), nargs - 1);
+    if(nargs != 0) {
       vargs.reserve(nargs);
       while(nargs != 0)
         vargs.emplace_back(this->m_stack.top(--nargs));
@@ -528,8 +530,9 @@ end_overload(cow_vector<Value>& vargs)
       return false;
 
     // Check for variadic arguments. Note the `...` is not a parameter.
-    if(this->m_stack.size() > this->m_state.nparams - 1) {
-      size_t nargs = this->m_stack.size() - (this->m_state.nparams - 1);
+    size_t nargs = this->m_state.nparams;
+    nargs = subsat(this->m_stack.size(), nargs - 1);
+    if(nargs != 0) {
       vargs.reserve(nargs);
       while(nargs != 0)
         vargs.emplace_back(this->m_stack.top(--nargs).dereference_readonly());
