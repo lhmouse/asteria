@@ -1279,13 +1279,14 @@ do_accept_return_statement_opt(Token_Stream& tstrm)
       return nullopt;
 
     auto kpair = do_accept_return_argument_opt(tstrm);
-    if(!kpair)
-      kpair.emplace();  // returns void
-
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_semicolon_expected, tstrm.next_sloc());
+                kpair ? compiler_status_semicolon_expected : compiler_status_expression_expected,
+                tstrm.next_sloc());
+
+    if(!kpair)
+      kpair.emplace();  // returns void
 
     Statement::S_return xstmt = { ::std::move(sloc), kpair->first, ::std::move(kpair->second) };
     return ::std::move(xstmt);
