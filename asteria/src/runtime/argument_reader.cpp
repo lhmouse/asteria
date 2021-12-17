@@ -66,7 +66,7 @@ do_peek_argument() const
     if(index >= this->m_stack.size())
       return nullptr;
 
-    return this->m_stack.bottom() + index;
+    return this->m_stack.obsolete_bottom() + index;
   }
 
 Argument_Reader&
@@ -506,7 +506,7 @@ end_overload(cow_vector<Reference>& vargs)
 
     size_t index = this->m_state.nparams - 1;
     if(index < this->m_stack.size()) {
-      vargs.append(this->m_stack.bottom() + index, this->m_stack.top());
+      vargs.append(this->m_stack.obsolete_bottom() + index, this->m_stack.obsolete_top());
     }
     return true;
   }
@@ -526,7 +526,7 @@ end_overload(cow_vector<Value>& vargs)
     size_t index = this->m_state.nparams - 1;
     if(index < this->m_stack.size()) {
       vargs.reserve(this->m_stack.size() - index);
-      ::std::transform(this->m_stack.bottom() + index, this->m_stack.top(),
+      ::std::transform(this->m_stack.obsolete_bottom() + index, this->m_stack.obsolete_top(),
                        ::std::back_inserter(vargs),
                        ::std::mem_fn(&Reference::dereference_readonly));
     }
@@ -545,7 +545,7 @@ throw_no_matching_function_call() const
           arguments += ", ";  // fallthrough
       default:
           arguments += describe_type(
-              this->m_stack.bottom()[index].dereference_readonly().type());
+              this->m_stack.obsolete_bottom()[index].dereference_readonly().type());
         }
         while(++index != this->m_stack.size());  // fallthrough
       case 0:

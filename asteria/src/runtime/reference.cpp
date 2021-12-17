@@ -105,8 +105,8 @@ do_finish_call_slow(Global_Context& global)
 
         // Get the `this` reference and all the other arguments.
         auto& stack = ptca->stack();
-        *this = ::std::move(stack.mut_back());
-        stack.pop_back();
+        *this = ::std::move(stack.mut_top());
+        stack.pop();
 
         // Call the hook function if any.
         if(auto qhooks = global.get_hooks_opt())

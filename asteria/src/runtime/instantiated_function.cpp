@@ -71,7 +71,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
       case air_status_return_ref: {
         // Return the reference at the top of `stack`.
-        self = ::std::move(stack.mut_back());
+        self = ::std::move(stack.mut_top());
 
         // In case of PTCs, set up source location. This cannot be set at the
         // call site where such information isn't available.

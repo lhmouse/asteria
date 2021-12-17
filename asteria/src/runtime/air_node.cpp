@@ -74,9 +74,9 @@ do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
 void
 do_simple_assign_value_common(Executive_Context& ctx)
   {
-    auto value = ctx.stack().back().dereference_readonly();
-    ctx.stack().pop_back();
-    ctx.stack().back().dereference_mutable() = ::std::move(value);
+    auto value = ctx.stack().top().dereference_readonly();
+    ctx.stack().pop();
+    ctx.stack().top().dereference_mutable() = ::std::move(value);
   }
 
 AIR_Status
@@ -90,7 +90,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
       // Discard the top which will be overwritten anyway, then evaluate the
       // subexpression. The status code must be forwarded as is, because PTCs may
       // return `air_status_return_ref`.
-      ctx.stack().pop_back();
+      ctx.stack().pop();
       return queue.execute(ctx);
     }
 
@@ -105,9 +105,9 @@ Value&
 do_get_first_operand(Reference_Stack& stack, bool assign)
   {
     if(assign)
-      return stack.back().dereference_mutable();
+      return stack.top().dereference_mutable();
     else
-      return stack.mut_back().open_temporary();
+      return stack.mut_top().open_temporary();
   }
 
 Reference&
@@ -357,13 +357,13 @@ struct Traits_initialize_variable
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        auto val = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
 
         // Get the variable back.
-        auto var = ctx.stack().back().get_variable_opt();
+        auto var = ctx.stack().top().get_variable_opt();
         ROCKET_ASSERT(var && var->is_uninitialized());
-        ctx.stack().pop_back();
+        ctx.stack().pop();
 
         // Initialize it.
         const auto vstat = up.u8v[0] ? Variable::state_immutable : Variable::state_mutable;
@@ -399,7 +399,7 @@ struct Traits_if_statement
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().back().dereference_readonly().test() != up.u8v[0])
+        if(ctx.stack().top().dereference_readonly().test() != up.u8v[0])
           // Execute the true branch and forward the status verbatim.
           return do_execute_block(sp.queues[0], ctx);
 
@@ -436,7 +436,7 @@ struct Traits_switch_statement
         ROCKET_ASSERT(nclauses == sp.names_added.size());
 
         // Read the value of the condition and find the target clause for it.
-        auto cond = ctx.stack().back().dereference_readonly();
+        auto cond = ctx.stack().top().dereference_readonly();
         size_t bp = SIZE_MAX;
 
         // This is different from the `switch` statement in C, where `case` labels must
@@ -455,7 +455,7 @@ struct Traits_switch_statement
           // Evaluate the operand and check whether it equals `cond`.
           auto status = sp.queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().back().dereference_readonly().compare(cond) == compare_equal) {
+          if(ctx.stack().top().dereference_readonly().compare(cond) == compare_equal) {
             bp = i;
             break;
           }
@@ -533,7 +533,7 @@ struct Traits_do_while_statement
           // Check the condition.
           status = sp.queues[1].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().back().dereference_readonly().test() == up.u8v[0])
+          if(ctx.stack().top().dereference_readonly().test() == up.u8v[0])
             break;
         }
         return air_status_next;
@@ -570,7 +570,7 @@ struct Traits_while_statement
           // Check the condition.
           auto status = sp.queues[0].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().back().dereference_readonly().test() == up.u8v[0])
+          if(ctx.stack().top().dereference_readonly().test() == up.u8v[0])
             break;
 
           // Execute the body.
@@ -624,7 +624,7 @@ struct Traits_for_each_statement
         // change for all loops.
         auto status = sp.queue_init.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
-        mapped = ::std::move(ctx_for.stack().mut_back());
+        mapped = ::std::move(ctx_for.stack().mut_top());
 
         const auto range = mapped.dereference_readonly();
         switch(weaken_enum(range.type())) {
@@ -721,7 +721,7 @@ struct Traits_for_statement
 
           // This is a special case: If the condition is empty then the loop is infinite.
           if(!ctx_for.stack().empty() &&
-             !ctx_for.stack().back().dereference_readonly().test())
+             !ctx_for.stack().top().dereference_readonly().test())
             break;
 
           // Execute the body.
@@ -772,7 +772,7 @@ struct Traits_try_statement
 
         // This must not be PTC'd, otherwise exceptions thrown from tail calls
         // won't be caught.
-        ctx.stack().mut_back().finish_call(ctx.global());
+        ctx.stack().mut_top().finish_call(ctx.global());
         return status;
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
@@ -841,7 +841,7 @@ struct Traits_throw_statement
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
         throw Runtime_Error(Runtime_Error::M_throw(),
-                 ctx.stack().back().dereference_readonly(), sloc);
+                 ctx.stack().top().dereference_readonly(), sloc);
       }
   };
 
@@ -864,7 +864,7 @@ struct Traits_assert_statement
       {
         // Check the value of the condition.
         // When the assertion succeeds, there is nothing to do.
-        if(ROCKET_EXPECT(ctx.stack().back().dereference_readonly().test()))
+        if(ROCKET_EXPECT(ctx.stack().top().dereference_readonly().test()))
           return air_status_next;
 
         // Throw an exception if the assertion fails.
@@ -908,7 +908,7 @@ struct Traits_convert_to_temporary
     static AIR_Status
     execute(Executive_Context& ctx)
       {
-        ctx.stack().mut_back().open_temporary();
+        ctx.stack().mut_top().open_temporary();
         return air_status_next;
       }
   };
@@ -1076,7 +1076,7 @@ struct Traits_branch_expression
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().back().dereference_readonly().test())
+        if(ctx.stack().top().dereference_readonly().test())
           return do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[0]);
         else
           return do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
@@ -1114,7 +1114,7 @@ struct Traits_coalescence
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const AVMC_Queue& queue)
       {
         // Check the value of the condition.
-        if(!ctx.stack().back().dereference_readonly().is_null())
+        if(!ctx.stack().top().dereference_readonly().is_null())
           return air_status_next;
         else
           return do_evaluate_subexpression(ctx, up.u8v[0], queue);
@@ -1151,7 +1151,7 @@ do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function&
                PTC_Aware ptc, Reference_Stack&& stack)
   {
     Reference_Stack bound_args;
-    for(auto p = stack.mut_bottom();  p != stack.top();  ++p) {
+    for(auto p = stack.obsolete_mut_bottom();  p != stack.obsolete_top();  ++p) {
       ROCKET_ASSERT(!p->is_ptc_args());
       bound_args.push() = ::std::move(*p);
     }
@@ -1178,18 +1178,18 @@ do_check_and_set_reference(Reference& out, Reference&& src)
   }
 
 Reference_Stack&
-do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t nargs)
+do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
   {
+    auto& stack = ctx.stack();
     auto& alt_stack = ctx.alt_stack();
     alt_stack.clear();
 
-    for(size_t k = nargs - 1;  k != SIZE_MAX;  --k) {
-      // Get an argument. Ensure it is dereferenceable.
-      ROCKET_ASSERT(k < ctx.stack().size());
-      auto& arg = ctx.stack().mut_back(k);
-      do_check_and_set_reference(alt_stack.push(), ::std::move(arg));
-    }
-    ctx.stack().pop_back(nargs);
+    size_t nargs = count;
+    ROCKET_ASSERT(nargs <= stack.size());
+    while(nargs != 0)
+      do_check_and_set_reference(alt_stack.push(), ::std::move(stack.mut_top(--nargs)));
+
+    stack.pop(count);
     return alt_stack;
   }
 
@@ -1234,12 +1234,12 @@ struct Traits_function_call
         auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.u32);
 
         // Copy the target, which shall be of type `function`.
-        auto value = ctx.stack().back().dereference_readonly();
+        auto value = ctx.stack().top().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW_RUNTIME_ERROR("attempt to call a non-function (value `$1`)", value);
 
         const auto& target = value.as_function();
-        auto& self = ctx.stack().mut_back().pop_modifier();
+        auto& self = ctx.stack().mut_top().pop_modifier();
         const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
 
         return ROCKET_EXPECT(ptc == ptc_aware_none)
@@ -1268,7 +1268,7 @@ struct Traits_member_access
     static AIR_Status
     execute(Executive_Context& ctx, const phsh_string& name)
       {
-        auto& ref = ctx.stack().mut_back();
+        auto& ref = ctx.stack().mut_top();
         ref.push_modifier_object_key(name);
         ref.dereference_readonly();
         return air_status_next;
@@ -1302,8 +1302,8 @@ struct Traits_push_unnamed_array
         array.resize(up.u32);
         for(auto it = array.mut_rbegin();  it != array.rend();  ++it) {
           // Write elements backwards.
-          *it = ctx.stack().back().dereference_readonly();
-          ctx.stack().pop_back();
+          *it = ctx.stack().top().dereference_readonly();
+          ctx.stack().pop();
         }
 
         // Push the array as a temporary.
@@ -1338,8 +1338,8 @@ struct Traits_push_unnamed_object
         for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
           // Use `try_emplace()` instead of `insert_or_assign()`. In case of duplicate keys,
           // the last value takes precedence.
-          object.try_emplace(*it, ctx.stack().back().dereference_readonly());
-          ctx.stack().pop_back();
+          object.try_emplace(*it, ctx.stack().top().dereference_readonly());
+          ctx.stack().pop();
         }
 
         // Push the object as a temporary.
@@ -1394,7 +1394,7 @@ struct Traits_apply_xop_inc_post
       {
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
-        auto& lhs = ctx.stack().back().dereference_mutable();
+        auto& lhs = ctx.stack().top().dereference_mutable();
 
         // Increment the value and replace the top with the old one.
         switch(do_tmask_of(lhs)) {
@@ -1405,14 +1405,14 @@ struct Traits_apply_xop_inc_post
             if(val == INT64_MAX)
               ASTERIA_THROW_RUNTIME_ERROR("integer increment overflow");
 
-            ctx.stack().mut_back().set_temporary(val++);
+            ctx.stack().mut_top().set_temporary(val++);
             return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(lhs.is_real());
             auto& val = lhs.open_real();
-            ctx.stack().mut_back().set_temporary(val++);
+            ctx.stack().mut_top().set_temporary(val++);
             return air_status_next;
           }
 
@@ -1440,7 +1440,7 @@ struct Traits_apply_xop_dec_post
       {
         // This operator is unary. `assign` is ignored.
         // First, get the old value.
-        auto& lhs = ctx.stack().back().dereference_mutable();
+        auto& lhs = ctx.stack().top().dereference_mutable();
 
         // Decrement the value and replace the top with the old one.
         switch(do_tmask_of(lhs)) {
@@ -1451,14 +1451,14 @@ struct Traits_apply_xop_dec_post
             if(val == INT64_MIN)
               ASTERIA_THROW_RUNTIME_ERROR("integer decrement overflow");
 
-            ctx.stack().mut_back().set_temporary(val--);
+            ctx.stack().mut_top().set_temporary(val--);
             return air_status_next;
           }
 
           case tmask_real: {
             ROCKET_ASSERT(lhs.is_real());
             auto& val = lhs.open_real();
-            ctx.stack().mut_back().set_temporary(val--);
+            ctx.stack().mut_top().set_temporary(val--);
             return air_status_next;
           }
 
@@ -1485,14 +1485,14 @@ struct Traits_apply_xop_subscr
     execute(Executive_Context& ctx)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
 
         // Push a modifier depending the type of `rhs`.
         switch(do_tmask_of(rhs)) {
           case tmask_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& ref = ctx.stack().mut_back();
+            auto& ref = ctx.stack().mut_top();
             ref.push_modifier_array_index(rhs.as_integer());
             ref.dereference_readonly();
             return air_status_next;
@@ -1500,7 +1500,7 @@ struct Traits_apply_xop_subscr
 
           case tmask_string: {
             ROCKET_ASSERT(rhs.is_string());
-            auto& ref = ctx.stack().mut_back();
+            auto& ref = ctx.stack().mut_top();
             ref.push_modifier_object_key(rhs.as_string());
             ref.dereference_readonly();
             return air_status_next;
@@ -1698,7 +1698,7 @@ struct Traits_apply_xop_inc_pre
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        auto& rhs = ctx.stack().back().dereference_mutable();
+        auto& rhs = ctx.stack().top().dereference_mutable();
 
         // Increment the value in place.
         switch(do_tmask_of(rhs)) {
@@ -1743,7 +1743,7 @@ struct Traits_apply_xop_dec_pre
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        auto& rhs = ctx.stack().back().dereference_mutable();
+        auto& rhs = ctx.stack().top().dereference_mutable();
 
         // Decrement the value in place.
         switch(do_tmask_of(rhs)) {
@@ -1789,8 +1789,8 @@ struct Traits_apply_xop_unset
       {
         // This operator is unary. `assign` is ignored.
         // Unset the reference and store the result as a temporary.
-        auto val = ctx.stack().back().dereference_unset();
-        ctx.stack().mut_back().set_temporary(::std::move(val));
+        auto val = ctx.stack().top().dereference_unset();
+        ctx.stack().mut_top().set_temporary(::std::move(val));
         return air_status_next;
       }
   };
@@ -2512,8 +2512,8 @@ struct Traits_apply_xop_cmp_eq
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Check whether the two operands equal.
@@ -2547,8 +2547,8 @@ struct Traits_apply_xop_cmp_ne
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Check whether the two operands don't equal.
@@ -2582,8 +2582,8 @@ struct Traits_apply_xop_cmp_lt
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Check whether the LHS operand is less than the RHS operand.
@@ -2622,8 +2622,8 @@ struct Traits_apply_xop_cmp_gt
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Check whether the LHS operand is greater than the RHS operand.
@@ -2662,8 +2662,8 @@ struct Traits_apply_xop_cmp_lte
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Check whether the LHS operand is less than or equal to the RHS operand.
@@ -2702,8 +2702,8 @@ struct Traits_apply_xop_cmp_gte
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Check whether the LHS operand is greater than or equal to the RHS operand.
@@ -2742,8 +2742,8 @@ struct Traits_apply_xop_cmp_3way
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Perform 3-way comparison on both operands.
@@ -2795,8 +2795,8 @@ struct Traits_apply_xop_add
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `boolean` type, perform logical OR of the operands.
@@ -2870,8 +2870,8 @@ struct Traits_apply_xop_sub
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `boolean` type, perform logical XOR of the operands.
@@ -2937,8 +2937,8 @@ struct Traits_apply_xop_mul
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `boolean` type, perform logical AND of the operands.
@@ -3040,8 +3040,8 @@ struct Traits_apply_xop_div
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform arithmetic division.
@@ -3103,8 +3103,8 @@ struct Traits_apply_xop_mod
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform arithmetic modulo.
@@ -3166,8 +3166,8 @@ struct Traits_apply_xop_sll
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // The shift chount must be a non-negative integer.
@@ -3246,8 +3246,8 @@ struct Traits_apply_xop_srl
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // The shift chount must be a non-negative integer.
@@ -3326,8 +3326,8 @@ struct Traits_apply_xop_sla
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // The shift chount must be a non-negative integer.
@@ -3415,8 +3415,8 @@ struct Traits_apply_xop_sra
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // The shift chount must be a non-negative integer.
@@ -3492,8 +3492,8 @@ struct Traits_apply_xop_andb
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `boolean` type, perform logical AND of the operands.
@@ -3562,8 +3562,8 @@ struct Traits_apply_xop_orb
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `boolean` type, perform logical OR of the operands.
@@ -3633,8 +3633,8 @@ struct Traits_apply_xop_xorb
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `boolean` type, perform logical XOR of the operands.
@@ -3724,10 +3724,10 @@ struct Traits_apply_xop_fma
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is ternary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
-        const auto& mid = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
+        const auto& mid = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform fused multiply-add.
@@ -3766,7 +3766,7 @@ struct Traits_apply_xop_head
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        auto& ref = ctx.stack().mut_back();
+        auto& ref = ctx.stack().mut_top();
         ref.push_modifier_array_head();
         ref.dereference_readonly();
         return air_status_next;
@@ -3788,7 +3788,7 @@ struct Traits_apply_xop_tail
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        auto& ref = ctx.stack().mut_back();
+        auto& ref = ctx.stack().mut_top();
         ref.push_modifier_array_tail();
         ref.dereference_readonly();
         return air_status_next;
@@ -3820,8 +3820,8 @@ struct Traits_unpack_struct_array
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        auto val = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
 
         // Make sure it is really an `array`.
         V_array arr;
@@ -3835,8 +3835,8 @@ struct Traits_unpack_struct_array
 
         for(uint32_t i = up.u32 - 1;  i != UINT32_MAX;  --i) {
           // Get the variable back.
-          auto var = ctx.stack().back().get_variable_opt();
-          ctx.stack().pop_back();
+          auto var = ctx.stack().top().get_variable_opt();
+          ctx.stack().pop();
 
           // Initialize it.
           ROCKET_ASSERT(var && var->is_uninitialized());
@@ -3881,8 +3881,8 @@ struct Traits_unpack_struct_object
       {
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        auto val = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
 
         // Make sure it is really an `object`.
         V_object obj;
@@ -3896,8 +3896,8 @@ struct Traits_unpack_struct_object
 
         for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
           // Get the variable back.
-          auto var = ctx.stack().back().get_variable_opt();
-          ctx.stack().pop_back();
+          auto var = ctx.stack().top().get_variable_opt();
+          ctx.stack().pop();
 
           // Initialize it.
           ROCKET_ASSERT(var && var->is_uninitialized());
@@ -4023,10 +4023,11 @@ struct Traits_variadic_call
           qhooks->on_single_step_trap(sloc);
 
         // Initialize arguments.
+        auto& stack = ctx.stack();
         auto& alt_stack = ctx.alt_stack();
         alt_stack.clear();
 
-        auto value = ctx.stack().back().dereference_readonly();
+        auto value = stack.top().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
             // Leave `stack` empty.
@@ -4047,12 +4048,12 @@ struct Traits_variadic_call
 
             // Pass an empty argument stack to get the number of arguments to generate.
             // This destroys the `self` reference so we have to copy it first.
-            ctx.stack().mut_back().pop_modifier();
-            auto self = ctx.stack().back();
-            ctx.stack().push() = self;
-            do_invoke_nontail(ctx.stack().mut_back(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
-            value = ctx.stack().back().dereference_readonly();
-            ctx.stack().pop_back();
+            stack.mut_top().pop_modifier();
+            auto self = stack.top();
+            stack.push() = self;
+            do_invoke_nontail(stack.mut_top(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
+            value = stack.top().dereference_readonly();
+            stack.pop();
 
             // Verify the argument count.
             if(!value.is_integer())
@@ -4066,9 +4067,9 @@ struct Traits_variadic_call
 
             // Prepare `self` references for all upcoming  calls.
             for(int64_t k = 0;  k < nvargs;  ++k)
-              ctx.stack().push() = self;
+              stack.push() = self;
 
-            // Generate arguments and push them onto `ctx.stack()`.
+            // Generate arguments and push them onto `stack`.
             // The top is the first argument.
             for(int64_t k = 0;  k < nvargs;  ++k) {
               // Initialize arguments for the generator function.
@@ -4076,7 +4077,7 @@ struct Traits_variadic_call
               alt_stack.push().set_temporary(k);
 
               // Generate an argument. Ensure it is dereferenceable.
-              auto& arg = ctx.stack().mut_back(static_cast<size_t>(k));
+              auto& arg = stack.mut_top(static_cast<size_t>(k));
               do_invoke_nontail(arg, sloc, gfunc, ctx.global(), ::std::move(alt_stack));
               arg.dereference_readonly();
             }
@@ -4085,8 +4086,8 @@ struct Traits_variadic_call
             // This reverses all arguments so the top will be the last argument.
             alt_stack.clear();
             for(int64_t k = 0;  k < nvargs;  ++k) {
-              alt_stack.push() = ::std::move(ctx.stack().mut_back());
-              ctx.stack().pop_back();
+              alt_stack.push() = ::std::move(stack.mut_top());
+              stack.pop();
             }
             break;
           }
@@ -4095,16 +4096,16 @@ struct Traits_variadic_call
             ASTERIA_THROW_RUNTIME_ERROR(
                 "invalid variadic argument generator (value `$1`)", value);
         }
-        ctx.stack().pop_back();
+        stack.pop();
 
         // Copy the target, which shall be of type `function`.
-        value = ctx.stack().back().dereference_readonly();
+        value = ctx.stack().top().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW_RUNTIME_ERROR(
               "attempt to call a non-function (value `$1`)", value);
 
         const auto& target = value.as_function();
-        auto& self = ctx.stack().mut_back().pop_modifier();
+        auto& self = ctx.stack().mut_top().pop_modifier();
         const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
 
         return ROCKET_EXPECT(ptc == ptc_aware_none)
@@ -4194,7 +4195,7 @@ struct Traits_import_call
         auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.u32 - 1);
 
         // Copy the filename, which shall be of type `string`.
-        auto value = ctx.stack().back().dereference_readonly();
+        auto value = ctx.stack().top().dereference_readonly();
         if(!value.is_string())
           ASTERIA_THROW_RUNTIME_ERROR(
               "invalid path specified for `import` (value `$1` not a string)", value);
@@ -4237,7 +4238,7 @@ struct Traits_import_call
 
         // Invoke the script.
         // `this` is null for imported scripts.
-        auto& self = ctx.stack().mut_back();
+        auto& self = ctx.stack().mut_top();
         self.set_temporary(nullopt);
         do_invoke_nontail(self, sp.sloc, qtarget, ctx.global(), ::std::move(alt_stack));
         return air_status_next;
@@ -4288,9 +4289,9 @@ struct Traits_initialize_reference
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
-        auto& top = ctx.stack().mut_back();
+        auto& top = ctx.stack().mut_top();
         do_check_and_set_reference(ctx.open_named_reference(sp.name), ::std::move(top));
-        ctx.stack().pop_back();
+        ctx.stack().pop();
         return air_status_next;
       }
   };
@@ -4325,7 +4326,7 @@ struct Traits_catch_expression
         }
 
         while(ctx.stack().size() > old_size)
-          ctx.stack().pop_back();
+          ctx.stack().pop();
 
         ROCKET_ASSERT(ctx.stack().size() == old_size);
         ctx.stack().push().set_temporary(::std::move(val));
@@ -4482,8 +4483,8 @@ struct Traits_apply_xop_addm
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, perform modular addition.
@@ -4529,8 +4530,8 @@ struct Traits_apply_xop_subm
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, perform modular subtraction.
@@ -4576,8 +4577,8 @@ struct Traits_apply_xop_mulm
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, perform modular multiplication.
@@ -4623,8 +4624,8 @@ struct Traits_apply_xop_adds
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform saturation addition.
@@ -4681,8 +4682,8 @@ struct Traits_apply_xop_subs
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform saturation subtraction.
@@ -4739,8 +4740,8 @@ struct Traits_apply_xop_muls
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
-        const auto& rhs = ctx.stack().back().dereference_readonly();
-        ctx.stack().pop_back();
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform saturation multiplication.
@@ -4789,7 +4790,7 @@ struct Traits_apply_xop_random
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
-        auto& ref = ctx.stack().mut_back();
+        auto& ref = ctx.stack().mut_top();
         ref.push_modifier_array_random(ctx.global().random_engine()->bump());
         ref.dereference_readonly();
         return air_status_next;

@@ -59,19 +59,19 @@ class Reference_Stack
       { return this->m_etop;  }
 
     const Reference*
-    bottom() const noexcept
+    obsolete_bottom() const noexcept
       { return this->m_bptr;  }
 
     const Reference*
-    top() const noexcept
+    obsolete_top() const noexcept
       { return this->m_bptr + this->m_etop;  }
 
     Reference*
-    mut_bottom() noexcept
+    obsolete_mut_bottom() noexcept
       { return this->m_bptr;  }
 
     Reference*
-    mut_top() noexcept
+    obsolete_mut_top() noexcept
       { return this->m_bptr + this->m_etop;  }
 
     Reference_Stack&
@@ -100,35 +100,39 @@ class Reference_Stack
       }
 
     const Reference&
-    back(size_t index = 0) const noexcept
+    top(size_t index = 0) const noexcept
       {
-        ROCKET_ASSERT(index < this->size());
-        return this->top()[~index];
+        size_t ki = this->m_etop + ~index;
+        ROCKET_ASSERT(ki < this->m_etop);
+        return this->m_bptr[ki];
       }
 
     Reference&
-    mut_back(size_t index = 0)
+    mut_top(size_t index = 0)
       {
-        ROCKET_ASSERT(index < this->size());
-        return this->mut_top()[~index];
+        size_t ki = this->m_etop + ~index;
+        ROCKET_ASSERT(ki < this->m_etop);
+        return this->m_bptr[ki];
       }
 
     Reference&
     push()
       {
-        if(ROCKET_UNEXPECT(this->m_etop == this->m_einit)) {
-          // Construct a new reference.
-          if(ROCKET_UNEXPECT(this->m_etop == this->m_estor))
+        size_t ki = this->m_etop;
+        if(ROCKET_UNEXPECT(ki == this->m_einit)) {
+          // Construct a new reference beyond the top.
+          if(ROCKET_UNEXPECT(ki == this->m_estor))
             this->do_reserve_more();
 
-          ::rocket::construct_at(this->m_bptr + this->m_einit);
-          this->m_einit++;
+          ::rocket::construct_at(this->m_bptr + ki);
+          this->m_einit += 1;
         }
-        return this->m_bptr[this->m_etop++];
+        this->m_etop += 1;
+        return this->m_bptr[ki];
       }
 
     Reference_Stack&
-    pop_back(size_t count = 1) noexcept
+    pop(size_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->size());
         this->m_etop -= static_cast<uint32_t>(count);

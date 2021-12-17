@@ -44,8 +44,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
-    auto bptr = stack.bottom();
-    auto eptr = stack.top();
+    auto bptr = stack.obsolete_bottom();
+    auto eptr = stack.obsolete_top();
 
     for(const auto& name : params) {
       if(name.empty())
@@ -128,7 +128,7 @@ do_on_scope_exit_slow(AIR_Status status)
     // Stash the returned reference, if any.
     Reference self;
     if(status == air_status_return_ref)
-      self = ::std::move(this->m_stack->mut_back());
+      self = ::std::move(this->m_stack->mut_top());
 
     if(auto ptca = self.get_ptc_args_opt()) {
       // If a PTC wrapper was returned, prepend all deferred expressions
@@ -163,7 +163,7 @@ do_on_scope_exit_slow(AIR_Status status)
     ROCKET_ASSERT(!self.is_invalid());
 
     // Restore the returned reference.
-    this->m_stack->mut_back() = ::std::move(self);
+    this->m_stack->mut_top() = ::std::move(self);
     return status;
   }
 
