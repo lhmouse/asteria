@@ -580,8 +580,7 @@ throw_no_matching_function_call() const
     // Throw the exception now.
     ASTERIA_THROW_RUNTIME_ERROR(
            "no matching function call for `$1($2)`\n"
-           "[list of overloads:\n"
-           "$3  -- end of list of overloads]",
+           "[list of overloads:\n$3  -- end of list of overloads]",
            this->m_name, arguments, overloads);
   }
 
