@@ -23,7 +23,7 @@ do_prepare_parameter(const char* param)
 
     // Append the parameter.
     // If it is not the first one, insert a comma before it.
-    if(this->m_state.nparams == 0)
+    if(this->m_state.nparams)
       this->m_state.params += ", ";
 
     this->m_state.params += param;
@@ -557,17 +557,24 @@ throw_no_matching_function_call() const
                 this->m_stack.top(--index).dereference_readonly().type());
         }
         while(index != 0);  // fallthrough
+
       case 0:
         break;
     }
 
     // Compose the list of overloads.
-    ::rocket::tinyfmt_str overloads;
+    cow_string overloads;
     index = 0;
     while(index != this->m_overloads.size()) {
-      auto params = sref(this->m_overloads.c_str() + index);
-      format(overloads, "  $1($2)\n", this->m_name, params);
-      index += params.length() + 1;
+      const char* ovr = this->m_overloads.c_str() + index;
+      size_t len = ::std::strlen(ovr);
+      index += len + 1;
+
+      overloads += "  ";
+      overloads += this->m_name;
+      overloads += "(";
+      overloads.append(ovr, len);
+      overloads += ")\n";
     }
 
     // Throw the exception now.
@@ -575,7 +582,7 @@ throw_no_matching_function_call() const
            "no matching function call for `$1($2)`\n"
            "[list of overloads:\n"
            "$3  -- end of list of overloads]",
-           this->m_name, arguments, overloads.get_string());
+           this->m_name, arguments, overloads);
   }
 
 // Binding factory operators
