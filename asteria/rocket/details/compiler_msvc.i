@@ -13,7 +13,7 @@
 #define ROCKET_CONST                        // not implemented
 #define ROCKET_ARTIFICIAL                   // not implemented
 #define ROCKET_FLATTEN                      // not implemented
-#define ROCKET_FORCED_INLINE                __forceinline
+#define ROCKET_ALWAYS_INLINE                __forceinline
 #define ROCKET_COLD                         // not implemented
 #define ROCKET_HOT                          // not implemented
 

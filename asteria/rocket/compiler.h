@@ -23,7 +23,7 @@
     && defined(ROCKET_CONST)  \
     && defined(ROCKET_ARTIFICIAL)  \
     && defined(ROCKET_FLATTEN)  \
-    && defined(ROCKET_FORCED_INLINE)  \
+    && defined(ROCKET_ALWAYS_INLINE)  \
     && defined(ROCKET_COLD)  \
     && defined(ROCKET_HOT)  \
     \

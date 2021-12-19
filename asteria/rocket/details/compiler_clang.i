@@ -13,7 +13,7 @@
 #define ROCKET_CONST                        __attribute__((__const__))
 #define ROCKET_ARTIFICIAL                   __attribute__((__artificial__, __always_inline__))
 #define ROCKET_FLATTEN                      __attribute__((__flatten__))
-#define ROCKET_FORCED_INLINE                __attribute__((__always_inline__)) __inline__
+#define ROCKET_ALWAYS_INLINE                __attribute__((__always_inline__)) __inline__
 #define ROCKET_COLD                         __attribute__((__cold__))
 #define ROCKET_HOT                          __attribute__((__hot__))
 
