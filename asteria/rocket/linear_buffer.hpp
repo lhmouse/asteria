@@ -196,7 +196,7 @@ class basic_linear_buffer
     data() const noexcept
       { return this->m_stor.data() + this->m_goff;  }
 
-    basic_linear_buffer&
+    ROCKET_ALWAYS_INLINE basic_linear_buffer&
     discard(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
@@ -281,7 +281,7 @@ class basic_linear_buffer
         return this->m_stor.capacity() - this->m_eoff;
       }
 
-    basic_linear_buffer&
+    ROCKET_ALWAYS_INLINE basic_linear_buffer&
     accept(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_stor.capacity() - this->m_eoff);
@@ -321,8 +321,9 @@ class basic_linear_buffer
       { return this->putn(s, traits_type::length(s));  }
 
     basic_linear_buffer&
-    swap(basic_linear_buffer& other) noexcept(is_always_equal_allocator<allocator_type>::value ||
-             allocator_traits<allocator_type>::propagate_on_container_swap::value)
+    swap(basic_linear_buffer& other)
+      noexcept(is_always_equal_allocator<allocator_type>::value ||
+               allocator_traits<allocator_type>::propagate_on_container_swap::value)
       {
         ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
                       allocator_traits<allocator_type>::propagate_on_container_swap::value);
