@@ -1136,23 +1136,23 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_functi
                   Global_Context& global, Reference_Stack&& stack)
   {
     const auto qhooks = global.get_hooks_opt();
+
+    // Perform a plain call if there is no hook.
     if(ROCKET_EXPECT(!qhooks)) {
-      // Perform a plain call if there is no hook.
+      target.invoke(self, global, ::std::move(stack));
+      return air_status_next;
+    }
+
+    // Note exceptions thrown here are not caught.
+    qhooks->on_function_call(sloc, target);
+    ASTERIA_RUNTIME_TRY {
       target.invoke(self, global, ::std::move(stack));
     }
-    else {
-      // Note exceptions thrown here are not caught.
-      qhooks->on_function_call(sloc, target);
-
-      ASTERIA_RUNTIME_TRY {
-        target.invoke(self, global, ::std::move(stack));
-      }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        qhooks->on_function_except(sloc, target, except);
-        throw;
-      }
-      qhooks->on_function_return(sloc, target, self);
+    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      qhooks->on_function_except(sloc, target, except);
+      throw;
     }
+    qhooks->on_function_return(sloc, target, self);
     return air_status_next;
   }
 
