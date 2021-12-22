@@ -92,10 +92,10 @@ enum AIR_Status : uint8_t
 // Tail call optimization (PTC) awareness bitmask
 enum PTC_Aware : int8_t
   {
-    ptc_aware_none    =  0,  // Proper tail call is not allowed.
-    ptc_aware_void    = -1,  // The call is forwarded but its result is discarded.
-    ptc_aware_by_ref  =  1,  // The result is forwarded by reference.
-    ptc_aware_by_val  =  3,  // The result is forwarded by value.
+    ptc_aware_none    =  0,  // allow PTC only in `return`
+    ptc_aware_void    = -1,  // call and discard results
+    ptc_aware_by_ref  =  1,  // call and forward results by reference
+    ptc_aware_by_val  =  3,  // call and forward results by value
   };
 
 }  // namespace asteria
