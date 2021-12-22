@@ -70,8 +70,8 @@ class reference_counter
         for(;;)
           if(old == 0)
             return old;
-          else if(this->m_nref.compare_exchange_weak(
-                               old, old + 1, ::std::memory_order_relaxed))
+          else if(this->m_nref.compare_exchange_weak(old, old + 1,
+                                 ::std::memory_order_relaxed))
             return old + 1;
       }
 
