@@ -35,8 +35,8 @@
     && defined(ROCKET_FUNCSIG)  \
     \
     && defined(ROCKET_LZCNT32)  \
-    && defined(ROCKET_LZCNT64)  \
     && defined(ROCKET_TZCNT32)  \
+    && defined(ROCKET_LZCNT64)  \
     && defined(ROCKET_TZCNT64)  \
     && defined(ROCKET_POPCNT32)  \
     && defined(ROCKET_POPCNT64)  \

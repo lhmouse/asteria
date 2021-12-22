@@ -25,8 +25,8 @@
 #define ROCKET_FUNCSIG                      __FUNCSIG__
 
 #define ROCKET_LZCNT32(...)                 ((int)_lzcnt_u32(__VA_ARGS__))
-#define ROCKET_LZCNT64(...)                 ((int)_lzcnt_u64(__VA_ARGS__))
 #define ROCKET_TZCNT32(...)                 ((int)_tzcnt_u32(__VA_ARGS__))
+#define ROCKET_LZCNT64(...)                 ((int)_lzcnt_u64(__VA_ARGS__))
 #define ROCKET_TZCNT64(...)                 ((int)_tzcnt_u64(__VA_ARGS__))
 #define ROCKET_POPCNT32(...)                ((int)_mm_popcnt_u32(__VA_ARGS__))
 #define ROCKET_POPCNT64(...)                ((int)_mm_popcnt_u64(__VA_ARGS__))
