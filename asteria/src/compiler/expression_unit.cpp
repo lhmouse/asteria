@@ -210,12 +210,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_argument_finish: {
         const auto& altr = this->m_stor.as<index_argument_finish>();
 
-        // Apply glvalue-to-rvalue conversion if the argument is to be passed by value.
-        if(altr.by_ref)
-          return code;
-
         // Encode arguments.
-        AIR_Node::S_convert_to_temporary xnode = { altr.sloc };
+        AIR_Node::S_check_argument xnode = { altr.sloc, altr.by_ref };
         code.emplace_back(::std::move(xnode));
         return code;
       }

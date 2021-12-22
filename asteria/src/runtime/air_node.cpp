@@ -847,7 +847,7 @@ struct Traits_throw_statement
 
 struct Traits_assert_statement
   {
-    // `up` is `negative`.
+    // `up` is unused.
     // `sp` is the source location.
 
     static Sparam_sloc_text
@@ -890,25 +890,37 @@ struct Traits_simple_status
     static AIR_Status
     execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
-        return static_cast<AIR_Status>(up.u8v[0]);
+        auto status = static_cast<AIR_Status>(up.u8v[0]);
+        ROCKET_ASSERT(status != air_status_next);
+        return status;
       }
   };
 
-struct Traits_convert_to_temporary
+struct Traits_check_argument
   {
-    // `up` is unused.
+    // `up` is `by_ref`.
     // `sp` is unused.
 
     static const Source_Location&
-    get_symbols(const AIR_Node::S_convert_to_temporary& altr)
+    get_symbols(const AIR_Node::S_check_argument& altr)
       {
         return altr.sloc;
       }
 
-    static AIR_Status
-    execute(Executive_Context& ctx)
+    static AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_check_argument& altr)
       {
-        ctx.stack().mut_top().open_temporary();
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.by_ref;
+        return up;
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // Ensure the argument is dereferenceable.
+        auto& top = ctx.stack().mut_top();
+        (void)(up.u8v[0] ? top.dereference_readonly() : top.open_temporary());
         return air_status_next;
       }
   };
@@ -1076,10 +1088,9 @@ struct Traits_branch_expression
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().top().dereference_readonly().test())
-          return do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[0]);
-        else
-          return do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
+        return (ctx.stack().top().dereference_readonly().test())
+                  ? do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[0])
+                  : do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
       }
   };
 
@@ -1114,10 +1125,9 @@ struct Traits_coalescence
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const AVMC_Queue& queue)
       {
         // Check the value of the condition.
-        if(!ctx.stack().top().dereference_readonly().is_null())
-          return air_status_next;
-        else
-          return do_evaluate_subexpression(ctx, up.u8v[0], queue);
+        return ctx.stack().top().dereference_readonly().is_null()
+                    ? do_evaluate_subexpression(ctx, up.u8v[0], queue)
+                    : air_status_next;
       }
   };
 
@@ -1338,6 +1348,38 @@ struct Traits_push_unnamed_object
         // Push the object as a temporary.
         ctx.stack().push().set_temporary(::std::move(object));
         return air_status_next;
+      }
+  };
+
+struct Traits_return_value
+  {
+    // `up` is unused.
+    // `sp` is unused.
+
+    static const Source_Location&
+    get_symbols(const AIR_Node::S_return_value& altr)
+      {
+        return altr.sloc;
+      }
+
+    static AVMC_Queue::Uparam
+    make_uparam(bool& reachable, const AIR_Node::S_return_value& /*altr*/)
+      {
+        reachable = false;
+        return { };
+      }
+
+    static AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+      {
+        // Void references are forwarded verbatim.
+        auto& top = ctx.stack().mut_top();
+        if(top.is_void())
+          return air_status_return_void;
+
+        // Ensure the argument is dereferenceable.
+        (void)top.open_temporary();
+        return air_status_return_ref;
       }
   };
 
@@ -5065,7 +5107,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_throw_statement:
       case index_assert_statement:
       case index_simple_status:
-      case index_convert_to_temporary:
+      case index_check_argument:
       case index_push_global_reference:
         // There is nothing to rebind.
         return nullopt;
@@ -5179,6 +5221,10 @@ rebind_opt(Abstract_Context& ctx) const
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
+      case index_return_value:
+        // There is nothing to rebind.
+        return nullopt;
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -5245,9 +5291,9 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_simple_status>(queue,
                        this->m_stor.as<index_simple_status>());
 
-      case index_convert_to_temporary:
-        return do_solidify<Traits_convert_to_temporary>(queue,
-                       this->m_stor.as<index_convert_to_temporary>());
+      case index_check_argument:
+        return do_solidify<Traits_check_argument>(queue,
+                       this->m_stor.as<index_check_argument>());
 
       case index_push_global_reference:
         return do_solidify<Traits_push_global_reference>(queue,
@@ -5511,6 +5557,10 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_catch_expression>(queue,
                        this->m_stor.as<index_catch_expression>());
 
+      case index_return_value:
+        return do_solidify<Traits_return_value>(queue,
+                       this->m_stor.as<index_return_value>());
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -5590,7 +5640,7 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_throw_statement:
       case index_assert_statement:
       case index_simple_status:
-      case index_convert_to_temporary:
+      case index_check_argument:
       case index_push_global_reference:
       case index_push_local_reference:
         return;
@@ -5648,6 +5698,9 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         do_for_each_get_variables(altr.code_body, staged, temp);
         return;
       }
+
+      case index_return_value:
+        return;
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());

@@ -38,14 +38,6 @@ do_generate_clear_stack(cow_vector<AIR_Node>& code)
   }
 
 cow_vector<AIR_Node>&
-do_generate_convert_to_temporary(cow_vector<AIR_Node>& code, const Source_Location& sloc)
-  {
-    AIR_Node::S_convert_to_temporary xnode = { sloc };
-    code.emplace_back(::std::move(xnode));
-    return code;
-  }
-
-cow_vector<AIR_Node>&
 do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                           const Global_Context& global, Analytic_Context& ctx,
                           PTC_Aware ptc, const Statement::S_expression& expr)
@@ -513,19 +505,20 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           AIR_Node::S_simple_status xnode = { air_status_return_void };
           code.emplace_back(::std::move(xnode));
         }
-        else {
-          // Generate code for the operand.
-          if(altr.by_ref) {
-            // This may be PTC'd by reference.
-            do_generate_expression(code, opts, global, ctx, ptc_aware_by_ref, altr.expr);
-          }
-          else {
-            // This may be PTC'd by value.
-            do_generate_expression(code, opts, global, ctx, ptc_aware_by_val, altr.expr);
-            do_generate_convert_to_temporary(code, altr.expr.sloc);
-          }
+        else if(altr.by_ref) {
+          // This may be PTC'd.
+          do_generate_expression(code, opts, global, ctx, ptc_aware_by_ref, altr.expr);
+
           // Forward the result as is.
           AIR_Node::S_simple_status xnode = { air_status_return_ref };
+          code.emplace_back(::std::move(xnode));
+        }
+        else {
+          // This may be PTC'd.
+          do_generate_expression(code, opts, global, ctx, ptc_aware_by_val, altr.expr);
+
+          // Convert the result to an rvalue and return it.
+          AIR_Node::S_return_value xnode = { altr.expr.sloc };
           code.emplace_back(::std::move(xnode));
         }
         return code;

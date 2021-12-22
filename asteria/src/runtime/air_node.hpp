@@ -104,9 +104,10 @@ class AIR_Node
         AIR_Status status;
       };
 
-    struct S_convert_to_temporary
+    struct S_check_argument
       {
         Source_Location sloc;
+        bool by_ref;
       };
 
     struct S_push_global_reference
@@ -244,6 +245,11 @@ class AIR_Node
         cow_vector<AIR_Node> code_body;
       };
 
+    struct S_return_value
+      {
+        Source_Location sloc;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -260,7 +266,7 @@ class AIR_Node
         index_throw_statement        = 11,
         index_assert_statement       = 12,
         index_simple_status          = 13,
-        index_convert_to_temporary   = 14,
+        index_check_argument         = 14,
         index_push_global_reference  = 15,
         index_push_local_reference   = 16,
         index_push_bound_reference   = 17,
@@ -282,6 +288,7 @@ class AIR_Node
         index_declare_reference      = 33,
         index_initialize_reference   = 34,
         index_catch_expression       = 35,
+        index_return_value           = 36,
       };
 
   private:
@@ -301,7 +308,7 @@ class AIR_Node
         ,S_throw_statement        // 11,
         ,S_assert_statement       // 12,
         ,S_simple_status          // 13,
-        ,S_convert_to_temporary   // 14,
+        ,S_check_argument         // 14,
         ,S_push_global_reference  // 15,
         ,S_push_local_reference   // 16,
         ,S_push_bound_reference   // 17,
@@ -323,6 +330,7 @@ class AIR_Node
         ,S_declare_reference      // 33,
         ,S_initialize_reference   // 34,
         ,S_catch_expression       // 35,
+        ,S_return_value           // 36,
       )>
       m_stor;
 
