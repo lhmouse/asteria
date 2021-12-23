@@ -103,23 +103,23 @@ int main()
         assert std.string.rfind("hello", 2, "") == 5;
         assert std.string.rfind("hello", 2, 0, "") == 2;
 
-        assert std.string.find_and_replace("hello hello world", "llo", "####") == "he#### he#### world";
-        assert std.string.find_and_replace("hello hello world", 2, "llo", "####") == "he#### he#### world";
-        assert std.string.find_and_replace("hello hello world", 3, "llo", "####") == "hello he#### world";
-        assert std.string.find_and_replace("hello hello world", 8, "llo", "####") == "hello he#### world";
-        assert std.string.find_and_replace("hello hello world", 9, "llo", "####") == "hello hello world";
-        assert std.string.find_and_replace("hello hello world", 2, 7, "llo", "####") == "he#### hello world";
-        assert std.string.find_and_replace("hello hello world", 2, 8, "llo", "####") == "he#### hello world";
-        assert std.string.find_and_replace("hello hello world", 2, 9, "llo", "####") == "he#### he#### world";
-        assert std.string.find_and_replace("hello hello world", 3, 7, "llo", "####") == "hello hello world";
-        assert std.string.find_and_replace("hello hello world", 4, 7, "llo", "####") == "hello he#### world";
-        assert std.string.find_and_replace("abab", "ab", "abab") == "abababab";
-        assert std.string.find_and_replace("abab", 1, "ab", "abab") == "ababab";
-        assert std.string.find_and_replace("abab", 2, "ab", "abab") == "ababab";
-        assert std.string.find_and_replace("abab", 3, "ab", "abab") == "abab";
-        assert std.string.find_and_replace("hello", "", "X") == "XhXeXlXlXoX";
-        assert std.string.find_and_replace("hello", 2, "", "X") == "heXlXlXoX";
-        assert std.string.find_and_replace("hello", 2, 2, "", "X") == "heXlXlXo";
+        assert std.string.replace("hello hello world", "llo", "####") == "he#### he#### world";
+        assert std.string.replace("hello hello world", 2, "llo", "####") == "he#### he#### world";
+        assert std.string.replace("hello hello world", 3, "llo", "####") == "hello he#### world";
+        assert std.string.replace("hello hello world", 8, "llo", "####") == "hello he#### world";
+        assert std.string.replace("hello hello world", 9, "llo", "####") == "hello hello world";
+        assert std.string.replace("hello hello world", 2, 7, "llo", "####") == "he#### hello world";
+        assert std.string.replace("hello hello world", 2, 8, "llo", "####") == "he#### hello world";
+        assert std.string.replace("hello hello world", 2, 9, "llo", "####") == "he#### he#### world";
+        assert std.string.replace("hello hello world", 3, 7, "llo", "####") == "hello hello world";
+        assert std.string.replace("hello hello world", 4, 7, "llo", "####") == "hello he#### world";
+        assert std.string.replace("abab", "ab", "abab") == "abababab";
+        assert std.string.replace("abab", 1, "ab", "abab") == "ababab";
+        assert std.string.replace("abab", 2, "ab", "abab") == "ababab";
+        assert std.string.replace("abab", 3, "ab", "abab") == "abab";
+        assert std.string.replace("hello", "", "X") == "XhXeXlXlXoX";
+        assert std.string.replace("hello", 2, "", "X") == "heXlXlXoX";
+        assert std.string.replace("hello", 2, 2, "", "X") == "heXlXlXo";
 
         assert std.string.find_any_of("hello", "aeiou") == 1;
         assert std.string.find_any_of("hello", 1, "aeiou") == 1;
@@ -324,15 +324,14 @@ int main()
         assert m.yy == null;
         assert m.zz == "2c";
 
-        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*') == "a*2c333d4e555";
-        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*', ['global']) == "a*****";
+        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*') == "a*****";
         assert std.string.pcre_replace("a11b2c333d4e555", '(\d{3})(\w)', '$2$1') == "a11b2cd3334e555";
         assert std.string.pcre_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";
 
         var M_dw = std.string.PCRE('\d+\w');
         assert M_dw.find("a11b2c333d4e555") == [1,3];
         assert M_dw.match("a11b2c333d4e555") == [ "11b" ];
-        assert M_dw.replace("a11b2c333d4e555", '*') == "a*2c333d4e555";
+        assert M_dw.replace("a11b2c333d4e555", '*') == "a*****";
 
         var M_nn = std.string.PCRE('(?<xx>\d+\w)(?<yy>22)?(?<zz>\d+\w)');
         m = M_nn.named_match("a11b2c333d4e555");

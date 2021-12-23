@@ -324,7 +324,7 @@
 	  `pattern` in `text` if one is found, which is always
 	  non-negative, or `null` otherwise.
 
-`std.string.find_and_replace(text, [from, [length]], pattern, replacement)`
+`std.string.replace(text, [from, [length]], pattern, replacement)`
 
 	* Searches `text` and replaces all occurrences of `pattern` with
 	  `replacement`. The search operation is performed on the same
@@ -649,7 +649,6 @@
 	  * `"caseless"`    Do caseless matching
 	  * `"dotall"`      `.` matches anything including new lines
 	  * `"extended"`    Ignore white space and `#` comments
-	  * `"global"`      Replace all occurrences in the subject
 	  * `"multiline"`   `^` and `$` match newlines within data
 
 	* Returns a matcher as an object consisting of the following
@@ -714,7 +713,7 @@
 
 `std.string.pcre_replace(text, [from, [length]], pattern, replacement, [options])`
 
-	* Searches `text` and replaces matches of the Perl-compatible
+	* Searches `text` and replaces all matches of the Perl-compatible
 	  regular expression (PCRE) `pattern` with `replacement`. The
 	  search operation is performed on the same subrange that would
 	  be returned by `slice(text, from, length)`. `options` specifies

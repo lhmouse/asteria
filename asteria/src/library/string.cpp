@@ -128,8 +128,7 @@ do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
 
 template<typename IterT>
 V_string&
-do_find_and_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend,
-                    IterT rbegin, IterT rend)
+do_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend, IterT rbegin, IterT rend)
   {
     // If the pattern is empty, there is a match beside every byte.
     if(pbegin == pend) {
@@ -359,8 +358,6 @@ class PCRE2_Matcher final
               this->m_opts |= PCRE2_DOTALL;
             else if(do_streq_ci(opt.as_string(), sref("extended")))
               this->m_opts |= PCRE2_EXTENDED;
-            else if(do_streq_ci(opt.as_string(), sref("global")))
-              this->m_opts |= PCRE2_SUBSTITUTE_GLOBAL;
             else if(do_streq_ci(opt.as_string(), sref("multiline")))
               this->m_opts |= PCRE2_MULTILINE;
             else if(!opt.as_string().empty())
@@ -544,7 +541,8 @@ class PCRE2_Matcher final
         // Try substitution.
         this->do_initialize_match_data();
         int err = ::pcre2_substitute(this->m_code, sub_ptr, sub_len, 0,
-                        this->m_opts | PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
+                        this->m_opts | PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
+                                     | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
                         this->m_match, nullptr, reinterpret_cast<const uint8_t*>(rep.data()),
                         rep.size(), reinterpret_cast<uint8_t*>(out_str.mut_data()), &out_len);
 
@@ -553,7 +551,7 @@ class PCRE2_Matcher final
           // Resize the buffer and try again.
           out_str.assign(out_len, '/');
           err = ::pcre2_substitute(this->m_code, sub_ptr, sub_len, 0,
-                        this->m_opts | PCRE2_SUBSTITUTE_EXTENDED,
+                        this->m_opts | PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL,
                         this->m_match, nullptr, reinterpret_cast<const uint8_t*>(rep.data()),
                         rep.size(), reinterpret_cast<uint8_t*>(out_str.mut_data()), &out_len);
         }
@@ -811,14 +809,12 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
   }
 
 V_string
-std_string_find_and_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
-                            V_string replacement)
+std_string_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement)
   {
     V_string res;
     auto range = do_slice(text, from, length);
     res.append(text.begin(), range.first);
-    do_find_and_replace(res, range.first, range.second, pattern.begin(), pattern.end(),
-                             replacement.begin(), replacement.end());
+    do_replace(res, range.first, range.second, pattern.begin(), pattern.end(), replacement.begin(), replacement.end());
     res.append(range.second, text.end());
     return res;
   }
@@ -1936,9 +1932,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find_and_replace"),
+    result.insert_or_assign(sref("replace"),
       ASTERIA_BINDING(
-        "std.string.find_and_replace", "text, [from, [length]], pattern, replacement",
+        "std.string.replace", "text, [from, [length]], pattern, replacement",
         Argument_Reader&& reader)
       {
         V_string text, patt, rep;
@@ -1951,7 +1947,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_find_and_replace(text, 0, nullopt, patt, rep);
+          return (Value)std_string_replace(text, 0, nullopt, patt, rep);
 
         reader.load_state(0);
         reader.required(from);
@@ -1959,14 +1955,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_find_and_replace(text, from, nullopt, patt, rep);
+          return (Value)std_string_replace(text, from, nullopt, patt, rep);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_find_and_replace(text, from, len, patt, rep);
+          return (Value)std_string_replace(text, from, len, patt, rep);
 
         reader.throw_no_matching_function_call();
       });

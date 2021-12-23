@@ -36,9 +36,9 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
 optV_integer
 std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pattern);
 
-// `std.string.find_and_replace`
+// `std.string.replace`
 V_string
-std_string_find_and_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement);
+std_string_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement);
 
 // `std.string.find_any_of`
 optV_integer
