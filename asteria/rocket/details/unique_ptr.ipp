@@ -20,7 +20,7 @@ struct pointer_of<elementT, deleterT, ROCKET_VOID_T(typename deleterT::pointer)>
 template<typename deleterT>
 struct deleter_reference
   {
-    deleterT* m_qdel;
+    typename remove_reference<deleterT>::type* m_qdel;
 
     constexpr
     deleter_reference(deleterT& del) noexcept
@@ -36,9 +36,15 @@ struct deleter_reference
       { return *(this->m_qdel);  }
   };
 
+// deleter base wrapper
+template<typename pointerT, typename deleterT,
+         bool objT = is_object<deleterT>::value,
+         bool refT = disjunction<is_function<deleterT>, is_reference<deleterT>>::value>
+class stored_pointer;
+
 // deleter of object types
 template<typename pointerT, typename deleterT>
-class stored_pointer
+class stored_pointer<pointerT, deleterT, true, false>
   : private allocator_wrapper_base_for<deleterT>::type
   {
   public:
@@ -108,7 +114,7 @@ class stored_pointer
 
 // deleter of reference types
 template<typename pointerT, typename deleterT>
-class stored_pointer<pointerT, deleterT&>
+class stored_pointer<pointerT, deleterT, false, true>
   : private deleter_reference<deleterT>
   {
   public:

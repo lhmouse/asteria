@@ -88,6 +88,7 @@ using ::std::add_lvalue_reference;
 using ::std::add_rvalue_reference;
 using ::std::remove_reference;
 using ::std::is_same;
+using ::std::is_object;
 using ::std::is_trivial;
 using ::std::is_integral;
 using ::std::is_floating_point;

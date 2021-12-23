@@ -323,8 +323,8 @@ operator<<(tinyfmt& fmt, const PCRE2_Error& err)
 class PCRE2_Matcher
   {
   private:
-    uptr<::pcre2_code, void (&)(::pcre2_code*)> m_code;
-    uptr<::pcre2_match_data, void (&)(::pcre2_match_data*)> m_match;
+    uptr<::pcre2_code, void (::pcre2_code*)> m_code;
+    uptr<::pcre2_match_data, void (::pcre2_match_data*)> m_match;
 
   public:
     explicit
