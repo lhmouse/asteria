@@ -73,7 +73,9 @@ class Deflator final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.zlib.Deflator` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.zlib.Deflator` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -271,7 +273,9 @@ class Inflator final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.zlib.Inflator` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.zlib.Inflator` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override

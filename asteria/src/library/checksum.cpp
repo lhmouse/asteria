@@ -29,7 +29,9 @@ class CRC32_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.CRC32` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.CRC32` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -141,7 +143,9 @@ class FNV1a32_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.FNV1a32` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.FNV1a32` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -263,7 +267,9 @@ class MD5_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.MD5` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.MD5` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -367,7 +373,9 @@ class SHA1_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.SHA1` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.SHA1` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -471,7 +479,9 @@ class SHA224_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.SHA224` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.SHA224` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -575,7 +585,9 @@ class SHA256_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.SHA256` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.SHA256` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -679,7 +691,9 @@ class SHA384_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.SHA384` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.SHA384` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
@@ -783,7 +797,9 @@ class SHA512_Hasher final
   public:
     tinyfmt&
     describe(tinyfmt& fmt) const override
-      { return fmt << "instance of `std.checksum.SHA512` at `" << this << "`";  }
+      {
+        return format(fmt, "instance of `std.checksum.SHA512` at `$1`", this);
+      }
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
