@@ -22,26 +22,20 @@ tell_precedence() const noexcept
       case index_ternary:
         return precedence_assignment;
 
-      case index_logical_and: {
-        const auto& altr = this->m_stor.as<index_logical_and>();
-        if(altr.assign)
-          return precedence_assignment;
-        return precedence_logical_and;
-      }
+      case index_logical_and:
+        return this->m_stor.as<index_logical_and>().assign
+                 ? precedence_assignment
+                 : precedence_logical_and;
 
-      case index_logical_or: {
-        const auto& altr = this->m_stor.as<index_logical_or>();
-        if(altr.assign)
-          return precedence_assignment;
-        return precedence_logical_or;
-      }
+      case index_logical_or:
+        return this->m_stor.as<index_logical_or>().assign
+                 ? precedence_assignment
+                 : precedence_logical_or;
 
-      case index_coalescence: {
-        const auto& altr = this->m_stor.as<index_coalescence>();
-        if(altr.assign)
-          return precedence_assignment;
-        return precedence_coalescence;
-      }
+      case index_coalescence:
+        return this->m_stor.as<index_coalescence>().assign
+                 ? precedence_assignment
+                 : precedence_coalescence;
 
       case index_general: {
         const auto& altr = this->m_stor.as<index_general>();
@@ -89,6 +83,7 @@ tell_precedence() const noexcept
             ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
         }
       }
+
       default:
         ASTERIA_TERMINATE("invalid infix element type (index `$1`)", this->index());
     }
