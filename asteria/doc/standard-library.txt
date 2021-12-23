@@ -638,12 +638,40 @@
 	  sequences, or when a placeholder sequence has no corresponding
 	  argument.
 
-`std.string.pcre_find(text, [from, [length]], pattern)`
+`std.string.PCRE(pattern, [options])`
+
+	* Constructs a string matcher from the Perl-compatible regular
+	  expression (PCRE) `pattern`. If `options` is set, it shall be
+	  an array of strings, each of whose elements specifies an option
+	  for the regular expression (this list is partly copied from the
+	  PCRE2 manual):
+
+	  * `"caseless"`    Do caseless matching
+	  * `"dotall"`      `.` matches anything including new lines
+	  * `"extended"`    Ignore white space and `#` comments
+	  * `"global"`      Replace all occurrences in the subject
+	  * `"multiline"`   `^` and `$` match newlines within data
+
+	* Returns a matcher as an object consisting of the following
+	  members:
+
+	  * `find(text, [from, [length]])`
+	  * `match(text, [from, [length]])`
+	  * `named_match(text, [from, [length]])`
+	  * `replace(text, [from, [length]], replacement)`
+
+	  These functions behave the same way as their counterparts with
+	  the `pcre_` prefix, as described in this document.
+
+	* Throws an exception if `pattern` is not a valid PCRE.
+
+`std.string.pcre_find(text, [from, [length]], pattern, [options])`
 
 	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`. The search operation is
+	  regular expression (PCRE) `pattern`. The search operation is
 	  performed on the same subrange that would be returned by
-	  `slice(text, from, length)`.
+	  `slice(text, from, length)`. `options` specifies options passed
+	  to `PCRE(pattern, options)`.
 
 	* Returns an array of two integers. The first integer specifies
 	  the subscript of the matching sequence and the second integer
@@ -652,12 +680,13 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.pcre_match(text, [from, [length]], pattern)`
+`std.string.pcre_match(text, [from, [length]], pattern, [options])`
 
 	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`. The search operation is
+	  regular expression (PCRE) `pattern`. The search operation is
 	  performed on the same subrange that would be returned by
-	  `slice(text, from, length)`.
+	  `slice(text, from, length)`. `options` specifies options passed
+	  to `PCRE(pattern, options)`.
 
 	* Returns an array of strings. The first element is a copy of the
 	  substring that matches `pattern`. The remaining elements are
@@ -667,12 +696,13 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.pcre_named_match(text, [from, [length]], pattern)`
+`std.string.pcre_named_match(text, [from, [length]], pattern, [options])`
 
 	* Searches `text` for the first match of the Perl-compatible
-	  regular expressions (PCRE) `pattern`. The search operation is
+	  regular expression (PCRE) `pattern`. The search operation is
 	  performed on the same subrange that would be returned by
-	  `slice(text, from, length)`.
+	  `slice(text, from, length)`. `options` specifies options passed
+	  to `PCRE(pattern, options)`.
 
 	* Returns an object of all named groups. Each key is the name of
 	  a group and its value is the matched substring. If there are no
@@ -682,12 +712,13 @@
 
 	* Throws an exception if `pattern` is not a valid PCRE.
 
-`std.string.pcre_replace(text, [from, [length]], pattern, replacement)`
+`std.string.pcre_replace(text, [from, [length]], pattern, replacement, [options])`
 
-	* Searches `text` and replaces all matches of the Perl-compatible
-	  regular expressions (PCRE) `pattern` with `replacement`. The
+	* Searches `text` and replaces matches of the Perl-compatible
+	  regular expression (PCRE) `pattern` with `replacement`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from, length)`. This function
+	  be returned by `slice(text, from, length)`. `options` specifies
+	  options passed to `PCRE(pattern, options)`. This function
 	  returns a new string without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not

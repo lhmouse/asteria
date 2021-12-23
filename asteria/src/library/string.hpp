@@ -160,21 +160,40 @@ std_string_utf8_decode(V_string text, optV_boolean permissive);
 V_string
 std_string_format(V_string templ, cow_vector<Value> values);
 
+// `std.string.PCRE`
+V_object
+std_string_PCRE(V_string pattern, optV_array options);
+
+V_opaque
+std_string_PCRE_private(V_string pattern, optV_array options);
+
+opt<pair<V_integer, V_integer>>
+std_string_PCRE_find(V_opaque& m, V_string text, V_integer from, optV_integer length);
+
+optV_array
+std_string_PCRE_match(V_opaque& m, V_string text, V_integer from, optV_integer length);
+
+optV_object
+std_string_PCRE_named_match(V_opaque& m, V_string text, V_integer from, optV_integer length);
+
+V_string
+std_string_PCRE_replace(V_opaque& m, V_string text, V_integer from, optV_integer length, V_string replacement);
+
 // `std.string.pcre_find`.
 opt<pair<V_integer, V_integer>>
-std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern);
+std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern, optV_array options);
 
 // `std.string.pcre_match`
 optV_array
-std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern);
+std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern, optV_array options);
 
 // `std.string.pcre_named_match`
 optV_object
-std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern);
+std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern, optV_array options);
 
 // `std.string.pcre_replace`
 V_string
-std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement);
+std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement, optV_array options);
 
 // `std.string.iconv`
 V_string

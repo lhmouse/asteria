@@ -324,9 +324,23 @@ int main()
         assert m.yy == null;
         assert m.zz == "2c";
 
-        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*') == "a*****";
+        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*') == "a*2c333d4e555";
+        assert std.string.pcre_replace("a11b2c333d4e555", '\d+\w', '*', ['global']) == "a*****";
         assert std.string.pcre_replace("a11b2c333d4e555", '(\d{3})(\w)', '$2$1') == "a11b2cd3334e555";
         assert std.string.pcre_replace("a11b2c333d4e555", '\d{34}\w', '#') == "a11b2c333d4e555";
+
+        var M_dw = std.string.PCRE('\d+\w');
+        assert M_dw.find("a11b2c333d4e555") == [1,3];
+        assert M_dw.match("a11b2c333d4e555") == [ "11b" ];
+        assert M_dw.replace("a11b2c333d4e555", '*') == "a*2c333d4e555";
+
+        var M_nn = std.string.PCRE('(?<xx>\d+\w)(?<yy>22)?(?<zz>\d+\w)');
+        m = M_nn.named_match("a11b2c333d4e555");
+        assert typeof m == "object";
+        assert countof m == 3;
+        assert m.xx == "11b";
+        assert m.yy == null;
+        assert m.zz == "2c";
 
         assert std.string.iconv("UTF-16", "") == "";
         assert catch( std.string.iconv("invalid encoding", "") ) != null;
