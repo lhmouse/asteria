@@ -250,11 +250,11 @@ class optional
 
     constexpr const value_type*
     operator->() const
-      { return this->m_stor.data();  }
+      { return ::std::addressof(this->m_stor.front());  }
 
     constexpr value_type*
     operator->()
-      { return this->m_stor.mut_data();  }
+      { return ::std::addressof(this->m_stor.mut_front());  }
 
     // 19.6.3.6, modifiers
     optional&
