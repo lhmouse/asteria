@@ -987,8 +987,7 @@ struct Traits_push_local_reference
         // Get the context.
         Executive_Context* qctx = &ctx;
         for(uint32_t k = 0;  k != up.u32;  ++k)
-          qctx = qctx->get_parent_opt(),
-            ROCKET_ASSERT(qctx);
+          qctx = qctx->get_parent_opt();
 
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(name);
@@ -5119,8 +5118,7 @@ rebind_opt(Abstract_Context& ctx) const
         // Don't bind references in analytic contexts.
         Abstract_Context* qctx = &ctx;
         for(uint32_t k = 0;  k != altr.depth;  ++k)
-          qctx = qctx->get_parent_opt(),
-            ROCKET_ASSERT(qctx);
+          qctx = qctx->get_parent_opt();
 
         if(qctx->is_analytic())
           return nullopt;
