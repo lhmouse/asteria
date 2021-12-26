@@ -153,8 +153,8 @@ class Reference_Stack;
 class AVMC_Queue;
 
 // Runtime
-enum AIR_Status : uint8_t;
-enum PTC_Aware : int8_t;  // this is a bitmask!
+enum AIR_Status : uint32_t;
+enum PTC_Aware : int32_t;  // this is a bitmask!
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
