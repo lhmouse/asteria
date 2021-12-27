@@ -103,12 +103,6 @@ do_get_first_operand(Reference_Stack& stack, bool assign)
         : stack.mut_top().open_temporary();
   }
 
-Reference&
-do_declare(Executive_Context& ctx, const phsh_string& name)
-  {
-    return ctx.open_named_reference(name).set_invalid();
-  }
-
 AIR_Status
 do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
@@ -461,7 +455,7 @@ struct Traits_switch_statement
 
           // Inject all bypassed variables into the scope.
           for(const auto& name : sp.names_added[bp])
-            do_declare(ctx_body, name);
+            ctx_body.open_named_reference(name).set_invalid();
 
           ASTERIA_RUNTIME_TRY {
             do {
@@ -611,7 +605,7 @@ struct Traits_for_each_statement
         ctx_for.open_named_reference(sp.name_key).set_variable(vkey);
 
         // Create the mapped reference.
-        auto& mapped = do_declare(ctx_for, sp.name_mapped);
+        auto& mapped = ctx_for.open_named_reference(sp.name_mapped);
 
         // Evaluate the range initializer and set the range up, which isn't going to
         // change for all loops.
