@@ -57,10 +57,10 @@ template<typename NodeT>
 opt<AIR_Node>
 do_return_rebound_opt(bool dirty, NodeT&& xnode)
   {
-    if(!dirty)
-      return nullopt;
-    else
-      return ::std::forward<NodeT>(xnode);
+    opt<AIR_Node> res;
+    if(dirty)
+      res.emplace(::std::forward<NodeT>(xnode));
+    return res;
   }
 
 bool
