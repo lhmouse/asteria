@@ -71,25 +71,17 @@ do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
     return r;
   }
 
-void
-do_simple_assign_value_common(Executive_Context& ctx)
-  {
-    auto value = ctx.stack().top().dereference_readonly();
-    ctx.stack().pop();
-    ctx.stack().top().dereference_mutable() = ::std::move(value);
-  }
-
 AIR_Status
 do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
   {
+    // If the queue is empty, leave the condition on the top of the stack.
     if(queue.empty())
-      // Leave the condition on the top of the stack.
       return air_status_next;
 
+    // If this is no compound assignment, discard the top which will be
+    // overwritten anyway, then evaluate the subexpression. The status code
+    // must be forwarded as is, because PTCs may return `air_status_return_ref`.
     if(!assign) {
-      // Discard the top which will be overwritten anyway, then evaluate the
-      // subexpression. The status code must be forwarded as is, because PTCs may
-      // return `air_status_return_ref`.
       ctx.stack().pop();
       return queue.execute(ctx);
     }
@@ -97,17 +89,18 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
     // Evaluate the subexpression.
     auto status = queue.execute(ctx);
     ROCKET_ASSERT(status == air_status_next);
-    do_simple_assign_value_common(ctx);
+    auto value = ctx.stack().top().dereference_readonly();
+    ctx.stack().pop();
+    ctx.stack().top().dereference_mutable() = ::std::move(value);
     return air_status_next;
   }
 
 Value&
 do_get_first_operand(Reference_Stack& stack, bool assign)
   {
-    if(assign)
-      return stack.top().dereference_mutable();
-    else
-      return stack.mut_top().open_temporary();
+    return assign
+        ? stack.top().dereference_mutable()
+        : stack.mut_top().open_temporary();
   }
 
 Reference&
@@ -3721,7 +3714,9 @@ struct Traits_apply_xop_assign
     execute(Executive_Context& ctx)
       {
         // This operator is binary. `assign` is ignored.
-        do_simple_assign_value_common(ctx);
+        auto value = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
+        ctx.stack().top().dereference_mutable() = ::std::move(value);
         return air_status_next;
       }
   };
