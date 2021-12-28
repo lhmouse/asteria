@@ -126,7 +126,8 @@ class Reference_Dictionary
           this->do_destroy_buckets();
 
         if(this->m_bptr)
-          ::operator delete(this->m_bptr);
+          ::rocket::freeN<Bucket>(this->m_bptr,
+                static_cast<size_t>(this->m_eptr - this->m_bptr));
 
 #ifdef ROCKET_DEBUG
         ::std::memset((void*)this, 0xA6, sizeof(*this));

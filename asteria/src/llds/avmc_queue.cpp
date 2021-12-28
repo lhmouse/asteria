@@ -29,7 +29,7 @@ do_destroy_nodes() noexcept
         delete qnode->pv_meta;
     }
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_bptr, 0xE6, this->m_rsrv * sizeof(Header));
+    ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
 #endif
     this->m_used = 0xDEADBEEF;
   }
@@ -43,17 +43,16 @@ do_reallocate(uint32_t nadd)
     if(nheaders_max - this->m_used < nadd)
       throw ::std::bad_alloc();
 
-    uint32_t rsrv = this->m_used + nadd;
-    auto bptr = static_cast<Header*>(::operator new(rsrv * sizeof(Header)));
+    uint32_t estor = this->m_used + nadd;
+    auto bptr = ::rocket::allocN<Header>(estor);
 
     // Perform a bitwise copy of all contents of the old block.
     // This copies all existent headers and trivial data.
     // Note that the size is unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
     ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
-    this->m_rsrv = rsrv;
-
-    if(!bold)
+    auto esold = ::std::exchange(this->m_estor, estor);
+    if(ROCKET_EXPECT(!bold))
       return;
 
     // Move old non-trivial nodes if any.
@@ -68,7 +67,9 @@ do_reallocate(uint32_t nadd)
       if(qnode->meta_ver && qnode->pv_meta->reloc_opt)
         qnode->pv_meta->reloc_opt(qnode, qfrom);
     }
-    ::operator delete(bold);
+
+    // Deallocate the old table.
+    ::rocket::freeN<Header>(bold, esold);
   }
 
 details_avmc_queue::Header*
@@ -84,7 +85,7 @@ do_reserve_one(Uparam uparam, size_t size)
     size_t nheaders_p1 = (sizeof(Header) * 2 - 1 + size) / sizeof(Header);
 
     // Allocate a new memory block as needed.
-    if(ROCKET_UNEXPECT(this->m_rsrv - this->m_used < nheaders_p1)) {
+    if(ROCKET_UNEXPECT(this->m_estor - this->m_used < nheaders_p1)) {
       size_t nadd = nheaders_p1;
 #ifndef ROCKET_DEBUG
       // Reserve more space for non-debug builds.
@@ -92,7 +93,7 @@ do_reserve_one(Uparam uparam, size_t size)
 #endif
       this->do_reallocate(static_cast<uint32_t>(nadd));
     }
-    ROCKET_ASSERT(this->m_rsrv - this->m_used >= nheaders_p1);
+    ROCKET_ASSERT(this->m_estor - this->m_used >= nheaders_p1);
 
     // Append a new node.
     // `uparam` is overlapped with `nheaders` so it must be assigned first.

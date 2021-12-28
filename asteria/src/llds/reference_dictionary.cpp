@@ -81,15 +81,14 @@ do_rehash_more()
     if(nbkt / 2 <= this->m_size)
       throw ::std::bad_alloc();
 
-    auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
+    auto bptr = ::rocket::allocN<Bucket>(nbkt);
     auto eptr = bptr + nbkt;
 
     // Initialize an empty table.
     ::std::for_each(bptr, eptr, [&](Bucket& r) { r.prev = nullptr;  });
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    this->m_eptr = eptr;
-
-    if(!bold)
+    auto eold = ::std::exchange(this->m_eptr, eptr);
+    if(ROCKET_EXPECT(!bold))
       return;
 
     // Move buckets into the new table.
@@ -120,7 +119,9 @@ do_rehash_more()
       // Process the next bucket.
       sbkt = sbkt->next;
     }
-    ::operator delete(bold);
+
+    // Deallocate the old table.
+    ::rocket::freeN<Bucket>(bold, static_cast<size_t>(eold - bold));
   }
 
 }  // namespace asteria

@@ -35,7 +35,7 @@ do_reserve_more()
     if(estor <= this->m_estor)
       throw ::std::bad_alloc();
 
-    auto bptr = static_cast<Reference*>(::operator new(estor * sizeof(Reference)));
+    auto bptr = ::rocket::allocN<Reference>(estor);
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)bptr, 0xE6, estor * sizeof(Reference));
 #endif
@@ -43,10 +43,9 @@ do_reserve_more()
     // Move-construct references below `m_etop` into the new storage. This shall
     // not throw exceptions. `m_etop` is left unchanged.
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    const uint32_t eiold = ::std::exchange(this->m_einit, this->m_etop);
-    this->m_estor = estor;
-
-    if(!bold)
+    auto eiold = ::std::exchange(this->m_einit, this->m_etop);
+    auto esold = ::std::exchange(this->m_estor, estor);
+    if(ROCKET_EXPECT(!bold))
       return;
 
     // Move references into the new storage.
@@ -58,7 +57,9 @@ do_reserve_more()
       // Destroy the old reference, always.
       ::rocket::destroy(bold + k);
     }
-    ::operator delete(bold);
+
+    // Deallocate the old table.
+    ::rocket::freeN<Reference>(bold, esold);
   }
 
 }  // namespace asteria

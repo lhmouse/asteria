@@ -43,7 +43,7 @@ class Reference_Stack
           this->do_destroy_elements();
 
         if(this->m_bptr)
-          ::operator delete(this->m_bptr);
+          ::rocket::freeN<Reference>(this->m_bptr, this->m_estor);
 
 #ifdef ROCKET_DEBUG
         ::std::memset((void*)this, 0xBA, sizeof(*this));

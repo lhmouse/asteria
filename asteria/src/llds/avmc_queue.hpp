@@ -24,9 +24,9 @@ class AVMC_Queue
     using Relocator    = details_avmc_queue::Relocator;
     using Destructor   = details_avmc_queue::Destructor;
 
-    Header* m_bptr = nullptr;  // beginning of raw storage
-    uint32_t m_rsrv = 0;  // size of raw storage, in number of `Header`s [!]
-    uint32_t m_used = 0;  // size of used storage, in number of `Header`s [!]
+    Header* m_bptr = nullptr;  // beginning of storage
+    uint32_t m_used = 0;       // used storage in number of `Header`s [!]
+    uint32_t m_estor = 0;      // allocated storage in number of `Header`s [!]
 
   public:
     explicit constexpr
@@ -72,7 +72,7 @@ class AVMC_Queue
           this->do_destroy_nodes();
 
         if(this->m_bptr)
-          ::operator delete(this->m_bptr);
+          ::rocket::freeN<Header>(this->m_bptr, this->m_estor);
 
 #ifdef ROCKET_DEBUG
         ::std::memset((void*)this, 0xCA, sizeof(*this));
@@ -97,8 +97,11 @@ class AVMC_Queue
     AVMC_Queue&
     shrink_to_fit()
       {
-        if(this->m_used != this->m_rsrv)
-          this->do_reallocate(0);
+        if(ROCKET_EXPECT(this->m_used == this->m_estor))
+          return *this;
+
+        // Force reallocation of the table.
+        this->do_reallocate(0);
         return *this;
       }
 
@@ -106,7 +109,7 @@ class AVMC_Queue
     swap(AVMC_Queue& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_rsrv, other.m_rsrv);
+        ::std::swap(this->m_estor, other.m_estor);
         ::std::swap(this->m_used, other.m_used);
         return *this;
       }
