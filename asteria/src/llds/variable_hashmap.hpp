@@ -95,7 +95,7 @@ class Variable_HashMap
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
         qbkt->key_p = key_p;
-        ::rocket::construct_at(qbkt->vstor, var);
+        ::rocket::construct(qbkt->vstor, var);
         ROCKET_ASSERT(*qbkt);
         this->m_size++;
       }
@@ -106,7 +106,7 @@ class Variable_HashMap
         // Destroy the old variable, then detach the bucket.
         this->m_size--;
         ROCKET_ASSERT(*qbkt);
-        ::rocket::destroy_at(qbkt->vstor);
+        ::rocket::destroy(qbkt->vstor);
         this->do_list_detach(qbkt);
         ROCKET_ASSERT(!*qbkt);
 

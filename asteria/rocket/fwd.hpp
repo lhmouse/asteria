@@ -312,7 +312,7 @@ estimate_distance(iteratorT first, iteratorT last)
 
 template<typename elementT, typename... paramsT>
 elementT*
-construct_at(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
+construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
@@ -322,7 +322,7 @@ construct_at(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructib
 
 template<typename elementT>
 elementT*
-default_construct_at(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
+default_construct(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xBE, sizeof(elementT));
@@ -332,7 +332,7 @@ default_construct_at(elementT* ptr) noexcept(is_nothrow_default_constructible<el
 
 template<typename elementT>
 void
-destroy_at(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
+destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     // The C++ standard says the lifetime of a trivial object does not end.
     if(is_trivially_destructible<elementT>::value)

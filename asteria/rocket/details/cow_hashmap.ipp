@@ -146,7 +146,7 @@ struct basic_storage
         // Initialize an empty table.
         size_t nbkts = this->bucket_count();
         for(size_t k = 0;  k != nbkts;  ++k)
-          noadl::construct_at(this->bkts + k);
+          noadl::construct(this->bkts + k);
       }
 
     ~basic_storage()
@@ -158,7 +158,7 @@ struct basic_storage
             this->free_value(qval);
 
         for(size_t k = 0;  k != nbkts;  ++k)
-          noadl::destroy_at(this->bkts + k);
+          noadl::destroy(this->bkts + k);
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
@@ -410,7 +410,7 @@ class storage_handle
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
-        noadl::destroy_at(noadl::unfancy(qstor));
+        noadl::destroy(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 
@@ -622,9 +622,9 @@ class storage_handle
         auto nblk = sth.m_qstor->nblk;
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(qstor),
-                            reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
-                            this->as_allocator(), this->as_hasher(), nblk);
+        noadl::construct(noadl::unfancy(qstor),
+                 reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
+                 this->as_allocator(), this->as_hasher(), nblk);
 
         // Copy/move old elements from `sth`.
         try {
@@ -653,9 +653,9 @@ class storage_handle
         auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(qstor),
-                            reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
-                            this->as_allocator(), this->as_hasher(), nblk);
+        noadl::construct(noadl::unfancy(qstor),
+                 reinterpret_cast<void (*)(...)>(this->do_destroy_storage),
+                 this->as_allocator(), this->as_hasher(), nblk);
 
         // Copy/move old elements from `sth`.
         try {

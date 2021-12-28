@@ -108,7 +108,7 @@ class Reference_Stack
           if(ROCKET_UNEXPECT(ki == this->m_estor))
             this->do_reserve_more();
 
-          ::rocket::construct_at(this->m_bptr + ki);
+          ::rocket::construct(this->m_bptr + ki);
           this->m_einit += 1;
         }
         this->m_etop += 1;

@@ -129,7 +129,7 @@ class storage_handle
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
-        noadl::destroy_at(noadl::unfancy(qstor));
+        noadl::destroy(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 
@@ -228,7 +228,7 @@ class storage_handle
         auto nblk = storage::min_nblk_for_nchar(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(qstor), this->as_allocator(), nblk);
+        noadl::construct(noadl::unfancy(qstor), this->as_allocator(), nblk);
 
         // Add a null character anyway.
         // The user still has to keep track of it if the storage is not fully utilized.

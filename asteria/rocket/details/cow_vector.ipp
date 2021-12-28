@@ -255,7 +255,7 @@ class storage_handle
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
-        noadl::destroy_at(noadl::unfancy(qstor));
+        noadl::destroy(noadl::unfancy(qstor));
         allocator_traits<storage_allocator>::deallocate(st_alloc, qstor, nblk);
       }
 
@@ -388,9 +388,9 @@ class storage_handle
         auto nblk = sth.m_qstor->nblk;
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(qstor),
-                            reinterpret_cast<unknown_function*>(this->do_destroy_storage), len,
-                            this->as_allocator(), nblk);
+        noadl::construct(noadl::unfancy(qstor),
+                 reinterpret_cast<unknown_function*>(this->do_destroy_storage), len,
+                 this->as_allocator(), nblk);
 
         // Copy/move old elements from `sth`.
         try {
@@ -419,9 +419,9 @@ class storage_handle
         auto nblk = storage::min_nblk_for_nelem(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-        noadl::construct_at(noadl::unfancy(qstor),
-                            reinterpret_cast<unknown_function*>(this->do_destroy_storage), len,
-                            this->as_allocator(), nblk);
+        noadl::construct(noadl::unfancy(qstor),
+                 reinterpret_cast<unknown_function*>(this->do_destroy_storage), len,
+                 this->as_allocator(), nblk);
 
         // Copy/move old elements from `sth`.
         try {

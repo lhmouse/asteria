@@ -80,8 +80,8 @@ do_nontrivial_reloc(Header* head, Header* from)
   {
     auto ptr = reinterpret_cast<SparamT*>(head->sparam);
     auto src = reinterpret_cast<SparamT*>(from->sparam);
-    ::rocket::construct_at(ptr, ::std::move(*src));
-    ::rocket::destroy_at(src);
+    ::rocket::construct(ptr, ::std::move(*src));
+    ::rocket::destroy(src);
   }
 
 template<typename SparamT>
@@ -89,7 +89,7 @@ inline void
 do_nontrivial_dtor(Header* head)
   {
     auto ptr = reinterpret_cast<SparamT*>(head->sparam);
-    ::rocket::destroy_at(ptr);
+    ::rocket::destroy(ptr);
   }
 
 template<typename SparamT>
@@ -146,7 +146,7 @@ do_forward_ctor(Header* head, intptr_t arg)
     using Sparam = typename ::std::decay<XSparamT>::type;
     auto ptr = reinterpret_cast<Sparam*>(head->sparam);
     auto src = reinterpret_cast<Sparam*>(arg);
-    ::rocket::construct_at(ptr, static_cast<XSparamT&&>(*src));
+    ::rocket::construct(ptr, static_cast<XSparamT&&>(*src));
   }
 
 }  // namespace details_avmc_queue

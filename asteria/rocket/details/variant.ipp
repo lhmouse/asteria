@@ -130,7 +130,7 @@ wrapped_copy_construct(void* dptr, const void* sptr)
   {
     auto dp = static_cast<altT*>(dptr);
     auto sp = static_cast<const altT*>(sptr);
-    noadl::construct_at(dp, *sp);
+    noadl::construct(dp, *sp);
   }
 
 template<typename altT>
@@ -139,7 +139,7 @@ wrapped_move_construct(void* dptr, void* sptr)
   {
     auto dp = static_cast<altT*>(dptr);
     auto sp = static_cast<altT*>(sptr);
-    noadl::construct_at(dp, ::std::move(*sp));
+    noadl::construct(dp, ::std::move(*sp));
   }
 
 template<typename altT>
@@ -165,7 +165,7 @@ void
 wrapped_destroy(void* sptr)
   {
     auto sp = static_cast<altT*>(sptr);
-    noadl::destroy_at(sp);
+    noadl::destroy(sp);
   }
 
 template<typename altT>
@@ -174,8 +174,8 @@ wrapped_move_then_destroy(void* dptr, void* sptr)
   {
     auto dp = static_cast<altT*>(dptr);
     auto sp = static_cast<altT*>(sptr);
-    noadl::construct_at(dp, ::std::move(*sp));
-    noadl::destroy_at(sp);
+    noadl::construct(dp, ::std::move(*sp));
+    noadl::destroy(sp);
   }
 
 template<typename altT>

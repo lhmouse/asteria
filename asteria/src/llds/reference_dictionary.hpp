@@ -95,8 +95,8 @@ class Reference_Dictionary
         // Construct the node, then attach it.
         ROCKET_ASSERT(!*qbkt);
         this->do_list_attach(qbkt);
-        ::rocket::construct_at(qbkt->kstor, name);
-        ::rocket::construct_at(qbkt->vstor);
+        ::rocket::construct(qbkt->kstor, name);
+        ::rocket::construct(qbkt->vstor);
         ROCKET_ASSERT(*qbkt);
         this->m_size++;
       }
@@ -107,8 +107,8 @@ class Reference_Dictionary
         // Destroy the old name and reference, then detach the bucket.
         this->m_size--;
         ROCKET_ASSERT(*qbkt);
-        ::rocket::destroy_at(qbkt->kstor);
-        ::rocket::destroy_at(qbkt->vstor);
+        ::rocket::destroy(qbkt->kstor);
+        ::rocket::destroy(qbkt->vstor);
         this->do_list_detach(qbkt);
         ROCKET_ASSERT(!*qbkt);
 

@@ -18,7 +18,7 @@ do_destroy_elements() noexcept
       next += 1;
 
       // Destroy this element.
-      ::rocket::destroy_at(qref);
+      ::rocket::destroy(qref);
     }
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)this->m_bptr, 0xD3, this->m_estor * sizeof(Reference));
@@ -53,10 +53,10 @@ do_reserve_more()
     for(uint32_t k = 0;  k < eiold;  ++k) {
       // Note again, only references below `m_etop` will be moved.
       if(ROCKET_EXPECT(k < this->m_einit))
-        ::rocket::construct_at(bptr + k, ::std::move(bold[k]));
+        ::rocket::construct(bptr + k, ::std::move(bold[k]));
 
       // Destroy the old reference, always.
-      ::rocket::destroy_at(bold + k);
+      ::rocket::destroy(bold + k);
     }
     ::operator delete(bold);
   }

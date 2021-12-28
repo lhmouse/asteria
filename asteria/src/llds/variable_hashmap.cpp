@@ -18,7 +18,7 @@ do_destroy_buckets() noexcept
 
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
-      ::rocket::destroy_at(qbkt->vstor);
+      ::rocket::destroy(qbkt->vstor);
 #ifdef ROCKET_DEBUG
       ::std::memset(static_cast<void*>(qbkt), 0xD2, sizeof(Bucket));
 #endif
@@ -62,8 +62,8 @@ do_xrelocate_but(Bucket* qxcld) noexcept
 
         // Relocate the bucket.
         qbkt->key_p = sbkt->key_p;
-        ::rocket::construct_at(qbkt->vstor, ::std::move(sbkt->vstor[0]));
-        ::rocket::destroy_at(sbkt->vstor);
+        ::rocket::construct(qbkt->vstor, ::std::move(sbkt->vstor[0]));
+        ::rocket::destroy(sbkt->vstor);
 
         // Keep probing until an empty bucket is found.
         return false;
@@ -113,8 +113,8 @@ do_rehash_more(size_t nadd)
 
       // Relocate the bucket.
       qbkt->key_p = sbkt->key_p;
-      ::rocket::construct_at(qbkt->vstor, ::std::move(sbkt->vstor[0]));
-      ::rocket::destroy_at(sbkt->vstor);
+      ::rocket::construct(qbkt->vstor, ::std::move(sbkt->vstor[0]));
+      ::rocket::destroy(sbkt->vstor);
 
       // Process the next bucket.
       sbkt = sbkt->next;

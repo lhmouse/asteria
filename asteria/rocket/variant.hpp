@@ -78,7 +78,7 @@ class variant
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
-        noadl::construct_at(this->do_cast_storage<index_new>(),
+        noadl::construct(this->do_cast_storage<index_new>(),
             ::std::forward<paramT>(param));
         this->m_index = index_new;
       }
@@ -137,7 +137,7 @@ class variant
           // Destroy the old alternative.
           details_variant::dispatch_destroy<altsT...>(index_old, this->m_stor);
           // Copy-construct the alternative in place.
-          noadl::construct_at(this->do_cast_storage<index_new>(), param);
+          noadl::construct(this->do_cast_storage<index_new>(), param);
           this->m_index = index_new;
         }
         else {
@@ -147,7 +147,7 @@ class variant
                     index_old, backup, this->m_stor);
           try {
             // Copy-construct the alternative in place.
-            noadl::construct_at(this->do_cast_storage<index_new>(), param);
+            noadl::construct(this->do_cast_storage<index_new>(), param);
           }
           catch(...) {
             // Move the backup back in case of exceptions.
@@ -178,7 +178,7 @@ class variant
           // Destroy the old alternative.
           details_variant::dispatch_destroy<altsT...>(index_old, this->m_stor);
           // Move-construct the alternative in place.
-          noadl::construct_at(this->do_cast_storage<index_new>(), ::std::move(param));
+          noadl::construct(this->do_cast_storage<index_new>(), ::std::move(param));
           this->m_index = index_new;
         }
         return *this;
@@ -407,7 +407,7 @@ class variant
           details_variant::dispatch_destroy<altsT...>(
                           index_old, this->m_stor);
           // Construct the alternative in place.
-          noadl::construct_at(this->do_cast_storage<index_new>(),
+          noadl::construct(this->do_cast_storage<index_new>(),
                               ::std::forward<paramsT>(params)...);
           this->m_index = index_new;
         }
@@ -418,7 +418,7 @@ class variant
                     index_old, backup, this->m_stor);
           try {
             // Construct the alternative in place.
-            noadl::construct_at(this->do_cast_storage<index_new>(),
+            noadl::construct(this->do_cast_storage<index_new>(),
                                 ::std::forward<paramsT>(params)...);
           }
           catch(...) {
