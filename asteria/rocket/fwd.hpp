@@ -310,28 +310,38 @@ estimate_distance(iteratorT first, iteratorT last)
              ::std::move(first), ::std::move(last));
   }
 
+template<typename elementT>
+ROCKET_ALWAYS_INLINE elementT*
+allocN(size_t n)
+  { return allocator<elementT>().allocate(n);  }
+
+template<typename elementT>
+ROCKET_ALWAYS_INLINE void
+freeN(typename identity<elementT>::type* p, size_t n) noexcept
+  { allocator<elementT>().deallocate(p, n);  }
+
 template<typename elementT, typename... paramsT>
-elementT*
+ROCKET_ALWAYS_INLINE elementT*
 construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
-    ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
+    ::std::memset((void*)ptr, 0xAA, sizeof(elementT));
 #endif
-    return ::new(static_cast<void*>(ptr)) elementT(::std::forward<paramsT>(params)...);
+    return ::new((void*)ptr) elementT(::std::forward<paramsT>(params)...);
   }
 
 template<typename elementT>
-elementT*
+ROCKET_ALWAYS_INLINE elementT*
 default_construct(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
-    ::std::memset(static_cast<void*>(ptr), 0xBE, sizeof(elementT));
+    ::std::memset((void*)ptr, 0xBE, sizeof(elementT));
 #endif
-    return ::new(static_cast<void*>(ptr)) elementT;
+    return ::new((void*)ptr) elementT;
   }
 
 template<typename elementT>
-void
+ROCKET_ALWAYS_INLINE void
 destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     // The C++ standard says the lifetime of a trivial object does not end.
@@ -340,7 +350,7 @@ destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
 
     ptr->~elementT();
 #ifdef ROCKET_DEBUG
-    ::std::memset(static_cast<void*>(ptr), 0xD9, sizeof(elementT));
+    ::std::memset((void*)ptr, 0xD9, sizeof(elementT));
 #endif
   }
 
