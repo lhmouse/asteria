@@ -918,10 +918,9 @@ do_hash_file(const V_string& path)
           format_errno(errno), path);
 
     // Allocate the I/O buffer.
+    ::rocket::unique_ptr<char, void (void*)> pbuf(::operator delete);
     size_t nbuf = static_cast<size_t>(stb.st_blksize | 0x1000);
-    auto pbuf = ::rocket::make_unique_handle(
-                      static_cast<char*>(::operator new(nbuf)),
-                      static_cast<void (*)(void*)>(::operator delete));
+    pbuf.reset(static_cast<char*>(::operator new(nbuf)));
 
     // Read bytes from the file and hash them.
     HasherT h;

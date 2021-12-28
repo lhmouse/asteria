@@ -637,9 +637,9 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
           format_errno(errno), path_old);
 
     // Allocate the I/O buffer.
+    ::rocket::unique_ptr<char, void (void*)> pbuf(::operator delete);
     size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x1000);
-    auto pbuf = ::rocket::make_unique_handle(static_cast<char*>(::operator new(nbuf)),
-                                             static_cast<void (*)(void*)>(::operator delete));
+    pbuf.reset(static_cast<char*>(::operator new(nbuf)));
 
     // Copy all contents.
     for(;;) {
