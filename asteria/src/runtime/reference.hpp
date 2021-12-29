@@ -23,41 +23,79 @@ class alignas(max_align_t) Reference
       };
 
   private:
-    Value m_value;
+    Index m_index;
     rcfwdp<Variable> m_var;
     rcfwdp<PTC_Arguments> m_ptca;
-
     cow_vector<Reference_Modifier> m_mods;
-    Index m_index = index_invalid;
+    Value m_value;
 
   public:
     // Constructors and assignment operators
     constexpr
     Reference() noexcept
+      : m_index(index_invalid)
       { }
 
     Reference(const Reference& other) noexcept
-      { this->assign(other);  }
+      : m_index(other.m_index),
+        m_mods(other.m_mods)
+      { this->do_copy_assign_partial(other);  }
 
     Reference(Reference&& other) noexcept
-      { this->assign(::std::move(other));  }
+      : m_index(other.m_index),
+        m_mods(::std::move(other.m_mods))
+      { this->do_move_assign_partial(::std::move(other));  }
 
     Reference&
     operator=(const Reference& other) noexcept
-      { return this->assign(other);  }
+      {
+        this->m_index = other.m_index;
+        this->m_mods = other.m_mods;
+        this->do_copy_assign_partial(other);
+        return *this;
+      }
 
     Reference&
     operator=(Reference&& other) noexcept
-      { return this->assign(::std::move(other));  }
+      {
+        this->m_index = other.m_index;
+        this->m_mods.swap(other.m_mods);
+        this->do_move_assign_partial(::std::move(other));
+        return *this;
+      }
 
   private:
-    ROCKET_COLD const Value&
+    ROCKET_ALWAYS_INLINE void
+    do_copy_assign_partial(const Reference& other)
+      {
+        // Note not all fields have to be copied.
+        if(other.m_index == index_temporary)
+          this->m_value = other.m_value;
+        else if(other.m_index == index_variable)
+          this->m_var = other.m_var;
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca = other.m_ptca;
+      }
+
+    ROCKET_ALWAYS_INLINE void
+    do_move_assign_partial(Reference&& other)
+      {
+        // Note not all fields have to be moved.
+        if(other.m_index == index_temporary)
+          this->m_value = ::std::move(other.m_value);
+        else if(other.m_index == index_variable)
+          this->m_var.swap(other.m_var);
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca.swap(other.m_ptca);
+      }
+
+    const Value&
     do_dereference_readonly_slow() const;
 
-    ROCKET_COLD Value&
+    Value&
     do_mutate_into_temporary_slow();
 
-    ROCKET_COLD Reference&
+    Reference&
     do_finish_call_slow(Global_Context& global);
 
   public:
@@ -148,49 +186,13 @@ class alignas(max_align_t) Reference
       }
 
     Reference&
-    assign(const Reference& other) noexcept
-      {
-        // Note not all fields have to be copied.
-        if(other.m_index == index_temporary) {
-          this->m_value = other.m_value;
-        }
-        else if(other.m_index == index_variable) {
-          this->m_var = other.m_var;
-        }
-        else if(other.m_index == index_ptc_args) {
-          this->m_ptca = other.m_ptca;
-        }
-        this->m_mods = other.m_mods;
-        this->m_index = other.m_index;
-        return *this;
-      }
-
-    Reference&
-    assign(Reference&& other) noexcept
-      {
-        // Note not all fields have to be moved.
-        if(other.m_index == index_temporary) {
-          this->m_value = ::std::move(other.m_value);
-        }
-        else if(other.m_index == index_variable) {
-          this->m_var = ::std::move(other.m_var);
-        }
-        else if(other.m_index == index_ptc_args) {
-          this->m_ptca = ::std::move(other.m_ptca);
-        }
-        this->m_mods = ::std::move(other.m_mods);
-        this->m_index = ::std::exchange(other.m_index, index_invalid);
-        return *this;
-      }
-
-    Reference&
     swap(Reference& other) noexcept
       {
-        this->m_value.swap(other.m_value);
-        this->m_var.swap(other.m_var);
-        this->m_ptca.swap(other.m_ptca);
-        this->m_mods.swap(other.m_mods);
-        ::std::swap(this->m_index, other.m_index);
+        // Don't play with this at home!
+        char temp[sizeof(*this)];
+        ::std::memcpy(temp, (void*)this, sizeof(*this));
+        ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
+        ::std::memcpy((void*)&other, temp, sizeof(*this));
         return *this;
       }
 
