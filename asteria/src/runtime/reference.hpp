@@ -23,11 +23,11 @@ class alignas(max_align_t) Reference
       };
 
   private:
-    Index m_index;
+    Value m_value;
     rcfwdp<Variable> m_var;
     rcfwdp<PTC_Arguments> m_ptca;
     cow_vector<Reference_Modifier> m_mods;
-    Value m_value;
+    Index m_index;
 
   public:
     // Constructors and assignment operators
@@ -37,30 +37,30 @@ class alignas(max_align_t) Reference
       { }
 
     Reference(const Reference& other) noexcept
-      : m_index(other.m_index),
-        m_mods(other.m_mods)
+      : m_mods(other.m_mods),
+        m_index(other.m_index)
       { this->do_copy_assign_partial(other);  }
 
     Reference(Reference&& other) noexcept
-      : m_index(other.m_index),
-        m_mods(::std::move(other.m_mods))
+      : m_mods(::std::move(other.m_mods)),
+        m_index(other.m_index)
       { this->do_move_assign_partial(::std::move(other));  }
 
     Reference&
     operator=(const Reference& other) noexcept
       {
-        this->m_index = other.m_index;
-        this->m_mods = other.m_mods;
         this->do_copy_assign_partial(other);
+        this->m_mods = other.m_mods;
+        this->m_index = other.m_index;
         return *this;
       }
 
     Reference&
     operator=(Reference&& other) noexcept
       {
-        this->m_index = other.m_index;
-        this->m_mods.swap(other.m_mods);
         this->do_move_assign_partial(::std::move(other));
+        this->m_mods.swap(other.m_mods);
+        this->m_index = other.m_index;
         return *this;
       }
 
@@ -71,9 +71,9 @@ class alignas(max_align_t) Reference
         // Note not all fields have to be copied.
         if(other.m_index == index_temporary)
           this->m_value = other.m_value;
-        else if(other.m_index == index_variable)
+        if(other.m_index == index_variable)
           this->m_var = other.m_var;
-        else if(other.m_index == index_ptc_args)
+        if(other.m_index == index_ptc_args)
           this->m_ptca = other.m_ptca;
       }
 
@@ -83,9 +83,9 @@ class alignas(max_align_t) Reference
         // Note not all fields have to be moved.
         if(other.m_index == index_temporary)
           this->m_value = ::std::move(other.m_value);
-        else if(other.m_index == index_variable)
+        if(other.m_index == index_variable)
           this->m_var.swap(other.m_var);
-        else if(other.m_index == index_ptc_args)
+        if(other.m_index == index_ptc_args)
           this->m_ptca.swap(other.m_ptca);
       }
 
@@ -188,11 +188,17 @@ class alignas(max_align_t) Reference
     Reference&
     swap(Reference& other) noexcept
       {
-        // Don't play with this at home!
-        char temp[sizeof(*this)];
-        ::std::memcpy(temp, (void*)this, sizeof(*this));
-        ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
-        ::std::memcpy((void*)&other, temp, sizeof(*this));
+        // Determine which fields have to be swapped.
+        int mask = 1 << this->m_index | 1 << other.m_index;
+        if(mask & 1 << index_temporary)
+          this->m_value.swap(other.m_value);
+        if(mask & 1 << index_variable)
+          this->m_var.swap(other.m_var);
+        if(mask & 1 << index_ptc_args)
+          this->m_ptca.swap(other.m_ptca);
+
+        this->m_mods.swap(other.m_mods);
+        ::std::swap(this->m_index, other.m_index);
         return *this;
       }
 
