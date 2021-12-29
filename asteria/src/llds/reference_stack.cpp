@@ -28,10 +28,10 @@ do_destroy_elements() noexcept
 
 void
 Reference_Stack::
-do_reserve_more()
+do_reserve_more(uint32_t nadd)
   {
     // Allocate a new table.
-    uint32_t estor = (this->m_estor * 3 / 2 + 5) | 29;
+    uint32_t estor = (this->m_estor * 3 / 2 + nadd + 5) | 17;
     if(estor <= this->m_estor)
       throw ::std::bad_alloc();
 

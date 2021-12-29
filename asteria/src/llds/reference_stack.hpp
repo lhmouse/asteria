@@ -34,7 +34,7 @@ class Reference_Stack
     do_destroy_elements() noexcept;
 
     void
-    do_reserve_more();
+    do_reserve_more(uint32_t nadd);
 
   public:
     ~Reference_Stack()
@@ -103,14 +103,17 @@ class Reference_Stack
     push()
       {
         size_t ki = this->m_etop;
-        if(ROCKET_UNEXPECT(ki == this->m_einit)) {
-          // Construct a new reference beyond the top.
-          if(ROCKET_UNEXPECT(ki == this->m_estor))
-            this->do_reserve_more();
-
-          ::rocket::construct(this->m_bptr + ki);
-          this->m_einit += 1;
+        if(ROCKET_EXPECT(ki < this->m_einit)) {
+          this->m_etop += 1;
+          return this->m_bptr[ki];
         }
+
+        if(ROCKET_UNEXPECT(ki >= this->m_estor))
+          this->do_reserve_more(7);
+
+        ROCKET_ASSERT(ki < this->m_estor);
+        ::std::memset((void*)(this->m_bptr + ki), 0, sizeof(Reference));
+        this->m_einit += 1;
         this->m_etop += 1;
         return this->m_bptr[ki];
       }
@@ -119,7 +122,7 @@ class Reference_Stack
     pop(size_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->size());
-        this->m_etop -= static_cast<uint32_t>(count);
+        this->m_etop -= (uint32_t)count;
         return *this;
       }
   };
