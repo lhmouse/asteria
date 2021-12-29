@@ -598,8 +598,8 @@ operator%(const Factory& fact, F_ref_global_self_reader func)
                          Reference_Stack&& args) const override
           {
             Argument_Reader reader(this->m_name, ::std::move(args));
-            auto res = this->m_func(global, ::std::move(self), ::std::move(reader));
-            return self.assign(::std::move(res));
+            self = this->m_func(global, ::std::move(self), ::std::move(reader));
+            return self;
           }
       };
 
@@ -619,8 +619,8 @@ operator%(const Factory& fact, F_ref_global_reader func)
                          Reference_Stack&& args) const override
           {
             Argument_Reader reader(this->m_name, ::std::move(args));
-            auto res = this->m_func(global, ::std::move(reader));
-            return self.assign(::std::move(res));
+            self = this->m_func(global, ::std::move(reader));
+            return self;
           }
       };
 
@@ -640,8 +640,8 @@ operator%(const Factory& fact, F_ref_self_reader func)
                          Reference_Stack&& args) const override
           {
             Argument_Reader reader(this->m_name, ::std::move(args));
-            auto res = this->m_func(::std::move(self), ::std::move(reader));
-            return self.assign(::std::move(res));
+            self = this->m_func(::std::move(self), ::std::move(reader));
+            return self;
           }
       };
 
@@ -661,8 +661,8 @@ operator%(const Factory& fact, F_ref_reader func)
                          Reference_Stack&& args) const override
           {
             Argument_Reader reader(this->m_name, ::std::move(args));
-            auto res = this->m_func(::std::move(reader));
-            return self.assign(::std::move(res));
+            self = this->m_func(::std::move(reader));
+            return self;
           }
       };
 
