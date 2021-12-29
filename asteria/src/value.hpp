@@ -336,9 +336,12 @@ class alignas(max_align_t) Value
     bool
     test() const noexcept
       {
-        return this->is_null() ? false
-            : this->is_boolean() ? this->as_boolean()
-            : this->do_test_slow();
+        if(this->is_null())
+          return false;
+        else if(this->is_boolean())
+          return this->as_boolean();
+        else
+          return this->do_test_slow();
       }
 
     // This performs the builtin comparison with another value.
