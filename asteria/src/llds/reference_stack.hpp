@@ -99,7 +99,7 @@ class Reference_Stack
         return this->m_bptr[ki];
       }
 
-    Reference&
+    ROCKET_ALWAYS_INLINE Reference&
     push()
       {
         size_t ki = this->m_etop;
