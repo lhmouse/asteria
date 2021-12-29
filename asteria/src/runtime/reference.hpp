@@ -65,8 +65,8 @@ class alignas(max_align_t) Reference
       }
 
   private:
-    ROCKET_ALWAYS_INLINE void
-    do_copy_assign_partial(const Reference& other)
+    void
+    do_copy_assign_partial(const Reference& other) noexcept
       {
         // Note not all fields have to be copied.
         if(other.m_index == index_temporary)
@@ -77,8 +77,8 @@ class alignas(max_align_t) Reference
           this->m_ptca = other.m_ptca;
       }
 
-    ROCKET_ALWAYS_INLINE void
-    do_move_assign_partial(Reference&& other)
+    void
+    do_move_assign_partial(Reference&& other) noexcept
       {
         // Note not all fields have to be moved.
         if(other.m_index == index_temporary)
@@ -86,6 +86,19 @@ class alignas(max_align_t) Reference
         if(other.m_index == index_variable)
           this->m_var.swap(other.m_var);
         if(other.m_index == index_ptc_args)
+          this->m_ptca.swap(other.m_ptca);
+      }
+
+    void
+    do_swap_partial(Reference& other) noexcept
+      {
+        // Determine which fields have to be swapped.
+        int mask = 1 << this->m_index | 1 << other.m_index;
+        if(mask & 1 << index_temporary)
+          this->m_value.swap(other.m_value);
+        if(mask & 1 << index_variable)
+          this->m_var.swap(other.m_var);
+        if(mask & 1 << index_ptc_args)
           this->m_ptca.swap(other.m_ptca);
       }
 
@@ -188,15 +201,7 @@ class alignas(max_align_t) Reference
     Reference&
     swap(Reference& other) noexcept
       {
-        // Determine which fields have to be swapped.
-        int mask = 1 << this->m_index | 1 << other.m_index;
-        if(mask & 1 << index_temporary)
-          this->m_value.swap(other.m_value);
-        if(mask & 1 << index_variable)
-          this->m_var.swap(other.m_var);
-        if(mask & 1 << index_ptc_args)
-          this->m_ptca.swap(other.m_ptca);
-
+        this->do_swap_partial(other);
         this->m_mods.swap(other.m_mods);
         ::std::swap(this->m_index, other.m_index);
         return *this;
