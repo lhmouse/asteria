@@ -268,7 +268,7 @@ class array
       { return this->m_stor;  }
 
     // N.B. This is a non-standard extension.
-    value_type*
+    ROCKET_ALWAYS_INLINE value_type*
     mut_data()
       { return this->m_stor;  }
   };

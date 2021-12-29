@@ -707,7 +707,7 @@ class static_vector
 
     // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.
-    value_type*
+    ROCKET_ALWAYS_INLINE value_type*
     mut_data()
       { return this->m_sth.mut_data();  }
 

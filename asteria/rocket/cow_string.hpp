@@ -1300,7 +1300,7 @@ class basic_cow_string
 
     // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    value_type*
+    ROCKET_ALWAYS_INLINE value_type*
     mut_data()
       {
         auto ptr = this->m_sth.mut_data_opt();
