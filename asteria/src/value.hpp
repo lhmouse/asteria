@@ -39,7 +39,7 @@ class alignas(max_align_t) Value
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       : m_stor(typename details_value::Valuable<XValT>::via_type(
-                                        ::std::forward<XValT>(xval)))
+                           ::std::forward<XValT>(xval)))
       { }
 
     template<typename XValT,
@@ -49,7 +49,7 @@ class alignas(max_align_t) Value
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
-                                        ::std::forward<XValT>(xval));
+                           ::std::forward<XValT>(xval));
       }
 
     template<typename XValT,
@@ -60,7 +60,7 @@ class alignas(max_align_t) Value
                   typename details_value::Valuable<XValT>::via_type&&>::value)
       {
         details_value::Valuable<XValT>::assign(this->m_stor,
-                                           ::std::forward<XValT>(xval));
+                           ::std::forward<XValT>(xval));
         return *this;
       }
 

@@ -273,7 +273,6 @@ do_destroy_variant_slow() noexcept
 
     // Expand arrays and objects by hand.
     // This blows the entire C++ object model up. Don't play with this at home!
-    constexpr size_t N = sizeof(Value);
     ::rocket::linear_buffer bytes;
 
     do {
@@ -302,8 +301,8 @@ do_destroy_variant_slow() noexcept
             // Move raw bytes into `bytes`.
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
               char* src = reinterpret_cast<char(&)[]>(*it);
-              bytes.putn(src, N);
-              ::std::memset(src, 0, N);
+              bytes.putn(src, sizeof(Value));
+              ::std::memset(src, 0, sizeof(Value));
             }
           }
           altr.~V_array();
@@ -316,8 +315,8 @@ do_destroy_variant_slow() noexcept
             // Move raw bytes into `bytes`.
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
               char* src = reinterpret_cast<char(&)[]>(it->second);
-              bytes.putn(src, N);
-              ::std::memset(src, 0, N);
+              bytes.putn(src, sizeof(Value));
+              ::std::memset(src, 0, sizeof(Value));
             }
           }
           altr.~V_object();
@@ -328,10 +327,10 @@ do_destroy_variant_slow() noexcept
           ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
       }
     }
-    while(bytes.getn(reinterpret_cast<char*>(this), N) == N);
+    while(bytes.getn(reinterpret_cast<char*>(this), sizeof(Value)) == sizeof(Value));
 
     ROCKET_ASSERT(bytes.empty());
-    ::std::memset((void*)this, 0, N);
+    ::std::memset((void*)this, 0, sizeof(Value));
   }
   catch(exception& stdex) {
     ::fprintf(stderr,
