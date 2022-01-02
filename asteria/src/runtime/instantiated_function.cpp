@@ -70,17 +70,14 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         break;
 
       case air_status_return_ref: {
-        // Return the reference at the top of `stack`.
-        self = ::std::move(stack.mut_top());
-
         // In case of PTCs, set up source location. This cannot be set at the
         // call site where such information isn't available.
-        auto ptca = self.get_ptc_args_opt();
-        if(!ptca)
-          break;
+        auto ptca = stack.top().get_ptc_args_opt();
+        if(ptca)
+          ptca->set_caller(this->m_zvarg);
 
-        ROCKET_ASSERT(ptca.use_count() == 2);
-        ptca->set_caller(this->m_zvarg);
+        // Return the reference at the top of `stack`.
+        self = ::std::move(stack.mut_top());
         break;
       }
 
