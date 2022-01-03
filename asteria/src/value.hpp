@@ -317,10 +317,10 @@ class alignas(max_align_t) Value
     swap(Value& other) noexcept
       {
         // Don't play with this at home!
-        char temp[sizeof(*this)];
-        ::std::memcpy(temp, (void*)this, sizeof(*this));
+        typename ::std::aligned_union<0, Value>::type temp;
+        ::std::memcpy(&temp, (void*)this, sizeof(*this));
         ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
-        ::std::memcpy((void*)&other, temp, sizeof(*this));
+        ::std::memcpy((void*)&other, &temp, sizeof(*this));
         return *this;
       }
 
