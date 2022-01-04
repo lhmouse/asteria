@@ -149,6 +149,12 @@ using ::std::swap;
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       ROCKET_VOID_T(__VA_ARGS__)* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 
+extern "C" float
+fmaf(float x, float y, float z) noexcept;
+
+extern "C" double
+fma(double x, double y, double z) noexcept;
+
 template<typename typeT>
 struct remove_cvref
   : remove_cv<typename remove_reference<typeT>::type>

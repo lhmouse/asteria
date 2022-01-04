@@ -84,4 +84,5 @@ lib_librocket_la_SOURCES =  \
   %reldir%/tinyfmt_file.cpp  \
   %reldir%/format.cpp  \
   %reldir%/prehashed_string.cpp  \
+  %reldir%/fma.cpp  \
   ${NOTHING}
