@@ -1291,21 +1291,6 @@
 
 	* Throws an exception if `limit` is zero or non-finite.
 
-`std.numeric.sqrt(value)`
-
-	* Calculates the square root of `value` which may be either an
-	  integer or a real number. The result is always a real.
-
-	* Returns the square root of `value` as a real.
-
-`std.numeric.fma(x, y, z)`
-
-	* Performs fused multiply-add operation on `x`, `y` and `z`. This
-	  functions calculates `x * y + z` without intermediate rounding
-	  operations.
-
-	* Returns the value of `x * y + z` as a real.
-
 `std.numeric.remainder(x, y)`
 
 	* Calculates the IEEE floating-point remainder of division of `x`
