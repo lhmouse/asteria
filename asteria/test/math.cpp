@@ -73,8 +73,8 @@ int main()
 
         for(var i = 0;  i < 100;  ++i) {
           var r = std.math.sincos(i);
-          assert r[0] == std.math.sin(i);
-          assert r[1] == std.math.cos(i);
+          assert lt_1ups(r[0], std.math.sin(i));
+          assert lt_1ups(r[1], std.math.cos(i));
         }
 
         assert std.math.tan(0) == 0;
