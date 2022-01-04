@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_COMPILER_ENUMS_HPP_
 #define ASTERIA_COMPILER_ENUMS_HPP_

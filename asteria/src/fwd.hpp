@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2021, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
@@ -728,7 +728,7 @@ enum Compiler_Status : uint32_t
     compiler_status_for_statement_initializer_expected         = 2018,
     compiler_status_semicolon_or_expression_expected           = 2019,
     compiler_status_closed_brace_expected                      = 2020,
-    compiler_status_too_many_elements                          = 2021,
+    compiler_status_too_many_elements                          = 2022,
     compiler_status_closed_bracket_expected                    = 2022,
     compiler_status_open_brace_or_equal_initializer_expected   = 2023,
     compiler_status_equals_sign_or_colon_expected              = 2024,
