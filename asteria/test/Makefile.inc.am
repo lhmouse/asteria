@@ -48,6 +48,7 @@ check_PROGRAMS +=  \
   %reldir%/github_116.test  \
   %reldir%/zlib.test  \
   %reldir%/c_stack_overflow.test  \
+  %reldir%/var_mod.test  \
   ${NOTHING}
 
 EXTRA_DIST +=  \

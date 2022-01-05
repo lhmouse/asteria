@@ -30,14 +30,14 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       // this overhead.
       const auto& val = self.dereference_readonly();
       if(!val.is_null())
-        this->do_open_named_reference(nullptr, sref("__this")).set_temporary(val);
+        this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else if(self.is_variable()) {
       // If the self reference points to a variable, copy it because it is
       // always an lvalue.
       auto var = self.get_variable_opt();
       ROCKET_ASSERT(var);
-      this->do_open_named_reference(nullptr, sref("__this")).set_variable(::std::move(var));
+      this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else
       ASTERIA_THROW_RUNTIME_ERROR("invalid `this` reference passed to `$1`", zvarg->func());
