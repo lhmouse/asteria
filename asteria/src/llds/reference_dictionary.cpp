@@ -21,7 +21,7 @@ do_destroy_buckets() noexcept
       ::rocket::destroy(qbkt->kstor);
       ::rocket::destroy(qbkt->vstor);
 #ifdef ROCKET_DEBUG
-      ::std::memset(static_cast<void*>(qbkt), 0xD2, sizeof(Bucket));
+      ::std::memset((void*)qbkt, 0xD2, sizeof(*qbkt));
 #endif
       qbkt->prev = nullptr;
     }
