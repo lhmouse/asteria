@@ -15,6 +15,8 @@ struct Bucket
     Bucket* prev;  // the previous bucket in the [circular] list;
                    // used to mark whether this bucket is empty or not
 
+    uintptr_t padding[2];
+
     union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
     union { Reference vstor[1];  };  // initialized iff `prev` is non-null
 
