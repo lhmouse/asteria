@@ -77,7 +77,7 @@ Reference_Dictionary::
 do_rehash_more()
   {
     // Allocate a new table.
-    size_t nbkt = (this->m_size * 3 + 2) | 7;
+    size_t nbkt = (this->m_size * 3 + 2) | 17;
     if(nbkt / 2 <= this->m_size)
       throw ::std::bad_alloc();
 
