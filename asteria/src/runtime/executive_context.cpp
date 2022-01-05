@@ -85,14 +85,14 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update
     // 'analytic_context.cpp' as well.
-    if(name == "__func") {
+    if(name == sref("__func")) {
       // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
       ref.set_temporary(this->m_zvarg->func());
       return &ref;
     }
 
-    if(name == "__this") {
+    if(name == sref("__this")) {
       // Note: This can only happen inside a function context and the `this`
       // argument is null.
       auto& ref = this->do_open_named_reference(hint_opt, name);
@@ -100,7 +100,7 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
       return &ref;
     }
 
-    if(name == "__varg") {
+    if(name == sref("__varg")) {
       // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
       ref.set_temporary(this->m_lazy_args.empty()
