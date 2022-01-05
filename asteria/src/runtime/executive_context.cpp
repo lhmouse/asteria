@@ -86,27 +86,33 @@ do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const
     // N.B. If you have ever changed these, remember to update
     // 'analytic_context.cpp' as well.
     if(name == sref("__func")) {
-      // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
+
+      // Note: This can only happen inside a function context.
       ref.set_temporary(this->m_zvarg->func());
       return &ref;
     }
 
     if(name == sref("__this")) {
+      auto& ref = this->do_open_named_reference(hint_opt, name);
+
       // Note: This can only happen inside a function context and the `this`
       // argument is null.
-      auto& ref = this->do_open_named_reference(hint_opt, name);
       ref.set_temporary(nullopt);
       return &ref;
     }
 
     if(name == sref("__varg")) {
-      // Note: This can only happen inside a function context.
       auto& ref = this->do_open_named_reference(hint_opt, name);
-      ref.set_temporary(this->m_lazy_args.empty()
-              ? this->m_zvarg
-              : ::rocket::make_refcnt<Variadic_Arguer>(
-                              *(this->m_zvarg), this->m_lazy_args));
+
+      // Use the zero-ary argument getter if there is variadic argument.
+      // Create a new one otherwise.
+      auto varg = this->m_zvarg;
+      if(!this->m_lazy_args.empty())
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*varg, this->m_lazy_args);
+
+      // Note: This can only happen inside a function context.
+      ref.set_temporary(::std::move(varg));
       return &ref;
     }
 
