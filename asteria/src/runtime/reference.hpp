@@ -39,17 +39,17 @@ class alignas(max_align_t) Reference
     Reference(const Reference& other) noexcept
       : m_mods(other.m_mods),
         m_index(other.m_index)
-      { this->do_copy_assign_partial(other);  }
+      { this->do_copy_partial(other);  }
 
     Reference(Reference&& other) noexcept
       : m_mods(::std::move(other.m_mods)),
         m_index(other.m_index)
-      { this->do_move_assign_partial(::std::move(other));  }
+      { this->do_swap_partial(other);  }
 
     Reference&
     operator=(const Reference& other) noexcept
       {
-        this->do_copy_assign_partial(other);
+        this->do_copy_partial(other);
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
         return *this;
@@ -58,7 +58,7 @@ class alignas(max_align_t) Reference
     Reference&
     operator=(Reference&& other) noexcept
       {
-        this->do_move_assign_partial(::std::move(other));
+        this->do_swap_partial(other);
         this->m_mods.swap(other.m_mods);
         this->m_index = other.m_index;
         return *this;
@@ -66,7 +66,7 @@ class alignas(max_align_t) Reference
 
   private:
     void
-    do_copy_assign_partial(const Reference& other) noexcept
+    do_copy_partial(const Reference& other) noexcept
       {
         // Note not all fields have to be copied.
         if(other.m_index == index_temporary)
@@ -75,18 +75,6 @@ class alignas(max_align_t) Reference
           this->m_var = other.m_var;
         if(other.m_index == index_ptc_args)
           this->m_ptca = other.m_ptca;
-      }
-
-    void
-    do_move_assign_partial(Reference&& other) noexcept
-      {
-        // Note not all fields have to be moved.
-        if(other.m_index == index_temporary)
-          this->m_value = ::std::move(other.m_value);
-        if(other.m_index == index_variable)
-          this->m_var.swap(other.m_var);
-        if(other.m_index == index_ptc_args)
-          this->m_ptca.swap(other.m_ptca);
       }
 
     void
