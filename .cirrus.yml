@@ -9,7 +9,7 @@ task:
     - export LANG=C.UTF-8
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get update
-    - apt-get install -y --no-install-recommends autoconf automake libtool g++ gettext make python3 parallel
+    - apt-get install -y --no-install-recommends autoconf automake libtool g++ gettext make parallel python3
     - apt-get install -y libpcre2-dev libssl-dev zlib1g-dev
     - ./ci/build.sh
     - ./check_includes.sh
