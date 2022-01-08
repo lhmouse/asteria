@@ -77,7 +77,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
           ptca->set_caller(this->m_zvarg);
 
         // Return the reference at the top of `stack`.
-        self = ::std::move(stack.mut_top());
+        self.swap(stack.mut_top());
         break;
       }
 
