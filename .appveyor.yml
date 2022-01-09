@@ -6,7 +6,7 @@ environment:
   CXX: g++
 
 install:
-  - cmd: pacman -S --noconfirm autoconf automake libtool gcc gettext make python3 parallel libiconv
+  - cmd: pacman -S --noconfirm autoconf automake libtool gcc gettext make python3 parallel libiconv-devel
   - cmd: pacman -S --noconfirm pcre2-devel openssl-devel zlib-devel
 
 build:
