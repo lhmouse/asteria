@@ -1074,7 +1074,7 @@ struct Traits_branch_expression
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        return (ctx.stack().top().dereference_readonly().test())
+        return ctx.stack().top().dereference_readonly().test()
                   ? do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[0])
                   : do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
       }
