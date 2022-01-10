@@ -86,7 +86,7 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
     uint64_t ireg;
     ::std::memcpy(&ireg, &freg, sizeof(double));
     int bexp = (int)(ireg >> 52) & 0x7FF;
-    ireg &= 0xFFFFF'FFFFFFFF;
+    ireg &= (UINT64_C(1) << 52) - 1;
 
     if(bexp == 0) {
       // Normalize the denormal value.
@@ -99,7 +99,7 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
     }
 
     // Recover the hidden bit.
-    ireg |= 0x100000'00000000;
+    ireg |= (UINT64_C(1) << 52);
 
     // Bias the exponent back and normalize the mantissa.
     exp = bexp - 0x3FF;
