@@ -19,7 +19,7 @@ class Global_Context
     rcfwdp<Abstract_Hooks> m_qhooks;
     rcfwdp<Garbage_Collector> m_gcoll;
     rcfwdp<Random_Engine> m_prng;
-    rcfwdp<Loader_Lock> m_ldrlk;
+    rcfwdp<Module_Loader> m_ldrlk;
     rcfwdp<Variable> m_vstd;
 
   public:
@@ -86,10 +86,10 @@ class Global_Context
     random_engine() const noexcept
       { return unerase_pointer_cast<Random_Engine>(this->m_prng);  }
 
-    ASTERIA_INCOMPLET(Loader_Lock)
-    rcptr<Loader_Lock>
-    loader_lock() const noexcept
-      { return unerase_pointer_cast<Loader_Lock>(this->m_ldrlk);  }
+    ASTERIA_INCOMPLET(Module_Loader)
+    rcptr<Module_Loader>
+    module_loader() const noexcept
+      { return unerase_pointer_cast<Module_Loader>(this->m_ldrlk);  }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>

@@ -5,7 +5,7 @@
 #include "global_context.hpp"
 #include "garbage_collector.hpp"
 #include "random_engine.hpp"
-#include "loader_lock.hpp"
+#include "module_loader.hpp"
 #include "variable.hpp"
 #include "abstract_hooks.hpp"
 #include "../library/version.hpp"
@@ -71,7 +71,7 @@ Global_Context::
 Global_Context(API_Version version)
   : m_gcoll(::rocket::make_refcnt<Garbage_Collector>()),
     m_prng(::rocket::make_refcnt<Random_Engine>()),
-    m_ldrlk(::rocket::make_refcnt<Loader_Lock>())
+    m_ldrlk(::rocket::make_refcnt<Module_Loader>())
   {
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which

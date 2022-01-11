@@ -43,7 +43,7 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/global_context.hpp  \
   %reldir%/runtime/garbage_collector.hpp  \
   %reldir%/runtime/random_engine.hpp  \
-  %reldir%/runtime/loader_lock.hpp  \
+  %reldir%/runtime/module_loader.hpp  \
   %reldir%/runtime/variadic_arguer.hpp  \
   %reldir%/runtime/instantiated_function.hpp  \
   %reldir%/runtime/air_node.hpp  \
@@ -104,7 +104,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/global_context.cpp  \
   %reldir%/runtime/garbage_collector.cpp  \
   %reldir%/runtime/random_engine.cpp  \
-  %reldir%/runtime/loader_lock.cpp  \
+  %reldir%/runtime/module_loader.cpp  \
   %reldir%/runtime/variadic_arguer.cpp  \
   %reldir%/runtime/instantiated_function.cpp  \
   %reldir%/runtime/air_node.cpp  \

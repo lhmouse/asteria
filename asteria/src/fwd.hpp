@@ -168,7 +168,7 @@ class Executive_Context;
 class Global_Context;
 class Garbage_Collector;
 class Random_Engine;
-class Loader_Lock;
+class Module_Loader;
 class Variadic_Arguer;
 class Instantiated_Function;
 class AIR_Node;

@@ -13,7 +13,7 @@
 #include "runtime_error.hpp"
 #include "variable.hpp"
 #include "ptc_arguments.hpp"
-#include "loader_lock.hpp"
+#include "module_loader.hpp"
 #include "air_optimizer.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
@@ -4231,9 +4231,9 @@ struct Traits_import_call
               format_errno(errno), path);
 
         // Compile the script file into a function object.
-        Loader_Lock::Unique_Stream strm;
+        Module_Loader::Unique_Stream strm;
         path.assign(abspath);
-        strm.reset(ctx.global().loader_lock(), path.safe_c_str());
+        strm.reset(ctx.global().module_loader(), path.safe_c_str());
 
         // Parse source code.
         Token_Stream tstrm(sp.opts);
