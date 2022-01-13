@@ -186,6 +186,7 @@ do_merge_blocks(V_array& output, V_array& input, ComparatorT&& compare, ptrdiff_
     auto opos = output.mut_begin();
     auto ipos = input.mut_begin();
     auto iend = input.mut_end();
+
     while(iend - ipos > bsize) {
       // Get the ranges of the blocks to merge.
       V_array::iterator bpos[2] = { ipos, ipos += bsize };
@@ -197,8 +198,8 @@ do_merge_blocks(V_array& output, V_array& input, ComparatorT&& compare, ptrdiff_
         // in `bi`.
         auto cmp = compare(*(bpos[0]), *(bpos[1]));
         if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)",
-                        *(bpos[0]), *(bpos[1]));
+          ASTERIA_THROW_RUNTIME_ERROR(
+              "unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
 
         // For Merge Sort to be stable, the two elements will only be swapped if the first one
         // is greater than the second one.
@@ -234,6 +235,7 @@ do_merge_blocks(V_array& output, V_array& input, ComparatorT&& compare, ptrdiff_
       bi ^= 1;
       do_merge_range(opos, compare, bpos[bi], bend[bi], unique);
     }
+
     // Copy all remaining elements.
     ROCKET_ASSERT(opos != output.begin());
     do_merge_range(opos, compare, ipos, iend, unique);
