@@ -305,36 +305,33 @@ class basic_hasher
   private:
     static constexpr char32_t xoffset = 0x811C9DC5;
     static constexpr char32_t xprime = 0x1000193;
-
     char32_t m_reg = xoffset;
 
   public:
     constexpr basic_hasher&
-    append(const charT& c) noexcept
+    append(charT c) noexcept
       {
         char32_t word = static_cast<char32_t>(c);
-        char32_t reg = this->m_reg;
-
-        for(size_t k = 0;  k < sizeof(c);  ++k)
-          reg = (reg ^ ((word >> k * 8) & 0xFF)) * xprime;
-
-        this->m_reg = reg;
+        for(unsigned k = 0;  k < sizeof(charT);  ++k)
+          this->m_reg = (this->m_reg ^ ((word >> k * 8) & 0xFF)) * xprime;
         return *this;
       }
 
     constexpr basic_hasher&
     append(const charT* s, size_t n)
       {
-        for(auto sp = s;  sp != s + n;  ++sp)
-          this->append(*sp);
+        const charT* sp = s;
+        while(sp != s + n)
+          this->append(*(sp++));
         return *this;
       }
 
     constexpr basic_hasher&
     append(const charT* s)
       {
-        for(auto sp = s;  !traitsT::eq(*sp, charT());  ++sp)
-          this->append(*sp);
+        const charT* sp = s;
+        while(!traitsT::eq(*sp, charT()))
+          this->append(*(sp++));
         return *this;
       }
 
