@@ -1789,15 +1789,19 @@ struct basic_cow_string<charT, traitsT, allocT>::hash
 
     constexpr result_type
     operator()(const argument_type& str) const noexcept
-      { return details_cow_string::basic_hasher<charT, traitsT>()
-                   .append(str.data(), str.size())
-                   .finish();  }
+      {
+        details_cow_string::basic_hasher<charT, traitsT> hf;
+        hf.append(str.data(), str.size());
+        return hf.finish();
+      }
 
     constexpr result_type
     operator()(const charT* s) const noexcept
-      { return details_cow_string::basic_hasher<charT, traitsT>()
-                   .append(s)
-                   .finish();  }
+      {
+        details_cow_string::basic_hasher<charT, traitsT> hf;
+        hf.append(s);
+        return hf.finish();
+      }
   };
 
 extern template
