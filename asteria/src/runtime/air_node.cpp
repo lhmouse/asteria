@@ -869,7 +869,7 @@ struct Traits_simple_status
     make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u32 = weaken_enum(altr.status);
+        up.u8v[0] = weaken_enum(altr.status);
         reachable = false;
         return up;
       }
@@ -877,7 +877,7 @@ struct Traits_simple_status
     static AIR_Status
     execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
-        auto status = static_cast<AIR_Status>(up.u32);
+        auto status = static_cast<AIR_Status>(up.u8v[0]);
         ROCKET_ASSERT(status != air_status_next);
         return status;
       }

@@ -75,7 +75,7 @@ ROCKET_CONST const char*
 describe_xop(Xop xop) noexcept;
 
 // IR status codes
-enum AIR_Status : uint32_t
+enum AIR_Status : uint8_t
   {
     air_status_next             = 0,
     air_status_return_void      = 1,
@@ -90,7 +90,7 @@ enum AIR_Status : uint32_t
   };
 
 // Tail call optimization (PTC) awareness bitmask
-enum PTC_Aware : int32_t
+enum PTC_Aware : int8_t
   {
     ptc_aware_none    =  0,  // allow PTC only in `return`
     ptc_aware_void    = -1,  // call and discard results
