@@ -1163,6 +1163,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
     auto& stack = ctx.stack();
     auto& alt_stack = ctx.alt_stack();
     alt_stack.clear();
+    alt_stack.clear_cache();
 
     size_t nargs = count;
     ROCKET_ASSERT(nargs <= stack.size());
