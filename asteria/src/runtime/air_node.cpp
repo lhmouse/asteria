@@ -1170,8 +1170,6 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
       alt_stack.push() = ::std::move(stack.mut_top(--nargs));
 
     stack.pop(count);
-    stack.clear_cache();
-    alt_stack.clear_cache();
     return alt_stack;
   }
 
@@ -1216,13 +1214,17 @@ struct Traits_function_call
         auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.u32);
 
         // Copy the target, which shall be of type `function`.
-        auto value = ctx.stack().top().dereference_readonly();
+        auto& stack = ctx.stack();
+        auto value = stack.top().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW_RUNTIME_ERROR("attempt to call a non-function (value `$1`)", value);
 
         const auto& target = value.as_function();
-        auto& self = ctx.stack().mut_top().pop_modifier();
+        auto& self = stack.mut_top().pop_modifier();
         const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
+
+        stack.clear_cache();
+        alt_stack.clear_cache();
 
         return ROCKET_EXPECT(ptc == ptc_aware_none)
                  ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
@@ -4115,8 +4117,6 @@ struct Traits_variadic_call
                 "invalid variadic argument generator (value `$1`)", value);
         }
         stack.pop();
-        stack.clear_cache();
-        alt_stack.clear_cache();
 
         // Copy the target, which shall be of type `function`.
         value = ctx.stack().top().dereference_readonly();
@@ -4127,6 +4127,9 @@ struct Traits_variadic_call
         const auto& target = value.as_function();
         auto& self = ctx.stack().mut_top().pop_modifier();
         const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
+
+        stack.clear_cache();
+        alt_stack.clear_cache();
 
         return ROCKET_EXPECT(ptc == ptc_aware_none)
                  ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
@@ -4215,7 +4218,8 @@ struct Traits_import_call
         auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.u32 - 1);
 
         // Copy the filename, which shall be of type `string`.
-        auto value = ctx.stack().top().dereference_readonly();
+        auto& stack = ctx.stack();
+        auto value = stack.top().dereference_readonly();
         if(!value.is_string())
           ASTERIA_THROW_RUNTIME_ERROR(
               "invalid path specified for `import` (value `$1` not a string)", value);
@@ -4256,9 +4260,12 @@ struct Traits_import_call
         optmz.reload(nullptr, params, ctx.global(), stmtq);
         auto qtarget = optmz.create_function(sloc, sref("[file scope]"));
 
+        stack.clear_cache();
+        alt_stack.clear_cache();
+
         // Invoke the script.
         // `this` is null for imported scripts.
-        auto& self = ctx.stack().mut_top();
+        auto& self = stack.mut_top();
         self.set_temporary(nullopt);
         do_invoke_nontail(self, sp.sloc, qtarget, ctx.global(), ::std::move(alt_stack));
         return air_status_next;
