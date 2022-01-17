@@ -47,9 +47,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     size_t nargs = stack.size();
 
     for(const auto& name : params) {
-      if(name.empty())
-        continue;
-
+      // The variadic placeholder terminates this parameter list.
       if(name == sref("...")) {
         // Move all arguments into the variadic argument getter.
         while(nargs != 0)
