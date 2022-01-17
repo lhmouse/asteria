@@ -78,9 +78,22 @@ class Reference_Stack
     void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
+        auto bptr = this->m_bptr;
         auto eptr = this->m_bptr + this->m_einit;
-        while(eptr != this->m_bptr)
+        while(eptr != bptr)
           (--eptr)->get_variables(staged, temp);
+      }
+
+    Reference_Stack&
+    clear_cache() noexcept
+      {
+        auto tptr = this->m_bptr + this->m_etop;
+        auto eptr = this->m_bptr + this->m_einit;
+        while(eptr != tptr)
+          ::rocket::destroy(--eptr);
+
+        this->m_einit = this->m_etop;
+        return *this;
       }
 
     const Reference&

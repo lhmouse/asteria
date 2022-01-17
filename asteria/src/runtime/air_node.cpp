@@ -1170,6 +1170,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
       alt_stack.push() = ::std::move(stack.mut_top(--nargs));
 
     stack.pop(count);
+    stack.clear_cache();
     return alt_stack;
   }
 
