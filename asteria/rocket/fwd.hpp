@@ -299,7 +299,7 @@ for_range(firstT first, lastT last, funcT&& func, const paramsT&... params)
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
-ranged_do_while(firstT first, lastT last, funcT&& func, const paramsT&... params)
+do_while_range(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
     auto qit = ::std::move(first);
     do
