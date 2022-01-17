@@ -1163,7 +1163,6 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
     auto& stack = ctx.stack();
     auto& alt_stack = ctx.alt_stack();
     alt_stack.clear();
-    alt_stack.clear_cache();
 
     size_t nargs = count;
     ROCKET_ASSERT(nargs <= stack.size());
@@ -1172,6 +1171,7 @@ do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
 
     stack.pop(count);
     stack.clear_cache();
+    alt_stack.clear_cache();
     return alt_stack;
   }
 
@@ -4053,8 +4053,9 @@ struct Traits_variadic_call
             auto& vals = value.open_array();
 
             // Push all arguments backwards as temporaries.
-            for(auto it = vals.mut_rbegin();  it != vals.rend();  ++it) {
-              alt_stack.push().set_temporary(::std::move(*it));
+            while(!vals.empty()) {
+              alt_stack.push().set_temporary(::std::move(vals.mut_back()));
+              vals.pop_back();
             }
             break;
           }
@@ -4101,6 +4102,7 @@ struct Traits_variadic_call
             // Pop arguments and re-push them into the alternative stack.
             // This reverses all arguments so the top will be the last argument.
             alt_stack.clear();
+
             for(int64_t k = 0;  k < nvargs;  ++k) {
               alt_stack.push() = ::std::move(stack.mut_top());
               stack.pop();
@@ -4113,6 +4115,8 @@ struct Traits_variadic_call
                 "invalid variadic argument generator (value `$1`)", value);
         }
         stack.pop();
+        stack.clear_cache();
+        alt_stack.clear_cache();
 
         // Copy the target, which shall be of type `function`.
         value = ctx.stack().top().dereference_readonly();
