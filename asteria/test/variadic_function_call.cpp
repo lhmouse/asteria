@@ -17,6 +17,7 @@ int main()
 
         var obj = {
           value = "hello";
+          int_value = 5;
 
           do_imuladd = func(x, y, z) {
             assert this.value == "hello";  // member function
@@ -35,7 +36,7 @@ int main()
             if(x == 1)
               return 2;     // arg 1 := 2
             if(x == 2)
-              return 5;     // arg 2 := 5
+              return this.int_value;     // arg 2 := 5
 
             assert false;  // unreachable
           };
@@ -49,11 +50,12 @@ int main()
         assert num == 67;  // 31 * 2 + 5
 
         var obj = {
-          value = "meow";
+          value = "bad value";
+          prefix = "sum ";
 
           do_sum = func(x, y, z) {
             this.value = x + y + z;
-            return "sum success";
+            return this.prefix + "success";
           };
         };
 
