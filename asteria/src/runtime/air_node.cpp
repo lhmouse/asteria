@@ -4066,12 +4066,9 @@ struct Traits_variadic_call
 
             // Pass an empty argument stack to get the number of arguments to generate.
             // This destroys the `self` reference so we have to copy it first.
-            stack.mut_top().pop_modifier();
-            auto self = stack.top();
-            stack.push() = self;
+            auto self = stack.mut_top().pop_modifier();
             do_invoke_nontail(stack.mut_top(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
             value = stack.top().dereference_readonly();
-            stack.pop();
 
             // Verify the argument count.
             if(!value.is_integer())
