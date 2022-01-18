@@ -4066,7 +4066,7 @@ struct Traits_variadic_call
 
             // Pass an empty argument stack to get the number of arguments to generate.
             // This destroys the `self` reference so we have to copy it first.
-            auto self = stack.mut_top().pop_modifier();
+            auto gself = stack.mut_top().pop_modifier();
             do_invoke_nontail(stack.mut_top(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
             value = stack.top().dereference_readonly();
 
@@ -4082,7 +4082,7 @@ struct Traits_variadic_call
 
             // Prepare `self` references for all upcoming  calls.
             for(int64_t k = 0;  k < nvargs;  ++k)
-              stack.push() = self;
+              stack.push() = gself;
 
             // Generate arguments and push them onto `stack`.
             // The top is the first argument.
