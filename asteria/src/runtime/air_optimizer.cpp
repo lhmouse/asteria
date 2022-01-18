@@ -32,9 +32,9 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
     // Generate code for all statements.
-    for(size_t i = 0;  i + 1 < stmts.size();  ++i)
-      stmts.at(i).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-              stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
+    for(size_t k = 0;  k + 1 < stmts.size();  ++k)
+      stmts.at(k).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
+              stmts.at(k + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
 
     stmts.back().generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
             ptc_aware_void);
@@ -64,9 +64,9 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
     // Rebind all nodes recursively.
     // Don't trigger copy-on-write unless a node needs rewriting.
-    for(size_t i = 0;  i < code.size();  ++i)
-      if(auto qnode = code.at(i).rebind_opt(ctx_func))
-        this->m_code.mut(i) = ::std::move(*qnode);
+    for(size_t k = 0;  k < code.size();  ++k)
+      if(auto qnode = code.at(k).rebind_opt(ctx_func))
+        this->m_code.mut(k) = ::std::move(*qnode);
 
     // Check whether optimization is enabled during execution.
     if(this->m_opts.optimization_level < 3)
@@ -87,7 +87,7 @@ create_function(const Source_Location& sloc, const cow_string& name)
       func << '(';
       if(this->m_params.size()) {
         func << this->m_params[0];
-        for(size_t k = 1;  k != this->m_params.size();  ++k)
+        for(size_t k = 1;  k < this->m_params.size();  ++k)
           func << ", " << this->m_params[k];
       }
       func << ')';
