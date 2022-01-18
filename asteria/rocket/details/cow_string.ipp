@@ -275,26 +275,20 @@ struct comparator
     using traits_type  = traitsT;
     using size_type    = size_t;
 
-    static int
+    static constexpr int
     inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
       {
-        if(n1 != n2)
-          return 2;
-        else if(s1 == s2)
-          return 0;
-        else
-          return traits_type::compare(s1, s2, n1);
+        return (n1 != n2) ? 2  // length not equal
+             : (s1 == s2) ? 0  // reflexive
+                          : traits_type::compare(s1, s2, n1);
       }
 
-    static int
+    static constexpr int
     relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
       {
-        if(n1 < n2)
-          return (traits_type::compare(s1, s2, n1) > 0) ? +1 : -1;
-        else if(n1 > n2)
-          return (traits_type::compare(s1, s2, n1) < 0) ? -1 : +1;
-        else
-          return traits_type::compare(s1, s2, n1);
+        return (n1 == n2) ?      traits_type::compare(s1, s2, n1)
+             : (n1 >= n2) ? 1 |  traits_type::compare(s1, s2, n2)
+                          : 1 | ~traits_type::compare(s2, s1, n1);
       }
   };
 
