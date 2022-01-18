@@ -1158,10 +1158,8 @@ do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function&
   }
 
 Reference_Stack&
-do_pop_positional_arguments_into_alt_stack(Executive_Context& ctx, size_t count)
+do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, size_t count)
   {
-    auto& stack = ctx.stack();
-    auto& alt_stack = ctx.alt_stack();
     alt_stack.clear();
 
     size_t nargs = count;
@@ -1211,10 +1209,11 @@ struct Traits_function_call
           qhooks->on_single_step_trap(sloc);
 
         // Pop arguments off the stack backwards.
-        auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.u32);
+        auto& alt_stack = ctx.alt_stack();
+        auto& stack = ctx.stack();
+        do_pop_positional_arguments(alt_stack, stack, up.u32);
 
         // Copy the target, which shall be of type `function`.
-        auto& stack = ctx.stack();
         auto value = stack.top().dereference_readonly();
         if(!value.is_function())
           ASTERIA_THROW_RUNTIME_ERROR("attempt to call a non-function (value `$1`)", value);
@@ -4214,11 +4213,12 @@ struct Traits_import_call
           qhooks->on_single_step_trap(sp.sloc);
 
         // Pop arguments off the stack backwards.
+        auto& alt_stack = ctx.alt_stack();
+        auto& stack = ctx.stack();
         ROCKET_ASSERT(up.u32 != 0);
-        auto& alt_stack = do_pop_positional_arguments_into_alt_stack(ctx, up.u32 - 1);
+        do_pop_positional_arguments(alt_stack, stack, up.u32 - 1);
 
         // Copy the filename, which shall be of type `string`.
-        auto& stack = ctx.stack();
         auto value = stack.top().dereference_readonly();
         if(!value.is_string())
           ASTERIA_THROW_RUNTIME_ERROR(
