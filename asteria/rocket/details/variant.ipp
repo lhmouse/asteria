@@ -108,7 +108,7 @@ class const_func_table
       = default;
 
     template<typename... argsT>
-    ROCKET_COLD constexpr typename ::std::result_of<targetT*(argsT&&...)>::type
+    constexpr typename ::std::result_of<targetT*(argsT&&...)>::type
     operator()(size_t k, argsT&&... args) const
       noexcept(noexcept(::std::declval<targetT*>()(args...)))
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
