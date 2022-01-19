@@ -124,12 +124,16 @@ struct basic_storage
 
     static constexpr size_type
     min_nblk_for_nbkt(size_t nbkt) noexcept
-      { return (nbkt * sizeof(bucket_type) + sizeof(basic_storage) - 1)
-                    / sizeof(basic_storage) + 1;  }
+      {
+        // Note this is correct even when `nbkt` is zero, as long as
+        // `basic_storage` is larger than `bucket_type`.
+        return ((nbkt - 1) * sizeof(bucket_type) + sizeof(basic_storage) - 1)
+                / sizeof(basic_storage) + 1;
+      }
 
     static constexpr size_t
     max_nbkt_for_nblk(size_type nblk) noexcept
-      { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type);  }
+      { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type) + 1;  }
 
     size_type nblk;
     union { bucket_type bkts[1];  };
@@ -162,8 +166,7 @@ struct basic_storage
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->bkts), '~',
-                      (this->nblk - 1) * sizeof(basic_storage));
+                 sizeof(bucket) + (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 

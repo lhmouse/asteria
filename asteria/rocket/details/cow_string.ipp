@@ -28,12 +28,17 @@ struct basic_storage
 
     static constexpr size_type
     min_nblk_for_nchar(size_t nchar) noexcept
-      { return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1)
-                    / sizeof(basic_storage) + 1;  }
+      {
+        // Note this is correct even when `nchar` is zero, as long as
+        // `basic_storage` is larger than `value_type`. The `data` field
+        // counts as the null terminator.
+        return (nchar * sizeof(value_type) + sizeof(basic_storage) - 1)
+                / sizeof(basic_storage) + 1;
+      }
 
     static constexpr size_t
     max_nchar_for_nblk(size_type nblk) noexcept
-      { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;  }
+      { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
 
     size_type nblk;
     union { value_type data[1];  };
@@ -44,7 +49,7 @@ struct basic_storage
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->data), '*',
-                      (this->nblk - 1) * sizeof(basic_storage));
+                 sizeof(value_type) + (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -52,7 +57,7 @@ struct basic_storage
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->data), '~',
-                      (this->nblk - 1) * sizeof(basic_storage));
+                 sizeof(value_type) + (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
