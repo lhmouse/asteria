@@ -12,7 +12,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -U_FORTIFY_SOURCE -DDLL_E
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 
 AM_CXXFLAGS = -include precompiled.w.hpp -std=gnu++14 -Wp,-std=c++11  \
-  -fno-{gnu-keywords,elide-constructors} -fvisibility-inlines-hidden  \
+  -fno-gnu-keywords -fvisibility-inlines-hidden  \
   -Wno-redundant-move  \
   -Werror={non-virtual-dtor,missing-declarations}
 
