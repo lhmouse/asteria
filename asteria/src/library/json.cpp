@@ -718,7 +718,7 @@ std_json_parse_file(V_string path)
     if(!fp)
       ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
                     "[`fopen()` failed: $1]",
-                    format_errno(errno), path);
+                    format_errno(), path);
 
     // Parse characters from the file.
     ::rocket::tinybuf_file cbuf(::std::move(fp));

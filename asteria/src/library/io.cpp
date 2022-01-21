@@ -84,7 +84,7 @@ do_write_utf8_common(::FILE* fp, const cow_string& text)
       if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
         ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                       "[`fputwc_unlocked()` failed: $1]",
-                      format_errno(errno));
+                      format_errno());
 
       // The return value is the number of code points rather than bytes.
       ncps += 1;
@@ -218,7 +218,7 @@ std_io_putc(V_integer value)
     if(::fputwc_unlocked(static_cast<wchar_t>(cp), fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
-                    format_errno(errno));
+                    format_errno());
 
     // Return the number of code points that have been written.
     // This is always 1 for this function.
@@ -263,7 +263,7 @@ std_io_putln(V_string value)
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
-                    format_errno(errno));
+                    format_errno());
 
     // Return the number of code points that have been written.
     // The implicit LF also counts.
@@ -308,7 +308,7 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR("error writing standard output\n"
                     "[`fputwc_unlocked()` failed: $1]",
-                    format_errno(errno));
+                    format_errno());
 
     // Return the number of code points that have been written.
     // The implicit LF also counts.
@@ -396,7 +396,7 @@ std_io_flush()
     if(::fflush(stdout) == EOF)
       ASTERIA_THROW_RUNTIME_ERROR("error flushing standard output\n"
                     "[`fflush()` failed: $1]",
-                    format_errno(errno));
+                    format_errno());
   }
 
 void

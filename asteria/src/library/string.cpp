@@ -1735,7 +1735,7 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
              "could not create iconv context\n"
              "[`iconv_open()` failed: $1]\n"
              "[converting to encoding `$2` from `$3`]",
-             format_errno(errno), to_enc, from_enc);
+             format_errno(), to_enc, from_enc);
 
     // Perform bytewise conversion.
     V_string output;
@@ -1754,7 +1754,7 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
                "invalid input byte at offset `$4`\n"
                "[`iconv()` failed: $1]\n"
                "[converting to encoding `$2` from `$3`]",
-               format_errno(errno), to_enc, from_enc,
+               format_errno(), to_enc, from_enc,
                inp - text.c_str());
     }
     return output;

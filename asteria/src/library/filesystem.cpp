@@ -59,7 +59,7 @@ do_remove_recursive(const char* path)
           ASTERIA_THROW_RUNTIME_ERROR(
               "could not remove directory '$2'\n"
               "[`rmdir()` failed: $1]",
-              format_errno(errno), elem.path);
+              format_errno(), elem.path);
         }
 
         case rm_disp_unlink: {
@@ -76,7 +76,7 @@ do_remove_recursive(const char* path)
           ASTERIA_THROW_RUNTIME_ERROR(
               "could not remove file '$2'\n"
               "[`unlink()` failed: $1]",
-              format_errno(errno), elem.path);
+              format_errno(), elem.path);
         }
 
         case rm_disp_expand: {
@@ -92,7 +92,7 @@ do_remove_recursive(const char* path)
             ASTERIA_THROW_RUNTIME_ERROR(
                 "could not open directory '$2'\n"
                 "[`opendir()` failed: $1]",
-                format_errno(errno), elem.path);
+                format_errno(), elem.path);
 
           // Append all entries.
           while(auto next = ::readdir(dp)) {
@@ -121,7 +121,7 @@ do_remove_recursive(const char* path)
                 ASTERIA_THROW_RUNTIME_ERROR(
                     "could not get information about '$2'\n"
                     "[`lstat()` failed: $1]",
-                    format_errno(errno), child);
+                    format_errno(), child);
 
               // Check whether the child path denotes a directory.
               is_dir = S_ISDIR(stb.st_mode);
@@ -152,7 +152,7 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
         ASTERIA_THROW_RUNTIME_ERROR(
             "error writing file '$2'\n"
             "[`write()` failed: $1]",
-            format_errno(errno), path);
+            format_errno(), path);
       }
       bp += nwrtn;
     }
@@ -171,7 +171,7 @@ std_filesystem_get_working_directory()
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not get current working directory\n"
           "[`getcwd()` failed: $1]",
-          format_errno(errno));
+          format_errno());
     }
     return V_string(qcwd);
   }
@@ -185,7 +185,7 @@ std_filesystem_get_real_path(V_string path)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not resolve path '$2'\n"
           "[`realpath()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
     }
     return V_string(abspath);
   }
@@ -257,7 +257,7 @@ std_filesystem_move_from(V_string path_new, V_string path_old)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not move file '$2' to '$3'\n"
           "[`rename()` failed: $1]",
-          format_errno(errno), path_old, path_new);
+          format_errno(), path_old, path_new);
   }
 
 V_integer
@@ -285,7 +285,7 @@ std_filesystem_remove_recursive(V_string path)
         ASTERIA_THROW_RUNTIME_ERROR(
             "could not remove file '$2'\n"
             "[`unlink()` failed: $1]",
-            format_errno(errno), path);
+            format_errno(), path);
       }
 
       case EEXIST:
@@ -298,7 +298,7 @@ std_filesystem_remove_recursive(V_string path)
     ASTERIA_THROW_RUNTIME_ERROR(
         "could not remove directory '$2'\n"
         "[`rmdir()` failed: $1]",
-        format_errno(errno), path);
+        format_errno(), path);
   }
 
 V_object
@@ -310,7 +310,7 @@ std_filesystem_dir_list(V_string path)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open directory '$2'\n"
           "[`opendir()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Append all entries.
     V_object entries;
@@ -342,7 +342,7 @@ std_filesystem_dir_list(V_string path)
           ASTERIA_THROW_RUNTIME_ERROR(
               "could not get information about '$2'\n"
               "[`lstat()` failed: $1]",
-              format_errno(errno), child);
+              format_errno(), child);
 
         // Check whether the child path denotes a directory.
         is_dir = S_ISDIR(stb.st_mode);
@@ -386,7 +386,7 @@ std_filesystem_dir_create(V_string path)
         ASTERIA_THROW_RUNTIME_ERROR(
             "could not get information about '$2'\n"
             "[`stat()` failed: $1]",
-            format_errno(errno), path);
+            format_errno(), path);
 
       if(S_ISDIR(stb.st_mode))
         return 0;
@@ -402,7 +402,7 @@ std_filesystem_dir_create(V_string path)
     ASTERIA_THROW_RUNTIME_ERROR(
         "could not create directory '$2'\n"
         "[`mkdir()` failed: $1]",
-        format_errno(errno), path);
+        format_errno(), path);
   }
 
 V_integer
@@ -420,7 +420,7 @@ std_filesystem_dir_remove(V_string path)
     ASTERIA_THROW_RUNTIME_ERROR(
         "could remove directory '$2'\n"
         "[`rmdir()` failed: $1]",
-        format_errno(errno), path);
+        format_errno(), path);
   }
 
 V_string
@@ -436,7 +436,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open file '$2'\n"
           "[`open()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // We return data that have been read as a byte string.
     V_string data;
@@ -460,7 +460,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
           ASTERIA_THROW_RUNTIME_ERROR(
               "error reading file '$2'\n"
               "[`pread()` failed: $1]",
-              format_errno(errno), path);
+              format_errno(), path);
       }
       else {
         // Use the internal file pointer.
@@ -469,7 +469,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
           ASTERIA_THROW_RUNTIME_ERROR(
               "error reading file '$2'\n"
               "[`read()` failed: $1]",
-              format_errno(errno), path);
+              format_errno(), path);
       }
       data.erase(insert_pos + nread, data.end());
       if(nread == 0)
@@ -495,7 +495,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open file '$2'\n"
           "[`open()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // We return data that have been read as a byte string.
     Reference self;
@@ -521,7 +521,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
           ASTERIA_THROW_RUNTIME_ERROR(
               "error reading file '$2'\n"
               "[`pread()` failed: $1]",
-              format_errno(errno), path);
+              format_errno(), path);
       }
       else {
         // Use the internal file pointer.
@@ -530,7 +530,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
           ASTERIA_THROW_RUNTIME_ERROR(
               "error reading file '$2'\n"
               "[`read()` failed: $1]",
-              format_errno(errno), path);
+              format_errno(), path);
       }
       data.erase(data.begin() + nread, data.end());
       if(nread == 0)
@@ -570,7 +570,7 @@ std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open file '$2'\n"
           "[`open()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Set the file pointer when an offset is specified, even when it is an explicit
     // zero. This ensures that the file is actually seekable (not a pipe or socket
@@ -579,7 +579,7 @@ std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not truncate file '$2'\n"
           "[`ftruncate()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Write all data.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -601,7 +601,7 @@ std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open file '$2'\n"
           "[`open()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Append all data to the end.
     do_write_loop(fd, data.data(), data.size(), path);
@@ -616,7 +616,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open source file '$2'\n"
           "[`open()` failed: $1]",
-          format_errno(errno), path_old);
+          format_errno(), path_old);
 
     // Create the new file, discarding its contents.
     // The file is initially write-only.
@@ -626,7 +626,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not create destination file '$2'\n"
           "[`open()` failed: $1]",
-          format_errno(errno), path_new);
+          format_errno(), path_new);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
@@ -634,7 +634,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not get information about source file '$2'\n"
           "[`fstat()` failed: $1]",
-          format_errno(errno), path_old);
+          format_errno(), path_old);
 
     // Allocate the I/O buffer.
     ::rocket::unique_ptr<char, void (void*)> pbuf(::operator delete);
@@ -648,7 +648,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
         ASTERIA_THROW_RUNTIME_ERROR(
             "error reading file '$2'\n"
             "[`read()` failed: $1]",
-            format_errno(errno), path_old);
+            format_errno(), path_old);
 
       if(nread == 0)
         break;
@@ -662,7 +662,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not set permission of '$2'\n"
           "[`fchmod()` failed: $1]",
-          format_errno(errno), path_new);
+          format_errno(), path_new);
   }
 
 V_integer
@@ -680,7 +680,7 @@ std_filesystem_file_remove(V_string path)
     ASTERIA_THROW_RUNTIME_ERROR(
         "could not remove file '$2'\n"
         "[`unlink()` failed: $1]",
-        format_errno(errno), path);
+        format_errno(), path);
   }
 
 void

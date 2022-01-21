@@ -4235,7 +4235,7 @@ struct Traits_import_call
           ASTERIA_THROW_RUNTIME_ERROR(
               "could not open module file '$2'\n"
               "[`realpath()` failed: $1]",
-              format_errno(errno), path);
+              format_errno(), path);
 
         // Compile the script file into a function object.
         Module_Loader::Unique_Stream strm;

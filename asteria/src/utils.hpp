@@ -130,7 +130,7 @@ pwrap(size_t indent, size_t hanging) noexcept
 
 // Error numbers
 constexpr details_utils::Formatted_errno
-format_errno(int err) noexcept
+format_errno(int err = errno) noexcept
   { return { err };  }
 
 // Negative array index wrapper

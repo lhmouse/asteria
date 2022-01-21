@@ -26,7 +26,7 @@ do_lock_stream(const char* path)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open script file '$2'\n"
           "[`fopen()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Make the unique identifier of this file from its device ID and inode number.
     int fd = ::fileno(file);
@@ -35,7 +35,7 @@ do_lock_stream(const char* path)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not get properties of script file '$2'\n"
           "[`fstat()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Mark the stream locked.
     auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
@@ -52,7 +52,7 @@ do_lock_stream(const char* path)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not lock script file '$2'\n"
           "[`fcntl()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     return &*(result.first);
   }

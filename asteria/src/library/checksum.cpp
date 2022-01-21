@@ -907,7 +907,7 @@ do_hash_file(const V_string& path)
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not open file '$2'\n[`open()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb;
@@ -915,7 +915,7 @@ do_hash_file(const V_string& path)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not get information about source file '$2'\n"
           "[`fstat()` failed: $1]",
-          format_errno(errno), path);
+          format_errno(), path);
 
     // Allocate the I/O buffer.
     ::rocket::unique_ptr<char, void (void*)> pbuf(::operator delete);
@@ -933,7 +933,7 @@ do_hash_file(const V_string& path)
 
         ASTERIA_THROW_RUNTIME_ERROR(
             "error reading file '$2'\n[`read()` failed: $1]",
-            format_errno(errno), path);
+            format_errno(), path);
       }
       h.update(pbuf, static_cast<size_t>(nread));
     }

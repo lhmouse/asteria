@@ -79,7 +79,7 @@ reload_file(const char* path)
     if(!abspath)
       ASTERIA_THROW("could not open script file '$2'\n"
                     "[`realpath()` failed: $1]",
-                    format_errno(errno), path);
+                    format_errno(), path);
 
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
