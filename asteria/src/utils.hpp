@@ -110,15 +110,6 @@ is_convertible_to_integer(double val) noexcept
            ::std::isless(val, 0x1p63);
   }
 
-ROCKET_CONST inline bool
-is_safe_integer(double val) noexcept
-  {
-    double absv = ::std::abs(val);
-    return ::std::islessequal(1 - 0x1p53, absv) &&
-           ::std::islessequal(absv, 0x1p53 - 1) &&
-           static_cast<double>(static_cast<int64_t>(val)) == val;
-  }
-
 // C-style quoting
 constexpr details_utils::Quote_Wrapper
 quote(const char* str, size_t len) noexcept
