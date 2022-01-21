@@ -37,13 +37,13 @@ linear_probe(bucketT* begin, bucketT* to, bucketT* from, bucketT* end, predT&& p
     ROCKET_ASSERT(begin < end);
 
     // Phase 1: Probe from `from` to `end`.
-    for(auto bkt = from; bkt != end; ++bkt)
-      if(!*bkt || pred(*bkt))
+    for(auto bkt = from;  bkt != end;  ++bkt)
+      if(!*bkt || bool(pred(*bkt)))
         return bkt;
 
     // Phase 2: Probe from `begin` to `to`.
-    for(auto bkt = begin; bkt != to; ++bkt)
-      if(!*bkt || pred(*bkt))
+    for(auto bkt = begin;  bkt != to;  ++bkt)
+      if(!*bkt || bool(pred(*bkt)))
         return bkt;
 
     // The table is full and no desired bucket has been found so far.
