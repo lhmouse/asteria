@@ -24,9 +24,9 @@ sprintf_and_throw(const char* fmt, ...)
     va_end(ap);
     if(ret < 0)
       throw ::std::bad_alloc();
-    unique_ptr<char, void (&)(void*)> uptr(str, ::free);
 
     // Construct the exception object and throw it.
+    unique_ptr<char, void (void*)> uptr(str, ::free);
     throw exceptT(uptr);
   }
 
