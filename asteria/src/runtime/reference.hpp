@@ -69,11 +69,12 @@ class alignas(max_align_t) Reference
     do_copy_partial(const Reference& other) noexcept
       {
         // Note not all fields have to be copied.
-        if(other.m_index == index_temporary)
+        unsigned type = other.m_index;
+        if(ROCKET_UNEXPECT(type == index_temporary))
           this->m_value = other.m_value;
-        if(other.m_index == index_variable)
+        else if(ROCKET_UNEXPECT(type == index_variable))
           this->m_var = other.m_var;
-        if(other.m_index == index_ptc_args)
+        else if(ROCKET_UNEXPECT(type == index_ptc_args))
           this->m_ptca = other.m_ptca;
       }
 
@@ -81,12 +82,12 @@ class alignas(max_align_t) Reference
     do_swap_partial(Reference& other) noexcept
       {
         // Determine which fields have to be swapped.
-        int mask = 1 << this->m_index | 1 << other.m_index;
-        if(mask & 1 << index_temporary)
+        unsigned mask = 1u<<this->m_index | 1u<<other.m_index;
+        if(ROCKET_UNEXPECT(mask & 1u<<index_temporary))
           this->m_value.swap(other.m_value);
-        if(mask & 1 << index_variable)
+        if(ROCKET_UNEXPECT(mask & 1u<<index_variable))
           this->m_var.swap(other.m_var);
-        if(mask & 1 << index_ptc_args)
+        if(ROCKET_UNEXPECT(mask & 1u<<index_ptc_args))
           this->m_ptca.swap(other.m_ptca);
       }
 

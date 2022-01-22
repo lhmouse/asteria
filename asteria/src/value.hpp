@@ -101,7 +101,7 @@ class alignas(max_align_t) Value
   public:
     ~Value()
       {
-        if((1 << this->type()) & (1 << type_array | 1 << type_object))
+        if((1u<<this->type()) & (1u<<type_array | 1u<<type_object))
           this->do_destroy_variant_slow();
       }
 
@@ -308,9 +308,9 @@ class alignas(max_align_t) Value
     bool
     is_scalar() const noexcept
       {
-        return (1 << this->type()) &
-               (1 << type_null | 1 << type_boolean | 1 << type_integer |
-                1 << type_real | 1 << type_string);
+        return (1u<<this->type()) &
+               (1u<<type_null | 1u<<type_boolean | 1u<<type_integer |
+                1u<<type_real | 1u<<type_string);
       }
 
     Value&
