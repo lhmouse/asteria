@@ -20,6 +20,8 @@ struct Bucket
 
     Bucket() noexcept { }
     ~Bucket() noexcept { }
+    Bucket(const Bucket&) = delete;
+    Bucket& operator=(const Bucket&) = delete;
 
     explicit operator
     bool() const noexcept
