@@ -26,6 +26,7 @@
 #include "../rocket/reference_wrapper.hpp"
 #include "../rocket/tinyfmt.hpp"
 #include "../rocket/ascii_case.hpp"
+#include "../rocket/bit_mask.hpp"
 #include <utility>
 #include <stdexcept>
 #include <typeinfo>
@@ -111,6 +112,9 @@ using ::rocket::arent;
 
 // Aliases
 using phsh_string = ::rocket::prehashed_string;
+using bmask32 = ::rocket::bit_mask<uint32_t>;
+using bmask64 = ::rocket::bit_mask<uint64_t>;
+using bmword = ::rocket::bit_mask<uintptr_t>;
 
 template<typename E, typename D = ::std::default_delete<const E>>
 using uptr = ::rocket::unique_ptr<E, D>;

@@ -101,7 +101,8 @@ class alignas(max_align_t) Value
   public:
     ~Value()
       {
-        if((1u<<this->type()) & (1u<<type_array | 1u<<type_object))
+        constexpr bmask32 recursive_types = { type_array, type_object };
+        if(recursive_types.get(this->type()))
           this->do_destroy_variant_slow();
       }
 
@@ -308,9 +309,10 @@ class alignas(max_align_t) Value
     bool
     is_scalar() const noexcept
       {
-        return (1u<<this->type()) &
-               (1u<<type_null | 1u<<type_boolean | 1u<<type_integer |
-                1u<<type_real | 1u<<type_string);
+        constexpr bmask32 scalar_types = { type_null,
+            type_boolean, type_integer, type_real, type_string };
+
+        return scalar_types.get(this->type());
       }
 
     Value&

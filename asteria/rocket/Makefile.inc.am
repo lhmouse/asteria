@@ -40,6 +40,7 @@ include_rocket_HEADERS =  \
   %reldir%/recursive_mutex.hpp  \
   %reldir%/condition_variable.hpp  \
   %reldir%/once_flag.hpp  \
+  %reldir%/bit_mask.hpp  \
   ${NOTHING}
 
 include_rocket_detailsdir = ${includedir}/rocket/details
