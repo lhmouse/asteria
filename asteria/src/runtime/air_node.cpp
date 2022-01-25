@@ -253,7 +253,7 @@ struct Traits_clear_stack
     // `up` is unused.
     // `sp` is unused.
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         ctx.stack().clear();
@@ -274,7 +274,7 @@ struct Traits_execute_block
         return queue;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue& queue)
       {
         return do_execute_block(queue, ctx);
@@ -301,7 +301,7 @@ struct Traits_declare_variable
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_sloc_name& sp)
       {
         const auto qhooks = ctx.global().get_hooks_opt();
@@ -339,7 +339,7 @@ struct Traits_initialize_variable
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Read the value of the initializer.
@@ -382,7 +382,7 @@ struct Traits_if_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
@@ -414,7 +414,7 @@ struct Traits_switch_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_switch& sp)
       {
         // Get the number of clauses.
@@ -502,7 +502,7 @@ struct Traits_do_while_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // This is the same as the `do...while` statement in C.
@@ -549,7 +549,7 @@ struct Traits_while_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // This is the same as the `while` statement in C.
@@ -590,7 +590,7 @@ struct Traits_for_each_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_for_each& sp)
       {
         // Get global interfaces.
@@ -689,7 +689,7 @@ struct Traits_for_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_queues_4& sp)
       {
         // This is the same as the `for` statement in C.
@@ -747,7 +747,7 @@ struct Traits_try_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_try_catch& sp)
       ASTERIA_RUNTIME_TRY {
         // This is almost identical to JavaScript.
@@ -846,7 +846,7 @@ struct Traits_assert_statement
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_sloc_text& sp)
       {
         // Check the value of the condition.
@@ -874,7 +874,7 @@ struct Traits_simple_status
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
         auto status = static_cast<AIR_Status>(up.u8v[0]);
@@ -902,7 +902,7 @@ struct Traits_check_argument
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Ensure the argument is dereferenceable.
@@ -929,7 +929,7 @@ struct Traits_push_global_reference
         return altr.name;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const phsh_string& name)
       {
         // Look for the name in the global context.
@@ -968,7 +968,7 @@ struct Traits_push_local_reference
         return altr.name;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const phsh_string& name)
       {
         // Get the context.
@@ -1002,7 +1002,7 @@ struct Traits_push_bound_reference
         return altr.ref;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Reference& ref)
       {
         ctx.stack().push() = ref;
@@ -1070,7 +1070,7 @@ struct Traits_branch_expression
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
@@ -1107,7 +1107,7 @@ struct Traits_coalescence
         return queue;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const AVMC_Queue& queue)
       {
         // Check the value of the condition.
@@ -1248,7 +1248,7 @@ struct Traits_member_access
         return altr.name;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const phsh_string& name)
       {
         auto& ref = ctx.stack().mut_top();
@@ -1277,7 +1277,7 @@ struct Traits_push_unnamed_array
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Pop elements from the stack and store them in an array backwards.
@@ -1312,7 +1312,7 @@ struct Traits_push_unnamed_object
         return altr.keys;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const cow_vector<phsh_string>& keys)
       {
         // Pop elements from the stack and store them in an object backwards.
@@ -1349,7 +1349,7 @@ struct Traits_return_value
         return { };
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
       {
         // Void references are forwarded verbatim.
@@ -1404,7 +1404,7 @@ struct Traits_apply_xop_inc_post
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -1450,7 +1450,7 @@ struct Traits_apply_xop_dec_post
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -1496,7 +1496,7 @@ struct Traits_apply_xop_subscr
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is binary.
@@ -1546,7 +1546,7 @@ struct Traits_apply_xop_pos
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1575,7 +1575,7 @@ struct Traits_apply_xop_neg
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1628,7 +1628,7 @@ struct Traits_apply_xop_notb
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1685,7 +1685,7 @@ struct Traits_apply_xop_notl
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1709,7 +1709,7 @@ struct Traits_apply_xop_inc_pre
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -1754,7 +1754,7 @@ struct Traits_apply_xop_dec_pre
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -1799,7 +1799,7 @@ struct Traits_apply_xop_unset
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -1829,7 +1829,7 @@ struct Traits_apply_xop_countof
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1888,7 +1888,7 @@ struct Traits_apply_xop_typeof
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1920,7 +1920,7 @@ struct Traits_apply_xop_sqrt
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -1967,7 +1967,7 @@ struct Traits_apply_xop_isnan
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2015,7 +2015,7 @@ struct Traits_apply_xop_isinf
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2063,7 +2063,7 @@ struct Traits_apply_xop_abs
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2116,7 +2116,7 @@ struct Traits_apply_xop_sign
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2163,7 +2163,7 @@ struct Traits_apply_xop_round
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2208,7 +2208,7 @@ struct Traits_apply_xop_floor
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2253,7 +2253,7 @@ struct Traits_apply_xop_ceil
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2298,7 +2298,7 @@ struct Traits_apply_xop_trunc
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2343,7 +2343,7 @@ struct Traits_apply_xop_iround
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2388,7 +2388,7 @@ struct Traits_apply_xop_ifloor
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2433,7 +2433,7 @@ struct Traits_apply_xop_iceil
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2478,7 +2478,7 @@ struct Traits_apply_xop_itrunc
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -2523,7 +2523,7 @@ struct Traits_apply_xop_cmp_eq
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2558,7 +2558,7 @@ struct Traits_apply_xop_cmp_ne
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2593,7 +2593,7 @@ struct Traits_apply_xop_cmp_lt
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2633,7 +2633,7 @@ struct Traits_apply_xop_cmp_gt
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2673,7 +2673,7 @@ struct Traits_apply_xop_cmp_lte
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2713,7 +2713,7 @@ struct Traits_apply_xop_cmp_gte
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2753,7 +2753,7 @@ struct Traits_apply_xop_cmp_3way
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2806,7 +2806,7 @@ struct Traits_apply_xop_add
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2881,7 +2881,7 @@ struct Traits_apply_xop_sub
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -2948,7 +2948,7 @@ struct Traits_apply_xop_mul
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3051,7 +3051,7 @@ struct Traits_apply_xop_div
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3114,7 +3114,7 @@ struct Traits_apply_xop_mod
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3177,7 +3177,7 @@ struct Traits_apply_xop_sll
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3257,7 +3257,7 @@ struct Traits_apply_xop_srl
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3337,7 +3337,7 @@ struct Traits_apply_xop_sla
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3426,7 +3426,7 @@ struct Traits_apply_xop_sra
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3503,7 +3503,7 @@ struct Traits_apply_xop_andb
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3573,7 +3573,7 @@ struct Traits_apply_xop_orb
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3644,7 +3644,7 @@ struct Traits_apply_xop_xorb
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -3707,7 +3707,7 @@ struct Traits_apply_xop_assign
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is binary. `assign` is ignored.
@@ -3737,7 +3737,7 @@ struct Traits_apply_xop_fma
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is ternary.
@@ -3779,7 +3779,7 @@ struct Traits_apply_xop_head
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -3801,7 +3801,7 @@ struct Traits_apply_xop_tail
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -3957,7 +3957,7 @@ struct Traits_define_null_variable
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_name& sp)
       {
         const auto qhooks = ctx.global().get_hooks_opt();
@@ -3994,7 +3994,7 @@ struct Traits_single_step_trap
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Source_Location& sloc)
       {
         const auto qhooks = ctx.global().get_hooks_opt();
@@ -4282,7 +4282,7 @@ struct Traits_declare_reference
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
         ctx.open_named_reference(sp.name).set_invalid();
@@ -4309,7 +4309,7 @@ struct Traits_initialize_reference
         return sp;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
@@ -4376,7 +4376,7 @@ struct Traits_apply_xop_lzcnt
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -4418,7 +4418,7 @@ struct Traits_apply_xop_tzcnt
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -4460,7 +4460,7 @@ struct Traits_apply_xop_popcnt
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is unary.
@@ -4502,7 +4502,7 @@ struct Traits_apply_xop_addm
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -4549,7 +4549,7 @@ struct Traits_apply_xop_subm
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -4596,7 +4596,7 @@ struct Traits_apply_xop_mulm
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -4643,7 +4643,7 @@ struct Traits_apply_xop_adds
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -4701,7 +4701,7 @@ struct Traits_apply_xop_subs
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -4759,7 +4759,7 @@ struct Traits_apply_xop_muls
         return up;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // This operator is binary.
@@ -4809,7 +4809,7 @@ struct Traits_apply_xop_random
         return altr.sloc;
       }
 
-    static AIR_Status
+    ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx)
       {
         // This operator is unary. `assign` is ignored.
@@ -4872,7 +4872,7 @@ struct solidify_disp;
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
   {
-    ROCKET_FLATTEN static AIR_Status
+    static AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
@@ -4896,7 +4896,7 @@ struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
   {
-    ROCKET_FLATTEN static AIR_Status
+    static AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
@@ -4916,7 +4916,7 @@ struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
   {
-    ROCKET_FLATTEN static AIR_Status
+    static AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
@@ -4936,7 +4936,7 @@ struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
   {
-    ROCKET_FLATTEN static AIR_Status
+    static AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
       {
         return TraitsT::execute(ctx);
