@@ -113,16 +113,18 @@ class static_vector
       { this->append(init);  }
 
     static_vector&
-    operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
-                         is_nothrow_copy_constructible<value_type>>::value)
+    operator=(const static_vector& other)
+      noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+                           is_nothrow_copy_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(other);
       }
 
     static_vector&
-    operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
-                         is_nothrow_move_constructible<value_type>>::value)
+    operator=(static_vector&& other)
+      noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+                           is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return this->assign(::std::move(other));
@@ -638,14 +640,17 @@ class static_vector
     // N.B. This is a non-standard extension.
     static_vector
     subvec(size_type tpos, size_type tn = size_type(-1)) const
-      { return static_vector(this->data() + tpos,
+      {
+        return static_vector(this->data() + tpos,
                              this->data() + tpos + this->do_clamp_subvec(tpos, tn),
-                             this->m_sth.as_allocator());  }
+                             this->m_sth.as_allocator());
+      }
 
     // N.B. The return type is a non-standard extension.
     static_vector&
-    assign(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
-                         is_nothrow_copy_constructible<value_type>>::value)
+    assign(const static_vector& other)
+      noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+                           is_nothrow_copy_constructible<value_type>>::value)
       {
         this->m_sth.copy_from(other.m_sth);
         return *this;
@@ -653,8 +658,9 @@ class static_vector
 
     // N.B. The return type is a non-standard extension.
     static_vector&
-    assign(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
-                         is_nothrow_move_constructible<value_type>>::value)
+    assign(static_vector&& other)
+      noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+                           is_nothrow_move_constructible<value_type>>::value)
       {
         this->m_sth.move_from(other.m_sth);
         return *this;
@@ -692,8 +698,9 @@ class static_vector
       }
 
     static_vector&
-    swap(static_vector& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
-                         is_nothrow_move_constructible<value_type>>::value)
+    swap(static_vector& other)
+      noexcept(conjunction<is_nothrow_swappable<value_type>,
+                           is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
