@@ -2521,7 +2521,8 @@
 `std.json.parse_file(path)`
 
 	* Parses the contents of the file denoted by `path` as a JSON
-	  string. This function behaves identical to `parse()` otherwise.
+	  string for a value. This function behaves identically to
+	  `parse()` otherwise.
 
 	* Returns the parsed value.
 
