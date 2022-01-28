@@ -507,7 +507,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(gen);
         if(reader.end_overload())
-          return (Value)std_system_gc_count_variables(global, gen);
+          return (Value) std_system_gc_count_variables(global, gen);
 
         reader.throw_no_matching_function_call();
       });
@@ -522,7 +522,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(gen);
         if(reader.end_overload())
-          return (Value)std_system_gc_get_threshold(global, gen);
+          return (Value) std_system_gc_get_threshold(global, gen);
 
         reader.throw_no_matching_function_call();
       });
@@ -538,7 +538,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.required(gen);
         reader.required(thrs);
         if(reader.end_overload())
-          return (Value)std_system_gc_set_threshold(global, gen, thrs);
+          return (Value) std_system_gc_set_threshold(global, gen, thrs);
 
         reader.throw_no_matching_function_call();
       });
@@ -553,7 +553,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.optional(glim);
         if(reader.end_overload())
-          return (Value)std_system_gc_collect(global, glim);
+          return (Value) std_system_gc_collect(global, glim);
 
         reader.throw_no_matching_function_call();
       });
@@ -568,7 +568,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(name);
         if(reader.end_overload())
-          return (Value)std_system_env_get_variable(name);
+          return (Value) std_system_env_get_variable(name);
 
         reader.throw_no_matching_function_call();
       });
@@ -580,7 +580,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_system_env_get_variables();
+          return (Value) std_system_env_get_variables();
 
         reader.throw_no_matching_function_call();
       });
@@ -592,7 +592,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_system_uuid(global);
+          return (Value) std_system_uuid(global);
 
         reader.throw_no_matching_function_call();
       });
@@ -604,7 +604,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_system_proc_get_pid();
+          return (Value) std_system_proc_get_pid();
 
         reader.throw_no_matching_function_call();
       });
@@ -616,7 +616,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_system_proc_get_ppid();
+          return (Value) std_system_proc_get_ppid();
 
         reader.throw_no_matching_function_call();
       });
@@ -628,7 +628,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_system_proc_get_uid();
+          return (Value) std_system_proc_get_uid();
 
         reader.throw_no_matching_function_call();
       });
@@ -640,7 +640,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_system_proc_get_euid();
+          return (Value) std_system_proc_get_euid();
 
         reader.throw_no_matching_function_call();
       });
@@ -658,7 +658,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.optional(argv);
         reader.optional(envp);
         if(reader.end_overload())
-          return (Value)std_system_proc_invoke(cmd, argv, envp);
+          return (Value) std_system_proc_invoke(cmd, argv, envp);
 
         reader.throw_no_matching_function_call();
       });
@@ -670,7 +670,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_system_proc_daemonize();
+          return (void) std_system_proc_daemonize();
 
         reader.throw_no_matching_function_call();
       });
@@ -685,7 +685,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_system_conf_load_file(path);
+          return (Value) std_system_conf_load_file(path);
 
         reader.throw_no_matching_function_call();
       });

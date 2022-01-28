@@ -409,7 +409,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_io_getc();
+          return (Value) std_io_getc();
 
         reader.throw_no_matching_function_call();
       });
@@ -421,7 +421,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_io_getln();
+          return (Value) std_io_getln();
 
         reader.throw_no_matching_function_call();
       });
@@ -437,12 +437,12 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(ch);
         if(reader.end_overload())
-          return (Value)std_io_putc(ch);
+          return (Value) std_io_putc(ch);
 
         reader.start_overload();
         reader.required(str);
         if(reader.end_overload())
-          return (Value)std_io_putc(str);
+          return (Value) std_io_putc(str);
 
         reader.throw_no_matching_function_call();
       });
@@ -457,7 +457,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_io_putln(text);
+          return (Value) std_io_putln(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -473,7 +473,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(templ);
         if(reader.end_overload(values))
-          return (Value)std_io_putf(templ, values);
+          return (Value) std_io_putf(templ, values);
 
         reader.throw_no_matching_function_call();
       });
@@ -489,7 +489,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(templ);
         if(reader.end_overload(values))
-          return (Value)std_io_putfln(templ, values);
+          return (Value) std_io_putfln(templ, values);
 
         reader.throw_no_matching_function_call();
       });
@@ -504,7 +504,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.optional(limit);
         if(reader.end_overload())
-          return (Value)std_io_read(limit);
+          return (Value) std_io_read(limit);
 
         reader.throw_no_matching_function_call();
       });
@@ -519,7 +519,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_io_write(data);
+          return (Value) std_io_write(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -531,7 +531,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_io_flush();
+          return (void) std_io_flush();
 
         reader.throw_no_matching_function_call();
       });

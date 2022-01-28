@@ -713,7 +713,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(from);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value)std_array_slice(data, from, len);
+          return (Value) std_array_slice(data, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -738,7 +738,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.optional(rfrom);
         reader.optional(rlen);
         if(reader.end_overload())
-          return (Value)std_array_replace_slice(text, from, nullopt, rep, rfrom, rlen);
+          return (Value) std_array_replace_slice(text, from, nullopt, rep, rfrom, rlen);
 
         reader.load_state(0);
         reader.optional(len);
@@ -746,7 +746,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.optional(rfrom);
         reader.optional(rlen);
         if(reader.end_overload())
-          return (Value)std_array_replace_slice(text, from, len, rep, rfrom, rlen);
+          return (Value) std_array_replace_slice(text, from, len, rep, rfrom, rlen);
 
         reader.throw_no_matching_function_call();
       });
@@ -766,20 +766,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_find(data, 0, nullopt, targ);
+          return (Value) std_array_find(data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_find(data, from, nullopt, targ);
+          return (Value) std_array_find(data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_find(data, from, len, targ);
+          return (Value) std_array_find(data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -799,20 +799,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_find_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_find_if(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_find_if(global, data, from, nullopt, pred);
+          return (Value) std_array_find_if(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_find_if(global, data, from, len, pred);
+          return (Value) std_array_find_if(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -832,20 +832,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_find_if_not(global, data, 0, nullopt, pred);
+          return (Value) std_array_find_if_not(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_find_if_not(global, data, from, nullopt, pred);
+          return (Value) std_array_find_if_not(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_find_if_not(global, data, from, len, pred);
+          return (Value) std_array_find_if_not(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -865,20 +865,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_rfind(data, 0, nullopt, targ);
+          return (Value) std_array_rfind(data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_rfind(data, from, nullopt, targ);
+          return (Value) std_array_rfind(data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_rfind(data, from, len, targ);
+          return (Value) std_array_rfind(data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -898,20 +898,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_rfind_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_rfind_if(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_rfind_if(global, data, from, nullopt, pred);
+          return (Value) std_array_rfind_if(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_rfind_if(global, data, from, len, pred);
+          return (Value) std_array_rfind_if(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -931,20 +931,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_rfind_if_not(global, data, 0, nullopt, pred);
+          return (Value) std_array_rfind_if_not(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_rfind_if_not(global, data, from, nullopt, pred);
+          return (Value) std_array_rfind_if_not(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_rfind_if_not(global, data, from, len, pred);
+          return (Value) std_array_rfind_if_not(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -964,20 +964,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_count(data, 0, nullopt, targ);
+          return (Value) std_array_count(data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_count(data, from, nullopt, targ);
+          return (Value) std_array_count(data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_count(data, from, len, targ);
+          return (Value) std_array_count(data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -997,20 +997,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_count_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_count_if(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_count_if(global, data, from, nullopt, pred);
+          return (Value) std_array_count_if(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_count_if(global, data, from, len, pred);
+          return (Value) std_array_count_if(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -1030,20 +1030,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_count_if_not(global, data, 0, nullopt, pred);
+          return (Value) std_array_count_if_not(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_count_if_not(global, data, from, nullopt, pred);
+          return (Value) std_array_count_if_not(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_count_if_not(global, data, from, len, pred);
+          return (Value) std_array_count_if_not(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -1063,20 +1063,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_exclude(data, 0, nullopt, targ);
+          return (Value) std_array_exclude(data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_exclude(data, from, nullopt, targ);
+          return (Value) std_array_exclude(data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value)std_array_exclude(data, from, len, targ);
+          return (Value) std_array_exclude(data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -1096,20 +1096,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_exclude_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_exclude_if(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_exclude_if(global, data, from, nullopt, pred);
+          return (Value) std_array_exclude_if(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_exclude_if(global, data, from, len, pred);
+          return (Value) std_array_exclude_if(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -1129,20 +1129,20 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_exclude_if_not(global, data, 0, nullopt, pred);
+          return (Value) std_array_exclude_if_not(global, data, 0, nullopt, pred);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_exclude_if_not(global, data, from, nullopt, pred);
+          return (Value) std_array_exclude_if_not(global, data, from, nullopt, pred);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(pred);
         if(reader.end_overload())
-          return (Value)std_array_exclude_if_not(global, data, from, len, pred);
+          return (Value) std_array_exclude_if_not(global, data, from, len, pred);
 
         reader.throw_no_matching_function_call();
       });
@@ -1159,7 +1159,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_is_sorted(global, data, comp);
+          return (Value) std_array_is_sorted(global, data, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1178,7 +1178,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.optional(targ);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_binary_search(global, data, targ, comp);
+          return (Value) std_array_binary_search(global, data, targ, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1197,7 +1197,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.optional(targ);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_lower_bound(global, data, targ, comp);
+          return (Value) std_array_lower_bound(global, data, targ, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1216,7 +1216,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.optional(targ);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_upper_bound(global, data, targ, comp);
+          return (Value) std_array_upper_bound(global, data, targ, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1235,7 +1235,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.optional(targ);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_equal_range(global, data, targ, comp);
+          return (Value) std_array_equal_range(global, data, targ, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1252,7 +1252,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_sort(global, data, comp);
+          return (Value) std_array_sort(global, data, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1269,7 +1269,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_sortu(global, data, comp);
+          return (Value) std_array_sortu(global, data, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1286,7 +1286,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(object);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_ksort(global, object, comp);
+          return (Value) std_array_ksort(global, object, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1303,7 +1303,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_max_of(global, data, comp);
+          return (Value) std_array_max_of(global, data, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1320,7 +1320,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value)std_array_min_of(global, data, comp);
+          return (Value) std_array_min_of(global, data, comp);
 
         reader.throw_no_matching_function_call();
       });
@@ -1335,7 +1335,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_array_reverse(data);
+          return (Value) std_array_reverse(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1352,7 +1352,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(gen);
         reader.required(len);
         if(reader.end_overload())
-          return (Value)std_array_generate(global, gen, len);
+          return (Value) std_array_generate(global, gen, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -1369,7 +1369,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(seed);
         if(reader.end_overload())
-          return (Value)std_array_shuffle(data, seed);
+          return (Value) std_array_shuffle(data, seed);
 
         reader.throw_no_matching_function_call();
       });
@@ -1386,7 +1386,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.required(shift);
         if(reader.end_overload())
-          return (Value)std_array_rotate(data, shift);
+          return (Value) std_array_rotate(data, shift);
 
         reader.throw_no_matching_function_call();
       });
@@ -1401,7 +1401,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(obj);
         if(reader.end_overload())
-          return (Value)std_array_copy_keys(obj);
+          return (Value) std_array_copy_keys(obj);
 
         reader.throw_no_matching_function_call();
       });
@@ -1416,7 +1416,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(obj);
         if(reader.end_overload())
-          return (Value)std_array_copy_values(obj);
+          return (Value) std_array_copy_values(obj);
 
         reader.throw_no_matching_function_call();
       });

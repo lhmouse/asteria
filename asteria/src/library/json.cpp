@@ -742,11 +742,11 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(sind);
         if(reader.end_overload())
-          return (Value)std_json_format(value, sind);
+          return (Value) std_json_format(value, sind);
 
         reader.load_state(0);
         reader.required(iind);
-          return (Value)std_json_format(value, iind);
+          return (Value) std_json_format(value, iind);
 
         reader.throw_no_matching_function_call();
       });
@@ -765,11 +765,11 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(sind);
         if(reader.end_overload())
-          return (Value)std_json_format5(value, sind);
+          return (Value) std_json_format5(value, sind);
 
         reader.load_state(0);
         reader.required(iind);
-          return (Value)std_json_format5(value, iind);
+          return (Value) std_json_format5(value, iind);
 
         reader.throw_no_matching_function_call();
       });
@@ -784,7 +784,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_json_parse(text);
+          return (Value) std_json_parse(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -799,7 +799,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_json_parse_file(path);
+          return (Value) std_json_parse_file(path);
 
         reader.throw_no_matching_function_call();
       });

@@ -244,13 +244,13 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(y);
         if(reader.end_overload())
-          return (Value)std_math_exp(y);
+          return (Value) std_math_exp(y);
 
         reader.start_overload();
         reader.required(base);
         reader.required(y);
         if(reader.end_overload())
-          return (Value)std_math_exp(base, y);
+          return (Value) std_math_exp(base, y);
 
         reader.throw_no_matching_function_call();
       });
@@ -265,13 +265,13 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_log(x);
+          return (Value) std_math_log(x);
 
         reader.start_overload();
         reader.required(base);
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_log(base, x);
+          return (Value) std_math_log(base, x);
 
         reader.throw_no_matching_function_call();
       });
@@ -286,7 +286,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(y);
         if(reader.end_overload())
-          return (Value)std_math_expm1(y);
+          return (Value) std_math_expm1(y);
 
         reader.throw_no_matching_function_call();
       });
@@ -301,7 +301,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_log1p(x);
+          return (Value) std_math_log1p(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -316,7 +316,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_sin(x);
+          return (Value) std_math_sin(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -331,7 +331,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_cos(x);
+          return (Value) std_math_cos(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -346,7 +346,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_sincos(x);
+          return (Value) std_math_sincos(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -361,7 +361,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_tan(x);
+          return (Value) std_math_tan(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -376,7 +376,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_asin(x);
+          return (Value) std_math_asin(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -391,7 +391,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_acos(x);
+          return (Value) std_math_acos(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -406,7 +406,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_atan(x);
+          return (Value) std_math_atan(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -423,7 +423,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.required(y);
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_atan2(y, x);
+          return (Value) std_math_atan2(y, x);
 
         reader.throw_no_matching_function_call();
       });
@@ -437,7 +437,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
 
         reader.start_overload();
         if(reader.end_overload(vals))
-          return (Value)std_math_hypot(vals);
+          return (Value) std_math_hypot(vals);
 
         reader.throw_no_matching_function_call();
       });
@@ -452,7 +452,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_sinh(x);
+          return (Value) std_math_sinh(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -467,7 +467,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_cosh(x);
+          return (Value) std_math_cosh(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -482,7 +482,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_tanh(x);
+          return (Value) std_math_tanh(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -497,7 +497,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_asinh(x);
+          return (Value) std_math_asinh(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -512,7 +512,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_acosh(x);
+          return (Value) std_math_acosh(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -527,7 +527,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_atanh(x);
+          return (Value) std_math_atanh(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -542,7 +542,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_erf(x);
+          return (Value) std_math_erf(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -557,7 +557,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_cerf(x);
+          return (Value) std_math_cerf(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -572,7 +572,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_gamma(x);
+          return (Value) std_math_gamma(x);
 
         reader.throw_no_matching_function_call();
       });
@@ -587,7 +587,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(x);
         if(reader.end_overload())
-          return (Value)std_math_lgamma(x);
+          return (Value) std_math_lgamma(x);
 
         reader.throw_no_matching_function_call();
       });

@@ -595,18 +595,18 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.required(text);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_find(m, text, 0, nullopt);
+          return (Value) std_string_PCRE_find(m, text, 0, nullopt);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_find(m, text, from, nullopt);
+          return (Value) std_string_PCRE_find(m, text, from, nullopt);
 
         reader.load_state(0);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_find(m, text, from, len);
+          return (Value) std_string_PCRE_find(m, text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -627,18 +627,18 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.required(text);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_match(m, text, 0, nullopt);
+          return (Value) std_string_PCRE_match(m, text, 0, nullopt);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_match(m, text, from, nullopt);
+          return (Value) std_string_PCRE_match(m, text, from, nullopt);
 
         reader.load_state(0);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_match(m, text, from, len);
+          return (Value) std_string_PCRE_match(m, text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -659,18 +659,18 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.required(text);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_named_match(m, text, 0, nullopt);
+          return (Value) std_string_PCRE_named_match(m, text, 0, nullopt);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_named_match(m, text, from, nullopt);
+          return (Value) std_string_PCRE_named_match(m, text, from, nullopt);
 
         reader.load_state(0);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_named_match(m, text, from, len);
+          return (Value) std_string_PCRE_named_match(m, text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -692,20 +692,20 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.save_state(0);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_replace(m, text, 0, nullopt, rep);
+          return (Value) std_string_PCRE_replace(m, text, 0, nullopt, rep);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_replace(m, text, from, nullopt, rep);
+          return (Value) std_string_PCRE_replace(m, text, from, nullopt, rep);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_PCRE_replace(m, text, from, len, rep);
+          return (Value) std_string_PCRE_replace(m, text, from, len, rep);
 
         reader.throw_no_matching_function_call();
       });
@@ -1777,7 +1777,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(from);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value)std_string_slice(text, from, len);
+          return (Value) std_string_slice(text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -1802,7 +1802,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.optional(rfrom);
         reader.optional(rlen);
         if(reader.end_overload())
-          return (Value)std_string_replace_slice(text, from, nullopt, rep, rfrom, rlen);
+          return (Value) std_string_replace_slice(text, from, nullopt, rep, rfrom, rlen);
 
         reader.load_state(0);
         reader.optional(len);
@@ -1810,7 +1810,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.optional(rfrom);
         reader.optional(rlen);
         if(reader.end_overload())
-          return (Value)std_string_replace_slice(text, from, len, rep, rfrom, rlen);
+          return (Value) std_string_replace_slice(text, from, len, rep, rfrom, rlen);
 
         reader.throw_no_matching_function_call();
       });
@@ -1829,7 +1829,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text2);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value)std_string_compare(text1, text2, len);
+          return (Value) std_string_compare(text1, text2, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -1846,7 +1846,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.required(prfx);
         if(reader.end_overload())
-          return (Value)std_string_starts_with(text, prfx);
+          return (Value) std_string_starts_with(text, prfx);
 
         reader.throw_no_matching_function_call();
       });
@@ -1863,7 +1863,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.required(sufx);
         if(reader.end_overload())
-          return (Value)std_string_ends_with(text, sufx);
+          return (Value) std_string_ends_with(text, sufx);
 
         reader.throw_no_matching_function_call();
       });
@@ -1882,20 +1882,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(patt);
         if(reader.end_overload())
-          return (Value)std_string_find(text, 0, nullopt, patt);
+          return (Value) std_string_find(text, 0, nullopt, patt);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(patt);
         if(reader.end_overload())
-          return (Value)std_string_find(text, from, nullopt, patt);
+          return (Value) std_string_find(text, from, nullopt, patt);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         if(reader.end_overload())
-          return (Value)std_string_find(text, from, len, patt);
+          return (Value) std_string_find(text, from, len, patt);
 
         reader.throw_no_matching_function_call();
       });
@@ -1914,20 +1914,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(patt);
         if(reader.end_overload())
-          return (Value)std_string_rfind(text, 0, nullopt, patt);
+          return (Value) std_string_rfind(text, 0, nullopt, patt);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(patt);
         if(reader.end_overload())
-          return (Value)std_string_rfind(text, from, nullopt, patt);
+          return (Value) std_string_rfind(text, from, nullopt, patt);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         if(reader.end_overload())
-          return (Value)std_string_rfind(text, from, len, patt);
+          return (Value) std_string_rfind(text, from, len, patt);
 
         reader.throw_no_matching_function_call();
       });
@@ -1947,7 +1947,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_replace(text, 0, nullopt, patt, rep);
+          return (Value) std_string_replace(text, 0, nullopt, patt, rep);
 
         reader.load_state(0);
         reader.required(from);
@@ -1955,14 +1955,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_replace(text, from, nullopt, patt, rep);
+          return (Value) std_string_replace(text, from, nullopt, patt, rep);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value)std_string_replace(text, from, len, patt, rep);
+          return (Value) std_string_replace(text, from, len, patt, rep);
 
         reader.throw_no_matching_function_call();
       });
@@ -1982,20 +1982,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(acc);
         if(reader.end_overload())
-          return (Value)std_string_find_any_of(text, 0, nullopt, acc);
+          return (Value) std_string_find_any_of(text, 0, nullopt, acc);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(acc);
         if(reader.end_overload())
-          return (Value)std_string_find_any_of(text, from, nullopt, acc);
+          return (Value) std_string_find_any_of(text, from, nullopt, acc);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(acc);
         if(reader.end_overload())
-          return (Value)std_string_find_any_of(text, from, len, acc);
+          return (Value) std_string_find_any_of(text, from, len, acc);
 
         reader.throw_no_matching_function_call();
       });
@@ -2015,20 +2015,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(acc);
         if(reader.end_overload())
-          return (Value)std_string_rfind_any_of(text, 0, nullopt, acc);
+          return (Value) std_string_rfind_any_of(text, 0, nullopt, acc);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(acc);
         if(reader.end_overload())
-          return (Value)std_string_rfind_any_of(text, from, nullopt, acc);
+          return (Value) std_string_rfind_any_of(text, from, nullopt, acc);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(acc);
         if(reader.end_overload())
-          return (Value)std_string_rfind_any_of(text, from, len, acc);
+          return (Value) std_string_rfind_any_of(text, from, len, acc);
 
         reader.throw_no_matching_function_call();
       });
@@ -2048,20 +2048,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(rej);
         if(reader.end_overload())
-          return (Value)std_string_find_not_of(text, 0, nullopt, rej);
+          return (Value) std_string_find_not_of(text, 0, nullopt, rej);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(rej);
         if(reader.end_overload())
-          return (Value)std_string_find_not_of(text, from, nullopt, rej);
+          return (Value) std_string_find_not_of(text, from, nullopt, rej);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(rej);
         if(reader.end_overload())
-          return (Value)std_string_find_not_of(text, from, len, rej);
+          return (Value) std_string_find_not_of(text, from, len, rej);
 
         reader.throw_no_matching_function_call();
       });
@@ -2081,20 +2081,20 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(rej);
         if(reader.end_overload())
-          return (Value)std_string_rfind_not_of(text, 0, nullopt, rej);
+          return (Value) std_string_rfind_not_of(text, 0, nullopt, rej);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.required(rej);
         if(reader.end_overload())
-          return (Value)std_string_rfind_not_of(text, from, nullopt, rej);
+          return (Value) std_string_rfind_not_of(text, from, nullopt, rej);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(rej);
         if(reader.end_overload())
-          return (Value)std_string_rfind_not_of(text, from, len, rej);
+          return (Value) std_string_rfind_not_of(text, from, len, rej);
 
         reader.throw_no_matching_function_call();
       });
@@ -2109,7 +2109,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_reverse(text);
+          return (Value) std_string_reverse(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2126,7 +2126,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.optional(rej);
         if(reader.end_overload())
-          return (Value)std_string_trim(text, rej);
+          return (Value) std_string_trim(text, rej);
 
         reader.throw_no_matching_function_call();
       });
@@ -2143,7 +2143,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.optional(rej);
         if(reader.end_overload())
-          return (Value)std_string_triml(text, rej);
+          return (Value) std_string_triml(text, rej);
 
         reader.throw_no_matching_function_call();
       });
@@ -2160,7 +2160,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.optional(rej);
         if(reader.end_overload())
-          return (Value)std_string_trimr(text, rej);
+          return (Value) std_string_trimr(text, rej);
 
         reader.throw_no_matching_function_call();
       });
@@ -2179,7 +2179,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(len);
         reader.optional(pad);
         if(reader.end_overload())
-          return (Value)std_string_padl(text, len, pad);
+          return (Value) std_string_padl(text, len, pad);
 
         reader.throw_no_matching_function_call();
       });
@@ -2198,7 +2198,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(len);
         reader.optional(pad);
         if(reader.end_overload())
-          return (Value)std_string_padr(text, len, pad);
+          return (Value) std_string_padr(text, len, pad);
 
         reader.throw_no_matching_function_call();
       });
@@ -2213,7 +2213,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_to_upper(text);
+          return (Value) std_string_to_upper(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2228,7 +2228,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_to_lower(text);
+          return (Value) std_string_to_lower(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2247,7 +2247,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(in);
         reader.optional(out);
         if(reader.end_overload())
-          return (Value)std_string_translate(text, in, out);
+          return (Value) std_string_translate(text, in, out);
 
         reader.throw_no_matching_function_call();
       });
@@ -2266,7 +2266,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.optional(delim);
         reader.optional(limit);
         if(reader.end_overload())
-          return (Value)std_string_explode(text, delim, limit);
+          return (Value) std_string_explode(text, delim, limit);
 
         reader.throw_no_matching_function_call();
       });
@@ -2283,7 +2283,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(segs);
         reader.optional(delim);
         if(reader.end_overload())
-          return (Value)std_string_implode(segs, delim);
+          return (Value) std_string_implode(segs, delim);
 
         reader.throw_no_matching_function_call();
       });
@@ -2301,7 +2301,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(delim);
         if(reader.end_overload())
-          return (Value)std_string_hex_encode(data, delim);
+          return (Value) std_string_hex_encode(data, delim);
 
         reader.throw_no_matching_function_call();
       });
@@ -2316,7 +2316,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_hex_decode(text);
+          return (Value) std_string_hex_decode(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2332,7 +2332,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_string_base32_encode(data);
+          return (Value) std_string_base32_encode(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -2347,7 +2347,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_base32_decode(text);
+          return (Value) std_string_base32_decode(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2362,7 +2362,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_string_base64_encode(data);
+          return (Value) std_string_base64_encode(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -2377,7 +2377,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_base64_decode(text);
+          return (Value) std_string_base64_decode(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2393,7 +2393,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_string_url_encode(data);
+          return (Value) std_string_url_encode(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -2408,7 +2408,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_url_decode(text);
+          return (Value) std_string_url_decode(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2424,7 +2424,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_string_url_encode_query(data);
+          return (Value) std_string_url_encode_query(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -2439,7 +2439,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_url_decode_query(text);
+          return (Value) std_string_url_decode_query(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2454,7 +2454,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value)std_string_utf8_validate(text);
+          return (Value) std_string_utf8_validate(text);
 
         reader.throw_no_matching_function_call();
       });
@@ -2472,13 +2472,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(cp);
         reader.optional(perm);
         if(reader.end_overload())
-          return (Value)std_string_utf8_encode(cp, perm);
+          return (Value) std_string_utf8_encode(cp, perm);
 
         reader.start_overload();
         reader.required(cps);
         reader.optional(perm);
         if(reader.end_overload())
-          return (Value)std_string_utf8_encode(cps, perm);
+          return (Value) std_string_utf8_encode(cps, perm);
 
         reader.throw_no_matching_function_call();
       });
@@ -2495,7 +2495,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.optional(perm);
         if(reader.end_overload())
-          return (Value)std_string_utf8_decode(text, perm);
+          return (Value) std_string_utf8_decode(text, perm);
 
         reader.throw_no_matching_function_call();
       });
@@ -2511,7 +2511,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(templ);
         if(reader.end_overload(args))
-          return (Value)std_string_format(templ, args);
+          return (Value) std_string_format(templ, args);
 
         reader.throw_no_matching_function_call();
       });
@@ -2528,7 +2528,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_PCRE(patt, opts);
+          return (Value) std_string_PCRE(patt, opts);
 
         reader.throw_no_matching_function_call();
       });
@@ -2549,7 +2549,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_find(text, 0, nullopt, patt, opts);
+          return (Value) std_string_pcre_find(text, 0, nullopt, patt, opts);
 
         reader.load_state(0);
         reader.required(from);
@@ -2557,14 +2557,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_find(text, from, nullopt, patt, opts);
+          return (Value) std_string_pcre_find(text, from, nullopt, patt, opts);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_find(text, from, len, patt, opts);
+          return (Value) std_string_pcre_find(text, from, len, patt, opts);
 
         reader.throw_no_matching_function_call();
       });
@@ -2585,7 +2585,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_match(text, 0, nullopt, patt, opts);
+          return (Value) std_string_pcre_match(text, 0, nullopt, patt, opts);
 
         reader.load_state(0);
         reader.required(from);
@@ -2593,14 +2593,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_match(text, from, nullopt, patt, opts);
+          return (Value) std_string_pcre_match(text, from, nullopt, patt, opts);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_match(text, from, len, patt, opts);
+          return (Value) std_string_pcre_match(text, from, len, patt, opts);
 
         reader.throw_no_matching_function_call();
       });
@@ -2621,7 +2621,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_named_match(text, 0, nullopt, patt, opts);
+          return (Value) std_string_pcre_named_match(text, 0, nullopt, patt, opts);
 
         reader.load_state(0);
         reader.required(from);
@@ -2629,14 +2629,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_named_match(text, from, nullopt, patt, opts);
+          return (Value) std_string_pcre_named_match(text, from, nullopt, patt, opts);
 
         reader.load_state(0);
         reader.optional(len);
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_named_match(text, from, len, patt, opts);
+          return (Value) std_string_pcre_named_match(text, from, len, patt, opts);
 
         reader.throw_no_matching_function_call();
       });
@@ -2658,7 +2658,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(rep);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_replace(text, 0, nullopt, patt, rep, opts);
+          return (Value) std_string_pcre_replace(text, 0, nullopt, patt, rep, opts);
 
         reader.load_state(0);
         reader.required(from);
@@ -2667,7 +2667,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(rep);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_replace(text, from, nullopt, patt, rep, opts);
+          return (Value) std_string_pcre_replace(text, from, nullopt, patt, rep, opts);
 
         reader.load_state(0);
         reader.optional(len);
@@ -2675,7 +2675,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(rep);
         reader.optional(opts);
         if(reader.end_overload())
-          return (Value)std_string_pcre_replace(text, from, len, patt, rep, opts);
+          return (Value) std_string_pcre_replace(text, from, len, patt, rep, opts);
 
         reader.throw_no_matching_function_call();
       });
@@ -2693,7 +2693,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.required(text);
         reader.optional(from_encoding);
         if(reader.end_overload())
-          return (Value)std_string_iconv(to_encoding, text, from_encoding);
+          return (Value) std_string_iconv(to_encoding, text, from_encoding);
 
         reader.throw_no_matching_function_call();
       });

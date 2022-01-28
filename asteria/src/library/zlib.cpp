@@ -168,7 +168,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_zlib_Deflator_update(defl, output, data);
+          return (void) std_zlib_Deflator_update(defl, output, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -187,7 +187,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_zlib_Deflator_flush(defl, output);
+          return (void) std_zlib_Deflator_flush(defl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -206,7 +206,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_zlib_Deflator_finish(defl, output);
+          return (Value) std_zlib_Deflator_finish(defl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -221,7 +221,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_zlib_Deflator_clear(defl);
+          return (void) std_zlib_Deflator_clear(defl);
 
         reader.throw_no_matching_function_call();
       });
@@ -370,7 +370,7 @@ do_construct_Inflator(V_object& result, V_string format)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_zlib_Inflator_update(infl, output, data);
+          return (void) std_zlib_Inflator_update(infl, output, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -389,7 +389,7 @@ do_construct_Inflator(V_object& result, V_string format)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_zlib_Inflator_flush(infl, output);
+          return (void) std_zlib_Inflator_flush(infl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -408,7 +408,7 @@ do_construct_Inflator(V_object& result, V_string format)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_zlib_Inflator_finish(infl, output);
+          return (Value) std_zlib_Inflator_finish(infl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -423,7 +423,7 @@ do_construct_Inflator(V_object& result, V_string format)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_zlib_Inflator_clear(infl);
+          return (void) std_zlib_Inflator_clear(infl);
 
         reader.throw_no_matching_function_call();
       });
@@ -607,7 +607,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.required(format);
         reader.optional(level);
         if(reader.end_overload())
-          return (Value)std_zlib_Deflator(format, level);
+          return (Value) std_zlib_Deflator(format, level);
 
         reader.throw_no_matching_function_call();
       });
@@ -624,7 +624,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(level);
         if(reader.end_overload())
-          return (Value)std_zlib_deflate(data, level);
+          return (Value) std_zlib_deflate(data, level);
 
         reader.throw_no_matching_function_call();
       });
@@ -641,7 +641,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(level);
         if(reader.end_overload())
-          return (Value)std_zlib_gzip(data, level);
+          return (Value) std_zlib_gzip(data, level);
 
         reader.throw_no_matching_function_call();
       });
@@ -656,7 +656,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(format);
         if(reader.end_overload())
-          return (Value)std_zlib_Inflator(format);
+          return (Value) std_zlib_Inflator(format);
 
         reader.throw_no_matching_function_call();
       });
@@ -671,7 +671,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_zlib_inflate(data);
+          return (Value) std_zlib_inflate(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -686,7 +686,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_zlib_gunzip(data);
+          return (Value) std_zlib_gunzip(data);
 
         reader.throw_no_matching_function_call();
       });

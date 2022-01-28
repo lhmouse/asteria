@@ -71,7 +71,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(templ);
         if(reader.end_overload(values))
-          return (Value)std_debug_logf(templ, values);
+          return (Value) std_debug_logf(templ, values);
 
         reader.throw_no_matching_function_call();
       });
@@ -88,7 +88,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
         reader.optional(value);
         reader.optional(indent);
         if(reader.end_overload())
-          return (Value)std_debug_dump(value, indent);
+          return (Value) std_debug_dump(value, indent);
 
         reader.throw_no_matching_function_call();
       });

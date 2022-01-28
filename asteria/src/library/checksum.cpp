@@ -93,7 +93,7 @@ do_construct_CRC32(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_CRC32_update(hasher, data);
+          return (void) std_checksum_CRC32_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -108,7 +108,7 @@ do_construct_CRC32(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_CRC32_finish(hasher);
+          return (Value) std_checksum_CRC32_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -123,7 +123,7 @@ do_construct_CRC32(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_CRC32_clear(hasher);
+          return (void) std_checksum_CRC32_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -201,7 +201,7 @@ do_construct_FNV1a32(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_FNV1a32_update(hasher, data);
+          return (void) std_checksum_FNV1a32_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -216,7 +216,7 @@ do_construct_FNV1a32(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_FNV1a32_finish(hasher);
+          return (Value) std_checksum_FNV1a32_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -231,7 +231,7 @@ do_construct_FNV1a32(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_FNV1a32_clear(hasher);
+          return (void) std_checksum_FNV1a32_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -323,7 +323,7 @@ do_construct_MD5(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_MD5_update(hasher, data);
+          return (void) std_checksum_MD5_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -338,7 +338,7 @@ do_construct_MD5(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_MD5_finish(hasher);
+          return (Value) std_checksum_MD5_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -353,7 +353,7 @@ do_construct_MD5(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_MD5_clear(hasher);
+          return (void) std_checksum_MD5_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -429,7 +429,7 @@ do_construct_SHA1(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_SHA1_update(hasher, data);
+          return (void) std_checksum_SHA1_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -444,7 +444,7 @@ do_construct_SHA1(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA1_finish(hasher);
+          return (Value) std_checksum_SHA1_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -459,7 +459,7 @@ do_construct_SHA1(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_SHA1_clear(hasher);
+          return (void) std_checksum_SHA1_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -535,7 +535,7 @@ do_construct_SHA224(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_SHA224_update(hasher, data);
+          return (void) std_checksum_SHA224_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -550,7 +550,7 @@ do_construct_SHA224(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA224_finish(hasher);
+          return (Value) std_checksum_SHA224_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -565,7 +565,7 @@ do_construct_SHA224(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_SHA224_clear(hasher);
+          return (void) std_checksum_SHA224_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -641,7 +641,7 @@ do_construct_SHA256(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_SHA256_update(hasher, data);
+          return (void) std_checksum_SHA256_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -656,7 +656,7 @@ do_construct_SHA256(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA256_finish(hasher);
+          return (Value) std_checksum_SHA256_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -671,7 +671,7 @@ do_construct_SHA256(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_SHA256_clear(hasher);
+          return (void) std_checksum_SHA256_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -747,7 +747,7 @@ do_construct_SHA384(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_SHA384_update(hasher, data);
+          return (void) std_checksum_SHA384_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -762,7 +762,7 @@ do_construct_SHA384(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA384_finish(hasher);
+          return (Value) std_checksum_SHA384_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -777,7 +777,7 @@ do_construct_SHA384(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_SHA384_clear(hasher);
+          return (void) std_checksum_SHA384_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -853,7 +853,7 @@ do_construct_SHA512(V_object& result)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_checksum_SHA512_update(hasher, data);
+          return (void) std_checksum_SHA512_update(hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -868,7 +868,7 @@ do_construct_SHA512(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA512_finish(hasher);
+          return (Value) std_checksum_SHA512_finish(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -883,7 +883,7 @@ do_construct_SHA512(V_object& result)
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void)std_checksum_SHA512_clear(hasher);
+          return (void) std_checksum_SHA512_clear(hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -1304,7 +1304,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_CRC32();
+          return (Value) std_checksum_CRC32();
 
         reader.throw_no_matching_function_call();
       });
@@ -1319,7 +1319,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_crc32(data);
+          return (Value) std_checksum_crc32(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1334,7 +1334,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_crc32_file(path);
+          return (Value) std_checksum_crc32_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1346,7 +1346,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_FNV1a32();
+          return (Value) std_checksum_FNV1a32();
 
         reader.throw_no_matching_function_call();
       });
@@ -1361,7 +1361,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_fnv1a32(data);
+          return (Value) std_checksum_fnv1a32(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1376,7 +1376,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_fnv1a32_file(path);
+          return (Value) std_checksum_fnv1a32_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1388,7 +1388,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_MD5();
+          return (Value) std_checksum_MD5();
 
         reader.throw_no_matching_function_call();
       });
@@ -1403,7 +1403,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_md5(data);
+          return (Value) std_checksum_md5(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1418,7 +1418,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_md5_file(path);
+          return (Value) std_checksum_md5_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1430,7 +1430,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA1();
+          return (Value) std_checksum_SHA1();
 
         reader.throw_no_matching_function_call();
       });
@@ -1445,7 +1445,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_sha1(data);
+          return (Value) std_checksum_sha1(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1460,7 +1460,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_sha1_file(path);
+          return (Value) std_checksum_sha1_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1472,7 +1472,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA224();
+          return (Value) std_checksum_SHA224();
 
         reader.throw_no_matching_function_call();
       });
@@ -1487,7 +1487,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_sha224(data);
+          return (Value) std_checksum_sha224(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1502,7 +1502,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_sha224_file(path);
+          return (Value) std_checksum_sha224_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1514,7 +1514,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA256();
+          return (Value) std_checksum_SHA256();
 
         reader.throw_no_matching_function_call();
       });
@@ -1529,7 +1529,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_sha256(data);
+          return (Value) std_checksum_sha256(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1544,7 +1544,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_sha256_file(path);
+          return (Value) std_checksum_sha256_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1556,7 +1556,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA384();
+          return (Value) std_checksum_SHA384();
 
         reader.throw_no_matching_function_call();
       });
@@ -1571,7 +1571,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_sha384(data);
+          return (Value) std_checksum_sha384(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1586,7 +1586,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_sha384_file(path);
+          return (Value) std_checksum_sha384_file(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -1598,7 +1598,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_checksum_SHA512();
+          return (Value) std_checksum_SHA512();
 
         reader.throw_no_matching_function_call();
       });
@@ -1613,7 +1613,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value)std_checksum_sha512(data);
+          return (Value) std_checksum_sha512(data);
 
         reader.throw_no_matching_function_call();
       });
@@ -1628,7 +1628,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_checksum_sha512_file(path);
+          return (Value) std_checksum_sha512_file(path);
 
         reader.throw_no_matching_function_call();
       });

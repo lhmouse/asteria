@@ -693,7 +693,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_filesystem_get_working_directory();
+          return (Value) std_filesystem_get_working_directory();
 
         reader.throw_no_matching_function_call();
       });
@@ -708,7 +708,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_get_real_path(path);
+          return (Value) std_filesystem_get_real_path(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -723,7 +723,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_get_properties(path);
+          return (Value) std_filesystem_get_properties(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -739,7 +739,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(to);
         reader.required(from);
         if(reader.end_overload())
-          return (void)std_filesystem_move_from(to, from);
+          return (void) std_filesystem_move_from(to, from);
 
         reader.throw_no_matching_function_call();
       });
@@ -754,7 +754,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_remove_recursive(path);
+          return (Value) std_filesystem_remove_recursive(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -769,7 +769,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_dir_list(path);
+          return (Value) std_filesystem_dir_list(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -784,7 +784,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_dir_create(path);
+          return (Value) std_filesystem_dir_create(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -799,7 +799,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_dir_remove(path);
+          return (Value) std_filesystem_dir_remove(path);
 
         reader.throw_no_matching_function_call();
       });
@@ -817,7 +817,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.optional(off);
         reader.optional(lim);
         if(reader.end_overload())
-          return (Value)std_filesystem_file_read(path, off, lim);
+          return (Value) std_filesystem_file_read(path, off, lim);
 
         reader.throw_no_matching_function_call();
       });
@@ -837,7 +837,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.optional(off);
         reader.optional(lim);
         if(reader.end_overload())
-          return (Value)std_filesystem_file_stream(global, path, func, off, lim);
+          return (Value) std_filesystem_file_stream(global, path, func, off, lim);
 
         reader.throw_no_matching_function_call();
       });
@@ -855,13 +855,13 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_filesystem_file_write(path, nullopt, data);
+          return (void) std_filesystem_file_write(path, nullopt, data);
 
         reader.load_state(0);
         reader.optional(off);
         reader.required(data);
         if(reader.end_overload())
-          return (void)std_filesystem_file_write(path, off, data);
+          return (void) std_filesystem_file_write(path, off, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -879,7 +879,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(excl);
         if(reader.end_overload())
-          return (void)std_filesystem_file_append(path, data, excl);
+          return (void) std_filesystem_file_append(path, data, excl);
 
         reader.throw_no_matching_function_call();
       });
@@ -895,7 +895,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(to);
         reader.required(from);
         if(reader.end_overload())
-          return (void)std_filesystem_file_copy_from(to, from);
+          return (void) std_filesystem_file_copy_from(to, from);
 
         reader.throw_no_matching_function_call();
       });
@@ -910,7 +910,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value)std_filesystem_file_remove(path);
+          return (Value) std_filesystem_file_remove(path);
 
         reader.throw_no_matching_function_call();
       });

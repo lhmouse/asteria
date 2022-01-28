@@ -486,7 +486,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_chrono_utc_now();
+          return (Value) std_chrono_utc_now();
 
         reader.throw_no_matching_function_call();
       });
@@ -498,7 +498,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_chrono_local_now();
+          return (Value) std_chrono_local_now();
 
         reader.throw_no_matching_function_call();
       });
@@ -510,7 +510,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_chrono_hires_now();
+          return (Value) std_chrono_hires_now();
 
         reader.throw_no_matching_function_call();
       });
@@ -522,7 +522,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value)std_chrono_steady_now();
+          return (Value) std_chrono_steady_now();
 
         reader.throw_no_matching_function_call();
       });
@@ -537,7 +537,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(time_utc);
         if(reader.end_overload())
-          return (Value)std_chrono_local_from_utc(time_utc);
+          return (Value) std_chrono_local_from_utc(time_utc);
 
         reader.throw_no_matching_function_call();
       });
@@ -552,7 +552,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(time_local);
         if(reader.end_overload())
-          return (Value)std_chrono_utc_from_local(time_local);
+          return (Value) std_chrono_utc_from_local(time_local);
 
         reader.throw_no_matching_function_call();
       });
@@ -569,7 +569,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.required(time_point);
         reader.optional(with_ms);
         if(reader.end_overload())
-          return (Value)std_chrono_utc_format(time_point, with_ms);
+          return (Value) std_chrono_utc_format(time_point, with_ms);
 
         reader.throw_no_matching_function_call();
       });
@@ -584,7 +584,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(time_str);
         if(reader.end_overload())
-          return (Value)std_chrono_utc_parse(time_str);
+          return (Value) std_chrono_utc_parse(time_str);
 
         reader.throw_no_matching_function_call();
       });
