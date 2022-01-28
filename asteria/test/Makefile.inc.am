@@ -49,6 +49,7 @@ check_PROGRAMS +=  \
   %reldir%/zlib.test  \
   %reldir%/c_stack_overflow.test  \
   %reldir%/var_mod.test  \
+  %reldir%/ini.test  \
   ${NOTHING}
 
 EXTRA_DIST +=  \

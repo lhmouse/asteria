@@ -2529,6 +2529,42 @@
 	* Throws an exception if a read error occurs, or if the string is
 	  invalid.
 
+### `std.ini`
+
+`std.ini.format([object])`
+
+       * Converts `object` to a string in the INI format. Unlike JSON,
+         the INI format is too primitive to support complex structures,
+         which limits the domain of convertible values. `object` may be
+         null or an object of objects, where up to two nesting levels are
+         supported. Boolean, integer, real and string values are written
+         in string forms; the others are ignored silently.
+
+       * Returns the formatted text as a string.
+
+`std.ini.parse(text)`
+
+       * Parses a string containing data encoded in the INI format and
+         converts it to a value.
+
+       * Returns the parsed value as an object. Each section in the INI
+         string corresponds to a subobject, and each key in this section
+         corresponds to a string in this subobject. No type conversion
+         is performed. Comments may start with either `;` or `#`.
+
+       * Throws an exception if the string is invalid.
+
+`std.ini.parse_file(path)`
+
+       * Parses the contents of the file denoted by `path` as an INI
+         string for a value. This function behaves identically to
+         `parse()` otherwise.
+
+       * Returns the parsed value.
+
+       * Throws an exception if a read error occurs, or if the string is
+         invalid.
+
 ### `std.io`
 
 `std.io.getc()`
