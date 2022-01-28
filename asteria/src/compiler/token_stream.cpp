@@ -16,19 +16,19 @@ class Line_Reader
   private:
     tinybuf* m_cbuf;
     cow_string m_file;
-    size_t m_line = 0;
+    int m_line = 0;
 
     // current line
     size_t m_off = 0;
     cow_string m_str;
 
     // string cache
-    cow_dictionary<bool> m_csc_cache;
+    cow_dictionary<bool> m_interned_strings;
 
   public:
     explicit
     Line_Reader(tinybuf& xcbuf, const cow_string& xfile, int xline)
-      : m_cbuf(&xcbuf), m_file(xfile), m_line(static_cast<size_t>(xline) - 1)
+      : m_cbuf(&xcbuf), m_file(xfile), m_line(xline)
       { }
 
   public:
@@ -45,18 +45,18 @@ class Line_Reader
 
     int
     line() const noexcept
-      { return static_cast<int>(this->m_line);  }
+      { return this->m_line - 1;  }
 
     int
     column() const noexcept
-      { return static_cast<int>(this->m_off + 1);  }
+      { return static_cast<int>(this->m_off) + 1;  }
 
     Source_Location
     tell() const noexcept
-      { return Source_Location(this->file(), this->line(), this->column());  }
+      { return { this->file(), this->line(), this->column() };  }
 
     bool
-    next_line()
+    advance()
       {
         // Clear the current line.
         this->m_str.clear();
@@ -64,15 +64,16 @@ class Line_Reader
 
         // Buffer a line.
         int ch;
-        while(((ch = this->m_cbuf->getc()) != EOF) && (ch != '\n'))
-          this->m_str.push_back(static_cast<char>(ch));
+        for(;;)
+          if((ch = this->m_cbuf->getc()) == '\n')
+            break;
+          else if(this->m_str.empty() && (ch == EOF))
+            return false;
+          else if(ch == EOF)
+            break;
+          else
+            this->m_str.push_back(static_cast<char>(ch));
 
-        // Fail if the last line is empty and EOF is encountered.
-        if(this->m_str.empty() && (ch == EOF))
-          return false;
-
-        // Accept the line.
-        // Increment the line number if a line has been read successfully.
         this->m_line++;
         return true;
       }
@@ -124,12 +125,12 @@ class Line_Reader
       }
 
     const phsh_string&
-    cache_string(cow_string&& val)
+    intern_string(cow_string&& val)
       {
-        auto it = this->m_csc_cache.find(val);
-        if(it == this->m_csc_cache.end()) {
+        auto it = this->m_interned_strings.find(val);
+        if(it == this->m_interned_strings.end()) {
           val.shrink_to_fit();
-          it = this->m_csc_cache.try_emplace(::std::move(val)).first;
+          it = this->m_interned_strings.try_emplace(::std::move(val)).first;
         }
         return it->first;
       }
@@ -673,7 +674,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char he
       }
     }
 
-    Token::S_string_literal xtoken = { reader.cache_string(::std::move(val)) };
+    Token::S_string_literal xtoken = { reader.intern_string(::std::move(val)) };
     return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
 
@@ -776,7 +777,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
     cow_string name;
     name.assign(reader.data(), tlen);
 
-    Token::S_identifier xtoken = { reader.cache_string(::std::move(name)) };
+    Token::S_identifier xtoken = { reader.intern_string(::std::move(name)) };
     return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
   }
 
@@ -803,7 +804,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
 
     // Read source code line by line.
     Line_Reader reader(cbuf, file, line);
-    while(reader.next_line()) {
+    while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))
         continue;
