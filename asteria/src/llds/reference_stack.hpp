@@ -132,7 +132,7 @@ class Reference_Stack
     Reference_Stack&
     pop(size_t count = 1) noexcept
       {
-        ROCKET_ASSERT(count <= this->size());
+        ROCKET_ASSERT(count <= this->m_etop);
         this->m_etop -= (uint32_t)count;
         return *this;
       }
