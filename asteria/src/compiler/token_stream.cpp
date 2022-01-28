@@ -11,10 +11,10 @@
 namespace asteria {
 namespace {
 
-class Line_Reader
+class Text_Reader
   {
   private:
-    tinybuf* m_cbuf;
+    tinybuf& m_cbuf;
     cow_string m_file;
     int m_line = 0;
 
@@ -27,18 +27,11 @@ class Line_Reader
 
   public:
     explicit
-    Line_Reader(tinybuf& xcbuf, const cow_string& xfile, int xline)
-      : m_cbuf(&xcbuf), m_file(xfile), m_line(xline)
+    Text_Reader(tinybuf& xcbuf, const cow_string& xfile, int xline)
+      : m_cbuf(xcbuf), m_file(xfile), m_line(xline)
       { }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Line_Reader)
-      = default;
-
-    tinybuf&
-    cbuf() const noexcept
-      { return *(this->m_cbuf);  }
-
     const cow_string&
     file() const noexcept
       { return this->m_file;  }
@@ -58,24 +51,10 @@ class Line_Reader
     bool
     advance()
       {
-        // Clear the current line.
-        this->m_str.clear();
         this->m_off = 0;
-
-        // Buffer a line.
-        int ch;
-        for(;;)
-          if((ch = this->m_cbuf->getc()) == '\n')
-            break;
-          else if(this->m_str.empty() && (ch == EOF))
-            return false;
-          else if(ch == EOF)
-            break;
-          else
-            this->m_str.push_back(static_cast<char>(ch));
-
-        this->m_line++;
-        return true;
+        bool succ = getline(this->m_str, this->m_cbuf);
+        this->m_line += succ;
+        return succ;
       }
 
     size_t
@@ -83,62 +62,44 @@ class Line_Reader
       { return this->m_str.size() - this->m_off;  }
 
     const char*
-    data(size_t add = 0) const
+    data(size_t nadd = 0) const noexcept
       {
-        if(add > this->navail())
-          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
-                        this->m_off, add, this->m_str.size());
-
-        size_t off = this->m_off + add;
-        return this->m_str.data() + off;
+        return (nadd <= this->navail())
+                  ? (this->m_str.data() + this->m_off + nadd)
+                  : "";
       }
 
     char
-    peek(size_t add = 0) const noexcept
-      {
-        if(add > this->navail())
-          return 0;
+    peek(size_t nadd = 0) const noexcept
+      { return *(this->data(nadd));  }
 
-        size_t off = this->m_off + add;
-        return this->m_str[off];
+    void
+    consume(size_t nadd) noexcept
+      {
+        ROCKET_ASSERT(nadd <= this->navail());
+        this->m_off += nadd;
       }
 
     void
-    consume(size_t add)
-      {
-        if(add > this->navail())
-          ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)",
-                        this->m_off, add, this->m_str.size());
-
-        size_t off = this->m_off + add;
-        this->m_off = off;
-      }
-
-    void
-    rewind(size_t off = 0)
-      {
-        if(off > this->m_str.size()) {
-          ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)",
-                        off, this->m_str.size());
-        }
-        this->m_off = off;
-      }
+    rewind() noexcept
+      { this->m_off = 0;  }
 
     const phsh_string&
     intern_string(cow_string&& val)
       {
         auto it = this->m_interned_strings.find(val);
-        if(it == this->m_interned_strings.end()) {
-          val.shrink_to_fit();
-          it = this->m_interned_strings.try_emplace(::std::move(val)).first;
-        }
+        if(it != this->m_interned_strings.end())
+          return it->first;
+
+        val.shrink_to_fit();
+        it = this->m_interned_strings.try_emplace(::std::move(val)).first;
         return it->first;
       }
   };
 
 template<typename XTokenT>
 bool
-do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
+do_push_token(cow_vector<Token>& tokens, Text_Reader& reader, size_t tlen, XTokenT&& xtoken)
   {
     tokens.emplace_back(reader.tell(), tlen, ::std::forward<XTokenT>(xtoken));
     reader.consume(tlen);
@@ -169,7 +130,7 @@ do_may_infix_operators_follow(cow_vector<Token>& tokens)
   }
 
 size_t
-do_mask_length(size_t& tlen, Line_Reader& reader, uint8_t mask)
+do_mask_length(size_t& tlen, Text_Reader& reader, uint8_t mask)
   {
     size_t mlen = 0;
     while(is_cctype(reader.peek(tlen), mask)) {
@@ -180,7 +141,7 @@ do_mask_length(size_t& tlen, Line_Reader& reader, uint8_t mask)
   }
 
 cow_string&
-do_collect_digits(cow_string& tstr, size_t& tlen, Line_Reader& reader, uint8_t mask)
+do_collect_digits(cow_string& tstr, size_t& tlen, Text_Reader& reader, uint8_t mask)
   {
     for(;;) {
       // Skip a digit separator.
@@ -202,7 +163,7 @@ do_collect_digits(cow_string& tstr, size_t& tlen, Line_Reader& reader, uint8_t m
   }
 
 bool
-do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader,
+do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
                           bool integers_as_reals)
   {
     // numeric-literal ::=
@@ -501,7 +462,7 @@ constexpr s_punctuators[] =
   };
 
 bool
-do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
+do_accept_punctuator(cow_vector<Token>& tokens, Text_Reader& reader)
   {
     // For two elements X and Y, if X is in front of Y, then X is potential a prefix
     // of Y. Traverse the range backwards to prevent premature matches, as a token is
@@ -526,7 +487,7 @@ do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
   }
 
 bool
-do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char head,
+do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char head,
                          bool escapable)
   {
     // string-literal ::=
@@ -745,7 +706,7 @@ constexpr s_keywords[] =
   };
 
 bool
-do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader,
+do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
                                 bool keywords_as_identifiers)
   {
     // identifier ::=
@@ -803,7 +764,7 @@ reload(const cow_string& file, int line, tinybuf& cbuf)
     opt<Source_Location> bcomm;
 
     // Read source code line by line.
-    Line_Reader reader(cbuf, file, line);
+    Text_Reader reader(cbuf, file, line);
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))

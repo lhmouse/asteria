@@ -39,6 +39,12 @@ class basic_cow_string;
 **/
 
 template<typename charT, typename traitsT>
+class basic_tinybuf;
+
+template<typename charT, typename traitsT>
+class basic_tinyfmt;
+
+template<typename charT, typename traitsT>
 class basic_shallow_string
   {
   private:
@@ -118,9 +124,6 @@ template<typename charT, typename traitsT, typename allocT>
 constexpr basic_shallow_string<charT, traitsT>
 sref(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
   { return basic_shallow_string<charT, traitsT>(str);  }
-
-template<typename charT, typename traitsT>
-class basic_tinyfmt;
 
 template<typename charT, typename traitsT>
 inline basic_tinyfmt<charT, traitsT>&
@@ -2115,6 +2118,22 @@ inline basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt,
            const basic_cow_string<charT, traitsT, allocT>& str)
   { return fmt.putn(str.data(), str.size());  }
+
+template<typename charT, typename traitsT, typename allocT>
+inline bool
+getline(basic_cow_string<charT, traitsT, allocT>& str, basic_tinybuf<charT, traitsT>& buf)
+  {
+    str.clear();
+    typename traitsT::int_type ch;
+
+    for(;;)
+      if(traitsT::is_eof(ch = buf.getc()))
+        return !str.empty();  // end of stream
+      else if(traitsT::eq(traitsT::to_char_type(ch), '\n'))
+        return true;  // end of line
+      else
+        str += traitsT::to_char_type(ch);  // plain character
+  }
 
 using shallow_string     = basic_shallow_string<char>;
 using shallow_wstring    = basic_shallow_string<wchar_t>;
