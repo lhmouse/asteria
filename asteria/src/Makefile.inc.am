@@ -77,6 +77,7 @@ include_asteria_library_HEADERS =  \
   %reldir%/library/checksum.hpp  \
   %reldir%/library/json.hpp  \
   %reldir%/library/io.hpp  \
+  %reldir%/library/zlib.hpp  \
   ${NOTHING}
 
 lib_LTLIBRARIES += lib/libasteria.la
