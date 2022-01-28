@@ -10,7 +10,7 @@ namespace asteria {
 
 void
 load_and_execute_single_noreturn()
-  try {
+  {
     // Load and parse the script.
     try {
       if(repl_file == "-")
@@ -19,6 +19,7 @@ load_and_execute_single_noreturn()
         repl_script.reload_file(repl_file.c_str());
     }
     catch(exception& stdex) {
+      // Print the error and exit.
       exit_printf(exit_compiler_error, "! error: %s\n", stdex.what());
     }
 
@@ -36,9 +37,6 @@ load_and_execute_single_noreturn()
 
     // Exit with this code.
     exit_printf(static_cast<Exit_Status>(val.as_integer()));
-  }
-  catch(exception& stdex) {
-    exit_printf(exit_runtime_error, "! error: %s\n", stdex.what());
   }
 
 }  // namespace asteria

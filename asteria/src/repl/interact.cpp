@@ -12,7 +12,7 @@ namespace asteria {
 
 void
 read_execute_print_single()
-  try {
+  {
     // Prepare for the next snippet.
     repl_source.clear();
     repl_file.clear();
@@ -124,9 +124,11 @@ read_execute_print_single()
       compl_source += "\n);";
 
       cow_string real_name = repl_file;
-      if(real_name.empty())
-        ::sprintf(strbuf, "expression #%lu", repl_index),
-          real_name.append(strbuf);
+      if(real_name.empty()) {
+        // Compose a self-incremental name for the expression.
+        ::sprintf(strbuf, "expression #%lu", repl_index);
+        real_name.append(strbuf);
+      }
 
       repl_script.reload_string(real_name, 0, compl_source);
       repl_file = ::std::move(real_name);
@@ -138,12 +140,20 @@ read_execute_print_single()
         throw;
 
       cow_string real_name = repl_file;
-      if(real_name.empty())
-        ::sprintf(strbuf, "snippet #%lu", repl_index),
-          real_name.append(strbuf);
+      if(real_name.empty()) {
+        // Compose a self-incremental name for the snippet.
+        ::sprintf(strbuf, "snippet #%lu", repl_index);
+        real_name.append(strbuf);
+      }
 
-      repl_script.reload_string(real_name, repl_source);
-      repl_file = ::std::move(real_name);
+      try {
+        repl_script.reload_string(real_name, repl_source);
+        repl_file = ::std::move(real_name);
+      }
+      catch(Compiler_Error& again) {
+        // Reject the snippet if there is an error.
+        return repl_printf("! error: %s\n", again.what());
+      }
     }
 
     // Save the accepted snippet.
@@ -151,8 +161,15 @@ read_execute_print_single()
     repl_last_file.assign(repl_file.begin(), repl_file.end());
 
     // Execute the script.
-    repl_printf("* running '%s'...\n", repl_file.c_str());
-    auto ref = repl_script.execute(::std::move(repl_args));
+    Reference ref;
+    try {
+      repl_printf("* running '%s'...\n", repl_file.c_str());
+      ref = repl_script.execute(::std::move(repl_args));
+    }
+    catch(exception& stdex) {
+      // Print the error and fail.
+      return repl_printf("! error: %s\n", stdex.what());
+    }
 
     // Stringify the result.
     if(ref.is_void())
@@ -162,9 +179,6 @@ read_execute_print_single()
     ::rocket::tinyfmt_str fmt;
     val.dump(fmt);
     return repl_printf("* result #%lu: %s\n", repl_index, fmt.c_str());
-  }
-  catch(exception& stdex) {
-    repl_printf("! error: %s\n", stdex.what());
   }
 
 }  // namespace asteria
