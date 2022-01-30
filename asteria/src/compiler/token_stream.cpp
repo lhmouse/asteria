@@ -52,9 +52,11 @@ class Text_Reader
     advance()
       {
         this->m_off = 0;
-        bool succ = getline(this->m_str, this->m_cbuf);
-        this->m_line += succ;
-        return succ;
+        if(!getline(this->m_str, this->m_cbuf))
+          return false;
+
+        this->m_line += 1;
+        return true;
       }
 
     size_t
@@ -64,9 +66,8 @@ class Text_Reader
     const char*
     data(size_t nadd = 0) const noexcept
       {
-        return (nadd <= this->navail())
-                  ? (this->m_str.data() + this->m_off + nadd)
-                  : "";
+        return ROCKET_EXPECT(nadd <= this->navail())
+            ? (this->m_str.data() + this->m_off + nadd) : "";
       }
 
     char
