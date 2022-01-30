@@ -239,23 +239,20 @@ main(int argc, char** argv)
     prepare_repl_commands();
 
     for(;;) {
-      // Check for errors.
-      if(::ferror(stdin))
-        exit_printf(exit_system_error,
-              "! could not read standard input (errno was `%d`)\n", errno);
-
-      if(::feof(stdin))
-        exit_printf(exit_success, "* have a nice day :)\n");
-
-      // Process the next snippet.
       const STDIO_Sentry sentry;
       ::fputc('\n', stderr);
+
+      // Read a snippet.
       read_execute_print_single();
+
+      if(::ferror(stdin))
+        exit_printf(exit_system_error, "! could not read standard input: %m\n");
+      else if(::feof(stdin))
+        exit_printf(exit_success, "* have a nice day :)\n");
     }
   }
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available.
     // There isn't much we can do.
-    exit_printf(exit_system_error,
-          "! unhandled exception: %s\n", stdex.what());
+    exit_printf(exit_system_error, "! unhandled exception: %s\n", stdex.what());
   }
