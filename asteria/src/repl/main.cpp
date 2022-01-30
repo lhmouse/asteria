@@ -244,7 +244,6 @@ main(int argc, char** argv)
 
       // Read a snippet.
       read_execute_print_single();
-
       if(::ferror(stdin))
         exit_printf(exit_system_error, "! could not read standard input: %m\n");
       else if(::feof(stdin))
