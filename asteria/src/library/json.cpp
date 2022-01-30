@@ -716,9 +716,9 @@ std_json_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
     if(!fp)
-      ASTERIA_THROW_RUNTIME_ERROR("could not open file '$2'\n"
-                    "[`fopen()` failed: $1]",
-                    format_errno(), path);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not open file '$2'\n"
+          "[`fopen()` failed: $1]", format_errno(), path);
 
     // Parse characters from the file.
     ::rocket::tinybuf_file cbuf(::std::move(fp));
