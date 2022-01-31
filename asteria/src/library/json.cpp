@@ -468,7 +468,7 @@ do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm)
   }
 
 Value
-do_json_parse_nonrecursive(Token_Stream& tstrm)
+do_parse_nonrecursive(Token_Stream& tstrm)
   {
     // Implement a non-recursive descent parser.
     Value value;
@@ -641,7 +641,7 @@ do_json_parse_nonrecursive(Token_Stream& tstrm)
   }
 
 Value
-do_json_parse(tinybuf& cbuf)
+do_parse(tinybuf& cbuf)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric
     // literals and comments.
@@ -656,7 +656,7 @@ do_json_parse(tinybuf& cbuf)
       ASTERIA_THROW_RUNTIME_ERROR("empty JSON string");
 
     // Parse a single value.
-    auto value = do_json_parse_nonrecursive(tstrm);
+    auto value = do_parse_nonrecursive(tstrm);
     if(!tstrm.empty())
       ASTERIA_THROW_RUNTIME_ERROR("excess text at end of JSON string");
 
@@ -707,7 +707,7 @@ std_json_parse(V_string text)
     // Parse characters from the string.
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(text, tinybuf::open_read);
-    return do_json_parse(cbuf);
+    return do_parse(cbuf);
   }
 
 Value
@@ -722,7 +722,7 @@ std_json_parse_file(V_string path)
 
     // Parse characters from the file.
     ::rocket::tinybuf_file cbuf(::std::move(fp));
-    return do_json_parse(cbuf);
+    return do_parse(cbuf);
   }
 
 void
