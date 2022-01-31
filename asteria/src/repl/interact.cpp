@@ -137,7 +137,7 @@ read_execute_print_single()
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
       if(except.status() >= compiler_status_semantic_error_base)
-        throw;
+        return repl_printf("! error: %s\n", except.what());
 
       cow_string real_name = repl_file;
       if(real_name.empty()) {
