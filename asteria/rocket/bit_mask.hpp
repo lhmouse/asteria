@@ -17,7 +17,7 @@ class bit_mask
 
   public:
     using value_type = valueT;
-    static constexpr size_t bit_count = sizeof(valueT) * CHAR_BIT;
+    static constexpr size_t bit_count = sizeof(valueT) * 8;
 
   private:
     value_type m_value = { };
