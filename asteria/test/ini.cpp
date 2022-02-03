@@ -20,6 +20,7 @@ int main()
         assert obj.global == "value";
         assert obj.section1.key == "value";
         assert obj.section1."some crazy" == "spaces";
+        assert obj.section2."key without a value" == "";
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
