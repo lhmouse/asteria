@@ -54,6 +54,24 @@ class Reference_Dictionary
         return qbkt;
       }
 
+    // This function is used to de-duplicate the implementations of
+    // `use_hint_opt()` and `mut_use_hint_opt()`.
+    Reference*
+    do_xhint_opt(size_t hint, const phsh_string& name) const noexcept
+      {
+        size_t nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
+        if(hint >= nbkt)
+          return nullptr;
+
+        // Check whether the hint points to a match.
+        auto qbkt = this->m_bptr + hint;
+        if(!*qbkt || !details_reference_dictionary::do_compare_eq(qbkt->kstor[0], name))
+          return nullptr;
+
+        // The hint is valid.
+        return qbkt->vstor;
+      }
+
     // This function is used for relocation after an element is erased.
     void
     do_xrelocate_but(Bucket* qxcld) noexcept;
@@ -194,6 +212,29 @@ class Reference_Dictionary
         return qbkt->vstor;
       }
 
+    size_t
+    get_hint(const Reference* qref) const noexcept
+      {
+        // Note `qref` has to point to a valid reference in this container.
+        ROCKET_ASSERT(qref);
+        size_t nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
+        size_t hint = (size_t)((char*)qref - (char*)this->m_bptr) / sizeof(Bucket);
+        ROCKET_ASSERT(hint < nbkt);
+        return hint;
+      }
+
+    const Reference*
+    use_hint_opt(size_t hint, const phsh_string& name) const noexcept
+      {
+        return this->do_xhint_opt(hint, name);
+      }
+
+    Reference*
+    mut_use_hint_opt(size_t hint, const phsh_string& name) noexcept
+      {
+        return this->do_xhint_opt(hint, name);
+      }
+
     pair<Reference*, bool>
     insert(const phsh_string& name)
       {
@@ -206,11 +247,11 @@ class Reference_Dictionary
         // Find a bucket for the new name.
         auto qbkt = this->do_xprobe(name);
         if(*qbkt)
-          return ::std::make_pair(qbkt->vstor, false);
+          return { qbkt->vstor, false };
 
         // Construct a null reference and return it.
         this->do_attach(qbkt, name);
-        return ::std::make_pair(qbkt->vstor, true);
+        return { qbkt->vstor, true };
       }
 
     bool

@@ -74,8 +74,30 @@ class Abstract_Context
     get_named_reference_opt(const phsh_string& name) const
       {
         auto qref = this->m_named_refs.find_opt(name);
+        if(qref)
+          return qref;
+
+        // If the name is not reserved, fail.
+        if(!name.rdstr().starts_with(sref("__")))
+          return nullptr;
+
+        qref = this->do_create_lazy_reference(nullptr, name);
+        return qref;
+      }
+
+    const Reference*
+    get_named_reference_with_hint_opt(size_t& hint, const phsh_string& name) const
+      {
+        auto qref = this->m_named_refs.use_hint_opt(hint, name);
+        if(qref)
+          return qref;
+
+        // Try a plain find operation.
+        qref = this->get_named_reference_opt(name);
         if(!qref)
-          qref = this->do_create_lazy_reference(nullptr, name);
+          return nullptr;
+
+        hint = this->m_named_refs.get_hint(qref);
         return qref;
       }
 
@@ -83,9 +105,16 @@ class Abstract_Context
     open_named_reference(const phsh_string& name)
       {
         auto pair = this->m_named_refs.insert(name);
-        if(pair.second && name.rdstr().starts_with(sref("__")))
-          this->do_create_lazy_reference(pair.first, name);
-        return *(pair.first);
+        auto qref = pair.first;
+        if(!pair.second)
+          return *qref;
+
+        // If the name is not reserved, fail.
+        if(!name.rdstr().starts_with(sref("__")))
+          return *qref;
+
+        this->do_create_lazy_reference(pair.first, name);
+        return *qref;
       }
   };
 
