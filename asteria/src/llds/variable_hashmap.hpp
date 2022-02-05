@@ -42,10 +42,6 @@ class Variable_HashMap
     ROCKET_PURE Bucket*
     do_xprobe(const void* key_p) const noexcept
       {
-        // Optimize the lookup for small tables.
-        if(this->m_head && (this->m_head->key_p == key_p))
-          return this->m_head;
-
         // Find a bucket using linear probing.
         auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
                           reinterpret_cast<uintptr_t>(key_p));
