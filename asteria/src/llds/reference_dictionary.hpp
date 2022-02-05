@@ -55,20 +55,33 @@ class Reference_Dictionary
       }
 
     // This function is used to de-duplicate the implementations of
-    // `use_hint_opt()` and `mut_use_hint_opt()`.
+    // find functions.
     Reference*
-    do_xhint_opt(size_t hint, const phsh_string& name) const noexcept
+    do_xfind_opt(size_t* hint_opt, const phsh_string& name) const noexcept
       {
+        // Be advised that `do_xprobe()` shall not be called when the
+        // table has not been allocated.
         size_t nbkt = static_cast<size_t>(this->m_eptr - this->m_bptr);
-        if(hint >= nbkt)
+        if(nbkt == 0)
           return nullptr;
 
-        // Check whether the hint points to a match.
-        auto qbkt = this->m_bptr + hint;
-        if(!*qbkt || !details_reference_dictionary::do_compare_eq(qbkt->kstor[0], name))
+        // If a hint is provided, use it.
+        if(hint_opt && ROCKET_EXPECT(*hint_opt < nbkt)) {
+          auto qbkt = this->m_bptr + *hint_opt;
+          if(*qbkt && details_reference_dictionary::do_compare_eq(qbkt->kstor[0], name))
+            return qbkt->vstor;
+        }
+
+        // Find the bucket for the name.
+        auto qbkt = this->do_xprobe(name);
+        if(!*qbkt)
           return nullptr;
 
-        // The hint is valid.
+        // Update the hint as necessary.
+        if(hint_opt)
+          *hint_opt = static_cast<size_t>(qbkt - this->m_bptr);
+
+        ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
         return qbkt->vstor;
       }
 
@@ -181,35 +194,25 @@ class Reference_Dictionary
     const Reference*
     find_opt(const phsh_string& name) const noexcept
       {
-        // Be advised that `do_xprobe()` shall not be called when the
-        // table has not been allocated.
-        if(!this->m_bptr)
-          return nullptr;
-
-        // Find the bucket for the name.
-        auto qbkt = this->do_xprobe(name);
-        if(!*qbkt)
-          return nullptr;
-
-        ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
-        return qbkt->vstor;
+        return this->do_xfind_opt(nullptr, name);
       }
 
     Reference*
     mut_find_opt(const phsh_string& name) noexcept
       {
-        // Be advised that `do_xprobe()` shall not be called when the
-        // table has not been allocated.
-        if(!this->m_bptr)
-          return nullptr;
+        return this->do_xfind_opt(nullptr, name);
+      }
 
-        // Find the bucket for the name.
-        auto qbkt = this->do_xprobe(name);
-        if(!*qbkt)
-          return nullptr;
+    const Reference*
+    find_with_hint_opt(size_t& hint, const phsh_string& name) const noexcept
+      {
+        return this->do_xfind_opt(&hint, name);
+      }
 
-        ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
-        return qbkt->vstor;
+    Reference*
+    mut_find_with_hint_opt(size_t& hint, const phsh_string& name) noexcept
+      {
+        return this->do_xfind_opt(&hint, name);
       }
 
     size_t
@@ -221,18 +224,6 @@ class Reference_Dictionary
         size_t hint = (size_t)((char*)qref - (char*)this->m_bptr) / sizeof(Bucket);
         ROCKET_ASSERT(hint < nbkt);
         return hint;
-      }
-
-    const Reference*
-    use_hint_opt(size_t hint, const phsh_string& name) const noexcept
-      {
-        return this->do_xhint_opt(hint, name);
-      }
-
-    Reference*
-    mut_use_hint_opt(size_t hint, const phsh_string& name) noexcept
-      {
-        return this->do_xhint_opt(hint, name);
       }
 
     pair<Reference*, bool>

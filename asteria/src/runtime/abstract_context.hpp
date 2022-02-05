@@ -88,16 +88,15 @@ class Abstract_Context
     const Reference*
     get_named_reference_with_hint_opt(size_t& hint, const phsh_string& name) const
       {
-        auto qref = this->m_named_refs.use_hint_opt(hint, name);
+        auto qref = this->m_named_refs.find_with_hint_opt(hint, name);
         if(qref)
           return qref;
 
-        // Try a plain find operation.
-        qref = this->get_named_reference_opt(name);
-        if(!qref)
+        // If the name is not reserved, fail.
+        if(!name.rdstr().starts_with(sref("__")))
           return nullptr;
 
-        hint = this->m_named_refs.get_hint(qref);
+        qref = this->do_create_lazy_reference(nullptr, name);
         return qref;
       }
 
