@@ -121,6 +121,13 @@ do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     return status;
   }
 
+Reference&
+do_push_reference_common(Reference_Stack& stack, const Reference& ref)
+  {
+    // TODO: This is called heavily and requires some optimization.
+    return stack.push() = ref;
+  }
+
 // These are user-defined parameter types for AVMC nodes.
 // The `enumerate_variables()` callback is optional.
 
@@ -946,8 +953,7 @@ struct Traits_push_global_reference
         if(!qref)
           ASTERIA_THROW_RUNTIME_ERROR("unresolvable global identifier `$1`", name);
 
-        // Push a copy of it.
-        ctx.stack().push() = *qref;
+        do_push_reference_common(ctx.stack(), *qref);
         return air_status_next;
       }
   };
@@ -996,8 +1002,7 @@ struct Traits_push_local_reference
         if(qref->is_invalid())
           ASTERIA_THROW_RUNTIME_ERROR("use of bypassed variable or reference `$1`", name);
 
-        // Push a copy of it.
-        ctx.stack().push() = *qref;
+        do_push_reference_common(ctx.stack(), *qref);
         return air_status_next;
       }
   };
@@ -1016,7 +1021,7 @@ struct Traits_push_bound_reference
     ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Reference& ref)
       {
-        ctx.stack().push() = ref;
+        do_push_reference_common(ctx.stack(), ref);
         return air_status_next;
       }
   };
