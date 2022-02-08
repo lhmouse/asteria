@@ -39,6 +39,7 @@
 #include <type_traits>
 #include <functional>
 #include <algorithm>
+#include <array>
 
 #include <climits>
 #include <cmath>
