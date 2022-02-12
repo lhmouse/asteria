@@ -34,9 +34,10 @@ inline bool
 do_compare_eq(const phsh_string& lhs, const phsh_string& rhs) noexcept
   {
     // Generally, we expect the strings to compare equal.
-    return (lhs.size() == rhs.size())
-           && ((lhs.c_str() == rhs.c_str())
-               || (::std::memcmp(lhs.c_str(), rhs.c_str(), lhs.size()) == 0));
+    return ROCKET_EXPECT((((uintptr_t) lhs.c_str() ^ (uintptr_t) rhs.c_str())
+                          | (lhs.size() ^ rhs.size())) == 0)
+           || ((lhs.size() == rhs.size())
+               && (::std::memcmp(lhs.c_str(), rhs.c_str(), lhs.size()) == 0));
   }
 
 }  // namespace details_reference_dictionary
