@@ -210,24 +210,24 @@ class basic_prehashed_string
       { return this->m_sth.str().rend();  }
 
     // 24.3.2.4, capacity
-    bool
+    constexpr bool
     empty() const noexcept
       { return this->m_sth.str().empty();  }
 
-    size_type
+    constexpr size_type
     size() const noexcept
       { return this->m_sth.str().size();  }
 
-    size_type
+    constexpr size_type
     length() const noexcept
       { return this->m_sth.str().length();  }
 
     // N.B. This is a non-standard extension.
-    difference_type
+    constexpr difference_type
     ssize() const noexcept
       { return static_cast<difference_type>(this->m_sth.str().size());  }
 
-    size_type
+    constexpr size_type
     max_size() const noexcept
       { return this->m_sth.str().max_size();  }
 
@@ -306,7 +306,7 @@ class basic_prehashed_string
     data() const noexcept
       { return this->m_sth.str().data();  }
 
-    const value_type*
+    constexpr const value_type*
     c_str() const noexcept
       { return this->m_sth.str().c_str();  }
   };
