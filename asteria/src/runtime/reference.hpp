@@ -83,11 +83,11 @@ class alignas(max_align_t) Reference
       {
         // Determine which fields have to be swapped.
         bmask32 mask = { this->m_index, other.m_index };
-        if(ROCKET_UNEXPECT(mask.get(index_temporary)))
+        if(ROCKET_UNEXPECT(mask[index_temporary]))
           this->m_value.swap(other.m_value);
-        if(ROCKET_UNEXPECT(mask.get(index_variable)))
+        if(ROCKET_UNEXPECT(mask[index_variable]))
           this->m_var.swap(other.m_var);
-        if(ROCKET_UNEXPECT(mask.get(index_ptc_args)))
+        if(ROCKET_UNEXPECT(mask[index_ptc_args]))
           this->m_ptca.swap(other.m_ptca);
       }
 

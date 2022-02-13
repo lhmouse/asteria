@@ -20,7 +20,7 @@ class bit_mask
     static constexpr size_t bit_count = sizeof(valueT) * 8;
 
   private:
-    value_type m_value = { };
+    value_type m_value = valueT();
 
   public:
     constexpr
@@ -35,9 +35,41 @@ class bit_mask
       }
 
   public:
+    constexpr value_type
+    value() const noexcept
+      { return this->m_value;  }
+
+    constexpr bool
+    test(size_t b) const noexcept
+      {
+        ROCKET_ASSERT(b < bit_count);
+        return (this->m_value >> b) & valueT(1);
+      }
+
+    constexpr bit_mask&
+    set(size_t b, bool v = true) noexcept
+      {
+        ROCKET_ASSERT(b < bit_count);
+        this->m_value &= ~(valueT(1) << b);
+        this->m_value |= valueT(v) << b;
+        return *this;
+      }
+
+    constexpr bit_mask&
+    flip(size_t b) noexcept
+      {
+        ROCKET_ASSERT(b < bit_count);
+        this->m_value ^= valueT(1) << b;
+        return *this;
+      }
+
     explicit constexpr operator
     bool() const noexcept
-      { return this->m_value == valueT();  }
+      { return this->value() == valueT();  }
+
+    constexpr bool
+    operator[](size_t b) const noexcept
+      { return this->test(b);  }
 
     constexpr bit_mask&
     operator&=(const bit_mask& other) noexcept
@@ -57,30 +89,6 @@ class bit_mask
     operator|=(const bit_mask& other) noexcept
       {
         this->m_value |= other.m_value;
-        return *this;
-      }
-
-    constexpr bool
-    get(size_t b) const noexcept
-      {
-        ROCKET_ASSERT(b < bit_count);
-        return this->m_value & (valueT(1) << b);
-      }
-
-    constexpr bit_mask&
-    set(size_t b, bool v = true) noexcept
-      {
-        ROCKET_ASSERT(b < bit_count);
-        this->m_value &= ~(valueT(1) << b);
-        this->m_value |= valueT(v) << b;
-        return *this;
-      }
-
-    constexpr bit_mask&
-    flip(size_t b) noexcept
-      {
-        ROCKET_ASSERT(b < bit_count);
-        this->m_value ^= valueT(1) << b;
         return *this;
       }
   };

@@ -102,7 +102,7 @@ class alignas(max_align_t) Value
     ~Value()
       {
         constexpr bmask32 recursive_types = { type_array, type_object };
-        if(recursive_types.get(this->type()))
+        if(recursive_types[this->type()])
           this->do_destroy_variant_slow();
       }
 
@@ -312,7 +312,7 @@ class alignas(max_align_t) Value
         constexpr bmask32 scalar_types = { type_null,
             type_boolean, type_integer, type_real, type_string };
 
-        return scalar_types.get(this->type());
+        return scalar_types[this->type()];
       }
 
     Value&
