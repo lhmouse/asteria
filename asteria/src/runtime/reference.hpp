@@ -37,19 +37,35 @@ class alignas(max_align_t) Reference
       { }
 
     Reference(const Reference& other) noexcept
-      : m_mods(other.m_mods),
+      : m_var(other.m_var),
+        m_ptca(other.m_ptca),
+        m_mods(other.m_mods),
         m_index(other.m_index)
-      { this->do_copy_partial(other);  }
+      {
+        if(other.m_index == index_temporary)
+          this->m_value = other.m_value;
+      }
 
     Reference(Reference&& other) noexcept
-      : m_mods(::std::move(other.m_mods)),
+      : m_var(::std::move(other.m_var)),
+        m_ptca(::std::move(other.m_ptca)),
+        m_mods(::std::move(other.m_mods)),
         m_index(other.m_index)
-      { this->do_swap_partial(other);  }
+      {
+        if(other.m_index == index_temporary)
+          this->m_value = ::std::move(other.m_value);
+      }
 
     Reference&
     operator=(const Reference& other) noexcept
       {
-        this->do_copy_partial(other);
+        if(other.m_index == index_temporary)
+          this->m_value = other.m_value;
+        else if(other.m_index == index_variable)
+          this->m_var = other.m_var;
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca = other.m_ptca;
+
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
         return *this;
@@ -58,39 +74,19 @@ class alignas(max_align_t) Reference
     Reference&
     operator=(Reference&& other) noexcept
       {
-        this->do_swap_partial(other);
+        if(other.m_index == index_temporary)
+          this->m_value = ::std::move(other.m_value);
+        else if(other.m_index == index_variable)
+          this->m_var = ::std::move(other.m_var);
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca = ::std::move(other.m_ptca);
+
         this->m_mods.swap(other.m_mods);
         this->m_index = other.m_index;
         return *this;
       }
 
   private:
-    void
-    do_copy_partial(const Reference& other) noexcept
-      {
-        // Note not all fields have to be copied.
-        uint32_t type = other.m_index;
-        if(ROCKET_UNEXPECT(type == index_temporary))
-          this->m_value = other.m_value;
-        else if(ROCKET_UNEXPECT(type == index_variable))
-          this->m_var = other.m_var;
-        else if(ROCKET_UNEXPECT(type == index_ptc_args))
-          this->m_ptca = other.m_ptca;
-      }
-
-    void
-    do_swap_partial(Reference& other) noexcept
-      {
-        // Determine which fields have to be swapped.
-        bmask32 mask = { this->m_index, other.m_index };
-        if(ROCKET_UNEXPECT(mask[index_temporary]))
-          this->m_value.swap(other.m_value);
-        if(ROCKET_UNEXPECT(mask[index_variable]))
-          this->m_var.swap(other.m_var);
-        if(ROCKET_UNEXPECT(mask[index_ptc_args]))
-          this->m_ptca.swap(other.m_ptca);
-      }
-
     const Value&
     do_dereference_readonly_slow() const;
 
@@ -190,7 +186,14 @@ class alignas(max_align_t) Reference
     Reference&
     swap(Reference& other) noexcept
       {
-        this->do_swap_partial(other);
+        const bmask32 mask = { this->m_index, other.m_index };
+        if(mask[index_temporary])
+          this->m_value.swap(other.m_value);
+        if(mask[index_variable])
+          this->m_var.swap(other.m_var);
+        if(mask[index_ptc_args])
+          this->m_ptca.swap(other.m_ptca);
+
         this->m_mods.swap(other.m_mods);
         ::std::swap(this->m_index, other.m_index);
         return *this;
