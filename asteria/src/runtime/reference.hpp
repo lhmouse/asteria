@@ -37,35 +37,19 @@ class alignas(max_align_t) Reference
       { }
 
     Reference(const Reference& other) noexcept
-      : m_var(other.m_var),
-        m_ptca(other.m_ptca),
-        m_mods(other.m_mods),
+      : m_mods(other.m_mods),
         m_index(other.m_index)
-      {
-        if(other.m_index == index_temporary)
-          this->m_value = other.m_value;
-      }
+      { this->do_assign_partial(other);  }
 
     Reference(Reference&& other) noexcept
-      : m_var(::std::move(other.m_var)),
-        m_ptca(::std::move(other.m_ptca)),
-        m_mods(::std::move(other.m_mods)),
+      : m_mods(::std::move(other.m_mods)),
         m_index(other.m_index)
-      {
-        if(other.m_index == index_temporary)
-          this->m_value = ::std::move(other.m_value);
-      }
+      { this->do_assign_partial(::std::move(other));  }
 
     Reference&
     operator=(const Reference& other) noexcept
       {
-        if(other.m_index == index_temporary)
-          this->m_value = other.m_value;
-        else if(other.m_index == index_variable)
-          this->m_var = other.m_var;
-        else if(other.m_index == index_ptc_args)
-          this->m_ptca = other.m_ptca;
-
+        this->do_assign_partial(other);
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
         return *this;
@@ -74,19 +58,25 @@ class alignas(max_align_t) Reference
     Reference&
     operator=(Reference&& other) noexcept
       {
-        if(other.m_index == index_temporary)
-          this->m_value = ::std::move(other.m_value);
-        else if(other.m_index == index_variable)
-          this->m_var = ::std::move(other.m_var);
-        else if(other.m_index == index_ptc_args)
-          this->m_ptca = ::std::move(other.m_ptca);
-
+        this->do_assign_partial(::std::move(other));
         this->m_mods.swap(other.m_mods);
         this->m_index = other.m_index;
         return *this;
       }
 
   private:
+    template<typename OtherT>
+    ROCKET_ALWAYS_INLINE void
+    do_assign_partial(OtherT&& other)
+      {
+        if(other.m_index == index_temporary)
+          this->m_value = ::std::forward<OtherT>(other).m_value;
+        else if(other.m_index == index_variable)
+          this->m_var = ::std::forward<OtherT>(other).m_var;
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca = ::std::forward<OtherT>(other).m_ptca;
+      }
+
     const Value&
     do_dereference_readonly_slow() const;
 
@@ -186,6 +176,7 @@ class alignas(max_align_t) Reference
     Reference&
     swap(Reference& other) noexcept
       {
+        // Swap only members that we are interested of.
         const bmask32 mask = { this->m_index, other.m_index };
         if(mask[index_temporary])
           this->m_value.swap(other.m_value);
