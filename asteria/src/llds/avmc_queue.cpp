@@ -160,6 +160,15 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
     return *this;
   }
 
+AVMC_Queue&
+AVMC_Queue::
+finalize()
+  {
+    // TODO: Add JIT support.
+    this->do_reallocate(0);
+    return *this;
+  }
+
 AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const

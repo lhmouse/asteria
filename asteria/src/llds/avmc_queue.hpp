@@ -95,17 +95,6 @@ class AVMC_Queue
       }
 
     AVMC_Queue&
-    shrink_to_fit()
-      {
-        if(ROCKET_EXPECT(this->m_used == this->m_estor))
-          return *this;
-
-        // Force reallocation of the table.
-        this->do_reallocate(0);
-        return *this;
-      }
-
-    AVMC_Queue&
     swap(AVMC_Queue& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
@@ -150,6 +139,11 @@ class AVMC_Queue
                           sizeof(sp), details_avmc_queue::do_forward_ctor<XSparamT>,
                           reinterpret_cast<intptr_t>(::std::addressof(sp)));
       }
+
+    // Mark this queue ready for execution. No nodes may be appended hereafter.
+    // This function serves as an optimization hint.
+    AVMC_Queue&
+    finalize();
 
     // These are interfaces called by the runtime.
     AIR_Status

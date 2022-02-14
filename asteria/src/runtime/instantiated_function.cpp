@@ -23,8 +23,9 @@ void
 Instantiated_Function::
 do_solidify(const cow_vector<AIR_Node>& code)
   {
+    this->m_queue.clear();
     ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(this->m_queue);  });
-    this->m_queue.shrink_to_fit();
+    this->m_queue.finalize();
   }
 
 tinyfmt&

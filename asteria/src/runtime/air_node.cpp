@@ -66,9 +66,18 @@ do_return_rebound_opt(bool dirty, NodeT&& xnode)
 bool
 do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
+    queue.clear();
     bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
-    queue.shrink_to_fit();
+    queue.finalize();
     return r;
+  }
+
+void
+do_solidify_nodes(cow_vector<AVMC_Queue>& queue, const cow_vector<cow_vector<AIR_Node>>& code)
+  {
+    queue.resize(code.size());
+    for(size_t k = 0;  k != code.size();  ++k)
+      do_solidify_nodes(queue.mut(k), code.at(k));
   }
 
 AIR_Status
@@ -411,12 +420,8 @@ struct Traits_switch_statement
     make_sparam(bool& /*reachable*/, const AIR_Node::S_switch_statement& altr)
       {
         Sparam_switch sp;
-        sp.queues_labels.reserve(altr.code_labels.size());
-        for(const auto& code : altr.code_labels)
-          do_solidify_nodes(sp.queues_labels.emplace_back(), code);
-        sp.queues_bodies.reserve(altr.code_bodies.size());
-        for(const auto& code : altr.code_bodies)
-          do_solidify_nodes(sp.queues_bodies.emplace_back(), code);
+        do_solidify_nodes(sp.queues_labels, altr.code_labels);
+        do_solidify_nodes(sp.queues_bodies, altr.code_bodies);
         sp.names_added = altr.names_added;
         return sp;
       }
