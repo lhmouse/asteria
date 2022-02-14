@@ -31,7 +31,7 @@ class Reference_Stack
 
   private:
     void
-    do_destroy_elements() noexcept;
+    do_destroy_elements(bool xfree) noexcept;
 
     void
     do_reserve_more(uint32_t nadd);
@@ -39,15 +39,8 @@ class Reference_Stack
   public:
     ~Reference_Stack()
       {
-        if(this->m_einit)
-          this->do_destroy_elements();
-
         if(this->m_bptr)
-          ::rocket::freeN<Reference>(this->m_bptr, this->m_estor);
-
-#ifdef ROCKET_DEBUG
-        ::std::memset((void*)this, 0xBA, sizeof(*this));
-#endif
+          this->do_destroy_elements(true);
       }
 
     bool

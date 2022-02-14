@@ -9,7 +9,7 @@ namespace asteria {
 
 void
 Reference_Stack::
-do_destroy_elements() noexcept
+do_destroy_elements(bool xfree) noexcept
   {
     auto next = this->m_bptr;
     const auto eptr = next + this->m_einit;
@@ -20,10 +20,19 @@ do_destroy_elements() noexcept
       // Destroy this element.
       ::rocket::destroy(qref);
     }
+
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)this->m_bptr, 0xD3, this->m_estor * sizeof(Reference));
 #endif
+
     this->m_etop = 0xDEADBEEF;
+    if(!xfree)
+      return;
+
+    // Deallocate the old table.
+    auto bold = ::std::exchange(this->m_bptr, (Reference*)0xDEADBEEF);
+    auto esold = ::std::exchange(this->m_estor, (size_t)0xBEEFDEAD);
+    ::rocket::freeN<Reference>(bold, esold);
   }
 
 void

@@ -34,7 +34,7 @@ class Reference_Dictionary
 
   private:
     void
-    do_destroy_buckets() noexcept;
+    do_destroy_buckets(bool xfree) noexcept;
 
     // This function returns a pointer to either an empty bucket or a
     // bucket containing a key which is equal to `name`, but in no case
@@ -149,16 +149,8 @@ class Reference_Dictionary
   public:
     ~Reference_Dictionary()
       {
-        if(this->m_head)
-          this->do_destroy_buckets();
-
         if(this->m_bptr)
-          ::rocket::freeN<Bucket>(this->m_bptr,
-                static_cast<size_t>(this->m_eptr - this->m_bptr));
-
-#ifdef ROCKET_DEBUG
-        ::std::memset((void*)this, 0xA6, sizeof(*this));
-#endif
+          this->do_destroy_buckets(true);
       }
 
     bool
@@ -173,7 +165,7 @@ class Reference_Dictionary
     clear() noexcept
       {
         if(this->m_head)
-          this->do_destroy_buckets();
+          this->do_destroy_buckets(false);
 
         // Clean invalid data up.
         this->m_head = nullptr;

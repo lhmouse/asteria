@@ -12,7 +12,7 @@ namespace asteria {
 
 void
 AVMC_Queue::
-do_destroy_nodes() noexcept
+do_destroy_nodes(bool xfree) noexcept
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
@@ -28,10 +28,19 @@ do_destroy_nodes() noexcept
       if(qnode->meta_ver)
         delete qnode->pv_meta;
     }
+
 #ifdef ROCKET_DEBUG
     ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
 #endif
+
     this->m_used = 0xDEADBEEF;
+    if(!xfree)
+      return;
+
+    // Deallocate the old table.
+    auto bold = ::std::exchange(this->m_bptr, (Header*)0xDEADBEEF);
+    auto esold = ::std::exchange(this->m_estor, (size_t)0xBEEFDEAD);
+    ::rocket::freeN<Header>(bold, esold);
   }
 
 void

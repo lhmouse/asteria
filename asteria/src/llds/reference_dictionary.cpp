@@ -9,7 +9,7 @@ namespace asteria {
 
 void
 Reference_Dictionary::
-do_destroy_buckets() noexcept
+do_destroy_buckets(bool xfree) noexcept
   {
     auto next = this->m_head;
     while(ROCKET_EXPECT(next)) {
@@ -25,7 +25,15 @@ do_destroy_buckets() noexcept
 #endif
       qbkt->prev = nullptr;
     }
-    this->m_head = reinterpret_cast<Bucket*>(0xDEADBEEF);
+
+    this->m_head = (Bucket*)0xDEADBEEF;
+    if(!xfree)
+      return;
+
+    // Deallocate the old table.
+    auto bold = ::std::exchange(this->m_bptr, (Bucket*)0xDEADBEEF);
+    auto eold = ::std::exchange(this->m_eptr, (Bucket*)0xBEEFDEAD);
+    ::rocket::freeN<Bucket>(bold, (size_t)(eold - bold));
   }
 
 void
@@ -121,7 +129,7 @@ do_rehash_more()
     }
 
     // Deallocate the old table.
-    ::rocket::freeN<Bucket>(bold, static_cast<size_t>(eold - bold));
+    ::rocket::freeN<Bucket>(bold, (size_t)(eold - bold));
   }
 
 }  // namespace asteria

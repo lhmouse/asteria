@@ -42,7 +42,7 @@ class AVMC_Queue
 
   private:
     void
-    do_destroy_nodes() noexcept;
+    do_destroy_nodes(bool xfree) noexcept;
 
     void
     do_reallocate(uint32_t nadd);
@@ -68,15 +68,8 @@ class AVMC_Queue
   public:
     ~AVMC_Queue()
       {
-        if(this->m_used)
-          this->do_destroy_nodes();
-
         if(this->m_bptr)
-          ::rocket::freeN<Header>(this->m_bptr, this->m_estor);
-
-#ifdef ROCKET_DEBUG
-        ::std::memset((void*)this, 0xCA, sizeof(*this));
-#endif
+          this->do_destroy_nodes(true);
       }
 
     bool
@@ -87,7 +80,7 @@ class AVMC_Queue
     clear() noexcept
       {
         if(this->m_used)
-          this->do_destroy_nodes();
+          this->do_destroy_nodes(false);
 
         // Clean invalid data up.
         this->m_used = 0;
