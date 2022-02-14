@@ -182,35 +182,32 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
-    AIR_Status status = air_status_next;
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      if(qnode->meta_ver > 1) {
-        // Symbols are available.
-        ASTERIA_RUNTIME_TRY {
-          status = qnode->pv_meta->exec(ctx, qnode);
-        }
-        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+      // Get the executor, which must always exist.
+      Executor* executor = qnode->pv_exec;
+      if(qnode->meta_ver != 0)
+        executor = qnode->pv_meta->exec;
+
+      ASTERIA_RUNTIME_TRY {
+        auto status = executor(ctx, qnode);
+        if(status != air_status_next)
+          return status;
+      }
+      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        if(qnode->meta_ver == 1)
           throw;
-        }
+
+        // Symbols exist. Use them.
+        except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+        throw;
       }
-      else if(qnode->meta_ver == 1) {
-        // Symbols are not available.
-        status = qnode->pv_meta->exec(ctx, qnode);
-      }
-      else {
-        // Symbols are not available.
-        status = qnode->pv_exec(ctx, qnode);
-      }
-      if(status != air_status_next)
-        break;
     }
-    return status;
+    return air_status_next;
   }
 
 void
@@ -223,9 +220,13 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      // Get all variables from this node.
-      if((qnode->meta_ver >= 1) && qnode->pv_meta->vget_opt)
-        qnode->pv_meta->vget_opt(staged, temp, qnode);
+      // Get the variable enumeration callback, which is optional.
+      Var_Getter* vgetter = nullptr;
+      if(qnode->meta_ver != 0)
+        vgetter = qnode->pv_meta->vget_opt;
+
+      if(vgetter)
+        vgetter(staged, temp, qnode);
     }
   }
 
