@@ -311,7 +311,6 @@ class alignas(max_align_t) Value
       {
         constexpr bmask32 scalar_types = { type_null,
             type_boolean, type_integer, type_real, type_string };
-
         return scalar_types[this->type()];
       }
 
