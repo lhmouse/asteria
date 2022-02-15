@@ -39,55 +39,57 @@ class alignas(max_align_t) Reference
     Reference(const Reference& other) noexcept
       : m_mods(other.m_mods),
         m_index(other.m_index)
-      { this->do_assign_partial(other);  }
+      { this->do_copy_partial(other);  }
 
     Reference(Reference&& other) noexcept
       : m_mods(::std::move(other.m_mods)),
         m_index(other.m_index)
-      { this->do_assign_partial(::std::move(other));  }
+      { this->do_swap_partial(other);  }
 
     Reference&
     operator=(const Reference& other) noexcept
-      { this->do_assign_partial(other);
+      { this->do_copy_partial(other);
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
         return *this;  }
 
     Reference&
     operator=(Reference&& other) noexcept
-      { this->do_assign_partial(::std::move(other));
-        this->m_mods.swap(other.m_mods);
+      { this->do_swap_partial(other);
+        this->m_mods = ::std::move(other.m_mods);
         this->m_index = other.m_index;
         return *this;  }
 
     Reference&
     swap(Reference& other) noexcept
-      {
-        // Swap only members that we are interested of.
-        const bmask32 mask = { this->m_index, other.m_index };
-        if(mask[index_temporary])
-          this->m_value.swap(other.m_value);
-        if(mask[index_variable])
-          this->m_var.swap(other.m_var);
-        if(mask[index_ptc_args])
-          this->m_ptca.swap(other.m_ptca);
-
+      { this->do_swap_partial(other);
         this->m_mods.swap(other.m_mods);
         ::std::swap(this->m_index, other.m_index);
-        return *this;
-      }
+        return *this;  }
 
   private:
-    template<typename OtherT>
     ROCKET_ALWAYS_INLINE void
-    do_assign_partial(OtherT&& other)
+    do_copy_partial(const Reference& other)
       {
-        if(other.m_index == index_temporary)
-          this->m_value = ::std::forward<OtherT>(other).m_value;
-        else if(other.m_index == index_variable)
-          this->m_var = ::std::forward<OtherT>(other).m_var;
-        else if(other.m_index == index_ptc_args)
-          this->m_ptca = ::std::forward<OtherT>(other).m_ptca;
+        const uint32_t index = other.m_index;
+        if(index == index_temporary)
+          this->m_value = other.m_value;
+        if(index == index_variable)
+          this->m_var = other.m_var;
+        if(index == index_ptc_args)
+          this->m_ptca = other.m_ptca;
+      }
+
+    ROCKET_ALWAYS_INLINE void
+    do_swap_partial(Reference& other)
+      {
+        const bmask32 mask = { this->m_index, other.m_index };
+        if(mask.test(index_temporary))
+          this->m_value.swap(other.m_value);
+        if(mask.test(index_variable))
+          this->m_var.swap(other.m_var);
+        if(mask.test(index_ptc_args))
+          this->m_ptca.swap(other.m_ptca);
       }
 
     const Value&
