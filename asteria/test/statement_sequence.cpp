@@ -11,7 +11,7 @@
 #include "../src/runtime/variadic_arguer.hpp"
 #include "../src/llds/avmc_queue.hpp"
 
-using namespace asteria;
+using namespace ::asteria;
 
 int main()
   {

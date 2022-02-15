@@ -8,7 +8,7 @@
 #include <unistd.h>  // isatty()
 
 namespace {
-using namespace asteria;
+using namespace ::asteria;
 
 [[noreturn]] int
 do_print_help_and_exit(const char* self)

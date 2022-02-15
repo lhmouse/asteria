@@ -6,7 +6,7 @@
 #include "../src/compiler/token.hpp"
 #include "../src/compiler/enums.hpp"
 
-using namespace asteria;
+using namespace ::asteria;
 
 int main()
   {

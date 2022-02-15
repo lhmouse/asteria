@@ -4,7 +4,7 @@
 #include "utils.hpp"
 #include "asteria/rocket/ascii_numget.hpp"
 
-using namespace asteria;
+using namespace ::asteria;
 
 // Test cases of known-bad strtod conversions that motivated the use of dmg_fp.
 // See https://bugs.chromium.org/p/chromium/issues/detail?id=593512.

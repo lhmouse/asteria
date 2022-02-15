@@ -5,7 +5,7 @@
 #include "../src/runtime/reference.hpp"
 #include "../src/runtime/variable.hpp"
 
-using namespace asteria;
+using namespace ::asteria;
 
 int main()
   {

@@ -4,7 +4,7 @@
 #include "utils.hpp"
 #include "../src/utils.hpp"
 
-using namespace asteria;
+using namespace ::asteria;
 
 int main()
   {

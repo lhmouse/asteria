@@ -6,7 +6,7 @@
 #include "../src/runtime/garbage_collector.hpp"
 #include "../src/runtime/variable.hpp"
 
-using namespace asteria;
+using namespace ::asteria;
 
 ::std::atomic<long> bcnt;
 
