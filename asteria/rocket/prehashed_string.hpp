@@ -129,26 +129,20 @@ class basic_prehashed_string
 
     basic_prehashed_string&
     operator=(initializer_list<value_type> init)
-      {
-        this->m_sth.assign(init);
-        return *this;
-      }
+      { this->m_sth.assign(init);
+        return *this;  }
 
     basic_prehashed_string&
     operator=(const basic_prehashed_string& other)
       noexcept(is_nothrow_copy_assignable<string_type>::value)
-      {
-        this->m_sth.assign(other.m_sth);
-        return *this;
-      }
+      { this->m_sth.assign(other.m_sth);
+        return *this;  }
 
     basic_prehashed_string&
     operator=(basic_prehashed_string&& other)
       noexcept(is_nothrow_move_assignable<string_type>::value)
-      {
-        this->m_sth.assign(::std::move(other.m_sth));
-        return *this;
-      }
+      { this->m_sth.assign(::std::move(other.m_sth));
+        return *this;  }
 
   public:
     // getters

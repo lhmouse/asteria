@@ -828,12 +828,10 @@ class hashmap_iterator
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
     hashmap_iterator&
     operator=(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
-      {
-        this->m_begin = other.m_begin;
+      { this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
         this->m_end = other.m_end;
-        return *this;
-      }
+        return *this;  }
 
   private:
     bucketT*

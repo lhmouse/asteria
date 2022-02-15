@@ -38,8 +38,7 @@ class alignas(max_align_t) Value
     Value(XValT&& xval)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                   typename details_value::Valuable<XValT>::via_type&&>::value)
-      : m_stor(typename details_value::Valuable<XValT>::via_type(
-                           ::std::forward<XValT>(xval)))
+      : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
       { }
 
     template<typename XValT,
@@ -47,10 +46,7 @@ class alignas(max_align_t) Value
     Value(XValT&& xval)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
-      {
-        details_value::Valuable<XValT>::assign(this->m_stor,
-                           ::std::forward<XValT>(xval));
-      }
+      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));  }
 
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
@@ -58,11 +54,8 @@ class alignas(max_align_t) Value
     operator=(XValT&& xval)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                   typename details_value::Valuable<XValT>::via_type&&>::value)
-      {
-        details_value::Valuable<XValT>::assign(this->m_stor,
-                           ::std::forward<XValT>(xval));
-        return *this;
-      }
+      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
+        return *this;  }
 
     Value(const Value&) noexcept
       = default;

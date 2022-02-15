@@ -91,10 +91,8 @@ class Infix_Element
     Infix_Element&
     operator=(XElemT&& xelem)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XElemT&&>::value)
-      {
-        this->m_stor = ::std::forward<XElemT>(xelem);
-        return *this;
-      }
+      { this->m_stor = ::std::forward<XElemT>(xelem);
+        return *this;  }
 
   public:
     Index

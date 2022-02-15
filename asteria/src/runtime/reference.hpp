@@ -48,21 +48,17 @@ class alignas(max_align_t) Reference
 
     Reference&
     operator=(const Reference& other) noexcept
-      {
-        this->do_assign_partial(other);
+      { this->do_assign_partial(other);
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
-        return *this;
-      }
+        return *this;  }
 
     Reference&
     operator=(Reference&& other) noexcept
-      {
-        this->do_assign_partial(::std::move(other));
+      { this->do_assign_partial(::std::move(other));
         this->m_mods.swap(other.m_mods);
         this->m_index = other.m_index;
-        return *this;
-      }
+        return *this;  }
 
   private:
     template<typename OtherT>

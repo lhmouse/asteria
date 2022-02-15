@@ -146,45 +146,34 @@ class refcnt_ptr
 
     refcnt_ptr&
     operator=(nullptr_t) noexcept
-      {
-        this->reset();
-        return *this;
-      }
+      { this->reset();
+        return *this;  }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr&
     operator=(const refcnt_ptr<yelementT>& other) noexcept
-      {
-        this->reset(other.m_sth.fork());
-        return *this;
-      }
+      { this->reset(other.m_sth.fork());
+        return *this;  }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr&
     operator=(refcnt_ptr<yelementT>&& other) noexcept
-      {
-        this->reset(other.m_sth.release());
-        return *this;
-      }
+      { this->reset(other.m_sth.release());
+        return *this;  }
 
     refcnt_ptr&
     operator=(const refcnt_ptr& other) noexcept
-      {
-        if(this->m_sth.get() != other.m_sth.get())
-          this->reset(other.m_sth.fork());
-        return *this;
-      }
+      { this->reset(other.m_sth.fork());
+        return *this;  }
 
     refcnt_ptr&
     operator=(refcnt_ptr&& other) noexcept
-      {
-        this->reset(other.m_sth.release());
-        return *this;
-      }
+      { this->reset(other.m_sth.release());
+        return *this;  }
 
   public:
     // 23.11.1.2.4, observers

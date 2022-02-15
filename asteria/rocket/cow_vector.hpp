@@ -116,17 +116,13 @@ class cow_vector
 
     cow_vector&
     operator=(const cow_vector& other) noexcept
-      {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);
-      }
+      { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(other);  }
 
     cow_vector&
     operator=(cow_vector&& other) noexcept
-      {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));
-      }
+      { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(::std::move(other));  }
 
     cow_vector&
     operator=(initializer_list<value_type> init)

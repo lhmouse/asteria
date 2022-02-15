@@ -116,19 +116,15 @@ class static_vector
     operator=(const static_vector& other)
       noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                            is_nothrow_copy_constructible<value_type>>::value)
-      {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);
-      }
+      { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(other);  }
 
     static_vector&
     operator=(static_vector&& other)
       noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                            is_nothrow_move_constructible<value_type>>::value)
-      {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));
-      }
+      { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        return this->assign(::std::move(other));  }
 
     static_vector&
     operator=(initializer_list<value_type> init)
