@@ -46,9 +46,11 @@ class array
 
     array&
     swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
-      { for(size_type i = 0; i != capacityT; ++i)
+      {
+        for(size_type i = 0; i != capacityT; ++i)
           noadl::xswap(this->m_stor[i], other.m_stor[i]);
-        return *this;  }
+        return *this;
+      }
 
   private:
     [[noreturn]] ROCKET_NOINLINE void
