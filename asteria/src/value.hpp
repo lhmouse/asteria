@@ -67,20 +67,31 @@ class alignas(max_align_t) Value
     Value(const Value&) noexcept
       = default;
 
-    Value(Value&& other) noexcept
-      {
-        // Don't play with this at home!
-        ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
-        ::std::memset((void*)&other, 0, sizeof(*this));
-      }
-
     Value&
     operator=(const Value&) noexcept
       = default;
 
+    Value(Value&& other) noexcept
+      {
+        // Don't play with this at home!
+        void* dptr = &(this->m_stor);
+        void* sptr = &(other.m_stor);
+        ::std::memcpy(dptr, sptr, sizeof(m_stor));
+        ::std::memset(sptr, 0, sizeof(m_stor));
+      }
+
     Value&
     operator=(Value&& other) noexcept
-      { return this->swap(other);  }
+      {
+        // Don't play with this at home!
+        void* dptr = &(this->m_stor);
+        void* sptr = &(other.m_stor);
+        char temp[sizeof(m_stor)];
+        ::std::memcpy(temp, dptr, sizeof(m_stor));
+        ::std::memcpy(dptr, sptr, sizeof(m_stor));
+        ::std::memcpy(sptr, temp, sizeof(m_stor));
+        return *this;
+      }
 
   private:
     void
@@ -318,10 +329,12 @@ class alignas(max_align_t) Value
     swap(Value& other) noexcept
       {
         // Don't play with this at home!
-        typename ::std::aligned_union<0, Value>::type temp;
-        ::std::memcpy(&temp, (void*)this, sizeof(*this));
-        ::std::memcpy((void*)this, (void*)&other, sizeof(*this));
-        ::std::memcpy((void*)&other, &temp, sizeof(*this));
+        void* dptr = &(this->m_stor);
+        void* sptr = &(other.m_stor);
+        char temp[sizeof(m_stor)];
+        ::std::memcpy(temp, dptr, sizeof(m_stor));
+        ::std::memcpy(dptr, sptr, sizeof(m_stor));
+        ::std::memcpy(sptr, temp, sizeof(m_stor));
         return *this;
       }
 
