@@ -21,10 +21,6 @@ do_destroy_elements(bool xfree) noexcept
       ::rocket::destroy(qref);
     }
 
-#ifdef ROCKET_DEBUG
-    ::std::memset((void*)this->m_bptr, 0xD3, this->m_estor * sizeof(Reference));
-#endif
-
     this->m_etop = 0xDEADBEEF;
     if(!xfree)
       return;
