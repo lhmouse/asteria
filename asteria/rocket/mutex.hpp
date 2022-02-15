@@ -59,11 +59,17 @@ class mutex::unique_lock
       { this->lock(parent);  }
 
     unique_lock(unique_lock&& other) noexcept
-      { this->swap(other);  }
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     unique_lock&
     operator=(unique_lock&& other) noexcept
-      { return this->swap(other);  }
+      { this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
+
+    unique_lock&
+    swap(unique_lock& other) noexcept
+      { this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
 
     ~unique_lock()
       { this->unlock();  }
@@ -122,13 +128,6 @@ class mutex::unique_lock
         ROCKET_ASSERT(r == 0);
 
         this->m_sth.reset(ptr);
-        return *this;
-      }
-
-    unique_lock&
-    swap(unique_lock& other) noexcept
-      {
-        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
   };

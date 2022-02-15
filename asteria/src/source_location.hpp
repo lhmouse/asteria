@@ -24,6 +24,13 @@ class Source_Location
       : m_file(xfile), m_line(xline), m_column(xcolumn)
       { }
 
+    Source_Location&
+    swap(Source_Location& other) noexcept
+      { this->m_file.swap(other.m_file);
+        ::std::swap(this->m_line, other.m_line);
+        ::std::swap(this->m_column, other.m_column);
+        return *this;  }
+
   public:
     const cow_string&
     file() const noexcept
@@ -40,15 +47,6 @@ class Source_Location
     int
     column() const noexcept
       { return this->m_column;  }
-
-    Source_Location&
-    swap(Source_Location& other) noexcept
-      {
-        this->m_file.swap(other.m_file);
-        ::std::swap(this->m_line, other.m_line);
-        ::std::swap(this->m_column, other.m_column);
-        return *this;
-      }
 
     tinyfmt&
     print(tinyfmt& fmt) const;

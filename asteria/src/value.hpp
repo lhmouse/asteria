@@ -75,6 +75,10 @@ class alignas(max_align_t) Value
 
     Value&
     operator=(Value&& other) noexcept
+      { return this->swap(other);  }
+
+    Value&
+    swap(Value& other) noexcept
       {
         // Don't play with this at home!
         void* dptr = &(this->m_stor);
@@ -85,6 +89,7 @@ class alignas(max_align_t) Value
         ::std::memcpy(sptr, temp, sizeof(m_stor));
         return *this;
       }
+
 
   private:
     void
@@ -316,19 +321,6 @@ class alignas(max_align_t) Value
         constexpr bmask32 scalar_types = { type_null,
             type_boolean, type_integer, type_real, type_string };
         return scalar_types.test(this->type());
-      }
-
-    Value&
-    swap(Value& other) noexcept
-      {
-        // Don't play with this at home!
-        void* dptr = &(this->m_stor);
-        void* sptr = &(other.m_stor);
-        char temp[sizeof(m_stor)];
-        ::std::memcpy(temp, dptr, sizeof(m_stor));
-        ::std::memcpy(dptr, sptr, sizeof(m_stor));
-        ::std::memcpy(sptr, temp, sizeof(m_stor));
-        return *this;
       }
 
     // This is used by garbage collection.

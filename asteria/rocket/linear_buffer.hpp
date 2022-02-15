@@ -121,6 +121,21 @@ class basic_linear_buffer
         return *this;
       }
 
+    basic_linear_buffer&
+    swap(basic_linear_buffer& other)
+      noexcept(is_always_equal_allocator<allocator_type>::value ||
+               allocator_traits<allocator_type>::propagate_on_container_swap::value)
+      {
+        ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
+                      allocator_traits<allocator_type>::propagate_on_container_swap::value);
+
+        // Note that, as with standard containers, if the allocators are not swapped and they compare
+        // unequal, the behavior is undefined.
+        noadl::propagate_allocator_on_swap(this->m_stor.as_allocator(), other.m_stor.as_allocator());
+        this->do_exchange_with(other);
+        return *this;
+      }
+
   private:
     void
     do_deallocate() noexcept
@@ -319,21 +334,6 @@ class basic_linear_buffer
     basic_linear_buffer&
     puts(const value_type* s)
       { return this->putn(s, traits_type::length(s));  }
-
-    basic_linear_buffer&
-    swap(basic_linear_buffer& other)
-      noexcept(is_always_equal_allocator<allocator_type>::value ||
-               allocator_traits<allocator_type>::propagate_on_container_swap::value)
-      {
-        ROCKET_ASSERT((this->m_stor.as_allocator() == other.m_stor.as_allocator()) ||
-                      allocator_traits<allocator_type>::propagate_on_container_swap::value);
-
-        // Note that, as with standard containers, if the allocators are not swapped and they compare
-        // unequal, the behavior is undefined.
-        noadl::propagate_allocator_on_swap(this->m_stor.as_allocator(), other.m_stor.as_allocator());
-        this->do_exchange_with(other);
-        return *this;
-      }
   };
 
 template<typename charT, typename traitsT, typename allocT>

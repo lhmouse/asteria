@@ -175,6 +175,11 @@ class refcnt_ptr
       { this->reset(other.m_sth.release());
         return *this;  }
 
+    refcnt_ptr&
+    swap(refcnt_ptr& other) noexcept
+      { this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
+
   public:
     // 23.11.1.2.4, observers
     bool
@@ -222,13 +227,6 @@ class refcnt_ptr
     reset(pointer ptr = nullptr) noexcept
       {
         this->m_sth.reset(ptr);
-        return *this;
-      }
-
-    refcnt_ptr&
-    swap(refcnt_ptr& other) noexcept
-      {
-        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
   };

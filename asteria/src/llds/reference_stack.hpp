@@ -29,6 +29,14 @@ class Reference_Stack
     operator=(Reference_Stack&& other) noexcept
       { return this->swap(other);  }
 
+    Reference_Stack&
+    swap(Reference_Stack& other) noexcept
+      { ::std::swap(this->m_bptr, other.m_bptr);
+        ::std::swap(this->m_etop, other.m_etop);
+        ::std::swap(this->m_einit, other.m_einit);
+        ::std::swap(this->m_estor, other.m_estor);
+        return *this;  }
+
   private:
     void
     do_destroy_elements(bool xfree) noexcept;
@@ -55,16 +63,6 @@ class Reference_Stack
     clear() noexcept
       {
         this->m_etop = 0;
-        return *this;
-      }
-
-    Reference_Stack&
-    swap(Reference_Stack& other) noexcept
-      {
-        ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_etop, other.m_etop);
-        ::std::swap(this->m_einit, other.m_einit);
-        ::std::swap(this->m_estor, other.m_estor);
         return *this;
       }
 

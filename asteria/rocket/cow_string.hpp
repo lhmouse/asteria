@@ -163,37 +163,45 @@ class basic_cow_string
 
   private:
     storage_handle m_sth;
-    const value_type* m_ptr = storage_handle::null_char;
-    size_type m_len = 0;
+    const value_type* m_ptr;
+    size_type m_len;
 
   public:
     // 24.3.2.2, construct/copy/destroy
     constexpr
     basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
-      : m_sth(alloc), m_ptr(sh.c_str()), m_len(sh.length())
+      : m_sth(alloc),
+        m_ptr(sh.c_str()), m_len(sh.length())
       { }
 
     explicit constexpr
     basic_cow_string(const allocator_type& alloc) noexcept
-      : m_sth(alloc)
+      : m_sth(alloc),
+        m_ptr(storage_handle::null_char), m_len()
       { }
 
     basic_cow_string(const basic_cow_string& other) noexcept
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
-                                                    other.m_sth.as_allocator()))
-      { this->assign(other);  }
+                                                    other.m_sth.as_allocator())),
+        m_ptr(other.m_ptr), m_len(other.m_len)
+      { this->m_sth.share_with(other.m_sth);  }
 
     basic_cow_string(const basic_cow_string& other, const allocator_type& alloc) noexcept
-      : m_sth(alloc)
-      { this->assign(other);  }
+      : m_sth(alloc),
+        m_ptr(other.m_ptr), m_len(other.m_len)
+      { this->m_sth.share_with(other.m_sth);  }
 
     basic_cow_string(basic_cow_string&& other) noexcept
-      : m_sth(::std::move(other.m_sth.as_allocator()))
-      { this->assign(::std::move(other));  }
+      : m_sth(::std::move(other.m_sth.as_allocator())),
+        m_ptr(::std::exchange(other.m_ptr, storage_handle::null_char)),
+        m_len(::std::exchange(other.m_len, size_type()))
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
-      : m_sth(alloc)
-      { this->assign(::std::move(other));  }
+      : m_sth(alloc),
+        m_ptr(::std::exchange(other.m_ptr, storage_handle::null_char)),
+        m_len(::std::exchange(other.m_len, size_type()))
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     constexpr
     basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
@@ -226,25 +234,41 @@ class basic_cow_string
 
     basic_cow_string(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       : basic_cow_string(alloc)
-      { this->append(init);  }
+      { this->append(init.begin(), init.end());  }
 
     basic_cow_string&
     operator=(const basic_cow_string& other) noexcept
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);  }
+        this->m_sth.share_with(other.m_sth);
+        m_ptr = other.m_ptr;
+        m_len = other.m_len;
+        return *this;  }
 
     basic_cow_string&
     operator=(basic_cow_string&& other) noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));  }
+        this->m_sth.exchange_with(other.m_sth);
+        m_ptr = ::std::exchange(other.m_ptr, storage_handle::null_char);
+        m_len = ::std::exchange(other.m_len, size_type());
+        return *this;  }
 
     basic_cow_string&
     operator=(shallow_type sh) noexcept
-      { return this->assign(sh);  }
+      { this->m_ptr = sh.c_str();
+        this->m_len = sh.length();
+        return *this;  }
 
     basic_cow_string&
     operator=(initializer_list<value_type> init)
-      { return this->assign(init);  }
+      { return this->assign(init.begin(), init.end());  }
+
+    basic_cow_string&
+    swap(basic_cow_string& other) noexcept
+      { noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->m_sth.exchange_with(other.m_sth);
+        noadl::xswap(this->m_ptr, other.m_ptr);
+        noadl::xswap(this->m_len, other.m_len);
+        return *this;  }
 
   private:
     basic_cow_string&
@@ -882,32 +906,6 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    assign(shallow_type sh) noexcept
-      {
-        this->m_ptr = sh.c_str();
-        this->m_len = sh.length();
-        return *this;
-      }
-
-    basic_cow_string&
-    assign(const basic_cow_string& other) noexcept
-      {
-        this->m_sth.share_with(other.m_sth);
-        this->m_ptr = other.m_ptr;
-        this->m_len = other.m_len;
-        return *this;
-      }
-
-    basic_cow_string&
-    assign(basic_cow_string&& other) noexcept
-      {
-        this->m_sth.exchange_with(other.m_sth);
-        this->m_ptr = ::std::exchange(other.m_ptr, storage_handle::null_char);
-        this->m_len = ::std::exchange(other.m_len, size_type(0));
-        return *this;
-      }
-
-    basic_cow_string&
     assign(const basic_cow_string& other, size_type pos, size_type n = npos)
       {
         // Note `other` may be `*this`.
@@ -1264,16 +1262,6 @@ class basic_cow_string
     size_type
     copy(value_type* s, size_type tn) const
       { return this->copy(0, s, tn);  }
-
-    basic_cow_string&
-    swap(basic_cow_string& other) noexcept
-      {
-        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->m_sth.exchange_with(other.m_sth);
-        noadl::xswap(this->m_ptr, other.m_ptr);
-        noadl::xswap(this->m_len, other.m_len);
-        return *this;
-      }
 
     // 24.3.2.7, string operations
     constexpr const value_type*

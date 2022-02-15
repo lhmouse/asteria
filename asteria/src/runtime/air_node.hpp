@@ -354,17 +354,15 @@ class AIR_Node
       { this->m_stor = ::std::forward<XNodeT>(xnode);
         return *this;  }
 
+    AIR_Node&
+    swap(AIR_Node& other) noexcept
+      { this->m_stor.swap(other.m_stor);
+        return *this;  }
+
   public:
     Index
     index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
-
-    AIR_Node&
-    swap(AIR_Node& other) noexcept
-      {
-        this->m_stor.swap(other.m_stor);
-        return *this;
-      }
 
     // Rebind this node.
     // If this node refers to a local reference, which has been allocated in an

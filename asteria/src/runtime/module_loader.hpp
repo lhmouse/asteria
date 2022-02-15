@@ -58,6 +58,12 @@ class Module_Loader::Unique_Stream
     operator=(Unique_Stream&& other) noexcept
       { return this->swap(other);  }
 
+    Unique_Stream&
+    swap(Unique_Stream& other) noexcept
+      { this->m_loader.swap(other.m_loader);
+        ::std::swap(this->m_strm, other.m_strm);
+        return *this;  }
+
   private:
     Unique_Stream&
     do_reset(const rcptr<Module_Loader>& loader, locked_stream_pair* strm) noexcept
@@ -105,14 +111,6 @@ class Module_Loader::Unique_Stream
         ROCKET_ASSERT(path);
         auto qstrm = loader->do_lock_stream(path);
         return this->do_reset(loader, qstrm);
-      }
-
-    Unique_Stream&
-    swap(Unique_Stream& other) noexcept
-      {
-        this->m_loader.swap(other.m_loader);
-        ::std::swap(this->m_strm, other.m_strm);
-        return *this;
       }
   };
 

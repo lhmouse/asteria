@@ -66,21 +66,21 @@ class static_vector
       noexcept(is_nothrow_copy_constructible<value_type>::value)
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                       other.m_sth.as_allocator()))
-      { this->assign(other);  }
+      { this->m_sth.copy_from(other.m_sth);  }
 
     static_vector(const static_vector& other, const allocator_type& alloc)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
       : m_sth(alloc)
-      { this->assign(other);  }
+      { this->m_sth.copy_from(other.m_sth);  }
 
     static_vector(static_vector&& other) noexcept(is_nothrow_move_constructible<value_type>::value)
       : m_sth(::std::move(other.m_sth.as_allocator()))
-      { this->assign(::std::move(other));  }
+      { this->m_sth.move_from(::std::move(other.m_sth));  }
 
     static_vector(static_vector&& other, const allocator_type& alloc)
       noexcept(is_nothrow_move_constructible<value_type>::value)
       : m_sth(alloc)
-      { this->assign(::std::move(other));  }
+      { this->m_sth.move_from(::std::move(other.m_sth));  }
 
     static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
       : static_vector(allocator_type())
@@ -110,25 +110,35 @@ class static_vector
 
     static_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
-      { this->append(init);  }
+      { this->append(init.begin(), init.end());  }
 
     static_vector&
     operator=(const static_vector& other)
       noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                            is_nothrow_copy_constructible<value_type>>::value)
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);  }
+        this->m_sth.copy_from(other.m_sth);
+        return *this;  }
 
     static_vector&
     operator=(static_vector&& other)
       noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                            is_nothrow_move_constructible<value_type>>::value)
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));  }
+        this->m_sth.move_from(::std::move(other.m_sth));
+        return *this;  }
 
     static_vector&
     operator=(initializer_list<value_type> init)
-      { return this->assign(init);  }
+      { return this->assign(init.begin(), init.end());  }
+
+    static_vector&
+    swap(static_vector& other)
+      noexcept(conjunction<is_nothrow_swappable<value_type>,
+                           is_nothrow_move_constructible<value_type>>::value)
+      { noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
 
   private:
     [[noreturn]] ROCKET_NOINLINE void
@@ -642,26 +652,6 @@ class static_vector
                              this->m_sth.as_allocator());
       }
 
-    // N.B. The return type is a non-standard extension.
-    static_vector&
-    assign(const static_vector& other)
-      noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
-                           is_nothrow_copy_constructible<value_type>>::value)
-      {
-        this->m_sth.copy_from(other.m_sth);
-        return *this;
-      }
-
-    // N.B. The return type is a non-standard extension.
-    static_vector&
-    assign(static_vector&& other)
-      noexcept(conjunction<is_nothrow_move_assignable<value_type>,
-                           is_nothrow_move_constructible<value_type>>::value)
-      {
-        this->m_sth.move_from(other.m_sth);
-        return *this;
-      }
-
     // N.B. The parameter pack is a non-standard extension.
     // N.B. The return type is a non-standard extension.
     template<typename... paramsT>
@@ -674,15 +664,6 @@ class static_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    static_vector&
-    assign(initializer_list<value_type> init)
-      {
-        this->clear();
-        this->append(init);
-        return *this;
-      }
-
-    // N.B. The return type is a non-standard extension.
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector&
@@ -690,16 +671,6 @@ class static_vector
       {
         this->clear();
         this->append(::std::move(first), ::std::move(last));
-        return *this;
-      }
-
-    static_vector&
-    swap(static_vector& other)
-      noexcept(conjunction<is_nothrow_swappable<value_type>,
-                           is_nothrow_move_constructible<value_type>>::value)
-      {
-        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
 

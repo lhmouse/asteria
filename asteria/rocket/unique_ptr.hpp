@@ -92,6 +92,12 @@ class unique_ptr
         this->reset(other.m_sth.release());
         return *this;  }
 
+    unique_ptr&
+    swap(unique_ptr& other) noexcept
+      { noadl::xswap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
+
   public:
     // 23.11.1.2.4, observers
     constexpr pointer
@@ -140,14 +146,6 @@ class unique_ptr
     reset(pointer ptr_new = nullptr) noexcept
       {
         this->m_sth.reset(::std::move(ptr_new));
-        return *this;
-      }
-
-    unique_ptr&
-    swap(unique_ptr& other) noexcept
-      {
-        noadl::xswap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
-        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
   };

@@ -82,18 +82,19 @@ class string_storage
         this->m_hval = this->as_hasher()(this->m_str);
       }
 
+    template<typename paramT>
     void
-    assign(const string_storage& other)
+    set_string(paramT&& param)
       {
-        this->m_str = other.m_str;
-        this->m_hval = other.m_hval;
+        this->m_str = ::std::forward<paramT>(param);
+        this->m_hval = this->as_hasher()(this->m_str);
       }
 
     void
-    assign(string_storage&& other)
+    share_with(const string_storage& other)
       {
-        noadl::xswap(this->m_str, other.m_str);
-        ::std::swap(this->m_hval, other.m_hval);
+        this->m_str = other.m_str;
+        this->m_hval = other.m_hval;
       }
 
     void

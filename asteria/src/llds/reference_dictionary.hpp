@@ -32,6 +32,14 @@ class Reference_Dictionary
     operator=(Reference_Dictionary&& other) noexcept
       { return this->swap(other);  }
 
+    Reference_Dictionary&
+    swap(Reference_Dictionary& other) noexcept
+      { ::std::swap(this->m_bptr, other.m_bptr);
+        ::std::swap(this->m_eptr, other.m_eptr);
+        ::std::swap(this->m_head, other.m_head);
+        ::std::swap(this->m_size, other.m_size);
+        return *this;  }
+
   private:
     void
     do_destroy_buckets(bool xfree) noexcept;
@@ -170,16 +178,6 @@ class Reference_Dictionary
         // Clean invalid data up.
         this->m_head = nullptr;
         this->m_size = 0;
-        return *this;
-      }
-
-    Reference_Dictionary&
-    swap(Reference_Dictionary& other) noexcept
-      {
-        ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_eptr, other.m_eptr);
-        ::std::swap(this->m_head, other.m_head);
-        ::std::swap(this->m_size, other.m_size);
         return *this;
       }
 

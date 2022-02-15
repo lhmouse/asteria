@@ -164,17 +164,15 @@ class Expression_Unit
       { this->m_stor = ::std::forward<XUnitT>(xunit);
         return *this;  }
 
+    Expression_Unit&
+    swap(Expression_Unit& other) noexcept
+      { this->m_stor.swap(other.m_stor);
+        return *this;  }
+
   public:
     Index
     index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
-
-    Expression_Unit&
-    swap(Expression_Unit& other) noexcept
-      {
-        this->m_stor.swap(other.m_stor);
-        return *this;
-      }
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,

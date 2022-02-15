@@ -170,7 +170,7 @@ class storage_handle
       }
 
     void
-    move_from(storage_handle& other)
+    move_from(storage_handle&& other)
       {
         if(this->m_nelem < other.m_nelem) {
           // `*this` is shorter than `other`.

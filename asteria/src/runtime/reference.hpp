@@ -60,6 +60,23 @@ class alignas(max_align_t) Reference
         this->m_index = other.m_index;
         return *this;  }
 
+    Reference&
+    swap(Reference& other) noexcept
+      {
+        // Swap only members that we are interested of.
+        const bmask32 mask = { this->m_index, other.m_index };
+        if(mask[index_temporary])
+          this->m_value.swap(other.m_value);
+        if(mask[index_variable])
+          this->m_var.swap(other.m_var);
+        if(mask[index_ptc_args])
+          this->m_ptca.swap(other.m_ptca);
+
+        this->m_mods.swap(other.m_mods);
+        ::std::swap(this->m_index, other.m_index);
+        return *this;
+      }
+
   private:
     template<typename OtherT>
     ROCKET_ALWAYS_INLINE void
@@ -166,23 +183,6 @@ class alignas(max_align_t) Reference
       {
         this->m_ptca = ptca;
         this->m_index = index_ptc_args;
-        return *this;
-      }
-
-    Reference&
-    swap(Reference& other) noexcept
-      {
-        // Swap only members that we are interested of.
-        const bmask32 mask = { this->m_index, other.m_index };
-        if(mask[index_temporary])
-          this->m_value.swap(other.m_value);
-        if(mask[index_variable])
-          this->m_var.swap(other.m_var);
-        if(mask[index_ptc_args])
-          this->m_ptca.swap(other.m_ptca);
-
-        this->m_mods.swap(other.m_mods);
-        ::std::swap(this->m_index, other.m_index);
         return *this;
       }
 

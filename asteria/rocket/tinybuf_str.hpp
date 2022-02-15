@@ -57,6 +57,13 @@ class basic_tinybuf_str
       : m_str(::std::forward<xstrT>(xstr)), m_off(), m_mode(mode)
       { }
 
+    basic_tinybuf_str&
+    swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
+      { noadl::xswap(this->m_str, other.m_str);
+        noadl::xswap(this->m_off, other.m_off);
+        noadl::xswap(this->m_mode, other.m_mode);
+        return *this;  }
+
   protected:
     void
     do_flush() override
@@ -200,15 +207,6 @@ class basic_tinybuf_str
         string_type r = ::std::move(this->m_str);
         this->clear_string(mode);
         return r;
-      }
-
-    basic_tinybuf_str&
-    swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
-      {
-        noadl::xswap(this->m_str, other.m_str);
-        noadl::xswap(this->m_off, other.m_off);
-        noadl::xswap(this->m_mode, other.m_mode);
-        return *this;
       }
   };
 

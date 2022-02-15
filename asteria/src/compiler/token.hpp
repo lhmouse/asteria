@@ -76,6 +76,13 @@ class Token
         m_stor(::std::forward<XTokT>(xtok))
       { }
 
+    Token&
+    swap(Token& other) noexcept
+      { this->m_sloc.swap(other.m_sloc);
+        ::std::swap(this->m_length, other.m_length);
+        this->m_stor.swap(other.m_stor);
+        return *this;  }
+
   public:
     const Source_Location&
     sloc() const noexcept
@@ -148,15 +155,6 @@ class Token
     const cow_string&
     as_string_literal() const
       { return this->m_stor.as<index_string_literal>().val;  }
-
-    Token&
-    swap(Token& other) noexcept
-      {
-        this->m_sloc.swap(other.m_sloc);
-        ::std::swap(this->m_length, other.m_length);
-        this->m_stor.swap(other.m_stor);
-        return *this;
-      }
 
     tinyfmt&
     print(tinyfmt& fmt) const;

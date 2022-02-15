@@ -40,6 +40,13 @@ class AVMC_Queue
     operator=(AVMC_Queue&& other) noexcept
       { return this->swap(other);  }
 
+    AVMC_Queue&
+    swap(AVMC_Queue& other) noexcept
+      { ::std::swap(this->m_bptr, other.m_bptr);
+        ::std::swap(this->m_estor, other.m_estor);
+        ::std::swap(this->m_used, other.m_used);
+        return *this;  }
+
   private:
     void
     do_destroy_nodes(bool xfree) noexcept;
@@ -84,15 +91,6 @@ class AVMC_Queue
 
         // Clean invalid data up.
         this->m_used = 0;
-        return *this;
-      }
-
-    AVMC_Queue&
-    swap(AVMC_Queue& other) noexcept
-      {
-        ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_estor, other.m_estor);
-        ::std::swap(this->m_used, other.m_used);
         return *this;
       }
 

@@ -59,6 +59,11 @@ class basic_tinybuf_file
       : m_file(nullptr, nullptr)
       { this->open(path, mode);  }
 
+    basic_tinybuf_file&
+    swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<unique_posix_file>::value)
+      { noadl::xswap(this->m_file, other.m_file);
+        return *this;  }
+
   protected:
     void
     do_flush() override
@@ -252,13 +257,6 @@ class basic_tinybuf_file
     basic_tinybuf_file&
     close() noexcept
       { return this->reset();  }
-
-    basic_tinybuf_file&
-    swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<unique_posix_file>::value)
-      {
-        noadl::xswap(this->m_file, other.m_file);
-        return *this;
-      }
   };
 
 template<typename charT, typename traitsT>

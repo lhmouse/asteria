@@ -261,6 +261,36 @@ class variant
         return *this;
       }
 
+    // 23.7.3.6, swap
+    variant&
+    swap(variant& other)
+      noexcept(conjunction<is_nothrow_swappable<altsT>...>::value)
+      {
+        auto index_old = this->m_index;
+        auto index_new = other.m_index;
+        if(index_old == index_new) {
+          // Swap both alternatives in place.
+          details_variant::dispatch_xswap<altsT...>(
+                    index_old, this->m_stor, other.m_stor);
+        }
+        else {
+          // Swap active alternatives using an indeterminate buffer.
+          typename aligned_union<0, altsT...>::type backup[1];
+          details_variant::dispatch_move_then_destroy<altsT...>(
+                    index_old, backup, this->m_stor);
+
+          // Move-construct the other alternative in place.
+          details_variant::dispatch_move_then_destroy<altsT...>(
+                    index_new, this->m_stor, other.m_stor);
+          this->m_index = index_new;
+          // Move the backup into `other`.
+          details_variant::dispatch_move_then_destroy<altsT...>(
+                    index_old, other.m_stor, backup);
+          other.m_index = index_old;
+        }
+        return *this;
+      }
+
     // 23.7.3.2, destructor
     ~variant()
       {
@@ -440,36 +470,6 @@ class variant
       {
         return this->emplace<index_of<targetT>::value>(
                          ::std::forward<paramsT>(params)...);
-      }
-
-    // 23.7.3.6, swap
-    variant&
-    swap(variant& other)
-      noexcept(conjunction<is_nothrow_swappable<altsT>...>::value)
-      {
-        auto index_old = this->m_index;
-        auto index_new = other.m_index;
-        if(index_old == index_new) {
-          // Swap both alternatives in place.
-          details_variant::dispatch_xswap<altsT...>(
-                    index_old, this->m_stor, other.m_stor);
-        }
-        else {
-          // Swap active alternatives using an indeterminate buffer.
-          typename aligned_union<0, altsT...>::type backup[1];
-          details_variant::dispatch_move_then_destroy<altsT...>(
-                    index_old, backup, this->m_stor);
-
-          // Move-construct the other alternative in place.
-          details_variant::dispatch_move_then_destroy<altsT...>(
-                    index_new, this->m_stor, other.m_stor);
-          this->m_index = index_new;
-          // Move the backup into `other`.
-          details_variant::dispatch_move_then_destroy<altsT...>(
-                    index_old, other.m_stor, backup);
-          other.m_index = index_old;
-        }
-        return *this;
       }
   };
 

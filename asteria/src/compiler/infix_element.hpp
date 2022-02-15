@@ -94,17 +94,15 @@ class Infix_Element
       { this->m_stor = ::std::forward<XElemT>(xelem);
         return *this;  }
 
+    Infix_Element&
+    swap(Infix_Element& other) noexcept
+      { this->m_stor.swap(other.m_stor);
+        return *this;  }
+
   public:
     Index
     index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
-
-    Infix_Element&
-    swap(Infix_Element& other) noexcept
-      {
-        this->m_stor.swap(other.m_stor);
-        return *this;
-      }
 
     // Returns the precedence of this element.
     Precedence

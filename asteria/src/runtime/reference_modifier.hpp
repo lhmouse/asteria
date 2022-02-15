@@ -72,6 +72,11 @@ class Reference_Modifier
       { this->m_stor = ::std::forward<XModT>(xmod);
         return *this;  }
 
+    Reference_Modifier&
+    swap(Reference_Modifier& other) noexcept
+      { this->m_stor.swap(other.m_stor);
+        return *this;  }
+
   public:
     Index
     index() const noexcept
@@ -104,13 +109,6 @@ class Reference_Modifier
     bool
     is_array_random() const noexcept
       { return this->index() == index_array_random;  }
-
-    Reference_Modifier&
-    swap(Reference_Modifier& other) noexcept
-      {
-        this->m_stor.swap(other.m_stor);
-        return *this;
-      }
 
     // Apply this modifier on a value.
     const Value*

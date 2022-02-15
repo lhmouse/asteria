@@ -68,19 +68,19 @@ class cow_vector
     cow_vector(const cow_vector& other) noexcept
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                     other.m_sth.as_allocator()))
-      { this->assign(other);  }
+      { this->m_sth.share_with(other.m_sth);  }
 
     cow_vector(const cow_vector& other, const allocator_type& alloc) noexcept
       : m_sth(alloc)
-      { this->assign(other);  }
+      { this->m_sth.share_with(other.m_sth);  }
 
     cow_vector(cow_vector&& other) noexcept
       : m_sth(::std::move(other.m_sth.as_allocator()))
-      { this->assign(::std::move(other));  }
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
       : m_sth(alloc)
-      { this->assign(::std::move(other));  }
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     constexpr
     cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
@@ -112,21 +112,29 @@ class cow_vector
 
     cow_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       : cow_vector(alloc)
-      { this->assign(init);  }
+      { this->assign(init.begin(), init.end());  }
 
     cow_vector&
     operator=(const cow_vector& other) noexcept
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);  }
+        this->m_sth.share_with(other.m_sth);
+        return *this;  }
 
     cow_vector&
     operator=(cow_vector&& other) noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));  }
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
 
     cow_vector&
     operator=(initializer_list<value_type> init)
-      { return this->assign(init);  }
+      { return this->assign(init.begin(), init.end());  }
+
+    cow_vector&
+    swap(cow_vector& other) noexcept
+      { noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
 
   private:
     cow_vector&
@@ -749,22 +757,6 @@ class cow_vector
                           this->m_sth.as_allocator());
       }
 
-    // N.B. The return type is a non-standard extension.
-    cow_vector&
-    assign(const cow_vector& other) noexcept
-      {
-        this->m_sth.share_with(other.m_sth);
-        return *this;
-      }
-
-    // N.B. The return type is a non-standard extension.
-    cow_vector&
-    assign(cow_vector&& other) noexcept
-      {
-        this->m_sth.exchange_with(other.m_sth);
-        return *this;
-      }
-
     // N.B. The parameter pack is a non-standard extension.
     // N.B. The return type is a non-standard extension.
     template<typename... paramsT,
@@ -778,15 +770,6 @@ class cow_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    cow_vector&
-    assign(initializer_list<value_type> init)
-      {
-        this->clear();
-        this->append(init);
-        return *this;
-      }
-
-    // N.B. The return type is a non-standard extension.
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_vector&
@@ -794,14 +777,6 @@ class cow_vector
       {
         this->clear();
         this->append(::std::move(first), ::std::move(last));
-        return *this;
-      }
-
-    cow_vector&
-    swap(cow_vector& other) noexcept
-      {
-        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
 

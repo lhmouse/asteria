@@ -52,6 +52,11 @@ class basic_tinyfmt_file
       : m_buf(path, mode)
       { }
 
+    basic_tinyfmt_file&
+    swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
+      { noadl::xswap(this->m_buf, other.m_buf);
+        return *this;  }
+
   public:
     ~basic_tinyfmt_file() override;
 
@@ -96,13 +101,6 @@ class basic_tinyfmt_file
     close() noexcept
       {
         this->m_buf.close();
-        return *this;
-      }
-
-    basic_tinyfmt_file&
-    swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
-      {
-        noadl::xswap(this->m_buf, other.m_buf);
         return *this;
       }
   };

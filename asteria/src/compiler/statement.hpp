@@ -202,6 +202,11 @@ class Statement
       { this->m_stor = ::std::forward<XStmtT>(xstmt);
         return *this;  }
 
+    Statement&
+    swap(Statement& other) noexcept
+      { this->m_stor.swap(other.m_stor);
+        return *this;  }
+
   public:
     Index
     index() const noexcept
@@ -214,13 +219,6 @@ class Statement
           return false;
         else
           return this->m_stor.as<index_return>().expr.units.empty();
-      }
-
-    Statement&
-    swap(Statement& other) noexcept
-      {
-        this->m_stor.swap(other.m_stor);
-        return *this;
       }
 
     cow_vector<AIR_Node>&

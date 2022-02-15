@@ -93,26 +93,26 @@ class cow_hashmap
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                    other.m_sth.as_allocator()),
               other.m_sth.as_hasher(), other.m_sth.as_key_equal())
-      { this->assign(other);  }
+      { this->m_sth.share_with(other.m_sth);  }
 
     cow_hashmap(const cow_hashmap& other, const allocator_type& alloc)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
-      { this->assign(other);  }
+      { this->m_sth.share_with(other.m_sth);  }
 
     cow_hashmap(cow_hashmap&& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(),
               other.m_sth.as_key_equal())
-      { this->assign(::std::move(other));  }
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
-      { this->assign(::std::move(other));  }
+      { this->m_sth.exchange_with(other.m_sth);  }
 
     constexpr
     cow_hashmap()
@@ -141,7 +141,7 @@ class cow_hashmap
                 const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                 const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
-      { this->assign(init);  }
+      { this->assign(init.begin(), init.end());  }
 
     cow_hashmap(size_type res_arg, const hasher& hf, const allocator_type& alloc)
       : cow_hashmap(res_arg, hf, key_equal(), alloc)
@@ -176,16 +176,24 @@ class cow_hashmap
     cow_hashmap&
     operator=(const cow_hashmap& other) noexcept
       { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(other);  }
+        this->m_sth.share_with(other.m_sth);
+        return *this;  }
 
     cow_hashmap&
     operator=(cow_hashmap&& other) noexcept
       { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        return this->assign(::std::move(other));  }
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
 
     cow_hashmap&
     operator=(initializer_list<value_type> init)
-      { return this->assign(init);  }
+      { return this->assign(init.begin(), init.end());  }
+
+    cow_hashmap&
+    swap(cow_hashmap& other) noexcept
+      { noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;  }
 
   private:
     cow_hashmap&
@@ -728,31 +736,6 @@ class cow_hashmap
       }
 
     // N.B. This function is a non-standard extension.
-    cow_hashmap&
-    assign(const cow_hashmap& other) noexcept
-      {
-        this->m_sth.share_with(other.m_sth);
-        return *this;
-      }
-
-    // N.B. This function is a non-standard extension.
-    cow_hashmap&
-    assign(cow_hashmap&& other) noexcept
-      {
-        this->m_sth.share_with(::std::move(other.m_sth));
-        return *this;
-      }
-
-    // N.B. This function is a non-standard extension.
-    cow_hashmap&
-    assign(initializer_list<value_type> init)
-      {
-        this->clear();
-        this->insert(init);
-        return *this;
-      }
-
-    // N.B. This function is a non-standard extension.
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap&
@@ -760,14 +743,6 @@ class cow_hashmap
       {
         this->clear();
         this->insert(::std::move(first), ::std::move(last));
-        return *this;
-      }
-
-    cow_hashmap&
-    swap(cow_hashmap& other) noexcept
-      {
-        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
 
