@@ -90,7 +90,6 @@ class alignas(max_align_t) Value
         return *this;
       }
 
-
   private:
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
