@@ -90,25 +90,17 @@ enum : uint8_t
   };
 
 ROCKET_CONST inline uint8_t
-get_cctype(char c) noexcept
-  {
-    size_t m = static_cast<uint8_t>(c);
-    if(m >= 128)
-      return 0;
-    return details_utils::cctype_table[m];
-  }
+get_cctype(char ch) noexcept
+  { return (ch < 0) ? 0 : details_utils::cctype_table[ch & 0x7F];  }
 
 ROCKET_CONST inline bool
-is_cctype(char c, uint8_t mask) noexcept
-  { return noadl::get_cctype(c) & mask;  }
+is_cctype(char ch, uint8_t mask) noexcept
+  { return (ch < 0) ? false : details_utils::cctype_table[ch & 0x7F] & mask;  }
 
 // Numeric conversion
 ROCKET_CONST inline bool
 is_convertible_to_integer(double val) noexcept
-  {
-    return ::std::islessequal(-0x1p63, val) &&
-           ::std::isless(val, 0x1p63);
-  }
+  { return (-0x1p63 <= val) && (val < 0x1p63);  }
 
 // C-style quoting
 constexpr details_utils::Quote_Wrapper
