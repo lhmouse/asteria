@@ -17,7 +17,7 @@ ptrdiff_t
 write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 template<typename... ParamsT>
-ROCKET_NOINLINE ROCKET_FLATTEN cow_string
+ROCKET_NEVER_INLINE ROCKET_FLATTEN cow_string
 format_string(const char* templ, const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;

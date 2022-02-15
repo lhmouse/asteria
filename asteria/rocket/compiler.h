@@ -18,7 +18,7 @@
     && defined(ROCKET_ATTRIBUTE_PRINTF)  \
     && defined(ROCKET_SELECTANY)  \
     && defined(ROCKET_SECTION)  \
-    && defined(ROCKET_NOINLINE)  \
+    && defined(ROCKET_NEVER_INLINE)  \
     && defined(ROCKET_PURE)  \
     && defined(ROCKET_CONST)  \
     && defined(ROCKET_ARTIFICIAL)  \

@@ -38,7 +38,7 @@ class refcnt_base
     using deleter_base  = typename allocator_wrapper_base_for<deleter_type>::type;
 
   protected:
-    [[noreturn]] ROCKET_NOINLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE void
     do_throw_bad_cast(const type_info& to, const type_info& from) const
       {
         noadl::sprintf_and_throw<domain_error>(

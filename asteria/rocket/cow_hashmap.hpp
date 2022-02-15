@@ -203,7 +203,7 @@ class cow_hashmap
         return *this;
       }
 
-    [[noreturn]] ROCKET_NOINLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE void
     do_throw_key_not_found(const details_cow_hashmap::stringified_key& skey) const
       {
         noadl::sprintf_and_throw<out_of_range>(

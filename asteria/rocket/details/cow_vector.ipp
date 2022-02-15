@@ -254,7 +254,7 @@ class storage_handle
         reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
       }
 
-    ROCKET_NOINLINE static void
+    ROCKET_NEVER_INLINE static void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -380,7 +380,7 @@ class storage_handle
           this->pop_back_unchecked();
       }
 
-    ROCKET_NOINLINE value_type*
+    ROCKET_NEVER_INLINE value_type*
     reallocate_clone(storage_handle& sth)
       {
         // Get the number of existent elements.
@@ -411,7 +411,7 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_NOINLINE value_type*
+    ROCKET_NEVER_INLINE value_type*
     reallocate_prepare(storage_handle& sth, size_type skip, size_type add)
       {
         // Calculate the combined length of vector (sth.size() + add).

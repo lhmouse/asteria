@@ -8,7 +8,7 @@
 #define ROCKET_ATTRIBUTE_PRINTF(...)        // not implemented
 #define ROCKET_SELECTANY                    __declspec(selectany)
 #define ROCKET_SECTION(...)                 __declspec(allocate(__VA_ARGS__))
-#define ROCKET_NOINLINE                     __declspec(noinline)
+#define ROCKET_NEVER_INLINE                 __declspec(noinline)
 #define ROCKET_PURE                         // not implemented
 #define ROCKET_CONST                        // not implemented
 #define ROCKET_ARTIFICIAL                   // not implemented

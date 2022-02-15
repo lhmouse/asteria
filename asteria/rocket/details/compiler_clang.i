@@ -8,7 +8,7 @@
 #define ROCKET_ATTRIBUTE_PRINTF(...)        __attribute__((__format__(__printf__, __VA_ARGS__)))
 #define ROCKET_SELECTANY                    __attribute__((__weak__))
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
-#define ROCKET_NOINLINE                     __attribute__((__noinline__))
+#define ROCKET_NEVER_INLINE                 __attribute__((__noinline__))
 #define ROCKET_PURE                         __attribute__((__pure__))
 #define ROCKET_CONST                        __attribute__((__const__))
 #define ROCKET_ARTIFICIAL                   __attribute__((__artificial__, __always_inline__))

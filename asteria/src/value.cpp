@@ -254,7 +254,7 @@ do_throw_type_mismatch(const char* desc) const
           desc, describe_type(this->type()));
   }
 
-ROCKET_NOINLINE void
+ROCKET_NEVER_INLINE void
 Value::
 do_destroy_variant_slow() noexcept
   try {

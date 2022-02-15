@@ -409,7 +409,7 @@ class storage_handle
         reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
       }
 
-    ROCKET_NOINLINE static void
+    ROCKET_NEVER_INLINE static void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -614,7 +614,7 @@ class storage_handle
           });
       }
 
-    ROCKET_NOINLINE bucket_type*
+    ROCKET_NEVER_INLINE bucket_type*
     reallocate_clone(storage_handle& sth)
       {
         // Get the number of existent elements.
@@ -645,7 +645,7 @@ class storage_handle
         return qstor->bkts;
       }
 
-    ROCKET_NOINLINE bucket_type*
+    ROCKET_NEVER_INLINE bucket_type*
     reallocate_reserve(storage_handle& sth, bool finish, size_type add)
       {
         // Calculate the combined length of hashmap (sth.size() + add).

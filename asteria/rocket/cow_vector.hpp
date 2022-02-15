@@ -144,7 +144,7 @@ class cow_vector
         return *this;
       }
 
-    [[noreturn]] ROCKET_NOINLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(

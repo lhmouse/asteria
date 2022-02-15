@@ -71,7 +71,7 @@ class basic_storage
     capacity() const noexcept
       { return this->m_cap;  }
 
-    ROCKET_NOINLINE size_type
+    ROCKET_NEVER_INLINE size_type
     reserve(size_type goff, size_type eoff, size_type nadd)
       {
         ROCKET_ASSERT(goff <= eoff);

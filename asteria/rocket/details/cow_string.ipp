@@ -129,7 +129,7 @@ class storage_handle
         this->do_destroy_storage(qstor);
       }
 
-    ROCKET_NOINLINE static void
+    ROCKET_NEVER_INLINE static void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -222,7 +222,7 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_NOINLINE value_type*
+    ROCKET_NEVER_INLINE value_type*
     reallocate_more(const value_type* src, size_type len, size_type add)
       {
         // Calculate the combined length of string (len + add).
