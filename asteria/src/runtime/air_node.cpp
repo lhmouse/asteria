@@ -1403,17 +1403,6 @@ do_tmask_of(const Value& val) noexcept
     return UINT32_C(1) << val.type();
   }
 
-int64_t
-do_icast(double value)
-  {
-    if(!is_convertible_to_integer(value)) {
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "real value not representable as integer (value `$1`)",
-          value);
-    }
-    return static_cast<int64_t>(value);
-  }
-
 struct Traits_apply_xop_inc_post
   {
     // `up` is unused.
@@ -2379,7 +2368,7 @@ struct Traits_apply_xop_iround
 
           case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
-            rhs = do_icast(::std::round(rhs.as_real()));
+            rhs = safe_double_to_int64(::std::round(rhs.as_real()));
             return air_status_next;
 
           default:
@@ -2424,7 +2413,7 @@ struct Traits_apply_xop_ifloor
 
           case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
-            rhs = do_icast(::std::floor(rhs.as_real()));
+            rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
             return air_status_next;
 
           default:
@@ -2469,7 +2458,7 @@ struct Traits_apply_xop_iceil
 
           case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
-            rhs = do_icast(::std::ceil(rhs.as_real()));
+            rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
             return air_status_next;
 
           default:
@@ -2514,7 +2503,7 @@ struct Traits_apply_xop_itrunc
 
           case tmask_real:
             ROCKET_ASSERT(rhs.is_real());
-            rhs = do_icast(::std::trunc(rhs.as_real()));
+            rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
             return air_status_next;
 
           default:

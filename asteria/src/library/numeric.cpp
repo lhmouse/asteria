@@ -34,17 +34,6 @@ do_verify_bounds(double lower, double upper)
     return upper;
   }
 
-int64_t
-do_cast_to_integer(double value)
-  {
-    if(!is_convertible_to_integer(value))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "real value not representable as integer (value `$1`)",
-          value);
-
-    return static_cast<int64_t>(value);
-  }
-
 pair<V_integer, int>
 do_decompose_integer(uint8_t ebase, int64_t value)
   {
@@ -381,7 +370,7 @@ std_numeric_iround(V_integer value)
 V_integer
 std_numeric_iround(V_real value)
   {
-    return do_cast_to_integer(::std::round(value));
+    return safe_double_to_int64(::std::round(value));
   }
 
 V_integer
@@ -405,7 +394,7 @@ std_numeric_ifloor(V_integer value)
 V_integer
 std_numeric_ifloor(V_real value)
   {
-    return do_cast_to_integer(::std::floor(value));
+    return safe_double_to_int64(::std::floor(value));
   }
 
 V_integer
@@ -429,7 +418,7 @@ std_numeric_iceil(V_integer value)
 V_integer
 std_numeric_iceil(V_real value)
   {
-    return do_cast_to_integer(::std::ceil(value));
+    return safe_double_to_int64(::std::ceil(value));
   }
 
 V_integer
@@ -453,7 +442,7 @@ std_numeric_itrunc(V_integer value)
 V_integer
 std_numeric_itrunc(V_real value)
   {
-    return do_cast_to_integer(::std::trunc(value));
+    return safe_double_to_int64(::std::trunc(value));
   }
 
 V_real
