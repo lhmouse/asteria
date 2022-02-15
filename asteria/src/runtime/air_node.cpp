@@ -4319,10 +4319,9 @@ struct Traits_import_call
         if(path.empty())
           ASTERIA_THROW_RUNTIME_ERROR("empty path specified for `import`");
 
-        if((path[0] != '/') && (sp.sloc.file()[0] == '/'))
-          path.assign(sp.sloc.file())
-              .erase(path.rfind('/') + 1)
-              .append(value.as_string());
+        const auto& src_path = sp.sloc.file();
+        if((path[0] != '/') && (src_path[0] == '/'))
+          path.insert(0, src_path, 0, src_path.rfind('/') + 1);
 
         auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
         if(!abspath)
