@@ -112,12 +112,12 @@ safe_double_to_int64(double val)
     double fval = ::std::trunc(val);
     if(fval != val)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_itrunc: value `%.17g` is not an exact integer",
+            "safe_double_to_int64: value `%.17g` is not an exact integer",
             val);
 
     if(!noadl::is_convertible_to_int64(val))
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_itrunc: value `%.17g` is out of range for an `int64`",
+            "safe_double_to_int64: value `%.17g` is out of range for an `int64`",
             val);
 
     return static_cast<int64_t>(val);
