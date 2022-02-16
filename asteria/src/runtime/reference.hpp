@@ -24,16 +24,21 @@ class alignas(max_align_t) Reference
 
   private:
     Value m_value;
+
     rcfwdp<Variable> m_var;
     rcfwdp<PTC_Arguments> m_ptca;
     cow_vector<Reference_Modifier> m_mods;
-    Index m_index;
+
+    union {
+      Index m_index;
+      uintptr_t m_init_index;  // force initialization of padding bits
+    };
 
   public:
     // Constructors and assignment operators
     constexpr
     Reference() noexcept
-      : m_index(index_invalid)
+      : m_init_index()
       { }
 
     Reference(const Reference& other) noexcept
