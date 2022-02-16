@@ -21,19 +21,26 @@ class storage_handle
     using nelem_type      = typename lowest_unsigned<capacityT - 1>::type;
 
   private:
-    nelem_type m_nelem;
     union {
-      volatile char m_do_not_use;  // suppress warnings about potential use of uninitialized objects
+      nelem_type m_nelem;
+
+      // This eliminates padding bytes for constexpr initialization.
+      typename aligned_storage<1, alignof(value_type)>::type m_init_nelem;
+    };
+
+    union {
       value_type m_data[capacityT];
+
+      // This suppresses warnings about potential use of uninitialized objects.
+      volatile char m_do_not_use;
     };
 
   public:
     explicit
     storage_handle(const allocator_type& alloc) noexcept
-      : allocator_base(alloc)
+      : allocator_base(alloc),
+        m_init_nelem()
       {
-        this->m_nelem = 0;
-
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
 #endif
@@ -41,10 +48,9 @@ class storage_handle
 
     explicit
     storage_handle(allocator_type&& alloc) noexcept
-      : allocator_base(::std::move(alloc))
+      : allocator_base(::std::move(alloc)),
+        m_init_nelem()
       {
-        this->m_nelem = 0;
-
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
 #endif
@@ -58,8 +64,8 @@ class storage_handle
           allocator_traits<allocator_type>::destroy(*this, this->m_data + off);
 
 #ifdef ROCKET_DEBUG
-        this->m_nelem = static_cast<nelem_type>(0xBAD1BEEF);
         ::std::memset(static_cast<void*>(this->m_data), '~', sizeof(m_data));
+        this->m_nelem = static_cast<nelem_type>(0xBAD1BEEF);
 #endif
       }
 
