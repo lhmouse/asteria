@@ -5002,6 +5002,7 @@ struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
     append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
+            AVMC_Queue::Uparam(),
             TraitsT::make_sparam(reachable, altr));
       }
   };

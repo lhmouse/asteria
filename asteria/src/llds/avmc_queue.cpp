@@ -114,14 +114,13 @@ do_reserve_one(Uparam uparam, size_t size)
     return qnode;
   }
 
-AVMC_Queue&
+details_avmc_queue::Header*
 AVMC_Queue::
 do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_opt)
   {
-    auto qnode = this->do_reserve_one(uparam, size);
-
     // Copy source data if `data_opt` is non-null. Fill zeroes otherwise.
     // This operation will not throw exceptions.
+    auto qnode = this->do_reserve_one(uparam, size);
     if(data_opt)
       ::std::memcpy(qnode->sparam, data_opt, size);
     else if(size)
@@ -130,17 +129,15 @@ do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_o
     // Accept this node.
     qnode->pv_exec = exec;
     this->m_used += UINT32_C(1) + qnode->nheaders;
-    return *this;
+    return qnode;
   }
 
-AVMC_Queue&
+details_avmc_queue::Header*
 AVMC_Queue::
 do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
                      Var_Getter* vget_opt, Relocator* reloc_opt, Destructor* dtor_opt,
                      size_t size, Constructor* ctor_opt, intptr_t ctor_arg)
   {
-    auto qnode = this->do_reserve_one(uparam, size);
-
     // Allocate metadata for this node.
     auto meta = ::rocket::make_unique<details_avmc_queue::Metadata>();
     uint8_t meta_ver = 1;
@@ -157,6 +154,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
 
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
+    auto qnode = this->do_reserve_one(uparam, size);
     if(ctor_opt)
       ctor_opt(qnode, ctor_arg);
     else if(size)
@@ -166,7 +164,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
     qnode->pv_meta = meta.release();
     qnode->meta_ver = meta_ver;
     this->m_used += UINT32_C(1) + qnode->nheaders;
-    return *this;
+    return qnode;
   }
 
 AVMC_Queue&

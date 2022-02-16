@@ -61,13 +61,13 @@ class AVMC_Queue
     // Append a new node to the end. `size` is the size of `sparam` to initialize.
     // If `data_opt` is specified, it should point to the buffer containing data to copy.
     // Otherwise, `sparam` is filled with zeroes.
-    AVMC_Queue&
+    Header*
     do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_opt);
 
     // Append a new node to the end. `size` is the size of `sparam` to initialize.
     // If `ctor_opt` is specified, it is called to initialize `sparam`. Otherwise,
     // `sparam` is filled with zeroes.
-    AVMC_Queue&
+    Header*
     do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
                          Var_Getter* vget_opt, Relocator* reloc_opt, Destructor* dtor_opt,
                          size_t size, Constructor* ctor_opt, intptr_t ctor_arg);
@@ -95,27 +95,8 @@ class AVMC_Queue
       }
 
     // Append a node. This allows you to bind an arbitrary function.
-    // If `data` is a null pointer, `size` zero bytes are allocated.
-    // Call the `append()` function if the node is non-trivial.
-    AVMC_Queue&
-    append(Executor& exec, const Source_Location* sloc_opt, Uparam up = { })
-      {
-        if(!sloc_opt)
-          return this->do_append_trivial(up, exec, 0, nullptr);
-
-        return this->do_append_nontrivial(up, exec, sloc_opt,
-                           nullptr, nullptr, nullptr, 0, nullptr, 0);
-      }
-
     template<typename XSparamT>
-    AVMC_Queue&
-    append(Executor& exec, const Source_Location* sloc_opt, XSparamT&& sp)
-      {
-        return this->append(exec, sloc_opt, Uparam(), ::std::forward<XSparamT>(sp));
-      }
-
-    template<typename XSparamT>
-    AVMC_Queue&
+    Header*
     append(Executor& exec, const Source_Location* sloc_opt, Uparam up, XSparamT&& sp)
       {
         using Sparam = typename ::std::decay<XSparamT>::type;
@@ -129,6 +110,16 @@ class AVMC_Queue
                           Traits::vget_opt, Traits::reloc_opt, Traits::dtor_opt,
                           sizeof(sp), details_avmc_queue::do_forward_ctor<XSparamT>,
                           reinterpret_cast<intptr_t>(::std::addressof(sp)));
+      }
+
+    Header*
+    append(Executor& exec, const Source_Location* sloc_opt, Uparam up = { })
+      {
+        if(!sloc_opt)
+          return this->do_append_trivial(up, exec, 0, nullptr);
+
+        return this->do_append_nontrivial(up, exec, sloc_opt,
+                           nullptr, nullptr, nullptr, 0, nullptr, 0);
       }
 
     // Mark this queue ready for execution. No nodes may be appended hereafter.
