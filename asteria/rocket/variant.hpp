@@ -37,35 +37,38 @@ class variant
     static constexpr size_t alternative_size = sizeof...(altsT);
 
   private:
-    // The first member of this union is used for constexpr initialization.
+    using my_storage = typename aligned_union<0, altsT...>::type;
+
     union {
-      typename alternative_at<0>::type m_first;
-      typename aligned_union<0, altsT...>::type m_stor[1];
+      my_storage m_stor[1];
+
+      // This is used for constexpr initialization.
+      typename alternative_at<0>::type m_init_stor;
     };
-    typename lowest_unsigned<alternative_size - 1>::type m_index;
+
+    union {
+      typename lowest_unsigned<alternative_size - 1>::type m_index;
+
+      // Like above, this eliminates padding bytes for constexpr initialization.
+      typename aligned_storage<1, alignof(my_storage)>::type m_init_index;
+    };
 
   private:
     template<size_t indexT>
     ROCKET_PURE const typename alternative_at<indexT>::type*
     do_cast_storage() const noexcept
-      {
-        return reinterpret_cast<const typename alternative_at<indexT>::type*>(
-                                  this->m_stor);
-      }
+      { return (const typename alternative_at<indexT>::type*) this->m_stor;  }
 
     template<size_t indexT>
     ROCKET_PURE typename alternative_at<indexT>::type*
     do_cast_storage() noexcept
-      {
-        return reinterpret_cast<typename alternative_at<indexT>::type*>(
-                                  this->m_stor);
-      }
+      { return (typename alternative_at<indexT>::type*) this->m_stor;  }
 
   public:
     // 23.7.3.1, constructors
     constexpr
     variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
-      : m_first(), m_index(0)
+      : m_init_stor(), m_init_index()
       { }
 
     template<typename paramT,

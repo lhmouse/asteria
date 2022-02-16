@@ -103,6 +103,7 @@ using ::std::is_trivially_copyable;
 using ::std::underlying_type;
 using ::std::is_array;
 using ::std::is_base_of;
+using ::std::aligned_storage;
 using ::std::aligned_union;
 using ::std::is_signed;
 using ::std::make_signed;
