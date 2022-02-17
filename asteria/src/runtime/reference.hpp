@@ -31,7 +31,7 @@ class alignas(max_align_t) Reference
 
     union {
       Index m_index;
-      uintptr_t m_init_index;  // force initialization of padding bits
+      void* m_init_index;  // force initialization of padding bits
     };
 
   public:
