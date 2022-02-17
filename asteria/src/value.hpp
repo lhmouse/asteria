@@ -9,7 +9,7 @@
 
 namespace asteria {
 
-class alignas(max_align_t) Value
+class Value
   {
   private:
     using storage = ::rocket::variant<

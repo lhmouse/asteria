@@ -10,7 +10,7 @@
 
 namespace asteria {
 
-class alignas(max_align_t) Reference
+class Reference
   {
   public:
     enum Index : uint8_t
