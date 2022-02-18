@@ -52,8 +52,8 @@ class variant
 
       // Like above, this eliminates padding bytes for constexpr initialization.
       typename conditional<(my_align < 4),
-            conditional<!!(my_align == 1),  uint8_t, uint16_t>,  // 1, 2
-            conditional<!!(my_align == 4), uint32_t, uint64_t>   // 4, 8
+            conditional<(my_align == 1),  uint8_t, uint16_t>,  // 1, 2
+            conditional<(my_align == 4), uint32_t, uint64_t>   // 4, 8
           >::type::type m_init_index;
     };
 
