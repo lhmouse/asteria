@@ -62,7 +62,7 @@ class Global_Context
 
     Global_Context&
     set_recursion_base(const void* base) noexcept
-      { return this->m_sentry.set_base(base), *this;  }
+      { this->m_sentry.set_base(base);  return *this;  }
 
     // This helps debugging and profiling.
     ASTERIA_INCOMPLET(Abstract_Hooks)
@@ -73,7 +73,7 @@ class Global_Context
     ASTERIA_INCOMPLET(Abstract_Hooks)
     Global_Context&
     set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
-      { return this->m_qhooks = ::std::move(hooks_opt), *this;  }
+      { this->m_qhooks = ::std::move(hooks_opt);  return *this;  }
 
     // These are interfaces for individual global components.
     ASTERIA_INCOMPLET(Garbage_Collector)

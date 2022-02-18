@@ -107,8 +107,7 @@ execute(cow_vector<Value>&& vals)
     // Push all arguments backwards as temporaries.
     Reference_Stack stack;
     for(auto it = vals.mut_begin();  it != vals.end();  ++it)
-      stack.push()
-          .set_temporary(::std::move(*it));
+      stack.push().set_temporary(::std::move(*it));
 
     return this->execute(::std::move(stack));
   }

@@ -133,7 +133,7 @@ class basic_tinybuf
 
     basic_tinybuf&
     flush()
-      { return this->do_flush(), *this;  }
+      { this->do_flush();  return *this;  }
 
     off_type
     tell() const
@@ -141,7 +141,7 @@ class basic_tinybuf
 
     basic_tinybuf&
     seek(off_type off, seek_dir dir = seek_set)
-      { return this->do_seek(off, dir), *this;  }
+      { this->do_seek(off, dir);  return *this;  }
 
     size_type
     getn(char_type* s, size_type n)
@@ -153,15 +153,15 @@ class basic_tinybuf
 
     basic_tinybuf&
     putn(const char_type* s, size_type n)
-      { return this->do_putn(s, n), *this;  }
+      { this->do_putn(s, n);  return *this;  }
 
     basic_tinybuf&
     putc(char_type c)
-      { return this->do_putc(c), *this;  }
+      { this->do_putc(c);  return *this;  }
 
     basic_tinybuf&
     puts(const char_type* s)
-      { return this->do_putn(s, traits_type::length(s)), *this;  }
+      { this->do_putn(s, traits_type::length(s));  return *this;  }
   };
 
 template<typename charT, typename traitsT>

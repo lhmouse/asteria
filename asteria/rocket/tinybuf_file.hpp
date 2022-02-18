@@ -181,15 +181,15 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     reset() noexcept
-      { return this->m_file.reset(), *this;  }
+      { this->m_file.reset();  return *this;  }
 
     basic_tinybuf_file&
     reset(unique_posix_file&& file) noexcept
-      { return this->m_file = ::std::move(file), *this;  }
+      { this->m_file = ::std::move(file);  return *this;  }
 
     basic_tinybuf_file&
     reset(handle_type fp, closer_type cl) noexcept
-      { return this->m_file.reset(fp, cl), *this;  }
+      { this->m_file.reset(fp, cl);  return *this;  }
 
     basic_tinybuf_file&
     open(const char* path, open_mode mode)

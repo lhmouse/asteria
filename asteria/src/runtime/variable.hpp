@@ -40,7 +40,7 @@ class Variable final
 
     Variable&
     set_gc_ref(long ref) noexcept
-      { return this->m_gc_ref = ref, *this;  }
+      { this->m_gc_ref = ref;  return *this;  }
 
     // Accessors
     State

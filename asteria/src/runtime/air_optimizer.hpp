@@ -36,7 +36,7 @@ class AIR_Optimizer
 
     AIR_Optimizer&
     set_options(const Compiler_Options& opts) noexcept
-      { return this->m_opts = opts, *this;  }
+      { this->m_opts = opts;  return *this;  }
 
     // These are accessors and modifiers of tokens in this stream.
     bool

@@ -37,7 +37,7 @@ class fill_iterator
 
     fill_iterator&
     seek(difference_type pos) noexcept
-      { return this->m_pos = pos, *this;  }
+      { this->m_pos = pos;  return *this;  }
 
     constexpr reference
     operator*() const noexcept
