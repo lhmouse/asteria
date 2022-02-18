@@ -1384,6 +1384,25 @@ struct Traits_return_value
       }
   };
 
+struct Traits_push_temporary
+  {
+    // `up` is unused.
+    // `sp` is the value to push.
+
+    static Value
+    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_temporary& altr)
+      {
+        return altr.value;
+      }
+
+    ROCKET_FLATTEN static AIR_Status
+    execute(Executive_Context& ctx, const Value& value)
+      {
+        ctx.stack().push().set_temporary(value);
+        return air_status_next;
+      }
+  };
+
 enum : uint32_t
   {
     tmask_null      = UINT32_C(1) << type_null,
@@ -5209,7 +5228,11 @@ rebind_opt(Abstract_Context& ctx) const
         if(!qref)
           return nullopt;
 
-        // Bind it now.
+        if(qref->is_temporary()) {
+          S_push_temporary xnode = { qref->dereference_readonly() };
+          return ::std::move(xnode);
+        }
+
         S_push_bound_reference xnode = { *qref };
         return ::std::move(xnode);
       }
@@ -5637,6 +5660,10 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_return_value>(queue,
                        this->m_stor.as<index_return_value>());
 
+      case index_push_temporary:
+        return do_solidify<Traits_push_temporary>(queue,
+                       this->m_stor.as<index_push_temporary>());
+
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
@@ -5777,6 +5804,12 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       case index_return_value:
         return;
+
+      case index_push_temporary: {
+        const auto& altr = this->m_stor.as<index_push_temporary>();
+        altr.value.get_variables(staged, temp);
+        return;
+      }
 
       default:
         ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());

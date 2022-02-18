@@ -252,6 +252,11 @@ class AIR_Node
         Source_Location sloc;
       };
 
+    struct S_push_temporary
+      {
+        Value value;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -291,6 +296,7 @@ class AIR_Node
         index_initialize_reference   = 34,
         index_catch_expression       = 35,
         index_return_value           = 36,
+        index_push_temporary         = 37,
       };
 
   private:
@@ -333,6 +339,7 @@ class AIR_Node
         ,S_initialize_reference   // 34,
         ,S_catch_expression       // 35,
         ,S_return_value           // 36,
+        ,S_push_temporary         // 37,
       )>
       m_stor;
 
