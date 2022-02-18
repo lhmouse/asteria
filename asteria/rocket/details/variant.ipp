@@ -205,9 +205,9 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
         const_bitset<is_trivially_copy_constructible<altsT>::value...>();
 
     static constexpr auto t_nbytes =
-        max_size<(sizeof(altsT) *
-              !is_empty<altsT>::value *
-              is_trivially_copy_constructible<altsT>::value)...>::value;
+        max_size<(sizeof(altsT)
+                  * !is_empty<altsT>::value
+                  * is_trivially_copy_constructible<altsT>::value)...>::value;
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*, const void*),
@@ -234,9 +234,9 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
         const_bitset<is_trivially_move_constructible<altsT>::value...>();
 
     static constexpr auto t_nbytes =
-        max_size<(sizeof(altsT) *
-              !is_empty<altsT>::value *
-              is_trivially_move_constructible<altsT>::value)...>::value;
+        max_size<(sizeof(altsT)
+                  * !is_empty<altsT>::value
+                  * is_trivially_move_constructible<altsT>::value)...>::value;
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*, void*),
@@ -263,9 +263,9 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
         const_bitset<is_trivially_copyable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
-        max_size<(sizeof(altsT) *
-              !is_empty<altsT>::value *
-              is_trivially_copyable<altsT>::value)...>::value;
+        max_size<(sizeof(altsT)
+                  * !is_empty<altsT>::value
+                  * is_trivially_copyable<altsT>::value)...>::value;
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*, void*),
@@ -308,9 +308,9 @@ dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
         const_bitset<is_trivially_copy_assignable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
-        max_size<(sizeof(altsT) *
-              !is_empty<altsT>::value *
-              is_trivially_copy_assignable<altsT>::value)...>::value;
+        max_size<(sizeof(altsT)
+                  * !is_empty<altsT>::value
+                  * is_trivially_copy_assignable<altsT>::value)...>::value;
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*, const void*),
@@ -337,9 +337,9 @@ dispatch_move_assign(size_t k, void* dptr, void* sptr)
         const_bitset<is_trivially_move_assignable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
-        max_size<(sizeof(altsT) *
-              !is_empty<altsT>::value *
-              is_trivially_move_assignable<altsT>::value)...>::value;
+        max_size<(sizeof(altsT)
+                  * !is_empty<altsT>::value
+                  * is_trivially_move_assignable<altsT>::value)...>::value;
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*, void*),
@@ -366,13 +366,18 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
         const_bitset<is_trivially_move_assignable<altsT>::value...>();
 
     static constexpr auto t_nbytes =
-        max_size<(sizeof(altsT) *
-              !is_empty<altsT>::value *
-              is_trivially_move_assignable<altsT>::value)...>::value;
+        max_size<(sizeof(altsT)
+                  * !is_empty<altsT>::value
+                  * is_trivially_move_assignable<altsT>::value)...>::value;
 
     static constexpr auto nt_funcs =
         const_func_table<void (void*, void*),
                          wrapped_xswap<altsT>...>();
+
+    // Declare the storage type for all trivial alternatives.
+    using t_storage = typename aligned_union<0,
+              typename conditional<is_trivially_move_assignable<altsT>::value,
+                                   altsT, char>::type...>::type;
 
     // Don't bother writing overlapped regions.
     if(dptr == sptr)
@@ -384,11 +389,7 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
 
     // Perform a bytewise swap for trivial types.
     if(t_nbytes != 0)
-      wrapped_xswap<typename aligned_union<0,
-              typename conditional<
-                  is_trivially_move_assignable<altsT>::value,
-                  altsT, char>::type...
-                >::type>(dptr, sptr);
+      wrapped_xswap<t_storage>(dptr, sptr);
   }
 
 }  // namespace details_variant
