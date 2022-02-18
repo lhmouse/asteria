@@ -21,11 +21,16 @@ class storage_handle
     using nelem_type      = typename lowest_unsigned<capacityT - 1>::type;
 
   private:
+    static constexpr size_t my_align = alignof(value_type);
+
     union {
       nelem_type m_nelem;
 
       // This eliminates padding bytes for constexpr initialization.
-      typename aligned_storage<1, alignof(value_type)>::type m_init_nelem;
+      typename conditional<(my_align < 4),
+            conditional<!!(my_align == 1),  uint8_t, uint16_t>,  // 1, 2
+            conditional<!!(my_align == 4), uint32_t, uint64_t>   // 4, 8
+          >::type::type m_init_nelem;
     };
 
     union {

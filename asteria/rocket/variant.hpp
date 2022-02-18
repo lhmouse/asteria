@@ -38,6 +38,7 @@ class variant
 
   private:
     using my_storage = typename aligned_union<0, altsT...>::type;
+    static constexpr size_t my_align = alignof(my_storage);
 
     union {
       my_storage m_stor[1];
@@ -50,7 +51,10 @@ class variant
       typename lowest_unsigned<alternative_size - 1>::type m_index;
 
       // Like above, this eliminates padding bytes for constexpr initialization.
-      typename aligned_storage<1, alignof(my_storage)>::type m_init_index;
+      typename conditional<(my_align < 4),
+            conditional<!!(my_align == 1),  uint8_t, uint16_t>,  // 1, 2
+            conditional<!!(my_align == 4), uint32_t, uint64_t>   // 4, 8
+          >::type::type m_init_index;
     };
 
   private:
