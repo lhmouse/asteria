@@ -5064,7 +5064,6 @@ rebind_opt(Abstract_Context& ctx) const
   {
     switch(this->index()) {
       case index_clear_stack:
-        // There is nothing to rebind.
         return nullopt;
 
       case index_execute_block: {
@@ -5082,7 +5081,6 @@ rebind_opt(Abstract_Context& ctx) const
 
       case index_declare_variable:
       case index_initialize_variable:
-        // There is nothing to rebind.
         return nullopt;
 
       case index_if_statement: {
@@ -5192,7 +5190,6 @@ rebind_opt(Abstract_Context& ctx) const
       case index_simple_status:
       case index_check_argument:
       case index_push_global_reference:
-        // There is nothing to rebind.
         return nullopt;
 
       case index_push_local_reference: {
@@ -5218,7 +5215,6 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_push_bound_reference:
-        // There is nothing to rebind.
         return nullopt;
 
       case index_define_function: {
@@ -5270,7 +5266,6 @@ rebind_opt(Abstract_Context& ctx) const
       case index_define_null_variable:
       case index_single_step_trap:
       case index_variadic_call:
-        // There is nothing to rebind.
         return nullopt;
 
       case index_defer_expression: {
@@ -5288,7 +5283,6 @@ rebind_opt(Abstract_Context& ctx) const
       case index_import_call:
       case index_declare_reference:
       case index_initialize_reference:
-        // There is nothing to rebind.
         return nullopt;
 
       case index_catch_expression: {
@@ -5304,7 +5298,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_return_value:
-        // There is nothing to rebind.
+      case index_push_temporary:
         return nullopt;
 
       default:
