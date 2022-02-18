@@ -41,4 +41,6 @@
 *.tar
 *.tar.*
 *.deb
+*.stackdump
+core.*
 callgrind.*
