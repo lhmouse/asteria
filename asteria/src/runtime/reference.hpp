@@ -24,7 +24,6 @@ class Reference
 
   private:
     Value m_value;
-
     rcfwdp<Variable> m_var;
     rcfwdp<PTC_Arguments> m_ptca;
     cow_vector<Reference_Modifier> m_mods;
@@ -201,9 +200,23 @@ class Reference
     // For instance, the expression `obj.x[42]` results in a reference having two
     // modifiers. Modifiers can be removed to yield references to ancestor objects.
     // Removing the last modifier shall yield the constant `null`.
-    size_t
-    count_modifiers() const noexcept
-      { return this->m_mods.size();  }
+    const cow_vector<Reference_Modifier>&
+    get_modifiers() const noexcept
+      { return this->m_mods;  }
+
+    Reference&
+    set_modifiers(const cow_vector<Reference_Modifier>& mods) noexcept
+      {
+        this->m_mods = mods;
+        return *this;
+      }
+
+    Reference&
+    clear_modifiers() noexcept
+      {
+        this->m_mods.clear();
+        return *this;
+      }
 
     Reference&
     push_modifier_array_index(int64_t index)
