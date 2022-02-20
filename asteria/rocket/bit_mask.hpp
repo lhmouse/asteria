@@ -63,14 +63,6 @@ class bit_mask
         return *this;
       }
 
-    explicit constexpr operator
-    bool() const noexcept
-      { return this->value() != valueT();  }
-
-    constexpr bool
-    operator[](size_t b) const noexcept
-      { return this->test(b);  }
-
     constexpr bit_mask&
     operator&=(const bit_mask& other) noexcept
       {
@@ -91,6 +83,18 @@ class bit_mask
         this->m_value |= other.m_value;
         return *this;
       }
+
+    explicit constexpr operator
+    bool() const noexcept
+      { return this->value() != valueT();  }
+
+    constexpr operator
+    value_type() const noexcept
+      { return this->value();  }
+
+    constexpr bool
+    operator[](size_t b) const noexcept
+      { return this->test(b);  }
   };
 
 template<typename valueT>
