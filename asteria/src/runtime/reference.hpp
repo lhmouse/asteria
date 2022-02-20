@@ -111,6 +111,10 @@ class Reference
     index() const noexcept
       { return this->m_index;  }
 
+    bmask32
+    index_bmask() const noexcept
+      { return { (size_t) this->m_index };  }
+
     bool
     is_invalid() const noexcept
       { return this->index() == index_invalid;  }

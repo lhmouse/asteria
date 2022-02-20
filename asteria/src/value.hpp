@@ -106,14 +106,14 @@ class Value
     [[noreturn]] void
     do_throw_type_mismatch(const char* desc) const;
 
-    void
+    ROCKET_COLD void
     do_destroy_variant_slow() noexcept;
 
   public:
     ~Value()
       {
-        constexpr bmask32 recursive_types = { type_array, type_object };
-        if(recursive_types.test(this->type()))
+        constexpr bmask32 container = M_array | M_object;
+        if(container.test(this->type()))
           this->do_destroy_variant_slow();
         else
           this->m_stor.~storage();
@@ -123,6 +123,10 @@ class Value
     Type
     type() const noexcept
       { return static_cast<Type>(this->m_stor.index());  }
+
+    bmask32
+    type_bmask() const noexcept
+      { return { this->m_stor.index() };  }
 
     bool
     is_null() const noexcept
@@ -322,9 +326,8 @@ class Value
     bool
     is_scalar() const noexcept
       {
-        constexpr bmask32 scalar_types = { type_null,
-            type_boolean, type_integer, type_real, type_string };
-        return scalar_types.test(this->type());
+        constexpr bmask32 scalar = M_null | M_boolean | M_integer | M_real | M_string;
+        return scalar.test(this->type());
       }
 
     // This is used by garbage collection.
