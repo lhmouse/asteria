@@ -65,7 +65,7 @@ class bit_mask
 
     explicit constexpr operator
     bool() const noexcept
-      { return this->value() == valueT();  }
+      { return this->value() != valueT();  }
 
     constexpr bool
     operator[](size_t b) const noexcept
@@ -119,6 +119,16 @@ operator|(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
     temp |= rhs;
     return temp;
   }
+
+template<typename valueT>
+constexpr bool
+operator==(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
+  { return lhs.value() == rhs.value();  }
+
+template<typename valueT>
+constexpr bool
+operator!=(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
+  { return lhs.value() != rhs.value();  }
 
 }  // namespace rocket
 
