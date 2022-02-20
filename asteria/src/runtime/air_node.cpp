@@ -1422,7 +1422,7 @@ struct Traits_apply_xop_inc_post
         auto& lhs = ctx.stack().top().dereference_mutable();
 
         // Increment the value and replace the top with the old one.
-        switch(lhs.type_bmask()) {
+        switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
@@ -1468,7 +1468,7 @@ struct Traits_apply_xop_dec_post
         auto& lhs = ctx.stack().top().dereference_mutable();
 
         // Decrement the value and replace the top with the old one.
-        switch(lhs.type_bmask()) {
+        switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
@@ -1514,7 +1514,7 @@ struct Traits_apply_xop_subscr
         ctx.stack().pop();
 
         // Push a modifier depending the type of `rhs`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& ref = ctx.stack().mut_top();
@@ -1592,7 +1592,7 @@ struct Traits_apply_xop_neg
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Get the opposite of the operand.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -1645,7 +1645,7 @@ struct Traits_apply_xop_notb
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Get the bitwise complement of the operand.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(rhs.is_boolean());
             auto& val = rhs.open_boolean();
@@ -1726,7 +1726,7 @@ struct Traits_apply_xop_inc_pre
         auto& rhs = ctx.stack().top().dereference_mutable();
 
         // Increment the value in place.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -1771,7 +1771,7 @@ struct Traits_apply_xop_dec_pre
         auto& rhs = ctx.stack().top().dereference_mutable();
 
         // Decrement the value in place.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -1846,7 +1846,7 @@ struct Traits_apply_xop_countof
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Get the number of bytes or elements in the operand.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_null: {
             ROCKET_ASSERT(rhs.is_null());
             rhs = 0;
@@ -1937,7 +1937,7 @@ struct Traits_apply_xop_sqrt
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Get the square root of the operand as a real number.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs = ::std::sqrt(rhs.as_real());
@@ -1985,7 +1985,7 @@ struct Traits_apply_xop_isnan
 
         // Check whether the operand is an arithmetic type and is a NaN.
         // Note an integer is never a NaN.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs = false;
@@ -2033,7 +2033,7 @@ struct Traits_apply_xop_isinf
 
         // Check whether the operand is an arithmetic type and is an infinity.
         // Note an integer is never an infinity.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs = false;
@@ -2080,7 +2080,7 @@ struct Traits_apply_xop_abs
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Get the absolute value of the operand.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -2133,7 +2133,7 @@ struct Traits_apply_xop_sign
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // Get the sign bit of the operand and extend it to 64 bits.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             rhs.open_integer() >>= 63;
@@ -2181,7 +2181,7 @@ struct Traits_apply_xop_round
 
         // Round the operand to the nearest integer.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2226,7 +2226,7 @@ struct Traits_apply_xop_floor
 
         // Round the operand to the nearest integer towards negative infinity.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2271,7 +2271,7 @@ struct Traits_apply_xop_ceil
 
         // Round the operand to the nearest integer towards positive infinity.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2316,7 +2316,7 @@ struct Traits_apply_xop_trunc
 
         // Round the operand to the nearest integer towards zero.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2361,7 +2361,7 @@ struct Traits_apply_xop_iround
 
         // Round the operand to the nearest integer.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2406,7 +2406,7 @@ struct Traits_apply_xop_ifloor
 
         // Round the operand to the nearest integer towards negative infinity.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2451,7 +2451,7 @@ struct Traits_apply_xop_iceil
 
         // Round the operand to the nearest integer towards positive infinity.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2496,7 +2496,7 @@ struct Traits_apply_xop_itrunc
 
         // Round the operand to the nearest integer towards zero.
         // This is a no-op for type `integer`.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer:
             ROCKET_ASSERT(rhs.is_integer());
             return air_status_next;
@@ -2827,7 +2827,7 @@ struct Traits_apply_xop_add
         // For the `boolean` type, perform logical OR of the operands.
         // For the `integer` and `real` types, perform arithmetic addition.
         // For the `string` type, concatenate them.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
@@ -2901,7 +2901,7 @@ struct Traits_apply_xop_sub
 
         // For the `boolean` type, perform logical XOR of the operands.
         // For the `integer` and `real` types, perform arithmetic subtraction.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
@@ -2969,7 +2969,7 @@ struct Traits_apply_xop_mul
         // For the `boolean` type, perform logical AND of the operands.
         // For the `integer` and `real` types, perform arithmetic multiplication.
         // If either operand is an `integer` and the other is a `string`, duplicate the string.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
@@ -3070,7 +3070,7 @@ struct Traits_apply_xop_div
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform arithmetic division.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -3133,7 +3133,7 @@ struct Traits_apply_xop_mod
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform arithmetic modulo.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -3212,7 +3212,7 @@ struct Traits_apply_xop_sll
         // If the LHS operand is of type `string`, fill space characters in the right
         // and discard characters from the left. The number of bytes in the LHS operand
         // will be preserved.
-        switch(lhs.type_bmask()) {
+        switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
@@ -3292,7 +3292,7 @@ struct Traits_apply_xop_srl
         // If the LHS operand is of type `string`, fill space characters in the left
         // and discard characters from the right. The number of bytes in the LHS operand
         // will be preserved.
-        switch(lhs.type_bmask()) {
+        switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
@@ -3372,7 +3372,7 @@ struct Traits_apply_xop_sla
         // that don't equal the sign bit cause an exception to be thrown. Bits shifted
         // in are filled with zeroes.
         // If the LHS operand is of type `string`, fill space characters in the right.
-        switch(lhs.type_bmask()) {
+        switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
@@ -3459,7 +3459,7 @@ struct Traits_apply_xop_sra
         // If the LHS operand is of type `integer`, shift the LHS operand to the right.
         // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
         // If the LHS operand is of type `string`, discard characters from the right.
-        switch(lhs.type_bmask()) {
+        switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.open_integer();
@@ -3524,7 +3524,7 @@ struct Traits_apply_xop_andb
         // For the `boolean` type, perform logical AND of the operands.
         // For the `integer` and `real` types, perform bitwise AND of the operands.
         // For the `string` type, perform bytewise AND of the operands.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
@@ -3594,7 +3594,7 @@ struct Traits_apply_xop_orb
         // For the `boolean` type, perform logical OR of the operands.
         // For the `integer` and `real` types, perform bitwise OR of the operands.
         // For the `string` type, perform bytewise OR of the operands.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
@@ -3665,7 +3665,7 @@ struct Traits_apply_xop_xorb
         // For the `boolean` type, perform logical XOR of the operands.
         // For the `integer` and `real` types, perform bitwise XOR of the operands.
         // For the `string` type, perform bytewise XOR of the operands.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
@@ -3836,7 +3836,7 @@ struct Traits_apply_xop_fma
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform fused multiply-add.
-        switch(lhs.type_bmask() | mid.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | mid.type_mask() | rhs.type_mask()) {
           case M_integer:
           case M_real | M_integer:
           case M_real: {
@@ -4476,7 +4476,7 @@ struct Traits_apply_xop_lzcnt
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, return the number of leading zero bits.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -4518,7 +4518,7 @@ struct Traits_apply_xop_tzcnt
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, return the number of leading zero bits.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -4560,7 +4560,7 @@ struct Traits_apply_xop_popcnt
         auto& rhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, return the number of leading zero bits.
-        switch(rhs.type_bmask()) {
+        switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.open_integer();
@@ -4604,7 +4604,7 @@ struct Traits_apply_xop_addm
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, perform modular addition.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -4651,7 +4651,7 @@ struct Traits_apply_xop_subm
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, perform modular subtraction.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -4698,7 +4698,7 @@ struct Traits_apply_xop_mulm
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` type, perform modular multiplication.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -4745,7 +4745,7 @@ struct Traits_apply_xop_adds
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform saturation addition.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -4803,7 +4803,7 @@ struct Traits_apply_xop_subs
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform saturation subtraction.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();
@@ -4861,7 +4861,7 @@ struct Traits_apply_xop_muls
         auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
 
         // For the `integer` and `real` types, perform saturation multiplication.
-        switch(lhs.type_bmask() | rhs.type_bmask()) {
+        switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& x = lhs.open_integer();

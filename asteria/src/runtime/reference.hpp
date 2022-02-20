@@ -112,7 +112,7 @@ class Reference
       { return this->m_index;  }
 
     bmask32
-    index_bmask() const noexcept
+    index_mask() const noexcept
       { return { (size_t) this->m_index };  }
 
     bool

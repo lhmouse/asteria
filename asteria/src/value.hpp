@@ -125,7 +125,7 @@ class Value
       { return static_cast<Type>(this->m_stor.index());  }
 
     bmask32
-    type_bmask() const noexcept
+    type_mask() const noexcept
       { return { this->m_stor.index() };  }
 
     bool
