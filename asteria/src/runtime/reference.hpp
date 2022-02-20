@@ -259,17 +259,21 @@ class Reference
       }
 
     Reference&
-    pop_modifier() noexcept
+    pop_modifier()
       {
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
-          // Set to null.
+        constexpr bmask32 has_value = { index_temporary, index_variable };
+        if(!has_value.test(this->index()))
+          return *this;
+
+        if(this->m_mods.empty()) {
+          // Set to `null`.
           this->m_value = nullopt;
           this->m_index = index_temporary;
+          return *this;
         }
-        else {
-          // Drop a modifier.
-          this->m_mods.pop_back();
-        }
+
+        // Drop a modifier.
+        this->m_mods.pop_back();
         return *this;
       }
 
