@@ -60,59 +60,46 @@ do_slice(const V_string& text, const V_integer& from, const optV_integer& length
   }
 
 // https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
+template<typename IterT>
 class BMH_Searcher
   {
   private:
-    ptrdiff_t m_plen;
-    ptrdiff_t m_bcrs[0x100];
+    IterT m_pbegin, m_pend;
+    ptrdiff_t m_bcr_offsets[0x100];
 
   public:
-    template<typename IterT>
-    explicit
+    inline
     BMH_Searcher(IterT pbegin, IterT pend)
+      : m_pbegin(pbegin), m_pend(pend)
       {
-        // Calculate the pattern length.
-        this->m_plen = ::std::distance(pbegin, pend);
-        ROCKET_ASSERT(this->m_plen > 0);
+        const ptrdiff_t plength = pend - pbegin;
+        if(plength == 0)
+          ASTERIA_THROW_RUNTIME_ERROR("empty pattern string not valid");
 
-        // Build a table according to the Bad Character Rule.
-        for(size_t i = 0;  i < 0x100;  ++i)
-          this->m_bcrs[i] = this->m_plen;
-
-        for(ptrdiff_t i = this->m_plen - 1;  i != 0;  --i)
-          this->m_bcrs[uint8_t(pend[~i])] = i;
       }
 
   public:
-    ptrdiff_t
-    pattern_length() const noexcept
-      { return this->m_plen;  }
-
-    template<typename IterT>
     opt<IterT>
-    search_opt(IterT tbegin, IterT tend, IterT pbegin) const
+    search_opt(IterT tbegin, IterT tend) const
       {
-        // Search for the pattern.
-        auto tcur = tbegin;
-        for(;;) {
-          if(tend - tcur < this->m_plen)
-            return nullopt;
-
-          auto tnext = tcur + this->m_plen;
-          if(::std::equal(tcur, tnext, pbegin))
-            return tcur;
-
-          // Adjust the read iterator using the Bad Character Rule.
-          tcur += this->m_bcrs[uint8_t(tnext[-1])];
-        }
+        auto zz = ::std::search(tbegin, tend, this->m_pbegin, this->m_pend);
+        if(zz == tend)
+          return nullopt;
+        return zz;
       }
   };
+
+template<typename IterT>
+BMH_Searcher<IterT>
+do_create_searcher_for_pattern(IterT pbegin, IterT pend)
+  { return BMH_Searcher<IterT>(pbegin, pend);  }
 
 template<typename IterT>
 opt<IterT>
 do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   {
     // If the pattern is empty, there is a match at the beginning.
+    // Don't pass empty patterns to the BMH srch.
     if(pbegin == pend)
       return tbegin;
 
@@ -121,8 +108,8 @@ do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
       return nullopt;
 
     // This is the slow path.
-    BMH_Searcher srch(pbegin, pend);
-    return srch.search_opt(tbegin, tend, pbegin);
+    const auto srch = do_create_searcher_for_pattern(pbegin, pend);
+    return srch.search_opt(tbegin, tend);
   }
 
 template<typename IterT>
@@ -145,10 +132,10 @@ do_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend, It
       return res;
 
     // This is the slow path.
-    BMH_Searcher srch(pbegin, pend);
+    const auto srch = do_create_searcher_for_pattern(pbegin, pend);
     auto tcur = tbegin;
     for(;;) {
-      auto qtnext = srch.search_opt(tcur, tend, pbegin);
+      auto qtnext = srch.search_opt(tcur, tend);
       if(!qtnext) {
         // Append all remaining characters and finish.
         res.append(tcur, tend);
@@ -160,7 +147,7 @@ do_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend, It
       res.append(rbegin, rend);
 
       // Move `tcur` past the match.
-      tcur = *qtnext + srch.pattern_length();
+      tcur = *qtnext + (pend - pbegin);
     }
     return res;
   }
@@ -1049,40 +1036,41 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
       rlimit = static_cast<uint64_t>(*limit);
     }
 
-    // Return an empty array if there is no segment.
+    // Return an empty array if the string is empty.
     V_array segments;
-    if(text.empty())
+    auto tcur = text.begin();
+
+    if(tcur == text.end())
       return segments;
 
     if(!delim || delim->empty()) {
-      // Split every byte.
+      // Split the string into bytes.
       segments.reserve(text.size());
-      for(size_t i = 0;  i < text.size();  ++i) {
-        uint32_t b = text[i] & 0xFF;
+
+      while((segments.size() + 1 < rlimit) && (tcur != text.end())) {
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
-        segments.emplace_back(V_string(sref(s_char_table[b], 1)));
+        segments.emplace_back(V_string(sref(s_char_table[uint8_t(*tcur)], 1)));
+        tcur += 1;
       }
-      return segments;
+
+      // Push the last segment if any.
+      if(tcur != text.end())
+        segments.emplace_back(V_string(tcur, text.end()));
     }
+    else {
+      // Search for `*delim` in the `text`.
+      opt<cow_string::const_iterator> qbrk;
+      const auto srch = do_create_searcher_for_pattern(delim->begin(), delim->end());
 
-    // Break `text` down.
-    BMH_Searcher srch(delim->begin(), delim->end());
-    auto bpos = text.begin();
-    auto epos = text.end();
+      while((segments.size() + 1 < rlimit) && !!(qbrk = srch.search_opt(tcur, text.end()))) {
+        // Push this segment and move `tcur` past it.
+        segments.emplace_back(V_string(tcur, *qbrk));
+        tcur = *qbrk + delim->ssize();
+      }
 
-    for(;;) {
-      if(segments.size() + 1 >= rlimit) {
-        segments.emplace_back(V_string(bpos, epos));
-        break;
-      }
-      auto qbrk = srch.search_opt(bpos, epos, delim->begin());
-      if(!qbrk) {
-        segments.emplace_back(V_string(bpos, epos));
-        break;
-      }
-      segments.emplace_back(V_string(bpos, *qbrk));
-      bpos = *qbrk + delim->ssize();
+      // Push the last segment if any.
+      segments.emplace_back(V_string(tcur, text.end()));
     }
     return segments;
   }
