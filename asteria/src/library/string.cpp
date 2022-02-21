@@ -777,9 +777,7 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
-    if(!qit)
-      return nullopt;
-    return *qit - text.begin();
+    return qit ? (*qit - text.begin()) : optV_integer();
   }
 
 optV_integer
@@ -789,9 +787,7 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
                            ::std::make_reverse_iterator(range.first),
                            pattern.rbegin(), pattern.rend());
-    if(!qit)
-      return nullopt;
-    return text.rend() - *qit - pattern.ssize();
+    return qit ? (text.rend() - *qit - pattern.ssize()) : optV_integer();
   }
 
 V_string
@@ -810,9 +806,7 @@ std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_str
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
-    if(!qit)
-      return nullopt;
-    return *qit - text.begin();
+    return qit ? (*qit - text.begin()) : optV_integer();
   }
 
 optV_integer
@@ -820,9 +814,7 @@ std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_str
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
-    if(!qit)
-      return nullopt;
-    return *qit - text.begin();
+    return qit ? (*qit - text.begin()) : optV_integer();
   }
 
 optV_integer
@@ -831,9 +823,7 @@ std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_st
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
                               ::std::make_reverse_iterator(range.first), accept, true);
-    if(!qit)
-      return nullopt;
-    return text.rend() - *qit - 1;
+    return qit ? (text.rend() - *qit - 1) : optV_integer();
   }
 
 optV_integer
@@ -842,9 +832,7 @@ std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_st
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
                               ::std::make_reverse_iterator(range.first), reject, false);
-    if(!qit)
-      return nullopt;
-    return text.rend() - *qit - 1;
+    return qit ? (text.rend() - *qit - 1) : optV_integer();
   }
 
 V_string
