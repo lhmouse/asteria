@@ -29,16 +29,15 @@ do_slice(const V_string& text, V_string::const_iterator tbegin, const optV_integ
 pair<V_string::const_iterator, V_string::const_iterator>
 do_slice(const V_string& text, const V_integer& from, const optV_integer& length)
   {
+    // Behave like `::std::string::substr()` except that no exception is thrown when `from`
+    // is greater than `text.size()`.
     auto slen = static_cast<int64_t>(text.size());
-    if(from >= 0) {
-      // Behave like `::std::string::substr()` except that no exception is thrown when `from`
-      // is greater than `text.size()`.
-      if(from >= slen)
-        return ::std::make_pair(text.end(), text.end());
+    if(from >= slen)
+      return ::std::make_pair(text.end(), text.end());
 
-      // Return a subrange from `begin() + from`.
+    // For positive offsets, return a subrange from `begin() + from`.
+    if(from >= 0)
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
-    }
 
     // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is
     // negative and `slen` is not.
