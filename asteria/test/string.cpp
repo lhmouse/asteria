@@ -199,6 +199,9 @@ int main()
         assert std.string.explode("aa", "``", 2) == [ "aa" ];
         assert std.string.explode("aa``bb", "``", 2) == [ "aa", "bb" ];
         assert std.string.explode("aa``bb``cc", "``", 2) == [ "aa", "bb``cc" ];
+        assert std.string.explode("abcd", null) == [ "a", "b", "c", "d" ];
+        assert std.string.explode("abcd", "") == [ "a", "b", "c", "d" ];
+        assert std.string.explode("abcd", "", 3) == [ "a", "b", "cd" ];
 
         assert std.string.implode([ ], "``") == "";
         assert std.string.implode([ "aa" ], "``") == "aa";
