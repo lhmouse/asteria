@@ -59,7 +59,6 @@ do_slice(const V_string& text, const V_integer& from, const optV_integer& length
     return do_slice(text, text.begin(), rfrom + *length);
   }
 
-// https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
 template<typename IterT>
 class BMH_Searcher
   {
@@ -72,20 +71,51 @@ class BMH_Searcher
     BMH_Searcher(IterT pbegin, IterT pend)
       : m_pbegin(pbegin), m_pend(pend)
       {
-        const ptrdiff_t plength = pend - pbegin;
-        if(plength == 0)
-          ASTERIA_THROW_RUNTIME_ERROR("empty pattern string not valid");
+        const ptrdiff_t plen = this->m_pend - this->m_pbegin;
+        if(plen <= 0)
+          ASTERIA_THROW_RUNTIME_ERROR("empty pattern string not allowed");
 
+        // Create a table according to the Bad Character Rule.
+        for(ptrdiff_t k = 0;  k != 0x100;  ++k)
+          this->m_bcr_offsets[k] = plen;
+
+        for(ptrdiff_t k = 0;  k != plen - 1;  ++k)
+          this->m_bcr_offsets[uint8_t(this->m_pbegin[k])] = plen - 1 - k;
       }
 
   public:
     opt<IterT>
     search_opt(IterT tbegin, IterT tend) const
       {
-        auto zz = ::std::search(tbegin, tend, this->m_pbegin, this->m_pend);
-        if(zz == tend)
+        const ptrdiff_t plen = this->m_pend - this->m_pbegin;
+        ROCKET_ASSERT(plen != 0);
+
+        // If no enough bytes are given, there can't be matches.
+        if(tend - tbegin < plen)
           return nullopt;
-        return zz;
+
+        // Perform a naive search for the first byte.
+        auto tcur = tbegin;
+        const auto tfinalcand = tend - plen;
+
+        while(ROCKET_EXPECT(tcur[0] != this->m_pbegin[0]))
+          if(++tcur > tfinalcand)
+            return nullopt;
+
+        for(;;) {
+          // Compare candidate intervals from right to left.
+          ptrdiff_t tml = plen - 1;
+          auto tcand = tcur;
+          tcur += this->m_bcr_offsets[uint8_t(tcand[tml])];
+
+          while(ROCKET_UNEXPECT(tcand[tml] == this->m_pbegin[tml]))
+            if(--tml < 0)
+              return tcand;  // found
+
+          // Shift the read pointer by the proposed offset.
+          if(tcur > tfinalcand)
+            return nullopt;
+        }
       }
   };
 
