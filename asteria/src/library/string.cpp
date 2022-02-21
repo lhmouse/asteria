@@ -113,46 +113,6 @@ do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   }
 
 template<typename IterT>
-V_string&
-do_replace(V_string& res, IterT tbegin, IterT tend, IterT pbegin, IterT pend, IterT rbegin, IterT rend)
-  {
-    // If the pattern is empty, there is a match beside every byte.
-    if(pbegin == pend) {
-      // This is really evil.
-      for(auto it = tbegin;  it != tend;  ++it) {
-        res.append(rbegin, rend);
-        res.push_back(*it);
-      }
-      res.append(rbegin, rend);
-      return res;
-    }
-
-    // If the text is empty but the pattern is not, there cannot be matches.
-    if(tbegin == tend)
-      return res;
-
-    // This is the slow path.
-    const auto srch = do_create_searcher_for_pattern(pbegin, pend);
-    auto tcur = tbegin;
-    for(;;) {
-      auto qtnext = srch.search_opt(tcur, tend);
-      if(!qtnext) {
-        // Append all remaining characters and finish.
-        res.append(tcur, tend);
-        break;
-      }
-
-      // Append all characters that precede the match, followed by the replacement string.
-      res.append(tcur, *qtnext);
-      res.append(rbegin, rend);
-
-      // Move `tcur` past the match.
-      tcur = *qtnext + (pend - pbegin);
-    }
-    return res;
-  }
-
-template<typename IterT>
 opt<IterT>
 do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
   {
@@ -793,11 +753,34 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
 V_string
 std_string_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement)
   {
-    V_string res;
     auto range = do_slice(text, from, length);
+    if(range.first == range.second)
+      return text;
+
+    V_string res;
     res.append(text.begin(), range.first);
-    do_replace(res, range.first, range.second, pattern.begin(), pattern.end(), replacement.begin(), replacement.end());
-    res.append(range.second, text.end());
+
+    if(pattern.empty()) {
+      // Insert `replacement` beside all bytes.
+      while(range.first != range.second) {
+        res.append(replacement);
+        res.push_back(*(range.first));
+        ++ range.first;
+      }
+      res.append(replacement);
+      res.append(range.second, text.end());
+    }
+    else {
+      // Search for `pattern` in `text`.
+      opt<cow_string::const_iterator> qbrk;
+      const auto srch = do_create_searcher_for_pattern(pattern.begin(), pattern.end());
+      while(!!(qbrk = srch.search_opt(range.first, range.second))) {
+        res.append(range.first, *qbrk);
+        res.append(replacement);
+        range.first = *qbrk + pattern.ssize();
+      }
+      res.append(range.first, text.end());
+    }
     return res;
   }
 
@@ -1033,16 +1016,12 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
 
     if(!delim || delim->empty()) {
       // Split the string into bytes.
-      segments.reserve(text.size());
-
       while((segments.size() + 1 < rlimit) && (tcur != text.end())) {
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
         segments.emplace_back(V_string(sref(s_char_table[uint8_t(*tcur)], 1)));
         tcur += 1;
       }
-
-      // Push the last segment if any.
       if(tcur != text.end())
         segments.emplace_back(V_string(tcur, text.end()));
     }
@@ -1050,14 +1029,11 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
       // Search for `*delim` in the `text`.
       opt<cow_string::const_iterator> qbrk;
       const auto srch = do_create_searcher_for_pattern(delim->begin(), delim->end());
-
       while((segments.size() + 1 < rlimit) && !!(qbrk = srch.search_opt(tcur, text.end()))) {
         // Push this segment and move `tcur` past it.
         segments.emplace_back(V_string(tcur, *qbrk));
         tcur = *qbrk + delim->ssize();
       }
-
-      // Push the last segment if any.
       segments.emplace_back(V_string(tcur, text.end()));
     }
     return segments;
