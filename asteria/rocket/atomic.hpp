@@ -95,7 +95,8 @@ class atomic
 
     atomic&
     store(value_type val) noexcept
-      { this->m_val.store(val, this->do_order_release());  return *this;  }
+      { this->m_val.store(val, this->do_order_release());
+        return *this;  }
 
     // exchange operations
     value_type

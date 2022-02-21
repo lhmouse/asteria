@@ -45,7 +45,8 @@ class Garbage_Collector final
 
     Garbage_Collector&
     set_threshold(GC_Generation gen, size_t thres)
-      { this->m_thres.mut(gMax-gen) = thres;  return *this;  }
+      { this->m_thres.mut(gMax-gen) = thres;
+        return *this;  }
 
     size_t
     count_tracked_variables(GC_Generation gen) const
@@ -57,7 +58,8 @@ class Garbage_Collector final
 
     Garbage_Collector&
     clear_pooled_variables() noexcept
-      { this->m_pool.clear();  return *this;  }
+      { this->m_pool.clear();
+        return *this;  }
 
     // Allocation and collection
     rcptr<Variable>

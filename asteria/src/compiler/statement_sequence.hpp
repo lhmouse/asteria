@@ -35,7 +35,8 @@ class Statement_Sequence
 
     Statement_Sequence&
     set_options(const Compiler_Options& opts) noexcept
-      { this->m_opts = opts;  return *this;  }
+      { this->m_opts = opts;
+        return *this;  }
 
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.

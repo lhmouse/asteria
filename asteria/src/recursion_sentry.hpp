@@ -65,7 +65,8 @@ class Recursion_Sentry
 
     Recursion_Sentry&
     set_base(const void* base) noexcept
-      { this->m_base = base;  return *this;  }
+      { this->m_base = base;
+        return *this;  }
   };
 
 }  // namespace asteria

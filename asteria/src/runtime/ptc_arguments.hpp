@@ -65,7 +65,8 @@ class PTC_Arguments final
     template<typename ArguerT>
     PTC_Arguments&
     set_caller(const rcptr<ArguerT>& caller) noexcept
-      { this->m_caller_opt = ::std::move(caller);  return *this;  }
+      { this->m_caller_opt = ::std::move(caller);
+        return *this;  }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
     defer() const noexcept
