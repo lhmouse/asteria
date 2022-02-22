@@ -101,8 +101,6 @@ class BMH_Searcher
         if(tfinalcand - tcur >= 120) {
           // Perform a naive search for the first byte.
           // This has to be fast, but need not be very accurate.
-          static constexpr uint64_t bmask = 0x01010101'01010101;
-
           uint64_t bcomp = (uint8_t) this->m_pbegin[0];
           bcomp |= bcomp <<  8;
           bcomp |= bcomp << 16;
@@ -115,7 +113,9 @@ class BMH_Searcher
               btext = btext << 8 | (uint8_t) tcur[k];
 
             // Check whether this word contains the first pattern byte.
-            if(ROCKET_UNEXPECT(((btext ^ bcomp) - bmask) & (bmask << 7)))
+            btext ^= bcomp;
+            btext ^= btext - 0x01010101'01010101;
+            if(btext & 0x80808080'80808080)
               break;
 
             // Shift the read pointer past this word.
@@ -129,7 +129,7 @@ class BMH_Searcher
           auto tcand = tcur;
           ptrdiff_t bcr_offset = this->m_bcr_offsets[uint8_t(tcand[tml])];
 
-          while(ROCKET_UNEXPECT(tcand[tml] == this->m_pbegin[tml]))
+          while(tcand[tml] == this->m_pbegin[tml])
             if(--tml < 0)
               return tcand;  // found
 
