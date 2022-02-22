@@ -27,11 +27,8 @@ do_format_key(tinyfmt& fmt, const cow_string& key)
     if(pos == 0)
       ASTERIA_THROW_RUNTIME_ERROR("key shall not begin with a space: $1", key);
 
-    if(pos != cow_string::npos) {
-      pos = key.find_last_of(s_space);
-      if(pos == key.size() - 1)
-        ASTERIA_THROW_RUNTIME_ERROR("key shall not end with a space: $1", key);
-    }
+    if((pos != cow_string::npos) && (key.find_last_of(s_space) == key.size() - 1))
+      ASTERIA_THROW_RUNTIME_ERROR("key shall not end with a space: $1", key);
 
     return fmt << key;
   }
@@ -114,6 +111,9 @@ do_ini_parse(tinybuf& buf)
       pos = line.find_last_not_of(s_space);
       line.erase(pos + 1);
 
+      cow_string key = line;
+      cow_string value;
+
       // if the line begins with an open bracket, it shall start a section.
       if(line.front() == '[') {
         if(line.back() != ']')
@@ -125,7 +125,6 @@ do_ini_parse(tinybuf& buf)
           ASTERIA_TERMINATE("empty section name on line $1", nlines);
 
         // Make a copy of the section name that is just large enough.
-        cow_string key;
         key.assign(line, 1, line.size() - 2);
 
         // Insert a new section.
@@ -136,9 +135,6 @@ do_ini_parse(tinybuf& buf)
       }
 
       // Otherwise, it shall be a property.
-      cow_string key;
-      cow_string value;
-
       size_t eqpos = line.find('=');
       if(eqpos != cow_string::npos) {
         pos = line.find_last_not_of(eqpos - 1, s_space);
@@ -147,11 +143,12 @@ do_ini_parse(tinybuf& buf)
 
         // Make copies of the key and value that are just large enough.
         key.assign(line, 0, pos + 1);
+
+        // Get the value without leading spaces.
         pos = line.find_first_not_of(eqpos + 1, s_space);
-        value.assign(line, pos, line.size());
+        if(pos != cow_string::npos)
+          value.assign(line, pos, line.size());
       }
-      else
-        key.assign(line, 0, line.size());
 
       // Insert a new value.
       sink->insert_or_assign(::std::move(key), ::std::move(value));
