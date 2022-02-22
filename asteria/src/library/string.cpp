@@ -98,9 +98,30 @@ class BMH_Searcher
         auto tcur = tbegin;
         const auto tfinalcand = tend - plen;
 
-        while(ROCKET_EXPECT(tcur[0] != this->m_pbegin[0]))
-          if(++tcur > tfinalcand)
-            return nullopt;
+        if(tfinalcand - tcur >= 120) {
+          // Perform a naive search for the first byte.
+          // This has to be fast, but need not be very accurate.
+          static constexpr uint64_t bmask = 0x01010101'01010101;
+
+          uint64_t bcomp = (uint8_t) this->m_pbegin[0];
+          bcomp |= bcomp <<  8;
+          bcomp |= bcomp << 16;
+          bcomp |= bcomp << 32;
+
+          while(ROCKET_EXPECT(tfinalcand - tcur >= 8)) {
+            // Load a word. Endianness does not matter.
+            uint64_t btext = 0;
+            for(ptrdiff_t k = 0;  k != sizeof(btext);  ++k)
+              btext = btext << 8 | (uint8_t) tcur[k];
+
+            // Check whether this word contains the first pattern byte.
+            if(ROCKET_UNEXPECT(((btext ^ bcomp) - bmask) & (bmask << 7)))
+              break;
+
+            // Shift the read pointer past this word.
+            tcur += sizeof(btext);
+          }
+        }
 
         while(ROCKET_EXPECT(tcur <= tfinalcand)) {
           // Compare candidate intervals from right to left.
