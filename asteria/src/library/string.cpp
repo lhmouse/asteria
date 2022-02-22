@@ -100,16 +100,17 @@ class BMH_Searcher
         if(tfinalcand - tcur >= 120) {
           // Perform a naive search for the first byte.
           // This has to be fast, but need not be very accurate.
-          static constexpr uint64_t bmask = 0x80808080'80808080;
+          uintptr_t bcomp = (uint8_t) this->m_pbegin[0];
+          for(size_t k = 1;  k != sizeof(bcomp);  k *= 2)
+            bcomp |= bcomp << k * 8;
 
-          uint64_t bcomp = (uint8_t) this->m_pbegin[0];
-          bcomp |= bcomp <<  8;
-          bcomp |= bcomp << 16;
-          bcomp |= bcomp << 32;
+          uintptr_t bmask = 0x80;
+          for(size_t k = 1;  k != sizeof(bmask);  k *= 2)
+            bmask |= bmask << k * 8;
 
           while(ROCKET_EXPECT(tfinalcand - tcur >= 8)) {
             // Load a word. Endianness does not matter.
-            uint64_t btext = 0;
+            uintptr_t btext = 0;
             for(ptrdiff_t k = sizeof(btext) - 1;  k != -1;  --k)
               btext = btext << 8 | (uint8_t) tcur[k];
 
@@ -124,7 +125,7 @@ class BMH_Searcher
               break;
 
             // Shift the read pointer past this word.
-            tcur += sizeof(btext);
+            tcur += (ptrdiff_t) sizeof(btext);
           }
         }
 
