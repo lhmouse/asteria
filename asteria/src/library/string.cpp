@@ -158,7 +158,7 @@ opt<IterT>
 do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
   {
     // If the pattern is empty, there is a match at the beginning.
-    // Don't pass empty patterns to the BMH srch.
+    // Don't pass empty patterns to the BMH searcher.
     if(pbegin == pend)
       return tbegin;
 
