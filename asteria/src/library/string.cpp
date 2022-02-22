@@ -102,20 +102,22 @@ class BMH_Searcher
           if(++tcur > tfinalcand)
             return nullopt;
 
-        for(;;) {
+        while(ROCKET_EXPECT(tcur <= tfinalcand)) {
           // Compare candidate intervals from right to left.
           ptrdiff_t tml = plen - 1;
           auto tcand = tcur;
-          tcur += this->m_bcr_offsets[uint8_t(tcand[tml])];
+          ptrdiff_t bcr_offset = this->m_bcr_offsets[uint8_t(tcand[tml])];
 
           while(ROCKET_UNEXPECT(tcand[tml] == this->m_pbegin[tml]))
             if(--tml < 0)
               return tcand;  // found
 
           // Shift the read pointer by the proposed offset.
-          if(tcur > tfinalcand)
-            return nullopt;
+          tcur += bcr_offset;
         }
+
+        // No matches has been found so far.
+        return nullopt;
       }
   };
 
