@@ -101,6 +101,8 @@ class BMH_Searcher
         if(tfinalcand - tcur >= 120) {
           // Perform a naive search for the first byte.
           // This has to be fast, but need not be very accurate.
+          static constexpr uint64_t bmask = 0x80808080'80808080;
+
           uint64_t bcomp = (uint8_t) this->m_pbegin[0];
           bcomp |= bcomp <<  8;
           bcomp |= bcomp << 16;
@@ -114,8 +116,12 @@ class BMH_Searcher
 
             // Check whether this word contains the first pattern byte.
             btext ^= bcomp;
-            btext ^= btext - 0x01010101'01010101;
-            if(btext & 0x80808080'80808080)
+
+            // Now see whether `btext` contains a zero byte. The condition is that there
+            // shall be a byte whose MSB becomes one after subtraction, but was zero
+            // before the operation.
+            btext = (btext - (bmask >> 7)) & (btext ^ bmask) & bmask;
+            if(btext != 0)
               break;
 
             // Shift the read pointer past this word.
