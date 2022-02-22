@@ -97,7 +97,7 @@ class BMH_Searcher
         auto tcur = tbegin;
         const auto tfinalcand = tend - plen;
 
-        if(tfinalcand - tcur >= 120) {
+        if(tfinalcand - tcur >= 64) {
           // Perform a naive search for the first byte.
           // This has to be fast, but need not be very accurate.
           uintptr_t bcomp = (uint8_t) this->m_pbegin[0];
@@ -120,8 +120,7 @@ class BMH_Searcher
             // Now see whether `btext` contains a zero byte. The condition
             // is that there shall be a byte whose MSB becomes one after the
             // subtraction below, but was zero before it.
-            btext = (btext - (bmask >> 7)) & (btext ^ bmask) & bmask;
-            if(btext != 0)
+            if((btext - (bmask >> 7)) & (btext ^ bmask) & bmask)
               break;
 
             // Shift the read pointer past this word.
