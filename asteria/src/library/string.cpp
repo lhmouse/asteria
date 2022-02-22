@@ -94,7 +94,6 @@ class BMH_Searcher
         if(tend - tbegin < plen)
           return nullopt;
 
-        // Perform a naive search for the first byte.
         auto tcur = tbegin;
         const auto tfinalcand = tend - plen;
 
