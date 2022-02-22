@@ -98,7 +98,7 @@ class BMH_Searcher
         const auto tfinalcand = tend - plen;
 
         if(tfinalcand - tcur >= 64) {
-          // Perform a naive search for the first byte.
+          // Perform a linear search for the first byte.
           // This has to be fast, but need not be very accurate.
           uintptr_t bcomp = (uint8_t) this->m_pbegin[0];
           for(size_t k = 1;  k != sizeof(bcomp);  k *= 2)
@@ -108,7 +108,7 @@ class BMH_Searcher
           for(size_t k = 1;  k != sizeof(bmask);  k *= 2)
             bmask |= bmask << k * 8;
 
-          while(ROCKET_EXPECT(tfinalcand - tcur >= 8)) {
+          while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp))) {
             // Load a word. Endianness does not matter.
             uintptr_t btext = 0;
             for(ptrdiff_t k = sizeof(btext) - 1;  k != -1;  --k)
