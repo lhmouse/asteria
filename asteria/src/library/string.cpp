@@ -117,9 +117,9 @@ class BMH_Searcher
             // Check whether this word contains the first pattern byte.
             btext ^= bcomp;
 
-            // Now see whether `btext` contains a zero byte. The condition is that there
-            // shall be a byte whose MSB becomes one after subtraction, but was zero
-            // before the operation.
+            // Now see whether `btext` contains a zero byte. The condition
+            // is that there shall be a byte whose MSB becomes one after the
+            // subtraction below, but was zero before it.
             btext = (btext - (bmask >> 7)) & (btext ^ bmask) & bmask;
             if(btext != 0)
               break;
