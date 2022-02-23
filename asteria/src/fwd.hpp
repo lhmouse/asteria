@@ -675,8 +675,8 @@ enum Compare : uint8_t
   {
     compare_unordered  = 0,  // The LHS operand is unordered with the RHS operand.
     compare_less       = 1,  // The LHS operand is less than the RHS operand.
-    compare_equal      = 2,  // The LHS operand is equal to the RHS operand.
-    compare_greater    = 3,  // The LHS operand is greater than the RHS operand.
+    compare_greater    = 2,  // The LHS operand is greater than the RHS operand.
+    compare_equal      = 3,  // The LHS operand is equal to the RHS operand.
   };
 
 // Stack frame types
