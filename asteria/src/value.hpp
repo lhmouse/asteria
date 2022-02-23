@@ -94,6 +94,9 @@ class Value
       }
 
   private:
+    ROCKET_COLD void
+    do_destroy_variant_slow() noexcept;
+
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
@@ -105,9 +108,6 @@ class Value
 
     [[noreturn]] void
     do_throw_type_mismatch(const char* desc) const;
-
-    ROCKET_COLD void
-    do_destroy_variant_slow() noexcept;
 
   public:
     ~Value()
