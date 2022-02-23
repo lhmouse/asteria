@@ -32,9 +32,9 @@ std_chrono_local_from_utc(V_integer time_utc);
 V_integer
 std_chrono_utc_from_local(V_integer time_local);
 
-// `std.chrono.utc_format`
+// `std.chrono.format`
 V_string
-std_chrono_utc_format(V_integer time_point, optV_boolean with_ms);
+std_chrono_format(V_integer time_point, optV_boolean with_ms);
 
 // `std.chrono.utc_parse`
 V_integer
