@@ -115,20 +115,25 @@ read_execute_print_single()
     // expression to a return statement. As that expression is supposed to be
     // start at 'line 1', the `return` statement should start at 'line 0'.
     try {
+      // Compose a return statement from the expression.
+      // Source code is duplicated for syntax checking to prevent injection.
       cow_string compl_source;
-      compl_source.reserve(repl_source.size() + 100);
+      compl_source.reserve(repl_source.size() * 2 + 100);
 
-      // Parentheses are required in case of embedded semicolons.
-      compl_source += "return ->(\n";
-      compl_source += repl_source;
-      compl_source += "\n);";
+      compl_source << "return ref\n";
+      compl_source << repl_source << "\n";
+      compl_source << ";\n";
 
-      cow_string real_name = repl_file;
-      if(real_name.empty()) {
-        // Compose a self-incremental name for the expression.
-        ::sprintf(strbuf, "expression #%lu", repl_index);
-        real_name.append(strbuf);
-      }
+      compl_source << "assert (\n";
+      compl_source << repl_source << "\n";
+      compl_source << ");\n";
+
+      cow_string real_name;
+      if(repl_file.empty())
+        real_name.assign(strbuf, (unsigned) ::sprintf(strbuf,
+                     "expression #%lu", repl_index));
+      else
+        real_name = repl_file;
 
       repl_script.reload_string(real_name, 0, compl_source);
       repl_file = ::std::move(real_name);
@@ -139,12 +144,12 @@ read_execute_print_single()
       if(except.status() >= compiler_status_semantic_error_base)
         return repl_printf("! error: %s\n", except.what());
 
-      cow_string real_name = repl_file;
-      if(real_name.empty()) {
-        // Compose a self-incremental name for the snippet.
-        ::sprintf(strbuf, "snippet #%lu", repl_index);
-        real_name.append(strbuf);
-      }
+      cow_string real_name;
+      if(repl_file.empty())
+        real_name.assign(strbuf, (unsigned) ::sprintf(strbuf,
+                     "snippet #%lu", repl_index));
+      else
+        real_name = repl_file;
 
       try {
         repl_script.reload_string(real_name, repl_source);
