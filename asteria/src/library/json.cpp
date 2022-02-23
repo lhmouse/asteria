@@ -345,7 +345,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
       }
 
       // Advance to the next element.
-      while(stack.size())
+      while(stack.size()) {
         if(stack.back().index() == 0) {
           auto& ctxa = stack.mut_back().as<0>();
           if(++(ctxa.curp) != ctxa.refa->end()) {
@@ -358,8 +358,6 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           }
 
           // Close this array.
-          stack.pop_back();
-
           if(json5 && indent.has_indention())
             fmt << ',';
 
@@ -382,8 +380,6 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           }
 
           // Close this object.
-          stack.pop_back();
-
           if(json5 && indent.has_indention())
             fmt << ',';
 
@@ -393,6 +389,9 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         }
         else
           ROCKET_ASSERT(false);
+
+        stack.pop_back();
+      }
     }
     while(stack.size());
 
@@ -635,6 +634,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           // Close this object.
           value = ::std::move(ctxo.obj);
         }
+
         stack.pop_back();
       }
     }

@@ -205,16 +205,13 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
       }
 
       // Advance to the next element.
-      while(stack.size())
+      while(stack.size()) {
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
           if(++(elem.curp) != elem.refa->end()) {
             qval = &*(elem.curp);
             break;
           }
-
-          // Close this array.
-          stack.pop_back();
         }
         else if(stack.back().index() == 1) {
           auto& elem = stack.mut_back().as<1>();
@@ -222,12 +219,12 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
             qval = &(elem.curp->second);
             break;
           }
-
-          // Close this object.
-          stack.pop_back();
         }
         else
           ROCKET_ASSERT(false);
+
+        stack.pop_back();
+      }
     }
     while(stack.size());
   }
@@ -423,7 +420,7 @@ print(tinyfmt& fmt, bool escape) const
       }
 
       // Advance to the next element.
-      while(stack.size())
+      while(stack.size()) {
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
           if(++(elem.curp) != elem.refa->end()) {
@@ -433,7 +430,6 @@ print(tinyfmt& fmt, bool escape) const
           }
 
           // Close this array.
-          stack.pop_back();
           fmt << " ]";
         }
         else if(stack.back().index() == 1) {
@@ -445,11 +441,13 @@ print(tinyfmt& fmt, bool escape) const
           }
 
           // Close this object.
-          stack.pop_back();
           fmt << " }";
         }
         else
           ROCKET_ASSERT(false);
+
+        stack.pop_back();
+      }
     }
     while(stack.size());
 
@@ -552,7 +550,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       // Advance to the next element.
-      while(stack.size())
+      while(stack.size()) {
         if(stack.back().index() == 0) {
           auto& elem = stack.mut_back().as<0>();
           if(++(elem.curp) != elem.refa->end()) {
@@ -563,7 +561,6 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           }
 
           // Close this array.
-          stack.pop_back();
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << "];";
         }
@@ -577,12 +574,14 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           }
 
           // Close this object.
-          stack.pop_back();
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << "};";
         }
         else
           ROCKET_ASSERT(false);
+
+        stack.pop_back();
+      }
     }
     while(stack.size());
 

@@ -248,6 +248,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           // Close this object.
           value = ::std::move(ctxo.obj);
         }
+
         stack.pop_back();
       }
     }
