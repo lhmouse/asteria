@@ -112,8 +112,7 @@ class Value
   public:
     ~Value()
       {
-        constexpr bmask32 container = M_array | M_object;
-        if(container.test(this->type()))
+        if(this->type_mask() & (M_array | M_object))
           this->do_destroy_variant_slow();
         else
           this->m_stor.~storage();
@@ -178,15 +177,7 @@ class Value
 
     bool
     is_real() const noexcept
-      {
-        if(this->type() == type_real)
-          return true;
-
-        if(this->type() == type_integer)
-          return true;
-
-        return false;
-      }
+      { return this->type_mask() & (M_integer | M_real);  }
 
     V_real
     as_real() const
@@ -325,10 +316,7 @@ class Value
 
     bool
     is_scalar() const noexcept
-      {
-        constexpr bmask32 scalar = M_null | M_boolean | M_integer | M_real | M_string;
-        return scalar.test(this->type());
-      }
+      { return this->type_mask() & (M_null | M_boolean | M_integer | M_real | M_string);  }
 
     // This is used by garbage collection.
     void
