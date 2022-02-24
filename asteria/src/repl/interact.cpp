@@ -141,9 +141,6 @@ read_execute_print_single()
     catch(Compiler_Error& except) {
       // If the snippet is not a valid expression, try parsing it as a
       // statement.
-      if(except.status() >= compiler_status_semantic_error_base)
-        return repl_printf("! error: %s\n", except.what());
-
       cow_string real_name;
       if(repl_file.empty())
         real_name.assign(strbuf, (unsigned) ::sprintf(strbuf,

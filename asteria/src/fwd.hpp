@@ -700,7 +700,7 @@ enum Compiler_Status : uint32_t
   {
     compiler_status_success                                    =    0,
 
-    compiler_status_lexical_error_base                         = 1000,
+    // lexical errors
     compiler_status_utf8_sequence_invalid                      = 1001,
     compiler_status_utf8_sequence_incomplete                   = 1002,
     compiler_status_utf_code_point_invalid                     = 1003,
@@ -721,7 +721,7 @@ enum Compiler_Status : uint32_t
     compiler_status_block_comment_unclosed                     = 1018,
     compiler_status_digit_separator_following_nondigit         = 1019,
 
-    compiler_status_syntax_error_base                          = 2000,
+    // syntax errors
     compiler_status_duplicate_key_in_object                    = 2001,
     compiler_status_identifier_expected                        = 2002,
     compiler_status_semicolon_expected                         = 2003,
@@ -759,7 +759,7 @@ enum Compiler_Status : uint32_t
     compiler_status_closed_bracket_or_identifier_expected      = 2035,
     compiler_status_closed_brace_or_identifier_expected        = 2036,
 
-    compiler_status_semantic_error_base                        = 3000,
+    // semantic errors
     compiler_status_undeclared_identifier                      = 3001,
   };
 

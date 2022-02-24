@@ -145,9 +145,6 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_success:
         return "operation succeeded";
 
-      case compiler_status_lexical_error_base:
-        return "[lexical error base]";
-
       case compiler_status_utf8_sequence_invalid:
         return "UTF-8 sequence invalid";
 
@@ -204,9 +201,6 @@ describe_compiler_status(Compiler_Status status) noexcept
 
       case compiler_status_digit_separator_following_nondigit:
         return "digit separator not following a digit";
-
-      case compiler_status_syntax_error_base:
-        return "[syntax error base]";
 
       case compiler_status_duplicate_key_in_object:
         return "duplicate key in unnamed object";
@@ -315,9 +309,6 @@ describe_compiler_status(Compiler_Status status) noexcept
 
       case compiler_status_closed_brace_or_identifier_expected:
         return "`}` or identifier expected";
-
-      case compiler_status_semantic_error_base:
-        return "[semantic error base]";
 
       case compiler_status_undeclared_identifier:
         return "undeclared identifier";
