@@ -100,8 +100,8 @@ class Value
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
-    ROCKET_PURE static Compare
-    do_compare_slow(const Value& lhs, const Value& rhs) noexcept;
+    ROCKET_COLD ROCKET_PURE Compare
+    do_compare_slow(const Value& other) const noexcept;
 
     [[noreturn]] void
     do_throw_type_mismatch(const char* desc) const;
@@ -354,7 +354,49 @@ class Value
     // This performs the builtin comparison with another value.
     Compare
     compare(const Value& other) const noexcept
-      { return this->do_compare_slow(*this, other);  }
+      {
+        if(this->is_null() && other.is_null())
+          return compare_equal;
+
+        if(this->is_null() != other.is_null())
+          return compare_unordered;
+
+        if(this->is_real() && other.is_real()) {
+          // Convert integers to reals and compare them.
+          static_assert(compare_greater == 1);
+          static_assert(compare_less == 2);
+          static_assert(compare_equal == 3);
+
+          return static_cast<Compare>(
+              ::std::islessequal(this->as_real(), other.as_real()) * 2 +
+              ::std::isgreaterequal(this->as_real(), other.as_real()));
+        }
+
+        // Non-arithmetic values of different types can't be compared.
+        if(this->type() != other.type())
+          return compare_unordered;
+
+        // Compare values of the same type.
+        switch((uint32_t) this->type()) {
+          case type_boolean:
+            return details_value::do_3way_compare<int>(
+                             this->as_boolean(), other.as_boolean());
+
+          case type_integer:
+            return details_value::do_3way_compare<V_integer>(
+                             this->as_integer(), other.as_integer());
+
+          case type_string:
+            return details_value::do_3way_compare<int>(
+                          this->as_string().compare(other.as_string()), 0);
+
+          case type_array:
+            return this->do_compare_slow(other);
+
+          default:  // opaque, function, object
+            return compare_unordered;
+        }
+      }
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&

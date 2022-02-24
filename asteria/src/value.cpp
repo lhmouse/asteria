@@ -11,28 +11,6 @@
 namespace asteria {
 namespace {
 
-template<typename ValT,
-ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)>
-constexpr Compare
-do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
-  {
-    return (lhs < rhs) ? compare_less
-         : (lhs > rhs) ? compare_greater
-                       : compare_equal;
-  }
-
-template<typename ValT,
-ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)>
-constexpr Compare
-do_3way_compare_scalar(const ValT& lhs, const ValT& rhs)
-  {
-    return ::std::islessequal(lhs, rhs)
-         ? (::std::isless(lhs, rhs)    ? compare_less
-                                       : compare_equal)
-         : (::std::isgreater(lhs, rhs) ? compare_greater
-                                       : compare_unordered);
-  }
-
 // Recursion breaker
 struct Rbr_array
   {
@@ -229,67 +207,111 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
 
 Compare
 Value::
-do_compare_slow(const Value& lhs, const Value& rhs) noexcept
+do_compare_slow(const Value& other) const noexcept
   {
-    // Compare values of different types.
-    if(lhs.type() != rhs.type()) {
-      // If they both have arithmeteic types, convert them to `real`.
-      if(lhs.is_real() && rhs.is_real())
-        return do_3way_compare_scalar(lhs.as_real(), rhs.as_real());
+    // Expand recursion by hand with a stack.
+    static_assert(compare_greater == 1);
+    static_assert(compare_less == 2);
+    static_assert(compare_equal == 3);
 
-      // Otherwise, they are unordered.
-      return compare_unordered;
-    }
+    auto qlhs = this;
+    auto qrhs = &other;
+    cow_bivector<Rbr_array, Rbr_array> stack;
 
-    // Compare values of the same type
-    switch(lhs.type()) {
-      case type_null:
-        return compare_equal;
+    do {
+      Compare comp = compare_equal;
 
-      case type_boolean:
-        return do_3way_compare_scalar(
-                  lhs.as_boolean(), rhs.as_boolean());
+      if(qlhs->is_real() && qrhs->is_real()) {
+        // Convert integers to reals and compare them.
+        comp = static_cast<Compare>(
+                 ::std::islessequal(qlhs->as_real(), qrhs->as_real()) * 2 +
+                 ::std::isgreaterequal(qlhs->as_real(), qrhs->as_real()));
+      }
+      else {
+        // Non-arithmetic values of different types can't be compared.
+        if(qlhs->type() != qrhs->type())
+          return compare_unordered;
 
-      case type_integer:
-        return do_3way_compare_scalar(
-                  lhs.as_integer(), rhs.as_integer());
+        // Compare values of the same type.
+        switch(qlhs->type()) {
+          case type_null:
+            break;
 
-      case type_real:
-        return do_3way_compare_scalar(
-                  lhs.as_real(), rhs.as_real());
+          case type_boolean:
+            comp = details_value::do_3way_compare<int>(
+                             qlhs->as_boolean(), qrhs->as_boolean());
+            break;
 
-      case type_string:
-        return do_3way_compare_scalar(
-            lhs.as_string().compare(rhs.as_string()), 0);
+          case type_integer:
+            comp = details_value::do_3way_compare<V_integer>(
+                             qlhs->as_integer(), qrhs->as_integer());
+            break;
 
-      case type_opaque:
-      case type_function:
-        return compare_unordered;
+          case type_real:
+            ROCKET_ASSERT(false);
 
-      case type_array: {
-        // Perform lexicographical comparison on the longest initial sequences
-        // of the same length.
-        const auto& la = lhs.as_array();
-        const auto& ra = rhs.as_array();
-        size_t rlen = ::rocket::min(la.size(), ra.size());
+          case type_string:
+            comp = details_value::do_3way_compare<int>(
+                          qlhs->as_string().compare(qrhs->as_string()), 0);
+            break;
 
-        Compare comp;
-        for(size_t k = 0;  k != rlen;  ++k)
-          if((comp = do_compare_slow(la[k], ra[k])) != compare_equal)
-            return comp;
+          case type_opaque:
+          case type_function:
+            return compare_unordered;
 
-        // If the initial sequences compare equal, the longer array is greater
-        // than the shorter.
-        comp = do_3way_compare_scalar(la.size(), ra.size());
-        return comp;
+          case type_array: {
+            const auto& altr1 = qlhs->as_array();
+            const auto& altr2 = qrhs->as_array();
+
+            if(altr1.empty() != altr2.empty())
+              return details_value::do_3way_compare<size_t>(
+                                         altr1.size(), altr2.size());
+
+            if(altr1.empty())
+              break;
+
+            // Open a pair of arrays.
+            Rbr_array elem1 = { &altr1, altr1.begin() };
+            qlhs = &*(elem1.curp);
+            Rbr_array elem2 = { &altr2, altr2.begin() };
+            qrhs = &*(elem2.curp);
+            stack.emplace_back(::std::move(elem1), ::std::move(elem2));
+            continue;
+          }
+
+          case type_object:
+            return compare_unordered;
+
+          default:
+            ASTERIA_TERMINATE("invalid value type (type `$1`)", qlhs->type());
+        }
       }
 
-      case type_object:
-        return compare_unordered;
+      if(comp != compare_equal)
+        return comp;
 
-      default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", lhs.type());
+      // Advance to the next element.
+      while(stack.size()) {
+        auto& elem = stack.mut_back();
+        bool cont1 = ++(elem.first.curp) != elem.first.refa->end();
+        bool cont2 = ++(elem.second.curp) != elem.second.refa->end();
+
+        if(cont1 != cont2)
+          return details_value::do_3way_compare<size_t>(
+                       elem.first.refa->size(), elem.second.refa->size());
+
+        if(cont1) {
+          qlhs = &*(elem.first.curp);
+          qrhs = &*(elem.second.curp);
+          break;
+        }
+
+        stack.pop_back();
+      }
     }
+    while(stack.size());
+
+    return compare_equal;
   }
 
 void
