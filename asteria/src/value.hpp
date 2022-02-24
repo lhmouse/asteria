@@ -100,9 +100,6 @@ class Value
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
-    ROCKET_PURE bool
-    do_test_slow() const noexcept;
-
     ROCKET_PURE static Compare
     do_compare_slow(const Value& lhs, const Value& rhs) noexcept;
 
@@ -330,12 +327,28 @@ class Value
     bool
     test() const noexcept
       {
-        if(this->is_null())
-          return false;
-        else if(this->is_boolean())
-          return this->as_boolean();
-        else
-          return this->do_test_slow();
+        switch((uint32_t) this->type()) {
+          case type_null:
+            return false;
+
+          case type_boolean:
+            return this->as_boolean();
+
+          case type_integer:
+            return this->as_integer() != 0;
+
+          case type_real:
+            return this->as_real() != 0;
+
+          case type_string:
+            return this->as_string().size() != 0;
+
+          case type_array:
+            return this->as_array().size() != 0;
+
+          default:  // opaque, function, object
+            return true;
+        }
       }
 
     // This performs the builtin comparison with another value.
