@@ -47,9 +47,7 @@ class Recursion_Sentry
     do_check() const
       {
         // Estimate stack usage.
-        size_t usage = static_cast<size_t>(
-                         ::std::abs(reinterpret_cast<const char*>(this)
-                                    - static_cast<const char*>(this->m_base)));
+        size_t usage = (size_t) ::std::abs((char*) this->m_base - (char*) this);
         if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
           this->do_throw_stack_overflow(usage, size_t(1) << stack_mask_bits);
       }
