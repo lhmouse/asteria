@@ -178,9 +178,8 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
 
           // Open an array.
           Rbr_array elem = { &altr, altr.begin() };
-          stack.emplace_back(::std::move(elem));
-
           qval = &*(elem.curp);
+          stack.emplace_back(::std::move(elem));
           continue;
         }
 
@@ -194,9 +193,8 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
 
           // Open an object.
           Rbr_object elem = { &altr, altr.begin() };
-          stack.emplace_back(::std::move(elem));
-
           qval = &(elem.curp->second);
+          stack.emplace_back(::std::move(elem));
           continue;
         }
 
@@ -357,10 +355,10 @@ print(tinyfmt& fmt, bool escape) const
 
           // Open an array.
           Rbr_array elem = { &altr, altr.begin() };
+          qval = &*(elem.curp);
           stack.emplace_back(::std::move(elem));
 
           fmt << "[ ";
-          qval = &*(elem.curp);
           continue;
         }
 
@@ -373,10 +371,10 @@ print(tinyfmt& fmt, bool escape) const
 
           // Open an object.
           Rbr_object elem = { &altr, altr.begin() };
+          qval = &(elem.curp->second);
           stack.emplace_back(::std::move(elem));
 
           fmt << "{ " << quote(elem.curp->first) << ": ";
-          qval = &(elem.curp->second);
           continue;
         }
 
@@ -482,12 +480,12 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
           // Open an array.
           Rbr_array elem = { &altr, altr.begin() };
+          qval = &*(elem.curp);
           stack.emplace_back(::std::move(elem));
 
           fmt << '[';
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << (elem.curp - altr.begin()) << " = ";
-          qval = &*(elem.curp);
           continue;
         }
 
@@ -501,12 +499,12 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
           // Open an object.
           Rbr_object elem = { &altr, altr.begin() };
+          qval = &(elem.curp->second);
           stack.emplace_back(::std::move(elem));
 
           fmt << '{';
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << quote(elem.curp->first) << " = ";
-          qval = &(elem.curp->second);
           continue;
         }
 
