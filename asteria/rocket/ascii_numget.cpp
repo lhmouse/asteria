@@ -871,15 +871,15 @@ constexpr s_decmult_F[] =
     { 0x71EC7CF2B1D0CC73, +1021 },  // 1.0e+307
     { 0x4733CE17AF227FC8, +1025 },  // 1.0e+308
   };
-static_assert(size(s_decmult_F) == 652, "");
+static_assert(size(s_decmult_F) == 652);
 
 template<typename floatT, typename storageT, int E, int M>
 double
 do_xldexp_I_generic(uint64_t ubits, int exp2)
   {
-    static_assert(is_floating_point<floatT>::value, "");
-    static_assert(is_unsigned<storageT>::value, "");
-    static_assert(sizeof(floatT) == sizeof(storageT), "");
+    static_assert(is_floating_point<floatT>::value);
+    static_assert(is_unsigned<storageT>::value);
+    static_assert(sizeof(floatT) == sizeof(storageT));
 
     // Round ULP to even.
     constexpr uint64_t ulp_mask = UINT64_C(1) << (62 - M);

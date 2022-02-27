@@ -897,7 +897,7 @@ constexpr s_decmult_F[] =
     { 0x1.C7B1F3CAC7434p+1019,  0x63CAC186BA81C60E,  -962 },  // 1.0e+307
     { 0x1.1CCF385EBC8A0p+1023,  0x4FD5679EFB9B04D8,  -965 },  // 1.0e+308
   };
-static_assert(size(s_decmult_F) == 633, "");
+static_assert(size(s_decmult_F) == 633);
 
 inline uint64_t
 do_get_max_bias(uint64_t ireg, uint32_t add, bool single)
