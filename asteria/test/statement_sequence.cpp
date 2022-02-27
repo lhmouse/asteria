@@ -35,9 +35,11 @@ int main()
           return typeof(e) + ":" + e;
         }
       )__"), tinybuf::open_read);
+
     Token_Stream tstrm({ });
-    tstrm.reload(sref("dummy file"), 16, cbuf);
+    tstrm.reload(sref("dummy file"), 16, ::std::move(cbuf));
+
     Statement_Sequence stmtq({ });
-    stmtq.reload(tstrm);
+    stmtq.reload(::std::move(tstrm));
     ASTERIA_TEST_CHECK(cow_vector<Statement>(stmtq).size() == 4);
   }

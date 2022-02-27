@@ -15,24 +15,24 @@ namespace asteria {
 
 Simple_Script&
 Simple_Script::
-reload(const cow_string& name, int line, tinybuf& cbuf)
+reload(const cow_string& name, int line, tinybuf&& cbuf)
   {
     // Parse source code.
     Token_Stream tstrm(this->m_opts);
-    tstrm.reload(name, line, cbuf);
+    tstrm.reload(name, line, ::std::move(cbuf));
 
     Statement_Sequence stmtq(this->m_opts);
-    stmtq.reload(tstrm);
+    stmtq.reload(::std::move(tstrm));
 
     // Initialize the argument list. This is done only once.
     if(this->m_params.empty())
       this->m_params.emplace_back(sref("..."));
 
     // Instantiate the function.
-    Source_Location sloc(name, 0, 0);
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, this->m_global, stmtq);
 
+    Source_Location sloc(name, 0, 0);
     this->m_func = optmz.create_function(sloc, sref("[file scope]"));
     return *this;
   }
@@ -50,7 +50,7 @@ reload_string(const cow_string& name, int line, const cow_string& code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    return this->reload(name, line, cbuf);
+    return this->reload(name, line, ::std::move(cbuf));
   }
 
 Simple_Script&
@@ -67,7 +67,7 @@ reload_stdin(int line)
     // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(sref("[stdin]"), line, cbuf);
+    return this->reload(sref("[stdin]"), line, ::std::move(cbuf));
   }
 
 Simple_Script&
@@ -84,7 +84,7 @@ reload_file(const char* path)
     // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
     cbuf.open(abspath, tinybuf::open_read);
-    return this->reload(cow_string(abspath), 1, cbuf);
+    return this->reload(cow_string(abspath), 1, ::std::move(cbuf));
   }
 
 Reference

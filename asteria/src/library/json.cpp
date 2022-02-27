@@ -651,7 +651,7 @@ do_parse(tinybuf& cbuf)
     opts.integers_as_reals = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(sref("[JSON text]"), 1, cbuf);
+    tstrm.reload(sref("[JSON text]"), 1, ::std::move(cbuf));
     if(tstrm.empty())
       ASTERIA_THROW_RUNTIME_ERROR("empty JSON string");
 

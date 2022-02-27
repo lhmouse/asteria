@@ -95,10 +95,6 @@ class Module_Loader::Unique_Stream
         return qstrm->second;
       }
 
-    operator
-    ::rocket::tinybuf_file&() const noexcept
-      { return this->get();  }
-
     Unique_Stream&
     reset() noexcept
       { return this->do_reset(nullptr, nullptr);  }

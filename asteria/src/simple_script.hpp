@@ -24,12 +24,12 @@ class Simple_Script
       { }
 
     explicit
-    Simple_Script(const cow_string& name, tinybuf& cbuf)
-      { this->reload(name, 1, cbuf);  }
+    Simple_Script(const cow_string& name, tinybuf&& cbuf)
+      { this->reload(name, 1, ::std::move(cbuf));  }
 
     explicit
-    Simple_Script(const cow_string& name, int line, tinybuf& cbuf)
-      { this->reload(name, line, cbuf);  }
+    Simple_Script(const cow_string& name, int line, tinybuf&& cbuf)
+      { this->reload(name, line, ::std::move(cbuf));  }
 
   public:
     const Compiler_Options&
@@ -65,7 +65,7 @@ class Simple_Script
 
     // Load a script.
     Simple_Script&
-    reload(const cow_string& name, int line, tinybuf& cbuf);
+    reload(const cow_string& name, int line, tinybuf&& cbuf);
 
     Simple_Script&
     reload_string(const cow_string& name, const cow_string& code);

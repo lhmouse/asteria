@@ -2595,7 +2595,7 @@ Statement_Sequence::
 
 Statement_Sequence&
 Statement_Sequence::
-reload(Token_Stream& tstrm)
+reload(Token_Stream&& tstrm)
   {
     // Destroy the contents of `*this` and reuse their storage, if any.
     cow_vector<Statement> stmts;
@@ -2619,7 +2619,7 @@ reload(Token_Stream& tstrm)
 
 Statement_Sequence&
 Statement_Sequence::
-reload_oneline(Token_Stream& tstrm)
+reload_oneline(Token_Stream&& tstrm)
   {
     // Destroy the contents of `*this` and reuse their storage, if any.
     cow_vector<Statement> stmts;

@@ -479,7 +479,7 @@ std_system_conf_load_file(V_string path)
 
     Token_Stream tstrm(opts);
     ::rocket::tinybuf_file cbuf(path.safe_c_str(), tinybuf::open_read);
-    tstrm.reload(path, 1, cbuf);
+    tstrm.reload(path, 1, ::std::move(cbuf));
 
     // Parse a sequence of key-value pairs.
     S_xparse_object ctxo = { };

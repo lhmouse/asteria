@@ -4331,16 +4331,16 @@ struct Traits_import_call
               format_errno(), path);
 
         // Compile the script file into a function object.
-        Module_Loader::Unique_Stream strm;
+        Module_Loader::Unique_Stream utext;
         path.assign(abspath);
-        strm.reset(ctx.global().module_loader(), path.safe_c_str());
+        utext.reset(ctx.global().module_loader(), path.safe_c_str());
 
         // Parse source code.
         Token_Stream tstrm(sp.opts);
-        tstrm.reload(path, 1, strm);
+        tstrm.reload(path, 1, ::std::move(utext.get()));
 
         Statement_Sequence stmtq(sp.opts);
-        stmtq.reload(tstrm);
+        stmtq.reload(::std::move(tstrm));
 
         // Instantiate the function.
         const Source_Location sloc(path, 0, 0);

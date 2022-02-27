@@ -752,7 +752,7 @@ Token_Stream::
 
 Token_Stream&
 Token_Stream::
-reload(const cow_string& file, int line, tinybuf& cbuf)
+reload(const cow_string& file, int line, tinybuf&& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if

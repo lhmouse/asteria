@@ -59,14 +59,14 @@ class Statement_Sequence
     // statements into `*this`. The contents of `*this` are destroyed.
     // This function throws a `Compiler_Error` upon failure.
     Statement_Sequence&
-    reload(Token_Stream& tstrm);
+    reload(Token_Stream&& tstrm);
 
     // This function parses a single expression (without trailing
     // semicolons) instead of a series of statements, as a `return`
     // statement.
     // This function throws a `Compiler_Error` upon failure.
     Statement_Sequence&
-    reload_oneline(Token_Stream& tstrm);
+    reload_oneline(Token_Stream&& tstrm);
   };
 
 }  // namespace asteria

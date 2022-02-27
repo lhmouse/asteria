@@ -74,25 +74,22 @@ class Token_Stream
 
     Token_Stream&
     clear() noexcept
-      {
-        this->m_rtoks.clear();
-        return *this;
-      }
+      { this->m_rtoks.clear();
+        return *this;  }
 
     Source_Location
     next_sloc() const noexcept
       {
-        Source_Location sloc(sref("[end]"), -1, -1);
-        if(ROCKET_EXPECT(!this->m_rtoks.empty()))
-          sloc = this->m_rtoks.back().sloc();
-        return sloc;
+        return this->m_rtoks.empty()
+                  ? Source_Location(sref("[end]"), -1, -1)
+                  : this->m_rtoks.back().sloc();
       }
 
-    // This function parses characters from the input stream and fills tokens into
-    // `*this`. The contents of `*this` are destroyed prior to any further operation.
+    // This function parses characters from the input stream and fills
+    // tokens into `*this`. The contents of `*this` are destroyed
     // This function throws a `Compiler_Error` upon failure.
     Token_Stream&
-    reload(const cow_string& file, int line, tinybuf& cbuf);
+    reload(const cow_string& file, int line, tinybuf&& cbuf);
   };
 
 }  // namespace asteria
