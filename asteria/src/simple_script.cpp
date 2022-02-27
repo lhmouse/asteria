@@ -15,15 +15,8 @@ namespace asteria {
 
 Simple_Script&
 Simple_Script::
-reload(const cow_string& name, int line, tinybuf&& cbuf)
+reload(const cow_string& name, Statement_Sequence&& stmtq)
   {
-    // Parse source code.
-    Token_Stream tstrm(this->m_opts);
-    tstrm.reload(name, line, ::std::move(cbuf));
-
-    Statement_Sequence stmtq(this->m_opts);
-    stmtq.reload(::std::move(tstrm));
-
     // Initialize the argument list. This is done only once.
     if(this->m_params.empty())
       this->m_params.emplace_back(sref("..."));
@@ -39,9 +32,20 @@ reload(const cow_string& name, int line, tinybuf&& cbuf)
 
 Simple_Script&
 Simple_Script::
-reload_string(const cow_string& name, const cow_string& code)
+reload(const cow_string& name, Token_Stream&& tstrm)
   {
-    return this->reload_string(name, 1, code);
+    Statement_Sequence stmtq(this->m_opts);
+    stmtq.reload(::std::move(tstrm));
+    return this->reload(name, ::std::move(stmtq));
+  }
+
+Simple_Script&
+Simple_Script::
+reload(const cow_string& name, int line, tinybuf&& cbuf)
+  {
+    Token_Stream tstrm(this->m_opts);
+    tstrm.reload(name, line, ::std::move(cbuf));
+    return this->reload(name, ::std::move(tstrm));
   }
 
 Simple_Script&
@@ -55,16 +59,15 @@ reload_string(const cow_string& name, int line, const cow_string& code)
 
 Simple_Script&
 Simple_Script::
-reload_stdin()
+reload_string(const cow_string& name, const cow_string& code)
   {
-    return this->reload_stdin(1);
+    return this->reload_string(name, 1, code);
   }
 
 Simple_Script&
 Simple_Script::
 reload_stdin(int line)
   {
-    // Initialize a stream using `stdin`.
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
     return this->reload(sref("[stdin]"), line, ::std::move(cbuf));
@@ -72,26 +75,37 @@ reload_stdin(int line)
 
 Simple_Script&
 Simple_Script::
+reload_stdin()
+  {
+    return this->reload_stdin(1);
+  }
+
+Simple_Script&
+Simple_Script::
 reload_file(const char* path)
   {
-    // Resolve the path to an absolute one.
     auto abspath = ::rocket::make_unique_handle(::realpath(path, nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW("could not open script file '$2'\n"
                     "[`realpath()` failed: $1]",
                     format_errno(), path);
 
-    // Open the file denoted by this path.
     ::rocket::tinybuf_file cbuf;
     cbuf.open(abspath, tinybuf::open_read);
     return this->reload(cow_string(abspath), 1, ::std::move(cbuf));
+  }
+
+Simple_Script&
+Simple_Script::
+reload_file(const cow_string& path)
+  {
+    return this->reload_file(path.safe_c_str());
   }
 
 Reference
 Simple_Script::
 execute(Reference_Stack&& stack)
   {
-    // Execute the script as a plain function.
     Reference self;
     self.set_temporary(nullopt);
 
@@ -102,13 +116,19 @@ execute(Reference_Stack&& stack)
 
 Reference
 Simple_Script::
-execute(cow_vector<Value>&& vals)
+execute(cow_vector<Value>&& args)
   {
-    // Push all arguments backwards as temporaries.
     Reference_Stack stack;
-    for(auto it = vals.mut_begin();  it != vals.end();  ++it)
-      stack.push().set_temporary(::std::move(*it));
+    ::std::for_each(args.mut_begin(), args.mut_end(),
+        [&](auto& arg) { stack.push().set_temporary(::std::move(arg));  });
+    return this->execute(::std::move(stack));
+  }
 
+Reference
+Simple_Script::
+execute()
+  {
+    Reference_Stack stack;
     return this->execute(::std::move(stack));
   }
 

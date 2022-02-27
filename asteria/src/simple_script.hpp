@@ -20,16 +20,9 @@ class Simple_Script
 
   public:
     explicit
-    Simple_Script() noexcept
+    Simple_Script(API_Version version = api_version_latest)
+      : m_global(version)
       { }
-
-    explicit
-    Simple_Script(const cow_string& name, tinybuf&& cbuf)
-      { this->reload(name, 1, ::std::move(cbuf));  }
-
-    explicit
-    Simple_Script(const cow_string& name, int line, tinybuf&& cbuf)
-      { this->reload(name, line, ::std::move(cbuf));  }
 
   public:
     const Compiler_Options&
@@ -58,36 +51,47 @@ class Simple_Script
 
     Simple_Script&
     reset() noexcept
-      {
-        this->m_func.reset();
-        return *this;
-      }
+      { this->m_func.reset();
+        return *this;  }
+
+    // Load something. Calling these functions directly is not recommended.
+    Simple_Script&
+    reload(const cow_string& name, Statement_Sequence&& stmtq);
+
+    Simple_Script&
+    reload(const cow_string& name, Token_Stream&& tstrm);
+
+    Simple_Script&
+    reload(const cow_string& name, int line, tinybuf&& cbuf);
 
     // Load a script.
     Simple_Script&
-    reload(const cow_string& name, int line, tinybuf&& cbuf);
+    reload_string(const cow_string& name, int line, const cow_string& code);
 
     Simple_Script&
     reload_string(const cow_string& name, const cow_string& code);
 
     Simple_Script&
-    reload_string(const cow_string& name, int line, const cow_string& code);
+    reload_stdin(int line);
 
     Simple_Script&
     reload_stdin();
 
     Simple_Script&
-    reload_stdin(int line);
+    reload_file(const char* path);
 
     Simple_Script&
-    reload_file(const char* path);
+    reload_file(const cow_string& path);
 
     // Execute the script that has been loaded.
     Reference
     execute(Reference_Stack&& stack);
 
     Reference
-    execute(cow_vector<Value>&& args = { });
+    execute(cow_vector<Value>&& args);
+
+    Reference
+    execute();
   };
 
 }  // namespace asteria
