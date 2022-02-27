@@ -2599,8 +2599,8 @@ reload(Token_Stream& tstrm)
   {
     // Destroy the contents of `*this` and reuse their storage, if any.
     cow_vector<Statement> stmts;
+    this->m_stmts.clear();
     stmts.swap(this->m_stmts);
-    stmts.clear();
 
     // document ::=
     //   statement-list-opt
