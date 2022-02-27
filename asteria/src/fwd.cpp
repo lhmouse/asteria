@@ -310,6 +310,9 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_closed_brace_or_identifier_expected:
         return "`}` or identifier expected";
 
+      case compiler_status_invalid_expression:
+        return "invalid expression";
+
       case compiler_status_undeclared_identifier:
         return "undeclared identifier";
 

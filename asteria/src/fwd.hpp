@@ -758,6 +758,7 @@ enum Compiler_Status : uint32_t
     compiler_status_continue_no_matching_scope                 = 2034,
     compiler_status_closed_bracket_or_identifier_expected      = 2035,
     compiler_status_closed_brace_or_identifier_expected        = 2036,
+    compiler_status_invalid_expression                         = 2037,
 
     // semantic errors
     compiler_status_undeclared_identifier                      = 3001,

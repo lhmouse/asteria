@@ -2617,4 +2617,37 @@ reload(Token_Stream& tstrm)
     return *this;
   }
 
+Statement_Sequence&
+Statement_Sequence::
+reload_oneline(Token_Stream& tstrm)
+  {
+    // Destroy the contents of `*this` and reuse their storage, if any.
+    cow_vector<Statement> stmts;
+    this->m_stmts.clear();
+    stmts.swap(this->m_stmts);
+
+    // Parse an expression. This is not optional.
+    auto sloc = tstrm.next_sloc();
+    Statement::S_expression xexpr;
+    bool succ = do_accept_expression(xexpr.units, tstrm);
+    if(!succ)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_expression_expected, tstrm.next_sloc());
+
+    // If there are any non-statement tokens left in the stream, fail.
+    if(!tstrm.empty())
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_invalid_expression, tstrm.next_sloc());
+
+
+    // Build a return-statement that forwards the result by reference.
+    xexpr.sloc = sloc;
+    Statement::S_return xstmt = { ::std::move(sloc), true, ::std::move(xexpr) };
+    stmts.emplace_back(::std::move(xstmt));
+
+    // Succeed.
+    this->m_stmts = ::std::move(stmts);
+    return *this;
+  }
+
 }  // namespace asteria
