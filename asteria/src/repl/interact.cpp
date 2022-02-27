@@ -4,6 +4,8 @@
 #include "../precompiled.hpp"
 #include "fwd.hpp"
 #include "../compiler/compiler_error.hpp"
+#include "../compiler/token_stream.hpp"
+#include "../compiler/statement_sequence.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
 #include <stdio.h>  // fprintf(), fclearerr(), stdin, stderr
@@ -110,50 +112,41 @@ read_execute_print_single()
         return;
     }
 
-    // The snippet might be an expression or a statement list.
-    // First, try parsing it as the former. We do this by complementing the
-    // expression to a return statement. As that expression is supposed to be
-    // start at 'line 1', the `return` statement should start at 'line 0'.
+    // Tokenize source code.
+    cow_string real_name;
+    Token_Stream tstrm(repl_script.options());
+    Statement_Sequence stmtq(repl_script.options());
+
     try {
-      // Compose a return statement from the expression.
-      // Source code is duplicated for syntax checking to prevent injection.
-      cow_string compl_source;
-      compl_source.reserve(repl_source.size() * 2 + 100);
+      // The snippet may be an expression or a statement list.
+      // First, try parsing it as the former.
+      real_name = repl_file;
+      if(ROCKET_EXPECT(real_name.empty()))
+        real_name.assign(strbuf,
+              (unsigned) ::sprintf(strbuf, "expression #%lu", repl_index));
 
-      compl_source << "return ref\n";
-      compl_source << repl_source << "\n";
-      compl_source << ";\n";
-
-      compl_source << "assert (\n";
-      compl_source << repl_source << "\n";
-      compl_source << ");\n";
-
-      cow_string real_name;
-      if(repl_file.empty())
-        real_name.assign(strbuf, (unsigned) ::sprintf(strbuf,
-                     "expression #%lu", repl_index));
-      else
-        real_name = repl_file;
-
-      repl_script.reload_string(real_name, 0, compl_source);
+      ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
+      tstrm.reload(real_name, 1, ::std::move(cbuf));
+      stmtq.reload_oneline(::std::move(tstrm));
+      repl_script.reload(real_name, ::std::move(stmtq));
       repl_file = ::std::move(real_name);
     }
     catch(Compiler_Error& except) {
-      // If the snippet is not a valid expression, try parsing it as a
-      // statement.
-      cow_string real_name;
-      if(repl_file.empty())
-        real_name.assign(strbuf, (unsigned) ::sprintf(strbuf,
-                     "snippet #%lu", repl_index));
-      else
-        real_name = repl_file;
+      // Try parsing the snippet as a statement if it does not look
+      // like an expression.
+      real_name = repl_file;
+      if(ROCKET_EXPECT(real_name.empty()))
+        real_name.assign(strbuf,
+              (unsigned) ::sprintf(strbuf, "snippet #%lu", repl_index));
 
       try {
-        repl_script.reload_string(real_name, repl_source);
+        ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
+        tstrm.reload(real_name, 1, ::std::move(cbuf));
+        stmtq.reload(::std::move(tstrm));
+        repl_script.reload(real_name, ::std::move(stmtq));
         repl_file = ::std::move(real_name);
       }
       catch(Compiler_Error& again) {
-        // Reject the snippet if there is an error.
         return repl_printf("! error: %s\n", again.what());
       }
     }
@@ -169,7 +162,6 @@ read_execute_print_single()
       ref = repl_script.execute(::std::move(repl_args));
     }
     catch(exception& stdex) {
-      // Print the error and fail.
       return repl_printf("! error: %s\n", stdex.what());
     }
 
