@@ -546,7 +546,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           }
 
           // Close this array.
-          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
           fmt << "];";
         }
         else if(stack.back().index() == 1) {
@@ -559,7 +559,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           }
 
           // Close this object.
-          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
           fmt << "};";
         }
         else
