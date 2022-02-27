@@ -118,37 +118,39 @@ read_execute_print_single()
     Statement_Sequence stmtq(repl_script.options());
 
     try {
-      // The snippet may be an expression or a statement list.
+      // The snippet may be a sequence of statements or an expression.
       // First, try parsing it as the former.
-      real_name = repl_file;
-      if(ROCKET_EXPECT(real_name.empty()))
-        real_name.assign(strbuf,
-              (unsigned) ::sprintf(strbuf, "expression #%lu", repl_index));
-
-      ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
-      tstrm.reload(real_name, 1, ::std::move(cbuf));
-      stmtq.reload_oneline(::std::move(tstrm));
-      repl_script.reload(real_name, ::std::move(stmtq));
-      repl_file = ::std::move(real_name);
-    }
-    catch(Compiler_Error& except) {
-      // Try parsing the snippet as a statement if it does not look
-      // like an expression.
       real_name = repl_file;
       if(ROCKET_EXPECT(real_name.empty()))
         real_name.assign(strbuf,
               (unsigned) ::sprintf(strbuf, "snippet #%lu", repl_index));
 
+      ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
+      tstrm.reload(real_name, 1, ::std::move(cbuf));
+      stmtq.reload(::std::move(tstrm));
+      repl_script.reload(real_name, ::std::move(stmtq));
+      repl_file = ::std::move(real_name);
+    }
+    catch(Compiler_Error& except) {
+      // Check whether the input looks like an expression.
+      if(except.status() != compiler_status_semicolon_expected)
+        return repl_printf("! error: %s\n", except.what());
+
+      // Try parsing the snippet as an expression.
+      real_name = repl_file;
+      if(ROCKET_EXPECT(real_name.empty()))
+        real_name.assign(strbuf,
+              (unsigned) ::sprintf(strbuf, "expression #%lu", repl_index));
+
       try {
         ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
         tstrm.reload(real_name, 1, ::std::move(cbuf));
-        stmtq.reload(::std::move(tstrm));
+        stmtq.reload_oneline(::std::move(tstrm));
         repl_script.reload(real_name, ::std::move(stmtq));
         repl_file = ::std::move(real_name);
       }
       catch(Compiler_Error& again) {
-        return repl_printf("! error: %s\n", again.what());
-      }
+        return repl_printf("! error: %s\n", again.what());  }
     }
 
     // Save the accepted snippet.
@@ -162,8 +164,7 @@ read_execute_print_single()
       ref = repl_script.execute(::std::move(repl_args));
     }
     catch(exception& stdex) {
-      return repl_printf("! error: %s\n", stdex.what());
-    }
+      return repl_printf("! error: %s\n", stdex.what());  }
 
     // Stringify the result.
     if(ref.is_void())
