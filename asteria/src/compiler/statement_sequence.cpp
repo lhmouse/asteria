@@ -1225,70 +1225,34 @@ do_accept_reference_specifier_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<bool>
-do_accept_argument_no_conversion_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
-  {
-    // argument ::=
-    //   reference-specifier expression | expression
-    auto qref = do_accept_reference_specifier_opt(tstrm);
-    bool succ = do_accept_expression(units, tstrm);
-    if(!qref && !succ)
-      return nullopt;
-
-    if(!succ)
-      throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_expression_expected, tstrm.next_sloc());
-
-    return qref.value_or(false);
-  }
-
-opt<bool>
-do_accept_function_argument_opt(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
-  {
-    auto sloc = tstrm.next_sloc();
-    auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
-    if(!qref)
-      return nullopt;
-
-    Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), *qref };
-    units.emplace_back(::std::move(xunit));
-    return *qref;
-  }
-
-opt<pair<bool, Statement::S_expression>>
-do_accept_return_argument_opt(Token_Stream& tstrm)
-  {
-    cow_vector<Expression_Unit> units;
-    auto sloc = tstrm.next_sloc();
-    auto qref = do_accept_argument_no_conversion_opt(units, tstrm);
-    if(!qref)
-      return nullopt;
-
-    Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
-    return ::std::make_pair(*qref, ::std::move(xexpr));
-  }
-
 opt<Statement>
 do_accept_return_statement_opt(Token_Stream& tstrm)
   {
     // return-statement ::=
     //   "return" ( argument | "" ) ";"
+    // argument ::=
+    //   reference-specifier expression | expression
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
     if(!qkwrd)
       return nullopt;
 
-    auto kpair = do_accept_return_argument_opt(tstrm);
+    auto arg_sloc = tstrm.next_sloc();
+    auto refsp = do_accept_reference_specifier_opt(tstrm);
+    Statement::S_expression xexpr;
+    bool succ = do_accept_expression(xexpr.units, tstrm);
+    if(refsp && !succ)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_expression_expected, tstrm.next_sloc());
+
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_status(),
-                kpair ? compiler_status_semicolon_expected : compiler_status_expression_expected,
+                succ ? compiler_status_semicolon_expected : compiler_status_expression_expected,
                 tstrm.next_sloc());
 
-    if(!kpair)
-      kpair.emplace();  // returns void
-
-    Statement::S_return xstmt = { ::std::move(sloc), kpair->first, ::std::move(kpair->second) };
+    xexpr.sloc = ::std::move(arg_sloc);
+    Statement::S_return xstmt = { ::std::move(sloc), refsp.value_or(false), ::std::move(xexpr) };
     return ::std::move(xstmt);
   }
 
@@ -2096,10 +2060,18 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
     uint32_t nargs = 0;
     bool comma_allowed = false;
     for(;;) {
-      auto qref = do_accept_function_argument_opt(units, tstrm);
-      if(!qref)
+      auto arg_sloc = tstrm.next_sloc();
+      auto refsp = do_accept_reference_specifier_opt(tstrm);
+      bool succ = do_accept_expression(units, tstrm);
+      if(refsp && !succ)
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_expression_expected, tstrm.next_sloc());
+
+      if(!refsp && !succ)
         break;
 
+      Expression_Unit::S_argument_finish xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
+      units.emplace_back(::std::move(xunit));
       nargs += 1;
       if(nargs >= 0x100000)
         throw Compiler_Error(Compiler_Error::M_status(),
@@ -2238,10 +2210,18 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
     uint32_t nargs = 0;
     bool comma_allowed = false;
     for(;;) {
-      auto qref = do_accept_function_argument_opt(units, tstrm);
-      if(!qref)
+      auto arg_sloc = tstrm.next_sloc();
+      auto refsp = do_accept_reference_specifier_opt(tstrm);
+      bool succ = do_accept_expression(units, tstrm);
+      if(refsp && !succ)
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_expression_expected, tstrm.next_sloc());
+
+      if(!refsp && !succ)
         break;
 
+      Expression_Unit::S_argument_finish xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
+      units.emplace_back(::std::move(xunit));
       nargs += 1;
       if(nargs >= 0x100000)
         throw Compiler_Error(Compiler_Error::M_status(),
