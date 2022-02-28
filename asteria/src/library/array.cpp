@@ -434,15 +434,22 @@ std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, o
 V_boolean
 std_array_is_sorted(Global_Context& global, V_array data, optV_function comparator)
   {
-    if(data.size() <= 1)
-      // If `data` contains no more than 2 elements, it is considered sorted.
+    if(data.size() == 0)
       return true;
 
+    // The first element shall not be unordered with itself.
     Reference_Stack stack;
-    for(auto it = data.begin() + 1;  it != data.end();  ++it) {
-      // Compare the two elements.
-      auto cmp = do_compare(global, stack, comparator, it[-1], it[0]);
-      if((cmp == compare_greater) || (cmp == compare_unordered))
+    auto comp = do_compare(global, stack, comparator, data.front(), data.front());
+    if(comp != compare_equal)
+      return false;
+
+    if(data.size() <= 1)
+      return true;
+
+    // Check remaining elements.
+    for(size_t k = 1;  k < data.size();  ++k) {
+      comp = do_compare(global, stack, comparator, data.at(k - 1), data.at(k));
+      if((comp != compare_less) && (comp != compare_equal))
         return false;
     }
     return true;
@@ -453,9 +460,7 @@ std_array_binary_search(Global_Context& global, V_array data, Value target, optV
   {
     Reference_Stack stack;
     auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
-    if(!pair.second)
-      return nullopt;
-    return pair.first - data.begin();
+    return pair.second ? (pair.first - data.begin()) : optV_integer();
   }
 
 V_integer
