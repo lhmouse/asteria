@@ -60,35 +60,28 @@ do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
 
 template<typename IterT>
 opt<IterT>
-do_find_opt(IterT begin, IterT end, const Value& target)
+do_find_opt(Global_Context& global, Reference_Stack& stack,
+            IterT begin, IterT end, const Value& target, bool match)
   {
     for(auto it = ::std::move(begin);  it != end;  ++it) {
-      // Compare the value using the builtin 3-way comparison operator.
-      if(it->compare(target) == compare_equal)
+      bool result;
+      if(target.is_function()) {
+        // `target` is a unary predictor.
+        stack.clear();
+        stack.push().set_temporary(*it);
+
+        Reference self;
+        self.set_temporary(nullopt);
+        target.as_function().invoke(self, global, ::std::move(stack));
+        result = self.dereference_readonly().test();
+      }
+      else {
+        // `target` is a plain value.
+        result = it->compare(target) == compare_equal;
+      }
+      if(result == match)
         return ::std::move(it);
     }
-    // Fail to find an element.
-    return nullopt;
-  }
-
-template<typename IterT>
-opt<IterT>
-do_find_if_opt(Global_Context& global, IterT begin, IterT end, const V_function& pred, bool match)
-  {
-    Reference self;
-    Reference_Stack stack;
-    for(auto it = ::std::move(begin);  it != end;  ++it) {
-      // Set up arguments for the user-defined predictor.
-      stack.clear();
-      stack.push().set_temporary(*it);
-
-      // Call the predictor function and check the return value.
-      self.set_temporary(nullopt);
-      pred.invoke(self, global, ::std::move(stack));
-      if(self.dereference_readonly().test() == match)
-        return ::std::move(it);
-    }
-    // Fail to find an element.
     return nullopt;
   }
 
@@ -289,78 +282,54 @@ std_array_replace_slice(V_array data, V_integer from, optV_integer length,
   }
 
 optV_integer
-std_array_find(V_array data, V_integer from, optV_integer length, Value target)
+std_array_find(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_opt(range.first, range.second, target);
-    if(!qit)
-      return nullopt;
-    return *qit - data.begin();
+    Reference_Stack stack;
+    auto qit = do_find_opt(global, stack, range.first, range.second, target, true);
+    return qit ? (*qit - data.begin()) : optV_integer();
   }
 
 optV_integer
-std_array_find_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                  V_function predictor)
+std_array_find_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
-    if(!qit)
-      return nullopt;
-    return *qit - data.begin();
+    Reference_Stack stack;
+    auto qit = do_find_opt(global, stack, range.first, range.second, target, false);
+    return qit ? (*qit - data.begin()) : optV_integer();
   }
 
 optV_integer
-std_array_find_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                      V_function predictor)
+std_array_rfind(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
-    if(!qit)
-      return nullopt;
-    return *qit - data.begin();
+    Reference_Stack stack;
+    auto qit = do_find_opt(global, stack,
+                           ::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first),
+                           target, true);
+    return qit ? (data.rend() - *qit - 1) : optV_integer();
   }
 
 optV_integer
-std_array_rfind(V_array data, V_integer from, optV_integer length, Value target)
+std_array_rfind_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
-    auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
-                           ::std::make_reverse_iterator(range.first), target);
-    if(!qit)
-      return nullopt;
-    return data.rend() - *qit - 1;
-  }
-
-optV_integer
-std_array_rfind_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                   V_function predictor)
-  {
-    auto range = do_slice(data, from, length);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
-                                      ::std::make_reverse_iterator(range.first), predictor, true);
-    if(!qit)
-      return nullopt;
-    return data.rend() - *qit - 1;
-  }
-
-optV_integer
-std_array_rfind_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                       V_function predictor)
-  {
-    auto range = do_slice(data, from, length);
-    auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second),
-                                      ::std::make_reverse_iterator(range.first), predictor, false);
-    if(!qit)
-      return nullopt;
-    return data.rend() - *qit - 1;
+    Reference_Stack stack;
+    auto qit = do_find_opt(global, stack,
+                           ::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first),
+                           target, false);
+    return qit ? (data.rend() - *qit - 1) : optV_integer();
   }
 
 V_integer
-std_array_count(V_array data, V_integer from, optV_integer length, Value target)
+std_array_count(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
-    int64_t count = 0;
     auto range = do_slice(data, from, length);
-    while(auto qit = do_find_opt(range.first, range.second, target)) {
+    V_integer count = 0;
+    Reference_Stack stack;
+    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, true)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -368,25 +337,12 @@ std_array_count(V_array data, V_integer from, optV_integer length, Value target)
   }
 
 V_integer
-std_array_count_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                   V_function predictor)
+std_array_count_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
-    int64_t count = 0;
     auto range = do_slice(data, from, length);
-    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, true)) {
-      ++count;
-      range.first = ::std::move(++*qit);
-    }
-    return count;
-  }
-
-V_integer
-std_array_count_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                       V_function predictor)
-  {
-    int64_t count = 0;
-    auto range = do_slice(data, from, length);
-    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, false)) {
+    V_integer count = 0;
+    Reference_Stack stack;
+    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, false)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -394,11 +350,12 @@ std_array_count_if_not(Global_Context& global, V_array data, V_integer from, opt
   }
 
 V_array
-std_array_exclude(V_array data, V_integer from, optV_integer length, Value target)
+std_array_exclude(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
-    while(auto qit = do_find_opt(range.first, range.second, target)) {
+    Reference_Stack stack;
+    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, true)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -406,25 +363,12 @@ std_array_exclude(V_array data, V_integer from, optV_integer length, Value targe
   }
 
 V_array
-std_array_exclude_if(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                     V_function predictor)
+std_array_exclude_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
-    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, true)) {
-      range.first = data.erase(*qit);
-      range.second = data.end() - dist;
-    }
-    return data;
-  }
-
-V_array
-std_array_exclude_if_not(Global_Context& global, V_array data, V_integer from, optV_integer length,
-                         V_function predictor)
-  {
-    auto range = do_slice(data, from, length);
-    ptrdiff_t dist = data.end() - range.second;
-    while(auto qit = do_find_if_opt(global, range.first, range.second, predictor, false)) {
+    Reference_Stack stack;
+    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, false)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -758,7 +702,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("find"),
       ASTERIA_BINDING(
         "std.array.find", "data, [from, [length]], [target]",
-        Argument_Reader&& reader)
+        Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
@@ -770,86 +714,53 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_find(data, 0, nullopt, targ);
+          return (Value) std_array_find(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_find(data, from, nullopt, targ);
+          return (Value) std_array_find(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_find(data, from, len, targ);
+          return (Value) std_array_find(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find_if"),
+    result.insert_or_assign(sref("find_not"),
       ASTERIA_BINDING(
-        "std.array.find_if", "data, [from, [length]], predictor",
+        "std.array.find_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
         optV_integer len;
-        V_function pred;
+        Value targ;
 
         reader.start_overload();
         reader.required(data);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_find_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_find_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_find_if(global, data, from, nullopt, pred);
+          return (Value) std_array_find_not(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_find_if(global, data, from, len, pred);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("find_if_not"),
-      ASTERIA_BINDING(
-        "std.array.find_if_not", "data, [from, [length]], predictor",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_array data;
-        V_integer from;
-        optV_integer len;
-        V_function pred;
-
-        reader.start_overload();
-        reader.required(data);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_find_if_not(global, data, 0, nullopt, pred);
-
-        reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_find_if_not(global, data, from, nullopt, pred);
-
-        reader.load_state(0);
-        reader.optional(len);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_find_if_not(global, data, from, len, pred);
+          return (Value) std_array_find_not(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -857,7 +768,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("rfind"),
       ASTERIA_BINDING(
         "std.array.rfind", "data, [from, [length]], [target]",
-        Argument_Reader&& reader)
+        Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
@@ -869,86 +780,53 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_rfind(data, 0, nullopt, targ);
+          return (Value) std_array_rfind(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_rfind(data, from, nullopt, targ);
+          return (Value) std_array_rfind(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_rfind(data, from, len, targ);
+          return (Value) std_array_rfind(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rfind_if"),
+    result.insert_or_assign(sref("rfind_not"),
       ASTERIA_BINDING(
-        "std.array.rfind_if", "data, [from, [length]], predictor",
+        "std.array.rfind_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
         optV_integer len;
-        V_function pred;
+        Value targ;
 
         reader.start_overload();
         reader.required(data);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_rfind_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_rfind_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_rfind_if(global, data, from, nullopt, pred);
+          return (Value) std_array_rfind_not(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_rfind_if(global, data, from, len, pred);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("rfind_if_not"),
-      ASTERIA_BINDING(
-        "std.array.rfind_if_not", "data, [from, [length]], predictor",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_array data;
-        V_integer from;
-        optV_integer len;
-        V_function pred;
-
-        reader.start_overload();
-        reader.required(data);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_rfind_if_not(global, data, 0, nullopt, pred);
-
-        reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_rfind_if_not(global, data, from, nullopt, pred);
-
-        reader.load_state(0);
-        reader.optional(len);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_rfind_if_not(global, data, from, len, pred);
+          return (Value) std_array_rfind_not(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -956,7 +834,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("count"),
       ASTERIA_BINDING(
         "std.array.count", "data, [from, [length]], [target]",
-        Argument_Reader&& reader)
+        Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
@@ -968,86 +846,53 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_count(data, 0, nullopt, targ);
+          return (Value) std_array_count(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_count(data, from, nullopt, targ);
+          return (Value) std_array_count(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_count(data, from, len, targ);
+          return (Value) std_array_count(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("count_if"),
+    result.insert_or_assign(sref("count_not"),
       ASTERIA_BINDING(
-        "std.array.count_if", "data, [from, [length]], predictor",
+        "std.array.count_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
         optV_integer len;
-        V_function pred;
+        Value targ;
 
         reader.start_overload();
         reader.required(data);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_count_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_count_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_count_if(global, data, from, nullopt, pred);
+          return (Value) std_array_count_not(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_count_if(global, data, from, len, pred);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("count_if_not"),
-      ASTERIA_BINDING(
-        "std.array.count_if_not", "data, [from, [length]], predictor",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_array data;
-        V_integer from;
-        optV_integer len;
-        V_function pred;
-
-        reader.start_overload();
-        reader.required(data);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_count_if_not(global, data, 0, nullopt, pred);
-
-        reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_count_if_not(global, data, from, nullopt, pred);
-
-        reader.load_state(0);
-        reader.optional(len);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_count_if_not(global, data, from, len, pred);
+          return (Value) std_array_count_not(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
@@ -1055,7 +900,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(sref("exclude"),
       ASTERIA_BINDING(
         "std.array.exclude", "data, [from, [length]], [target]",
-        Argument_Reader&& reader)
+        Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
@@ -1067,86 +912,53 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_exclude(data, 0, nullopt, targ);
+          return (Value) std_array_exclude(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_exclude(data, from, nullopt, targ);
+          return (Value) std_array_exclude(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_exclude(data, from, len, targ);
+          return (Value) std_array_exclude(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("exclude_if"),
+    result.insert_or_assign(sref("exclude_not"),
       ASTERIA_BINDING(
-        "std.array.exclude_if", "data, [from, [length]], predictor",
+        "std.array.exclude_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         V_integer from;
         optV_integer len;
-        V_function pred;
+        Value targ;
 
         reader.start_overload();
         reader.required(data);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_exclude_if(global, data, 0, nullopt, pred);
+          return (Value) std_array_exclude_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
         reader.required(from);
         reader.save_state(0);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_exclude_if(global, data, from, nullopt, pred);
+          return (Value) std_array_exclude_not(global, data, from, nullopt, targ);
 
         reader.load_state(0);
         reader.optional(len);
-        reader.required(pred);
+        reader.optional(targ);
         if(reader.end_overload())
-          return (Value) std_array_exclude_if(global, data, from, len, pred);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("exclude_if_not"),
-      ASTERIA_BINDING(
-        "std.array.exclude_if_not", "data, [from, [length]], predicto",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_array data;
-        V_integer from;
-        optV_integer len;
-        V_function pred;
-
-        reader.start_overload();
-        reader.required(data);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_exclude_if_not(global, data, 0, nullopt, pred);
-
-        reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_exclude_if_not(global, data, from, nullopt, pred);
-
-        reader.load_state(0);
-        reader.optional(len);
-        reader.required(pred);
-        if(reader.end_overload())
-          return (Value) std_array_exclude_if_not(global, data, from, len, pred);
+          return (Value) std_array_exclude_not(global, data, from, len, targ);
 
         reader.throw_no_matching_function_call();
       });

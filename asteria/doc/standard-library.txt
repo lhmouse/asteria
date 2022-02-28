@@ -766,29 +766,21 @@
 
 `std.array.find(data, [from, [length]], [target])`
 
-	* Searches `data` for the first occurrence of `target`. The
-	  search operation is performed on the same subrange that would
-	  be returned by `slice(data, from, length)`.
-
-	* Returns the subscript of the first match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.find_if(data, [from, [length]], predictor)`
-
-	* Finds the first element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically true. The search operation is
-	  performed on the same subrange that would be returned by
+	* Searches `data` for the first element `x`, for which either
+	  `target` is a function and `target(x)` is true, or `target` is
+	  not a function and `x == target` is true. The search operation
+	  is performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an integer, if one
 	  is found, or `null` otherwise.
 
-`std.array.find_if_not(data, [from, [length]], predictor)`
+`std.array.find_not(data, [from, [length]], [target])`
 
-	* Finds the first element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically false. The search operation is
-	  performed on the same subrange that would be returned by
+	* Searches `data` for the first element `x`, for which either
+	  `target` is a function and `target(x)` is false, or `target` is
+	  not a function and `x == target` is false. The search operation
+	  is performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an integer, if one
@@ -796,29 +788,21 @@
 
 `std.array.rfind(data, [from, [length]], [target])`
 
-	* Searches `data` for the last occurrence of `target`. The search
-	  operation is performed on the same subrange that would be
-	  returned by `slice(data, from, length)`.
-
-	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.rfind_if(data, [from, [length]], predictor)`
-
-	* Finds the last element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically true. The search operation is
-	  performed on the same subrange that would be returned by
+	* Searches `data` for the last element `x`, for which either
+	  `target` is a function and `target(x)` is true, or `target` is
+	  not a function and `x == target` is true. The search operation
+	  is performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an integer, if one
 	  is found, or `null` otherwise.
 
-`std.array.rfind_if_not(data, [from, [length]], predictor)`
+`std.array.rfind_not(data, [from, [length]], [target])`
 
-	* Finds the last element, namely `x`, in `data`, for which
-	  `predictor(x)` yields logically false. The search operation is
-	  performed on the same subrange that would be returned by
+	* Searches `data` for the last element `x`, for which either
+	  `target` is a function and `target(x)` is false, or `target` is
+	  not a function and `x == target` is false. The search operation
+	  is performed on the same subrange that would be returned by
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an integer, if one
@@ -826,61 +810,47 @@
 
 `std.array.count(data, [from, [length]], [target])`
 
-	* Searches `data` for `target` and figures the total number of
-	  occurrences. The search operation is performed on the same
-	  subrange that would be returned by `slice(data, from, length)`.
-
-	* Returns the number of occurrences as an integer, which is
-	  always non-negative.
-
-`std.array.count_if(data, [from, [length]], predictor)`
-
-	* Searches `data` for every element, namely `x`, such that
-	  `predictor(x)` yields logically true, and figures the total
-	  number of elements. The search operation is performed on the
-	  same subrange that would be returned by `slice(data, from,
+	* Searches `data` for every element `x`, for which either
+	  `target` is a function and `target(x)` is true, or `target` is
+	  not a function and `x == target` is true, then returns the
+	  number of such elements. The search operation is performed on
+	  the same subrange that would be returned by `slice(data, from,
 	  length)`.
 
-	* Returns the number of occurrences as an integer, which is
+	* Returns the number of such elements as an integer, which is
 	  always non-negative.
 
-`std.array.count_if_not(data, [from, [length]], predictor)`
+`std.array.count_not(data, [from, [length]], predictor)`
 
-	* Searches on every element, namely `x`, in `data`, such that
-	  `predictor(x)` yields logically false, and figures the total
-	  number of elements. The search operation is performed on the
-	  same subrange that would be returned by `slice(data, from,
+	* Searches `data` for every element `x`, for which either
+	  `target` is a function and `target(x)` is false, or `target` is
+	  not a function and `x == target` is false, then returns the
+	  number of such elements. The search operation is performed on
+	  the same subrange that would be returned by `slice(data, from,
 	  length)`.
 
-	* Returns the number of occurrences as an integer, which is
+	* Returns the number of such elements as an integer, which is
 	  always non-negative.
 
 `std.array.exclude(data, [from, [length]], [target])`
 
-	* Removes every element from `data` which both compares equal
-	  to `target` and is within the same subrange that would be
-	  returned by `slice(data, from, length)` to create a new array.
-	  This function returns a new array without modifying `data`.
+	* Removes every element `x`, for which either `target` is a
+	  function and `target(x)` is true, or `target` is not a function
+	  and `x == target` is true. The search operation is performed on
+	  the same subrange that would be returned by `slice(data, from,
+	  length)`. This function returns a new array without modifying
+	  `data`.
 
 	* Returns a new array with all occurrences removed.
 
 `std.array.exclude_if(data, [from, [length]], predictor)`
 
-	* Removes every element from `data`, namely `x`, such that
-	  both `predictor(x)` yields logically false and `x` is within
-	  the subrange that would be returned by `slice(data, from,
-	  length)`, to create a new array. This function returns a new
-	  array without modifying `data`.
-
-	* Returns a new array with all occurrences removed.
-
-`std.array.exclude_if_not(data, [from, [length]], predictor)`
-
-	* Removes every element from `data`, namely `x`, such that
-	  both `predictor(x)` yields logically true and `x` is within
-	  the subrange that would be returned by `slice(data, from,
-	  length)`, to create a new array. This function returns a new
-	  array without modifying `data`.
+	* Removes every element `x`, for which either `target` is a
+	  function and `target(x)` is false, or `target` is not a
+	  function and `x == target` is false. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from, length)`. This function returns a new array
+	  without modifying `data`.
 
 	* Returns a new array with all occurrences removed.
 
@@ -1835,8 +1805,8 @@
 
 `std.filesystem.get_properties(path)`
 
-	* Retrieves properties of the file or directory that is denoted by
-	  `path`.
+	* Retrieves properties of the file or directory that is denoted
+	  by `path`.
 
 	* Returns an object consisting of the following members:
 
