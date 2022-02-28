@@ -111,7 +111,7 @@ class BMH_Searcher
           while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp))) {
             // Load a word. Endianness does not matter.
             uintptr_t btext = 0;
-            for(ptrdiff_t k = sizeof(btext) - 1;  k != -1;  --k)
+            for(ptrdiff_t k = sizeof(btext) - 1;  k != -1;  k -= 1)
               btext = btext << 8 | (uint8_t) tcur[k];
 
             // Check whether this word contains the first pattern byte.
@@ -124,7 +124,7 @@ class BMH_Searcher
               break;
 
             // Shift the read pointer past this word.
-            tcur += (ptrdiff_t) sizeof(btext);
+            tcur += (ptrdiff_t) sizeof(bcomp);
           }
         }
 
