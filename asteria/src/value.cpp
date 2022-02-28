@@ -123,86 +123,86 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
     auto qval = this;
     cow_vector<Rbr_Element> stack;
 
-    do {
-      switch(qval->type()) {
-        case type_null:
-        case type_boolean:
-        case type_integer:
-        case type_real:
-        case type_string:
+  r:
+    switch(qval->type()) {
+      case type_null:
+      case type_boolean:
+      case type_integer:
+      case type_real:
+      case type_string:
+        break;
+
+      case type_opaque:
+        if(!staged.insert(qval, nullptr))
           break;
 
-        case type_opaque:
-          if(!staged.insert(qval, nullptr))
-            break;
+        qval->as_opaque().get_variables(staged, temp);
+        break;
 
-          qval->as_opaque().get_variables(staged, temp);
+      case type_function:
+        if(!staged.insert(qval, nullptr))
           break;
 
-        case type_function:
-          if(!staged.insert(qval, nullptr))
-            break;
+        qval->as_function().get_variables(staged, temp);
+        break;
 
-          qval->as_function().get_variables(staged, temp);
+      case type_array: {
+        if(!staged.insert(qval, nullptr))
           break;
 
-        case type_array: {
-          const auto& altr = qval->as_array();
-          if(altr.empty())
-            break;
-
-          if(!staged.insert(qval, nullptr))
-            break;
-
-          // Open an array.
-          Rbr_array elem = { &altr, altr.begin() };
+        // Open an array.
+        const auto& altr = qval->as_array();
+        Rbr_array elem = { &altr, altr.begin() };
+        if(elem.curp != altr.end()) {
           qval = &*(elem.curp);
           stack.emplace_back(::std::move(elem));
-          continue;
+          goto r;
         }
 
-        case type_object: {
-          const auto& altr = qval->as_object();
-          if(altr.empty())
-            break;
+        break;
+      }
 
-          if(!staged.insert(qval, nullptr))
-            break;
+      case type_object: {
+        if(!staged.insert(qval, nullptr))
+          break;
 
-          // Open an object.
-          Rbr_object elem = { &altr, altr.begin() };
+        // Open an object.
+        const auto& altr = qval->as_object();
+        Rbr_object elem = { &altr, altr.begin() };
+        if(elem.curp != altr.end()) {
           qval = &(elem.curp->second);
           stack.emplace_back(::std::move(elem));
-          continue;
+          goto r;
         }
 
-        default:
-          ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+        break;
       }
 
-      // Advance to the next element.
-      while(stack.size()) {
-        if(stack.back().index() == 0) {
-          auto& elem = stack.mut_back().as<0>();
-          if(++(elem.curp) != elem.refa->end()) {
-            qval = &*(elem.curp);
-            break;
-          }
-        }
-        else if(stack.back().index() == 1) {
-          auto& elem = stack.mut_back().as<1>();
-          if(++(elem.curp) != elem.refo->end()) {
-            qval = &(elem.curp->second);
-            break;
-          }
-        }
-        else
-          ROCKET_ASSERT(false);
-
-        stack.pop_back();
-      }
+      default:
+        ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
     }
-    while(stack.size());
+
+    while(stack.size()) {
+      // Advance to the next element.
+      if(stack.back().index() == 0) {
+        auto& elem = stack.mut_back().as<0>();
+        if(++(elem.curp) != elem.refa->end()) {
+          qval = &*(elem.curp);
+          goto r;
+        }
+      }
+      else if(stack.back().index() == 1) {
+        auto& elem = stack.mut_back().as<1>();
+        if(++(elem.curp) != elem.refo->end()) {
+          qval = &(elem.curp->second);
+          goto r;
+        }
+      }
+      else
+        ROCKET_ASSERT(false);
+
+      stack.pop_back();
+    }
   }
 
 Compare
@@ -217,99 +217,99 @@ do_compare_slow(const Value& other) const noexcept
     auto qlhs = this;
     auto qrhs = &other;
     cow_bivector<Rbr_array, Rbr_array> stack;
+    Compare comp;
 
-    do {
-      Compare comp = compare_equal;
+  r:
+    if(qlhs->is_real() && qrhs->is_real()) {
+      // Convert integers to reals and compare them.
+      comp = static_cast<Compare>(
+               ::std::islessequal(qlhs->as_real(), qrhs->as_real()) * 2 +
+               ::std::isgreaterequal(qlhs->as_real(), qrhs->as_real()));
+    }
+    else {
+      // Non-arithmetic values of different types can't be compared.
+      if(qlhs->type() != qrhs->type())
+        return compare_unordered;
 
-      if(qlhs->is_real() && qrhs->is_real()) {
-        // Convert integers to reals and compare them.
-        comp = static_cast<Compare>(
-                 ::std::islessequal(qlhs->as_real(), qrhs->as_real()) * 2 +
-                 ::std::isgreaterequal(qlhs->as_real(), qrhs->as_real()));
-      }
-      else {
-        // Non-arithmetic values of different types can't be compared.
-        if(qlhs->type() != qrhs->type())
+      // Compare values of the same type.
+      comp = compare_equal;
+
+      switch(qlhs->type()) {
+        case type_null:
+          break;
+
+        case type_boolean:
+          comp = details_value::do_3way_compare<int>(
+                           qlhs->as_boolean(), qrhs->as_boolean());
+          break;
+
+        case type_integer:
+          comp = details_value::do_3way_compare<V_integer>(
+                           qlhs->as_integer(), qrhs->as_integer());
+          break;
+
+        case type_real:
+          ROCKET_ASSERT(false);
+
+        case type_string:
+          comp = details_value::do_3way_compare<int>(
+                        qlhs->as_string().compare(qrhs->as_string()), 0);
+          break;
+
+        case type_opaque:
+        case type_function:
           return compare_unordered;
 
-        // Compare values of the same type.
-        switch(qlhs->type()) {
-          case type_null:
-            break;
+        case type_array: {
+          const auto& altr1 = qlhs->as_array();
+          const auto& altr2 = qrhs->as_array();
 
-          case type_boolean:
-            comp = details_value::do_3way_compare<int>(
-                             qlhs->as_boolean(), qrhs->as_boolean());
-            break;
+          if(altr1.empty() != altr2.empty())
+            return details_value::do_3way_compare<size_t>(
+                                       altr1.size(), altr2.size());
 
-          case type_integer:
-            comp = details_value::do_3way_compare<V_integer>(
-                             qlhs->as_integer(), qrhs->as_integer());
-            break;
-
-          case type_real:
-            ROCKET_ASSERT(false);
-
-          case type_string:
-            comp = details_value::do_3way_compare<int>(
-                          qlhs->as_string().compare(qrhs->as_string()), 0);
-            break;
-
-          case type_opaque:
-          case type_function:
-            return compare_unordered;
-
-          case type_array: {
-            const auto& altr1 = qlhs->as_array();
-            const auto& altr2 = qrhs->as_array();
-
-            if(altr1.empty() != altr2.empty())
-              return details_value::do_3way_compare<size_t>(
-                                         altr1.size(), altr2.size());
-
-            if(altr1.empty())
-              break;
-
-            // Open a pair of arrays.
+          // Open a pair of arrays.
+          if(!altr1.empty()) {
             Rbr_array elem1 = { &altr1, altr1.begin() };
             qlhs = &*(elem1.curp);
             Rbr_array elem2 = { &altr2, altr2.begin() };
             qrhs = &*(elem2.curp);
             stack.emplace_back(::std::move(elem1), ::std::move(elem2));
-            continue;
+            goto r;
           }
 
-          case type_object:
-            return compare_unordered;
-
-          default:
-            ASTERIA_TERMINATE("invalid value type (type `$1`)", qlhs->type());
-        }
-      }
-
-      if(comp != compare_equal)
-        return comp;
-
-      // Advance to the next element.
-      while(stack.size()) {
-        auto& elem = stack.mut_back();
-        bool cont1 = ++(elem.first.curp) != elem.first.refa->end();
-        bool cont2 = ++(elem.second.curp) != elem.second.refa->end();
-
-        if(cont1 != cont2)
-          return details_value::do_3way_compare<size_t>(
-                       elem.first.refa->size(), elem.second.refa->size());
-
-        if(cont1) {
-          qlhs = &*(elem.first.curp);
-          qrhs = &*(elem.second.curp);
           break;
         }
 
-        stack.pop_back();
+        case type_object:
+          return compare_unordered;
+
+        default:
+          ASTERIA_TERMINATE("invalid value type (type `$1`)", qlhs->type());
       }
     }
-    while(stack.size());
+
+    if(comp != compare_equal)
+      return comp;
+
+    while(stack.size()) {
+      // Advance to the next element.
+      auto& elem = stack.mut_back();
+      bool cont1 = ++(elem.first.curp) != elem.first.refa->end();
+      bool cont2 = ++(elem.second.curp) != elem.second.refa->end();
+
+      if(cont1 != cont2)
+        return details_value::do_3way_compare<size_t>(
+                     elem.first.refa->size(), elem.second.refa->size());
+
+      if(cont1) {
+        qlhs = &*(elem.first.curp);
+        qrhs = &*(elem.second.curp);
+        goto r;
+      }
+
+      stack.pop_back();
+    }
 
     return compare_equal;
   }
@@ -331,110 +331,108 @@ print(tinyfmt& fmt, bool escape) const
     auto qval = this;
     cow_vector<Rbr_Element> stack;
 
-    do {
-      switch(qval->type()) {
-        case type_null:
-          fmt << "null";
-          break;
+  r:
+    switch(qval->type()) {
+      case type_null:
+        fmt << "null";
+        break;
 
-        case type_boolean:
-          fmt << qval->as_boolean();
-          break;
+      case type_boolean:
+        fmt << qval->as_boolean();
+        break;
 
-        case type_integer:
-          fmt << qval->as_integer();
-          break;
+      case type_integer:
+        fmt << qval->as_integer();
+        break;
 
-        case type_real:
-          fmt << qval->as_real();
-          break;
+      case type_real:
+        fmt << qval->as_real();
+        break;
 
-        case type_string:
-          if(escape) {
-            // Escape the string.
-            fmt << quote(qval->as_string());
-          }
-          else {
-            // Write the string verbatim.
-            fmt << qval->as_string();
-          }
-          break;
+      case type_string:
+        if(escape) {
+          // Escape the string.
+          fmt << quote(qval->as_string());
+        }
+        else {
+          // Write the string verbatim.
+          fmt << qval->as_string();
+        }
+        break;
 
-        case type_opaque:
-          fmt << "(opaque) [[" << qval->as_opaque() << "]]";
-          break;
+      case type_opaque:
+        fmt << "(opaque) [[" << qval->as_opaque() << "]]";
+        break;
 
-        case type_function:
-          fmt << "(function) [[" << qval->as_function() << "]]";
-          break;
+      case type_function:
+        fmt << "(function) [[" << qval->as_function() << "]]";
+        break;
 
-        case type_array: {
-          const auto& altr = qval->as_array();
-          if(altr.empty()) {
-            fmt << "[ ]";
-            break;
-          }
+      case type_array: {
+        const auto& altr = qval->as_array();
 
-          // Open an array.
-          Rbr_array elem = { &altr, altr.begin() };
+        // Open an array.
+        Rbr_array elem = { &altr, altr.begin() };
+        if(elem.curp != altr.end()) {
+          fmt << "[ ";
           qval = &*(elem.curp);
           stack.emplace_back(::std::move(elem));
-
-          fmt << "[ ";
-          continue;
+          goto r;
         }
 
-        case type_object: {
-          const auto& altr = qval->as_object();
-          if(altr.empty()) {
-            fmt << "{ }";
-            break;
-          }
+        fmt << "[ ]";
+        break;
+      }
 
-          // Open an object.
-          Rbr_object elem = { &altr, altr.begin() };
+      case type_object: {
+        const auto& altr = qval->as_object();
+
+        // Open an object.
+        Rbr_object elem = { &altr, altr.begin() };
+        if(elem.curp != altr.end()) {
+          fmt << "{ " << quote(elem.curp->first) << ": ";
           qval = &(elem.curp->second);
           stack.emplace_back(::std::move(elem));
-
-          fmt << "{ " << quote(elem.curp->first) << ": ";
-          continue;
+          goto r;
         }
 
-        default:
-          ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+        fmt << "{ }";
+        break;
       }
 
-      // Advance to the next element.
-      while(stack.size()) {
-        if(stack.back().index() == 0) {
-          auto& elem = stack.mut_back().as<0>();
-          if(++(elem.curp) != elem.refa->end()) {
-            fmt << ", ";
-            qval = &*(elem.curp);
-            break;
-          }
-
-          // Close this array.
-          fmt << " ]";
-        }
-        else if(stack.back().index() == 1) {
-          auto& elem = stack.mut_back().as<1>();
-          if(++(elem.curp) != elem.refo->end()) {
-            fmt << ", " << quote(elem.curp->first) << ": ";
-            qval = &(elem.curp->second);
-            break;
-          }
-
-          // Close this object.
-          fmt << " }";
-        }
-        else
-          ROCKET_ASSERT(false);
-
-        stack.pop_back();
-      }
+      default:
+        ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
     }
-    while(stack.size());
+
+    while(stack.size()) {
+      // Advance to the next element.
+      if(stack.back().index() == 0) {
+        auto& elem = stack.mut_back().as<0>();
+        if(++(elem.curp) != elem.refa->end()) {
+          fmt << ", ";
+          qval = &*(elem.curp);
+          goto r;
+        }
+
+        // Close this array.
+        fmt << " ]";
+      }
+      else if(stack.back().index() == 1) {
+        auto& elem = stack.mut_back().as<1>();
+        if(++(elem.curp) != elem.refo->end()) {
+          fmt << ", " << quote(elem.curp->first) << ": ";
+          qval = &(elem.curp->second);
+          goto r;
+        }
+
+        // Close this object.
+        fmt << " }";
+      }
+      else
+        ROCKET_ASSERT(false);
+
+      stack.pop_back();
+    }
 
     return fmt;
   }
@@ -456,119 +454,117 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
     auto qval = this;
     cow_vector<Rbr_Element> stack;
 
-    do {
-      switch(qval->type()) {
-        case type_null:
-          fmt << "null;";
-          break;
+  r:
+    switch(qval->type()) {
+      case type_null:
+        fmt << "null;";
+        break;
 
-        case type_boolean:
-          fmt << "boolean " << qval->as_boolean() << ';';
-          break;
+      case type_boolean:
+        fmt << "boolean " << qval->as_boolean() << ';';
+        break;
 
-        case type_integer:
-          fmt << "integer " << qval->as_integer() << ';';
-          break;
+      case type_integer:
+        fmt << "integer " << qval->as_integer() << ';';
+        break;
 
-        case type_real:
-          fmt << "real " << qval->as_real() << ';';
-          break;
+      case type_real:
+        fmt << "real " << qval->as_real() << ';';
+        break;
 
-        case type_string: {
-          const auto& altr = qval->as_string();
-          fmt << "string(" << altr.size() << ") " << quote(altr) << ';';
-          break;
-        }
+      case type_string: {
+        const auto& altr = qval->as_string();
+        fmt << "string(" << altr.size() << ") " << quote(altr) << ';';
+        break;
+      }
 
-        case type_opaque: {
-          const auto& altr = qval->as_opaque();
-          fmt << "opaque [[" << altr << "]];";
-          break;
-        }
+      case type_opaque: {
+        const auto& altr = qval->as_opaque();
+        fmt << "opaque [[" << altr << "]];";
+        break;
+      }
 
-        case type_function: {
-          const auto& altr = qval->as_function();
-          fmt << "function [[" << altr << "]];";
-          break;
-        }
+      case type_function: {
+        const auto& altr = qval->as_function();
+        fmt << "function [[" << altr << "]];";
+        break;
+      }
 
-        case type_array: {
-          const auto& altr = qval->as_array();
-          fmt << "array(" << altr.size() << ") ";
-          if(altr.empty()) {
-            fmt << "[ ];";
-            break;
-          }
+      case type_array: {
+        const auto& altr = qval->as_array();
+        fmt << "array(" << altr.size() << ") ";
 
-          // Open an array.
-          Rbr_array elem = { &altr, altr.begin() };
-          qval = &*(elem.curp);
-          stack.emplace_back(::std::move(elem));
-
+        // Open an array.
+        Rbr_array elem = { &altr, altr.begin() };
+        if(elem.curp != altr.end()) {
           fmt << '[';
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << (elem.curp - altr.begin()) << " = ";
-          continue;
+          qval = &*(elem.curp);
+          stack.emplace_back(::std::move(elem));
+          goto r;
         }
 
-        case type_object: {
-          const auto& altr = qval->as_object();
-          fmt << "object(" << altr.size() << ") ";
-          if(altr.empty()) {
-            fmt << "{ };";
-            break;
-          }
+        fmt << "[ ];";
+        break;
+      }
 
-          // Open an object.
-          Rbr_object elem = { &altr, altr.begin() };
-          qval = &(elem.curp->second);
-          stack.emplace_back(::std::move(elem));
+      case type_object: {
+        const auto& altr = qval->as_object();
+        fmt << "object(" << altr.size() << ") ";
 
+        // Open an object.
+        Rbr_object elem = { &altr, altr.begin() };
+        if(elem.curp != altr.end()) {
           fmt << '{';
           fmt << pwrap(indent, hanging + indent * stack.size());
           fmt << quote(elem.curp->first) << " = ";
-          continue;
+          qval = &(elem.curp->second);
+          stack.emplace_back(::std::move(elem));
+          goto r;
         }
 
-        default:
-          ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+        fmt << "{ };";
+        break;
       }
 
-      // Advance to the next element.
-      while(stack.size()) {
-        if(stack.back().index() == 0) {
-          auto& elem = stack.mut_back().as<0>();
-          if(++(elem.curp) != elem.refa->end()) {
-            fmt << pwrap(indent, hanging + indent * stack.size());
-            fmt << (elem.curp - elem.refa->begin()) << " = ";
-            qval = &*(elem.curp);
-            break;
-          }
-
-          // Close this array.
-          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
-          fmt << "];";
-        }
-        else if(stack.back().index() == 1) {
-          auto& elem = stack.mut_back().as<1>();
-          if(++(elem.curp) != elem.refo->end()) {
-            fmt << pwrap(indent, hanging + indent * stack.size());
-            fmt << quote(elem.curp->first) << " = ";
-            qval = &(elem.curp->second);
-            break;
-          }
-
-          // Close this object.
-          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
-          fmt << "};";
-        }
-        else
-          ROCKET_ASSERT(false);
-
-        stack.pop_back();
-      }
+      default:
+        ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
     }
-    while(stack.size());
+
+    while(stack.size()) {
+      // Advance to the next element.
+      if(stack.back().index() == 0) {
+        auto& elem = stack.mut_back().as<0>();
+        if(++(elem.curp) != elem.refa->end()) {
+          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << (elem.curp - elem.refa->begin()) << " = ";
+          qval = &*(elem.curp);
+          goto r;
+        }
+
+        // Close this array.
+        fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
+        fmt << "];";
+      }
+      else if(stack.back().index() == 1) {
+        auto& elem = stack.mut_back().as<1>();
+        if(++(elem.curp) != elem.refo->end()) {
+          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << quote(elem.curp->first) << " = ";
+          qval = &(elem.curp->second);
+          goto r;
+        }
+
+        // Close this object.
+        fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
+        fmt << "};";
+      }
+      else
+        ROCKET_ASSERT(false);
+
+      stack.pop_back();
+    }
 
     return fmt;
   }

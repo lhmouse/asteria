@@ -256,76 +256,72 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     auto qval = &value;
     cow_vector<Xformat> stack;
 
-    do {
-      // Format a value. `qval` must always point to a valid value here.
-      switch(weaken_enum(qval->type())) {
-        case type_boolean:
-          // Write `true` or `false`.
-          fmt << qval->as_boolean();
-          break;
+  r:
+    // Format a value. `qval` must always point to a valid value here.
+    switch(weaken_enum(qval->type())) {
+      case type_boolean:
+        // Write `true` or `false`.
+        fmt << qval->as_boolean();
+        break;
 
-        case type_integer:
-          // Write the integer in decimal.
-          fmt << static_cast<double>(qval->as_integer());
-          break;
+      case type_integer:
+        // Write the integer in decimal.
+        fmt << static_cast<double>(qval->as_integer());
+        break;
 
-        case type_real: {
-          double real = qval->as_real();
-          if(::std::isfinite(real)) {
-            // Write the real in decimal.
-            fmt << real;
-          }
-          else if(!json5) {
-            // Censor the value.
-            fmt << "null";
-          }
-          else if(!::std::isnan(real)) {
-            // JSON5 allows infinities in ECMAScript form.
-            fmt << "Infinity";
-          }
-          else {
-            // JSON5 allows NaNs in ECMAScript form.
-            fmt << "NaN";
-          }
-          break;
+      case type_real: {
+        double real = qval->as_real();
+        if(::std::isfinite(real)) {
+          // Write the real in decimal.
+          fmt << real;
         }
+        else if(!json5) {
+          // Censor the value.
+          fmt << "null";
+        }
+        else if(!::std::isnan(real)) {
+          // JSON5 allows infinities in ECMAScript form.
+          fmt << "Infinity";
+        }
+        else {
+          // JSON5 allows NaNs in ECMAScript form.
+          fmt << "NaN";
+        }
+        break;
+      }
 
-        case type_string:
-          // Write the quoted string.
-          do_quote_string(fmt, qval->as_string());
-          break;
+      case type_string:
+        // Write the quoted string.
+        do_quote_string(fmt, qval->as_string());
+        break;
 
-        case type_array: {
-          const auto& array = qval->as_array();
-          fmt << '[';
+      case type_array: {
+        const auto& array = qval->as_array();
+        fmt << '[';
 
-          // Open an array.
-          S_xformat_array ctxa = { &array, array.begin() };
-          if(ctxa.curp == array.end()) {
-            fmt << ']';
-            break;
-          }
-
+        // Open an array.
+        S_xformat_array ctxa = { &array, array.begin() };
+        if(ctxa.curp != array.end()) {
           indent.increment_level();
           indent.break_line(fmt);
 
           // Descend into the array.
           qval = &*(ctxa.curp);
           stack.emplace_back(::std::move(ctxa));
-          continue;
+          goto r;
         }
 
-        case type_object: {
-          const auto& object = qval->as_object();
-          fmt << '{';
+        fmt << ']';
+        break;
+      }
 
-          // Open an object.
-          S_xformat_object ctxo = { &object, object.begin() };
-          if(!do_find_uncensored(ctxo.curp, object)) {
-            fmt << '}';
-            break;
-          }
+      case type_object: {
+        const auto& object = qval->as_object();
+        fmt << '{';
 
+        // Open an object.
+        S_xformat_object ctxo = { &object, object.begin() };
+        if(do_find_uncensored(ctxo.curp, object)) {
           indent.increment_level();
           indent.break_line(fmt);
 
@@ -335,65 +331,67 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
           // Descend into the object.
           qval = &(ctxo.curp->second);
           stack.emplace_back(::std::move(ctxo));
-          continue;
+          goto r;
         }
 
-        default:
-          // Anything else is censored to `null`.
-          fmt << "null";
-          break;
+        fmt << '}';
+        break;
       }
 
-      // Advance to the next element.
-      while(stack.size()) {
-        if(stack.back().index() == 0) {
-          auto& ctxa = stack.mut_back().as<0>();
-          if(++(ctxa.curp) != ctxa.refa->end()) {
-            fmt << ',';
-            indent.break_line(fmt);
-
-            // Format the next element.
-            qval = &*(ctxa.curp);
-            break;
-          }
-
-          // Close this array.
-          if(json5 && indent.has_indention())
-            fmt << ',';
-
-          indent.decrement_level();
-          indent.break_line(fmt);
-          fmt << ']';
-        }
-        else if(stack.back().index() == 1) {
-          auto& ctxo = stack.mut_back().as<1>();
-          if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
-            fmt << ',';
-            indent.break_line(fmt);
-
-            // Write the key followed by a colon.
-            do_format_object_key(fmt, json5, indent, ctxo.curp->first);
-
-            // Format the next value.
-            qval = &(ctxo.curp->second);
-            break;
-          }
-
-          // Close this object.
-          if(json5 && indent.has_indention())
-            fmt << ',';
-
-          indent.decrement_level();
-          indent.break_line(fmt);
-          fmt << '}';
-        }
-        else
-          ROCKET_ASSERT(false);
-
-        stack.pop_back();
-      }
+      default:
+        // Anything else is censored to `null`.
+        fmt << "null";
+        break;
     }
-    while(stack.size());
+
+    while(stack.size()) {
+      // Advance to the next element.
+      if(stack.back().index() == 0) {
+        auto& ctxa = stack.mut_back().as<0>();
+        if(++(ctxa.curp) != ctxa.refa->end()) {
+          fmt << ',';
+          indent.break_line(fmt);
+
+          // Format the next element.
+          qval = &*(ctxa.curp);
+          goto r;
+        }
+
+        // Close this array.
+        if(json5 && indent.has_indention())
+          fmt << ',';
+
+        indent.decrement_level();
+        indent.break_line(fmt);
+        fmt << ']';
+      }
+      else if(stack.back().index() == 1) {
+        auto& ctxo = stack.mut_back().as<1>();
+        if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
+          fmt << ',';
+          indent.break_line(fmt);
+
+          // Write the key followed by a colon.
+          do_format_object_key(fmt, json5, indent, ctxo.curp->first);
+
+          // Format the next value.
+          qval = &(ctxo.curp->second);
+          goto r;
+        }
+
+        // Close this object.
+        if(json5 && indent.has_indention())
+          fmt << ',';
+
+        indent.decrement_level();
+        indent.break_line(fmt);
+        fmt << '}';
+      }
+      else
+        ROCKET_ASSERT(false);
+
+      stack.pop_back();
+    }
 
     return fmt.extract_string();
   }
