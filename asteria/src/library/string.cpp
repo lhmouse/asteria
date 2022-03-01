@@ -85,12 +85,12 @@ class BMH_Searcher
 
   private:
     static uintptr_t
-    do_xset_word(uint8_t ch)
+    do_xset_word(char ch)
       {
-        uintptr_t bmask = ch;
+        uintptr_t bmask = (uint8_t)ch;
         bmask |= bmask * 0x100;
         bmask |= bmask * 0x10000;
-        bmask |= bmask * (uintptr_t) 0x100000000;  // this is never undefined behavior
+        bmask |= bmask * (uintptr_t) 0x100000000;  // avert undefined behavior
         return bmask;
       }
 
@@ -127,8 +127,8 @@ class BMH_Searcher
         if(tfinalcand - tcur >= 64) {
           // Perform a linear search for the first byte.
           // This has to be fast, but need not be very accurate.
-          const uintptr_t bcomp = this->do_xset_word((uint8_t) this->m_pbegin[0]);
-          const uintptr_t bmask = this->do_xset_word(0x80);
+          const uintptr_t bcomp = this->do_xset_word(this->m_pbegin[0]);
+          const uintptr_t bmask = this->do_xset_word('\x80');
 
           while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp))) {
             // Load a word and check whether it contains the first pattern byte.
