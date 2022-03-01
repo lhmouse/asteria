@@ -91,6 +91,10 @@ int main()
         assert std.string.find("hello", "") == 0;
         assert std.string.find("hello", 2, "") == 2;
         assert std.string.find("hello", 2, 0, "") == 2;
+        assert std.string.find("hello" + "z" * 10000 + "hello", "hello") == 0;
+        assert std.string.find("hello" + "z" * 10000 + "hello", 1, "hello") == 10005;
+        assert std.string.find("hello" + "z" * 10000 + "hello", 10005, "hello") == 10005;
+        assert std.string.find("hello" + "z" * 10000 + "hello", 10006, "hello") == null;
 
         assert std.string.rfind("hello hello world", "lo") == 9;
         assert std.string.rfind("hello hello world", 3, "lo") == 9;
@@ -102,6 +106,10 @@ int main()
         assert std.string.rfind("hello", "") == 5;
         assert std.string.rfind("hello", 2, "") == 5;
         assert std.string.rfind("hello", 2, 0, "") == 2;
+        assert std.string.rfind("hello" + "z" * 10000 + "hello", "hello") == 10005;
+        assert std.string.rfind("hello" + "z" * 10000 + "hello", 1, "hello") == 10005;
+        assert std.string.rfind("hello" + "z" * 10000 + "hello", 10005, "hello") == 10005;
+        assert std.string.rfind("hello" + "z" * 10000 + "hello", 10006, "hello") == null;
 
         assert std.string.replace("hello hello world", "llo", "####") == "he#### he#### world";
         assert std.string.replace("hello hello world", 2, "llo", "####") == "he#### he#### world";

@@ -83,6 +83,33 @@ class BMH_Searcher
           this->m_bcr_offsets[uint8_t(this->m_pbegin[k])] = plen - 1 - k;
       }
 
+  private:
+    static uintptr_t
+    do_xset_word(uint8_t ch)
+      {
+        uintptr_t bmask = ch;
+        bmask |= bmask * 0x100;
+        bmask |= bmask * 0x10000;
+        bmask |= bmask * (uintptr_t) 0x100000000;  // this is never undefined behavior
+        return bmask;
+      }
+
+    static uintptr_t
+    do_xload_word(cow_string::const_iterator tcur)
+      {
+        uintptr_t btext;
+        ::std::memcpy(&btext, &*tcur, sizeof(btext));
+        return btext;
+      }
+
+    static uintptr_t
+    do_xload_word(cow_string::const_reverse_iterator tcur)
+      {
+        uintptr_t btext;
+        ::std::memcpy(&btext, &*tcur + 1 - sizeof(btext), sizeof(btext));
+        return btext;
+      }
+
   public:
     opt<IterT>
     search_opt(IterT tbegin, IterT tend) const
@@ -100,22 +127,13 @@ class BMH_Searcher
         if(tfinalcand - tcur >= 64) {
           // Perform a linear search for the first byte.
           // This has to be fast, but need not be very accurate.
-          uintptr_t bcomp = (uint8_t) this->m_pbegin[0];
-          for(size_t k = 1;  k != sizeof(bcomp);  k *= 2)
-            bcomp |= bcomp << k * 8;
-
-          uintptr_t bmask = 0x80;
-          for(size_t k = 1;  k != sizeof(bmask);  k *= 2)
-            bmask |= bmask << k * 8;
+          const uintptr_t bcomp = this->do_xset_word((uint8_t) this->m_pbegin[0]);
+          const uintptr_t bmask = this->do_xset_word(0x80);
 
           while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp))) {
-            // Load a word. Endianness does not matter.
-            uintptr_t btext = 0;
-            for(ptrdiff_t k = sizeof(btext) - 1;  k != -1;  k -= 1)
-              btext = btext << 8 | (uint8_t) tcur[k];
-
-            // Check whether this word contains the first pattern byte.
-            btext ^= bcomp;
+            // Load a word and check whether it contains the first pattern byte.
+            // Endianness does not matter.
+            uintptr_t btext = this->do_xload_word(tcur) ^ bcomp;
 
             // Now see whether `btext` contains a zero byte. The condition
             // is that there shall be a byte whose MSB becomes one after the
