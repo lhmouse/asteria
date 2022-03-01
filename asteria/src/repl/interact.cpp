@@ -44,10 +44,8 @@ read_execute_print_single()
 
       if(ch == '\n') {
         // REPL commands can't straddle multiple lines.
-        if(heredoc.empty() && escaped && (repl_source[0] == ':')) {
-          repl_printf("! dangling \\ at end of command\n");
-          return;
-        }
+        if(heredoc.empty() && escaped && (repl_source[0] == ':'))
+          return repl_printf("! dangling \\ at end of command\n");
 
         // In line input mode, the current snippet is terminated by an
         // unescaped line feed.
@@ -107,7 +105,13 @@ read_execute_print_single()
       // If the command fills something into `repl_source`, execute it.
       auto cmdline = repl_source.substr(pos);
       repl_source.clear();
-      handle_repl_command(::std::move(cmdline));
+
+      try {
+        handle_repl_command(::std::move(cmdline));
+      }
+      catch(exception& stdex) {
+        return repl_printf("! error: %s\n", stdex.what());  }
+
       if(repl_source.empty())
         return;
     }
