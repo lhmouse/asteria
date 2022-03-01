@@ -16,13 +16,14 @@ void
 read_execute_print_single()
   {
     // Prepare for the next snippet.
+    ++repl_index;
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
 
     char strbuf[64];
     bool escaped = false;
-    ++repl_index;
+    bool is_cmd = false;
 
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
@@ -36,6 +37,7 @@ read_execute_print_single()
 
     for(;;) {
       // Read a character. Break upon read errors.
+      is_cmd = heredoc.empty() && (repl_source[0] == repl_cmd_char);
       int ch = ::fgetc(stdin);
       if(ch == EOF) {
         ::fputc('\n', stderr);
@@ -44,7 +46,7 @@ read_execute_print_single()
 
       if(ch == '\n') {
         // REPL commands can't straddle multiple lines.
-        if(heredoc.empty() && escaped && (repl_source[0] == ':'))
+        if(escaped && is_cmd)
           return repl_printf("! dangling \\ at end of command\n");
 
         // In line input mode, the current snippet is terminated by an
@@ -95,8 +97,7 @@ read_execute_print_single()
       return;
 
     // If user input was empty, don't do anything.
-    bool is_cmd = heredoc.empty() && (repl_source[0] == ':');
-    size_t pos = repl_source.find_first_not_of(is_cmd, sref(" \f\n\r\t\v"));
+    size_t pos = repl_source.find_first_not_of(is_cmd, " \f\n\r\t\v");
     if(pos == cow_string::npos)
       return;
 

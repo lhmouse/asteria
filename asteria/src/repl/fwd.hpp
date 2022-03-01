@@ -20,6 +20,9 @@ enum Exit_Status : uint8_t
     exit_non_integer        = 5,
   };
 
+// This character initiates a command.
+constexpr char repl_cmd_char = ':';
+
 // These are global variables defined in 'globals.cpp'.
 extern const char repl_package_version[];
 extern const char repl_version[];
