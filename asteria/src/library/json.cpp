@@ -299,13 +299,12 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         const auto& array = qval->as_array();
         fmt << '[';
 
-        // Open an array.
         S_xformat_array ctxa = { &array, array.begin() };
         if(ctxa.curp != array.end()) {
+          // Open an array.
           indent.increment_level();
           indent.break_line(fmt);
 
-          // Descend into the array.
           qval = &*(ctxa.curp);
           stack.emplace_back(::std::move(ctxa));
           goto r;
@@ -319,16 +318,13 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         const auto& object = qval->as_object();
         fmt << '{';
 
-        // Open an object.
         S_xformat_object ctxo = { &object, object.begin() };
         if(do_find_uncensored(ctxo.curp, object)) {
+          // Open an object.
           indent.increment_level();
           indent.break_line(fmt);
-
-          // Write the key followed by a colon.
           do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
-          // Descend into the object.
           qval = &(ctxo.curp->second);
           stack.emplace_back(::std::move(ctxo));
           goto r;
@@ -346,49 +342,54 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
     while(stack.size()) {
       // Advance to the next element.
-      if(stack.back().index() == 0) {
-        auto& ctxa = stack.mut_back().as<0>();
-        if(++(ctxa.curp) != ctxa.refa->end()) {
-          fmt << ',';
-          indent.break_line(fmt);
+      auto& ctx = stack.mut_back();
+      switch(ctx.index()) {
+        case 0: {
+          auto& ctxa = ctx.as<0>();
+          if(++(ctxa.curp) != ctxa.refa->end()) {
+            fmt << ',';
+            indent.break_line(fmt);
 
-          // Format the next element.
-          qval = &*(ctxa.curp);
-          goto r;
+            // Format the next element.
+            qval = &*(ctxa.curp);
+            goto r;
+          }
+
+          // Close this array.
+          if(json5 && indent.has_indention())
+            fmt << ',';
+
+          indent.decrement_level();
+          indent.break_line(fmt);
+          fmt << ']';
+          break;
         }
 
-        // Close this array.
-        if(json5 && indent.has_indention())
-          fmt << ',';
+        case 1: {
+          auto& ctxo = ctx.as<1>();
+          if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
+            fmt << ',';
+            indent.break_line(fmt);
+            do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
-        indent.decrement_level();
-        indent.break_line(fmt);
-        fmt << ']';
-      }
-      else if(stack.back().index() == 1) {
-        auto& ctxo = stack.mut_back().as<1>();
-        if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
-          fmt << ',';
+            // Format the next value.
+            qval = &(ctxo.curp->second);
+            goto r;
+          }
+
+          // Close this object.
+          if(json5 && indent.has_indention())
+            fmt << ',';
+
+          indent.decrement_level();
           indent.break_line(fmt);
-
-          // Write the key followed by a colon.
-          do_format_object_key(fmt, json5, indent, ctxo.curp->first);
-
-          // Format the next value.
-          qval = &(ctxo.curp->second);
-          goto r;
+          fmt << '}';
+          break;
         }
 
-        // Close this object.
-        if(json5 && indent.has_indention())
-          fmt << ',';
-
-        indent.decrement_level();
-        indent.break_line(fmt);
-        fmt << '}';
+        default:
+          ROCKET_ASSERT(false);
       }
-      else
-        ROCKET_ASSERT(false);
 
       stack.pop_back();
     }

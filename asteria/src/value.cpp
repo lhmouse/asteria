@@ -150,12 +150,12 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         if(!staged.insert(qval, nullptr))
           break;
 
-        // Open an array.
         const auto& altr = qval->as_array();
-        Rbr_array elem = { &altr, altr.begin() };
-        if(elem.curp != altr.end()) {
-          qval = &*(elem.curp);
-          stack.emplace_back(::std::move(elem));
+        Rbr_array elema = { &altr, altr.begin() };
+        if(elema.curp != altr.end()) {
+          // Open an array.
+          qval = &*(elema.curp);
+          stack.emplace_back(::std::move(elema));
           goto r;
         }
 
@@ -166,12 +166,12 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         if(!staged.insert(qval, nullptr))
           break;
 
-        // Open an object.
         const auto& altr = qval->as_object();
-        Rbr_object elem = { &altr, altr.begin() };
-        if(elem.curp != altr.end()) {
-          qval = &(elem.curp->second);
-          stack.emplace_back(::std::move(elem));
+        Rbr_object elemo = { &altr, altr.begin() };
+        if(elemo.curp != altr.end()) {
+          // Open an object.
+          qval = &(elemo.curp->second);
+          stack.emplace_back(::std::move(elemo));
           goto r;
         }
 
@@ -184,22 +184,33 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
 
     while(stack.size()) {
       // Advance to the next element.
-      if(stack.back().index() == 0) {
-        auto& elem = stack.mut_back().as<0>();
-        if(++(elem.curp) != elem.refa->end()) {
-          qval = &*(elem.curp);
-          goto r;
+      auto& elem = stack.mut_back();
+      switch(elem.index()) {
+        case 0: {
+          auto& elema = elem.as<0>();
+          if(++(elema.curp) != elema.refa->end()) {
+            qval = &*(elema.curp);
+            goto r;
+          }
+
+          // Close this array.
+          break;
         }
-      }
-      else if(stack.back().index() == 1) {
-        auto& elem = stack.mut_back().as<1>();
-        if(++(elem.curp) != elem.refo->end()) {
-          qval = &(elem.curp->second);
-          goto r;
+
+        case 1: {
+          auto& elemo = elem.as<1>();
+          if(++(elemo.curp) != elemo.refo->end()) {
+            qval = &(elemo.curp->second);
+            goto r;
+          }
+
+          // Close this object.
+          break;
         }
+
+        default:
+          ROCKET_ASSERT(false);
       }
-      else
-        ROCKET_ASSERT(false);
 
       stack.pop_back();
     }
@@ -268,8 +279,8 @@ do_compare_slow(const Value& other) const noexcept
             return details_value::do_3way_compare<size_t>(
                                        altr1.size(), altr2.size());
 
-          // Open a pair of arrays.
           if(!altr1.empty()) {
+            // Open a pair of arrays.
             Rbr_array elem1 = { &altr1, altr1.begin() };
             qlhs = &*(elem1.curp);
             Rbr_array elem2 = { &altr2, altr2.begin() };
@@ -308,6 +319,7 @@ do_compare_slow(const Value& other) const noexcept
         goto r;
       }
 
+      // Close these arrays.
       stack.pop_back();
     }
 
@@ -371,12 +383,12 @@ print(tinyfmt& fmt, bool escape) const
       case type_array: {
         const auto& altr = qval->as_array();
 
-        // Open an array.
-        Rbr_array elem = { &altr, altr.begin() };
-        if(elem.curp != altr.end()) {
+        Rbr_array elema = { &altr, altr.begin() };
+        if(elema.curp != altr.end()) {
+          // Open an array.
           fmt << "[ ";
-          qval = &*(elem.curp);
-          stack.emplace_back(::std::move(elem));
+          qval = &*(elema.curp);
+          stack.emplace_back(::std::move(elema));
           goto r;
         }
 
@@ -387,12 +399,12 @@ print(tinyfmt& fmt, bool escape) const
       case type_object: {
         const auto& altr = qval->as_object();
 
-        // Open an object.
-        Rbr_object elem = { &altr, altr.begin() };
-        if(elem.curp != altr.end()) {
-          fmt << "{ " << quote(elem.curp->first) << ": ";
-          qval = &(elem.curp->second);
-          stack.emplace_back(::std::move(elem));
+        Rbr_object elemo = { &altr, altr.begin() };
+        if(elemo.curp != altr.end()) {
+          // Open an object.
+          fmt << "{ " << quote(elemo.curp->first) << ": ";
+          qval = &(elemo.curp->second);
+          stack.emplace_back(::std::move(elemo));
           goto r;
         }
 
@@ -406,30 +418,37 @@ print(tinyfmt& fmt, bool escape) const
 
     while(stack.size()) {
       // Advance to the next element.
-      if(stack.back().index() == 0) {
-        auto& elem = stack.mut_back().as<0>();
-        if(++(elem.curp) != elem.refa->end()) {
-          fmt << ", ";
-          qval = &*(elem.curp);
-          goto r;
+      auto& elem = stack.mut_back();
+      switch(elem.index()) {
+        case 0: {
+          auto& elema = elem.as<0>();
+          if(++(elema.curp) != elema.refa->end()) {
+            fmt << ", ";
+            qval = &*(elema.curp);
+            goto r;
+          }
+
+          // Close this array.
+          fmt << " ]";
+          break;
         }
 
-        // Close this array.
-        fmt << " ]";
-      }
-      else if(stack.back().index() == 1) {
-        auto& elem = stack.mut_back().as<1>();
-        if(++(elem.curp) != elem.refo->end()) {
-          fmt << ", " << quote(elem.curp->first) << ": ";
-          qval = &(elem.curp->second);
-          goto r;
+        case 1: {
+          auto& elemo = elem.as<1>();
+          if(++(elemo.curp) != elemo.refo->end()) {
+            fmt << ", " << quote(elemo.curp->first) << ": ";
+            qval = &(elemo.curp->second);
+            goto r;
+          }
+
+          // Close this object.
+          fmt << " }";
+          break;
         }
 
-        // Close this object.
-        fmt << " }";
+        default:
+          ROCKET_ASSERT(false);
       }
-      else
-        ROCKET_ASSERT(false);
 
       stack.pop_back();
     }
@@ -494,14 +513,14 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         const auto& altr = qval->as_array();
         fmt << "array(" << altr.size() << ") ";
 
-        // Open an array.
-        Rbr_array elem = { &altr, altr.begin() };
-        if(elem.curp != altr.end()) {
+        Rbr_array elema = { &altr, altr.begin() };
+        if(elema.curp != altr.end()) {
+          // Open an array.
           fmt << '[';
           fmt << pwrap(indent, hanging + indent * stack.size());
-          fmt << (elem.curp - altr.begin()) << " = ";
-          qval = &*(elem.curp);
-          stack.emplace_back(::std::move(elem));
+          fmt << (elema.curp - altr.begin()) << " = ";
+          qval = &*(elema.curp);
+          stack.emplace_back(::std::move(elema));
           goto r;
         }
 
@@ -513,14 +532,14 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         const auto& altr = qval->as_object();
         fmt << "object(" << altr.size() << ") ";
 
-        // Open an object.
-        Rbr_object elem = { &altr, altr.begin() };
-        if(elem.curp != altr.end()) {
+        Rbr_object elemo = { &altr, altr.begin() };
+        if(elemo.curp != altr.end()) {
+          // Open an object.
           fmt << '{';
           fmt << pwrap(indent, hanging + indent * stack.size());
-          fmt << quote(elem.curp->first) << " = ";
-          qval = &(elem.curp->second);
-          stack.emplace_back(::std::move(elem));
+          fmt << quote(elemo.curp->first) << " = ";
+          qval = &(elemo.curp->second);
+          stack.emplace_back(::std::move(elemo));
           goto r;
         }
 
@@ -534,34 +553,41 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
     while(stack.size()) {
       // Advance to the next element.
-      if(stack.back().index() == 0) {
-        auto& elem = stack.mut_back().as<0>();
-        if(++(elem.curp) != elem.refa->end()) {
-          fmt << pwrap(indent, hanging + indent * stack.size());
-          fmt << (elem.curp - elem.refa->begin()) << " = ";
-          qval = &*(elem.curp);
-          goto r;
+      auto& elem = stack.mut_back();
+      switch(elem.index()) {
+        case 0: {
+          auto& elema = elem.as<0>();
+          if(++(elema.curp) != elema.refa->end()) {
+            fmt << pwrap(indent, hanging + indent * stack.size());
+            fmt << (elema.curp - elema.refa->begin()) << " = ";
+            qval = &*(elema.curp);
+            goto r;
+          }
+
+          // Close this array.
+          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
+          fmt << "];";
+          break;
         }
 
-        // Close this array.
-        fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
-        fmt << "];";
-      }
-      else if(stack.back().index() == 1) {
-        auto& elem = stack.mut_back().as<1>();
-        if(++(elem.curp) != elem.refo->end()) {
-          fmt << pwrap(indent, hanging + indent * stack.size());
-          fmt << quote(elem.curp->first) << " = ";
-          qval = &(elem.curp->second);
-          goto r;
+        case 1: {
+          auto& elemo = elem.as<1>();
+          if(++(elemo.curp) != elemo.refo->end()) {
+            fmt << pwrap(indent, hanging + indent * stack.size());
+            fmt << quote(elemo.curp->first) << " = ";
+            qval = &(elemo.curp->second);
+            goto r;
+          }
+
+          // Close this object.
+          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
+          fmt << "};";
+          break;
         }
 
-        // Close this object.
-        fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
-        fmt << "};";
+        default:
+          ROCKET_ASSERT(false);
       }
-      else
-        ROCKET_ASSERT(false);
 
       stack.pop_back();
     }
