@@ -21,6 +21,7 @@ enum Exit_Status : uint8_t
   };
 
 // This character initiates a command.
+// Leading blank characters are not allowed.
 constexpr char repl_cmd_char = ':';
 
 // These are global variables defined in 'globals.cpp'.
