@@ -85,7 +85,7 @@ class BMH_Searcher
 
   private:
     static uintptr_t
-    do_xset_word(char ch)
+    do_xset_word(char ch) noexcept
       {
         uintptr_t bmask = (uint8_t)ch;
         bmask |= bmask * 0x100;
@@ -95,7 +95,7 @@ class BMH_Searcher
       }
 
     static uintptr_t
-    do_xload_word(cow_string::const_iterator tcur)
+    do_xload_word(cow_string::const_iterator tcur) noexcept
       {
         uintptr_t btext;
         ::std::memcpy(&btext, &*tcur, sizeof(btext));
@@ -103,7 +103,7 @@ class BMH_Searcher
       }
 
     static uintptr_t
-    do_xload_word(cow_string::const_reverse_iterator tcur)
+    do_xload_word(cow_string::const_reverse_iterator tcur) noexcept
       {
         uintptr_t btext;
         ::std::memcpy(&btext, &*tcur + 1 - sizeof(btext), sizeof(btext));
@@ -130,7 +130,7 @@ class BMH_Searcher
           const uintptr_t bcomp = this->do_xset_word(this->m_pbegin[0]);
           const uintptr_t bmask = this->do_xset_word('\x80');
 
-          while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp))) {
+          do {
             // Load a word and check whether it contains the first pattern byte.
             // Endianness does not matter.
             uintptr_t btext = this->do_xload_word(tcur) ^ bcomp;
@@ -144,6 +144,7 @@ class BMH_Searcher
             // Shift the read pointer past this word.
             tcur += (ptrdiff_t) sizeof(bcomp);
           }
+          while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp)));
         }
 
         while(ROCKET_EXPECT(tcur <= tfinalcand)) {
