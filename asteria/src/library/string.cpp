@@ -85,16 +85,6 @@ class BMH_Searcher
 
   private:
     static uintptr_t
-    do_xset_word(char ch) noexcept
-      {
-        uintptr_t bmask = (uint8_t)ch;
-        bmask |= bmask * 0x100;
-        bmask |= bmask * 0x10000;
-        bmask |= bmask * (uintptr_t) 0x100000000;  // avert undefined behavior
-        return bmask;
-      }
-
-    static uintptr_t
     do_xload_word(cow_string::const_iterator tcur) noexcept
       {
         uintptr_t btext;
@@ -127,10 +117,11 @@ class BMH_Searcher
         if(tfinalcand - tcur >= 64) {
           // Perform a linear search for the first byte.
           // This has to be fast, but need not be very accurate.
-          const uintptr_t bcomp = this->do_xset_word(this->m_pbegin[0]);
-          const uintptr_t bmask = this->do_xset_word('\x80');
+          const uintptr_t bmask = UINTPTR_MAX / 0xFF;
+          const uintptr_t bcomp = bmask * (uint8_t) this->m_pbegin[0];
+          constexpr ptrdiff_t bsize = sizeof(bcomp);
 
-          do {
+          while(tfinalcand - tcur >= bsize) {
             // Load a word and check whether it contains the first pattern byte.
             // Endianness does not matter.
             uintptr_t btext = this->do_xload_word(tcur) ^ bcomp;
@@ -138,16 +129,15 @@ class BMH_Searcher
             // Now see whether `btext` contains a zero byte. The condition
             // is that there shall be a byte whose MSB becomes one after the
             // subtraction below, but was zero before it.
-            if((btext - (bmask >> 7)) & (btext ^ bmask) & bmask)
+            if((btext - bmask) & (btext ^ (bmask << 7)) & (bmask << 7))
               break;
 
             // Shift the read pointer past this word.
-            tcur += (ptrdiff_t) sizeof(bcomp);
+            tcur += bsize;
           }
-          while(ROCKET_EXPECT(tfinalcand - tcur >= (ptrdiff_t) sizeof(bcomp)));
         }
 
-        while(ROCKET_EXPECT(tcur <= tfinalcand)) {
+        while(tcur <= tfinalcand) {
           // Compare candidate intervals from right to left.
           ptrdiff_t tml = plen - 1;
           auto tcand = tcur;
