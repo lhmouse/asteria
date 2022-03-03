@@ -111,33 +111,31 @@ class BMH_Searcher
         if(tend - tbegin < plen)
           return nullopt;
 
+        // Perform a linear search for the first byte.
+        // This has to be fast, but need not be very accurate.
+        const uintptr_t bmask = UINTPTR_MAX / 0xFF;
+        const uintptr_t bcomp = bmask * (uint8_t) this->m_pbegin[0];
+        constexpr ptrdiff_t bsize = sizeof(bcomp);
+
         auto tcur = tbegin;
         const auto tfinalcand = tend - plen;
 
-        if(tfinalcand - tcur >= 64) {
-          // Perform a linear search for the first byte.
-          // This has to be fast, but need not be very accurate.
-          const uintptr_t bmask = UINTPTR_MAX / 0xFF;
-          const uintptr_t bcomp = bmask * (uint8_t) this->m_pbegin[0];
-          constexpr ptrdiff_t bsize = sizeof(bcomp);
+        while(tfinalcand - tcur >= bsize) {
+          // Load a word and check whether it contains the first pattern byte.
+          // Endianness does not matter.
+          uintptr_t btext = this->do_xload_word(tcur) ^ bcomp;
 
-          while(tfinalcand - tcur >= bsize) {
-            // Load a word and check whether it contains the first pattern byte.
-            // Endianness does not matter.
-            uintptr_t btext = this->do_xload_word(tcur) ^ bcomp;
+          // Now see whether `btext` contains a zero byte. The condition
+          // is that there shall be a byte whose MSB becomes one after the
+          // subtraction below, but was zero before it.
+          if((btext - bmask) & (btext ^ (bmask << 7)) & (bmask << 7))
+            break;
 
-            // Now see whether `btext` contains a zero byte. The condition
-            // is that there shall be a byte whose MSB becomes one after the
-            // subtraction below, but was zero before it.
-            if((btext - bmask) & (btext ^ (bmask << 7)) & (bmask << 7))
-              break;
-
-            // Shift the read pointer past this word.
-            tcur += bsize;
-          }
+          // Shift the read pointer past this word.
+          tcur += bsize;
         }
 
-        while(tcur <= tfinalcand) {
+        while(tfinalcand - tcur >= 0) {
           // Compare candidate intervals from right to left.
           ptrdiff_t tml = plen - 1;
           auto tcand = tcur;
