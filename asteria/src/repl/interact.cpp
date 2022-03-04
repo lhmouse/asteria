@@ -16,23 +16,20 @@ void
 read_execute_print_single()
   {
     // Prepare for the next snippet.
-    ++repl_index;
+    repl_index ++;
+    long line = 0;
+    cow_string heredoc = ::std::move(repl_heredoc);
+
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
+    repl_heredoc.clear();
 
+    // Prompt for the first line.
     char strbuf[64];
     bool escaped = false;
     bool is_cmd = false;
-
-    cow_string heredoc;
-    heredoc.swap(repl_heredoc);
-    if(!heredoc.empty())
-      heredoc.insert(0, 1, '\n');
-
-    // Prompt for the first line.
-    long line = 0;
-    int indent;
+    int indent = 0;
     repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
 
     for(;;) {
