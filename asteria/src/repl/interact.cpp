@@ -17,7 +17,6 @@ read_execute_print_single()
   {
     // Prepare for the next snippet.
     repl_index ++;
-    long line = 0;
     cow_string heredoc = ::std::move(repl_heredoc);
 
     repl_source.clear();
@@ -25,13 +24,14 @@ read_execute_print_single()
     repl_args.clear();
     repl_heredoc.clear();
 
-    // Prompt for the first line.
     char strbuf[64];
-    bool escaped, is_cmd;
-    int indent;
+    bool is_cmd;
 
-    escaped = false;
+    // Prompt for the first line.
+    long line = 0;
+    int indent;
     repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
+    bool escaped = false;
 
     for(;;) {
       // Read a character. Break upon read errors.
