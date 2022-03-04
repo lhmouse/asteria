@@ -25,10 +25,11 @@ enum Exit_Status : uint8_t
 constexpr char repl_cmd_char = ':';
 
 // These are global variables defined in 'globals.cpp'.
-extern const char repl_package_version[];
+extern const char repl_name[];
 extern const char repl_version[];
 extern const char repl_url[];
 extern const char repl_bug_report[];
+extern const char repl_tar_name[];
 
 extern bool repl_verbose;
 extern bool repl_interactive;
