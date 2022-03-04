@@ -25,7 +25,7 @@ read_execute_print_single()
     repl_heredoc.clear();
 
     char strbuf[64];
-    bool is_cmd;
+    size_t pos;
 
     // Prompt for the first line.
     long line = 0;
@@ -35,7 +35,6 @@ read_execute_print_single()
 
     for(;;) {
       // Read a character. Break upon read errors.
-      is_cmd = heredoc.empty() && (repl_source[0] == repl_cmd_char);
       int ch = ::fgetc(stdin);
       if(ch == EOF) {
         ::fputc('\n', stderr);
@@ -44,7 +43,7 @@ read_execute_print_single()
 
       if(ch == '\n') {
         // REPL commands can't straddle multiple lines.
-        if(escaped && is_cmd)
+        if(escaped && heredoc.empty() && (repl_source[0] == repl_cmd_char))
           return repl_printf("! dangling \\ at end of command\n");
 
         // In line input mode, the current snippet is terminated by an
@@ -94,26 +93,27 @@ read_execute_print_single()
     if(::feof(stdin) && repl_source.empty())
       return;
 
-    // If user input was empty, don't do anything.
-    size_t pos = repl_source.find_first_not_of(is_cmd, " \f\n\r\t\v");
-    if(pos == cow_string::npos)
-      return;
-
-    if(is_cmd) {
-      // Process the command.
-      // If the command fills something into `repl_source`, execute it.
-      auto cmdline = repl_source.substr(pos);
-      repl_source.clear();
+    if(repl_source[0] == repl_cmd_char) {
+      // Skip space characters after the command initiator.
+      // If user input was empty, don't do anything.
+      pos = repl_source.find_first_not_of(1, " \f\n\r\t\v");
+      if(pos == cow_string::npos)
+        return;
 
       try {
+        // Process the command, which may re-populate `repl_source`.
+        auto cmdline = repl_source.substr(pos);
+        repl_source.clear();
         handle_repl_command(::std::move(cmdline));
       }
       catch(exception& stdex) {
         return repl_printf("! error: %s\n", stdex.what());  }
-
-      if(repl_source.empty())
-        return;
     }
+
+    // Skip space characters. If the source string becomes empty, do nothing.
+    pos = repl_source.find_first_not_of(" \f\n\r\t\v");
+    if(pos == cow_string::npos)
+      return;
 
     // Tokenize source code.
     cow_string real_name;
