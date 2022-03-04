@@ -8,97 +8,122 @@
 #include "../compiler/statement_sequence.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
-#include <stdio.h>  // fprintf(), fclearerr(), stdin, stderr
+#include <stdio.h>
+#include <histedit.h>
 
 namespace asteria {
 
 void
 read_execute_print_single()
   {
-    // Prepare for the next snippet.
-    repl_index ++;
-    cow_string heredoc = ::std::move(repl_heredoc);
+    static ::HistEvent el_event[1];
+    static ::History* el_history;
+    static ::EditLine* el_editor;
+    static char el_prompt[64];
 
+    // Initialize the Editline library if it hasn't been initialized.
+    if(ROCKET_UNEXPECT(!el_editor)) {
+      el_history = ::history_init();
+      if(!el_history)
+        exit_printf(exit_system_error, "! could not initialize history: %m");
+
+      el_editor = ::el_init(repl_tar_name, stdin, stdout, stderr);
+      if(!el_editor)
+        exit_printf(exit_system_error, "! could not initialize editline: %m");
+
+      // Initialize the editor. Errors are ignored.
+      ::history(el_history, el_event, H_SETSIZE, repl_history_size);
+      ::history(el_history, el_event, H_SETUNIQUE, 1);
+
+      ::el_set(el_editor, EL_TERMINAL, nullptr);
+      ::el_set(el_editor, EL_SIGNAL, 1);
+      ::el_set(el_editor, EL_EDITOR, "emacs");
+      ::el_set(el_editor, EL_PROMPT, +[]{ return el_prompt;  });
+      ::el_set(el_editor, EL_HIST, ::history, el_history);
+
+      // Load `~/.editrc`. Errors are ignored.
+      ::el_source(el_editor, nullptr);
+    }
+
+    // Prepare for the next snippet.
     repl_source.clear();
     repl_file.clear();
     repl_args.clear();
-    repl_heredoc.clear();
 
-    char strbuf[64];
-    size_t pos;
+    cow_string heredoc;
+    heredoc.swap(repl_heredoc);
 
     // Prompt for the first line.
-    long line = 0;
+    bool iscmd = false;
+    long linenum = 0;
     int indent;
-    repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
-    bool escaped = false;
+    ::sprintf(el_prompt, "#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
 
-    for(;;) {
-      // Read a character. Break upon read errors.
-      int ch = ::fgetc(stdin);
-      if(ch == EOF) {
-        ::fputc('\n', stderr);
+    const char* linebuf;
+    int linelen;
+    size_t pos;
+
+    while(!!(linebuf = ::el_gets(el_editor, &linelen))) {
+      // Append this line.
+      repl_source.append(linebuf, (unsigned)linelen);
+
+      // `linebuf` has a trailing line feed if it is not the last line.
+      // Remove it for simplicity.
+      if(repl_source.ends_with("\n"))
+        repl_source.pop_back();
+
+      // In heredoc mode, a line matching the user-defined terminator ends
+      // the current snippet, which is not part of the snippet.
+      if(!heredoc.empty() && repl_source.ends_with(heredoc)) {
+        repl_source.erase(repl_source.size() - heredoc.size());
         break;
       }
 
-      if(ch == '\n') {
-        // REPL commands can't straddle multiple lines.
-        if(escaped && heredoc.empty() && (repl_source[0] == repl_cmd_char))
+      if(heredoc.empty()) {
+        iscmd = repl_source[0] == repl_cmd_char;
+        if(!repl_source.ends_with("\\"))  // note `repl_source` may be empty
+          break;
+
+        // A command is not allowed to straddle multiple lines.
+        if(iscmd)
           return repl_printf("! dangling \\ at end of command\n");
 
-        // In line input mode, the current snippet is terminated by an
-        // unescaped line feed.
-        if(heredoc.empty() && !escaped)
-          break;
-
-        // In heredoc mode, it is terminated by a line consisting of the
-        // user-defined terminator, which is not part of the snippet and
-        // must be removed.
-        if(!heredoc.empty() && repl_source.ends_with(heredoc)) {
-          repl_source.pop_back(heredoc.size());
-          break;
-        }
-
-        // The line feed should be preserved. It'll be appended later.
-        // Prompt for the next consecutive line.
-        repl_printf("%*lu> ", indent, ++line);
-      }
-      else if(heredoc.empty()) {
-        // In line input mode, backslashes that precede line feeds are
-        // deleted; those that do not precede line feeds are kept as is.
-        if(escaped)
-          repl_source.push_back('\\');
-
-        escaped = (ch == '\\');
-        if(escaped)
-          continue;
+        // Backslashes that join lines are removed, unlike in heredoc mode.
+        repl_source.pop_back();
       }
 
-      // Append the character.
-      repl_source.push_back(static_cast<char>(ch));
-      escaped = false;
+      // Prompt for the next line.
+      repl_source.push_back('\n');
+      ::sprintf(el_prompt, "%*lu> ", indent, ++linenum);
     }
+
+    if(!linebuf)
+      ::fputc('\n', stderr);
 
     // Discard this snippet if Ctrl-C was received.
     if(get_and_clear_last_signal() != 0) {
+      ::el_reset(el_editor);
       repl_printf("! interrupted (type `:exit` to quit)\n");
-      ::clearerr(stdin);
       return;
     }
 
-    // Discard this snippet if a read error occurred.
-    if(::ferror(stdin))
+    // Exit if an error occurred while reading user input.
+    if(linelen == -1)
       exit_printf(exit_system_error, "! could not read standard input: %m\n");
 
-    if(::feof(stdin) && repl_source.empty())
+    // Exit if the end of user input has been reached.
+    if(!linebuf && repl_source.empty())
       exit_printf(exit_success, "* have a nice day :)\n");
 
-    if(repl_source[0] == repl_cmd_char) {
+    if(iscmd) {
       // Skip space characters after the command initiator.
       // If user input was empty, don't do anything.
       pos = repl_source.find_first_not_of(1, " \f\n\r\t\v");
       if(pos == cow_string::npos)
         return;
+
+      // Add the snippet into history.
+      ::history(el_history, el_event, H_ENTER, repl_source.c_str());
 
       try {
         // Process the command, which may re-populate `repl_source`.
@@ -115,22 +140,30 @@ read_execute_print_single()
     if(pos == cow_string::npos)
       return;
 
+    // Add the snippet into history, unless it was composed by a command.
+    if(!iscmd)
+      ::history(el_history, el_event, H_ENTER, repl_source.c_str());
+
     // Tokenize source code.
     cow_string real_name;
     Token_Stream tstrm(repl_script.options());
     Statement_Sequence stmtq(repl_script.options());
+    Reference ref;
 
     try {
       // The snippet may be a sequence of statements or an expression.
       // First, try parsing it as the former.
       real_name = repl_file;
-      if(ROCKET_EXPECT(real_name.empty()))
-        real_name.assign(strbuf,
-              (unsigned) ::sprintf(strbuf, "snippet #%lu", repl_index));
+      if(ROCKET_EXPECT(real_name.empty())) {
+        char strbuf[64];
+        ::sprintf(strbuf, "snippet #%lu", repl_index);
+        real_name.assign(strbuf);
+      }
 
       ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
       tstrm.reload(real_name, 1, ::std::move(cbuf));
       stmtq.reload(::std::move(tstrm));
+
       repl_script.reload(real_name, ::std::move(stmtq));
       repl_file = ::std::move(real_name);
     }
@@ -139,16 +172,19 @@ read_execute_print_single()
       if(except.status() != compiler_status_semicolon_expected)
         return repl_printf("! error: %s\n", except.what());
 
-      // Try parsing the snippet as an expression.
-      real_name = repl_file;
-      if(ROCKET_EXPECT(real_name.empty()))
-        real_name.assign(strbuf,
-              (unsigned) ::sprintf(strbuf, "expression #%lu", repl_index));
-
       try {
+        // Try parsing the snippet as an expression.
+        real_name = repl_file;
+        if(ROCKET_EXPECT(real_name.empty())) {
+          char strbuf[64];
+          ::sprintf(strbuf, "expression #%lu", repl_index);
+          real_name.assign(strbuf);
+        }
+
         ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
         tstrm.reload(real_name, 1, ::std::move(cbuf));
         stmtq.reload_oneline(::std::move(tstrm));
+
         repl_script.reload(real_name, ::std::move(stmtq));
         repl_file = ::std::move(real_name);
       }
@@ -160,9 +196,8 @@ read_execute_print_single()
     repl_last_source.assign(repl_source.begin(), repl_source.end());
     repl_last_file.assign(repl_file.begin(), repl_file.end());
 
-    // Execute the script.
-    Reference ref;
     try {
+      // Execute the script.
       repl_printf("* running '%s'...\n", repl_file.c_str());
       ref = repl_script.execute(::std::move(repl_args));
     }
