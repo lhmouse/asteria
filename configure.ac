@@ -27,6 +27,7 @@ AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_ERROR(`clock_gettime()` not foun
 AC_CHECK_LIB([z], [crc32], [], [AC_MSG_ERROR(zlib not found)])
 AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR(PCRE2 not found)])
 AC_CHECK_LIB([crypto], [MD5_Init], [], [AC_MSG_ERROR(OpenSSL not found)])
+AC_CHECK_LIB([edit], [el_init], [], [AC_MSG_ERROR(Editline library not found)])
 AM_ICONV_LINK()
 
 ## Check for assertions
