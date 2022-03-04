@@ -27,9 +27,10 @@ read_execute_print_single()
 
     // Prompt for the first line.
     char strbuf[64];
-    bool escaped = false;
-    bool is_cmd = false;
-    int indent = 0;
+    bool escaped, is_cmd;
+    int indent;
+
+    escaped = false;
     repl_printf("#%lu:%lu%n> ", repl_index, ++line, &indent);
 
     for(;;) {
