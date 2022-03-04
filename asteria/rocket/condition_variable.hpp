@@ -126,7 +126,7 @@ class condition_variable
 
         this->do_wait_check_loop(lock,
             [&](::timespec& ts) { return this->do_make_abstime(ts, msecs);  },
-            [&] { return true;  });
+            [&]() { return true;  });
       }
 
     template<typename predT>
@@ -149,7 +149,7 @@ class condition_variable
       {
         this->do_wait_check_loop(lock,
             [&](::timespec& /*ts*/) { return false;  },
-            [&] { return true;  });
+            [&]() { return true;  });
       }
 
     template<typename predT>
