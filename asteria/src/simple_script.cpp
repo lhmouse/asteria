@@ -84,7 +84,8 @@ Simple_Script&
 Simple_Script::
 reload_file(const char* path)
   {
-    auto abspath = ::rocket::make_unique_handle(::realpath(path, nullptr), ::free);
+    ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+    abspath.reset(::realpath(path, nullptr));
     if(!abspath)
       ASTERIA_THROW("could not open script file '$2'\n"
                     "[`realpath()` failed: $1]",

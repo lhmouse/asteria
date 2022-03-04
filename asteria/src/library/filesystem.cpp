@@ -166,28 +166,32 @@ std_filesystem_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
-    auto qcwd = ::rocket::make_unique_handle(::getcwd(nullptr, 0), ::free);
-    if(!qcwd) {
+    ::rocket::unique_ptr<char, void (void*)> cwd(::free);
+    cwd.reset(::getcwd(nullptr, 0));
+    if(!cwd)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not get current working directory\n"
           "[`getcwd()` failed: $1]",
           format_errno());
-    }
-    return V_string(qcwd);
+
+    V_string str(cwd.get());
+    return str;
   }
 
 V_string
 std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
-    auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
-    if(!abspath) {
+    ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+    abspath.reset(::realpath(path.safe_c_str(), nullptr));
+    if(!abspath)
       ASTERIA_THROW_RUNTIME_ERROR(
           "could not resolve path '$2'\n"
           "[`realpath()` failed: $1]",
           format_errno(), path);
-    }
-    return V_string(abspath);
+
+    V_string str(abspath.get());
+    return str;
   }
 
 optV_object
@@ -247,7 +251,7 @@ std_filesystem_get_properties(V_string path)
                                       // timestamp of last modification
       ));
 
-    return ::std::move(stat);
+    return stat;
   }
 
 void

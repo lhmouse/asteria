@@ -4323,7 +4323,8 @@ struct Traits_import_call
         if((path[0] != '/') && (src_path[0] == '/'))
           path.insert(0, src_path, 0, src_path.rfind('/') + 1);
 
-        auto abspath = ::rocket::make_unique_handle(::realpath(path.safe_c_str(), nullptr), ::free);
+        ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+        abspath.reset(::realpath(path.safe_c_str(), nullptr));
         if(!abspath)
           ASTERIA_THROW_RUNTIME_ERROR(
               "could not open module file '$2'\n"
