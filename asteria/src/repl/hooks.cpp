@@ -95,14 +95,14 @@ Verbose_Hooks::
   {
   }
 
-volatile ::sig_atomic_t s_intsig;
+::rocket::atomic_relaxed<int> s_sig_recv;
 
 }  // namespace
 
 int
 get_and_clear_last_signal() noexcept
   {
-    return ::std::exchange(s_intsig, 0);
+    return s_sig_recv.exchange(0);
   }
 
 void
@@ -110,7 +110,7 @@ install_signal_and_verbose_hooks()
   {
     // Trap Ctrl-C. Errors are ignored.
     struct ::sigaction sigx = { };
-    sigx.sa_handler = [](int n) { s_intsig = n;  };
+    sigx.sa_handler = [](int sig) { s_sig_recv.store(sig);  };
     ::sigaction(SIGINT, &sigx, nullptr);
 
     // Set the hooks class.
