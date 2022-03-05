@@ -48,7 +48,7 @@ class reference_counter
 
     ~reference_counter()
       {
-        auto old = this->m_nref.load(::std::memory_order_relaxed);
+        auto old = this->m_nref.load(memory_order_relaxed);
         if(old > 1)
           ::std::terminate();
       }
@@ -56,22 +56,22 @@ class reference_counter
   public:
     bool
     unique() const noexcept
-      { return this->m_nref.load(::std::memory_order_relaxed) == 1;  }
+      { return this->m_nref.load(memory_order_relaxed) == 1;  }
 
     value_type
     get() const noexcept
-      { return this->m_nref.load(::std::memory_order_relaxed);  }
+      { return this->m_nref.load(memory_order_relaxed);  }
 
     // Increment the counter only if it is non-zero, and return its new value.
     long
     try_increment() noexcept
       {
-        auto old = this->m_nref.load(::std::memory_order_relaxed);
+        auto old = this->m_nref.load(memory_order_relaxed);
         for(;;)
           if(old == 0)
             return old;
           else if(this->m_nref.compare_exchange_weak(old, old + 1,
-                                 ::std::memory_order_relaxed))
+                                 memory_order_relaxed))
             return old + 1;
       }
 
@@ -79,7 +79,7 @@ class reference_counter
     value_type
     increment() noexcept
       {
-        auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
+        auto old = this->m_nref.fetch_add(1, memory_order_relaxed);
         ROCKET_ASSERT(old >= 1);
         return old + 1;
       }
@@ -91,7 +91,7 @@ class reference_counter
     value_type
     decrement() noexcept
       {
-        auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
+        auto old = this->m_nref.fetch_sub(1, memory_order_acq_rel);
         ROCKET_ASSERT(old >= 1);
         return old - 1;
       }

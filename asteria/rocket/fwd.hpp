@@ -143,6 +143,14 @@ using ::std::begin;
 using ::std::end;
 using ::std::swap;
 
+using ::std::memory_order;
+using ::std::memory_order_relaxed;
+using ::std::memory_order_consume;
+using ::std::memory_order_acquire;
+using ::std::memory_order_release;
+using ::std::memory_order_acq_rel;
+using ::std::memory_order_seq_cst;
+
 #define ROCKET_VOID_T(...)               typename ::std::conditional<1, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr

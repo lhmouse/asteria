@@ -9,7 +9,7 @@
 
 namespace rocket {
 
-template<typename valueT, ::std::memory_order memorderT = ::std::memory_order_acq_rel>
+template<typename valueT, memory_order memorderT = memory_order_acq_rel>
 class atomic;
 
 /* Differences from `std::atomic`:
@@ -17,7 +17,7 @@ class atomic;
  * 2. Memory order is a template argument and cannot be specified elsewhere.
 **/
 
-template<typename valueT, ::std::memory_order memorderT>
+template<typename valueT, memory_order memorderT>
 class atomic
   {
   public:
@@ -40,47 +40,47 @@ class atomic
       = delete;
 
   private:
-    static constexpr ::std::memory_order
+    static constexpr memory_order
     do_order_acquire() noexcept
       {
         switch((int)memorderT) {
-          case ::std::memory_order_consume:
-            return ::std::memory_order_consume;
+          case memory_order_consume:
+            return memory_order_consume;
 
-          case ::std::memory_order_acquire:
-          case ::std::memory_order_release:
-          case ::std::memory_order_acq_rel:
-            return ::std::memory_order_acquire;
+          case memory_order_acquire:
+          case memory_order_release:
+          case memory_order_acq_rel:
+            return memory_order_acquire;
 
           default:  // relaxed || seq_cst
             return memorderT;
         }
       }
 
-    static constexpr ::std::memory_order
+    static constexpr memory_order
     do_order_release() noexcept
       {
         switch((int)memorderT) {
-          case ::std::memory_order_consume:
-          case ::std::memory_order_acquire:
-          case ::std::memory_order_release:
-          case ::std::memory_order_acq_rel:
-            return ::std::memory_order_release;
+          case memory_order_consume:
+          case memory_order_acquire:
+          case memory_order_release:
+          case memory_order_acq_rel:
+            return memory_order_release;
 
           default:  // relaxed || seq_cst
             return memorderT;
         }
       }
 
-    static constexpr ::std::memory_order
+    static constexpr memory_order
     do_order_acq_rel() noexcept
       {
         switch((int)memorderT) {
-          case ::std::memory_order_consume:
-          case ::std::memory_order_acquire:
-          case ::std::memory_order_release:
-          case ::std::memory_order_acq_rel:
-            return ::std::memory_order_acq_rel;
+          case memory_order_consume:
+          case memory_order_acquire:
+          case memory_order_release:
+          case memory_order_acq_rel:
+            return memory_order_acq_rel;
 
           default:  // relaxed || seq_cst
             return memorderT;
@@ -135,22 +135,22 @@ class atomic
   };
 
 template<typename valueT>
-using atomic_relaxed = atomic<valueT, ::std::memory_order_relaxed>;
+using atomic_relaxed = atomic<valueT, memory_order_relaxed>;
 
 template<typename valueT>
-using atomic_consume = atomic<valueT, ::std::memory_order_consume>;
+using atomic_consume = atomic<valueT, memory_order_consume>;
 
 template<typename valueT>
-using atomic_acquire = atomic<valueT, ::std::memory_order_acquire>;
+using atomic_acquire = atomic<valueT, memory_order_acquire>;
 
 template<typename valueT>
-using atomic_release = atomic<valueT, ::std::memory_order_release>;
+using atomic_release = atomic<valueT, memory_order_release>;
 
 template<typename valueT>
-using atomic_acq_rel = atomic<valueT, ::std::memory_order_acq_rel>;
+using atomic_acq_rel = atomic<valueT, memory_order_acq_rel>;
 
 template<typename valueT>
-using atomic_seq_cst = atomic<valueT, ::std::memory_order_seq_cst>;
+using atomic_seq_cst = atomic<valueT, memory_order_seq_cst>;
 
 }  // namespace rocket
 

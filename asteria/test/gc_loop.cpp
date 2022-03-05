@@ -16,7 +16,7 @@ void* operator new(size_t cb)
     if(!ptr)
       throw ::std::bad_alloc();
 
-    bcnt.fetch_add(1, ::std::memory_order_relaxed);
+    bcnt.fetch_add(1, memory_order_relaxed);
     return ptr;
   }
 
@@ -25,7 +25,7 @@ void operator delete(void* ptr) noexcept
     if(!ptr)
       return;
 
-    bcnt.fetch_sub(1, ::std::memory_order_relaxed);
+    bcnt.fetch_sub(1, memory_order_relaxed);
     ::std::free(ptr);
   }
 
@@ -39,7 +39,7 @@ int main()
     // Ignore leaks of emutls, emergency pool, etc.
     delete new int;
 
-    bcnt.store(0, ::std::memory_order_relaxed);
+    bcnt.store(0, memory_order_relaxed);
     {
       Simple_Script code;
       code.reload_string(
@@ -67,5 +67,5 @@ int main()
         )__"));
       code.execute();
     }
-    ASTERIA_TEST_CHECK(bcnt.load(::std::memory_order_relaxed) == 0);
+    ASTERIA_TEST_CHECK(bcnt.load(memory_order_relaxed) == 0);
   }
