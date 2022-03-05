@@ -222,7 +222,7 @@ main(int argc, char** argv)
     // Enter interactive mode.
     prepare_repl_commands();
 
-    ::fprintf(stderr,
+    repl_printf(
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
@@ -244,7 +244,6 @@ main(int argc, char** argv)
       // Clear EOF and error bits. Clear orientation. Errors are ignored.
       (void)!!::freopen(nullptr, "r", stdin);
       (void)!!::freopen(nullptr, "w", stdout);
-      ::fputc('\n', stderr);
 
       // Read a snippet and execute it.
       // In case of read errors, this function shall not return.

@@ -45,7 +45,6 @@ read_execute_print_single()
       repl_printf("* loading editline settings from `~/.editrc`...");
       ::el_source(el_editor, nullptr);
       repl_printf("* ... done.");
-      ::fputc('\n', stderr);
     }
 
     // Prepare for the next snippet.
@@ -65,6 +64,8 @@ read_execute_print_single()
     const char* linebuf;
     int linelen;
     size_t pos;
+
+    ::fputc('\n', stderr);
 
     while(!!(linebuf = ::el_gets(el_editor, &linelen))) {
       // Append this line.
