@@ -327,7 +327,7 @@ struct Handler_again final
     handle(cow_vector<cow_string>&& args) override
       {
         if(repl_last_source.empty())
-          return repl_printf("! no snippet has been compiled so far");
+          return repl_printf("! no previous snippet");
 
         // Set the script to execute.
         repl_source = repl_last_source;
