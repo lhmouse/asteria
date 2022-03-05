@@ -43,7 +43,7 @@ class atomic
     static constexpr ::std::memory_order
     do_order_acquire() noexcept
       {
-        switch(memorderT) {
+        switch((int)memorderT) {
           case ::std::memory_order_consume:
             return ::std::memory_order_consume;
 
@@ -60,7 +60,7 @@ class atomic
     static constexpr ::std::memory_order
     do_order_release() noexcept
       {
-        switch(memorderT) {
+        switch((int)memorderT) {
           case ::std::memory_order_consume:
           case ::std::memory_order_acquire:
           case ::std::memory_order_release:
@@ -75,7 +75,7 @@ class atomic
     static constexpr ::std::memory_order
     do_order_acq_rel() noexcept
       {
-        switch(memorderT) {
+        switch((int)memorderT) {
           case ::std::memory_order_consume:
           case ::std::memory_order_acquire:
           case ::std::memory_order_release:
