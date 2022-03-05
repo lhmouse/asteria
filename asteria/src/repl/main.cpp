@@ -215,11 +215,13 @@ main(int argc, char** argv)
     if(repl_verbose)
       repl_script.options().verbose_single_step_traps = true;
 
-    // In non-include mode, read the script, execute it, then exit.
+    // In non-interactive mode, read the script, execute it, then exit.
     if(!repl_interactive)
       load_and_execute_single_noreturn();
 
-    // Print the REPL banner.
+    // Enter interactive mode.
+    prepare_repl_commands();
+
     repl_printf(
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -237,19 +239,19 @@ main(int argc, char** argv)
       current_locale,
       repl_cmd_char, repl_cmd_char);
 
-    prepare_repl_commands();
-
-    for(;;) {
-      const STDIO_Sentry sentry;
+    do {
+      // Discard unread input data. Flush buffered output data.
+      // Clear EOF and error bits. Clear orientation. Errors are ignored.
+      (void)!!::freopen(nullptr, "r", stdin);
+      (void)!!::freopen(nullptr, "w", stdout);
       ::fputc('\n', stderr);
 
-      // Read a snippet.
+      // Read a snippet and execute it.
+      // In case of read errors, this function shall not return.
       read_execute_print_single();
-      if(::ferror(stdin))
-        exit_printf(exit_system_error, "! could not read standard input: %m\n");
-      else if(::feof(stdin))
-        exit_printf(exit_success, "* have a nice day :)\n");
+      ::fflush(nullptr);
     }
+    while(true);
   }
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available.

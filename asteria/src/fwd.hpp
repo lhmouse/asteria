@@ -33,7 +33,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits.h>
-#include <stdio.h>
 #include <wchar.h>
 #include <endian.h>
 
@@ -281,28 +280,6 @@ template<typename TargetT, typename RealT>
 constexpr rcptr<TargetT>
 unerase_pointer_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<TargetT>(ptr);  }
-
-// Standard I/O synchronization
-struct STDIO_Sentry
-  {
-    explicit
-    STDIO_Sentry() noexcept
-      {
-        // Discard unread data. Clear EOF and error bits. Clear orientation.
-        if(!::freopen(nullptr, "r", stdin))
-          ::abort();
-
-        // Flush buffered data. Clear error bit. Clear orientation.
-        if(!::freopen(nullptr, "w", stdout))
-          ::abort();
-      }
-
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(STDIO_Sentry)
-      {
-        // Flush all standard streams, ignoring any errors.
-        ::fflush(nullptr);
-      }
-  };
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque

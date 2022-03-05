@@ -88,10 +88,10 @@ read_execute_print_single()
 
     // Discard this snippet if a read error occurred.
     if(::ferror(stdin))
-      return;
+      exit_printf(exit_system_error, "! could not read standard input: %m\n");
 
     if(::feof(stdin) && repl_source.empty())
-      return;
+      exit_printf(exit_success, "* have a nice day :)\n");
 
     if(repl_source[0] == repl_cmd_char) {
       // Skip space characters after the command initiator.

@@ -109,9 +109,8 @@ execute(Reference_Stack&& stack)
   {
     Reference self;
     self.set_temporary(nullopt);
-
-    const STDIO_Sentry sentry;
     this->m_func.invoke(self, this->m_global, ::std::move(stack));
+    ::fflush(nullptr);
     return self;
   }
 
@@ -120,8 +119,8 @@ Simple_Script::
 execute(cow_vector<Value>&& args)
   {
     Reference_Stack stack;
-    ::std::for_each(args.mut_begin(), args.mut_end(),
-        [&](auto& arg) { stack.push().set_temporary(::std::move(arg));  });
+    for(auto it = args.mut_begin();  it != args.end(); ++it)
+      stack.push().set_temporary(::std::move(*it));
     return this->execute(::std::move(stack));
   }
 
