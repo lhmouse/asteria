@@ -30,12 +30,21 @@ cow_string repl_last_source;
 cow_string repl_last_file;
 
 void
+repl_vprintf(const char* fmt, ::va_list ap) noexcept
+  {
+    ::flockfile(stderr);
+    ::vfprintf(stderr, fmt, ap);
+    ::fputc_unlocked('\n', stderr);
+    ::funlockfile(stderr);
+  }
+
+void
 repl_printf(const char* fmt, ...) noexcept
   {
     // Output the string to standard error.
     ::va_list ap;
     va_start(ap, fmt);
-    ::vfprintf(stderr, fmt, ap);
+    repl_vprintf(fmt, ap);
     va_end(ap);
   }
 
@@ -45,7 +54,7 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
     // Output the string to standard error.
     ::va_list ap;
     va_start(ap, fmt);
-    ::vfprintf(stderr, fmt, ap);
+    repl_vprintf(fmt, ap);
     va_end(ap);
 
     // Perform normal exit if verbose mode is on.

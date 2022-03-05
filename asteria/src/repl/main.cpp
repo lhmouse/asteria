@@ -145,7 +145,7 @@ do_parse_command_line(int argc, char** argv)
       }
 
       // `getopt()` will have written an error message to standard error.
-      exit_printf(exit_invalid_argument, "Try `%s -h` for help.\n", argv[0]);
+      exit_printf(exit_invalid_argument, "Try `%s -h` for help.", argv[0]);
     }
 
     // Check for early exit conditions.
@@ -222,7 +222,7 @@ main(int argc, char** argv)
     // Enter interactive mode.
     prepare_repl_commands();
 
-    repl_printf(
+    ::fprintf(stderr,
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
@@ -256,5 +256,5 @@ main(int argc, char** argv)
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available.
     // There isn't much we can do.
-    exit_printf(exit_system_error, "! unhandled exception: %s\n", stdex.what());
+    exit_printf(exit_system_error, "! unhandled exception: %s", stdex.what());
   }

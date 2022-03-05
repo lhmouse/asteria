@@ -91,7 +91,7 @@ struct Handler_exit final
     handle(cow_vector<cow_string>&& args)
       {
         if(args.empty())
-          exit_printf(exit_success, "* have a nice day :)\n");
+          exit_printf(exit_success, "* have a nice day :)");
 
         // Parse the status code.
         Exit_Status stat = exit_non_integer;
@@ -104,13 +104,13 @@ struct Handler_exit final
         if(numg.get(num, bptr, eptr) && (bptr == eptr))
           stat = static_cast<Exit_Status>(num);
         else
-          repl_printf("! warning: invalid exit status: %s\n", args[0].c_str());
+          repl_printf("! warning: invalid exit status: %s", args[0].c_str());
 
         if(args.size() > 1)
-          repl_printf("! warning: excess arguments ignored\n");
+          repl_printf("! warning: excess arguments ignored");
 
         // Exit the interpreter now.
-        exit_printf(stat, "* exiting: %d\n", stat);
+        exit_printf(stat, "* exiting: %d", stat);
       }
   };
 
@@ -148,9 +148,9 @@ struct Handler_help final
         for(const auto& ptr : s_handlers)
           max_len = ::rocket::max(max_len, (int)::strlen(ptr->cmd()));
 
-        repl_printf("* list of commands:\n");
+        repl_printf("* list of commands:");
         for(const auto& ptr : s_handlers)
-          repl_printf("  %-*s  %s\n", max_len, ptr->cmd(), ptr->oneline());
+          repl_printf("  %-*s  %s", max_len, ptr->cmd(), ptr->oneline());
       }
 
     void
@@ -158,7 +158,7 @@ struct Handler_help final
       {
         auto qhand = do_find_handler_opt(::std::move(cmd));
         if(!qhand)
-          repl_printf("! unknown command `%s`\n", cmd.c_str());
+          repl_printf("! unknown command `%s`", cmd.c_str());
         else
           repl_printf("* %s", qhand->help());
       }
@@ -205,10 +205,10 @@ struct Handler_heredoc final
     handle(cow_vector<cow_string>&& args) override
       {
         if(args.size() != 1)
-          return repl_printf("! exactly one terminator string expected\n");
+          return repl_printf("! exactly one terminator string expected");
 
         repl_heredoc = ::std::move(args.mut(0));
-        repl_printf("* the next snippet will be terminated by `%s`\n",
+        repl_printf("* the next snippet will be terminated by `%s`",
                     repl_heredoc.c_str());
       }
   };
@@ -243,7 +243,7 @@ struct Handler_source final
     handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
-          return repl_printf("! file path expected\n");
+          return repl_printf("! file path expected");
 
         cow_string source;
         long line = 0;
@@ -254,17 +254,17 @@ struct Handler_source final
 
         int indent;
         ::snprintf(nullptr, 0, "#%lu:%lu%n> ", repl_index, line, &indent);
-        repl_printf("* loading file '%s'...\n", args[0].c_str());
+        repl_printf("* loading file '%s'...", args[0].c_str());
 
         int ch;
         bool noeol = false;
-        repl_printf("  ----------\n");
+        repl_printf("  ----------");
 
         do {
           ch = file.getc();
           if(get_and_clear_last_signal()) {
             ::fputc('\n', stderr);
-            repl_printf("! operation cancelled\n");
+            repl_printf("! operation cancelled");
             return;
           }
           if(ch == EOF) {
@@ -283,11 +283,11 @@ struct Handler_source final
         }
         while(ch != EOF);
 
-        repl_printf("  ----------\n");
+        repl_printf("  ----------");
         if(noeol)
-          repl_printf("! warning: missing new line at end of file\n");
+          repl_printf("! warning: missing new line at end of file");
 
-        repl_printf("* finished loading file '%s'\n", args[0].c_str());
+        repl_printf("* finished loading file '%s'", args[0].c_str());
 
         // Set the script to execute.
         repl_source = ::std::move(source);
@@ -327,7 +327,7 @@ struct Handler_again final
     handle(cow_vector<cow_string>&& args) override
       {
         if(repl_last_source.empty())
-          return repl_printf("! no snippet has been compiled so far\n");
+          return repl_printf("! no snippet has been compiled so far");
 
         // Set the script to execute.
         repl_source = repl_last_source;

@@ -42,7 +42,10 @@ read_execute_print_single()
       ::el_set(el_editor, EL_HIST, ::history, el_history);
 
       // Load `~/.editrc`. Errors are ignored.
+      repl_printf("* loading editline settings from `~/.editrc`...");
       ::el_source(el_editor, nullptr);
+      repl_printf("* ... done.");
+      ::fputc('\n', stderr);
     }
 
     // Prepare for the next snippet.
@@ -86,7 +89,7 @@ read_execute_print_single()
 
         // A command is not allowed to straddle multiple lines.
         if(iscmd)
-          return repl_printf("! dangling \\ at end of command\n");
+          return repl_printf("! dangling \\ at end of command");
 
         // Backslashes that join lines are removed, unlike in heredoc mode.
         repl_source.pop_back();
@@ -103,17 +106,17 @@ read_execute_print_single()
     // Discard this snippet if Ctrl-C was received.
     if(get_and_clear_last_signal() != 0) {
       ::el_reset(el_editor);
-      repl_printf("! interrupted (type `:exit` to quit)\n");
+      repl_printf("! interrupted (type `:exit` to quit)");
       return;
     }
 
     // Exit if an error occurred while reading user input.
     if(linelen == -1)
-      exit_printf(exit_system_error, "! could not read standard input: %m\n");
+      exit_printf(exit_system_error, "! could not read standard input: %m");
 
     // Exit if the end of user input has been reached.
     if(!linebuf && repl_source.empty())
-      exit_printf(exit_success, "* have a nice day :)\n");
+      exit_printf(exit_success, "* have a nice day :)");
 
     if(iscmd) {
       // Skip space characters after the command initiator.
@@ -132,7 +135,7 @@ read_execute_print_single()
         handle_repl_command(::std::move(cmdline));
       }
       catch(exception& stdex) {
-        return repl_printf("! error: %s\n", stdex.what());  }
+        return repl_printf("! error: %s", stdex.what());  }
     }
 
     // Skip space characters. If the source string becomes empty, do nothing.
@@ -170,7 +173,7 @@ read_execute_print_single()
     catch(Compiler_Error& except) {
       // Check whether the input looks like an expression.
       if(except.status() != compiler_status_semicolon_expected)
-        return repl_printf("! error: %s\n", except.what());
+        return repl_printf("! error: %s", except.what());
 
       try {
         // Try parsing the snippet as an expression.
@@ -189,7 +192,7 @@ read_execute_print_single()
         repl_file = ::std::move(real_name);
       }
       catch(Compiler_Error& again) {
-        return repl_printf("! error: %s\n", again.what());  }
+        return repl_printf("! error: %s", again.what());  }
     }
 
     // Save the accepted snippet.
@@ -198,20 +201,20 @@ read_execute_print_single()
 
     try {
       // Execute the script.
-      repl_printf("* running '%s'...\n", repl_file.c_str());
+      repl_printf("* running '%s'...", repl_file.c_str());
       ref = repl_script.execute(::std::move(repl_args));
     }
     catch(exception& stdex) {
-      return repl_printf("! error: %s\n", stdex.what());  }
+      return repl_printf("! error: %s", stdex.what());  }
 
     // Stringify the result.
     if(ref.is_void())
-      return repl_printf("* result #%lu: void\n", repl_index);
+      return repl_printf("* result #%lu: void", repl_index);
 
     const auto& val = ref.dereference_readonly();
     ::rocket::tinyfmt_str fmt;
     val.dump(fmt);
-    return repl_printf("* result #%lu: %s\n", repl_index, fmt.c_str());
+    return repl_printf("* result #%lu: %s", repl_index, fmt.c_str());
   }
 
 }  // namespace asteria

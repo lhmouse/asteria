@@ -47,6 +47,9 @@ extern cow_string repl_last_file;
 
 // These functions are defined in 'globals.cpp'.
 void
+repl_vprintf(const char* fmt, ::va_list ap) noexcept;
+
+void
 repl_printf(const char* fmt, ...) noexcept;
 
 [[noreturn]] void
