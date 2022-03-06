@@ -62,8 +62,8 @@ read_execute_print_single()
 
       // Load `~/.editrc`. Errors are ignored.
       repl_printf("* loading editline settings from `~/.editrc`...");
-      ::el_source(el_editor, nullptr);
-      repl_printf("* ... done.");
+      if(::el_source(el_editor, nullptr) == 0)
+        repl_printf("* ... done");
     }
 
     // Prepare for the next snippet.
