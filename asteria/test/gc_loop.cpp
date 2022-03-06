@@ -8,7 +8,7 @@
 
 using namespace ::asteria;
 
-::rocket::atomic_relaxed<long> bcnt;
+atomic_relaxed<long> bcnt;
 
 void* operator new(size_t cb)
   {

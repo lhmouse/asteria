@@ -109,6 +109,15 @@ using ::rocket::isnt;
 using ::rocket::are;
 using ::rocket::arent;
 
+using ::rocket::atomic;
+using ::rocket::memory_order;
+using ::rocket::atomic_relaxed;
+using ::rocket::atomic_consume;
+using ::rocket::atomic_acquire;
+using ::rocket::atomic_release;
+using ::rocket::atomic_acq_rel;
+using ::rocket::atomic_seq_cst;
+
 // Aliases
 using phsh_string = ::rocket::prehashed_string;
 using bmask32 = ::rocket::bit_mask<uint32_t>;
