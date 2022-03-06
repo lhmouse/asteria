@@ -55,8 +55,8 @@ class Verbose_Hooks final
       {
         int sig = get_and_clear_last_signal();
         if(sig)
-          ASTERIA_THROW("$1 received\n[callback inside '$2']",
-                        ::strsignal(sig), sloc);
+          ASTERIA_THROW(
+                "$1 received\n[callback inside '$2']", ::strsignal(sig), sloc);
       }
 
     void

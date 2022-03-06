@@ -123,13 +123,6 @@ read_execute_print_single()
     if(!linebuf)
       ::fputc('\n', stderr);
 
-    // Remove leading and trailing blank lines.
-    pos = repl_source.find_first_not_of('\n');
-    repl_source.erase(0, pos);
-
-    pos = repl_source.find_last_not_of('\n');
-    repl_source.erase(pos + 1);
-
     // Discard this snippet if Ctrl-C was received.
     if(get_and_clear_last_signal() != 0) {
       ::el_reset(el_editor);
@@ -140,6 +133,13 @@ read_execute_print_single()
     // Exit if an error occurred while reading user input.
     if(linelen == -1)
       exit_printf(exit_system_error, "! could not read standard input: %m");
+
+    // Remove leading and trailing blank lines.
+    pos = repl_source.find_first_not_of('\n');
+    repl_source.erase(0, pos);
+
+    pos = repl_source.find_last_not_of('\n');
+    repl_source.erase(pos + 1);
 
     // Exit if the end of user input has been reached.
     if(!linebuf && repl_source.empty())
