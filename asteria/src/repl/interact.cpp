@@ -31,9 +31,25 @@ read_execute_print_single()
       if(!el_editor)
         exit_printf(exit_system_error, "! could not initialize editline: %m");
 
-      // Initialize the editor. Errors are ignored.
-      ::history(el_history, el_event, H_SETSIZE, repl_history_size);
-      ::history(el_history, el_event, H_SETUNIQUE, 1);
+#ifndef EL_SAFEREAD
+      // Replace the default GETCFN.
+      // The default one ignores the first EINTR error and is confusing.
+      ::el_set(el_editor, EL_GETCFN,
+        +[](::EditLine*, wchar_t* out) {
+          FILE* const fp = stdin;
+
+          ::flockfile(fp);
+          ::clearerr_unlocked(fp);
+          ::wint_t wch = ::fgetwc_unlocked(fp);
+          ::funlockfile(fp);
+
+          if(wch == WEOF)
+            return ::ferror(fp) ? -1 : 0;
+
+          *out = (wchar_t)wch;
+          return 1;
+        });
+#endif  // EL_SAFEREAD
 
       // Initialize the editor. Errors are ignored.
       ::el_set(el_editor, EL_TERMINAL, nullptr);
