@@ -35,10 +35,14 @@ read_execute_print_single()
       ::history(el_history, el_event, H_SETSIZE, repl_history_size);
       ::history(el_history, el_event, H_SETUNIQUE, 1);
 
+      // Initialize the editor. Errors are ignored.
       ::el_set(el_editor, EL_TERMINAL, nullptr);
       ::el_set(el_editor, EL_SIGNAL, 1);
       ::el_set(el_editor, EL_EDITOR, "emacs");
       ::el_set(el_editor, EL_PROMPT, +[]{ return el_prompt;  });
+
+      ::history(el_history, el_event, H_SETSIZE, repl_history_size);
+      ::history(el_history, el_event, H_SETUNIQUE, 1);
       ::el_set(el_editor, EL_HIST, ::history, el_history);
 
       // Load `~/.editrc`. Errors are ignored.
