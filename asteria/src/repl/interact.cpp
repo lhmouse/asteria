@@ -8,7 +8,7 @@
 #include "../compiler/statement_sequence.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
-#include <stdio.h>
+#include <signal.h>
 #include <histedit.h>
 
 namespace asteria {
@@ -36,17 +36,23 @@ read_execute_print_single()
       // The default one ignores the first EINTR error and is confusing.
       ::el_set(el_editor, EL_GETCFN,
         +[](::EditLine*, wchar_t* out) {
+          ::wint_t wch;
+          int sig, msucc, mfail;
           ::FILE* const fp = stdin;
-
           ::flockfile(fp);
-          ::clearerr_unlocked(fp);
-          ::wint_t wch = ::fgetwc_unlocked(fp);
-          int succ = wch != WEOF;
-          int err = !succ && ::ferror_unlocked(fp);
-          ::funlockfile(fp);
 
+          do {
+            ::clearerr_unlocked(fp);
+            wch = ::fgetwc_unlocked(fp);
+            sig = SIGWINCH;
+            msucc = wch != WEOF;
+            mfail = !msucc && ::ferror_unlocked(fp);
+          }
+          while(mfail && repl_signal.compare_exchange(sig, 0));
+
+          ::funlockfile(fp);
           *out = (wchar_t)wch;
-          return succ | -err;
+          return msucc | -mfail;
         });
 #endif  // EL_SAFEREAD
 
