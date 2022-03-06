@@ -35,6 +35,7 @@ extern const char repl_tar_name[];
 extern bool repl_verbose;
 extern bool repl_interactive;
 extern Simple_Script repl_script;
+extern atomic_relaxed<int> repl_signal;
 
 extern unsigned long repl_index;  // snippet index
 extern cow_string repl_source;  // snippet text
@@ -58,12 +59,8 @@ exit_printf(Exit_Status stat, const char* fmt = "", ...) noexcept;
 void
 initialize_global_context(const void* stack_base);
 
-// These functions are defined in 'hooks.cpp'.
-int
-get_and_clear_last_signal() noexcept;
-
 void
-install_signal_and_verbose_hooks();
+install_verbose_hooks();
 
 // This function is defined in 'single.cpp'.
 [[noreturn]] void

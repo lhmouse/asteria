@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "fwd.hpp"
+#include "../utils.hpp"
 #include "../../rocket/tinybuf_file.hpp"
 
 namespace asteria {
@@ -11,7 +12,8 @@ namespace {
 struct Handler
   {
     virtual
-    ~Handler();
+    ~Handler()
+      = default;
 
     virtual const char*
     cmd() const  // the name of this command
@@ -29,11 +31,6 @@ struct Handler
     handle(cow_vector<cow_string>&& args)  // do something
       = 0;
   };
-
-Handler::
-~Handler()
-  {
-  }
 
 cow_vector<uptr<Handler>> s_handlers;
 
@@ -60,7 +57,7 @@ do_add_handler()
   }
 
 struct Handler_exit final
-  : public Handler
+  : Handler
   {
     const char*
     cmd() const override
@@ -115,7 +112,7 @@ struct Handler_exit final
   };
 
 struct Handler_help final
-  : public Handler
+  : Handler
   {
     const char*
     cmd() const override
@@ -175,7 +172,7 @@ struct Handler_help final
   };
 
 struct Handler_heredoc final
-  : public Handler
+  : Handler
   {
     const char*
     cmd() const override
@@ -214,7 +211,7 @@ struct Handler_heredoc final
   };
 
 struct Handler_source final
-  : public Handler
+  : Handler
   {
     const char*
     cmd() const override
@@ -245,59 +242,71 @@ struct Handler_source final
         if(args.empty())
           return repl_printf("! file path expected");
 
-        cow_string source;
-        long line = 0;
-        cow_string textln;
+        ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+        abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
+        if(!abspath)
+          ASTERIA_THROW("could not open script file '$2'\n"
+                        "[`realpath()` failed: $1]",
+                        format_errno(), args[0]);
 
+        repl_printf("* loading file '%s'...", abspath.get());
         ::rocket::tinybuf_file file;
-        file.open(args[0].safe_c_str(), ::rocket::tinybuf::open_read);
+        file.open(abspath, ::rocket::tinybuf::open_read);
+        repl_printf("  ----------");
 
-        int indent;
-        ::snprintf(nullptr, 0, "#%lu:%lu%n> ", repl_index, line, &indent);
-        repl_printf("* loading file '%s'...", args[0].c_str());
-
-        int ch;
+        cow_string source, textln;
         bool noeol = false;
-        repl_printf("  ----------");
 
-        do {
-          ch = file.getc();
-          if(get_and_clear_last_signal()) {
-            ::fputc('\n', stderr);
-            repl_printf("! operation cancelled");
-            return;
-          }
+        long linenum = 0;
+        int indent;
+        ::snprintf(nullptr, 0, "#%lu:%lu%n> ", repl_index, linenum, &indent);
+
+        for(;;) {
+          int ch = file.getc();
           if(ch == EOF) {
-            noeol = textln.size() && (textln.back() != '\n');
-            if(noeol)
-              textln.push_back('\n');
-          }
-          else
-            textln.push_back(static_cast<char>(ch));
+            // Check for errors.
+            if(repl_signal.exchange(0) != 0) {
+              ::fputc('\n', stderr);
+              repl_printf("! operation cancelled");
+              return;
+            }
 
-          if(textln.size() && (textln.back() == '\n')) {
-            source.append(textln);
-            repl_printf("%*lu> %s", indent, ++line, textln.c_str());
-            textln.clear();
+            // Check for EOF.
+            if(textln.empty())
+              break;
+
+            // Accept the last line without a line feed.
+            ROCKET_ASSERT(textln.back() != '\n');
+            noeol = true;
           }
+          else if(ch != '\n') {
+            // Accept a single character.
+            textln.push_back((char)ch);
+            continue;
+          }
+
+          // Accept a line.
+          repl_printf("%*lu> %s", indent, ++linenum, textln.c_str());
+          source.append(textln);
+          source.push_back('\n');
+          textln.clear();
         }
-        while(ch != EOF);
 
-        repl_printf("  ----------");
         if(noeol)
-          repl_printf("! warning: missing new line at end of file");
-
-        repl_printf("* finished loading file '%s'", args[0].c_str());
+          repl_printf("! warning: no line feed at end of file");
 
         // Set the script to execute.
-        repl_source = ::std::move(source);
-        repl_file = ::std::move(args.mut(0));
+        repl_printf("  ----------");
+        repl_source.swap(source);
+        repl_file.assign(abspath.get());
         repl_args.assign(args.move_begin() + 1, args.move_end());
+
+        repl_printf("* finished loading file '%s'", abspath.get());
       }
   };
 
 struct Handler_again final
-  : public Handler
+  : Handler
   {
     const char*
     cmd() const override

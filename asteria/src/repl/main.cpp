@@ -6,6 +6,7 @@
 #include "fwd.hpp"
 #include <locale.h>  // setlocale()
 #include <unistd.h>  // isatty()
+#include <signal.h>  // sigaction()
 
 namespace {
 using namespace ::asteria;
@@ -205,12 +206,18 @@ main(int argc, char** argv)
     // The argument is used to check for stack overflows.
     initialize_global_context(&argc);
 
-    // Set up runtime hooks.
+    // Set up signal handlers and runtime hooks.
     // In non-interactive mode, we would like to run as fast as possible,
     // unless verbosity is requested. In interactive mode, hooks are always
     // installed.
-    if(repl_verbose || repl_interactive)
-      install_signal_and_verbose_hooks();
+    if(repl_verbose || repl_interactive) {
+      struct ::sigaction sigact = { };
+      sigact.sa_handler = +[](int sig) { repl_signal.store(sig);  };
+      ::sigaction(SIGINT, &sigact, nullptr);
+      ::sigaction(SIGWINCH, &sigact, nullptr);
+
+      install_verbose_hooks();
+    }
 
     if(repl_verbose)
       repl_script.options().verbose_single_step_traps = true;

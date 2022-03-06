@@ -124,7 +124,7 @@ read_execute_print_single()
       ::fputc('\n', stderr);
 
     // Discard this snippet if Ctrl-C was received.
-    if(get_and_clear_last_signal() != 0) {
+    if(repl_signal.exchange(0) != 0) {
       ::el_reset(el_editor);
       repl_printf("! interrupted (type `:exit` to quit)");
       return;

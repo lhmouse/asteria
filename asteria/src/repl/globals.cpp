@@ -4,11 +4,88 @@
 #include "../precompiled.hpp"
 #include "fwd.hpp"
 #include "../simple_script.hpp"
+#include "../source_location.hpp"
+#include "../runtime/abstract_hooks.hpp"
+#include "../utils.hpp"
 #include <stdarg.h>  // va_list, va_start(), va_end()
 #include <stdlib.h>  // exit(), quick_exit()
 #include <stdio.h>  // fflush(), fprintf(), stderr
 
 namespace asteria {
+namespace {
+
+struct Verbose_Hooks final
+  :  Abstract_Hooks
+  {
+    ::rocket::tinyfmt_str m_fmt;  // reusable storage
+
+    template<typename... ParamsT>
+    void
+    do_verbose_trace(const Source_Location& sloc, const char* templ,
+                     const ParamsT&... params)
+      {
+        if(ROCKET_EXPECT(!repl_verbose))
+          return;
+
+        // Compose the string to write.
+        this->m_fmt.clear_string();
+        this->m_fmt << "REPL running at '" << sloc << "':\n";
+        format(this->m_fmt, templ, params...);  // ADL intended
+
+        // Extract the string and write it to standard error.
+        // Errors are ignored.
+        auto str = this->m_fmt.extract_string();
+        write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
+
+        // Reuse the storage.
+        this->m_fmt.set_string(::std::move(str));
+      }
+
+    void
+    on_single_step_trap(const Source_Location& sloc) override
+      {
+        int sig = repl_signal.exchange(0);
+        if(sig == 0)
+          return;
+
+        this->do_verbose_trace(sloc,
+            "received signal $1: $2", sig, ::strsignal(sig));
+
+        ASTERIA_THROW("signal $1 received", sig);
+      }
+
+    void
+    on_variable_declare(const Source_Location& sloc, const phsh_string& name) override
+      {
+        this->do_verbose_trace(sloc,
+            "declaring variable `$1`", name);
+      }
+
+    void
+    on_function_call(const Source_Location& sloc, const cow_function& target) override
+      {
+        this->do_verbose_trace(sloc,
+            "initiating function call: $1", target);
+      }
+
+    void
+    on_function_return(const Source_Location& sloc, const cow_function& target,
+                       const Reference&) override
+      {
+        this->do_verbose_trace(sloc,
+            "returned from function call: $1", target);
+      }
+
+    void
+    on_function_except(const Source_Location& sloc, const cow_function& target,
+                       const Runtime_Error&) override
+      {
+        this->do_verbose_trace(sloc,
+            "caught an exception inside function call: $1", target);
+      }
+  };
+
+}  // namespace
 
 const char repl_name[] = PACKAGE_NAME;
 const char repl_version[] = VERSION;
@@ -19,6 +96,7 @@ const char repl_tar_name[] = PACKAGE_TARNAME;
 bool repl_verbose;
 bool repl_interactive;
 Simple_Script repl_script;
+atomic_relaxed<int> repl_signal;
 
 unsigned long repl_index;  // snippet index
 cow_string repl_source;  // snippet text
@@ -71,6 +149,12 @@ void
 initialize_global_context(const void* stack_base)
   {
     repl_script.global().set_recursion_base(stack_base);
+  }
+
+void
+install_verbose_hooks()
+  {
+    repl_script.global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
   }
 
 }  // namespace asteria
