@@ -36,18 +36,17 @@ read_execute_print_single()
       // The default one ignores the first EINTR error and is confusing.
       ::el_set(el_editor, EL_GETCFN,
         +[](::EditLine*, wchar_t* out) {
-          FILE* const fp = stdin;
+          ::FILE* const fp = stdin;
 
           ::flockfile(fp);
           ::clearerr_unlocked(fp);
           ::wint_t wch = ::fgetwc_unlocked(fp);
+          int succ = wch != WEOF;
+          int err = !succ && ::ferror_unlocked(fp);
           ::funlockfile(fp);
 
-          if(wch == WEOF)
-            return ::ferror(fp) ? -1 : 0;
-
           *out = (wchar_t)wch;
-          return 1;
+          return succ | -err;
         });
 #endif  // EL_SAFEREAD
 
