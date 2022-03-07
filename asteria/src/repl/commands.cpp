@@ -252,14 +252,11 @@ struct Handler_source final
         repl_printf("* loading file '%s'...", abspath.get());
         ::rocket::tinybuf_file file;
         file.open(abspath, ::rocket::tinybuf::open_read);
-        repl_printf("  ----------");
+        repl_printf("  ---+");
 
         cow_string source, textln;
         bool noeol = false;
-
         long linenum = 0;
-        int indent;
-        ::snprintf(nullptr, 0, "#%lu:%lu%n> ", repl_index, linenum, &indent);
 
         for(;;) {
           int ch = file.getc();
@@ -286,7 +283,7 @@ struct Handler_source final
           }
 
           // Accept a line.
-          repl_printf("%*lu> %s", indent, ++linenum, textln.c_str());
+          repl_printf("  %3lu| %s", ++linenum, textln.c_str());
           source.append(textln);
           source.push_back('\n');
           textln.clear();
@@ -296,7 +293,7 @@ struct Handler_source final
           repl_printf("! warning: no line feed at end of file");
 
         // Set the script to execute.
-        repl_printf("  ----------");
+        repl_printf("  ---+");
         repl_source.swap(source);
         repl_file.assign(abspath.get());
         repl_args.assign(args.move_begin() + 1, args.move_end());
