@@ -131,10 +131,10 @@ do_may_infix_operators_follow(cow_vector<Token>& tokens)
   }
 
 size_t
-do_mask_length(size_t& tlen, Text_Reader& reader, uint8_t mask)
+do_cmask_length(size_t& tlen, Text_Reader& reader, uint8_t mask)
   {
     size_t mlen = 0;
-    while(is_cctype(reader.peek(tlen), mask)) {
+    while(is_cmask(reader.peek(tlen), mask)) {
       mlen += 1;
       tlen += 1;
     }
@@ -153,7 +153,7 @@ do_collect_digits(cow_string& tstr, size_t& tlen, Text_Reader& reader, uint8_t m
       }
 
       // Stop at an unwanted character.
-      if(!is_cctype(c, mask))
+      if(!is_cmask(c, mask))
         break;
 
       // Collect a digit.
@@ -190,7 +190,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     // These specify what are allowed in each individual part of the literal.
     double sign = 1;
     bool has_point = false;
-    uint8_t mmask = cctype_digit;
+    uint8_t mmask = cmask_digit;
     uint8_t expch = 'e';
 
     // Look for an explicit sign symbol.
@@ -215,7 +215,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     switch(reader.peek(tlen)) {
       case 'n':
       case 'N': {
-        if(do_mask_length(tlen, reader, cctype_namei | cctype_digit) != 3)
+        if(do_cmask_length(tlen, reader, cmask_namei | cmask_digit) != 3)
           return false;
 
         auto sptr = reader.data() + tlen - 3;
@@ -229,7 +229,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
 
       case 'i':
       case 'I': {
-        if(do_mask_length(tlen, reader, cctype_namei | cctype_digit) != 8)
+        if(do_cmask_length(tlen, reader, cmask_namei | cmask_digit) != 8)
           return false;
 
         auto sptr = reader.data() + tlen - 8;
@@ -251,7 +251,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
           tlen += 1;
 
           // Accept the radix identifier.
-          mmask = cctype_xdigit;
+          mmask = cmask_xdigit;
           expch = 'p';
         }
 
@@ -296,13 +296,13 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       }
 
       // Accept the exponent.
-      do_collect_digits(tstr, tlen, reader, cctype_digit);
+      do_collect_digits(tstr, tlen, reader, cmask_digit);
     }
 
     // Accept numeric suffixes.
     // Note, at the moment we make no use of such suffixes, so any suffix will
     // definitely cause lexical errors.
-    do_collect_digits(tstr, tlen, reader, cctype_alpha | cctype_digit);
+    do_collect_digits(tstr, tlen, reader, cmask_alpha | cmask_digit);
 
     // Convert the token to a literal.
     // We always parse the literal as a floating-point number.
@@ -604,7 +604,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
               throw Compiler_Error(Compiler_Error::M_status(),
                         compiler_status_escape_sequence_incomplete, reader.tell());
 
-            if(!is_cctype(c, cctype_xdigit))
+            if(!is_cmask(c, cmask_xdigit))
               throw Compiler_Error(Compiler_Error::M_status(),
                         compiler_status_escape_sequence_invalid_hex, reader.tell());
 
@@ -712,12 +712,12 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
   {
     // identifier ::=
     //   PCRE([A-Za-z_][A-Za-z_0-9]*)
-    if(!is_cctype(reader.peek(), cctype_namei))
+    if(!is_cmask(reader.peek(), cmask_namei))
       return false;
 
     // Check for keywords if not otherwise disabled.
     size_t tlen = 0;
-    do_mask_length(tlen, reader, cctype_namei | cctype_digit);
+    do_cmask_length(tlen, reader, cmask_namei | cmask_digit);
 
     if(!keywords_as_identifiers) {
       auto r = do_prefix_range(s_keywords, reader.peek());
@@ -816,7 +816,7 @@ reload(const cow_string& file, int line, tinybuf&& cbuf)
         }
 
         // Read a character.
-        if(is_cctype(reader.peek(), cctype_space)) {
+        if(is_cmask(reader.peek(), cmask_space)) {
           // Skip a space.
           reader.consume(1);
           continue;

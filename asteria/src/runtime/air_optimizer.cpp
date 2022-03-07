@@ -83,7 +83,7 @@ create_function(const Source_Location& sloc, const cow_string& name)
     // Compose the function signature.
     // We only do this if `name` really looks like a function name.
     cow_string func = name;
-    if(is_cctype(name.front(), cctype_namei) && (name.back() != ')')) {
+    if(is_cmask(name.front(), cmask_namei) && (name.back() != ')')) {
       func << '(';
       if(this->m_params.size()) {
         func << this->m_params[0];

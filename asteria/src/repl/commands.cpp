@@ -278,9 +278,9 @@ struct Handler_source final
           }
           else if(ch != '\n') {
             // Ensure we don't mistake a binary file.
-            int cct = (ch == 0xFF) ? (int)cctype_cntrl : get_cctype((char)ch);
-            cct &= cctype_cntrl | cctype_blank;
-            if(cct == cctype_cntrl) {
+            int cct = (ch == 0xFF) ? (int)cmask_cntrl : get_cmask((char)ch);
+            cct &= cmask_cntrl | cmask_blank;
+            if(cct == cmask_cntrl) {
               repl_printf("! this file doesn't seem to contain text; giving up");
               return;
             }

@@ -204,9 +204,9 @@ tinyfmt&
 do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, const cow_string& name)
   {
     // Write the key.
-    if(json5 && name.size() && is_cctype(name[0], cctype_namei) &&
+    if(json5 && name.size() && is_cmask(name[0], cmask_namei) &&
                 ::std::all_of(name.begin() + 1, name.end(),
-                              [](char c) { return is_cctype(c, cctype_namei | cctype_digit);  }))
+                              [](char c) { return is_cmask(c, cmask_namei | cmask_digit);  }))
       fmt << name;
     else
       do_quote_string(fmt, name);

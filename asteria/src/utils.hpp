@@ -81,22 +81,22 @@ subsat(uintT x, uintT y) noexcept
 // C character types
 enum : uint8_t
   {
-    cctype_space   = 0x01,  // [ \t\v\f\r\n]
-    cctype_alpha   = 0x02,  // [A-Za-z]
-    cctype_digit   = 0x04,  // [0-9]
-    cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
-    cctype_namei   = 0x10,  // [A-Za-z_]
-    cctype_blank   = 0x20,  // [ \t]
-    cctype_cntrl   = 0x40,  // [[:cntrl:]]
+    cmask_space   = 0x01,  // [ \t\v\f\r\n]
+    cmask_alpha   = 0x02,  // [A-Za-z]
+    cmask_digit   = 0x04,  // [0-9]
+    cmask_xdigit  = 0x08,  // [0-9A-Fa-f]
+    cmask_namei   = 0x10,  // [A-Za-z_]
+    cmask_blank   = 0x20,  // [ \t]
+    cmask_cntrl   = 0x40,  // [[:cntrl:]]
   };
 
 ROCKET_CONST inline uint8_t
-get_cctype(char ch) noexcept
-  { return ((ch & 0x7F) == ch) ? details_utils::cctype_table[(uint8_t)ch] : 0;  }
+get_cmask(char ch) noexcept
+  { return ((ch & 0x7F) == ch) ? details_utils::cmask_table[(uint8_t)ch] : 0;  }
 
 ROCKET_CONST inline bool
-is_cctype(char ch, uint8_t mask) noexcept
-  { return noadl::get_cctype(ch) & mask;  }
+is_cmask(char ch, uint8_t mask) noexcept
+  { return noadl::get_cmask(ch) & mask;  }
 
 // Numeric conversion
 ROCKET_CONST inline bool

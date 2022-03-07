@@ -8,7 +8,7 @@
 namespace asteria {
 namespace details_utils {
 
-extern const uint8_t cctype_table[128];
+extern const uint8_t cmask_table[128];
 
 struct Quote_Wrapper
   {
