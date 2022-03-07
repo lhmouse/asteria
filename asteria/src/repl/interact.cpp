@@ -35,10 +35,13 @@ read_execute_print_single()
       // Replace the default GETCFN.
       // The default one ignores the first EINTR error and is confusing.
       ::el_set(el_editor, EL_GETCFN,
-        +[](::EditLine*, wchar_t* out) {
-          ::wint_t wch;
+        +[](::EditLine* el, wchar_t* out) {
+          ::FILE* fp;
+          if((::el_get(el, EL_GETFP, 0, &fp) != 0) || (fp == nullptr))
+            return 0;
+
           int sig, msucc, mfail;
-          ::FILE* const fp = stdin;
+          ::wint_t wch;
           ::flockfile(fp);
 
           do {
