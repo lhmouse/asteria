@@ -87,11 +87,12 @@ enum : uint8_t
     cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
     cctype_namei   = 0x10,  // [A-Za-z_]
     cctype_blank   = 0x20,  // [ \t]
+    cctype_cntrl   = 0x40,  // [[:cntrl:]]
   };
 
 ROCKET_CONST inline uint8_t
 get_cctype(char ch) noexcept
-  { return (ch < 0) ? 0 : details_utils::cctype_table[ch & 0x7F];  }
+  { return ((ch & 0x7F) == ch) ? details_utils::cctype_table[(uint8_t)ch] : 0;  }
 
 ROCKET_CONST inline bool
 is_cctype(char ch, uint8_t mask) noexcept

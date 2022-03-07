@@ -240,7 +240,7 @@ struct Handler_source final
     handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
-          return repl_printf("! file path expected");
+          return repl_printf("! please specify a source file");
 
         ::rocket::unique_ptr<char, void (void*)> abspath(::free);
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
@@ -277,6 +277,14 @@ struct Handler_source final
             noeol = true;
           }
           else if(ch != '\n') {
+            // Ensure we don't mistake a binary file.
+            int cct = (ch == 0xFF) ? (int)cctype_cntrl : get_cctype((char)ch);
+            cct &= cctype_cntrl | cctype_blank;
+            if(cct == cctype_cntrl) {
+              repl_printf("! this file doesn't seem to contain text; giving up");
+              return;
+            }
+
             // Accept a single character.
             textln.push_back((char)ch);
             continue;
