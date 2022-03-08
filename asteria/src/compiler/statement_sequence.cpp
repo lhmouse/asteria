@@ -1740,14 +1740,14 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     bool comma_allowed = false;
 
     for(;;) {
-      auto key_sloc = tstrm.next_sloc();
+      auto op_sloc = tstrm.next_sloc();
       auto qkey = do_accept_json5_key_opt(tstrm);
       if(!qkey)
         break;
 
       if(::rocket::find(keys, *qkey))
         throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_duplicate_key_in_object, key_sloc);
+                  compiler_status_duplicate_key_in_object, op_sloc);
 
       // Look for the value with an initiator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
