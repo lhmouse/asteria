@@ -1764,12 +1764,12 @@ bool
 do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // unnamed-object ::=
-    //   "{" key-mapped-list-opt "}"
-    // key-mapped-list-opt ::=
-    //   key-mapped-list | ""
-    // key-mapped-list ::=
+    //   "{" object-member-list-opt "}"
+    // object-member-list-opt ::=
+    //   object-member-list | ""
+    // object-member-list ::=
     //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" )
-    //   key-mapped-list-opt | "" )
+    //   object-member-list-opt | "" )
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct)

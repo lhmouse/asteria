@@ -251,13 +251,13 @@ array-element-list ::=
 	expression ( ( "," | ";" ) array-element-list-opt | "" )
 
 unnamed-object ::=
-	"{" key-mapped-list-opt "}"
+	"{" object-member-list-opt "}"
 
-key-mapped-list-opt ::=
-	key-mapped-list | ""
+object-member-list-opt ::=
+	object-member-list | ""
 
-key-mapped-list ::=
-	( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
+object-member-list ::=
+	( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) object-member-list-opt | "" )
 
 nested-expression ::=
 	"(" expression ")"
