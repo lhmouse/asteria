@@ -1754,7 +1754,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
         auto qkey = do_accept_identifier_opt(tstrm, false);
         if(!qkey)
           throw Compiler_Error(Compiler_Error::M_status(),
-                    compiler_status_identifier_expected, key_sloc);
+                    compiler_status_identifier_expected, tstrm.next_sloc());
 
         if(::rocket::find(keys, *qkey))
           throw Compiler_Error(Compiler_Error::M_status(),
