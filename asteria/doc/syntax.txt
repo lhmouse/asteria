@@ -209,8 +209,17 @@ unnamed-object ::=
 	"{" object-member-list "}"
 
 object-member-list ::=
-	( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" )
-	object-member-list ? ) ?
+	( object-member-variable | object-member-function ) object-member-list ? |
+	object-member-key-value ( ( "," | ";" ) object-member-list ? ) ?
+
+object-member-variable ::=
+	"var" identifier equal-initailizer ? ";"
+
+object-member-function ::=
+	"func" identifier "(" parameter-list ? ")" block
+
+object-member-key-value ::=
+	( string-literal | identifier ) ( "=" | ":" ) expression
 
 nested-expression ::=
 	"(" expression ")"
