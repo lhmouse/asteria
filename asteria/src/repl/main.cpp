@@ -215,6 +215,7 @@ main(int argc, char** argv)
       sigact.sa_handler = +[](int sig) { repl_signal.store(sig);  };
       ::sigaction(SIGINT, &sigact, nullptr);
       ::sigaction(SIGWINCH, &sigact, nullptr);
+      ::sigaction(SIGCONT, &sigact, nullptr);
 
       install_verbose_hooks();
     }

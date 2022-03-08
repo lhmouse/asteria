@@ -40,22 +40,39 @@ read_execute_print_single()
           if((::el_get(el, EL_GETFP, 0, &fp) != 0) || (fp == nullptr))
             return 0;
 
-          int sig, msucc, mfail;
+          int succ;
           ::wint_t wch;
           ::flockfile(fp);
 
-          do {
-            ::clearerr_unlocked(fp);
-            wch = ::fgetwc_unlocked(fp);
-            sig = SIGWINCH;
-            msucc = wch != WEOF;
-            mfail = !msucc && ::ferror_unlocked(fp);
+        r:
+          repl_signal.store(0);
+          ::clearerr_unlocked(fp);
+          wch = ::fgetwc_unlocked(fp);
+          succ = wch != WEOF;
+          if(!succ && ::ferror_unlocked(fp)) {
+            // Check for recoverable errors, which are signals (except
+            // `SIGSTOP`) that are ignored by default.
+            if(errno == EINTR) {
+              switch(repl_signal.load()) {
+                case SIGCONT:
+                  el_set(el, EL_REFRESH);
+                  goto r;
+
+                case SIGSTOP:
+                case SIGURG:
+                case SIGCHLD:
+                case SIGWINCH:
+                  goto r;  // ignore these
+              }
+            }
+
+            // Report failure.
+            succ = -1;
           }
-          while(mfail && repl_signal.compare_exchange(sig, 0));
 
           ::funlockfile(fp);
           *out = (wchar_t)wch;
-          return msucc | -mfail;
+          return succ;
         });
 #endif  // EL_SAFEREAD
 
