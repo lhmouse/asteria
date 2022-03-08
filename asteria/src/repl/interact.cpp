@@ -86,6 +86,17 @@ read_execute_print_single()
       ::history(el_history, el_event, H_SETUNIQUE, 1);
       ::el_set(el_editor, EL_HIST, ::history, el_history);
 
+      // Make {Ctrl,Alt}+{Left,Right} move by words, like in bash.
+      ::el_set(el_editor, EL_BIND, R"(\e[1;3C)", "em-next-word", nullptr);
+      ::el_set(el_editor, EL_BIND, R"(\e[1;5C)", "em-next-word", nullptr);
+      ::el_set(el_editor, EL_BIND, R"(\e[5C)", "em-next-word", nullptr);
+      ::el_set(el_editor, EL_BIND, R"(\e\e[C)", "em-next-word", nullptr);
+
+      ::el_set(el_editor, EL_BIND, R"(\e[1;3D)", "ed-prev-word", nullptr);
+      ::el_set(el_editor, EL_BIND, R"(\e[1;5D)", "ed-prev-word", nullptr);
+      ::el_set(el_editor, EL_BIND, R"(\e[5D)", "ed-prev-word", nullptr);
+      ::el_set(el_editor, EL_BIND, R"(\e\e[D)", "ed-prev-word", nullptr);
+
       // Load `~/.editrc`. Errors are ignored.
       repl_printf("* loading editline settings from `~/.editrc`...");
       if(::el_source(el_editor, nullptr) == 0)
