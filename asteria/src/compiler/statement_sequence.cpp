@@ -519,6 +519,7 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     cow_vector<Source_Location> slocs;
     cow_vector<cow_vector<phsh_string>> decls;
     cow_vector<Statement::S_expression> inits;
+
     for(;;) {
       // Accept a declarator, which may denote a single variable or a structured binding.
       auto sloc = tstrm.next_sloc();
@@ -541,6 +542,7 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       if(!kpunct)
         break;
     }
+
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_status(),
@@ -564,6 +566,7 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
     cow_vector<Source_Location> slocs;
     cow_vector<phsh_string> names;
     cow_vector<Statement::S_expression> inits;
+
     for(;;) {
       // Accept the name of this declared reference.
       auto sloc = tstrm.next_sloc();
@@ -586,6 +589,7 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
       if(!kpunct)
         break;
     }
+
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_status(),
@@ -602,6 +606,7 @@ do_accept_parameter_list_opt(Token_Stream& tstrm)
     // parameter-list ::=
     //   "..." | identifier ( "," parameter-list ? ) ?
     cow_vector<phsh_string> params;
+
     for(;;) {
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
@@ -1682,6 +1687,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 
     uint32_t nelems = 0;
     bool comma_allowed = false;
+
     for(;;) {
       if(!do_accept_expression_as_rvalue(units, tstrm))
         break;
@@ -1725,6 +1731,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
 
     cow_vector<phsh_string> keys;
     bool comma_allowed = false;
+
     for(;;) {
       auto key_sloc = tstrm.next_sloc();
       auto qkey = do_accept_json5_key_opt(tstrm);
@@ -1996,6 +2003,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
 
     uint32_t nargs = 0;
     bool comma_allowed = false;
+
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
       auto refsp = do_accept_reference_specifier_opt(tstrm);
@@ -2145,6 +2153,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
 
     uint32_t nargs = 0;
     bool comma_allowed = false;
+
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
       auto refsp = do_accept_reference_specifier_opt(tstrm);
