@@ -168,18 +168,18 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
                           bool integers_as_reals)
   {
     // numeric-literal ::=
-    //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal )
-    //   exponent-suffix-opt
-    // number-sign-opt ::=
-    //   PCRE([+-]?)
+    //   number-sign ( binary-literal | decimal-literal | hexadecimal-literal )
+    //   exponent-suffix
+    // number-sign ::=
+    //   PCRE([+-])
     // binary-literal ::=
     //   PCRE(0[bB]([01]`?)+(\.([01]`?)+))
     // decimal-literal ::=
     //   PCRE(([0-9]`?)+(\.([0-9]`?)+))
     // hexadecimal-literal ::=
     //   PCRE(0[xX]([0-9A-Fa-f]`?)+(\.([0-9A-Fa-f]`?)+))
-    // exponent-suffix-opt ::=
-    //   decimal-exponent-suffix | binary-exponent-suffix | ""
+    // exponent-suffix ::=
+    //   decimal-exponent-suffix | binary-exponent-suffix
     // decimal-exponent-suffix ::=
     //   PCRE([eE][-+]?([0-9]`?)+)
     // binary-exponent-suffix ::=
@@ -492,7 +492,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
                          bool escapable)
   {
     // string-literal ::=
-    //   escape-string-literal | noescape-string-literal
+    //   ( escape-string-literal | noescape-string-literal ) string-literal ?
     // escape-string-literal ::=
     //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|
     //         (U[0-9A-Fa-f]{6}))))*?")

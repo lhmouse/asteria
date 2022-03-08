@@ -10,7 +10,7 @@ keyword-literal ::=
 	"null" | "false" | "true"
 
 string-literal ::=
-	( escape-string-literal | noescape-string-literal ) string-literal-add-opt
+	( escape-string-literal | noescape-string-literal ) string-literal ?
 
 escape-string-literal ::=
 	PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
@@ -18,18 +18,15 @@ escape-string-literal ::=
 noescape-string-literal ::=
 	PCRE('[^']*?')
 
-string-literal-add-opt ::=
-	string-literal | ""
-
 numeric-literal ::=
-	number-sign-opt unsigned-numeric-literal
+	number-sign ? unsigned-numeric-literal
 
-number-sign-opt ::=
-	PCRE([+-]?)
+number-sign ::=
+	PCRE([+-])
 
 unsigned-numeric-literal ::=
 	"nan" | "NaN" | "infinity" | "Infinity" |
-	( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
+	( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix ?
 
 binary-literal ::=
 	PCRE(0[bB]([01]`?)+(\.([01]`?)+))
@@ -40,8 +37,8 @@ decimal-literal ::=
 hexadecimal-literal ::=
 	PCRE(0[xX]([0-9A-Fa-f]`?)+(\.([0-9A-Fa-f]`?)+))
 
-exponent-suffix-opt ::=
-	decimal-exponent-suffix | binary-exponent-suffix | ""
+exponent-suffix ::=
+	decimal-exponent-suffix | binary-exponent-suffix
 
 decimal-exponent-suffix ::=
 	PCRE([eE][-+]?([0-9]`?)+)
@@ -52,102 +49,77 @@ binary-exponent-suffix ::=
 ### Syntax
 
 document ::=
-	statement-list-opt
-
-statement-list-opt ::=
-	statement-list | ""
-
-statement-list ::=
-	statement statement-list-opt
+	statement *
 
 statement ::=
 	block | nonblock-statement
 
 block ::=
-	"{" statement-list-opt "}"
+	"{" statement * "}"
 
 nonblock-statement ::=
 	null-statement |
-	variable-definition | immutable-variable-definition | reference-definition | function-definition |
-	expression-statement |
+	variable-definition | immutable-variable-definition | reference-definition |
+	function-definition | expression-statement |
 	if-statement | switch-statement | do-while-statement | while-statement | for-statement |
-	break-statement | continue-statement | throw-statement | return-statement | assert-statement |
-	try-statement | defer-statement
+	break-statement | continue-statement | throw-statement | return-statement |
+	assert-statement | try-statement | defer-statement
 
 null-statement ::=
 	";"
 
 variable-definition ::=
-	"var" variable-declarator equal-initailizer-opt ( "," variable-declarator equal-initializer-opt | "" ) ";"
+	"var" variable-declarator equal-initailizer ? ( "," variable-declarator
+	equal-initializer ? ) ?  ";"
 
 variable-declarator ::=
 	identifier | structured-binding-array | structured-binding-object
 
 structured-binding-array ::=
-	"[" identifier-list "]"
+	"[" identifier + "]"
 
 structured-binding-object ::=
-	"{" identifier-list "}"
-
-identifier-list-opt ::=
-	identifier-list | ""
-
-identifier-list ::=
-	identifier ( "," identifier-list-opt | "" )
-
-equal-initializer-opt ::=
-	equal-initializer | ""
+	"{" identifier + "}"
 
 equal-initializer ::=
 	"=" expression
 
 immutable-variable-definition ::=
-	"const" variable-declarator equal-initailizer ( "," variable-declarator equal-initializer | "" ) ";"
+	"const" variable-declarator equal-initailizer ( "," variable-declarator
+	equal-initializer ) ? ";"
 
 reference-definition ::=
-	"ref" identifier ref-initailizer-opt ( "," identifier ref-initializer-opt | "" ) ";"
+	"ref" identifier ref-initailizer ( "," identifier ref-initializer ) ? ";"
 
 function-definition ::=
-	"func" identifier "(" parameter-list-opt ")" block
-
-parameter-list-opt ::=
-	parameter-list | ""
+	"func" identifier "(" parameter-list ? ")" block
 
 parameter-list ::=
-	"..." | identifier ( "," parameter-list-opt | "" )
+	"..." | identifier ( "," parameter-list ? ) ?
 
 expression-statement ::=
 	expression ";"
 
 if-statement ::=
-	"if" negation-opt "(" expression ")" statement else-branch-opt
+	"if" negation ? "(" expression ")" statement ( "else" statement ) ?
 
-negation-opt ::=
-	"!" | "not" | ""
-
-else-branch-opt ::=
-	"else" statement | ""
+negation ::=
+	"!" | "not"
 
 switch-statement ::=
 	"switch" "(" expression ")" switch-block
 
 switch-block ::=
-	"{" swtich-clause-list-opt "}"
-
-switch-clause-list-opt ::=
-	switch-clause-list | ""
-
-switch-clause-list ::=
-	switch-clause switch-clause-list-opt
+	"{" swtich-clause * "}"
 
 switch-clause ::=
-	( "case" expression | "default" ) ":" statement-list-opt
+	( "case" expression | "default" ) ":" statement *
 
 do-while-statement ::=
-	"do" statement "while" negation-opt "(" expression ")" ";"
+	"do" statement "while" negation ? "(" expression ")" ";"
 
 while-statement ::=
-	"while" negation-opt "(" expression ")" statement
+	"while" negation ? "(" expression ")" statement
 
 for-statement ::=
 	"for" "(" for-complement
@@ -159,40 +131,37 @@ for-complement-range ::=
 	"each" identifier "," identifier "->" expression ")" statement
 
 for-complement-triplet ::=
-	for-initializer expression-opt ";" expression-opt ")" statement
+	for-initializer expression ? ";" expression ? ")" statement
 
 for-initializer ::=
 	null-statement | variable-definition | immutable-variable-definition | expression-statement
 
 break-statement ::=
-	"break" break-target-opt ";"
+	"break" break-target ? ";"
 
-break-target-opt ::=
-	"switch" | "while" | "for" | ""
+break-target ::=
+	"switch" | "while" | "for"
 
 continue-statement ::=
-	"continue" continue-target-opt ";"
+	"continue" continue-target ? ";"
 
-continue-target-opt ::=
-	"while" | "for" | ""
+continue-target ::=
+	"while" | "for"
 
 throw-statement ::=
 	"throw" expression ";"
 
 return-statement ::=
-	"return" ( argument | "" ) ";"
+	"return" argument ? ";"
 
 argument ::=
-	reference-specifier-opt expression | expression
+	reference-specifier ? expression | expression
 
-reference-specifier-opt ::=
-	"ref" | "->" | ""
+reference-specifier ::=
+	"ref" | "->"
 
 assert-statement ::=
-	"assert" expression assert-message-opt ";"
-
-assert-message ::=
-	":" string-literal | ""
+	"assert" expression assert-message ( ":" string-literal ) ? ";"
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement
@@ -200,40 +169,29 @@ try-statement ::=
 defer-statement ::=
 	"defer" expression ";"
 
-expression-opt ::=
-	expression | ""
-
 expression ::=
-	infix-head infix-carriage-list-opt
-
-infix-head ::=
-	infix-element
+	infix-element infix-carriage *
 
 infix-element ::=
-	prefix-operator-list-opt primary-expression postfix-operator-list-opt
-
-prefix-operator-list-opt ::=
-	prefix-operator-list | ""
-
-prefix-operator-list ::=
-	prefix-operator prefix-operator-list-opt
+	prefix-operator * primary-expression postfix-operator *
 
 prefix-operator ::=
 	"+" | "-" | "~" | "!" | "++" | "--" |
-	"unset" | "countof" | "typeof" | "not" | "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
-	"__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc" |
-	"__lzcnt" | "__tzcnt" | "__popcnt"
+	"unset" | "countof" | "typeof" | "not" |
+	"__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
+	"__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" |
+	"__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" | "__popcnt"
 
 primary-expression ::=
-	identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
-	nested-expression | fused-multiply-add | prefix-binary-expression | catch-expression |
-	variadic-function-call | import-function-call
+	identifier | global-identifier | literal | "this" | closure-function | unnamed-array |
+	unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
+	catch-expression | variadic-function-call | import-function-call
 
 global-identifier ::=
 	"__global" identifier
 
 closure-function ::=
-	"func" "(" parameter-list-opt ")" closure-body
+	"func" "(" parameter-list ? ")" closure-body
 
 closure-body ::=
 	block | equal-initializer | ref-initializer
@@ -242,22 +200,17 @@ ref-initializer ::=
 	"->" expression
 
 unnamed-array ::=
-	"[" array-element-list-opt "]"
-
-array-element-list-opt ::=
-	array-element-list | ""
+	"[" array-element-list ? "]"
 
 array-element-list ::=
-	expression ( ( "," | ";" ) array-element-list-opt | "" )
+	expression ( ( "," | ";" ) array-element-list ? ) ?
 
 unnamed-object ::=
-	"{" object-member-list-opt "}"
-
-object-member-list-opt ::=
-	object-member-list | ""
+	"{" object-member-list "}"
 
 object-member-list ::=
-	( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) object-member-list-opt | "" )
+	( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" )
+	object-member-list ? ) ?
 
 nested-expression ::=
 	"(" expression ")"
@@ -280,35 +233,21 @@ variadic-function-call ::=
 import-function-call ::=
 	"import" "(" argument-list ")"
 
-postfix-operator-list-opt ::=
-	postfix-operator-list | ""
-
-postfix-operator-list ::=
+postfix-operator ::=
+	"++" | "--" | "[^]" | "[$]" | "[?]" |
 	postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
 
-postfix-operator ::=
-	"++" | "--" | "[^]" | "[$]" | "[?]"
-
 postfix-function-call ::=
-	"(" argument-list-opt ")"
-
-argument-list-opt ::=
-	argument-list | ""
+	"(" argument-list ? ")"
 
 argument-list ::=
-	argument ( "," argument-list-opt | "" )
+	argument ( "," argument-list ? ) ?
 
 postfix-subscript ::=
 	"[" expression "]"
 
 postfix-member-access ::=
 	"." ( string-literal | identifier )
-
-infix-carriage-list-opt ::=
-	infix-carriage-list | ""
-
-infix-carriage-list ::=
-	infix-carriage infix-carriage-list-opt
 
 infix-carriage ::=
 	infix-operator infix-element
