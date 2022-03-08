@@ -352,8 +352,7 @@ bool
 do_accept_expression_as_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     auto sloc = tstrm.next_sloc();
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       return false;
 
     Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), false };
@@ -366,8 +365,7 @@ do_accept_expression_opt(Token_Stream& tstrm)
   {
     cow_vector<Expression_Unit> units;
     auto sloc = tstrm.next_sloc();
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       return nullopt;
 
     Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
@@ -379,8 +377,7 @@ do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
   {
     cow_vector<Expression_Unit> units;
     auto sloc = tstrm.next_sloc();
-    bool succ = do_accept_expression_as_rvalue(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression_as_rvalue(units, tstrm))
       return nullopt;
 
     Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
@@ -1686,8 +1683,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     uint32_t nelems = 0;
     bool comma_allowed = false;
     for(;;) {
-      bool succ = do_accept_expression_as_rvalue(units, tstrm);
-      if(!succ)
+      if(!do_accept_expression_as_rvalue(units, tstrm))
         break;
 
       nelems += 1;
@@ -1739,20 +1735,18 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_duplicate_key_in_object, key_sloc);
 
-      keys.emplace_back(::std::move(*qkey));
-
       // Look for the value with an initiator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
       if(!kpunct)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_equals_sign_or_colon_expected, tstrm.next_sloc());
 
-      bool succ = do_accept_expression_as_rvalue(units, tstrm);
-      if(!succ)
+      if(!do_accept_expression_as_rvalue(units, tstrm))
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
       // Look for the separator.
+      keys.emplace_back(::std::move(*qkey));
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
       comma_allowed = !kpunct;
       if(!kpunct)
@@ -1781,8 +1775,7 @@ do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& ts
     if(!kpunct)
       return false;
 
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1811,8 +1804,7 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1821,8 +1813,7 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_comma_expected, tstrm.next_sloc());
 
-    succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1831,8 +1822,7 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_comma_expected, tstrm.next_sloc());
 
-    succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1895,8 +1885,7 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1905,8 +1894,7 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_comma_expected, tstrm.next_sloc());
 
-    succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1936,8 +1924,7 @@ do_accept_catch_expression(cow_vector<Expression_Unit>& units, Token_Stream& tst
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
     Expression_Unit::S_catch xunit;
-    bool succ = do_accept_expression(xunit.operand, tstrm);
-    if(!succ)
+    if(!do_accept_expression(xunit.operand, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1967,8 +1954,7 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1977,8 +1963,7 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_comma_expected, tstrm.next_sloc());
 
-    succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2207,8 +2192,7 @@ do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& ts
     if(!kpunct)
       return false;
 
-    bool succ = do_accept_expression(units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2284,8 +2268,7 @@ opt<Infix_Element>
 do_accept_infix_element_opt(Token_Stream& tstrm)
   {
     cow_vector<Expression_Unit> units;
-    bool succ = do_accept_infix_element(units, tstrm);
-    if(!succ)
+    if(!do_accept_infix_element(units, tstrm))
       return nullopt;
 
     Infix_Element::S_head xelem = { ::std::move(units) };
@@ -2494,8 +2477,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       if(!qnext)
         break;
 
-      bool succ = do_accept_infix_element(qnext->open_junction(), tstrm);
-      if(!succ)
+      if(!do_accept_infix_element(qnext->open_junction(), tstrm))
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2566,8 +2548,7 @@ reload_oneline(Token_Stream&& tstrm)
     // Parse an expression. This is not optional.
     auto sloc = tstrm.next_sloc();
     Statement::S_expression xexpr;
-    bool succ = do_accept_expression(xexpr.units, tstrm);
-    if(!succ)
+    if(!do_accept_expression(xexpr.units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
