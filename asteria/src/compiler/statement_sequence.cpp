@@ -475,6 +475,7 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
     cow_vector<Source_Location> slocs;
     cow_vector<cow_vector<phsh_string>> decls;
     cow_vector<Statement::S_expression> inits;
+
     for(;;) {
       // Accept a declarator, which may denote a single variable or a structured binding.
       auto sloc = tstrm.next_sloc();
@@ -496,6 +497,7 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       if(!kpunct)
         break;
     }
+
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_status(),
@@ -1608,40 +1610,13 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     return true;
   }
 
-opt<Statement::S_block>
-do_accept_closure_body_opt(Token_Stream& tstrm)
-  {
-    // closure-body ::=
-    //   block | equal-initializer | ref-initializer
-    auto qblock = do_accept_block_opt(tstrm, scope_plain);
-    if(qblock)
-      return qblock;
-
-    auto sloc = tstrm.next_sloc();
-    auto qinit = do_accept_equal_initializer_opt(tstrm);
-    if(qinit) {
-      // In the case of an `equal-initializer`, behave as if it was a `return-statement`.
-      // Note that the result is returned by value.
-      Statement::S_return xstmt = { ::std::move(sloc), false, ::std::move(*qinit) };
-      return do_blockify_statement(::std::move(xstmt));
-    }
-
-    qinit = do_accept_ref_initializer_opt(tstrm);
-    if(qinit) {
-      // In the case of a `ref-initializer`, behave as if it was a `return-statement`.
-      // Note that the result is returned by reference.
-      Statement::S_return xstmt = { ::std::move(sloc), true, ::std::move(*qinit) };
-      return do_blockify_statement(::std::move(xstmt));
-    }
-
-    return nullopt;
-  }
-
 bool
 do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // closure-function ::=
     //   "func" "(" parameter-list ? ")" closure-body
+    // closure-body ::=
+    //   block | equal-initializer | ref-initializer
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd)
@@ -1663,7 +1638,26 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
                 compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_closure_body_opt(tstrm);
+    op_sloc = tstrm.next_sloc();
+    auto qblock = do_accept_block_opt(tstrm, scope_plain);
+    if(!qblock) {
+      // Try `equal-initializer`.
+      auto qinit = do_accept_equal_initializer_opt(tstrm);
+      if(qinit) {
+        // Behave as if it was a `return-statement` by value.
+        Statement::S_return xstmt = { ::std::move(op_sloc), false, ::std::move(*qinit) };
+        qblock = do_blockify_statement(::std::move(xstmt));
+      }
+    }
+    if(!qblock) {
+      // Try `ref-initializer`.
+      auto qinit = do_accept_ref_initializer_opt(tstrm);
+      if(qinit) {
+        // Behave as if it was a `return-statement` by reference.
+        Statement::S_return xstmt = { ::std::move(op_sloc), true, ::std::move(*qinit) };
+        qblock = do_blockify_statement(::std::move(xstmt));
+      }
+    }
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc());
