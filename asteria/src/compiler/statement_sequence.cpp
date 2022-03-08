@@ -1612,18 +1612,10 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     return true;
   }
 
-bool
-do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+void
+do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Stream& tstrm,
+                                   Source_Location&& sloc)
   {
-    // closure-function ::=
-    //   "func" "(" parameter-list ? ")" closure-body
-    // closure-body ::=
-    //   block | equal-initializer | ref-initializer
-    auto sloc = tstrm.next_sloc();
-    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
-    if(!qkwrd)
-      return false;
-
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
@@ -1670,6 +1662,21 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
                                                   ::std::move(*kparams),
                                                   ::std::move(qblock->stmts) };
     units.emplace_back(::std::move(xunit));
+  }
+
+bool
+do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
+  {
+    // closure-function ::=
+    //   "func" "(" parameter-list ? ")" closure-body
+    // closure-body ::=
+    //   block | equal-initializer | ref-initializer
+    auto sloc = tstrm.next_sloc();
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
+    if(!qkwrd)
+      return false;
+
+    do_accept_closure_function_no_name(units, tstrm, ::std::move(sloc));
     return true;
   }
 
