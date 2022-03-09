@@ -10,14 +10,8 @@
 
 |Compiler    |Category                   |Remarks          |
 |:-----------|:--------------------------|:----------------|
-|**GCC 11**  |:1st_place_medal:Primary   |                 |
-|**GCC 10**  |:1st_place_medal:Primary   |10.3 has an internal compiler error about `constexpr`.  |
-|**GCC 9**   |:1st_place_medal:Primary   |                 |
-|**GCC 8**   |:1st_place_medal:Primary   |                 |
-|**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.    |
-|**GCC 6**   |:1st_place_medal:Primary   |                 |
-|**Clang 8** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
-|**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
+|**GCC 6+**  |:1st_place_medal:Primary   |10.3 has an internal compiler error about `constexpr`.  |
+|**Clang 7+** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/asteria/master/GNU-nano-FTW.png)
