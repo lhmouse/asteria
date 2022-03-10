@@ -100,20 +100,32 @@ class Abstract_Context
         return qref;
       }
 
+    pair<Reference*, bool>
+    insert_named_reference(const phsh_string& name)
+      {
+        auto pair = this->m_named_refs.insert(name);
+        if(!pair.second)
+          return pair;
+
+        // If the name is not reserved, don't initialize it.
+        if(!name.rdstr().starts_with(sref("__")))
+          return pair;
+
+        this->do_create_lazy_reference(pair.first, name);
+        return pair;
+      }
+
     Reference&
     open_named_reference(const phsh_string& name)
       {
-        auto pair = this->m_named_refs.insert(name);
-        auto qref = pair.first;
-        if(!pair.second)
-          return *qref;
+        auto pair = this->insert_named_reference(name);
+        return *(pair.first);
+      }
 
-        // If the name is not reserved, fail.
-        if(!name.rdstr().starts_with(sref("__")))
-          return *qref;
-
-        this->do_create_lazy_reference(pair.first, name);
-        return *qref;
+    bool
+    erase_named_reference(const phsh_string& name) noexcept
+      {
+        return this->m_named_refs.erase(name);
       }
   };
 
