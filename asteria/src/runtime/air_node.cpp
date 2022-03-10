@@ -1236,8 +1236,10 @@ struct Traits_function_call
 
         // Copy the target, which shall be of type `function`.
         auto value = stack.top().dereference_readonly();
-        if(!value.is_function())
-          ASTERIA_THROW_RUNTIME_ERROR("attempt to call a non-function (value `$1`)", value);
+        if(value.is_null())
+          ASTERIA_THROW_RUNTIME_ERROR("target function not found");
+        else if(!value.is_function())
+          ASTERIA_THROW_RUNTIME_ERROR("target value not a function (value `$1`)", value);
 
         const auto& target = value.as_function();
         auto& self = stack.mut_top().pop_modifier();
