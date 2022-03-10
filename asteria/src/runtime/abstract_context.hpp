@@ -49,10 +49,8 @@ class Abstract_Context
     Reference&
     do_open_named_reference(Reference* hint_opt, const phsh_string& name) const
       {
-        auto qref = hint_opt;
-        if(!qref)
-          qref = this->m_named_refs.insert(name).first;
-        return *qref;
+        return hint_opt ? *hint_opt  // hint valid
+            : *(this->m_named_refs.insert(name).first);  // insert a new one
       }
 
     void
