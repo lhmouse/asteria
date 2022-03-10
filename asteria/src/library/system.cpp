@@ -439,24 +439,26 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("could not spawn process '$2'\n"
-                    "[`posix_spawnp()` failed: $1]",
-                    format_errno(), cmd);
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not spawn process '$2'\n"
+          "[`posix_spawnp()` failed: $1]",
+          format_errno(), cmd);
 
-    // Await its termination.
-    // Note: `waitpid()` may return if the child has been stopped or continued.
     for(;;) {
+      // Await its termination.
+      // Note: `waitpid()` may return if the child has been stopped or continued.
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
-        ASTERIA_THROW_RUNTIME_ERROR("error awaiting child process '$2'\n"
-                      "[`waitpid()` failed: $1]",
-                      format_errno(), pid);
+        ASTERIA_THROW_RUNTIME_ERROR(
+            "error awaiting child process '$2'\n"
+            "[`waitpid()` failed: $1]",
+            format_errno(), pid);
 
       if(WIFEXITED(wstat))
-        return WEXITSTATUS(wstat);
+        return WEXITSTATUS(wstat);  // exited
 
       if(WIFSIGNALED(wstat))
-        return 128 + WTERMSIG(wstat);
+        return 128 + WTERMSIG(wstat);  // killed by a signal
     }
   }
 
@@ -464,9 +466,10 @@ void
 std_system_proc_daemonize()
   {
     if(::daemon(1, 0) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("could not daemonize process\n"
-                    "[`daemon()` failed: $1]",
-                    format_errno());
+      ASTERIA_THROW_RUNTIME_ERROR(
+          "could not daemonize process\n"
+          "[`daemon()` failed: $1]",
+          format_errno());
   }
 
 V_object
