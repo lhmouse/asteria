@@ -45,7 +45,7 @@ do_dereference_readonly_slow() const
 
         if(qvar->is_uninitialized())
           ASTERIA_THROW_RUNTIME_ERROR(
-              "attempt to read from an uninitialized variable");
+              "attempt to reference an uninitialized variable");
 
         qval = &(qvar->get_value());
         break;
@@ -218,7 +218,7 @@ dereference_mutable() const
 
         if(qvar->is_uninitialized())
           ASTERIA_THROW_RUNTIME_ERROR(
-              "attempt to modify an uninitialized variable");
+              "attempt to reference an uninitialized variable");
 
         if(!qvar->is_mutable())
           ASTERIA_THROW_RUNTIME_ERROR(
@@ -275,7 +275,7 @@ dereference_unset() const
 
         if(qvar->is_uninitialized())
           ASTERIA_THROW_RUNTIME_ERROR(
-              "attempt to read from an uninitialized variable");
+              "attempt to reference an uninitialized variable");
 
         qval = &(qvar->open_value());
         break;
