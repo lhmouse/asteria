@@ -641,12 +641,12 @@ struct Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status,
-                    { air_status_break_unspec, air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec,
+                                 air_status_break_for }))
                 break;
 
               if(::rocket::is_none_of(status, { air_status_next,
-                      air_status_continue_unspec, air_status_continue_for }))
+                                 air_status_continue_unspec, air_status_continue_for }))
                 return status;
 
               // Restore the mapped reference.
@@ -665,12 +665,12 @@ struct Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status,
-                    { air_status_break_unspec, air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec,
+                                 air_status_break_for }))
                 break;
 
               if(::rocket::is_none_of(status, { air_status_next,
-                      air_status_continue_unspec, air_status_continue_for }))
+                                 air_status_continue_unspec, air_status_continue_for }))
                 return status;
 
               // Restore the mapped reference.
