@@ -5212,6 +5212,11 @@ rebind_opt(Abstract_Context& ctx) const
         if(!qref)
           return nullopt;
 
+        // Check if control flow has bypassed its initialization.
+        if(qref->is_invalid())
+          ASTERIA_THROW_RUNTIME_ERROR("use of bypassed variable or reference `$1`", altr.name);
+
+        // Optimize temporaries a little.
         if(qref->is_temporary()) {
           S_push_temporary xnode = { qref->dereference_readonly() };
           return ::std::move(xnode);
