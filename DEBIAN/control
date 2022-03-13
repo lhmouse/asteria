@@ -1,0 +1,10 @@
+Package: {_pkgname}
+Version: {_pkgversion}
+Multi-Arch: foreign
+Architecture: all
+Priority: optional
+Section: interpreters
+Maintainer: LIU Hao <lh_mouse@126.com>
+Provides: asteria, libasteria, libasteria-dev
+Description: The Asteria Programming language
+Homepage: https://github.com/lhmouse/asteria
