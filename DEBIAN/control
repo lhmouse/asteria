@@ -1,7 +1,7 @@
 Package: {_pkgname}
 Version: {_pkgversion}
-Multi-Arch: foreign
-Architecture: all
+Architecture: {_pkgarch}
+Multi-Arch: same
 Priority: optional
 Section: interpreters
 Maintainer: LIU Hao <lh_mouse@126.com>
