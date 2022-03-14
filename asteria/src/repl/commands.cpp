@@ -242,6 +242,16 @@ struct Handler_source final
         if(args.empty())
           return repl_printf("! please specify a source file");
 
+        if(args[0].starts_with("~/")) {
+          // Replace the tilde prefix with the home directory.
+          // I am too lazy to add support for `~+` or `~-` here.
+          const char* home = ::getenv("HOME");
+          if(!home)
+            home = "";
+
+          args.mut(0).replace(0, 1, home);
+        }
+
         ::rocket::unique_ptr<char, void (void*)> abspath(::free);
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
         if(!abspath)
