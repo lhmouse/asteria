@@ -257,6 +257,7 @@ main(int argc, char** argv)
       // In case of read errors, this function shall not return.
       read_execute_print_single();
       ::fflush(nullptr);
+      ::fputc('\n', stderr);
     }
     while(true);
   }

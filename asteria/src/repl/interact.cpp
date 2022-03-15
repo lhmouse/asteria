@@ -23,6 +23,8 @@ read_execute_print_single()
 
     // Initialize the Editline library if it hasn't been initialized.
     if(ROCKET_UNEXPECT(!el_editor)) {
+      repl_printf("* initializing editline...");
+
       el_history = ::history_init();
       if(!el_history)
         exit_printf(exit_system_error, "! could not initialize history: %m");
@@ -98,9 +100,20 @@ read_execute_print_single()
       ::el_set(el_editor, EL_BIND, R"(\e\e[D)", "ed-prev-word", nullptr);
 
       // Load `~/.editrc`. Errors are ignored.
-      repl_printf("* loading editline settings from `~/.editrc`...");
-      if(::el_source(el_editor, nullptr) == 0)
-        repl_printf("* ... done");
+      const char* home = ::secure_getenv("HOME");
+      if(home) {
+        cow_string path = sref("/.editrc");
+        path.insert(0, home);
+        ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+        abspath.reset(::realpath(path.c_str(), nullptr));
+        if(abspath) {
+          repl_printf("* loading settings from `%s`...", abspath.get());
+          ::el_source(el_editor, nullptr);
+          repl_printf("* ... done");
+        }
+      }
+
+      ::fputc('\n', stderr);
     }
 
     // Prepare for the next snippet.
@@ -120,8 +133,6 @@ read_execute_print_single()
     const char* linebuf;
     int linelen;
     size_t pos;
-
-    ::fputc('\n', stderr);
 
     while(!!(linebuf = ::el_gets(el_editor, &linelen))) {
       // Append this line.
