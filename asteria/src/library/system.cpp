@@ -315,7 +315,7 @@ std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
 optV_string
 std_system_env_get_variable(V_string name)
   {
-    const char* val = ::getenv(name.safe_c_str());
+    const char* val = ::secure_getenv(name.safe_c_str());
     if(!val)
       return nullopt;
 
