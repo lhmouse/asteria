@@ -240,16 +240,18 @@ struct Handler_source final
     handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
-          return repl_printf("! please specify a source file");
+          return repl_printf("! please specify a source file to load");
 
         if(args[0].starts_with("~/")) {
-          // Replace the tilde prefix with the home directory.
+          // Replace the tilde prefix with the HOME directory.
+          // If the HOME directory cannot be determined, delete the tilde
+          // so it becomes an absolute path, like in BASH.
           // I am too lazy to add support for `~+` or `~-` here.
-          const char* home = ::getenv("HOME");
+          const char* home = ::secure_getenv("HOME");
           if(!home)
-            home = "";
-
-          args.mut(0).replace(0, 1, home);
+            args.mut(0).erase(0, 1);
+          else
+            args.mut(0).replace(0, 1, home);
         }
 
         ::rocket::unique_ptr<char, void (void*)> abspath(::free);
