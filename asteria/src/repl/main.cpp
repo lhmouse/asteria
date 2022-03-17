@@ -256,8 +256,8 @@ main(int argc, char** argv)
       // Read a snippet and execute it.
       // In case of read errors, this function shall not return.
       read_execute_print_single();
+      repl_printf("");
       ::fflush(nullptr);
-      ::fputc('\n', stderr);
     }
     while(true);
   }

@@ -275,8 +275,7 @@ struct Handler_source final
           if(ch == EOF) {
             // Check for errors.
             if(repl_signal.exchange(0) != 0) {
-              ::fputc('\n', stderr);
-              repl_printf("! operation cancelled");
+              repl_printf("\n! operation cancelled");
               return;
             }
 

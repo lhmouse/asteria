@@ -113,7 +113,7 @@ read_execute_print_single()
         }
       }
 
-      ::fputc('\n', stderr);
+      repl_printf("");
     }
 
     // Prepare for the next snippet.
@@ -169,7 +169,7 @@ read_execute_print_single()
     }
 
     if(!linebuf)
-      ::fputc('\n', stderr);
+      repl_printf("");
 
     // Discard this snippet if Ctrl-C was received.
     if(repl_signal.exchange(0) != 0) {
