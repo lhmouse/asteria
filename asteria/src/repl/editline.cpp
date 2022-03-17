@@ -35,7 +35,7 @@ do_getcfn(::EditLine* el, wchar_t* out)
     if(wch != WEOF)
       return 1;  // success
 
-    if(::ferror_unlocked(fp) == 0)
+    if(::feof_unlocked(fp))
       return 0;  // EOF
 
     if(errno != EINTR)
