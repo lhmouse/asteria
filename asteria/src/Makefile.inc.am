@@ -150,4 +150,5 @@ bin_asteria_SOURCES =  \
   %reldir%/repl/interact.cpp  \
   %reldir%/repl/commands.cpp  \
   %reldir%/repl/main.cpp  \
+  %reldir%/repl/editline.cpp  \
   ${NOTHING}

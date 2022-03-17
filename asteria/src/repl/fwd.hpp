@@ -77,6 +77,19 @@ handle_repl_command(cow_string&& cmdline);
 void
 read_execute_print_single();
 
+// These functions are defined in 'editline.cpp'.
+void
+editline_set_prompt(const char* fmt, ...);
+
+const char*
+editline_gets(int* nchars);
+
+void
+editline_reset();
+
+void
+editline_add_history(const cow_string& text);
+
 }  // namespace asteria
 
 #endif

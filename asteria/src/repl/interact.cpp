@@ -8,114 +8,12 @@
 #include "../compiler/statement_sequence.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
-#include <signal.h>
-#include <histedit.h>
 
 namespace asteria {
 
 void
 read_execute_print_single()
   {
-    static ::HistEvent el_event[1];
-    static ::History* el_history;
-    static ::EditLine* el_editor;
-    static char el_prompt[64];
-
-    // Initialize the Editline library if it hasn't been initialized.
-    if(ROCKET_UNEXPECT(!el_editor)) {
-      repl_printf("* initializing editline...");
-
-      el_history = ::history_init();
-      if(!el_history)
-        exit_printf(exit_system_error, "! could not initialize history: %m");
-
-      el_editor = ::el_init(repl_tar_name, stdin, stdout, stderr);
-      if(!el_editor)
-        exit_printf(exit_system_error, "! could not initialize editline: %m");
-
-#ifndef EL_SAFEREAD
-      // Replace the default GETCFN.
-      // The default one ignores the first EINTR error and is confusing.
-      ::el_set(el_editor, EL_GETCFN,
-        +[](::EditLine* el, wchar_t* out) {
-          ::FILE* fp;
-          if((::el_get(el, EL_GETFP, 0, &fp) != 0) || (fp == nullptr))
-            return 0;
-
-          int succ;
-          ::wint_t wch;
-          ::flockfile(fp);
-
-        r:
-          repl_signal.store(0);
-          ::clearerr_unlocked(fp);
-          wch = ::fgetwc_unlocked(fp);
-          succ = wch != WEOF;
-          if(!succ && ::ferror_unlocked(fp)) {
-            // Check for recoverable errors, which are signals (except
-            // `SIGSTOP`) that are ignored by default.
-            if(errno == EINTR) {
-              switch(repl_signal.load()) {
-                case SIGCONT:
-                  el_set(el, EL_REFRESH);
-                  goto r;
-
-                case SIGSTOP:
-                case SIGURG:
-                case SIGCHLD:
-                case SIGWINCH:
-                  goto r;  // ignore these
-              }
-            }
-
-            // Report failure.
-            succ = -1;
-          }
-
-          ::funlockfile(fp);
-          *out = (wchar_t)wch;
-          return succ;
-        });
-#endif  // EL_SAFEREAD
-
-      // Initialize the editor. Errors are ignored.
-      ::el_set(el_editor, EL_TERMINAL, nullptr);
-      ::el_set(el_editor, EL_SIGNAL, 1);
-      ::el_set(el_editor, EL_EDITOR, "emacs");
-      ::el_set(el_editor, EL_PROMPT, +[]{ return el_prompt;  });
-
-      ::history(el_history, el_event, H_SETSIZE, repl_history_size);
-      ::history(el_history, el_event, H_SETUNIQUE, 1);
-      ::el_set(el_editor, EL_HIST, ::history, el_history);
-
-      // Make {Ctrl,Alt}+{Left,Right} move by words, like in bash.
-      ::el_set(el_editor, EL_BIND, R"(\e[1;3C)", "em-next-word", nullptr);
-      ::el_set(el_editor, EL_BIND, R"(\e[1;5C)", "em-next-word", nullptr);
-      ::el_set(el_editor, EL_BIND, R"(\e[5C)", "em-next-word", nullptr);
-      ::el_set(el_editor, EL_BIND, R"(\e\e[C)", "em-next-word", nullptr);
-
-      ::el_set(el_editor, EL_BIND, R"(\e[1;3D)", "ed-prev-word", nullptr);
-      ::el_set(el_editor, EL_BIND, R"(\e[1;5D)", "ed-prev-word", nullptr);
-      ::el_set(el_editor, EL_BIND, R"(\e[5D)", "ed-prev-word", nullptr);
-      ::el_set(el_editor, EL_BIND, R"(\e\e[D)", "ed-prev-word", nullptr);
-
-      // Load `~/.editrc`. Errors are ignored.
-      const char* home = ::secure_getenv("HOME");
-      if(home) {
-        cow_string path = sref("/.editrc");
-        path.insert(0, home);
-        ::rocket::unique_ptr<char, void (void*)> abspath(::free);
-        abspath.reset(::realpath(path.c_str(), nullptr));
-        if(abspath) {
-          repl_printf("* loading settings from `%s`...", abspath.get());
-          ::el_source(el_editor, nullptr);
-          repl_printf("* ... done");
-        }
-      }
-
-      repl_printf("");
-    }
-
     // Prepare for the next snippet.
     repl_source.clear();
     repl_file.clear();
@@ -124,17 +22,17 @@ read_execute_print_single()
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
 
-    // Prompt for the first line.
-    bool iscmd = false;
-    long linenum = 0;
-    int indent;
-    ::sprintf(el_prompt, "#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
-
     const char* linebuf;
     int linelen;
     size_t pos;
 
-    while(!!(linebuf = ::el_gets(el_editor, &linelen))) {
+    // Prompt for the first line.
+    bool iscmd = false;
+    long linenum = 0;
+    int indent;
+    editline_set_prompt("#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
+
+    while(!!(linebuf = editline_gets(&linelen))) {
       // Append this line.
       repl_source.append(linebuf, (unsigned)linelen);
 
@@ -165,7 +63,7 @@ read_execute_print_single()
 
       // Prompt for the next line.
       repl_source.push_back('\n');
-      ::sprintf(el_prompt, "%*lu> ", indent, ++linenum);
+      editline_set_prompt("%*lu> ", indent, ++linenum);
     }
 
     if(!linebuf)
@@ -173,7 +71,7 @@ read_execute_print_single()
 
     // Discard this snippet if Ctrl-C was received.
     if(repl_signal.exchange(0) != 0) {
-      ::el_reset(el_editor);
+      editline_reset();
       repl_printf("! interrupted (type `:exit` to quit)");
       return;
     }
@@ -200,8 +98,7 @@ read_execute_print_single()
       if(pos == cow_string::npos)
         return;
 
-      // Add the snippet into history.
-      ::history(el_history, el_event, H_ENTER, repl_source.c_str());
+      editline_add_history(repl_source);
 
       try {
         // Process the command, which may re-populate `repl_source`.
@@ -218,9 +115,10 @@ read_execute_print_single()
     if(pos == cow_string::npos)
       return;
 
-    // Add the snippet into history, unless it was composed by a command.
+    // Add the snippet into history if it is from the user, i.e. if it is
+    // not composited by a command.
     if(!iscmd)
-      ::history(el_history, el_event, H_ENTER, repl_source.c_str());
+      editline_add_history(repl_source);
 
     // Tokenize source code.
     cow_string real_name;
