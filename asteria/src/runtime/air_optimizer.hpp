@@ -44,8 +44,8 @@ class AIR_Optimizer
     empty() const noexcept
       { return this->m_code.empty();  }
 
-    operator
-    const cow_vector<AIR_Node>&() const noexcept
+    const cow_vector<AIR_Node>&
+    get_code() const noexcept
       { return this->m_code;  }
 
     AIR_Optimizer&

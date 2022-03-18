@@ -105,7 +105,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // Encode arguments.
         AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params,
-                                              optmz };
+                                              optmz.get_code() };
         code.emplace_back(::std::move(xnode));
         return code;
       }

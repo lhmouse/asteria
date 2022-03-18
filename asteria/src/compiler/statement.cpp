@@ -240,7 +240,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Encode arguments.
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params,
-                                                   optmz };
+                                                   optmz.get_code() };
         code.emplace_back(::std::move(xnode_defn));
 
         // Initialize the function.
