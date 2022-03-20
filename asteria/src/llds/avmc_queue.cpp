@@ -197,6 +197,7 @@ execute(Executive_Context& ctx) const
           return status;
       }
       ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        // When no symbols exist, be neutral.
         if(qnode->meta_ver == 1)
           throw;
 
