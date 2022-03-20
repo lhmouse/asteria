@@ -22,6 +22,7 @@ sprintf_and_throw(const char* fmt, ...)
     va_start(ap, fmt);
     ret = ::vasprintf(&str, fmt, ap);
     va_end(ap);
+
     if(ret < 0)
       throw ::std::bad_alloc();
 
