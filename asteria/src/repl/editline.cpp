@@ -32,6 +32,7 @@ do_getcfn(::EditLine* el, wchar_t* out)
     ::clearerr_unlocked(fp);
     ::wint_t wch = ::fgetwc_unlocked(fp);
     *out = (wchar_t)wch;
+
     if(wch != WEOF)
       return 1;  // success
 
