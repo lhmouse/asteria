@@ -14,7 +14,6 @@ namespace {
 ::EditLine* s_editor;
 char s_prompt[64];
 
-#ifndef EL_SAFEREAD
 int
 do_getcfn(::EditLine* el, wchar_t* out)
   {
@@ -58,7 +57,6 @@ do_getcfn(::EditLine* el, wchar_t* out)
 
     return -1;  // failure
   }
-#endif  // EL_SAFEREAD
 
 void
 do_init_once()
@@ -73,15 +71,13 @@ do_init_once()
     if(!s_editor)
       exit_printf(exit_system_error, "! could not initialize editline: %m");
 
-#ifndef EL_SAFEREAD
     // Replace the default GETCFN.
-    // The default one ignores the first EINTR error and is confusing.
+    // The default one used to ignore the first EINTR error and is confusing.
+    // Eventually we have decided to replace it unconditionally.
     ::el_set(s_editor, EL_GETCFN, do_getcfn);
-#endif
 
     // Initialize the editor. Errors are ignored.
     ::el_set(s_editor, EL_TERMINAL, nullptr);
-    ::el_set(s_editor, EL_SIGNAL, 1);
     ::el_set(s_editor, EL_EDITOR, "emacs");
     ::el_set(s_editor, EL_PROMPT, +[]{ return s_prompt;  });
 
