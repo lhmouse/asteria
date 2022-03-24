@@ -23,7 +23,6 @@ check_PROGRAMS +=  \
   %reldir%/defer.test  \
   %reldir%/defer_ptc.test  \
   %reldir%/trailing_commas.test  \
-  %reldir%/member_vars.test  \
   %reldir%/system.test  \
   %reldir%/chrono.test  \
   %reldir%/string.test  \

@@ -1729,14 +1729,8 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     // unnamed-object ::=
     //   "{" object-member-list "}"
     // object-member-list ::=
-    //   ( object-member-variable | object-member-function ) object-member-list ? |
-    //   object-member-key-value ( ( "," | ";" ) object-member-list ? ) ?
-    // object-member-variable ::=
-    //   "var" identifier equal-initailizer ? ";"
-    // object-member-function ::=
-    //   "func" identifier "(" parameter-list ? ")" block
-    // object-member-key-value ::=
-    //   ( string-literal | identifier ) ( "=" | ":" ) expression
+    //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" )
+    //   object-member-list ? ) ?
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct)
@@ -1747,50 +1741,6 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
 
     for(;;) {
       auto op_sloc = tstrm.next_sloc();
-      auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var, keyword_func });
-      if(qkwrd) {
-        // Accept a variable or function.
-        auto key_sloc = tstrm.next_sloc();
-        auto qkey = do_accept_identifier_opt(tstrm, false);
-        if(!qkey)
-          throw Compiler_Error(Compiler_Error::M_status(),
-                    compiler_status_identifier_expected, tstrm.next_sloc());
-
-        if(::rocket::find(keys, *qkey))
-          throw Compiler_Error(Compiler_Error::M_status(),
-                    compiler_status_duplicate_key_in_object, key_sloc);
-
-        if(*qkwrd == keyword_var) {
-          // Look for the optional inititializer.
-          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign });
-          if(!kpunct) {
-            // This is not a variable. If no initializer exists, we have to push
-            // an explicit null for this element.
-            Expression_Unit::S_literal xunit = {  };
-            units.emplace_back(::std::move(xunit));
-          }
-          else if(!do_accept_expression_as_rvalue(units, tstrm))
-            throw Compiler_Error(Compiler_Error::M_status(),
-                      compiler_status_expression_expected, tstrm.next_sloc());
-
-          // A semicolon has to exist to terminate this definition.
-          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
-          if(!kpunct)
-            throw Compiler_Error(Compiler_Error::M_status(),
-                      compiler_status_semicolon_expected, tstrm.next_sloc());
-        }
-        else {
-          // Look for a function.
-          ROCKET_ASSERT(*qkwrd == keyword_func);
-          do_accept_closure_function_no_name(units, tstrm, ::std::move(op_sloc));
-        }
-
-        keys.emplace_back(::std::move(*qkey));
-        comma_allowed = false;
-        continue;
-      }
-
-      // Accept a plain key-value pair.
       auto qkey = do_accept_json5_key_opt(tstrm);
       if(!qkey)
         break;
