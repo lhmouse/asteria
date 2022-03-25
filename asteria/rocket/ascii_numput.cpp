@@ -28,7 +28,7 @@ do_pdigit_X(uint32_t dval)
   }
 
 void
-do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
+do_xput_U_bkwd(char*& bp, uint64_t value, uint8_t base, size_t precision)
   {
     // Write digits backwards.
     ROCKET_ASSERT(precision <= 64);
@@ -51,7 +51,7 @@ do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision)
 
 template<typename valueT>
 char*
-do_check_special(char*& bp, char*& ep, const valueT& value)
+do_check_special(char*& bp, char*& ep, valueT value)
   {
     switch(::std::fpclassify(value)) {
       case FP_INFINITE:
@@ -75,7 +75,7 @@ do_check_special(char*& bp, char*& ep, const valueT& value)
   }
 
 void
-do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
+do_xfrexp_F_bin(uint64_t& mant, int& exp, double value)
   {
     // Note if `value` is not finite then the behavior is undefined.
     // Get the first digit.
@@ -107,7 +107,7 @@ do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value)
   }
 
 void
-do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp)
+do_xput_M_bin(char*& ep, uint64_t mant, const char* rdxp)
   {
     // Write digits in normal order.
     uint64_t ireg = mant;
@@ -131,7 +131,7 @@ do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp)
   }
 
 void
-do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp)
+do_xput_M_hex(char*& ep, uint64_t mant, const char* rdxp)
   {
     // Write digits in normal order.
     uint64_t ireg = mant;
@@ -909,7 +909,7 @@ do_get_max_bias(uint64_t ireg, uint32_t add, bool single)
   }
 
 void
-do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
+do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
   {
     // Note if `value` is not finite then the behavior is undefined.
     // Get the first digit.
@@ -927,16 +927,16 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
 
       // Get the median.
       uint32_t mpos = (bpos + epos) / 2;
-      const double& med = s_decmult_F[mpos].bound;
+      const auto& bound = s_decmult_F[mpos].bound;
 
-      // Stops immediately if `freg` equals `med`.
-      if(::std::memcmp(&freg, &med, sizeof(double)) == 0) {
+      // Stops immediately if `freg` equals `bound`.
+      if(::std::memcmp(&freg, &bound, sizeof(double)) == 0) {
         bpos = mpos;
         break;
       }
 
       // Decend into either subrange.
-      if(freg < med)
+      if(freg < bound)
         epos = mpos;
       else
         bpos = mpos + 1;
@@ -1066,7 +1066,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single)
   }
 
 void
-do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp)
+do_xput_M_dec(char*& ep, uint64_t mant, const char* rdxp)
   {
     // Write digits in normal order.
     uint64_t ireg = mant;
@@ -1216,15 +1216,14 @@ put_BI(int64_t value, size_t precision) noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+    uint64_t sign = do_cast_U(value >> 63);
+    uint64_t absval = (do_cast_U(value) ^ sign) - sign;
 
     // Append a null terminator.
     *bp = 0;
 
-    // Extend the sign bit to a word, assuming arithmetic shift.
-    uint64_t sign = do_cast_U(value >> 63);
-
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 2, precision);
+    do_xput_U_bkwd(bp, absval, 2, precision);
 
     // Prepend the binary prefix.
     *(--bp) = 'b';
@@ -1247,15 +1246,14 @@ put_XI(int64_t value, size_t precision) noexcept
     this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
+    uint64_t sign = do_cast_U(value >> 63);
+    uint64_t absval = (do_cast_U(value) ^ sign) - sign;
 
     // Append a null terminator.
     *bp = 0;
 
-    // Extend the sign bit to a word, assuming arithmetic shift.
-    uint64_t sign = do_cast_U(value >> 63);
-
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 16, precision);
+    do_xput_U_bkwd(bp, absval, 16, precision);
 
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
@@ -1303,10 +1301,8 @@ ascii_numput::
 put_BF(double value, bool single) noexcept
   {
     this->clear();
-    char* bp;
-    char* ep;
-
-    // Extract the sign bit and extend it to a word.
+    char* bp = this->m_stor;
+    char* ep = bp;
     int sign = ::std::signbit(value) ? -1 : 0;
 
     // Treat non-finite values and zeroes specially.
@@ -1316,10 +1312,6 @@ put_BF(double value, bool single) noexcept
       bp += do_cast_U(sign + 1);
     }
     else {
-      // Seek to the beginning of the internal buffer.
-      bp = this->m_stor;
-      ep = bp;
-
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
@@ -1367,10 +1359,8 @@ ascii_numput::
 put_BE(double value, bool /*single*/) noexcept
   {
     this->clear();
-    char* bp;
-    char* ep;
-
-    // Extract the sign bit and extend it to a word.
+    char* bp = this->m_stor;
+    char* ep = bp;
     int sign = ::std::signbit(value) ? -1 : 0;
 
     // Treat non-finite values and zeroes specially.
@@ -1380,10 +1370,6 @@ put_BE(double value, bool /*single*/) noexcept
       bp += do_cast_U(sign + 1);
     }
     else {
-      // Seek to the beginning of the internal buffer.
-      bp = this->m_stor;
-      ep = bp;
-
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
@@ -1417,10 +1403,8 @@ ascii_numput::
 put_XF(double value, bool single) noexcept
   {
     this->clear();
-    char* bp;
-    char* ep;
-
-    // Extract the sign bit and extend it to a word.
+    char* bp = this->m_stor;
+    char* ep = bp;
     int sign = ::std::signbit(value) ? -1 : 0;
 
     // Treat non-finite values and zeroes specially.
@@ -1430,10 +1414,6 @@ put_XF(double value, bool single) noexcept
       bp += do_cast_U(sign + 1);
     }
     else {
-      // Seek to the beginning of the internal buffer.
-      bp = this->m_stor;
-      ep = bp;
-
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
@@ -1484,10 +1464,8 @@ ascii_numput::
 put_XE(double value, bool /*single*/) noexcept
   {
     this->clear();
-    char* bp;
-    char* ep;
-
-    // Extract the sign bit and extend it to a word.
+    char* bp = this->m_stor;
+    char* ep = bp;
     int sign = ::std::signbit(value) ? -1 : 0;
 
     // Treat non-finite values and zeroes specially.
@@ -1497,10 +1475,6 @@ put_XE(double value, bool /*single*/) noexcept
       bp += do_cast_U(sign + 1);
     }
     else {
-      // Seek to the beginning of the internal buffer.
-      bp = this->m_stor;
-      ep = bp;
-
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
@@ -1538,10 +1512,8 @@ ascii_numput::
 put_DF(double value, bool single) noexcept
   {
     this->clear();
-    char* bp;
-    char* ep;
-
-    // Extract the sign bit and extend it to a word.
+    char* bp = this->m_stor;
+    char* ep = bp;
     int sign = ::std::signbit(value) ? -1 : 0;
 
     // Treat non-finite values and zeroes specially.
@@ -1551,10 +1523,6 @@ put_DF(double value, bool single) noexcept
       bp += do_cast_U(sign + 1);
     }
     else {
-      // Seek to the beginning of the internal buffer.
-      bp = this->m_stor;
-      ep = bp;
-
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
@@ -1597,10 +1565,8 @@ ascii_numput::
 put_DE(double value, bool single) noexcept
   {
     this->clear();
-    char* bp;
-    char* ep;
-
-    // Extract the sign bit and extend it to a word.
+    char* bp = this->m_stor;
+    char* ep = bp;
     int sign = ::std::signbit(value) ? -1 : 0;
 
     // Treat non-finite values and zeroes specially.
@@ -1610,10 +1576,6 @@ put_DE(double value, bool single) noexcept
       bp += do_cast_U(sign + 1);
     }
     else {
-      // Seek to the beginning of the internal buffer.
-      bp = this->m_stor;
-      ep = bp;
-
       // Prepend a minus sign if the number is negative.
       if(sign)
         *(ep++) = '-';
