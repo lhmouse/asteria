@@ -1520,13 +1520,13 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
               freg = 0;
               break;
             }
-            if(mpos >= noadl::size(s_decmult_F)) {
+            else if(mpos >= noadl::size(s_decmult_F)) {
               freg = HUGE_VAL;
               break;
             }
-            const auto& mult = s_decmult_F[mpos];
 
             // Adjust `ireg` such that its MSB is non-zero.
+            const auto& mult = s_decmult_F[mpos];
             int sh = ROCKET_LZCNT64(ireg);
             ireg |= this->m_madd;
             ireg <<= sh;

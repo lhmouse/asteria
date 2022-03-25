@@ -1166,6 +1166,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
     // Locate the last number in the table that is <= `freg`.
     uint32_t bpos = 1;
     uint32_t epos = (uint32_t) noadl::size(s_decmult_F);
+
     for(;;) {
       // Stop if the range is empty.
       if(bpos == epos) {
@@ -1189,7 +1190,6 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
       else
         bpos = mpos + 1;
     }
-    const auto& mult = s_decmult_F[bpos];
 
     // Extract the biased exponent and mantissa without the hidden bit.
     // This function requires `freg` to be normalized, finite and positive.
@@ -1212,6 +1212,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
 
     // Adjust the exponent.
     // This shall not cause overflows.
+    const auto& mult = s_decmult_F[bpos];
     bexp += mult.exp2;
 
     // Compose the new value.
