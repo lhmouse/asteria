@@ -255,22 +255,16 @@ constexpr char s_decimals[][6] =
 
 template<typename valueT>
 constexpr typename make_unsigned<valueT>::type
-do_cast_U(const valueT& value)
-  {
-    return static_cast<typename make_unsigned<valueT>::type>(value);
-  }
+do_cast_U(valueT value) noexcept
+  { return static_cast<typename make_unsigned<valueT>::type>(value);  }
 
 constexpr char
 do_pdigit_D(uint32_t dval)
-  {
-    return static_cast<char>('0' + dval);
-  }
+  { return static_cast<char>('0' + dval);  }
 
 constexpr char
 do_pdigit_X(uint32_t dval)
-  {
-    return static_cast<char>('0' + dval + ((9 - dval) >> 29));
-  }
+  { return static_cast<char>('0' + dval + ((9 - dval) >> 29));  }
 
 void
 do_xput_U_bkwd(char*& bp, uint64_t value, uint8_t base, size_t precision)
