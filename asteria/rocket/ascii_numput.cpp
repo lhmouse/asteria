@@ -410,12 +410,12 @@ do_xput_I_exp(char*& ep, int exp)
 
     // Get a static string for the absolute value of `exp`.
     // This starts with a minus sign that has to be skipped.
-    size_t off = do_cast_U(::std::abs(exp));
-    ROCKET_ASSERT(off < 2048);
-    const char* rp = s_decimals[off] + 1;
+    size_t absval = do_cast_U(::std::abs(exp));
+    ROCKET_ASSERT(absval < noadl::size(s_decimals));
+    const char* rp = s_decimals[absval] + 1;
 
     // ... well, ensure at least two significant figures, like POSIX.
-    if(off < 10)
+    if(absval < 10)
       *(ep++) = '0';
 
     while(*rp != 0)
@@ -1165,7 +1165,7 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
 
     // Locate the last number in the table that is <= `freg`.
     uint32_t bpos = 1;
-    uint32_t epos = static_cast<uint32_t>(size(s_decmult_F));
+    uint32_t epos = (uint32_t) noadl::size(s_decmult_F);
     for(;;) {
       // Stop if the range is empty.
       if(bpos == epos) {
@@ -1441,7 +1441,7 @@ put_DU(uint64_t value, size_t precision) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
 
-    if((value < 2048) && (precision == 1)) {
+    if((value < noadl::size(s_decimals)) && (precision == 1)) {
       // Get the template string literal. The internal storage is unused.
       // This starts with a minus sign that has to be skipped.
       bp = const_cast<char*>(s_decimals[value]) + 1;
@@ -1531,7 +1531,7 @@ put_DI(int64_t value, size_t precision) noexcept
     uint64_t sign = do_cast_U(value >> 63);
     uint64_t absval = (do_cast_U(value) ^ sign) - sign;
 
-    if((absval < 2048) && (precision == 1)) {
+    if((absval < noadl::size(s_decimals)) && (precision == 1)) {
       // Get the template string literal. The internal storage is unused.
       // This starts with a minus sign that has to be skipped for non-negative numbers.
       bp = const_cast<char*>(s_decimals[absval]) + 1 + sign;

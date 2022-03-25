@@ -1520,7 +1520,7 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
               freg = 0;
               break;
             }
-            if(mpos >= size(s_decmult_F)) {
+            if(mpos >= noadl::size(s_decmult_F)) {
               freg = HUGE_VAL;
               break;
             }
