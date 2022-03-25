@@ -113,9 +113,9 @@ class BMH_Searcher
 
         // Perform a linear search for the first byte.
         // This has to be fast, but need not be very accurate.
-        const uintptr_t bmask = UINTPTR_MAX / 0xFF;
+        constexpr uintptr_t bmask = UINTPTR_MAX / 0xFF;
+        constexpr ptrdiff_t bsize = sizeof(bmask);
         const uintptr_t bcomp = bmask * (uint8_t) this->m_pbegin[0];
-        constexpr ptrdiff_t bsize = sizeof(bcomp);
 
         auto tcur = tbegin;
         const auto tfinalcand = tend - plen;
