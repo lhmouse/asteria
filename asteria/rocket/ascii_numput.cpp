@@ -253,6 +253,23 @@ constexpr char s_decimals[][6] =
     "-2042", "-2043", "-2044", "-2045", "-2046", "-2047",
   };
 
+inline size_t
+do_small_strlen(const char* str) noexcept
+  {
+    // Load 8 bytes at once.
+    // This works because no constant string above is longer than 6.
+    uint64_t bytes;
+    ::std::memcpy(&bytes, str, sizeof(bytes));
+    bytes = htole64(bytes);
+
+    // Now see whether `bytes` contains a zero byte. The condition
+    // is that there shall be a byte whose MSB becomes one after the
+    // subtraction below, but was zero before it.
+    constexpr uint64_t bmask = UINT64_MAX / 0xFF;
+    bytes = (bytes - bmask) & (bytes ^ (bmask << 7)) & (bmask << 7);
+    return (size_t) ROCKET_TZCNT64(bytes) / 8;
+  }
+
 template<typename valueT>
 constexpr typename make_unsigned<valueT>::type
 do_cast_U(valueT value) noexcept
@@ -1440,7 +1457,7 @@ put_DU(uint64_t value, size_t precision) noexcept
       // Get the template string literal. The internal storage is unused.
       // This starts with a minus sign that has to be skipped.
       bp = const_cast<char*>(s_decimals[value]) + 1;
-      ep = bp + ::strlen(bp);
+      ep = bp + do_small_strlen(bp);
     }
     else {
       // Append a null terminator.
@@ -1530,7 +1547,7 @@ put_DI(int64_t value, size_t precision) noexcept
       // Get the template string literal. The internal storage is unused.
       // This starts with a minus sign that has to be skipped for non-negative numbers.
       bp = const_cast<char*>(s_decimals[absval]) + 1 + sign;
-      ep = bp + ::strlen(bp);
+      ep = bp + do_small_strlen(bp);
     }
     else {
       // Append a null terminator.
