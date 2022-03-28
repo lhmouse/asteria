@@ -27,8 +27,8 @@ standard output stream. We can also examine it directly:
 
 ### Functions
 
-We can define a function, which takes some or none arguments and return a
-value:
+We can define a function, which takes some or none arguments and returns
+a value:
 
   ```
   #1:1> func add(a, b) { return a + b;  }    \
@@ -40,10 +40,10 @@ value:
 
 We defined a function called `add` that took two arguments and returned
 the sum of them. The function `std.io.putfln` took a string template that
-contained a placeholder `$1`, which was replaced by our sum as its second
+contained a placeholder `$1` which was replaced by the sum as its second
 argument, and printed the result to standard output.
 
-It is not possible for a function to return multiple values. However we
+It is not possible for a function to return multiple values. However, we
 can compose a function that returns an array of two values:
 
   ```
@@ -62,9 +62,9 @@ can compose a function that returns an array of two values:
   ```
 
 A function can return no value at all, either by explicit `return;` or by
-not having a return statement at all. A call to a function that has
-returned no value yields a void reference. It is an error to use a void
-reference as a value:
+not having a return statement. A call to a function that has returned no
+value yields a void reference. It is an error to use a void reference as
+a value:
 
   ```
   #3:1> func novalue() { }       \
