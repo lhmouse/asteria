@@ -53,10 +53,10 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
           stack, alt_stack, this->m_zvarg, this->m_params, ::std::move(self));
 
     // Execute the function body.
-    ASTERIA_RUNTIME_TRY {
+    try {
       status = this->m_queue.execute(ctx_func);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+    catch(Runtime_Error& except) {
       ctx_func.on_scope_exit(except);
       except.push_frame_func(this->m_zvarg->sloc(), this->m_zvarg->func());
       throw;

@@ -114,7 +114,7 @@ do_finish_call_slow(Global_Context& global)
     int ptc_conj = ptc_aware_by_ref;
     Reference_Stack alt_stack;
 
-    ASTERIA_RUNTIME_TRY {
+    try {
       // Unpack all frames recursively.
       // Note that `*this` is overwritten before the wrapped function is called.
       while(this->m_index == index_ptc_args) {
@@ -160,7 +160,7 @@ do_finish_call_slow(Global_Context& global)
           qhooks->on_function_return(ptca->sloc(), ptca->target(), *this);
       }
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+    catch(Runtime_Error& except) {
       // Check for deferred expressions.
       while(frames.size()) {
         // Pop frames in reverse order.

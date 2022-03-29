@@ -151,11 +151,11 @@ do_on_scope_exit_slow(AIR_Status status)
 
         // Execute it.
         // If an exception is thrown, append a frame and rethrow it.
-        ASTERIA_RUNTIME_TRY {
+        try {
           auto status_def = pair.second.execute(*this);
           ROCKET_ASSERT(status_def == air_status_next);
         }
-        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        catch(Runtime_Error& except) {
           except.push_frame_defer(pair.first);
           this->on_scope_exit(except);
           throw;
@@ -182,11 +182,11 @@ do_on_scope_exit_slow(Runtime_Error& except)
 
       // Execute it.
       // If an exception is thrown, replace `except` with it.
-      ASTERIA_RUNTIME_TRY {
+      try {
         auto status_def = pair.second.execute(*this);
         ROCKET_ASSERT(status_def == air_status_next);
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
+      catch(Runtime_Error& nested) {
         except = nested;
         except.push_frame_defer(pair.first);
       }

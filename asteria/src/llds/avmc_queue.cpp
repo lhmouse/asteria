@@ -191,19 +191,23 @@ execute(Executive_Context& ctx) const
       if(qnode->meta_ver != 0)
         executor = qnode->pv_meta->exec;
 
-      ASTERIA_RUNTIME_TRY {
+      try {
         auto status = executor(ctx, qnode);
         if(status != air_status_next)
           return status;
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
-        // When no symbols exist, be neutral.
-        if(qnode->meta_ver == 1)
-          throw;
-
-        // Symbols exist. Use them.
-        except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+      catch(Runtime_Error& except) {
+        // Modify the exception in place and rethrow it without copying it.
+        if(qnode->meta_ver >= 2)
+          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
         throw;
+      }
+      catch(exception& stdex) {
+        // Replace the active exception.
+        Runtime_Error except(Runtime_Error::M_native(), stdex);
+        if(qnode->meta_ver >= 2)
+          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+        throw except;
       }
     }
     return air_status_next;

@@ -119,10 +119,10 @@ do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     Executive_Context ctx_next(Executive_Context::M_plain(), ctx);
     AIR_Status status;
 
-    ASTERIA_RUNTIME_TRY {
+    try {
       status = queue.execute(ctx_next);
     }
-    ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+    catch(Runtime_Error& except) {
       ctx_next.on_scope_exit(except);
       throw;
     }
@@ -469,7 +469,7 @@ struct Traits_switch_statement
           for(const auto& name : sp.names_added[bp])
             ctx_body.open_named_reference(name).set_invalid();
 
-          ASTERIA_RUNTIME_TRY {
+          try {
             do {
               // Execute the body.
               status = sp.queues_bodies[bp].execute(ctx_body);
@@ -482,7 +482,7 @@ struct Traits_switch_statement
             }
             while(++bp < nclauses);
           }
-          ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+          catch(Runtime_Error& except) {
             ctx_body.on_scope_exit(except);
             throw;
           }
@@ -761,7 +761,7 @@ struct Traits_try_statement
 
     ROCKET_FLATTEN static AIR_Status
     execute(Executive_Context& ctx, const Sparam_try_catch& sp)
-      ASTERIA_RUNTIME_TRY {
+      try {
         // This is almost identical to JavaScript.
         // Execute the `try` block. If no exception is thrown, this will have
         // little overhead.
@@ -774,7 +774,7 @@ struct Traits_try_statement
         ctx.stack().mut_top().finish_call(ctx.global());
         return status;
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      catch(Runtime_Error& except) {
         // Append a frame due to exit of the `try` clause.
         // Reuse the exception object. Don't bother allocating a new one.
         except.push_frame_try(sp.sloc_try);
@@ -785,7 +785,7 @@ struct Traits_try_statement
         Executive_Context ctx_catch(Executive_Context::M_plain(), ctx);
         AIR_Status status;
 
-        ASTERIA_RUNTIME_TRY {
+        try {
           // Set the exception reference.
           ctx_catch.open_named_reference(sp.name_except)
               .set_temporary(except.value());
@@ -812,7 +812,7 @@ struct Traits_try_statement
           // Execute the `catch` clause.
           status = sp.queue_catch.execute(ctx_catch);
         }
-        ASTERIA_RUNTIME_CATCH(Runtime_Error& nested) {
+        catch(Runtime_Error& nested) {
           ctx_catch.on_scope_exit(nested);
           nested.push_frame_catch(sp.sloc_catch, except.value());
           throw;
@@ -1151,10 +1151,10 @@ do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_functi
     else {
       // Note exceptions thrown here are not caught.
       qhooks->on_function_call(sloc, target);
-      ASTERIA_RUNTIME_TRY {
+      try {
         target.invoke(self, global, ::std::move(stack));
       }
-      ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+      catch(Runtime_Error& except) {
         qhooks->on_function_except(sloc, target, except);
         throw;
       }
@@ -4436,11 +4436,11 @@ struct Traits_catch_expression
         size_t old_size = ctx.stack().size();
         Value val;
 
-        ASTERIA_RUNTIME_TRY {
+        try {
           auto status = queue.execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
         }
-        ASTERIA_RUNTIME_CATCH(Runtime_Error& except) {
+        catch(Runtime_Error& except) {
           val = except.value();
         }
 
