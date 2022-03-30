@@ -41,18 +41,21 @@ do_getcfn(::EditLine* el, wchar_t* out)
     if(errno != EINTR)
       return -1;  // failure
 
-    // Check for recoverable errors, which are signals (except
-    // `SIGSTOP`) that are ignored by default.
+    // Check for recoverable errors, which are signals (except `SIGSTOP`)
+    // that are ignored by default.
     switch(repl_signal.load()) {
+      case SIGSTOP:
+      case SIGURG:
+      case SIGCHLD:
+        goto r;  // ignore these
+
       case SIGCONT:
         el_set(el, EL_REFRESH);
         goto r;
 
-      case SIGSTOP:
-      case SIGURG:
-      case SIGCHLD:
       case SIGWINCH:
-        goto r;  // ignore these
+        el_resize(el);
+        goto r;
     }
 
     return -1;  // failure
