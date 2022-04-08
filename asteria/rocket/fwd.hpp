@@ -155,6 +155,7 @@ using ::std::memory_order_seq_cst;
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
+#define ROCKET_VOID_DECLTYPE(...)            ROCKET_VOID_T(decltype(__VA_ARGS__))
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       ROCKET_VOID_T(__VA_ARGS__)* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 

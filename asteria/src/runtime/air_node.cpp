@@ -4927,9 +4927,9 @@ struct symbol_getter
 
 template<typename TraitsT, typename NodeT>
 struct symbol_getter<TraitsT, NodeT,
-    ROCKET_VOID_T(decltype(
+    ROCKET_VOID_DECLTYPE(
         TraitsT::get_symbols(
-            ::std::declval<const NodeT&>())))>
+            ::std::declval<const NodeT&>()))>
   {
     static constexpr const Source_Location*
     opt(const NodeT& altr) noexcept
@@ -4943,9 +4943,9 @@ struct has_uparam
 
 template<typename TraitsT, typename NodeT>
 struct has_uparam<TraitsT, NodeT,
-    ROCKET_VOID_T(decltype(
+    ROCKET_VOID_DECLTYPE(
         TraitsT::make_uparam(::std::declval<bool&>(),
-            ::std::declval<const NodeT&>())))>
+            ::std::declval<const NodeT&>()))>
   : ::std::true_type
   { };
 
@@ -4956,9 +4956,9 @@ struct has_sparam
 
 template<typename TraitsT, typename NodeT>
 struct has_sparam<TraitsT, NodeT,
-    ROCKET_VOID_T(decltype(
+    ROCKET_VOID_DECLTYPE(
         TraitsT::make_sparam(::std::declval<bool&>(),
-            ::std::declval<const NodeT&>())))>
+            ::std::declval<const NodeT&>()))>
   : ::std::true_type
   { };
 

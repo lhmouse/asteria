@@ -111,11 +111,11 @@ struct select_get_variables
 
 template<typename SparamT>
 struct select_get_variables<SparamT,
-    ROCKET_VOID_T(decltype(
+    ROCKET_VOID_DECLTYPE(
       ::std::declval<const SparamT&>().get_variables(
           ::std::declval<Variable_HashMap&>(),  // staged
           ::std::declval<Variable_HashMap&>()   // temp
-        )))>
+        ))>
   {
     constexpr operator
     Var_Getter*() const noexcept

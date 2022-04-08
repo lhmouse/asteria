@@ -15,8 +15,8 @@ struct is_input_iterator_aux
 
 template<typename iteratorT>
 struct is_input_iterator_aux<iteratorT,
-             ROCKET_VOID_T(decltype(static_cast<::std::input_iterator_tag>(
-                    typename iterator_traits<iteratorT>::iterator_category())))>
+             ROCKET_VOID_DECLTYPE(static_cast<::std::input_iterator_tag>(
+                    typename iterator_traits<iteratorT>::iterator_category()))>
   : true_type
   { };
 
@@ -149,7 +149,7 @@ struct can_static_cast
 
 template<typename targetT, typename sourceT>
 struct can_static_cast<targetT, sourceT,
-           ROCKET_VOID_T(decltype(static_cast<targetT>(::std::declval<sourceT>())))>
+           ROCKET_VOID_DECLTYPE(static_cast<targetT>(::std::declval<sourceT>()))>
   : true_type
   { };
 
@@ -160,7 +160,7 @@ struct can_dynamic_cast
 
 template<typename targetT, typename sourceT>
 struct can_dynamic_cast<targetT, sourceT,
-           ROCKET_VOID_T(decltype(dynamic_cast<targetT>(::std::declval<sourceT>())))>
+           ROCKET_VOID_DECLTYPE(dynamic_cast<targetT>(::std::declval<sourceT>()))>
   : true_type
   { };
 
