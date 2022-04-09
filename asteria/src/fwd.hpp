@@ -4,10 +4,6 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #ifdef __FAST_MATH__
 #  error Please turn off `-ffast-math`.
 #endif
