@@ -162,7 +162,8 @@ class basic_linear_buffer
       }
 
   public:
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     get_allocator() const noexcept
       { return this->m_stor.as_allocator();  }
 
@@ -337,15 +338,18 @@ class basic_linear_buffer
   };
 
 template<typename charT, typename traitsT, typename allocT>
-inline void
+inline
+void
 swap(basic_linear_buffer<charT, traitsT, allocT>& lhs, basic_linear_buffer<charT, traitsT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-extern template
+extern
+template
 class basic_linear_buffer<char>;
 
-extern template
+extern
+template
 class basic_linear_buffer<wchar_t>;
 
 using linear_buffer   = basic_linear_buffer<char>;

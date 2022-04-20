@@ -804,7 +804,8 @@ class cow_vector
       }
 
     // N.B. The return type differs from `std::vector`.
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     get_allocator() const noexcept
       { return this->m_sth.as_allocator();  }
 
@@ -814,7 +815,8 @@ class cow_vector
   };
 
 template<typename valueT, typename allocT>
-inline void
+inline
+void
 swap(cow_vector<valueT, allocT>& lhs, cow_vector<valueT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 

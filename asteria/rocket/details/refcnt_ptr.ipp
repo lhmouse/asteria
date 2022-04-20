@@ -31,7 +31,8 @@ class refcnt_cJveMKH5bI7L
   };
 
 template<typename elementT, typename deleterT>
-constexpr deleterT
+constexpr
+deleterT
 copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
   { return base.as_deleter();  }
 
@@ -85,7 +86,8 @@ class stored_pointer
         return ptr->refcnt_cJveMKH5bI7L::use_count();
       }
 
-    constexpr pointer
+    constexpr
+    pointer
     get() const noexcept
       { return this->m_ptr;  }
 

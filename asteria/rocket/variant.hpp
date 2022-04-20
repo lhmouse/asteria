@@ -323,7 +323,8 @@ class variant
 
   public:
     // 23.7.3.5, value status
-    constexpr size_t
+    constexpr
+    size_t
     index() const noexcept
       {
         return ROCKET_ASSERT(this->m_index < alternative_size),
@@ -489,7 +490,8 @@ const size_t variant<altsT...>::alternative_size;
 #endif
 
 template<typename... altsT>
-inline void
+inline
+void
 swap(variant<altsT...>& lhs, variant<altsT...>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

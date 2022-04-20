@@ -55,7 +55,8 @@ class stored_handle
     as_closer() noexcept
       { return static_cast<closer_base&>(*this);  }
 
-    constexpr const handle_type&
+    constexpr
+    const handle_type&
     get() const noexcept
       { return this->m_hv;  }
 
@@ -93,15 +94,18 @@ class default_closer_wrapper
       { }
 
   public:
-    constexpr handleT
+    constexpr
+    handleT
     null() const noexcept
       { return { };  }
 
-    constexpr bool
+    constexpr
+    bool
     is_null(handleT hv) const noexcept
       { return static_cast<bool>(hv) == false;  }
 
-    constexpr void
+    constexpr
+    void
     close(handleT hv)
       { this->m_cl(hv);  }
   };

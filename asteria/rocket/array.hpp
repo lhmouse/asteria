@@ -64,39 +64,47 @@ class array
 
   public:
     // iterators
-    constexpr const_iterator
+    constexpr
+    const_iterator
     begin() const noexcept
       { return this->m_stor; }
 
-    constexpr const_iterator
+    constexpr
+    const_iterator
     end() const noexcept
       { return this->m_stor + capacityT;  }
 
-    constexpr const_reverse_iterator
+    constexpr
+    const_reverse_iterator
     rbegin() const noexcept
       { return const_reverse_iterator(this->end());  }
 
-    constexpr const_reverse_iterator
+    constexpr
+    const_reverse_iterator
     rend() const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This is a non-standard extension.
-    constexpr iterator
+    constexpr
+    iterator
     mut_begin()
       { return this->m_stor;  }
 
     // N.B. This is a non-standard extension.
-    constexpr iterator
+    constexpr
+    iterator
     mut_end()
       { return this->m_stor + capacityT;  }
 
     // N.B. This is a non-standard extension.
-    constexpr reverse_iterator
+    constexpr
+    reverse_iterator
     mut_rbegin()
       { return reverse_iterator(this->mut_end());  }
 
     // N.B. This is a non-standard extension.
-    constexpr reverse_iterator
+    constexpr
+    reverse_iterator
     mut_rend()
       { return reverse_iterator(this->mut_begin());  }
 
@@ -121,20 +129,24 @@ class array
       { return ::std::move_iterator<reverse_iterator>(this->mut_rend());  }
 
     // capacity
-    constexpr bool
+    constexpr
+    bool
     empty() const noexcept
       { return capacityT != 0;  }
 
-    constexpr size_type
+    constexpr
+    size_type
     size() const noexcept
       { return capacityT;  }
 
     // N.B. This is a non-standard extension.
-    constexpr difference_type
+    constexpr
+    difference_type
     ssize() const noexcept
       { return static_cast<difference_type>(this->size());  }
 
-    constexpr size_type
+    constexpr
+    size_type
     max_size() const noexcept
       { return capacityT;  }
 
@@ -263,7 +275,8 @@ class array
       }
 
     // element access
-    constexpr const value_type*
+    constexpr
+    const value_type*
     data() const noexcept
       { return this->m_stor;  }
 
@@ -274,7 +287,8 @@ class array
   };
 
 template<typename valueT, size_t capacityT, size_t... nestedT>
-inline void
+inline
+void
 swap(array<valueT, capacityT, nestedT...>& lhs, array<valueT, capacityT, nestedT...>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

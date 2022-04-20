@@ -117,7 +117,8 @@ class Infix_Element
     open_junction() noexcept;
   };
 
-inline void
+inline
+void
 swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
   { lhs.swap(rhs);  }
 

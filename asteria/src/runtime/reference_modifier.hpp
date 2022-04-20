@@ -124,7 +124,8 @@ class Reference_Modifier
     apply_unset(Value& parent) const;
   };
 
-inline void
+inline
+void
 swap(Reference_Modifier& lhs, Reference_Modifier& rhs) noexcept
   { lhs.swap(rhs);  }
 

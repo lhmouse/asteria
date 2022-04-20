@@ -35,18 +35,21 @@ class bit_mask
       }
 
   public:
-    constexpr value_type
+    constexpr
+    value_type
     value() const noexcept
       { return this->m_value;  }
 
-    constexpr bool
+    constexpr
+    bool
     test(size_t b) const noexcept
       {
         ROCKET_ASSERT(b < bit_count);
         return (this->m_value >> b) & valueT(1);
       }
 
-    constexpr bit_mask&
+    constexpr
+    bit_mask&
     set(size_t b, bool v = true) noexcept
       {
         ROCKET_ASSERT(b < bit_count);
@@ -55,7 +58,8 @@ class bit_mask
         return *this;
       }
 
-    constexpr bit_mask&
+    constexpr
+    bit_mask&
     flip(size_t b) noexcept
       {
         ROCKET_ASSERT(b < bit_count);
@@ -63,38 +67,44 @@ class bit_mask
         return *this;
       }
 
-    constexpr bit_mask&
+    constexpr
+    bit_mask&
     operator&=(const bit_mask& other) noexcept
       {
         this->m_value &= other.m_value;
         return *this;
       }
 
-    constexpr bit_mask&
+    constexpr
+    bit_mask&
     operator^=(const bit_mask& other) noexcept
       {
         this->m_value ^= other.m_value;
         return *this;
       }
 
-    constexpr bit_mask&
+    constexpr
+    bit_mask&
     operator|=(const bit_mask& other) noexcept
       {
         this->m_value |= other.m_value;
         return *this;
       }
 
-    constexpr operator
+    constexpr
+    operator
     value_type() const noexcept
       { return this->value();  }
 
-    constexpr bool
+    constexpr
+    bool
     operator[](size_t b) const noexcept
       { return this->test(b);  }
   };
 
 template<typename valueT>
-constexpr bit_mask<valueT>
+constexpr
+bit_mask<valueT>
 operator&(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   {
     auto temp = lhs;
@@ -103,7 +113,8 @@ operator&(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   }
 
 template<typename valueT>
-constexpr bit_mask<valueT>
+constexpr
+bit_mask<valueT>
 operator^(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   {
     auto temp = lhs;
@@ -112,7 +123,8 @@ operator^(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   }
 
 template<typename valueT>
-constexpr bit_mask<valueT>
+constexpr
+bit_mask<valueT>
 operator|(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   {
     auto temp = lhs;
@@ -121,12 +133,14 @@ operator|(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator==(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   { return lhs.value() == rhs.value();  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator!=(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   { return lhs.value() != rhs.value();  }
 

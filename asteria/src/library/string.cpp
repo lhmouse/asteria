@@ -84,7 +84,8 @@ class BMH_Searcher
       }
 
   private:
-    static uintptr_t
+    static
+    uintptr_t
     do_xload_word(cow_string::const_iterator tcur) noexcept
       {
         uintptr_t btext;
@@ -92,7 +93,8 @@ class BMH_Searcher
         return btext;
       }
 
-    static uintptr_t
+    static
+    uintptr_t
     do_xload_word(cow_string::const_reverse_iterator tcur) noexcept
       {
         uintptr_t btext;
@@ -285,15 +287,18 @@ constexpr char s_url_chars[256] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
 
-constexpr bool
+constexpr
+bool
 do_is_url_invalid_char(char c) noexcept
   { return s_url_chars[uint8_t(c)] == 0;  }
 
-constexpr bool
+constexpr
+bool
 do_is_url_unreserved_char(char c) noexcept
   { return s_url_chars[uint8_t(c)] == 2;  }
 
-constexpr bool
+constexpr
+bool
 do_is_url_query_char(char c) noexcept
   { return s_url_chars[uint8_t(c)] & 2;  }
 
@@ -337,7 +342,8 @@ class PCRE2_Error
       { return reinterpret_cast<const char*>(this->m_buf);  }
   };
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const PCRE2_Error& err)
   { return fmt << err.c_str();  }
 
@@ -727,7 +733,8 @@ struct iconv_closer
     using handle_type  = ::iconv_t;
     using closer_type  = decltype(::iconv_close)*;
 
-    constexpr operator
+    constexpr
+    operator
     closer_type() const noexcept
       { return ::iconv_close;  }
 

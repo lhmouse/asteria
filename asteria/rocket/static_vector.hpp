@@ -251,20 +251,24 @@ class static_vector
       { return ::std::move_iterator<reverse_iterator>(this->mut_rend());  }
 
     // 26.3.11.3, capacity
-    constexpr bool
+    constexpr
+    bool
     empty() const noexcept
       { return this->m_sth.size() == 0;  }
 
-    constexpr size_type
+    constexpr
+    size_type
     size() const noexcept
       { return this->m_sth.size();  }
 
     // N.B. This is a non-standard extension.
-    constexpr difference_type
+    constexpr
+    difference_type
     ssize() const noexcept
       { return static_cast<difference_type>(this->size());  }
 
-    constexpr size_type
+    constexpr
+    size_type
     max_size() const noexcept
       { return this->m_sth.max_size();  }
 
@@ -686,7 +690,8 @@ class static_vector
       { return this->m_sth.mut_data();  }
 
     // N.B. The return type differs from `std::vector`.
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     get_allocator() const noexcept
       { return this->m_sth.as_allocator();  }
 
@@ -696,7 +701,8 @@ class static_vector
   };
 
 template<typename valueT, size_t capacityT, typename allocT>
-inline void
+inline
+void
 swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capacityT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

@@ -54,20 +54,23 @@ constexpr char s_escapes[][8] =
   };
 
 // POSIX
-constexpr const char*
+constexpr
+const char*
 do_result_of_strerror_r(int /*r*/, char* s) noexcept
   {
     return s;
   }
 
 // GNU
-constexpr const char*
+constexpr
+const char*
 do_result_of_strerror_r(char* r, char* /*s*/) noexcept
   {
     return r;
   }
 
-inline const char*
+inline
+const char*
 do_xstrerror_r(int errnum, char *strerrbuf, size_t buflen) noexcept
   {
     return do_result_of_strerror_r(

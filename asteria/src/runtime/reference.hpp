@@ -314,7 +314,8 @@ class Reference
     dereference_unset() const;
   };
 
-inline void
+inline
+void
 swap(Reference& lhs, Reference& rhs) noexcept
   { lhs.swap(rhs);  }
 

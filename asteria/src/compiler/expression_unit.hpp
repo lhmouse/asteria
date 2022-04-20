@@ -179,7 +179,8 @@ class Expression_Unit
                   const Global_Context& global, Analytic_Context& ctx, PTC_Aware ptc) const;
   };
 
-inline void
+inline
+void
 swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
   { lhs.swap(rhs);  }
 

@@ -31,7 +31,8 @@ class fill_iterator
       { }
 
   public:
-    constexpr difference_type
+    constexpr
+    difference_type
     tell() const noexcept
       { return this->m_pos;  }
 
@@ -40,7 +41,8 @@ class fill_iterator
       { this->m_pos = pos;
         return *this;  }
 
-    constexpr reference
+    constexpr
+    reference
     operator*() const noexcept
       { return this->m_value;  }
 

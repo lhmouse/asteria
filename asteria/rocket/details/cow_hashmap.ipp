@@ -77,7 +77,8 @@ class basic_bucket
       = delete;
 
   public:
-    constexpr const_pointer
+    constexpr
+    const_pointer
     get() const noexcept
       { return this->m_qval;  }
 
@@ -93,7 +94,8 @@ class basic_bucket
     bool() const noexcept
       { return bool(this->m_qval);  }
 
-    constexpr const value_type&
+    constexpr
+    const value_type&
     operator*() const
       { return *(this->m_qval);  }
 
@@ -101,7 +103,8 @@ class basic_bucket
     operator*()
       { return *(this->m_qval);  }
 
-    constexpr const value_type*
+    constexpr
+    const value_type*
     operator->() const noexcept
       { return noadl::unfancy(this->m_qval);  }
 
@@ -178,7 +181,8 @@ struct basic_storage
     operator=(const basic_storage&)
       = delete;
 
-    constexpr bool
+    constexpr
+    bool
     compatible(const basic_storage& other) const noexcept
       { return static_cast<const allocator_type&>(*this) ==
                static_cast<const allocator_type&>(other);  }
@@ -213,7 +217,8 @@ struct basic_storage
       }
 
     template<typename ykeyT>
-    constexpr size_t
+    constexpr
+    size_t
     hash(const ykeyT& ykey) const noexcept
       { return static_cast<const hasher&>(*this)(ykey);  }
 
@@ -273,7 +278,8 @@ struct storage_traits
     using storage_type     = storageT;
     using value_type       = typename allocator_type::value_type;
 
-    static void
+    static
+    void
     do_copy_insert(false_type,      // 1. copyable?
                    bool,            // 2. cloning?
                    storage_type&, const storage_type&)
@@ -283,7 +289,8 @@ struct storage_traits
               typeid(value_type).name());
       }
 
-    static void
+    static
+    void
     do_copy_insert(true_type,      // 1. copyable?
                    false_type,     // 2. cloning?
                    storage_type& st_new, const storage_type& st_old)
@@ -294,7 +301,8 @@ struct storage_traits
             st_new.adopt_value_unchecked(st_new.allocate_value(*qval));
       }
 
-    static void
+    static
+    void
     do_copy_insert(true_type,      // 1. copyable?
                    true_type,      // 2. cloning?
                    storage_type& st_new, const storage_type& st_old)
@@ -305,7 +313,8 @@ struct storage_traits
             st_new.adopt_value_unchecked(k, st_new.allocate_value(*qval));
       }
 
-    static void
+    static
+    void
     dispatch_transfer(storage_type& st_new, storage_type& st_old)
       {
         if(st_new.compatible(st_old) && st_old.nref.unique()) {
@@ -325,7 +334,8 @@ struct storage_traits
                          st_new, st_old);
       }
 
-    static void
+    static
+    void
     dispatch_clone(storage_type& st_new, const storage_type& st_old)
       {
         ROCKET_ASSERT(st_new.nelem == 0);
@@ -419,7 +429,8 @@ class storage_handle
       }
 
   public:
-    constexpr const hasher&
+    constexpr
+    const hasher&
     as_hasher() const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
@@ -427,7 +438,8 @@ class storage_handle
     as_hasher() noexcept
       { return static_cast<hasher_base&>(*this);  }
 
-    constexpr const key_equal&
+    constexpr
+    const key_equal&
     as_key_equal() const noexcept
       { return static_cast<const key_equal_base&>(*this);  }
 
@@ -435,7 +447,8 @@ class storage_handle
     as_key_equal() noexcept
       { return static_cast<key_equal_base&>(*this);  }
 
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -913,12 +926,14 @@ class hashmap_iterator
       { return ::std::exchange(*this, this->do_prev());  }
 
     template<typename ybucketT>
-    constexpr bool
+    constexpr
+    bool
     operator==(const hashmap_iterator<hashmapT, ybucketT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ybucketT>
-    constexpr bool
+    constexpr
+    bool
     operator!=(const hashmap_iterator<hashmapT, ybucketT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
   };

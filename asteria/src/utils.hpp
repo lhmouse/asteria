@@ -74,7 +74,8 @@ weaken_enum(enumT value) noexcept
 // Saturation subtraction
 template<typename uintT,
 ROCKET_ENABLE_IF(::std::is_unsigned<uintT>::value && !::std::is_same<uintT, bool>::value)>
-constexpr uintT
+constexpr
+uintT
 subsat(uintT x, uintT y) noexcept
   { return (x < y) ? 0 : (x - y);  }
 
@@ -107,7 +108,8 @@ ROCKET_CONST inline bool
 is_exact_int64(double val) noexcept
   { return noadl::is_convertible_to_int64(val) && (::std::trunc(val) == val);  }
 
-inline int64_t
+inline
+int64_t
 safe_double_to_int64(double val)
   {
     double fval = ::std::trunc(val);
@@ -125,25 +127,30 @@ safe_double_to_int64(double val)
   }
 
 // C-style quoting
-constexpr details_utils::Quote_Wrapper
+constexpr
+details_utils::Quote_Wrapper
 quote(const char* str, size_t len) noexcept
   { return { str, len };  }
 
-inline details_utils::Quote_Wrapper
+inline
+details_utils::Quote_Wrapper
 quote(const char* str) noexcept
   { return noadl::quote(str, ::std::strlen(str));  }
 
-inline details_utils::Quote_Wrapper
+inline
+details_utils::Quote_Wrapper
 quote(const cow_string& str) noexcept
   { return noadl::quote(str.data(), str.size());  }
 
 // Justifying
-constexpr details_utils::Paragraph_Wrapper
+constexpr
+details_utils::Paragraph_Wrapper
 pwrap(size_t indent, size_t hanging) noexcept
   { return { indent, hanging };  }
 
 // Error numbers
-constexpr details_utils::Formatted_errno
+constexpr
+details_utils::Formatted_errno
 format_errno(int err = errno) noexcept
   { return { err };  }
 

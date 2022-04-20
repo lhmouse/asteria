@@ -129,7 +129,8 @@ class Reference_Stack
       }
   };
 
-inline void
+inline
+void
 swap(Reference_Stack& lhs, Reference_Stack& rhs) noexcept
   { lhs.swap(rhs);  }
 

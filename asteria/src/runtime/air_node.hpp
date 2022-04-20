@@ -389,7 +389,8 @@ class AIR_Node
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
-inline void
+inline
+void
 swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
   { lhs.swap(rhs);  }
 

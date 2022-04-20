@@ -164,7 +164,8 @@ struct Sparam_import
   };
 
 template<typename ContainerT>
-inline void
+inline
+void
 do_for_each_get_variables(ContainerT& cont, Variable_HashMap& staged,
                           Variable_HashMap& temp)
   {
@@ -282,7 +283,8 @@ struct Traits_execute_block
     // `up` is unused.
     // `sp` is the solidified body.
 
-    static AVMC_Queue
+    static
+    AVMC_Queue
     make_sparam(bool& reachable, const AIR_Node::S_execute_block& altr)
       {
         AVMC_Queue queue;
@@ -302,13 +304,15 @@ struct Traits_declare_variable
     // `up` is unused.
     // `sp` is the source location and name;
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_declare_variable& altr)
       {
         return altr.sloc;
       }
 
-    static Sparam_sloc_name
+    static
+    Sparam_sloc_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_variable& altr)
       {
         Sparam_sloc_name sp;
@@ -341,13 +345,15 @@ struct Traits_initialize_variable
     // `up` is `immutable`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_initialize_variable& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_initialize_variable& altr)
       {
         AVMC_Queue::Uparam up;
@@ -380,7 +386,8 @@ struct Traits_if_statement
     // `up` is `negative`.
     // `sp` is the two branches.
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_if_statement& altr)
       {
         AVMC_Queue::Uparam up;
@@ -388,7 +395,8 @@ struct Traits_if_statement
         return up;
       }
 
-    static Sparam_queues_2
+    static
+    Sparam_queues_2
     make_sparam(bool& reachable, const AIR_Node::S_if_statement& altr)
       {
         Sparam_queues_2 sp;
@@ -416,7 +424,8 @@ struct Traits_switch_statement
     // `up` is unused.
     // `sp` is ... everything.
 
-    static Sparam_switch
+    static
+    Sparam_switch
     make_sparam(bool& /*reachable*/, const AIR_Node::S_switch_statement& altr)
       {
         Sparam_switch sp;
@@ -497,7 +506,8 @@ struct Traits_do_while_statement
     // `up` is `negative`.
     // `sp` is the loop body and condition.
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
       {
         AVMC_Queue::Uparam up;
@@ -505,7 +515,8 @@ struct Traits_do_while_statement
         return up;
       }
 
-    static Sparam_queues_2
+    static
+    Sparam_queues_2
     make_sparam(bool& reachable, const AIR_Node::S_do_while_statement& altr)
       {
         Sparam_queues_2 sp;
@@ -544,7 +555,8 @@ struct Traits_while_statement
     // `up` is `negative`.
     // `sp` is the condition and loop body.
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
       {
         AVMC_Queue::Uparam up;
@@ -552,7 +564,8 @@ struct Traits_while_statement
         return up;
       }
 
-    static Sparam_queues_2
+    static
+    Sparam_queues_2
     make_sparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
       {
         Sparam_queues_2 sp;
@@ -591,7 +604,8 @@ struct Traits_for_each_statement
     // `up` is unused.
     // `sp` is ... everything.
 
-    static Sparam_for_each
+    static
+    Sparam_for_each
     make_sparam(bool& /*reachable*/, const AIR_Node::S_for_each_statement& altr)
       {
         Sparam_for_each sp;
@@ -690,7 +704,8 @@ struct Traits_for_statement
     // `up` is unused.
     // `sp` is ... everything.
 
-    static Sparam_queues_4
+    static
+    Sparam_queues_4
     make_sparam(bool& /*reachable*/, const AIR_Node::S_for_statement& altr)
       {
         Sparam_queues_4 sp;
@@ -746,7 +761,8 @@ struct Traits_try_statement
     // `up` is unused.
     // `sp` is ... everything.
 
-    static Sparam_try_catch
+    static
+    Sparam_try_catch
     make_sparam(bool& reachable, const AIR_Node::S_try_statement& altr)
       {
         Sparam_try_catch sp;
@@ -827,7 +843,8 @@ struct Traits_throw_statement
     // `up` is unused.
     // `sp` is the source location.
 
-    static Source_Location
+    static
+    Source_Location
     make_sparam(bool& reachable, const AIR_Node::S_throw_statement& altr)
       {
         reachable = false;
@@ -849,7 +866,8 @@ struct Traits_assert_statement
     // `up` is unused.
     // `sp` is the source location.
 
-    static Sparam_sloc_text
+    static
+    Sparam_sloc_text
     make_sparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
       {
         Sparam_sloc_text sp;
@@ -877,7 +895,8 @@ struct Traits_simple_status
     // `up` is `status`.
     // `sp` is unused.
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
       {
         AVMC_Queue::Uparam up;
@@ -900,13 +919,15 @@ struct Traits_check_argument
     // `up` is `by_ref`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_check_argument& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_check_argument& altr)
       {
         AVMC_Queue::Uparam up;
@@ -929,13 +950,15 @@ struct Traits_push_global_reference
     // `up` is the hint.
     // `sp` is the source location and name;
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_push_global_reference& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_global_reference& altr)
       {
         AVMC_Queue::Uparam up;
@@ -943,7 +966,8 @@ struct Traits_push_global_reference
         return up;
       }
 
-    static phsh_string
+    static
+    phsh_string
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_global_reference& altr)
       {
         return altr.name;
@@ -968,13 +992,15 @@ struct Traits_push_local_reference
     // `up` is the depth and hint.
     // `sp` is the source location and name;
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_push_local_reference& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
       {
         AVMC_Queue::Uparam up;
@@ -983,7 +1009,8 @@ struct Traits_push_local_reference
         return up;
       }
 
-    static phsh_string
+    static
+    phsh_string
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
       {
         return altr.name;
@@ -1017,7 +1044,8 @@ struct Traits_push_bound_reference
     // `up` is unused.
     // `sp` is the reference to push.
 
-    static Reference
+    static
+    Reference
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_bound_reference& altr)
       {
         return altr.ref;
@@ -1036,7 +1064,8 @@ struct Traits_define_function
     // `up` is unused.
     // `sp` is ... everything.
 
-    static Sparam_func
+    static
+    Sparam_func
     make_sparam(bool& /*reachable*/, const AIR_Node::S_define_function& altr)
       {
         Sparam_func sp;
@@ -1048,7 +1077,8 @@ struct Traits_define_function
         return sp;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, const Sparam_func& sp)
       {
         // Rewrite nodes in the body as necessary.
@@ -1067,13 +1097,15 @@ struct Traits_branch_expression
     // `up` is `assign`.
     // `sp` is the branches.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_branch_expression& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_branch_expression& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1081,7 +1113,8 @@ struct Traits_branch_expression
         return up;
       }
 
-    static Sparam_queues_2
+    static
+    Sparam_queues_2
     make_sparam(bool& reachable, const AIR_Node::S_branch_expression& altr)
       {
         Sparam_queues_2 sp;
@@ -1106,13 +1139,15 @@ struct Traits_coalescence
     // `up` is `assign`.
     // `sp` is the null branch.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_coalescence& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1120,7 +1155,8 @@ struct Traits_coalescence
         return up;
       }
 
-    static AVMC_Queue
+    static
+    AVMC_Queue
     make_sparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue queue;
@@ -1197,13 +1233,15 @@ struct Traits_function_call
     // `up` is `nargs` and `ptc`.
     // `sp` is the source location.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_function_call& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_function_call& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1213,13 +1251,15 @@ struct Traits_function_call
         return up;
       }
 
-    static Source_Location
+    static
+    Source_Location
     make_sparam(bool& /*reachable*/, const AIR_Node::S_function_call& altr)
       {
         return altr.sloc;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -1259,13 +1299,15 @@ struct Traits_member_access
     // `up` is unused.
     // `sp` is the name.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_member_access& altr)
       {
         return altr.sloc;
       }
 
-    static phsh_string
+    static
+    phsh_string
     make_sparam(bool& /*reachable*/, const AIR_Node::S_member_access& altr)
       {
         return altr.name;
@@ -1286,13 +1328,15 @@ struct Traits_push_unnamed_array
     // `up` is `nelems`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_push_unnamed_array& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_array& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1323,13 +1367,15 @@ struct Traits_push_unnamed_object
     // `up` is unused.
     // `sp` is the list of keys.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_push_unnamed_object& altr)
       {
         return altr.sloc;
       }
 
-    static cow_vector<phsh_string>
+    static
+    cow_vector<phsh_string>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_object& altr)
       {
         return altr.keys;
@@ -1359,13 +1405,15 @@ struct Traits_return_value
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_return_value& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_return_value& /*altr*/)
       {
         reachable = false;
@@ -1391,7 +1439,8 @@ struct Traits_push_temporary
     // `up` is unused.
     // `sp` is the value to push.
 
-    static Value
+    static
+    Value
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_temporary& altr)
       {
         return altr.value;
@@ -1410,7 +1459,8 @@ struct Traits_apply_xop_inc_post
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -1456,7 +1506,8 @@ struct Traits_apply_xop_dec_post
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -1502,7 +1553,8 @@ struct Traits_apply_xop_subscr
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -1544,13 +1596,15 @@ struct Traits_apply_xop_pos
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1573,13 +1627,15 @@ struct Traits_apply_xop_neg
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1626,13 +1682,15 @@ struct Traits_apply_xop_notb
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1683,13 +1741,15 @@ struct Traits_apply_xop_notl
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1715,7 +1775,8 @@ struct Traits_apply_xop_inc_pre
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -1760,7 +1821,8 @@ struct Traits_apply_xop_dec_pre
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -1805,7 +1867,8 @@ struct Traits_apply_xop_unset
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -1827,13 +1890,15 @@ struct Traits_apply_xop_countof
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1886,13 +1951,15 @@ struct Traits_apply_xop_typeof
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1918,13 +1985,15 @@ struct Traits_apply_xop_sqrt
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -1965,13 +2034,15 @@ struct Traits_apply_xop_isnan
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2013,13 +2084,15 @@ struct Traits_apply_xop_isinf
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2061,13 +2134,15 @@ struct Traits_apply_xop_abs
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2114,13 +2189,15 @@ struct Traits_apply_xop_sign
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2161,13 +2238,15 @@ struct Traits_apply_xop_round
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2206,13 +2285,15 @@ struct Traits_apply_xop_floor
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2251,13 +2332,15 @@ struct Traits_apply_xop_ceil
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2296,13 +2379,15 @@ struct Traits_apply_xop_trunc
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2341,13 +2426,15 @@ struct Traits_apply_xop_iround
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2386,13 +2473,15 @@ struct Traits_apply_xop_ifloor
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2431,13 +2520,15 @@ struct Traits_apply_xop_iceil
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2476,13 +2567,15 @@ struct Traits_apply_xop_itrunc
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2521,13 +2614,15 @@ struct Traits_apply_xop_cmp_eq
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2556,13 +2651,15 @@ struct Traits_apply_xop_cmp_ne
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2591,13 +2688,15 @@ struct Traits_apply_xop_cmp_lt
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2631,13 +2730,15 @@ struct Traits_apply_xop_cmp_gt
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2671,13 +2772,15 @@ struct Traits_apply_xop_cmp_lte
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2711,13 +2814,15 @@ struct Traits_apply_xop_cmp_gte
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2751,13 +2856,15 @@ struct Traits_apply_xop_cmp_3way
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2804,13 +2911,15 @@ struct Traits_apply_xop_add
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2879,13 +2988,15 @@ struct Traits_apply_xop_sub
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -2946,13 +3057,15 @@ struct Traits_apply_xop_mul
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3049,13 +3162,15 @@ struct Traits_apply_xop_div
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3112,13 +3227,15 @@ struct Traits_apply_xop_mod
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3175,13 +3292,15 @@ struct Traits_apply_xop_sll
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3255,13 +3374,15 @@ struct Traits_apply_xop_srl
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3335,13 +3456,15 @@ struct Traits_apply_xop_sla
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3424,13 +3547,15 @@ struct Traits_apply_xop_sra
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3501,13 +3626,15 @@ struct Traits_apply_xop_andb
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3571,13 +3698,15 @@ struct Traits_apply_xop_orb
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3642,13 +3771,15 @@ struct Traits_apply_xop_xorb
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3713,7 +3844,8 @@ struct Traits_apply_xop_assign
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -3755,7 +3887,8 @@ struct float_traits<double>
   };
 
 template<typename floatT>
-inline void
+inline
+void
 do_split(floatT& hi, floatT& lo, floatT value) noexcept
   {
     using traits = float_traits<floatT>;
@@ -3771,7 +3904,8 @@ do_split(floatT& hi, floatT& lo, floatT value) noexcept
   }
 
 template<typename floatT>
-inline floatT
+inline
+floatT
 do_fma_impl(floatT x, floatT y, floatT z)
   {
     // Forward NaN arguments verbatim.
@@ -3813,13 +3947,15 @@ struct Traits_apply_xop_fma
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3869,7 +4005,8 @@ struct Traits_apply_xop_head
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -3891,7 +4028,8 @@ struct Traits_apply_xop_tail
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -3913,13 +4051,15 @@ struct Traits_unpack_struct_array
     // `up` is `immutable` and `nelems`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_unpack_struct_array& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_array& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3928,7 +4068,8 @@ struct Traits_unpack_struct_array
         return up;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
         // Read the value of the initializer.
@@ -3969,7 +4110,8 @@ struct Traits_unpack_struct_object
     // `up` is `immutable`.
     // `sp` is the list of keys.
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
       {
         AVMC_Queue::Uparam up;
@@ -3977,19 +4119,22 @@ struct Traits_unpack_struct_object
         return up;
       }
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_unpack_struct_object& altr)
       {
         return altr.sloc;
       }
 
-    static cow_vector<phsh_string>
+    static
+    cow_vector<phsh_string>
     make_sparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
       {
         return altr.keys;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const cow_vector<phsh_string>& keys)
       {
         // Read the value of the initializer.
@@ -4030,7 +4175,8 @@ struct Traits_define_null_variable
     // `up` is `immutable`.
     // `sp` is the source location and name.
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4038,13 +4184,15 @@ struct Traits_define_null_variable
         return up;
       }
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_define_null_variable& altr)
       {
         return altr.sloc;
       }
 
-    static Sparam_sloc_name
+    static
+    Sparam_sloc_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
       {
         Sparam_sloc_name sp;
@@ -4078,13 +4226,15 @@ struct Traits_single_step_trap
     // `up` is unused.
     // `sp` is the source location.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_single_step_trap& altr)
       {
         return altr.sloc;
       }
 
-    static Source_Location
+    static
+    Source_Location
     make_sparam(bool& /*reachable*/, const AIR_Node::S_single_step_trap& altr)
       {
         return altr.sloc;
@@ -4105,13 +4255,15 @@ struct Traits_variadic_call
     // `up` is `ptc`.
     // `sp` is the source location.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_variadic_call& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4119,13 +4271,15 @@ struct Traits_variadic_call
         return up;
       }
 
-    static Source_Location
+    static
+    Source_Location
     make_sparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
       {
         return altr.sloc;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -4234,13 +4388,15 @@ struct Traits_defer_expression
     // `up` is unused.
     // `sp` is the source location and body.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_defer_expression& altr)
       {
         return altr.sloc;
       }
 
-    static Sparam_defer
+    static
+    Sparam_defer
     make_sparam(bool& /*reachable*/, const AIR_Node::S_defer_expression& altr)
       {
         Sparam_defer sp;
@@ -4249,7 +4405,8 @@ struct Traits_defer_expression
         return sp;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, const Sparam_defer& sp)
       {
         // Rebind the body here.
@@ -4272,13 +4429,15 @@ struct Traits_import_call
     // `up` is `nargs`.
     // `sp` is the source location and compiler options.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_import_call& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4286,7 +4445,8 @@ struct Traits_import_call
         return up;
       }
 
-    static Sparam_import
+    static
+    Sparam_import
     make_sparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
       {
         Sparam_import sp;
@@ -4295,7 +4455,8 @@ struct Traits_import_call
         return sp;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_import& sp)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
@@ -4370,7 +4531,8 @@ struct Traits_declare_reference
     // `up` is unused.
     // `sp` is the name;
 
-    static Sparam_name
+    static
+    Sparam_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_reference& altr)
       {
         Sparam_name sp;
@@ -4391,13 +4553,15 @@ struct Traits_initialize_reference
     // `up` is unused.
     // `sp` is the name;
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_initialize_reference& altr)
       {
         return altr.sloc;
       }
 
-    static Sparam_name
+    static
+    Sparam_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_initialize_reference& altr)
       {
         Sparam_name sp;
@@ -4420,7 +4584,8 @@ struct Traits_catch_expression
     // `up` is unused.
     // `sp` is the body expression.
 
-    static AVMC_Queue
+    static
+    AVMC_Queue
     make_sparam(bool& /*reachable*/, const AIR_Node::S_catch_expression& altr)
       {
         AVMC_Queue queue;
@@ -4428,7 +4593,8 @@ struct Traits_catch_expression
         return queue;
       }
 
-    static AIR_Status
+    static
+    AIR_Status
     execute(Executive_Context& ctx, const AVMC_Queue& queue)
       {
         // Evaluate the body expression. If it effects an exception,
@@ -4458,13 +4624,15 @@ struct Traits_apply_xop_lzcnt
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4500,13 +4668,15 @@ struct Traits_apply_xop_tzcnt
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4542,13 +4712,15 @@ struct Traits_apply_xop_popcnt
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4584,13 +4756,15 @@ struct Traits_apply_xop_addm
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4631,13 +4805,15 @@ struct Traits_apply_xop_subm
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4678,13 +4854,15 @@ struct Traits_apply_xop_mulm
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4725,13 +4903,15 @@ struct Traits_apply_xop_adds
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4783,13 +4963,15 @@ struct Traits_apply_xop_subs
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4841,13 +5023,15 @@ struct Traits_apply_xop_muls
     // `up` is `assign`.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
       }
 
-    static AVMC_Queue::Uparam
+    static
+    AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
@@ -4899,7 +5083,8 @@ struct Traits_apply_xop_random
     // `up` is unused.
     // `sp` is unused.
 
-    static const Source_Location&
+    static
+    const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
       {
         return altr.sloc;
@@ -4968,7 +5153,8 @@ struct solidify_disp;
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
   {
-    static AIR_Status
+    static
+    AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
@@ -4980,7 +5166,8 @@ struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
                     ::std::declval<const NodeT&>()))>::type&>(head->sparam));
       }
 
-    static void
+    static
+    void
     append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
@@ -4992,7 +5179,8 @@ struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
   {
-    static AIR_Status
+    static
+    AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
@@ -5001,7 +5189,8 @@ struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
                     ::std::declval<const NodeT&>()))>::type&>(head->sparam));
       }
 
-    static void
+    static
+    void
     append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
@@ -5013,7 +5202,8 @@ struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
   {
-    static AIR_Status
+    static
+    AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* head)
       {
         return TraitsT::execute(ctx,
@@ -5022,7 +5212,8 @@ struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
                     ::std::declval<const NodeT&>()))>::type>(head->uparam));
       }
 
-    static void
+    static
+    void
     append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
@@ -5033,13 +5224,15 @@ struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
 template<typename TraitsT, typename NodeT>
 struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
   {
-    static AIR_Status
+    static
+    AIR_Status
     thunk(Executive_Context& ctx, const AVMC_Queue::Header* /*head*/)
       {
         return TraitsT::execute(ctx);
       }
 
-    static void
+    static
+    void
     append(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr));
@@ -5047,7 +5240,8 @@ struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
   };
 
 template<typename TraitsT, typename NodeT>
-inline bool
+inline
+bool
 do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
     using disp = solidify_disp<TraitsT, NodeT,

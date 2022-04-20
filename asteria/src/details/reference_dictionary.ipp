@@ -30,7 +30,8 @@ struct Bucket
       { return this->prev != nullptr;  }
   };
 
-inline bool
+inline
+bool
 do_compare_eq(const phsh_string& lhs, const phsh_string& rhs) noexcept
   {
     // Generally, we expect the strings to compare equal.

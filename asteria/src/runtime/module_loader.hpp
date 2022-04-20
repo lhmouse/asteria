@@ -110,7 +110,8 @@ class Module_Loader::Unique_Stream
       }
   };
 
-inline void
+inline
+void
 swap(Module_Loader::Unique_Stream& lhs, Module_Loader::Unique_Stream& rhs) noexcept
   { lhs.swap(rhs);  }
 

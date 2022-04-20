@@ -181,11 +181,13 @@ format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
 using formatter   = basic_formatter<char>;
 using wformatter  = basic_formatter<wchar_t>;
 
-extern template
+extern
+template
 tinyfmt&
 vformat(tinyfmt&, const char*, size_t, const formatter*, size_t);
 
-extern template
+extern
+template
 wtinyfmt&
 vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
 

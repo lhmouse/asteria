@@ -75,7 +75,8 @@ struct Header
   };
 
 template<typename SparamT>
-inline void
+inline
+void
 do_nontrivial_reloc(Header* head, Header* from)
   {
     auto ptr = reinterpret_cast<SparamT*>(head->sparam);
@@ -85,7 +86,8 @@ do_nontrivial_reloc(Header* head, Header* from)
   }
 
 template<typename SparamT>
-inline void
+inline
+void
 do_nontrivial_dtor(Header* head)
   {
     auto ptr = reinterpret_cast<SparamT*>(head->sparam);
@@ -93,7 +95,8 @@ do_nontrivial_dtor(Header* head)
   }
 
 template<typename SparamT>
-inline void
+inline
+void
 do_call_get_variables(Variable_HashMap& staged, Variable_HashMap& temp,
                       const Header* head)
   {
@@ -104,7 +107,8 @@ do_call_get_variables(Variable_HashMap& staged, Variable_HashMap& temp,
 template<typename SparamT, typename = void>
 struct select_get_variables
   {
-    constexpr operator
+    constexpr
+    operator
     Var_Getter*() const noexcept
       { return nullptr;  }
   };
@@ -117,7 +121,8 @@ struct select_get_variables<SparamT,
           ::std::declval<Variable_HashMap&>()   // temp
         ))>
   {
-    constexpr operator
+    constexpr
+    operator
     Var_Getter*() const noexcept
       { return do_call_get_variables<SparamT>;  }
   };
@@ -140,7 +145,8 @@ struct Sparam_traits
   };
 
 template<typename XSparamT>
-inline void
+inline
+void
 do_forward_ctor(Header* head, intptr_t arg)
   {
     using Sparam = typename ::std::decay<XSparamT>::type;

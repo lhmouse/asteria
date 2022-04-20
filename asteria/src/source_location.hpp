@@ -52,11 +52,13 @@ class Source_Location
     print(tinyfmt& fmt) const;
   };
 
-inline void
+inline
+void
 swap(Source_Location& lhs, Source_Location& rhs) noexcept
   { lhs.swap(rhs);  }
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const Source_Location& sloc)
   { return sloc.print(fmt);  }
 

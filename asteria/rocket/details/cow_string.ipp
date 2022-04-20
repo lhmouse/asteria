@@ -139,7 +139,8 @@ class storage_handle
       }
 
   public:
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -307,7 +308,8 @@ class basic_hasher
     char32_t m_reg = xoffset;
 
   public:
-    constexpr basic_hasher&
+    constexpr
+    basic_hasher&
     append(charT c) noexcept
       {
         char32_t word = static_cast<char32_t>(c);
@@ -316,7 +318,8 @@ class basic_hasher
         return *this;
       }
 
-    constexpr basic_hasher&
+    constexpr
+    basic_hasher&
     append(const charT* s, size_t n)
       {
         const charT* sp = s;
@@ -325,7 +328,8 @@ class basic_hasher
         return *this;
       }
 
-    constexpr basic_hasher&
+    constexpr
+    basic_hasher&
     append(const charT* s)
       {
         const charT* sp = s;
@@ -334,7 +338,8 @@ class basic_hasher
         return *this;
       }
 
-    constexpr size_t
+    constexpr
+    size_t
     finish() noexcept
       {
         char32_t reg = this->m_reg;
@@ -479,12 +484,14 @@ class string_iterator
       }
 
     template<typename ycharT>
-    constexpr bool
+    constexpr
+    bool
     operator==(const string_iterator<stringT, ycharT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ycharT>
-    constexpr bool
+    constexpr
+    bool
     operator!=(const string_iterator<stringT, ycharT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 

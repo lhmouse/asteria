@@ -267,22 +267,26 @@ using rcfwdp = rcptr<typename ::rocket::copy_cv<
           Rcfwd<typename ::std::remove_cv<RealT>::type>, RealT>::type>;
 
 template<typename TargetT, typename RealT>
-constexpr TargetT
+constexpr
+TargetT
 unerase_cast(const rcptr<Rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
   { return static_cast<TargetT>(ptr.get());  }
 
 template<typename TargetT, typename RealT>
-constexpr TargetT
+constexpr
+TargetT
 unerase_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
   { return static_cast<TargetT>(ptr.get());  }
 
 template<typename TargetT, typename RealT>
-constexpr rcptr<TargetT>
+constexpr
+rcptr<TargetT>
 unerase_pointer_cast(const rcptr<Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<TargetT>(ptr);  }
 
 template<typename TargetT, typename RealT>
-constexpr rcptr<TargetT>
+constexpr
+rcptr<TargetT>
 unerase_pointer_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<TargetT>(ptr);  }
 
@@ -317,7 +321,8 @@ struct Abstract_Opaque
       = 0;
   };
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
@@ -348,7 +353,8 @@ struct Abstract_Function
       = 0;
   };
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Function& func)
   { return func.describe(fmt);  }
 
@@ -435,12 +441,14 @@ class cow_opaque
     open();
   };
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   { return opaq.describe(fmt);  }
 
 template<typename OpaqueT>
-inline const OpaqueT&
+inline
+const OpaqueT&
 cow_opaque::
 get() const
   {
@@ -460,7 +468,8 @@ get() const
   }
 
 template<typename OpaqueT>
-inline OpaqueT&
+inline
+OpaqueT&
 cow_opaque::
 open()
   {
@@ -601,7 +610,8 @@ class cow_function
     invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const;
   };
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const cow_function& func)
   { return func.describe(fmt);  }
 

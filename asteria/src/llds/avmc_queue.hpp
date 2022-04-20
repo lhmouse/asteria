@@ -55,7 +55,8 @@ class AVMC_Queue
     do_reallocate(uint32_t nadd);
 
     // Reserve storage for the next node. `size` is the size of `sparam` to initialize.
-    inline Header*
+    inline
+    Header*
     do_reserve_one(Uparam uparam, size_t size);
 
     // Append a new node to the end. `size` is the size of `sparam` to initialize.
@@ -135,7 +136,8 @@ class AVMC_Queue
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
-inline void
+inline
+void
 swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
   { lhs.swap(rhs);  }
 

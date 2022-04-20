@@ -134,7 +134,8 @@ struct storage_traits
               typeid(value_type).name());
       }
 
-    static void
+    static
+    void
     do_transfer(true_type,    // 1. movable?
                 true_type,    // 2. trivial?
                 bool,         // 3. copyable?
@@ -145,7 +146,8 @@ struct storage_traits
         st_new.nskip = st_old.nskip;
       }
 
-    static void
+    static
+    void
     do_transfer(true_type,    // 1. movable?
                 false_type,   // 2. trivial?
                 true_type,    // 3. copyable?
@@ -163,7 +165,8 @@ struct storage_traits
             st_new.nskip = k;
       }
 
-    static void
+    static
+    void
     do_transfer(true_type,    // 1. movable?
                 false_type,   // 2. trivial?
                 false_type,   // 3. copyable?
@@ -180,7 +183,8 @@ struct storage_traits
                 typeid(value_type).name());
       }
 
-    static void
+    static
+    void
     dispatch_transfer(storage_type& st_new, storage_type& st_old, size_t nskip)
       {
         ROCKET_ASSERT(st_old.nskip <= st_old.nelem);
@@ -264,7 +268,8 @@ class storage_handle
       }
 
   public:
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -610,12 +615,14 @@ class vector_iterator
       }
 
     template<typename yvalueT>
-    constexpr bool
+    constexpr
+    bool
     operator==(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename yvalueT>
-    constexpr bool
+    constexpr
+    bool
     operator!=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 

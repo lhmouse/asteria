@@ -151,7 +151,8 @@ class basic_prehashed_string
 
   public:
     // getters
-    constexpr const string_type&
+    constexpr
+    const string_type&
     rdstr() const noexcept
       { return this->m_sth.str();  }
 
@@ -159,11 +160,13 @@ class basic_prehashed_string
     const string_type&() const noexcept
       { return this->m_sth.str();  }
 
-    constexpr size_t
+    constexpr
+    size_t
     rdhash() const noexcept
       { return this->m_sth.hval();  }
 
-    constexpr bool
+    constexpr
+    bool
     equals(const basic_prehashed_string& other) const
       noexcept(noexcept(::std::declval<const key_equal&>()(
             ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
@@ -173,7 +176,8 @@ class basic_prehashed_string
       }
 
     template<typename otherT>
-    constexpr bool
+    constexpr
+    bool
     equals(const otherT& other) const
       noexcept(noexcept(::std::declval<const key_equal&>()(
             ::std::declval<const string_type&>(), ::std::declval<const otherT&>())))
@@ -199,24 +203,29 @@ class basic_prehashed_string
       { return this->m_sth.str().rend();  }
 
     // 24.3.2.4, capacity
-    constexpr bool
+    constexpr
+    bool
     empty() const noexcept
       { return this->m_sth.str().empty();  }
 
-    constexpr size_type
+    constexpr
+    size_type
     size() const noexcept
       { return this->m_sth.str().size();  }
 
-    constexpr size_type
+    constexpr
+    size_type
     length() const noexcept
       { return this->m_sth.str().length();  }
 
     // N.B. This is a non-standard extension.
-    constexpr difference_type
+    constexpr
+    difference_type
     ssize() const noexcept
       { return static_cast<difference_type>(this->m_sth.str().size());  }
 
-    constexpr size_type
+    constexpr
+    size_type
     max_size() const noexcept
       { return this->m_sth.str().max_size();  }
 
@@ -261,11 +270,13 @@ class basic_prehashed_string
       { return this->m_sth.str().copy(s, tn);  }
 
     // 24.3.2.7, string operations
-    constexpr const value_type*
+    constexpr
+    const value_type*
     data() const noexcept
       { return this->m_sth.str().data();  }
 
-    constexpr const value_type*
+    constexpr
+    const value_type*
     c_str() const noexcept
       { return this->m_sth.str().c_str();  }
   };
@@ -276,63 +287,75 @@ struct basic_prehashed_string<stringT, hashT, eqT>::hash
     using result_type    = size_t;
     using argument_type  = basic_prehashed_string;
 
-    constexpr result_type
+    constexpr
+    result_type
     operator()(const argument_type& str) const noexcept
       { return str.rdhash();  }
   };
 
-extern template
+extern
+template
 class basic_prehashed_string<cow_string, cow_string::hash>;
 
-extern template
+extern
+template
 class basic_prehashed_string<cow_wstring, cow_wstring::hash>;
 
-extern template
+extern
+template
 class basic_prehashed_string<cow_u16string, cow_u16string::hash>;
 
-extern template
+extern
+template
 class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
 template<typename stringT, typename hashT, typename eqT>
-constexpr bool
+constexpr
+bool
 operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
            const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr bool
+constexpr
+bool
 operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr bool
+constexpr
+bool
 operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(rhs.equals(lhs)))
   { return rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
-constexpr bool
+constexpr
+bool
 operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
            const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return !lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr bool
+constexpr
+bool
 operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
   noexcept(noexcept(lhs.equals(rhs)))
   { return !lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
-constexpr bool
+constexpr
+bool
 operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(rhs.equals(lhs)))
   { return !rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
-inline void
+inline
+void
 swap(basic_prehashed_string<stringT, hashT, eqT>& lhs,
      basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))

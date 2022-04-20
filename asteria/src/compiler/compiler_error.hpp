@@ -91,19 +91,23 @@ class Compiler_Error
       { return this->m_sloc.column();  }
   };
 
-inline bool
+inline
+bool
 operator==(const Compiler_Error& lhs, Compiler_Status rhs) noexcept
   { return lhs.status() == rhs;  }
 
-inline bool
+inline
+bool
 operator!=(const Compiler_Error& lhs, Compiler_Status rhs) noexcept
   { return lhs.status() != rhs;  }
 
-inline bool
+inline
+bool
 operator==(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
   { return lhs == rhs.status();  }
 
-inline bool
+inline
+bool
 operator!=(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 

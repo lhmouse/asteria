@@ -82,7 +82,8 @@ class storage_handle
       = delete;
 
   public:
-    constexpr const allocator_type&
+    constexpr
+    const allocator_type&
     as_allocator() const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
@@ -94,7 +95,8 @@ class storage_handle
     capacity() noexcept
       { return capacityT;  }
 
-    constexpr size_type
+    constexpr
+    size_type
     max_size() const noexcept
       { return this->capacity();  }
 
@@ -373,12 +375,14 @@ class vector_iterator
       }
 
     template<typename yvalueT>
-    constexpr bool
+    constexpr
+    bool
     operator==(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename yvalueT>
-    constexpr bool
+    constexpr
+    bool
     operator!=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 

@@ -22,7 +22,8 @@ struct is_input_iterator_aux<iteratorT,
 
 // `estimate_distance()`
 template<typename iteratorT>
-constexpr size_t
+constexpr
+size_t
 estimate_distance_aux(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
   { return 0;  }
 
@@ -171,12 +172,14 @@ struct use_static_cast_aux
   { };
 
 template<typename targetT, typename sourceT>
-constexpr targetT
+constexpr
+targetT
 static_or_dynamic_cast_aux(true_type, sourceT&& src)
   { return static_cast<targetT>(::std::forward<sourceT>(src));  }
 
 template<typename targetT, typename sourceT>
-constexpr targetT
+constexpr
+targetT
 static_or_dynamic_cast_aux(false_type, sourceT&& src)
   { return dynamic_cast<targetT>(::std::forward<sourceT>(src));  }
 
@@ -196,7 +199,8 @@ struct binder_eq
       { }
 
     template<typename xvalueT>
-    constexpr bool
+    constexpr
+    bool
     operator()(const xvalueT& other) const
       { return this->m_val == other;  }
   };
@@ -217,7 +221,8 @@ struct binder_ne
       { }
 
     template<typename xvalueT>
-    constexpr bool
+    constexpr
+    bool
     operator()(const xvalueT& other) const
       { return this->m_val != other;  }
   };

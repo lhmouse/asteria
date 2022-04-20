@@ -254,7 +254,8 @@ class Reference_Dictionary
       }
   };
 
-inline void
+inline
+void
 swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
   { lhs.swap(rhs);  }
 

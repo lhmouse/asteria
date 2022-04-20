@@ -44,15 +44,18 @@ class reference_wrapper
 
   public:
     // access
-    constexpr reference
+    constexpr
+    reference
     get() const noexcept
       { return *(this->m_ptr);  }
 
-    constexpr pointer
+    constexpr
+    pointer
     ptr() const noexcept
       { return this->m_ptr;  }
 
-    constexpr operator
+    constexpr
+    operator
     reference() const noexcept
       { return this->get();  }
   };
@@ -73,17 +76,20 @@ cref(valueT&& value)
   = delete;
 
 template<typename valueT>
-constexpr reference_wrapper<valueT>
+constexpr
+reference_wrapper<valueT>
 ref(valueT& value) noexcept
   { return reference_wrapper<valueT>(value);  }
 
 template<typename valueT>
-constexpr reference_wrapper<valueT>
+constexpr
+reference_wrapper<valueT>
 ref(reference_wrapper<valueT> value) noexcept
   { return reference_wrapper<valueT>(value);  }
 
 template<typename valueT>
-constexpr reference_wrapper<valueT>
+constexpr
+reference_wrapper<valueT>
 ref(valueT&& value)
   = delete;
 

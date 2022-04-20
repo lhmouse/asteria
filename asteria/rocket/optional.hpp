@@ -175,7 +175,8 @@ class optional
 
   public:
     // 19.6.3.5, observers
-    constexpr bool
+    constexpr
+    bool
     has_value() const noexcept
       { return this->m_stor.size() != 0;  }
 
@@ -247,19 +248,23 @@ class optional
                  : ::std::move(this->m_stor.mut_front());
       }
 
-    constexpr const_reference
+    constexpr
+    const_reference
     operator*() const
       { return this->m_stor.front();  }
 
-    constexpr reference
+    constexpr
+    reference
     operator*()
       { return this->m_stor.mut_front();  }
 
-    constexpr const value_type*
+    constexpr
+    const value_type*
     operator->() const
       { return ::std::addressof(this->m_stor.front());  }
 
-    constexpr value_type*
+    constexpr
+    value_type*
     operator->()
       { return ::std::addressof(this->m_stor.mut_front());  }
 
@@ -291,62 +296,73 @@ class optional
   };
 
 template<typename valueT>
-inline void
+inline
+void
 swap(optional<valueT>& lhs, optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator==(const optional<valueT>& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
   { return (lhs && rhs) ? (*lhs == *rhs) : (!lhs == !rhs);  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator!=(const optional<valueT>& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
   { return (lhs && rhs) ? (*lhs != *rhs) : (!lhs != !rhs);  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator==(const optional<valueT>& lhs, nullopt_t) noexcept
   { return !lhs;  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator!=(const optional<valueT>& lhs, nullopt_t) noexcept
   { return !!lhs;  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator==(nullopt_t, const optional<valueT>& rhs) noexcept
   { return !rhs;  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator!=(nullopt_t, const optional<valueT>& rhs) noexcept
   { return !!rhs;  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator==(const optional<valueT>& lhs, const valueT& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
   { return !!lhs && (*lhs == rhs);  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator!=(const optional<valueT>& lhs, const valueT& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
   { return !lhs || (*lhs != rhs);  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator==(const valueT& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
   { return !!rhs && (lhs == *rhs);  }
 
 template<typename valueT>
-constexpr bool
+constexpr
+bool
 operator!=(const valueT& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
   { return !rhs || (lhs != *rhs);  }

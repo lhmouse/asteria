@@ -9,7 +9,8 @@
 namespace rocket {
 namespace {
 
-constexpr bool
+constexpr
+bool
 do_match_char_ci(char ch, char cmp)
   {
     return static_cast<uint8_t>(ch | 0x20) == static_cast<uint8_t>(cmp);
@@ -935,7 +936,8 @@ do_xldexp_I_generic(uint64_t ubits, int exp2)
     return static_cast<double>(freg);
   }
 
-inline double
+inline
+double
 do_xldexp_I(uint64_t ireg, int exp2, bool single)
   {
     return single

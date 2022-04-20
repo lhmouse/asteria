@@ -90,11 +90,13 @@ class unique_handle
 
   public:
     // 23.11.1.2.4, observers
-    constexpr handle_type
+    constexpr
+    handle_type
     get() const noexcept
       { return this->m_sth.get();  }
 
-    constexpr const closer_type&
+    constexpr
+    const closer_type&
     get_closer() const noexcept
       { return this->m_sth.as_closer();  }
 
@@ -106,7 +108,8 @@ class unique_handle
     bool() const noexcept
       { return !(this->m_sth.as_closer().is_null(this->m_sth.get()));  }
 
-    constexpr operator
+    constexpr
+    operator
     const handle_type&() const noexcept
       { return this->m_sth.get();  }
 
@@ -140,43 +143,50 @@ class unique_handle
   };
 
 template<typename handleT, typename closerT>
-constexpr bool
+constexpr
+bool
 operator==(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() == rhs.get();  }
 
 template<typename handleT, typename closerT>
-constexpr bool
+constexpr
+bool
 operator!=(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() != rhs.get();  }
 
 template<typename handleT, typename closerT>
-constexpr bool
+constexpr
+bool
 operator<(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() < rhs.get();  }
 
 template<typename handleT, typename closerT>
-constexpr bool
+constexpr
+bool
 operator>(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() > rhs.get();  }
 
 template<typename handleT, typename closerT>
-constexpr bool
+constexpr
+bool
 operator<=(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() <= rhs.get();  }
 
 template<typename handleT, typename closerT>
-constexpr bool
+constexpr
+bool
 operator>=(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
   { return lhs.get() >= rhs.get();  }
 
 template<typename handleT, typename closerT>
-inline void
+inline
+void
 swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }

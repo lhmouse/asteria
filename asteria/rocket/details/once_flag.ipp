@@ -17,13 +17,16 @@ union guard
     uint64_t word;
   };
 
-extern "C" int
+extern "C"
+int
 __cxa_guard_acquire(guard* g) noexcept;
 
-extern "C" void
+extern "C"
+void
 __cxa_guard_abort(guard* g) noexcept;
 
-extern "C" void
+extern "C"
+void
 __cxa_guard_release(guard* g) noexcept;
 
 }  // namespace details_once_flag

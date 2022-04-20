@@ -412,11 +412,13 @@ class Value
     dump_to_stderr(size_t indent = 2, size_t hanging = 0) const;
   };
 
-inline void
+inline
+void
 swap(Value& lhs, Value& rhs) noexcept
   { lhs.swap(rhs);  }
 
-inline tinyfmt&
+inline
+tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
   { return value.print(fmt);  }
 

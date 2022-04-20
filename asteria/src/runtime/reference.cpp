@@ -18,7 +18,8 @@
 namespace asteria {
 namespace {
 
-inline bool
+inline
+bool
 do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
                     const rcfwdp<Variable>& fwdp_opt)
   {
@@ -33,7 +34,8 @@ do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
     return true;
   }
 
-inline void
+inline
+void
 do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
                     const rcfwdp<Variable>&& fwdp_opt)
   = delete;

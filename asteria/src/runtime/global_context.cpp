@@ -54,15 +54,18 @@ constexpr s_modules[] =
 
 struct Module_Comparator
   {
-    constexpr bool
+    constexpr
+    bool
     operator()(const Module& lhs, const Module& rhs) const noexcept
       { return lhs.version < rhs.version;  }
 
-    constexpr bool
+    constexpr
+    bool
     operator()(API_Version lhs, const Module& rhs) const noexcept
       { return lhs < rhs.version;  }
 
-    constexpr bool
+    constexpr
+    bool
     operator()(const Module& lhs, API_Version rhs) const noexcept
       { return lhs.version < rhs;  }
   };

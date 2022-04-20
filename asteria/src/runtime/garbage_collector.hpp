@@ -32,7 +32,8 @@ class Garbage_Collector final
       { }
 
   private:
-    inline size_t
+    inline
+    size_t
     do_collect_generation(size_t gen);
 
   public:

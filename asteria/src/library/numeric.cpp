@@ -72,19 +72,22 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
     return text;
   }
 
-inline void
+inline
+void
 bswap_be(int8_t& value) noexcept
   {
     (void)value;
   }
 
-inline void
+inline
+void
 bswap_le(int8_t& value) noexcept
   {
     (void)value;
   }
 
-inline void
+inline
+void
 bswap_be(int16_t& value) noexcept
   {
     uint16_t buf;
@@ -93,7 +96,8 @@ bswap_be(int16_t& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_le(int16_t& value) noexcept
   {
     uint16_t buf;
@@ -102,7 +106,8 @@ bswap_le(int16_t& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_be(int32_t& value) noexcept
   {
     uint32_t buf;
@@ -111,7 +116,8 @@ bswap_be(int32_t& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_le(int32_t& value) noexcept
   {
     uint32_t buf;
@@ -120,7 +126,8 @@ bswap_le(int32_t& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_be(int64_t& value) noexcept
   {
     uint64_t buf;
@@ -129,7 +136,8 @@ bswap_be(int64_t& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_le(int64_t& value) noexcept
   {
     uint64_t buf;
@@ -138,7 +146,8 @@ bswap_le(int64_t& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_be(float& value) noexcept
   {
     uint32_t buf;
@@ -147,7 +156,8 @@ bswap_be(float& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_le(float& value) noexcept
   {
     uint32_t buf;
@@ -156,7 +166,8 @@ bswap_le(float& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_be(double& value) noexcept
   {
     uint64_t buf;
@@ -165,7 +176,8 @@ bswap_be(double& value) noexcept
     ::std::memcpy(&value, &buf, sizeof(value));
   }
 
-inline void
+inline
+void
 bswap_le(double& value) noexcept
   {
     uint64_t buf;
