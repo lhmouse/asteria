@@ -22,8 +22,7 @@ class final_wrapper
       { }
 
   public:
-    constexpr
-    operator
+    constexpr operator
     const allocT&() const noexcept
       { return this->m_alloc;  }
 

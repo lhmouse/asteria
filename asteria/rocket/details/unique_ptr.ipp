@@ -27,8 +27,7 @@ struct deleter_reference
       : m_qdel(::std::addressof(del))
       { }
 
-    constexpr
-    operator
+    constexpr operator
     deleterT&() const noexcept
       { return *(this->m_qdel);  }
 

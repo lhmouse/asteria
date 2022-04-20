@@ -733,8 +733,7 @@ struct iconv_closer
     using handle_type  = ::iconv_t;
     using closer_type  = decltype(::iconv_close)*;
 
-    constexpr
-    operator
+    constexpr operator
     closer_type() const noexcept
       { return ::iconv_close;  }
 

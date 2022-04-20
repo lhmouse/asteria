@@ -215,8 +215,7 @@ class refcnt_ptr
     bool() const noexcept
       { return bool(this->get());  }
 
-    constexpr
-    operator
+    constexpr operator
     pointer() const noexcept
       { return this->get();  }
 

@@ -54,8 +54,7 @@ class reference_wrapper
     ptr() const noexcept
       { return this->m_ptr;  }
 
-    constexpr
-    operator
+    constexpr operator
     reference() const noexcept
       { return this->get();  }
   };

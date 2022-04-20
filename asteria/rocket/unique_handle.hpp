@@ -108,8 +108,7 @@ class unique_handle
     bool() const noexcept
       { return !(this->m_sth.as_closer().is_null(this->m_sth.get()));  }
 
-    constexpr
-    operator
+    constexpr operator
     const handle_type&() const noexcept
       { return this->m_sth.get();  }
 

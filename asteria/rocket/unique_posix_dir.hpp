@@ -25,8 +25,7 @@ class posix_dir_closer
       { }
 
   public:
-    constexpr
-    operator
+    constexpr operator
     closer_type() const noexcept
       { return this->m_cl;  }
 

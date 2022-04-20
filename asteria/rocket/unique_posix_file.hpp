@@ -25,8 +25,7 @@ class posix_file_closer
       { }
 
   public:
-    constexpr
-    operator
+    constexpr operator
     const closer_type&() const noexcept
       { return this->m_cl;  }
 

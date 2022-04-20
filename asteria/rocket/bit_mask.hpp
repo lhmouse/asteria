@@ -91,8 +91,7 @@ class bit_mask
         return *this;
       }
 
-    constexpr
-    operator
+    constexpr operator
     value_type() const noexcept
       { return this->value();  }
 

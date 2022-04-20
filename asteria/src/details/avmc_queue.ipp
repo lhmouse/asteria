@@ -107,8 +107,7 @@ do_call_get_variables(Variable_HashMap& staged, Variable_HashMap& temp,
 template<typename SparamT, typename = void>
 struct select_get_variables
   {
-    constexpr
-    operator
+    constexpr operator
     Var_Getter*() const noexcept
       { return nullptr;  }
   };
@@ -121,8 +120,7 @@ struct select_get_variables<SparamT,
           ::std::declval<Variable_HashMap&>()   // temp
         ))>
   {
-    constexpr
-    operator
+    constexpr operator
     Var_Getter*() const noexcept
       { return do_call_get_variables<SparamT>;  }
   };
