@@ -15,19 +15,23 @@ struct Handler
     ~Handler()
       = default;
 
-    virtual const char*
+    virtual
+    const char*
     cmd() const  // the name of this command
       = 0;
 
-    virtual const char*
+    virtual
+    const char*
     oneline() const  // the one-line description for `help`
       = 0;
 
-    virtual const char*
+    virtual
+    const char*
     help() const  // the long description for `help [cmd]`
       = 0;
 
-    virtual void
+    virtual
+    void
     handle(cow_vector<cow_string>&& args)  // do something
       = 0;
   };

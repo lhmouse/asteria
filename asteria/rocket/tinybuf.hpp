@@ -88,29 +88,34 @@ class basic_tinybuf
 
   protected:
     // These can be overridden by derived buffer classes.
-    virtual void
+    virtual
+    void
     do_flush()
       { }
 
-    virtual off_type
+    virtual
+    off_type
     do_tell() const
       {
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
       }
 
-    virtual void
+    virtual
+    void
     do_seek(off_type /*off*/, seek_dir /*dir*/)
       {
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
       }
 
-    virtual size_type
+    virtual
+    size_type
     do_getn(char_type* /*s*/, size_type /*n*/)
       {
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");
       }
 
-    virtual int_type
+    virtual
+    int_type
     do_getc()
       {
         char_type c;
@@ -119,13 +124,15 @@ class basic_tinybuf
         return traits_type::to_int_type(c);
       }
 
-    virtual void
+    virtual
+    void
     do_putn(const char_type* /*s*/, size_type /*n*/)
       {
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
       }
 
-    virtual void
+    virtual
+    void
     do_putc(char_type c)
       {
         this->do_putn(::std::addressof(c), 1);

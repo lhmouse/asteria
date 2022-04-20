@@ -55,7 +55,8 @@ class basic_tinyfmt
 
   public:
     // buffer interfaces
-    virtual tinybuf_type&
+    virtual
+    tinybuf_type&
     get_tinybuf() const
       = 0;
 

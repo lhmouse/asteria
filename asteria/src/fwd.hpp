@@ -222,7 +222,8 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
     ~Rcbase()
       = default;
 
-    virtual void
+    virtual
+    void
     vtable_key_function_sLBHstEX() noexcept;
   };
 
@@ -241,7 +242,8 @@ struct Rcfwd : virtual Rcbase
     operator=(const Rcfwd&) noexcept
       = default;
 
-    virtual void
+    virtual
+    void
     vtable_key_function_GklPAslB() noexcept;
 
     template<typename XRealT = RealT>
@@ -301,14 +303,16 @@ struct Abstract_Opaque
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
 
     // This function is called to convert this object to a human-readble string.
-    virtual tinyfmt&
+    virtual
+    tinyfmt&
     describe(tinyfmt& fmt) const
       = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual void
+    virtual
+    void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       = 0;
 
@@ -316,7 +320,8 @@ struct Abstract_Opaque
     // is shared. If this function returns a null pointer, the shared instance is used. If this
     // function returns a non-null pointer, it replaces the current value. Derived classes that
     // are not copyable should throw an exception in this function.
-    virtual Abstract_Opaque*
+    virtual
+    Abstract_Opaque*
     clone_opt(rcptr<Abstract_Opaque>& out) const
       = 0;
   };
@@ -336,19 +341,22 @@ struct Abstract_Function
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
 
     // This function is called to convert this object to a human-readble string.
-    virtual tinyfmt&
+    virtual
+    tinyfmt&
     describe(tinyfmt& fmt) const
       = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
-    virtual void
+    virtual
+    void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       = 0;
 
     // This function may return a proper tail call wrapper.
-    virtual Reference&
+    virtual
+    Reference&
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const
       = 0;
   };
