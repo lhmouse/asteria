@@ -1,15 +1,16 @@
 ## AC_INIT(package, version, [bug-report], [tarname], [url])
 AC_INIT([asteria], [master], [lh_mouse@126.com], [asteria], [https://github.com/lhmouse/asteria])
-LT_INIT([disable-static])
-AM_INIT_AUTOMAKE([foreign subdir-objects])
-
+AC_LANG([C++])
 AC_CONFIG_SRCDIR([asteria/src/simple_script.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
-
 AC_PROG_CXX
-AC_LANG([C++])
+
+LT_INIT([disable-static])
+LT_LANG([C++])
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 
 ## Check for tcmalloc
