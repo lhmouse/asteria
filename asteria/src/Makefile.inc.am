@@ -1,7 +1,7 @@
 include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
+  asteria/src/fwd.hpp  \
   %reldir%/precompiled.hpp  \
-  %reldir%/fwd.hpp  \
   %reldir%/utils.hpp  \
   %reldir%/recursion_sentry.hpp  \
   %reldir%/value.hpp  \
@@ -140,7 +140,7 @@ lib_libasteria_la_LIBADD =  \
   lib/librocket.la ${LTLIBICONV}
 
 lib_libasteria_la_LDFLAGS =  \
-  -Wl,--no-undefined -no-undefined -version-info 0:0
+  -Wl,--no-undefined -version-info @ABI_MAJOR@:@ABI_MINOR@
 
 bin_PROGRAMS += bin/asteria
 bin_asteria_SOURCES =  \

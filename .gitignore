@@ -25,6 +25,7 @@
 /config.status
 /libtool
 /stamp-h1
+/asteria/src/fwd.hpp
 
 /lib/
 /bin/

@@ -12,4 +12,3 @@ task:
     - apt-get install -y --no-install-recommends autoconf automake libtool g++ gettext make parallel python3
     - apt-get install -y libedit-dev libpcre2-dev libssl-dev zlib1g-dev
     - ./ci/build.sh
-    - ./check_includes.sh
