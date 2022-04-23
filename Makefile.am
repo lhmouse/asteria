@@ -34,7 +34,7 @@ CLEANFILES =  \
 
 precompiled.w.hpp: ${srcdir}/src/precompiled.hpp
 	## Build the wrapper header, which contains the absolute path to the plain header.
-	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
+	${AM_V_GEN}echo "#include \"$$(readlink -f $<)\"" >$@
 
 precompiled.w.hpp.gch: precompiled.w.hpp config.h
 	## Compile the header. This must use LTCXXCOMPILE due to some nasty PIC flags...
