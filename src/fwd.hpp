@@ -4,6 +4,7 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
+#include "version.h"
 #include "../rocket/cow_string.hpp"
 #include "../rocket/cow_vector.hpp"
 #include "../rocket/cow_hashmap.hpp"
@@ -31,10 +32,6 @@
 #ifdef __FAST_MATH__
 #  error Please turn off `-ffast-math`.
 #endif
-
-#define ASTERIA_ABI_VERSION_MAJOR    @ABI_MAJOR@U
-#define ASTERIA_ABI_VERSION_MINOR    @ABI_MINOR@U
-#define ASTERIA_ABI_VERSION_STRING   "@ABI_MAJOR@.@ABI_MINOR@-@ABI_SUFFIX@"
 
 #define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
     C(const C&) = default;  \

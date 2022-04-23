@@ -1,6 +1,7 @@
 include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
-  src/fwd.hpp  \
+  src/version.h  \
+  %reldir%/fwd.hpp  \
   %reldir%/precompiled.hpp  \
   %reldir%/utils.hpp  \
   %reldir%/recursion_sentry.hpp  \

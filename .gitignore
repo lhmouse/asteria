@@ -25,7 +25,7 @@
 /config.status
 /libtool
 /stamp-h1
-/src/fwd.hpp
+/src/version.h
 
 /lib/
 /bin/
