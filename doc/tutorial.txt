@@ -22,7 +22,7 @@ standard output stream. We can also examine it directly:
   ```
   #2:1> std.io.putln
   * running 'expression #2'...
-  * result #2: function [[`std.io.putln(text)` at 'asteria/src/library/io.cpp:488']];
+  * result #2: function [[`std.io.putln(text)` at 'src/library/io.cpp:488']];
   ```
 
 ### Functions
@@ -72,7 +72,7 @@ a value:
   * running 'snippet #4'...
   ! error: runtime error: attempt to use the result of a function call which returned no value
   [backtrace frames:
-    0) native code at 'asteria/src/runtime/reference.cpp:56:0': "attempt to use the result of a function call which returned no value"
+    0) native code at 'src/runtime/reference.cpp:56:0': "attempt to use the result of a function call which returned no value"
     1)   expression at 'snippet #4:2:31': ""
     2)   function at 'snippet #4:0:0': "[file scope]"
     -- end of backtrace frames]

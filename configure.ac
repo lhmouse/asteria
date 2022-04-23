@@ -1,7 +1,7 @@
 ## AC_INIT(package, version, [bug-report], [tarname], [url])
 AC_INIT([asteria], [master], [lh_mouse@126.com], [asteria], [https://github.com/lhmouse/asteria])
 AC_LANG([C++])
-AC_CONFIG_SRCDIR([asteria/src/simple_script.cpp])
+AC_CONFIG_SRCDIR([src/simple_script.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -67,5 +67,5 @@ AC_SUBST([ABI_MAJOR])
 AC_SUBST([ABI_MINOR])
 AC_SUBST([ABI_SUFFIX])
 
-AC_CONFIG_FILES([Makefile] [asteria/src/fwd.hpp])
+AC_CONFIG_FILES([Makefile] [src/fwd.hpp])
 AC_OUTPUT

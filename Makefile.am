@@ -3,7 +3,7 @@ NOTHING =
 
 ## Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -DDLL_EXPORT  \
-  -Iasteria/src -Iasteria/src/runtime -I${srcdir}/asteria/src  \
+  -Isrc -Isrc/runtime -I${srcdir}/src  \
   -U_FORTIFY_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE  \
   -f{strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{math-errno,trapping-math,devirtualize-speculatively,stack-protector}  \
@@ -32,7 +32,7 @@ CLEANFILES =  \
   precompiled.w.hpp.gch.lo  \
   ${NOTHING}
 
-precompiled.w.hpp: ${srcdir}/asteria/src/precompiled.hpp
+precompiled.w.hpp: ${srcdir}/src/precompiled.hpp
 	## Build the wrapper header, which contains the absolute path to the plain header.
 	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
 
@@ -47,11 +47,11 @@ precompiled.w.hpp.gch: precompiled.w.hpp config.h
 
 ## Initialization
 EXTRA_DIST =  \
-  asteria/doc/operator-precedence.txt  \
-  asteria/doc/standard-library.txt  \
-  asteria/doc/syntax.txt  \
-  asteria/doc/examples.txt  \
-  asteria/doc/asteria.nanorc  \
+  doc/operator-precedence.txt  \
+  doc/standard-library.txt  \
+  doc/syntax.txt  \
+  doc/examples.txt  \
+  doc/asteria.nanorc  \
   ${NOTHING}
 
 noinst_LIBRARIES =
@@ -69,8 +69,8 @@ check_LTLIBRARIES =
 check_PROGRAMS =
 
 ## Programs and libraries
-include asteria/rocket/Makefile.inc.am
-include asteria/src/Makefile.inc.am
+include rocket/Makefile.inc.am
+include src/Makefile.inc.am
 
 ## Tests
-include asteria/test/Makefile.inc.am
+include test/Makefile.inc.am
