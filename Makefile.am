@@ -20,7 +20,6 @@ AM_CXXFLAGS = -include precompiled.w.hpp -std=gnu++14 -Wp,-std=c++11  \
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
-## Pre-compiled header
 BUILT_SOURCES =  \
   precompiled.w.hpp  \
   precompiled.w.hpp.gch  \
@@ -32,6 +31,7 @@ CLEANFILES =  \
   precompiled.w.hpp.gch.lo  \
   ${NOTHING}
 
+## Custome rules
 precompiled.w.hpp: ${srcdir}/src/precompiled.hpp
 	## Build the wrapper header, which contains the absolute path to the plain header.
 	${AM_V_GEN}echo "#include \"$$(readlink -f $<)\"" >$@
