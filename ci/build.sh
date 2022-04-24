@@ -27,6 +27,7 @@ mkdir -p m4
 autoreconf -ifv
 
 cd $(mktemp -d)
+trap 'rm -rf ~+' EXIT
 ~-/configure --disable-silent-rules --enable-debug-checks --disable-static
 make -j$(nproc)
 
