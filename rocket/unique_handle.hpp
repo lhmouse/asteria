@@ -191,12 +191,14 @@ swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs)
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename handleT, typename closerT>
-inline basic_tinyfmt<charT, traitsT>&
+inline
+basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const unique_handle<handleT, closerT>& rhs)
   { return fmt << rhs.get();  }
 
 template<typename handleT, typename closerT>
-inline unique_handle<handleT, details_unique_handle::default_closer_wrapper<handleT, closerT>>
+inline
+unique_handle<handleT, details_unique_handle::default_closer_wrapper<handleT, closerT>>
 make_unique_handle(handleT hv, closerT&& cl) noexcept
   { return { hv, ::std::forward<closerT>(cl) };  }
 

@@ -69,10 +69,12 @@ class Executive_Context
     Reference*
     do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const override;
 
-    ROCKET_COLD AIR_Status
+    ROCKET_COLD
+    AIR_Status
     do_on_scope_exit_slow(AIR_Status status);
 
-    ROCKET_COLD Runtime_Error&
+    ROCKET_COLD
+    Runtime_Error&
     do_on_scope_exit_slow(Runtime_Error& except);
 
   public:

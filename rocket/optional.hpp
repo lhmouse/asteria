@@ -167,7 +167,8 @@ class optional
         return *this;  }
 
   private:
-    [[noreturn]] ROCKET_NEVER_INLINE reference
+    [[noreturn]] ROCKET_NEVER_INLINE
+    reference
     do_throw_valueless() const
       {
         noadl::sprintf_and_throw<length_error>("variant: no value set");
@@ -368,7 +369,8 @@ operator!=(const valueT& lhs, const optional<valueT>& rhs)
   { return !rhs || (lhs != *rhs);  }
 
 template<typename charT, typename traitsT, typename valueT>
-inline basic_tinyfmt<charT, traitsT>&
+inline
+basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const optional<valueT>& rhs)
   { return rhs ? (fmt << *rhs) : (fmt << "[no value]");  }
 

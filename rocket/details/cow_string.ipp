@@ -26,7 +26,8 @@ struct basic_storage
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-    static constexpr size_type
+    static constexpr
+    size_type
     min_nblk_for_nchar(size_t nchar) noexcept
       {
         // Note this is correct even when `nchar` is zero, as long as
@@ -36,7 +37,8 @@ struct basic_storage
                 / sizeof(basic_storage) + 1;
       }
 
-    static constexpr size_t
+    static constexpr
+    size_t
     max_nchar_for_nblk(size_type nblk) noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
 
@@ -129,7 +131,8 @@ class storage_handle
         this->do_destroy_storage(qstor);
       }
 
-    ROCKET_NEVER_INLINE static void
+    ROCKET_NEVER_INLINE static
+    void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -148,7 +151,8 @@ class storage_handle
     as_allocator() noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    ROCKET_PURE bool
+    ROCKET_PURE
+    bool
     unique() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -166,7 +170,8 @@ class storage_handle
         return qstor->nref.get();
       }
 
-    ROCKET_PURE size_type
+    ROCKET_PURE
+    size_type
     capacity() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -205,7 +210,8 @@ class storage_handle
         return storage::max_nchar_for_nblk(nblk);
       }
 
-    ROCKET_PURE const value_type*
+    ROCKET_PURE
+    const value_type*
     data() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -223,7 +229,8 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_NEVER_INLINE value_type*
+    ROCKET_NEVER_INLINE
+    value_type*
     reallocate_more(const value_type* src, size_type len, size_type add)
       {
         // Calculate the combined length of string (len + add).
@@ -281,7 +288,8 @@ struct comparator
     using traits_type  = traitsT;
     using size_type    = size_t;
 
-    static constexpr int
+    static constexpr
+    int
     inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
       {
         return (n1 != n2) ? 2  // length not equal
@@ -289,7 +297,8 @@ struct comparator
                           : traits_type::compare(s1, s2, n1);
       }
 
-    static constexpr int
+    static constexpr
+    int
     relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
       {
         return (n1 == n2) ?      traits_type::compare(s1, s2, n1)

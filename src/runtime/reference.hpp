@@ -72,7 +72,8 @@ class Reference
         return *this;  }
 
   private:
-    ROCKET_ALWAYS_INLINE void
+    ROCKET_ALWAYS_INLINE
+    void
     do_copy_partial(const Reference& other)
       {
         const uint32_t index = other.m_index;
@@ -84,7 +85,8 @@ class Reference
           this->m_ptca = other.m_ptca;
       }
 
-    ROCKET_ALWAYS_INLINE void
+    ROCKET_ALWAYS_INLINE
+    void
     do_swap_partial(Reference& other)
       {
         const bmask32 mask = { this->m_index, other.m_index };
@@ -283,7 +285,8 @@ class Reference
 
     // These are conceptual read/write functions.
     // Some references are placeholders that do not denote values.
-    ROCKET_ALWAYS_INLINE const Value&
+    ROCKET_ALWAYS_INLINE
+    const Value&
     dereference_readonly() const
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
@@ -291,7 +294,8 @@ class Reference
             : this->do_dereference_readonly_slow();
       }
 
-    ROCKET_ALWAYS_INLINE Value&
+    ROCKET_ALWAYS_INLINE
+    Value&
     open_temporary()
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
@@ -299,7 +303,8 @@ class Reference
             : this->do_mutate_into_temporary_slow();
       }
 
-    ROCKET_ALWAYS_INLINE Reference&
+    ROCKET_ALWAYS_INLINE
+    Reference&
     finish_call(Global_Context& global)
       {
         return ROCKET_EXPECT(!this->is_ptc_args())

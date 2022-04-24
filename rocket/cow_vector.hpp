@@ -144,7 +144,8 @@ class cow_vector
         return *this;
       }
 
-    [[noreturn]] ROCKET_NEVER_INLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE
+    void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
@@ -787,7 +788,8 @@ class cow_vector
 
     // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.
-    ROCKET_ALWAYS_INLINE value_type*
+    ROCKET_ALWAYS_INLINE
+    value_type*
     mut_data()
       {
         auto ptr = this->m_sth.mut_data_opt();

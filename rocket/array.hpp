@@ -53,7 +53,8 @@ class array
       }
 
   private:
-    [[noreturn]] ROCKET_NEVER_INLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE
+    void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
@@ -161,7 +162,8 @@ class array
       }
 
     // N.B. This is a non-standard extension.
-    static constexpr size_type
+    static constexpr
+    size_type
     capacity() noexcept
       { return capacityT;  }
 
@@ -281,7 +283,8 @@ class array
       { return this->m_stor;  }
 
     // N.B. This is a non-standard extension.
-    ROCKET_ALWAYS_INLINE value_type*
+    ROCKET_ALWAYS_INLINE
+    value_type*
     mut_data()
       { return this->m_stor;  }
   };

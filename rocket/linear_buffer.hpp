@@ -212,7 +212,8 @@ class basic_linear_buffer
     data() const noexcept
       { return this->m_stor.data() + this->m_goff;  }
 
-    ROCKET_ALWAYS_INLINE basic_linear_buffer&
+    ROCKET_ALWAYS_INLINE
+    basic_linear_buffer&
     discard(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
@@ -297,7 +298,8 @@ class basic_linear_buffer
         return this->m_stor.capacity() - this->m_eoff;
       }
 
-    ROCKET_ALWAYS_INLINE basic_linear_buffer&
+    ROCKET_ALWAYS_INLINE
+    basic_linear_buffer&
     accept(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_stor.capacity() - this->m_eoff);

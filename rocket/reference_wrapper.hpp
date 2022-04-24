@@ -60,17 +60,20 @@ class reference_wrapper
   };
 
 template<typename valueT>
-constexpr reference_wrapper<const valueT>
+constexpr
+reference_wrapper<const valueT>
 cref(valueT& value) noexcept
   { return reference_wrapper<const valueT>(value);  }
 
 template<typename valueT>
-constexpr reference_wrapper<const valueT>
+constexpr
+reference_wrapper<const valueT>
 cref(reference_wrapper<valueT> value) noexcept
   { return reference_wrapper<const valueT>(value);  }
 
 template<typename valueT>
-constexpr reference_wrapper<const valueT>
+constexpr
+reference_wrapper<const valueT>
 cref(valueT&& value)
   = delete;
 

@@ -39,7 +39,8 @@ length(const charT* p) noexcept
   }
 
 template<typename charT>
-constexpr typename make_unsigned<charT>::type
+constexpr
+typename make_unsigned<charT>::type
 ucast(charT c) noexcept
   { return static_cast<typename make_unsigned<charT>::type>(c);  }
 

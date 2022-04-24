@@ -668,7 +668,8 @@ constexpr bmask32 M_function  = { type_function };
 constexpr bmask32 M_array     = { type_array };
 constexpr bmask32 M_object    = { type_object };
 
-ROCKET_CONST const char*
+ROCKET_CONST
+const char*
 describe_type(Type type) noexcept;
 
 // Value comparison results
@@ -693,7 +694,8 @@ enum Frame_Type : uint8_t
     frame_type_try     = 7,  // An exception propagated across a try block.
   };
 
-ROCKET_CONST const char*
+ROCKET_CONST
+const char*
 describe_frame_type(Frame_Type type) noexcept;
 
 // Compiler status codes
@@ -765,7 +767,8 @@ enum Compiler_Status : uint32_t
     compiler_status_undeclared_identifier                      = 3001,
   };
 
-ROCKET_CONST const char*
+ROCKET_CONST
+const char*
 describe_compiler_status(Compiler_Status status) noexcept;
 
 // API versioning of the standard library

@@ -56,11 +56,13 @@ class Random_Engine final
       }
 
     // This class is a UniformRandomBitGenerator.
-    static constexpr result_type
+    static constexpr
+    result_type
     min() noexcept
       { return 0; }
 
-    static constexpr result_type
+    static constexpr
+    result_type
     max() noexcept
       { return UINT32_MAX;  }
 

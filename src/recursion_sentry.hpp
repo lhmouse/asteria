@@ -40,7 +40,8 @@ class Recursion_Sentry
         return *this;  }
 
   private:
-    [[noreturn]] void
+    [[noreturn]]
+    void
     do_throw_stack_overflow(size_t usage, size_t limit) const;
 
     void

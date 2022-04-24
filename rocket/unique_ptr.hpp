@@ -226,7 +226,8 @@ swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs)
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename elementT, typename deleterT>
-inline basic_tinyfmt<charT, traitsT>&
+inline
+basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt,
            const unique_ptr<elementT, deleterT>& rhs)
   { return fmt << rhs.get();  }
@@ -235,28 +236,36 @@ template<typename elementT, typename... paramsT>
 inline
 unique_ptr<elementT>
 make_unique(paramsT&&... params)
-  { return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));  }
+  {
+    return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+  }
 
 template<typename targetT, typename sourceT>
 inline
 unique_ptr<targetT>
 static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
-  { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });  }
+  {
+    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
+               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+  }
 
 template<typename targetT, typename sourceT>
 inline
 unique_ptr<targetT>
 dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
-  { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });  }
+  {
+    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
+               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+  }
 
 template<typename targetT, typename sourceT>
 inline
 unique_ptr<targetT>
 const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
-  { return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });  }
+  {
+    return details_unique_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
+               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+  }
 
 }  // namespace rocket
 

@@ -118,22 +118,26 @@ template
 class basic_shallow_string<char32_t>;
 
 template<typename charT>
-constexpr basic_shallow_string<charT, char_traits<charT>>
+constexpr
+basic_shallow_string<charT, char_traits<charT>>
 sref(const charT* ptr) noexcept
   { return basic_shallow_string<charT, char_traits<charT>>(ptr);  }
 
 template<typename charT>
-constexpr basic_shallow_string<charT, char_traits<charT>>
+constexpr
+basic_shallow_string<charT, char_traits<charT>>
 sref(const charT* ptr, ::std::size_t len) noexcept
   { return basic_shallow_string<charT, char_traits<charT>>(ptr, len);  }
 
 template<typename charT, typename traitsT, typename allocT>
-constexpr basic_shallow_string<charT, traitsT>
+constexpr
+basic_shallow_string<charT, traitsT>
 sref(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
   { return basic_shallow_string<charT, traitsT>(str);  }
 
 template<typename charT, typename traitsT>
-inline basic_tinyfmt<charT, traitsT>&
+inline
+basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, basic_shallow_string<charT, traitsT> sh)
   { return fmt.putn(sh.c_str(), sh.length());  }
 
@@ -287,7 +291,8 @@ class basic_cow_string
         return *this;
       }
 
-    [[noreturn]] ROCKET_NEVER_INLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE
+    void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
@@ -1302,7 +1307,8 @@ class basic_cow_string
 
     // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    ROCKET_ALWAYS_INLINE value_type*
+    ROCKET_ALWAYS_INLINE
+    value_type*
     mut_data()
       {
         auto ptr = this->m_sth.mut_data_opt();
@@ -1826,7 +1832,8 @@ template
 class basic_cow_string<char32_t>;
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
           const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
@@ -1836,7 +1843,8 @@ operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
   }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
           basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
@@ -1848,19 +1856,22 @@ operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
   }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
           const basic_cow_string<charT, traitsT, allocT>& rhs)
   { return ::std::move(lhs.append(rhs));  }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
           basic_cow_string<charT, traitsT, allocT>&& rhs)
   { return ::std::move(rhs.insert(0, lhs));  }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
   {
     auto res = lhs;
@@ -1869,7 +1880,8 @@ operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, const charT* rhs)
   }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, charT rhs)
   {
     auto res = lhs;
@@ -1878,7 +1890,8 @@ operator+(const basic_cow_string<charT, traitsT, allocT>& lhs, charT rhs)
   }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = rhs;
@@ -1887,7 +1900,8 @@ operator+(const charT* lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
   }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(charT lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = rhs;
@@ -1896,22 +1910,26 @@ operator+(charT lhs, const basic_cow_string<charT, traitsT, allocT>& rhs)
   }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(basic_cow_string<charT, traitsT, allocT>&& lhs, const charT* rhs)
   { return ::std::move(lhs.append(rhs));  }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(basic_cow_string<charT, traitsT, allocT>&& lhs, charT rhs)
   { return ::std::move(lhs.append(1, rhs));  }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(const charT* lhs, basic_cow_string<charT, traitsT, allocT>&& rhs)
   { return ::std::move(rhs.insert(0, lhs));  }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_cow_string<charT, traitsT, allocT>
+inline
+basic_cow_string<charT, traitsT, allocT>
 operator+(charT lhs, basic_cow_string<charT, traitsT, allocT>&& rhs)
   { return ::std::move(rhs.insert(0, 1, lhs));  }
 
@@ -2151,7 +2169,8 @@ swap(basic_cow_string<charT, traitsT, allocT>& lhs,
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename allocT>
-inline basic_tinyfmt<charT, traitsT>&
+inline
+basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt,
            const basic_cow_string<charT, traitsT, allocT>& str)
   { return fmt.putn(str.data(), str.size());  }

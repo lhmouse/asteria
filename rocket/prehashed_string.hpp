@@ -362,7 +362,8 @@ swap(basic_prehashed_string<stringT, hashT, eqT>& lhs,
   { lhs.swap(rhs);  }
 
 template<typename charT, typename traitsT, typename stringT, typename hashT, typename eqT>
-inline basic_tinyfmt<charT, traitsT>&
+inline
+basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt,
            const basic_prehashed_string<stringT, hashT, eqT>& str)
   { return fmt << str.rdstr();  }

@@ -139,7 +139,8 @@ class Argument_Reader
 
     // This function throws an exception containing a message composed
     // from all overloads that have been tested so far.
-    [[noreturn]] void
+    [[noreturn]]
+    void
     throw_no_matching_function_call() const;
   };
 

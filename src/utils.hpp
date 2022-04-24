@@ -17,7 +17,8 @@ ptrdiff_t
 write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 template<typename... ParamsT>
-ROCKET_NEVER_INLINE ROCKET_FLATTEN cow_string
+ROCKET_NEVER_INLINE ROCKET_FLATTEN
+cow_string
 format_string(const char* templ, const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;
@@ -67,7 +68,8 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
 // Type conversion
 template<typename enumT>
-ROCKET_CONST constexpr typename ::std::underlying_type<enumT>::type
+ROCKET_CONST constexpr
+typename ::std::underlying_type<enumT>::type
 weaken_enum(enumT value) noexcept
   { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
 
@@ -91,20 +93,24 @@ enum : uint8_t
     cmask_cntrl   = 0x40,  // [[:cntrl:]]
   };
 
-ROCKET_CONST inline uint8_t
+ROCKET_CONST inline
+uint8_t
 get_cmask(char ch) noexcept
   { return ((ch & 0x7F) == ch) ? details_utils::cmask_table[(uint8_t)ch] : 0;  }
 
-ROCKET_CONST inline bool
+ROCKET_CONST inline
+bool
 is_cmask(char ch, uint8_t mask) noexcept
   { return noadl::get_cmask(ch) & mask;  }
 
 // Numeric conversion
-ROCKET_CONST inline bool
+ROCKET_CONST inline
+bool
 is_convertible_to_int64(double val) noexcept
   { return (-0x1p63 <= val) && (val < 0x1p63);  }
 
-ROCKET_CONST inline bool
+ROCKET_CONST inline
+bool
 is_exact_int64(double val) noexcept
   { return noadl::is_convertible_to_int64(val) && (::std::trunc(val) == val);  }
 

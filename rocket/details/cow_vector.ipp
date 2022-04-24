@@ -36,7 +36,8 @@ struct basic_storage
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-    static constexpr size_type
+    static constexpr
+    size_type
     min_nblk_for_nelem(size_t nelem) noexcept
       {
         // Note this is correct even when `nelem` is zero, as long as
@@ -45,7 +46,8 @@ struct basic_storage
                 / sizeof(basic_storage) + 1;
       }
 
-    static constexpr size_t
+    static constexpr
+    size_t
     max_nelem_for_nblk(size_type nblk) noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) + 1;  }
 
@@ -123,7 +125,8 @@ struct storage_traits
     using storage_type     = storageT;
     using value_type       = typename allocator_type::value_type;
 
-    [[noreturn]] static void
+    [[noreturn]] static
+    void
     do_transfer(false_type,   // 1. movable?
                 bool,         // 2. trivial?
                 bool,         // 3. copyable?
@@ -258,7 +261,8 @@ class storage_handle
         reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
       }
 
-    ROCKET_NEVER_INLINE static void
+    ROCKET_NEVER_INLINE static
+    void
     do_destroy_storage(storage_pointer qstor) noexcept
       {
         auto nblk = qstor->nblk;
@@ -277,7 +281,8 @@ class storage_handle
     as_allocator() noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    ROCKET_PURE bool
+    ROCKET_PURE
+    bool
     unique() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -295,7 +300,8 @@ class storage_handle
         return qstor->nref.get();
       }
 
-    ROCKET_PURE size_type
+    ROCKET_PURE
+    size_type
     capacity() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -334,7 +340,8 @@ class storage_handle
         return storage::max_nelem_for_nblk(nblk);
       }
 
-    ROCKET_PURE const value_type*
+    ROCKET_PURE
+    const value_type*
     data() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -352,7 +359,8 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_PURE size_type
+    ROCKET_PURE
+    size_type
     size() const noexcept
       {
         auto qstor = this->m_qstor;
@@ -385,7 +393,8 @@ class storage_handle
           this->pop_back_unchecked();
       }
 
-    ROCKET_NEVER_INLINE value_type*
+    ROCKET_NEVER_INLINE
+    value_type*
     reallocate_clone(storage_handle& sth)
       {
         // Get the number of existent elements.
@@ -416,7 +425,8 @@ class storage_handle
         return qstor->data;
       }
 
-    ROCKET_NEVER_INLINE value_type*
+    ROCKET_NEVER_INLINE
+    value_type*
     reallocate_prepare(storage_handle& sth, size_type skip, size_type add)
       {
         // Calculate the combined length of vector (sth.size() + add).

@@ -109,7 +109,8 @@ class const_func_table
       = default;
 
     template<typename... argsT>
-    constexpr typename ::std::result_of<targetT*(argsT&&...)>::type
+    constexpr
+    typename ::std::result_of<targetT*(argsT&&...)>::type
     operator()(size_t k, argsT&&... args) const
       noexcept(noexcept(::std::declval<targetT*>()(args...)))
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
@@ -118,7 +119,8 @@ class const_func_table
 // In a `catch` block that is conditionally unreachable, direct use
 // of `throw` is subject to compiler warnings. Wrapping the `throw`
 // expression in a function silences this warning.
-[[noreturn]] ROCKET_ALWAYS_INLINE void
+[[noreturn]] ROCKET_ALWAYS_INLINE
+void
 rethrow_current_exception()
   {
     throw;
@@ -199,7 +201,8 @@ wrapped_visit(xvoidT* sptr, visitorT&& visitor)
 constexpr size_t nbytes_eager_copy = 8 * sizeof(void*);
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   {
     static constexpr auto trivial =
@@ -228,7 +231,8 @@ dispatch_copy_construct(size_t k, void* dptr, const void* sptr)
   }
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_move_construct(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
@@ -257,7 +261,8 @@ dispatch_move_construct(size_t k, void* dptr, void* sptr)
   }
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
@@ -286,7 +291,8 @@ dispatch_move_then_destroy(size_t k, void* dptr, void* sptr)
   }
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_destroy(size_t k, void* sptr)
   {
     static constexpr auto trivial =
@@ -302,7 +308,8 @@ dispatch_destroy(size_t k, void* sptr)
   }
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   {
     static constexpr auto trivial =
@@ -331,7 +338,8 @@ dispatch_copy_assign(size_t k, void* dptr, const void* sptr)
   }
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_move_assign(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =
@@ -360,7 +368,8 @@ dispatch_move_assign(size_t k, void* dptr, void* sptr)
   }
 
 template<typename... altsT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 dispatch_xswap(size_t k, void* dptr, void* sptr)
   {
     static constexpr auto trivial =

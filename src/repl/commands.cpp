@@ -88,7 +88,8 @@ struct Handler_exit final
 //       1         2         3         4         5         6         7      |
       }
 
-    [[noreturn]] void
+    [[noreturn]]
+    void
     handle(cow_vector<cow_string>&& args)
       {
         if(args.empty())

@@ -141,7 +141,8 @@ class static_vector
         return *this;  }
 
   private:
-    [[noreturn]] ROCKET_NEVER_INLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE
+    void
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
@@ -283,7 +284,8 @@ class static_vector
           return this->pop_back(this->size() - n);
       }
 
-    static constexpr size_type
+    static constexpr
+    size_type
     capacity() noexcept
       { return storage_handle::capacity();  }
 
@@ -685,7 +687,8 @@ class static_vector
 
     // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.
-    ROCKET_ALWAYS_INLINE value_type*
+    ROCKET_ALWAYS_INLINE
+    value_type*
     mut_data()
       { return this->m_sth.mut_data();  }
 

@@ -59,12 +59,14 @@ class variant
 
   private:
     template<size_t indexT>
-    ROCKET_PURE const typename alternative_at<indexT>::type*
+    ROCKET_PURE
+    const typename alternative_at<indexT>::type*
     do_cast_storage() const noexcept
       { return (const typename alternative_at<indexT>::type*) this->m_stor;  }
 
     template<size_t indexT>
-    ROCKET_PURE typename alternative_at<indexT>::type*
+    ROCKET_PURE
+    typename alternative_at<indexT>::type*
     do_cast_storage() noexcept
       { return (typename alternative_at<indexT>::type*) this->m_stor;  }
 
@@ -312,7 +314,8 @@ class variant
       }
 
   private:
-    [[noreturn]] ROCKET_NEVER_INLINE void
+    [[noreturn]] ROCKET_NEVER_INLINE
+    void
     do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
         noadl::sprintf_and_throw<invalid_argument>(

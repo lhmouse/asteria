@@ -91,7 +91,8 @@ class storage_handle
     as_allocator() noexcept
       { return static_cast<allocator_base&>(*this);  }
 
-    ROCKET_CONST static constexpr size_type
+    ROCKET_CONST static constexpr
+    size_type
     capacity() noexcept
       { return capacityT;  }
 
@@ -114,7 +115,8 @@ class storage_handle
         return base + add;
       }
 
-    ROCKET_PURE constexpr const value_type*
+    ROCKET_PURE constexpr
+    const value_type*
     data() const noexcept
       { return this->m_data;  }
 
@@ -122,7 +124,8 @@ class storage_handle
     mut_data() noexcept
       { return this->m_data;  }
 
-    ROCKET_PURE constexpr size_type
+    ROCKET_PURE constexpr
+    size_type
     size() const noexcept
       { return this->m_nelem;  }
 

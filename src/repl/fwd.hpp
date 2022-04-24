@@ -53,7 +53,8 @@ repl_vprintf(const char* fmt, ::va_list ap) noexcept;
 void
 repl_printf(const char* fmt, ...) noexcept;
 
-[[noreturn]] void
+[[noreturn]]
+void
 exit_printf(Exit_Status stat, const char* fmt = "", ...) noexcept;
 
 void
@@ -63,7 +64,8 @@ void
 install_verbose_hooks();
 
 // This function is defined in 'single.cpp'.
-[[noreturn]] void
+[[noreturn]]
+void
 load_and_execute_single_noreturn();
 
 // These functions are defined in 'commands.cpp'.

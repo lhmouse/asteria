@@ -73,7 +73,8 @@ enum Punctuator : uint8_t
     punctuator_random      = 59,  // [?]
   };
 
-ROCKET_CONST const char*
+ROCKET_CONST
+const char*
 stringify_punctuator(Punctuator punct) noexcept;
 
 // Keywords
@@ -138,7 +139,8 @@ enum Keyword : uint8_t
     keyword_muls      = 56,  // __muls
   };
 
-ROCKET_CONST const char*
+ROCKET_CONST
+const char*
 stringify_keyword(Keyword kwrd) noexcept;
 
 // Target of jump statements

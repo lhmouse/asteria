@@ -40,7 +40,8 @@ class atomic
       = delete;
 
   private:
-    static constexpr memory_order
+    static constexpr
+    memory_order
     do_order_acquire() noexcept
       {
         switch((int)memorderT) {
@@ -57,7 +58,8 @@ class atomic
         }
       }
 
-    static constexpr memory_order
+    static constexpr
+    memory_order
     do_order_release() noexcept
       {
         switch((int)memorderT) {
@@ -72,7 +74,8 @@ class atomic
         }
       }
 
-    static constexpr memory_order
+    static constexpr
+    memory_order
     do_order_acq_rel() noexcept
       {
         switch((int)memorderT) {

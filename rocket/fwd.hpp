@@ -245,21 +245,24 @@ struct select_type<firstT, secondT>
   { };
 
 template<typename lhsT, typename rhsT>
-constexpr typename select_type<lhsT&&, rhsT&&>::type
+constexpr
+typename select_type<lhsT&&, rhsT&&>::type
 min(lhsT&& lhs, rhsT&& rhs)
   {
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
-constexpr typename select_type<lhsT&&, rhsT&&>::type
+constexpr
+typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
   {
     return (lhs < rhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
   }
 
 template<typename xvT, typename loT, typename upT>
-constexpr typename select_type<xvT&&, loT&&, upT&&>::type
+constexpr
+typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
   {
     return (xv < lo) ? ::std::forward<loT>(lo) :
@@ -325,17 +328,20 @@ estimate_distance(iteratorT first, iteratorT last)
   }
 
 template<typename elementT>
-ROCKET_ALWAYS_INLINE elementT*
+ROCKET_ALWAYS_INLINE
+elementT*
 allocN(size_t n)
   { return allocator<elementT>().allocate(n);  }
 
 template<typename elementT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 freeN(typename identity<elementT>::type* p, size_t n) noexcept
   { allocator<elementT>().deallocate(p, n);  }
 
 template<typename elementT, typename... paramsT>
-ROCKET_ALWAYS_INLINE elementT*
+ROCKET_ALWAYS_INLINE
+elementT*
 construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
@@ -345,7 +351,8 @@ construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<
   }
 
 template<typename elementT>
-ROCKET_ALWAYS_INLINE elementT*
+ROCKET_ALWAYS_INLINE
+elementT*
 default_construct(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
@@ -355,7 +362,8 @@ default_construct(elementT* ptr) noexcept(is_nothrow_default_constructible<eleme
   }
 
 template<typename elementT>
-ROCKET_ALWAYS_INLINE void
+ROCKET_ALWAYS_INLINE
+void
 destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     // The C++ standard says the lifetime of a trivial object does not end.
@@ -627,22 +635,26 @@ find_if(initializer_list<elementT> init, predictorT&& pred)
   }
 
 template<typename xvalueT>
-constexpr details_fwd::binder_eq<typename decay<xvalueT>::type>
+constexpr
+details_fwd::binder_eq<typename decay<xvalueT>::type>
 is(xvalueT&& xval)
   { return ::std::forward<xvalueT>(xval);  }
 
 template<typename xvalueT>
-constexpr details_fwd::binder_ne<typename decay<xvalueT>::type>
+constexpr
+details_fwd::binder_ne<typename decay<xvalueT>::type>
 isnt(xvalueT&& xval)
   { return ::std::forward<xvalueT>(xval);  }
 
 template<typename xvalueT>
-constexpr details_fwd::binder_eq<typename decay<xvalueT>::type>
+constexpr
+details_fwd::binder_eq<typename decay<xvalueT>::type>
 are(xvalueT&& xval)
   { return ::std::forward<xvalueT>(xval);  }
 
 template<typename xvalueT>
-constexpr details_fwd::binder_ne<typename decay<xvalueT>::type>
+constexpr
+details_fwd::binder_ne<typename decay<xvalueT>::type>
 arent(xvalueT&& xval)
   { return ::std::forward<xvalueT>(xval);  }
 
