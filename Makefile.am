@@ -20,11 +20,14 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
 BUILT_SOURCES =  \
+  src/version.h  \
   precompiled.w.hpp  \
   precompiled.w.hpp.gch  \
   ${NOTHING}
 
 CLEANFILES =  \
+  src/version.h  \
+  src/version.lo  \
   precompiled.w.hpp  \
   precompiled.w.hpp.gch  \
   precompiled.w.hpp.gch.lo  \
