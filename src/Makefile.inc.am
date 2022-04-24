@@ -84,6 +84,7 @@ include_asteria_library_HEADERS =  \
 
 lib_LTLIBRARIES += lib/libasteria.la
 lib_libasteria_la_SOURCES =  \
+  %reldir%/version.h.in  \
   %reldir%/fwd.cpp  \
   %reldir%/utils.cpp  \
   %reldir%/recursion_sentry.cpp  \
