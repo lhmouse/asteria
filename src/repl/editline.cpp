@@ -70,7 +70,7 @@ do_init_once()
       exit_printf(exit_system_error, "! could not initialize history: %m");
 
     ROCKET_ASSERT(!s_editor);
-    s_editor = ::el_init(repl_tar_name, stdin, stdout, stderr);
+    s_editor = ::el_init(PACKAGE_TARNAME, stdin, stdout, stderr);
     if(!s_editor)
       exit_printf(exit_system_error, "! could not initialize editline: %m");
 

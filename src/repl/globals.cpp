@@ -21,8 +21,7 @@ struct Verbose_Hooks final
 
     template<typename... ParamsT>
     void
-    do_verbose_trace(const Source_Location& sloc, const char* templ,
-                     const ParamsT&... params)
+    do_verbose_trace(const Source_Location& sloc, const char* templ, const ParamsT&... params)
       {
         if(ROCKET_EXPECT(!repl_verbose))
           return;
@@ -86,12 +85,6 @@ struct Verbose_Hooks final
   };
 
 }  // namespace
-
-const char repl_name[] = PACKAGE_NAME;
-const char repl_version[] = VERSION;
-const char repl_url[] = PACKAGE_URL;
-const char repl_bug_report[] = PACKAGE_BUGREPORT;
-const char repl_tar_name[] = PACKAGE_TARNAME;
 
 bool repl_verbose;
 bool repl_interactive;

@@ -55,8 +55,8 @@ Report bugs to <%s>.
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
       self,
-      repl_url,
-      repl_bug_report);
+      PACKAGE_URL,
+      PACKAGE_BUGREPORT);
 
     ::quick_exit(0);
   }
@@ -69,16 +69,16 @@ do_print_version_and_exit()
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-%s %s (version %s)
+%s (ABI %s)
 
 Visit the homepage at <%s>.
 Report bugs to <%s>.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
-      repl_name, repl_version, ASTERIA_ABI_VERSION_STRING,
-      repl_url,
-      repl_bug_report);
+      PACKAGE_STRING, ASTERIA_ABI_VERSION_STRING,
+      PACKAGE_URL,
+      PACKAGE_BUGREPORT);
 
     ::quick_exit(0);
   }
@@ -236,7 +236,7 @@ main(int argc, char** argv)
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-%s %s (version %s)
+%s (ABI %s)
 
   Global locale is now `%s`.
 
@@ -245,7 +245,7 @@ main(int argc, char** argv)
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
-      repl_name, repl_version, ASTERIA_ABI_VERSION_STRING,
+      PACKAGE_NAME, ASTERIA_ABI_VERSION_STRING,
       current_locale,
       repl_cmd_char, repl_cmd_char);
 
