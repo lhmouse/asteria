@@ -14,9 +14,9 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 
 ## Define ABI information
-AS_VAR_SET([ABI_MAJOR], [1])
-AS_VAR_SET([ABI_MINOR], [0])
-AS_VAR_SET([ABI_SUFFIX], [beta.0])
+AS_VAR_SET([abi_major], [1])
+AS_VAR_SET([abi_minor], [0])
+AS_VAR_SET([abi_suffix], [beta.0])
 
 ## Check for tcmalloc
 ## This has to come first as others may depend on it.
@@ -63,9 +63,9 @@ AM_COND_IF([enable_thread_sanitizer], [
 ])
 
 ## Finish
-AC_SUBST([ABI_MAJOR])
-AC_SUBST([ABI_MINOR])
-AC_SUBST([ABI_SUFFIX])
+AC_SUBST([abi_major])
+AC_SUBST([abi_minor])
+AC_SUBST([abi_suffix])
 
 AC_CONFIG_FILES([Makefile] [src/version.h])
 AC_OUTPUT

@@ -142,7 +142,7 @@ lib_libasteria_la_LIBADD =  \
   lib/librocket.la ${LTLIBICONV}
 
 lib_libasteria_la_LDFLAGS =  \
-  -Wl,--no-undefined -no-undefined -version-info @ABI_MAJOR@:@ABI_MINOR@
+  -Wl,--no-undefined -no-undefined -version-info @abi_major@:@abi_minor@
 
 bin_PROGRAMS += bin/asteria
 bin_asteria_SOURCES =  \

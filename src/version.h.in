@@ -4,8 +4,8 @@
 #ifndef ASTERIA_VERSION_H_
 #define ASTERIA_VERSION_H_
 
-#define ASTERIA_ABI_VERSION_MAJOR    @ABI_MAJOR@
-#define ASTERIA_ABI_VERSION_MINOR    @ABI_MINOR@
-#define ASTERIA_ABI_VERSION_STRING   "@ABI_MAJOR@.@ABI_MINOR@-@ABI_SUFFIX@"
+#define ASTERIA_ABI_VERSION_MAJOR    @abi_major@
+#define ASTERIA_ABI_VERSION_MINOR    @abi_minor@
+#define ASTERIA_ABI_VERSION_STRING   "@abi_major@.@abi_minor@-@abi_suffix@"
 
 #endif
