@@ -10,7 +10,7 @@ namespace asteria {
 
 // `std.ini.format`
 V_string
-std_ini_format(optV_object value);
+std_ini_format(V_object value);
 
 // `std.ini.parse`
 V_object

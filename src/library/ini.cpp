@@ -156,15 +156,12 @@ do_ini_parse(tinybuf& buf)
 }  // namespace
 
 V_string
-std_ini_format(optV_object value)
+std_ini_format(V_object value)
   {
-    if(!value)
-      return sref("");
-
     ::rocket::tinyfmt_str fmt;
     size_t nlines = 0;
 
-    for(const auto& r : *value) {
+    for(const auto& r : value) {
       if(!do_format_check_scalar(r.second))
         continue;
 
@@ -176,7 +173,7 @@ std_ini_format(optV_object value)
       nlines++;
     }
 
-    for(const auto& ro : *value) {
+    for(const auto& ro : value) {
       if(!ro.second.is_object())
         continue;
 
@@ -238,10 +235,10 @@ create_bindings_ini(V_object& result, API_Version /*version*/)
         "std.ini.format", "[object]",
         Argument_Reader&& reader)
       {
-        optV_object object;
+        V_object object;
 
         reader.start_overload();
-        reader.optional(object);
+        reader.required(object);
         if(reader.end_overload())
           return (Value) std_ini_format(object);
 

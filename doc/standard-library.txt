@@ -2501,14 +2501,14 @@
 
 ### `std.ini`
 
-`std.ini.format([object])`
+`std.ini.format(object)`
 
        * Converts `object` to a string in the INI format. Unlike JSON,
          the INI format is too primitive to support complex structures,
-         which limits the domain of convertible values. `object` may be
-         null or an object of objects, where up to two nesting levels are
-         supported. Boolean, integer, real and string values are written
-         in string forms; the others are ignored silently.
+         which limits the domain of convertible values. `object` shall be
+         an object of objects where up to two nesting levels are allowed.
+         Boolean, integer, real and string values are written in their
+         string forms; the others are ignored silently.
 
        * Returns the formatted text as a string.
 
