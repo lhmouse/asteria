@@ -4,10 +4,9 @@ container:
 task:
   environment:
     LANG: C.UTF-8
+    DEBIAN_FRONTEND: noninteractive
 
   build_script:
-    - export LANG=C.UTF-8
-    - export DEBIAN_FRONTEND=noninteractive
     - apt-get update
     - apt-get install -y --no-install-recommends autoconf automake libtool g++ gettext make parallel python3
     - apt-get install -y libedit-dev libpcre2-dev libssl-dev zlib1g-dev
