@@ -56,4 +56,6 @@ EXTRA_DIST +=  \
   %reldir%/checksum.txt  \
   %reldir%/import_recursive.txt  \
   %reldir%/import_sub.txt  \
+  %reldir%/test/sample.conf  \
+  %reldir%/test/test.ini  \
   ${NOTHING}
