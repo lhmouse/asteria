@@ -92,6 +92,10 @@ do_ini_parse(tinybuf& buf)
     while(getline(line, buf)) {
       nlines++;
 
+      // Remove the UTF-8 BOM, if any.
+      if(line.starts_with("\xEF\xBB\xBF", 3))
+        line.erase(0, 3);
+
       // Convert CR LF pairs to LF characters.
       if(line.ends_with(sref("\r")))
         line.pop_back();
