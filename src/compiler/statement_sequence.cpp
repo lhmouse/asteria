@@ -1237,7 +1237,7 @@ opt<Statement>
 do_accept_assert_statement_opt(Token_Stream& tstrm)
   {
     // assert-statement ::=
-    //   "assert" expression assert-message ( ":" string-literal ) ? ";"
+    //   "assert" expression ( ":" string-literal ) ? ";"
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
     if(!qkwrd)

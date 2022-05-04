@@ -161,7 +161,7 @@ reference-specifier ::=
 	"ref" | "->"
 
 assert-statement ::=
-	"assert" expression assert-message ( ":" string-literal ) ? ";"
+	"assert" expression ( ":" string-literal ) ? ";"
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement
