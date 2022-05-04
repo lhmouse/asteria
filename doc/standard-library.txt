@@ -2535,6 +2535,42 @@
        * Throws an exception if a read error occurs, or if the string is
          invalid.
 
+### `std.csv`
+
+`std.csv.format(array)`
+
+       * Converts `array` to a string in the CSV format. Unlike JSON,
+         the CSV format is too primitive to support complex structures,
+         which limits the domain of convertible values. `array` shall be
+         an array of arrays, where up to two nesting levels are allowed.
+         Boolean, integer, real and string values are written in their
+         string forms; the others are ignored silently.
+
+       * Returns the formatted text as a string.
+
+`std.csv.parse(text)`
+
+       * Parses a string containing data encoded in the CSV format and
+         converts it to an array.
+
+       * Returns the parsed value as an array. Each section in the CSV
+         string corresponds to a subarray, and each key in this section
+         corresponds to a string in this subarray. No type conversion is
+         performed.
+
+       * Throws an exception if the string is invalid.
+
+`std.csv.parse_file(path)`
+
+       * Parses the contents of the file denoted by `path` as an CSV
+         string for an array. This function behaves identically to
+         `parse()` otherwise.
+
+       * Returns the parsed value as an array.
+
+       * Throws an exception if a read error occurs, or if the string is
+         invalid.
+
 ### `std.io`
 
 `std.io.getc()`

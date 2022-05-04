@@ -22,6 +22,7 @@
 #include "../library/io.hpp"
 #include "../library/zlib.hpp"
 #include "../library/ini.hpp"
+#include "../library/csv.hpp"
 #include "../utils.hpp"
 
 namespace asteria {
@@ -50,6 +51,7 @@ constexpr s_modules[] =
     { api_version_0001_0000,  "io",          create_bindings_io          },
     { api_version_0001_0000,  "zlib",        create_bindings_zlib        },
     { api_version_0001_0000,  "ini",         create_bindings_ini         },
+    { api_version_0001_0000,  "csv",         create_bindings_csv         },
   };
 
 struct Module_Comparator

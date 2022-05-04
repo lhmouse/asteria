@@ -80,6 +80,7 @@ include_asteria_library_HEADERS =  \
   %reldir%/library/io.hpp  \
   %reldir%/library/zlib.hpp  \
   %reldir%/library/ini.hpp  \
+  %reldir%/library/csv.hpp  \
   ${NOTHING}
 
 lib_LTLIBRARIES += lib/libasteria.la
@@ -136,6 +137,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/library/io.cpp  \
   %reldir%/library/zlib.cpp  \
   %reldir%/library/ini.cpp  \
+  %reldir%/library/csv.cpp  \
   ${NOTHING}
 
 lib_libasteria_la_LIBADD =  \

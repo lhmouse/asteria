@@ -50,6 +50,7 @@ check_PROGRAMS +=  \
   %reldir%/c_stack_overflow.test  \
   %reldir%/var_mod.test  \
   %reldir%/ini.test  \
+  %reldir%/csv.test  \
   ${NOTHING}
 
 EXTRA_DIST +=  \
@@ -58,4 +59,5 @@ EXTRA_DIST +=  \
   %reldir%/import_sub.txt  \
   %reldir%/test/sample.conf  \
   %reldir%/test/test.ini  \
+  %reldir%/test/test.csv  \
   ${NOTHING}
