@@ -113,12 +113,12 @@ do_ini_parse(tinybuf& buf)
       // if the line begins with an open bracket, it shall start a section.
       if(line.front() == '[') {
         if(line.back() != ']')
-          ASTERIA_TERMINATE("invalid section name on line $1", nlines);
+          ASTERIA_THROW_RUNTIME_ERROR("invalid section name on line $1", nlines);
 
         // Trim the section name.
         pos = line.find_first_not_of(1, s_space);
         if(pos == line.size() - 1)
-          ASTERIA_TERMINATE("empty section name on line $1", nlines);
+          ASTERIA_THROW_RUNTIME_ERROR("empty section name on line $1", nlines);
 
         // Make a copy of the section name that is just large enough.
         key.assign(line, 1, line.size() - 2);
@@ -135,7 +135,7 @@ do_ini_parse(tinybuf& buf)
       if(eqpos != cow_string::npos) {
         pos = line.find_last_not_of(eqpos - 1, s_space);
         if(pos == cow_string::npos)
-          ASTERIA_TERMINATE("empty property name on line $1", nlines);
+          ASTERIA_THROW_RUNTIME_ERROR("empty property name on line $1", nlines);
 
         // Make copies of the key and value that are just large enough.
         key.assign(line, 0, pos + 1);
