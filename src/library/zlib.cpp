@@ -159,10 +159,10 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
       {
         auto output_ref = self;
         output_ref.push_modifier_object_key(sref("output"));
-        auto& output = output_ref.dereference_mutable().open_string();
+        auto& output = output_ref.dereference_mutable().mut_string();
 
         self.push_modifier_object_key(s_uuid);
-        auto& defl = self.dereference_mutable().open_opaque();
+        auto& defl = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -180,10 +180,10 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
       {
         auto output_ref = self;
         output_ref.push_modifier_object_key(sref("output"));
-        auto& output = output_ref.dereference_mutable().open_string();
+        auto& output = output_ref.dereference_mutable().mut_string();
 
         self.push_modifier_object_key(s_uuid);
-        auto& defl = self.dereference_mutable().open_opaque();
+        auto& defl = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -199,10 +199,10 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
       {
         auto output_ref = self;
         output_ref.push_modifier_object_key(sref("output"));
-        auto& output = output_ref.dereference_mutable().open_string();
+        auto& output = output_ref.dereference_mutable().mut_string();
 
         self.push_modifier_object_key(s_uuid);
-        auto& defl = self.dereference_mutable().open_opaque();
+        auto& defl = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -217,7 +217,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& defl = self.dereference_mutable().open_opaque();
+        auto& defl = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -361,10 +361,10 @@ do_construct_Inflator(V_object& result, V_string format)
       {
         auto output_ref = self;
         output_ref.push_modifier_object_key(sref("output"));
-        auto& output = output_ref.dereference_mutable().open_string();
+        auto& output = output_ref.dereference_mutable().mut_string();
 
         self.push_modifier_object_key(s_uuid);
-        auto& infl = self.dereference_mutable().open_opaque();
+        auto& infl = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -382,10 +382,10 @@ do_construct_Inflator(V_object& result, V_string format)
       {
         auto output_ref = self;
         output_ref.push_modifier_object_key(sref("output"));
-        auto& output = output_ref.dereference_mutable().open_string();
+        auto& output = output_ref.dereference_mutable().mut_string();
 
         self.push_modifier_object_key(s_uuid);
-        auto& infl = self.dereference_mutable().open_opaque();
+        auto& infl = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -401,10 +401,10 @@ do_construct_Inflator(V_object& result, V_string format)
       {
         auto output_ref = self;
         output_ref.push_modifier_object_key(sref("output"));
-        auto& output = output_ref.dereference_mutable().open_string();
+        auto& output = output_ref.dereference_mutable().mut_string();
 
         self.push_modifier_object_key(s_uuid);
-        auto& infl = self.dereference_mutable().open_opaque();
+        auto& infl = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -419,7 +419,7 @@ do_construct_Inflator(V_object& result, V_string format)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& infl = self.dereference_mutable().open_opaque();
+        auto& infl = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())

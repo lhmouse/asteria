@@ -95,7 +95,7 @@ Global_Context(API_Version version)
         if(r.second)
           r.first->second = V_object();
 
-        mod.init(r.first->second.open_object(), eptr[-1].version);
+        mod.init(r.first->second.mut_object(), eptr[-1].version);
       });
 
     // Allocate the global variable `std`.

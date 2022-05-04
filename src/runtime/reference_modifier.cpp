@@ -130,7 +130,7 @@ apply_write_opt(Value& parent) const
               "integer subscript not applicable (parent type was `$1`; index was `$2`)",
               describe_type(parent.type()), altr.index);
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         auto w = wrap_index(altr.index, arr.size());
         if(w.nprepend | w.nappend)
           return nullptr;
@@ -150,7 +150,7 @@ apply_write_opt(Value& parent) const
               "string subscript not applicable (parent type was `$1`; key was `$2`)",
               describe_type(parent.type()), altr.key);
 
-        auto& obj = parent.open_object();
+        auto& obj = parent.mut_object();
         return obj.mut_ptr(altr.key);
       }
 
@@ -165,7 +165,7 @@ apply_write_opt(Value& parent) const
               "head operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         if(arr.empty())
           return nullptr;
 
@@ -183,7 +183,7 @@ apply_write_opt(Value& parent) const
               "tail operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         if(arr.empty())
           return nullptr;
 
@@ -202,7 +202,7 @@ apply_write_opt(Value& parent) const
               "random operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         auto bptr = arr.mut_data();
         auto eptr = bptr + arr.size();
         if(bptr == eptr)
@@ -234,7 +234,7 @@ apply_open(Value& parent) const
               "integer subscript not applicable (parent type was `$1`; index was `$2`)",
               describe_type(parent.type()), altr.index);
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         auto w = wrap_index(altr.index, arr.size());
         if(w.nprepend)
           arr.insert(arr.begin(), w.nprepend);
@@ -256,7 +256,7 @@ apply_open(Value& parent) const
               "string subscript not applicable (parent type was `$1`; key was `$2`)",
               describe_type(parent.type()), altr.key);
 
-        auto& obj = parent.open_object();
+        auto& obj = parent.mut_object();
         return obj.try_emplace(altr.key).first->second;
       }
 
@@ -271,7 +271,7 @@ apply_open(Value& parent) const
               "head operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         if(arr.empty())
           arr.insert(arr.begin(), nullopt);
         else
@@ -291,7 +291,7 @@ apply_open(Value& parent) const
               "tail operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         if(arr.empty())
           arr.emplace_back();
         else
@@ -312,7 +312,7 @@ apply_open(Value& parent) const
               "random operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         auto bptr = arr.mut_data();
         auto eptr = bptr + arr.size();
         if(bptr == eptr)
@@ -345,7 +345,7 @@ apply_unset(Value& parent) const
               "integer subscript not applicable (parent type was `$1`; index was `$2`)",
               describe_type(parent.type()), altr.index);
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         auto w = wrap_index(altr.index, arr.size());
         if(w.nprepend | w.nappend)
           return nullopt;
@@ -367,7 +367,7 @@ apply_unset(Value& parent) const
               "string subscript not applicable (parent type was `$1`; key was `$2`)",
               describe_type(parent.type()), altr.key);
 
-        auto& obj = parent.open_object();
+        auto& obj = parent.mut_object();
         auto it = obj.find(altr.key);
         if(it == obj.end())
           return nullopt;
@@ -388,7 +388,7 @@ apply_unset(Value& parent) const
               "head operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         if(arr.empty())
           return nullopt;
 
@@ -408,7 +408,7 @@ apply_unset(Value& parent) const
               "tail operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         if(arr.empty())
           return nullopt;
 
@@ -429,7 +429,7 @@ apply_unset(Value& parent) const
               "random operator not applicable (parent type was `$1`)",
               describe_type(parent.type()));
 
-        auto& arr = parent.open_array();
+        auto& arr = parent.mut_array();
         auto bptr = arr.mut_data();
         auto eptr = bptr + arr.size();
         if(bptr == eptr)

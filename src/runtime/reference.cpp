@@ -198,7 +198,7 @@ do_finish_call_slow(Global_Context& global)
       if(ptc_conj == ptc_aware_void)
         this->set_void();
       else if(ptc_conj != ptc_aware_by_ref)
-        this->open_temporary();
+        this->mut_temporary();
     }
 
     return *this;
@@ -246,7 +246,7 @@ dereference_mutable() const
           ASTERIA_THROW_RUNTIME_ERROR(
               "attempt to modify an immutable variable");
 
-        qval = &(qvar->open_value());
+        qval = &(qvar->mut_value());
         break;
       }
 
@@ -299,7 +299,7 @@ dereference_unset() const
           ASTERIA_THROW_RUNTIME_ERROR(
               "attempt to reference an uninitialized variable");
 
-        qval = &(qvar->open_value());
+        qval = &(qvar->mut_value());
         break;
       }
 

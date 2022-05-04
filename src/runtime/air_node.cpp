@@ -109,7 +109,7 @@ do_get_first_operand(Reference_Stack& stack, bool assign)
   {
     return assign
         ? stack.top().dereference_mutable()
-        : stack.mut_top().open_temporary();
+        : stack.mut_top().mut_temporary();
   }
 
 AIR_Status
@@ -333,7 +333,7 @@ struct Traits_declare_variable
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
         const auto var = gcoll->create_variable();
-        ctx.open_named_reference(sp.name).set_variable(var);
+        ctx.mut_named_reference(sp.name).set_variable(var);
         if(qhooks)
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
@@ -482,7 +482,7 @@ struct Traits_switch_statement
 
           // Inject all bypassed variables into the scope.
           for(const auto& name : sp.names_added[bp])
-            ctx_body.open_named_reference(name).set_invalid();
+            ctx_body.mut_named_reference(name).set_invalid();
 
           try {
             do {
@@ -637,10 +637,10 @@ struct Traits_for_each_statement
 
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
-        ctx_for.open_named_reference(sp.name_key).set_variable(vkey);
+        ctx_for.mut_named_reference(sp.name_key).set_variable(vkey);
 
         // Create the mapped reference.
-        auto& mapped = ctx_for.open_named_reference(sp.name_mapped);
+        auto& mapped = ctx_for.mut_named_reference(sp.name_mapped);
 
         // Evaluate the range initializer and set the range up, which isn't going to
         // change for all loops.
@@ -814,7 +814,7 @@ struct Traits_try_statement
 
         try {
           // Set the exception reference.
-          ctx_catch.open_named_reference(sp.name_except)
+          ctx_catch.mut_named_reference(sp.name_except)
               .set_temporary(except.value());
 
           // Set backtrace frames.
@@ -833,7 +833,7 @@ struct Traits_try_statement
             // Append this frame.
             backtrace.emplace_back(::std::move(r));
           }
-          ctx_catch.open_named_reference(sref("__backtrace"))
+          ctx_catch.mut_named_reference(sref("__backtrace"))
               .set_temporary(::std::move(backtrace));
 
           // Execute the `catch` clause.
@@ -955,7 +955,7 @@ struct Traits_check_argument
       {
         // Ensure the argument is dereferenceable.
         auto& top = ctx.stack().mut_top();
-        (void)(up.u8v[0] ? top.dereference_readonly() : top.open_temporary());
+        (void)(up.u8v[0] ? top.dereference_readonly() : top.mut_temporary());
         return air_status_next;
       }
   };
@@ -1453,7 +1453,7 @@ struct Traits_return_value
           return air_status_return_void;
 
         // Ensure the argument is dereferenceable.
-        (void)top.open_temporary();
+        (void)top.mut_temporary();
         return air_status_return_ref;
       }
   };
@@ -1503,7 +1503,7 @@ struct Traits_apply_xop_inc_post
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& val = lhs.open_integer();
+            auto& val = lhs.mut_integer();
 
             if(val == INT64_MAX)
               ASTERIA_THROW_RUNTIME_ERROR("integer increment overflow");
@@ -1514,7 +1514,7 @@ struct Traits_apply_xop_inc_post
 
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
-            auto& val = lhs.open_real();
+            auto& val = lhs.mut_real();
             ctx.stack().mut_top().set_temporary(val++);
             return air_status_next;
           }
@@ -1551,7 +1551,7 @@ struct Traits_apply_xop_dec_post
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& val = lhs.open_integer();
+            auto& val = lhs.mut_integer();
 
             if(val == INT64_MIN)
               ASTERIA_THROW_RUNTIME_ERROR("integer decrement overflow");
@@ -1562,7 +1562,7 @@ struct Traits_apply_xop_dec_post
 
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
-            auto& val = lhs.open_real();
+            auto& val = lhs.mut_real();
             ctx.stack().mut_top().set_temporary(val--);
             return air_status_next;
           }
@@ -1683,7 +1683,7 @@ struct Traits_apply_xop_neg
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
 
             if(val == INT64_MIN)
               ASTERIA_THROW_RUNTIME_ERROR("integer negation overflow");
@@ -1694,7 +1694,7 @@ struct Traits_apply_xop_neg
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.open_real();
+            auto& val = rhs.mut_real();
             val = -val;
             return air_status_next;
           }
@@ -1739,21 +1739,21 @@ struct Traits_apply_xop_notb
         switch(rhs.type_mask()) {
           case M_boolean: {
             ROCKET_ASSERT(rhs.is_boolean());
-            auto& val = rhs.open_boolean();
+            auto& val = rhs.mut_boolean();
             val = !val;
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
             val = ~val;
             return air_status_next;
           }
 
           case M_string: {
             ROCKET_ASSERT(rhs.is_string());
-            auto& val = rhs.open_string();
+            auto& val = rhs.mut_string();
             for(auto it = val.mut_begin();  it != val.end();  ++it)
               *it = static_cast<char>(~*it);
             return air_status_next;
@@ -1825,7 +1825,7 @@ struct Traits_apply_xop_inc_pre
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
 
             if(val == INT64_MAX)
               ASTERIA_THROW_RUNTIME_ERROR("integer increment overflow");
@@ -1836,7 +1836,7 @@ struct Traits_apply_xop_inc_pre
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.open_real();
+            auto& val = rhs.mut_real();
             ++val;
             return air_status_next;
           }
@@ -1872,7 +1872,7 @@ struct Traits_apply_xop_dec_pre
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
 
             if(val == INT64_MIN)
               ASTERIA_THROW_RUNTIME_ERROR("integer decrement overflow");
@@ -1883,7 +1883,7 @@ struct Traits_apply_xop_dec_pre
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.open_real();
+            auto& val = rhs.mut_real();
             --val;
             return air_status_next;
           }
@@ -2201,7 +2201,7 @@ struct Traits_apply_xop_abs
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
 
             if(val == INT64_MIN)
               ASTERIA_THROW_RUNTIME_ERROR("integer absolute value overflow");
@@ -2212,7 +2212,7 @@ struct Traits_apply_xop_abs
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.open_real();
+            auto& val = rhs.mut_real();
             val = ::std::fabs(val);
             return air_status_next;
           }
@@ -2257,7 +2257,7 @@ struct Traits_apply_xop_sign
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            rhs.open_integer() >>= 63;
+            rhs.mut_integer() >>= 63;
             return air_status_next;
           }
 
@@ -3000,13 +3000,13 @@ struct Traits_apply_xop_add
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
-            lhs.open_boolean() |= rhs.as_boolean();
+            lhs.mut_boolean() |= rhs.as_boolean();
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -3022,14 +3022,14 @@ struct Traits_apply_xop_add
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() += rhs.as_real();
+            lhs.mut_real() += rhs.as_real();
             return air_status_next;
           }
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
             ROCKET_ASSERT(rhs.is_string());
-            lhs.open_string() += rhs.as_string();
+            lhs.mut_string() += rhs.as_string();
             return air_status_next;
           }
 
@@ -3077,13 +3077,13 @@ struct Traits_apply_xop_sub
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
-            lhs.open_boolean() ^= rhs.as_boolean();
+            lhs.mut_boolean() ^= rhs.as_boolean();
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -3099,7 +3099,7 @@ struct Traits_apply_xop_sub
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() -= rhs.as_real();
+            lhs.mut_real() -= rhs.as_real();
             return air_status_next;
           }
 
@@ -3148,13 +3148,13 @@ struct Traits_apply_xop_mul
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
-            lhs.open_boolean() &= rhs.as_boolean();
+            lhs.mut_boolean() &= rhs.as_boolean();
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -3170,12 +3170,12 @@ struct Traits_apply_xop_mul
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() *= rhs.as_real();
+            lhs.mut_real() *= rhs.as_real();
             return air_status_next;
           }
 
           case M_string | M_integer: {
-            cow_string str = lhs.is_string() ? ::std::move(lhs.open_string()) : rhs.as_string();
+            cow_string str = lhs.is_string() ? ::std::move(lhs.mut_string()) : rhs.as_string();
             int64_t n = rhs.is_integer() ? rhs.as_integer() : lhs.as_integer();
 
             // Optimize for special cases.
@@ -3251,7 +3251,7 @@ struct Traits_apply_xop_div
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -3271,7 +3271,7 @@ struct Traits_apply_xop_div
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() /= rhs.as_real();
+            lhs.mut_real() /= rhs.as_real();
             return air_status_next;
           }
 
@@ -3317,7 +3317,7 @@ struct Traits_apply_xop_mod
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -3399,7 +3399,7 @@ struct Traits_apply_xop_sll
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& val = lhs.open_integer();
+            auto& val = lhs.mut_integer();
 
             if(n >= 64) {
               val = 0;
@@ -3412,7 +3412,7 @@ struct Traits_apply_xop_sll
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
 
             if(n >= val.ssize()) {
               val.assign(val.size(), ' ');
@@ -3482,7 +3482,7 @@ struct Traits_apply_xop_srl
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& val = lhs.open_integer();
+            auto& val = lhs.mut_integer();
 
             if(n >= 64) {
               val = 0;
@@ -3495,7 +3495,7 @@ struct Traits_apply_xop_srl
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
 
             if(n >= val.ssize()) {
               val.assign(val.size(), ' ');
@@ -3565,7 +3565,7 @@ struct Traits_apply_xop_sla
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& val = lhs.open_integer();
+            auto& val = lhs.mut_integer();
 
             if(n >= 64) {
               ASTERIA_THROW_RUNTIME_ERROR(
@@ -3587,7 +3587,7 @@ struct Traits_apply_xop_sla
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
 
             if(n >= static_cast<int64_t>(val.max_size() - val.size())) {
               ASTERIA_THROW_RUNTIME_ERROR(
@@ -3655,7 +3655,7 @@ struct Traits_apply_xop_sra
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& val = lhs.open_integer();
+            auto& val = lhs.mut_integer();
 
             if(n >= 64) {
               val >>= 63;
@@ -3668,7 +3668,7 @@ struct Traits_apply_xop_sra
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
 
             if(n >= val.ssize()) {
               val.clear();
@@ -3724,21 +3724,21 @@ struct Traits_apply_xop_andb
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
-            lhs.open_boolean() &= rhs.as_boolean();
+            lhs.mut_boolean() &= rhs.as_boolean();
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             ROCKET_ASSERT(rhs.is_integer());
-            lhs.open_integer() &= rhs.as_integer();
+            lhs.mut_integer() &= rhs.as_integer();
             return air_status_next;
           }
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
             ROCKET_ASSERT(rhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
             const auto& mask = rhs.as_string();
 
             // The result is the bitwise AND of initial substrings of both operands.
@@ -3797,21 +3797,21 @@ struct Traits_apply_xop_orb
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
-            lhs.open_boolean() |= rhs.as_boolean();
+            lhs.mut_boolean() |= rhs.as_boolean();
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             ROCKET_ASSERT(rhs.is_integer());
-            lhs.open_integer() |= rhs.as_integer();
+            lhs.mut_integer() |= rhs.as_integer();
             return air_status_next;
           }
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
             ROCKET_ASSERT(rhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
             const auto& mask = rhs.as_string();
 
             // The result is the bitwise OR of both operands. Non-existent characters
@@ -3871,21 +3871,21 @@ struct Traits_apply_xop_xorb
           case M_boolean: {
             ROCKET_ASSERT(lhs.is_boolean());
             ROCKET_ASSERT(rhs.is_boolean());
-            lhs.open_boolean() ^= rhs.as_boolean();
+            lhs.mut_boolean() ^= rhs.as_boolean();
             return air_status_next;
           }
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             ROCKET_ASSERT(rhs.is_integer());
-            lhs.open_integer() ^= rhs.as_integer();
+            lhs.mut_integer() ^= rhs.as_integer();
             return air_status_next;
           }
 
           case M_string: {
             ROCKET_ASSERT(lhs.is_string());
             ROCKET_ASSERT(rhs.is_string());
-            auto& val = lhs.open_string();
+            auto& val = lhs.mut_string();
             const auto& mask = rhs.as_string();
 
             // The result is the bitwise XOR of both operands. Non-existent characters
@@ -4158,7 +4158,7 @@ struct Traits_unpack_struct_array
               val);
 
         if(val.is_array())
-          arr = ::std::move(val.open_array());
+          arr = ::std::move(val.mut_array());
 
         for(uint32_t i = up.u32 - 1;  i != UINT32_MAX;  --i) {
           // Get the variable back.
@@ -4223,7 +4223,7 @@ struct Traits_unpack_struct_object
               val);
 
         if(val.is_object())
-          obj = ::std::move(val.open_object());
+          obj = ::std::move(val.mut_object());
 
         for(auto it = keys.rbegin();  it != keys.rend();  ++it) {
           // Get the variable back.
@@ -4284,7 +4284,7 @@ struct Traits_define_null_variable
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
         const auto var = gcoll->create_variable();
-        ctx.open_named_reference(sp.name).set_variable(var);
+        ctx.mut_named_reference(sp.name).set_variable(var);
         if(qhooks)
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
@@ -4376,7 +4376,7 @@ struct Traits_variadic_call
             break;
 
           case type_array: {
-            auto& vals = value.open_array();
+            auto& vals = value.mut_array();
 
             // Push all arguments backwards as temporaries.
             while(!vals.empty()) {
@@ -4387,7 +4387,7 @@ struct Traits_variadic_call
           }
 
           case type_function: {
-            const auto gfunc = ::std::move(value.open_function());
+            const auto gfunc = ::std::move(value.mut_function());
 
             // Pass an empty argument stack to get the number of arguments to generate.
             // This destroys the `self` reference so we have to copy it first.
@@ -4619,7 +4619,7 @@ struct Traits_declare_reference
     AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
-        ctx.open_named_reference(sp.name).set_invalid();
+        ctx.mut_named_reference(sp.name).set_invalid();
         return air_status_next;
       }
   };
@@ -4650,7 +4650,7 @@ struct Traits_initialize_reference
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
-        ctx.open_named_reference(sp.name) = ::std::move(ctx.stack().mut_top());
+        ctx.mut_named_reference(sp.name) = ::std::move(ctx.stack().mut_top());
         ctx.stack().pop();
         return air_status_next;
       }
@@ -4728,7 +4728,7 @@ struct Traits_apply_xop_lzcnt
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
             val = ROCKET_LZCNT64(static_cast<uint64_t>(val));
             return air_status_next;
           }
@@ -4773,7 +4773,7 @@ struct Traits_apply_xop_tzcnt
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
             val = ROCKET_TZCNT64(static_cast<uint64_t>(val));
             return air_status_next;
           }
@@ -4818,7 +4818,7 @@ struct Traits_apply_xop_popcnt
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.open_integer();
+            auto& val = rhs.mut_integer();
             val = ROCKET_POPCNT64(static_cast<uint64_t>(val));
             return air_status_next;
           }
@@ -4865,7 +4865,7 @@ struct Traits_apply_xop_addm
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -4915,7 +4915,7 @@ struct Traits_apply_xop_subm
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -4965,7 +4965,7 @@ struct Traits_apply_xop_mulm
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -5015,7 +5015,7 @@ struct Traits_apply_xop_adds
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -5030,7 +5030,7 @@ struct Traits_apply_xop_adds
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() += rhs.as_real();
+            lhs.mut_real() += rhs.as_real();
             return air_status_next;
           }
 
@@ -5076,7 +5076,7 @@ struct Traits_apply_xop_subs
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -5091,7 +5091,7 @@ struct Traits_apply_xop_subs
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() -= rhs.as_real();
+            lhs.mut_real() -= rhs.as_real();
             return air_status_next;
           }
 
@@ -5137,7 +5137,7 @@ struct Traits_apply_xop_muls
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.open_integer();
+            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
@@ -5152,7 +5152,7 @@ struct Traits_apply_xop_muls
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             ROCKET_ASSERT(rhs.is_real());
-            lhs.open_real() *= rhs.as_real();
+            lhs.mut_real() *= rhs.as_real();
             return air_status_next;
           }
 

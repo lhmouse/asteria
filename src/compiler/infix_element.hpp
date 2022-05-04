@@ -114,7 +114,7 @@ class Infix_Element
 
     // Returns a reference where new units will be appended.
     cow_vector<Expression_Unit>&
-    open_junction() noexcept;
+    mut_junction() noexcept;
   };
 
 inline

@@ -87,7 +87,7 @@ do_construct_CRC32(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -104,7 +104,7 @@ do_construct_CRC32(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -119,7 +119,7 @@ do_construct_CRC32(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -195,7 +195,7 @@ do_construct_FNV1a32(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -212,7 +212,7 @@ do_construct_FNV1a32(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -227,7 +227,7 @@ do_construct_FNV1a32(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -317,7 +317,7 @@ do_construct_MD5(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -334,7 +334,7 @@ do_construct_MD5(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -349,7 +349,7 @@ do_construct_MD5(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -423,7 +423,7 @@ do_construct_SHA1(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -440,7 +440,7 @@ do_construct_SHA1(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -455,7 +455,7 @@ do_construct_SHA1(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -529,7 +529,7 @@ do_construct_SHA224(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -546,7 +546,7 @@ do_construct_SHA224(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -561,7 +561,7 @@ do_construct_SHA224(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -635,7 +635,7 @@ do_construct_SHA256(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -652,7 +652,7 @@ do_construct_SHA256(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -667,7 +667,7 @@ do_construct_SHA256(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -741,7 +741,7 @@ do_construct_SHA384(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -758,7 +758,7 @@ do_construct_SHA384(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -773,7 +773,7 @@ do_construct_SHA384(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -847,7 +847,7 @@ do_construct_SHA512(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -864,7 +864,7 @@ do_construct_SHA512(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -879,7 +879,7 @@ do_construct_SHA512(V_object& result)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& hasher = self.dereference_mutable().open_opaque();
+        auto& hasher = self.dereference_mutable().mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())

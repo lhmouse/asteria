@@ -296,7 +296,7 @@ class Reference
 
     ROCKET_ALWAYS_INLINE
     Value&
-    open_temporary()
+    mut_temporary()
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
             ? this->m_value

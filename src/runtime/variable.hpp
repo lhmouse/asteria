@@ -61,7 +61,7 @@ class Variable final
       { return this->m_value;  }
 
     Value&
-    open_value()
+    mut_value()
       { return this->m_value;  }
 
     // Modifiers

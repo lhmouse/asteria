@@ -165,7 +165,7 @@ extract(cow_vector<Expression_Unit>& units)
 
 cow_vector<Expression_Unit>&
 Infix_Element::
-open_junction() noexcept
+mut_junction() noexcept
   {
     switch(this->index()) {
       case index_head:

@@ -30,7 +30,7 @@ class Statement_Sequence
       { return this->m_opts;  }
 
     Compiler_Options&
-    open_options() noexcept
+    mut_options() noexcept
       { return this->m_opts;  }
 
     Statement_Sequence&

@@ -48,7 +48,7 @@ class Abstract_Context
 
     // This function is called by `do_create_lazy_reference()` to avoid
     // possibility of infinite recursion, which would otherwise be caused
-    // if `open_named_reference()` was called instead.
+    // if `mut_named_reference()` was called instead.
     Reference&
     do_open_named_reference(Reference* hint_opt, const phsh_string& name) const
       {
@@ -117,7 +117,7 @@ class Abstract_Context
       }
 
     Reference&
-    open_named_reference(const phsh_string& name)
+    mut_named_reference(const phsh_string& name)
       {
         auto pair = this->insert_named_reference(name);
         return *(pair.first);

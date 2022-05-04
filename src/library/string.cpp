@@ -602,7 +602,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& m = self.dereference_mutable().open_opaque();
+        auto& m = self.dereference_mutable().mut_opaque();
         V_string text;
         V_integer from;
         optV_integer len;
@@ -634,7 +634,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& m = self.dereference_mutable().open_opaque();
+        auto& m = self.dereference_mutable().mut_opaque();
         V_string text;
         V_integer from;
         optV_integer len;
@@ -666,7 +666,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& m = self.dereference_mutable().open_opaque();
+        auto& m = self.dereference_mutable().mut_opaque();
         V_string text;
         V_integer from;
         optV_integer len;
@@ -698,7 +698,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         Reference&& self, Argument_Reader&& reader)
       {
         self.push_modifier_object_key(s_uuid);
-        auto& m = self.dereference_mutable().open_opaque();
+        auto& m = self.dereference_mutable().mut_opaque();
         V_string text, rep;
         V_integer from;
         optV_integer len;

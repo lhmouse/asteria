@@ -2499,7 +2499,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       if(!qnext)
         break;
 
-      if(!do_accept_infix_element(qnext->open_junction(), tstrm))
+      if(!do_accept_infix_element(qnext->mut_junction(), tstrm))
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2512,7 +2512,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_limit)) {
         qelem = ::std::move(stack.mut_back());
         stack.pop_back();
-        qelem->extract(stack.mut_back().open_junction());
+        qelem->extract(stack.mut_back().mut_junction());
       }
       stack.emplace_back(::std::move(*qnext));
     }
@@ -2521,7 +2521,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     while(stack.size() >= 2) {
       qelem = ::std::move(stack.mut_back());
       stack.pop_back();
-      qelem->extract(stack.mut_back().open_junction());
+      qelem->extract(stack.mut_back().mut_junction());
     }
     stack.mut_back().extract(units);
     return true;

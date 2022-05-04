@@ -90,7 +90,7 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
-    ASTERIA_TEST_CHECK(value.open_real() == 3.0);
+    ASTERIA_TEST_CHECK(value.mut_real() == 3.0);
     ASTERIA_TEST_CHECK(value.is_real());
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
     swap(value, cmp);
@@ -123,16 +123,16 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
-    value.open_array().mut(1) = V_string(sref("hello"));
+    value.mut_array().mut(1) = V_string(sref("hello"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
 
-    value.open_array().mut(1) = V_boolean(true);
+    value.mut_array().mut(1) = V_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
-    value.open_array().erase(::std::prev(value.as_array().end()));
+    value.mut_array().erase(::std::prev(value.as_array().end()));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
 
     object.clear();

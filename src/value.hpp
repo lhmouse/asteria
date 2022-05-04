@@ -142,7 +142,7 @@ class Value
       }
 
     V_boolean&
-    open_boolean()
+    mut_boolean()
       {
         if(this->type() == type_boolean)
           return this->m_stor.as<V_boolean>();
@@ -164,7 +164,7 @@ class Value
       }
 
     V_integer&
-    open_integer()
+    mut_integer()
       {
         if(this->type() == type_integer)
           return this->m_stor.as<V_integer>();
@@ -189,7 +189,7 @@ class Value
       }
 
     V_real&
-    open_real()
+    mut_real()
       {
         if(this->type() == type_real)
           return this->m_stor.as<V_real>();
@@ -215,7 +215,7 @@ class Value
       }
 
     V_string&
-    open_string()
+    mut_string()
       {
         if(this->type() == type_string)
           return this->m_stor.as<V_string>();
@@ -237,7 +237,7 @@ class Value
       }
 
     V_function&
-    open_function()
+    mut_function()
       {
         if(this->type() == type_function)
           return this->m_stor.as<V_function>();
@@ -259,7 +259,7 @@ class Value
       }
 
     V_opaque&
-    open_opaque()
+    mut_opaque()
       {
         if(this->type() == type_opaque)
           return this->m_stor.as<V_opaque>();
@@ -281,7 +281,7 @@ class Value
       }
 
     V_array&
-    open_array()
+    mut_array()
       {
         if(this->type() == type_array)
           return this->m_stor.as<V_array>();
@@ -303,7 +303,7 @@ class Value
       }
 
     V_object&
-    open_object()
+    mut_object()
       {
         if(this->type() == type_object)
           return this->m_stor.as<V_object>();
