@@ -82,7 +82,7 @@ do_ini_parse(tinybuf& buf)
     cow_string line;
     size_t nlines = 0;
     while(getline(line, buf)) {
-      nlines++;
+      nlines ++;
 
       // Remove the UTF-8 BOM, if any.
       if((nlines == 1) && line.starts_with("\xEF\xBB\xBF", 3))
@@ -170,7 +170,7 @@ std_ini_format(V_object value)
       fmt << "=";
       r.second.print(fmt, false);
       fmt << "\r\n";
-      nlines++;
+      nlines ++;
     }
 
     for(const auto& ro : value) {
@@ -184,7 +184,7 @@ std_ini_format(V_object value)
       fmt << "[";
       do_format_key(fmt, ro.first);
       fmt << "]\r\n";
-      nlines++;
+      nlines ++;
 
       // Write all properties in this section.
       for(const auto& r : ro.second.as_object()) {
@@ -196,7 +196,7 @@ std_ini_format(V_object value)
         fmt << "=";
         r.second.print(fmt, false);
         fmt << "\r\n";
-        nlines++;
+        nlines ++;
       }
     }
 
