@@ -61,18 +61,27 @@ class Text_Reader
 
     size_t
     navail() const noexcept
-      { return this->m_str.size() - this->m_off;  }
+      {
+        return this->m_str.size() - this->m_off;
+      }
 
     const char*
     data(size_t nadd = 0) const noexcept
       {
-        return ROCKET_EXPECT(nadd <= this->navail())
-            ? (this->m_str.data() + this->m_off + nadd) : "";
+        return (nadd <= this->navail()) ? (this->m_str.data() + this->m_off + nadd) : "";
       }
 
     char
     peek(size_t nadd = 0) const noexcept
-      { return *(this->data(nadd));  }
+      {
+         return *(this->data(nadd));
+      }
+
+    bool
+    starts_with(const char* str, size_t len) const noexcept
+      {
+        return (this->navail() >= len) && (::std::memcmp(this->data(), str, len) == 0);
+      }
 
     void
     consume(size_t nadd) noexcept
@@ -83,7 +92,9 @@ class Text_Reader
 
     void
     rewind() noexcept
-      { this->m_off = 0;  }
+      {
+        this->m_off = 0;
+      }
 
     const phsh_string&
     intern_string(cow_string&& val)
@@ -752,7 +763,7 @@ Token_Stream::
 
 Token_Stream&
 Token_Stream::
-reload(const cow_string& file, int line, tinybuf&& cbuf)
+reload(const cow_string& file, int start_line, tinybuf&& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if
@@ -765,19 +776,23 @@ reload(const cow_string& file, int line, tinybuf&& cbuf)
     opt<Source_Location> bcomm;
 
     // Read source code line by line.
-    Text_Reader reader(cbuf, file, line);
+    Text_Reader reader(cbuf, file, start_line);
     while(reader.advance()) {
-      // Discard the first line if it looks like a shebang.
-      if((reader.line() == line) && (::std::strncmp(reader.data(), "#!", 2) == 0))
-        continue;
+      if(reader.line() == start_line) {
+        // Remove the UTF-8 BOM, if any.
+        if(reader.starts_with("\xEF\xBB\xBF", 3))
+          reader.consume(3);
+
+        // Discard the first line if it looks like a shebang.
+        if(reader.starts_with("#!", 2))
+          continue;
+      }
 
       // Check for conflict markers.
-      bool found = (reader.navail() >= 7) &&
-                   ::rocket::is_any_of(reader.peek(), { '<', '|', '=', '>' }) &&
-                   ::std::all_of(reader.data() + 1, reader.data() + 7, are(reader.peek()));
-      if(found)
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_conflict_marker_detected, reader.tell());
+      for(const char* marker : { "<<<<<<<", "|||||||", "=======", ">>>>>>>" })
+        if(reader.starts_with(marker, 7))
+          throw Compiler_Error(Compiler_Error::M_status(),
+                    compiler_status_conflict_marker_detected, reader.tell());
 
       // Ensure this line is a valid UTF-8 string.
       while(reader.navail() != 0) {
@@ -835,13 +850,14 @@ reload(const cow_string& file, int line, tinybuf&& cbuf)
           }
         }
 
-        found = do_accept_numeric_literal(tokens, reader, this->m_opts.integers_as_reals) ||
-                do_accept_punctuator(tokens, reader) ||
-                do_accept_string_literal(tokens, reader, '\"', true) ||
-                do_accept_string_literal(tokens, reader, '\'',
-                                         this->m_opts.escapable_single_quotes) ||
-                do_accept_identifier_or_keyword(tokens, reader,
-                                                this->m_opts.keywords_as_identifiers);
+        bool found = do_accept_numeric_literal(tokens, reader,
+                                   this->m_opts.integers_as_reals) ||
+                     do_accept_punctuator(tokens, reader) ||
+                     do_accept_string_literal(tokens, reader, '\"', true) ||
+                     do_accept_string_literal(tokens, reader, '\'',
+                                   this->m_opts.escapable_single_quotes) ||
+                     do_accept_identifier_or_keyword(tokens, reader,
+                                   this->m_opts.keywords_as_identifiers);
         if(!found)
           throw Compiler_Error(Compiler_Error::M_status(),
                     compiler_status_token_character_unrecognized, reader.tell());
