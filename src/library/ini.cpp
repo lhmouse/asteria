@@ -19,15 +19,13 @@ do_format_key(tinyfmt& fmt, const cow_string& key)
     if(key.empty())
       ASTERIA_THROW_RUNTIME_ERROR("empty key is not allowed");
 
-    size_t pos = key.find_first_of(s_reject);
-    if(pos != cow_string::npos)
+    if(key.find_first_of(s_reject) != cow_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR("key contains invalid characters: $1", key);
 
-    pos = key.find_first_of(s_space);
-    if(pos == 0)
+    if(key.find_first_of(s_space) == 0)
       ASTERIA_THROW_RUNTIME_ERROR("key shall not begin with a space: $1", key);
 
-    if((pos != cow_string::npos) && (key.find_last_of(s_space) == key.size() - 1))
+    if(key.find_last_of(s_space) == key.size() - 1)
       ASTERIA_THROW_RUNTIME_ERROR("key shall not end with a space: $1", key);
 
     return fmt << key;
@@ -45,25 +43,19 @@ do_format_check_scalar(const Value& value)
         return true;
 
       case type_string: {
-        const auto& str = value.as_string();
-
         // Verify the string, as we will have to write it verbatim later.
+        const auto& str = value.as_string();
         if(str.empty())
           return true;
 
-        size_t pos = str.find_first_of(s_reject);
-        if(pos != cow_string::npos)
+        if(str.find_first_of(s_reject) != cow_string::npos)
           ASTERIA_THROW_RUNTIME_ERROR("value contains invalid characters: $1", str);
 
-        pos = str.find_first_of(s_space);
-        if(pos == 0)
+        if(str.find_first_of(s_space) == 0)
           ASTERIA_THROW_RUNTIME_ERROR("value shall not begin with a space: $1", str);
 
-        if(pos != cow_string::npos) {
-          pos = str.find_last_of(s_space);
-          if(pos == str.size() - 1)
-            ASTERIA_THROW_RUNTIME_ERROR("value shall not end with a space: $1", str);
-        }
+        if(str.find_last_of(s_space) == str.size() - 1)
+          ASTERIA_THROW_RUNTIME_ERROR("value shall not end with a space: $1", str);
 
         return true;
       }
