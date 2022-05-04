@@ -72,7 +72,7 @@ do_format_check_scalar(const Value& value)
       case type_function:
       case type_array:
       case type_object:
-        // these values are always ignored.
+        // These values are always ignored.
         return false;
 
       default:
@@ -169,16 +169,14 @@ std_ini_format(optV_object value)
     if(!value)
       return sref("");
 
-    // Write top-level non-object values first.
     ::rocket::tinyfmt_str fmt;
     size_t nlines = 0;
 
-    // Write top-level properties.
     for(const auto& r : *value) {
       if(!do_format_check_scalar(r.second))
         continue;
 
-      // Write a key-value pair.
+      // Write a top-level property.
       do_format_key(fmt, r.first);
       fmt << "=";
       r.second.print(fmt, false);
@@ -186,7 +184,6 @@ std_ini_format(optV_object value)
       nlines++;
     }
 
-    // Write sections.
     for(const auto& ro : *value) {
       if(!ro.second.is_object())
         continue;
