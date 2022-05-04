@@ -2515,22 +2515,22 @@
 `std.ini.parse(text)`
 
        * Parses a string containing data encoded in the INI format and
-         converts it to a value.
+         converts it to an object.
 
        * Returns the parsed value as an object. Each section in the INI
          string corresponds to a subobject, and each key in this section
-         corresponds to a string in this subobject. No type conversion
-         is performed. Comments may start with either `;` or `#`.
+         corresponds to a string in this subobject. No type conversion is
+         performed. Comments may start with either `;` or `#`.
 
        * Throws an exception if the string is invalid.
 
 `std.ini.parse_file(path)`
 
        * Parses the contents of the file denoted by `path` as an INI
-         string for a value. This function behaves identically to
+         string for an object. This function behaves identically to
          `parse()` otherwise.
 
-       * Returns the parsed value.
+       * Returns the parsed value as an object.
 
        * Throws an exception if a read error occurs, or if the string is
          invalid.
