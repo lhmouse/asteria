@@ -4,6 +4,8 @@
 #ifndef ASTERIA_PRECOMPILED_
 #define ASTERIA_PRECOMPILED_
 
+#include "version.h"
+
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
