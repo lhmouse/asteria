@@ -245,7 +245,7 @@ main(int argc, char** argv)
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+1,
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
-      PACKAGE_NAME, ASTERIA_ABI_VERSION_STRING,
+      PACKAGE_STRING, ASTERIA_ABI_VERSION_STRING,
       current_locale,
       repl_cmd_char, repl_cmd_char);
 
