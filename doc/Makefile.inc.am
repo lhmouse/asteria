@@ -1,0 +1,7 @@
+EXTRA_DIST +=  \
+  doc/operator-precedence.txt  \
+  doc/standard-library.txt  \
+  doc/syntax.txt  \
+  doc/examples.txt  \
+  doc/asteria.nanorc  \
+  ${NOTHING}

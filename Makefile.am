@@ -47,14 +47,7 @@ CLEANFILES =  \
 	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
 ## Initialization
-EXTRA_DIST =  \
-  doc/operator-precedence.txt  \
-  doc/standard-library.txt  \
-  doc/syntax.txt  \
-  doc/examples.txt  \
-  doc/asteria.nanorc  \
-  ${NOTHING}
-
+EXTRA_DIST =
 noinst_LIBRARIES =
 noinst_LTLIBRARIES =
 TESTS = ${check_PROGRAMS}
@@ -68,6 +61,9 @@ check_HEADERS =
 check_LIBRARIES =
 check_LTLIBRARIES =
 check_PROGRAMS =
+
+## Documentation
+include doc/Makefile.inc.am
 
 ## Programs and libraries
 include rocket/Makefile.inc.am
