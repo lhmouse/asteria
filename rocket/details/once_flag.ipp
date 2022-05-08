@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ONCE_FLAG_HPP_
+#ifndef ROCKET_ONCE_FLAG_
 #  error Please include <rocket/once_flag.hpp> instead.
 #endif
 

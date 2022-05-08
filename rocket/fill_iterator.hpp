@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_FILL_ITERATOR_HPP_
-#define ROCKET_FILL_ITERATOR_HPP_
+#ifndef ROCKET_FILL_ITERATOR_
+#define ROCKET_FILL_ITERATOR_
 
 #include "fwd.hpp"
 

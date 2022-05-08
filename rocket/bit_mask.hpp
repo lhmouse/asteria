@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_BIT_MASK_HPP_
-#define ROCKET_BIT_MASK_HPP_
+#ifndef ROCKET_BIT_MASK_
+#define ROCKET_BIT_MASK_
 
 #include "fwd.hpp"
 #include "assert.hpp"

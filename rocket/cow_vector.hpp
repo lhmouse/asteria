@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COW_VECTOR_HPP_
-#define ROCKET_COW_VECTOR_HPP_
+#ifndef ROCKET_COW_VECTOR_
+#define ROCKET_COW_VECTOR_
 
 #include "fwd.hpp"
 #include "assert.hpp"

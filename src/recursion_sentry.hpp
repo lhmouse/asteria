@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RECURSION_SENTRY_HPP_
-#define ASTERIA_RECURSION_SENTRY_HPP_
+#ifndef ASTERIA_RECURSION_SENTRY_
+#define ASTERIA_RECURSION_SENTRY_
 
 #include "fwd.hpp"
 

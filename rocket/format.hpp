@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_FORMAT_HPP_
-#define ROCKET_FORMAT_HPP_
+#ifndef ROCKET_FORMAT_
+#define ROCKET_FORMAT_
 
 #include "tinyfmt.hpp"
 #include "throw.hpp"

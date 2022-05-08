@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_REFERENCE_WRAPPER_HPP_
-#define ROCKET_REFERENCE_WRAPPER_HPP_
+#ifndef ROCKET_REFERENCE_WRAPPER_
+#define ROCKET_REFERENCE_WRAPPER_
 
 #include "fwd.hpp"
 

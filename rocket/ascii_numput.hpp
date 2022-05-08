@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ASCII_NUMPUT_HPP_
-#define ROCKET_ASCII_NUMPUT_HPP_
+#ifndef ROCKET_ASCII_NUMPUT_
+#define ROCKET_ASCII_NUMPUT_
 
 #include "fwd.hpp"
 

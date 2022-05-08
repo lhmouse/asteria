@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_XALLOCATOR_HPP_
-#define ROCKET_XALLOCATOR_HPP_
+#ifndef ROCKET_XALLOCATOR_
+#define ROCKET_XALLOCATOR_
 
 #include "fwd.hpp"
 

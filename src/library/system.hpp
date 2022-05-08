@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LIBRARY_SYSTEM_HPP_
-#define ASTERIA_LIBRARY_SYSTEM_HPP_
+#ifndef ASTERIA_LIBRARY_SYSTEM_
+#define ASTERIA_LIBRARY_SYSTEM_
 
 #include "../fwd.hpp"
 

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LLDS_AVMC_QUEUE_HPP_
+#ifndef ASTERIA_LLDS_AVMC_QUEUE_
 #  error Please include <asteria/llds/avmc_queue.hpp> instead.
 #endif
 

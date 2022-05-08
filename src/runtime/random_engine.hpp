@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_HPP_
-#define ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_HPP_
+#ifndef ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_
+#define ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_
 
 #include "../fwd.hpp"
 

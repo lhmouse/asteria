@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UNIQUE_POSIX_FD_HPP_
-#define ROCKET_UNIQUE_POSIX_FD_HPP_
+#ifndef ROCKET_UNIQUE_POSIX_FD_
+#define ROCKET_UNIQUE_POSIX_FD_
 
 #include "unique_handle.hpp"
 #include <unistd.h>  // ::close()

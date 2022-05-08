@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_FWD_HPP_
-#define ASTERIA_FWD_HPP_
+#ifndef ASTERIA_FWD_
+#define ASTERIA_FWD_
 
 #include "version.h"
 #include "../rocket/cow_string.hpp"

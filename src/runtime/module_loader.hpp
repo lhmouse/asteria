@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_MODULE_LOADER_HPP_
-#define ASTERIA_RUNTIME_MODULE_LOADER_HPP_
+#ifndef ASTERIA_RUNTIME_MODULE_LOADER_
+#define ASTERIA_RUNTIME_MODULE_LOADER_
 
 #include "../fwd.hpp"
 #include "../../rocket/tinybuf_file.hpp"

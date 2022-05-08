@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_THROW_HPP_
-#define ROCKET_THROW_HPP_
+#ifndef ROCKET_THROW_
+#define ROCKET_THROW_
 
 #include "fwd.hpp"
 

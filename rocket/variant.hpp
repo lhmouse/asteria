@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_VARIANT_HPP_
-#define ROCKET_VARIANT_HPP_
+#ifndef ROCKET_VARIANT_
+#define ROCKET_VARIANT_
 
 #include "fwd.hpp"
 #include "assert.hpp"

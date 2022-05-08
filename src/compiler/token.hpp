@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_COMPILER_TOKEN_HPP_
-#define ASTERIA_COMPILER_TOKEN_HPP_
+#ifndef ASTERIA_COMPILER_TOKEN_
+#define ASTERIA_COMPILER_TOKEN_
 
 #include "../fwd.hpp"
 #include "../source_location.hpp"

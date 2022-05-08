@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_FORMAT_HPP_
+#ifndef ROCKET_FORMAT_
 #  error Please include <rocket/format.hpp> instead.
 #endif
 

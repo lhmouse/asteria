@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_REPL_FWD_HPP_
-#define ASTERIA_REPL_FWD_HPP_
+#ifndef ASTERIA_REPL_FWD_
+#define ASTERIA_REPL_FWD_
 
 #include "../fwd.hpp"
 #include "../value.hpp"

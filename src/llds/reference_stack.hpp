@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LLDS_REFERENCE_STACK_HPP_
-#define ASTERIA_LLDS_REFERENCE_STACK_HPP_
+#ifndef ASTERIA_LLDS_REFERENCE_STACK_
+#define ASTERIA_LLDS_REFERENCE_STACK_
 
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"

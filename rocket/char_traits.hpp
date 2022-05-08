@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_CHAR_TRAITS_HPP_
-#define ROCKET_CHAR_TRAITS_HPP_
+#ifndef ROCKET_CHAR_TRAITS_
+#define ROCKET_CHAR_TRAITS_
 
 #include "fwd.hpp"
 #include "throw.hpp"

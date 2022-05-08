@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_SOURCE_LOCATION_HPP_
-#define ASTERIA_SOURCE_LOCATION_HPP_
+#ifndef ASTERIA_SOURCE_LOCATION_
+#define ASTERIA_SOURCE_LOCATION_
 
 #include "fwd.hpp"
 

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_COMPILER_STATEMENT_SEQUENCE_HPP_
-#define ASTERIA_COMPILER_STATEMENT_SEQUENCE_HPP_
+#ifndef ASTERIA_COMPILER_STATEMENT_SEQUENCE_
+#define ASTERIA_COMPILER_STATEMENT_SEQUENCE_
 
 #include "../fwd.hpp"
 #include "statement.hpp"

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_REFCNT_PTR_HPP_
+#ifndef ROCKET_REFCNT_PTR_
 #  error Please include <rocket/refcnt_ptr.hpp> instead.
 #endif
 

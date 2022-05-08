@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_LINEAR_BUFFER_HPP_
+#ifndef ROCKET_LINEAR_BUFFER_
 #  error Please include <rocket/linear_buffer.hpp> instead.
 #endif
 

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_PTC_ARGUMENTS_HPP_
-#define ASTERIA_RUNTIME_PTC_ARGUMENTS_HPP_
+#ifndef ASTERIA_RUNTIME_PTC_ARGUMENTS_
+#define ASTERIA_RUNTIME_PTC_ARGUMENTS_
 
 #include "../fwd.hpp"
 #include "../llds/reference_stack.hpp"

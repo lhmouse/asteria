@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_RECURSIVE_MUTEX_HPP_
+#ifndef ROCKET_RECURSIVE_MUTEX_
 #  error Please include <rocket/recursive_mutex.hpp> instead.
 #endif
 

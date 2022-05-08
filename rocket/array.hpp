@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ARRAY_HPP_
-#define ROCKET_ARRAY_HPP_
+#ifndef ROCKET_ARRAY_
+#define ROCKET_ARRAY_
 
 #include "fwd.hpp"
 #include "assert.hpp"

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COMPILER_H_
+#ifndef ROCKET_COMPILER_
 #  error Please #include <rocket/compiler.h> instead.
 #endif
 

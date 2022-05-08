@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_ARGUMENT_READER_HPP_
+#ifndef ASTERIA_RUNTIME_ARGUMENT_READER_
 #  error Please include <asteria/runtime/argument_reader.hpp> instead.
 #endif
 

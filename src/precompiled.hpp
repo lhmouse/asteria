@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_PRECOMPILED_HPP_
-#define ASTERIA_PRECOMPILED_HPP_
+#ifndef ASTERIA_PRECOMPILED_
+#define ASTERIA_PRECOMPILED_
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ASSERT_HPP_
-#define ROCKET_ASSERT_HPP_
+#ifndef ROCKET_ASSERT_
+#define ROCKET_ASSERT_
 
 
 namespace rocket {

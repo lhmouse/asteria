@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_PREHASHED_STRING_HPP_
-#define ROCKET_PREHASHED_STRING_HPP_
+#ifndef ROCKET_PREHASHED_STRING_
+#define ROCKET_PREHASHED_STRING_
 
 #include "cow_string.hpp"
 

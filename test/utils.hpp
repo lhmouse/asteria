@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_TEST_UTILS_HPP_
-#define ASTERIA_TEST_UTILS_HPP_
+#ifndef ASTERIA_TEST_UTILS_
+#define ASTERIA_TEST_UTILS_
 
 #include "../src/fwd.hpp"
 #include "../src/utils.hpp"

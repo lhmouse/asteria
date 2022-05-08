@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_STATIC_VECTOR_HPP_
+#ifndef ROCKET_STATIC_VECTOR_
 #  error Please include <rocket/static_vector.hpp> instead.
 #endif
 

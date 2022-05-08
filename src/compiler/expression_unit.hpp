@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_COMPILER_EXPRESSION_UNIT_HPP_
-#define ASTERIA_COMPILER_EXPRESSION_UNIT_HPP_
+#ifndef ASTERIA_COMPILER_EXPRESSION_UNIT_
+#define ASTERIA_COMPILER_EXPRESSION_UNIT_
 
 #include "../fwd.hpp"
 #include "../value.hpp"

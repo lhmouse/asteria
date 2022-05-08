@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_FWD_HPP_
+#ifndef ROCKET_FWD_
 #  error Please include <rocket/fwd.hpp> instead.
 #endif
 

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_CHAR_TRAITS_HPP_
+#ifndef ROCKET_CHAR_TRAITS_
 #  error Please include <rocket/char_traits.hpp> instead.
 #endif
 

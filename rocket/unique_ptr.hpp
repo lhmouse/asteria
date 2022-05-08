@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UNIQUE_PTR_HPP_
-#define ROCKET_UNIQUE_PTR_HPP_
+#ifndef ROCKET_UNIQUE_PTR_
+#define ROCKET_UNIQUE_PTR_
 
 #include "fwd.hpp"
 #include "assert.hpp"

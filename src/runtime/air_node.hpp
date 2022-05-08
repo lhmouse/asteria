@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_AIR_NODE_HPP_
-#define ASTERIA_RUNTIME_AIR_NODE_HPP_
+#ifndef ASTERIA_RUNTIME_AIR_NODE_
+#define ASTERIA_RUNTIME_AIR_NODE_
 
 #include "../fwd.hpp"
 #include "reference.hpp"

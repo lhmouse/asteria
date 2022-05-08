@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COW_HASHMAP_HPP_
-#define ROCKET_COW_HASHMAP_HPP_
+#ifndef ROCKET_COW_HASHMAP_
+#define ROCKET_COW_HASHMAP_
 
 #include "fwd.hpp"
 #include "assert.hpp"

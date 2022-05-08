@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ASCII_CASE_HPP_
+#ifndef ROCKET_ASCII_CASE_
 #  error Please include <rocket/ascii_case.hpp> instead.
 #endif
 

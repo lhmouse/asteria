@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_VALUE_HPP_
+#ifndef ASTERIA_VALUE_
 #  error Please include <asteria/value.hpp> instead.
 #endif
 

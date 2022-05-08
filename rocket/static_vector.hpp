@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_STATIC_VECTOR_HPP_
-#define ROCKET_STATIC_VECTOR_HPP_
+#ifndef ROCKET_STATIC_VECTOR_
+#define ROCKET_STATIC_VECTOR_
 
 #include "fwd.hpp"
 #include "assert.hpp"

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LLDS_VARIABLE_HASHMAP_HPP_
+#ifndef ASTERIA_LLDS_VARIABLE_HASHMAP_
 #  error Please include <asteria/llds/variable_hashmap.hpp> instead.
 #endif
 

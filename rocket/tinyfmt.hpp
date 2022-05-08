@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_TINYFMT_HPP_
-#define ROCKET_TINYFMT_HPP_
+#ifndef ROCKET_TINYFMT_
+#define ROCKET_TINYFMT_
 
 #include "fwd.hpp"
 #include "throw.hpp"

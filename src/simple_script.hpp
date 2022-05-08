@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_SIMPLE_SCRIPT_HPP_
-#define ASTERIA_SIMPLE_SCRIPT_HPP_
+#ifndef ASTERIA_SIMPLE_SCRIPT_
+#define ASTERIA_SIMPLE_SCRIPT_
 
 #include "fwd.hpp"
 #include "runtime/global_context.hpp"

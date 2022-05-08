@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_VALUE_HPP_
-#define ASTERIA_VALUE_HPP_
+#ifndef ASTERIA_VALUE_
+#define ASTERIA_VALUE_
 
 #include "fwd.hpp"
 #include "details/value.ipp"

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_OPTIONAL_HPP_
-#define ROCKET_OPTIONAL_HPP_
+#ifndef ROCKET_OPTIONAL_
+#define ROCKET_OPTIONAL_
 
 #include "static_vector.hpp"
 

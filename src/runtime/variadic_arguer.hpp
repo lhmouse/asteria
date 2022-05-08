@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_VARIADIC_ARGUER_HPP_
-#define ASTERIA_RUNTIME_VARIADIC_ARGUER_HPP_
+#ifndef ASTERIA_RUNTIME_VARIADIC_ARGUER_
+#define ASTERIA_RUNTIME_VARIADIC_ARGUER_
 
 #include "../fwd.hpp"
 #include "reference.hpp"

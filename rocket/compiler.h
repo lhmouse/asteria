@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COMPILER_H_
-#define ROCKET_COMPILER_H_
+#ifndef ROCKET_COMPILER_
+#define ROCKET_COMPILER_
 
 // Clang may pretend to be GCC or MSVC so has to be checked very first.
 #if defined(__clang__)

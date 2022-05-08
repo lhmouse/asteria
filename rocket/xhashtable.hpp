@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_XHASHTABLE_HPP_
-#define ROCKET_XHASHTABLE_HPP_
+#ifndef ROCKET_XHASHTABLE_
+#define ROCKET_XHASHTABLE_
 
 #include "fwd.hpp"
 #include "assert.hpp"

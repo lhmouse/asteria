@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_EXECUTIVE_CONTEXT_HPP_
-#define ASTERIA_RUNTIME_EXECUTIVE_CONTEXT_HPP_
+#ifndef ASTERIA_RUNTIME_EXECUTIVE_CONTEXT_
+#define ASTERIA_RUNTIME_EXECUTIVE_CONTEXT_
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
