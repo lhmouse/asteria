@@ -2,62 +2,62 @@ check_HEADERS +=  \
   %reldir%/utils.hpp  \
   ${NOTHING}
 
-check_PROGRAMS +=  \
-  %reldir%/utils.test  \
-  %reldir%/value.test  \
-  %reldir%/variable.test  \
-  %reldir%/reference.test  \
-  %reldir%/token_stream.test  \
-  %reldir%/statement_sequence.test  \
-  %reldir%/simple_script.test  \
-  %reldir%/gc.test  \
-  %reldir%/gc2.test  \
-  %reldir%/gc_loop.test  \
-  %reldir%/varg.test  \
-  %reldir%/operators.test  \
-  %reldir%/proper_tail_call.test  \
-  %reldir%/stack_overflow.test  \
-  %reldir%/structured_binding.test  \
-  %reldir%/global_identifier.test  \
-  %reldir%/variadic_function_call.test  \
-  %reldir%/defer.test  \
-  %reldir%/defer_ptc.test  \
-  %reldir%/trailing_commas.test  \
-  %reldir%/system.test  \
-  %reldir%/chrono.test  \
-  %reldir%/string.test  \
-  %reldir%/array.test  \
-  %reldir%/numeric.test  \
-  %reldir%/math.test  \
-  %reldir%/filesystem.test  \
-  %reldir%/checksum.test  \
-  %reldir%/json.test  \
-  %reldir%/import.test  \
-  %reldir%/bypassed_variable.test  \
-  %reldir%/github_71.test  \
-  %reldir%/github_78.test  \
-  %reldir%/github_84.test  \
-  %reldir%/github_85.test  \
-  %reldir%/github_98.test  \
-  %reldir%/github_101.test  \
-  %reldir%/ref.test  \
-  %reldir%/github_105.test  \
-  %reldir%/ascii_numget.test  \
-  %reldir%/github_108.test  \
-  %reldir%/github_113.test  \
-  %reldir%/github_116.test  \
-  %reldir%/zlib.test  \
-  %reldir%/c_stack_overflow.test  \
-  %reldir%/var_mod.test  \
-  %reldir%/ini.test  \
-  %reldir%/csv.test  \
-  ${NOTHING}
-
 EXTRA_DIST +=  \
   %reldir%/checksum.txt  \
   %reldir%/import_recursive.txt  \
   %reldir%/import_sub.txt  \
-  %reldir%/test/sample.conf  \
-  %reldir%/test/test.ini  \
-  %reldir%/test/test.csv  \
+  %reldir%/sample.conf  \
+  %reldir%/test.ini  \
+  %reldir%/test.csv  \
+  ${NOTHING}
+
+check_PROGRAMS +=  \
+  test/utils.test  \
+  test/value.test  \
+  test/variable.test  \
+  test/reference.test  \
+  test/token_stream.test  \
+  test/statement_sequence.test  \
+  test/simple_script.test  \
+  test/gc.test  \
+  test/gc2.test  \
+  test/gc_loop.test  \
+  test/varg.test  \
+  test/operators.test  \
+  test/proper_tail_call.test  \
+  test/stack_overflow.test  \
+  test/structured_binding.test  \
+  test/global_identifier.test  \
+  test/variadic_function_call.test  \
+  test/defer.test  \
+  test/defer_ptc.test  \
+  test/trailing_commas.test  \
+  test/system.test  \
+  test/chrono.test  \
+  test/string.test  \
+  test/array.test  \
+  test/numeric.test  \
+  test/math.test  \
+  test/filesystem.test  \
+  test/checksum.test  \
+  test/json.test  \
+  test/import.test  \
+  test/bypassed_variable.test  \
+  test/github_71.test  \
+  test/github_78.test  \
+  test/github_84.test  \
+  test/github_85.test  \
+  test/github_98.test  \
+  test/github_101.test  \
+  test/ref.test  \
+  test/github_105.test  \
+  test/ascii_numget.test  \
+  test/github_108.test  \
+  test/github_113.test  \
+  test/github_116.test  \
+  test/zlib.test  \
+  test/c_stack_overflow.test  \
+  test/var_mod.test  \
+  test/ini.test  \
+  test/csv.test  \
   ${NOTHING}
