@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_VERSION_H_
-#define ASTERIA_VERSION_H_
+#ifndef ASTERIA_VERSION_
+#define ASTERIA_VERSION_
 
 #define ASTERIA_ABI_VERSION_MAJOR    @abi_major@
 #define ASTERIA_ABI_VERSION_MINOR    @abi_minor@
