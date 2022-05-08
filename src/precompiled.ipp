@@ -10,6 +10,12 @@
 #  include <config.h>
 #endif
 
+#ifdef DLL_EXPORT
+#  define ASTERIA_DLLEXPORT  __declspec(dllexport)
+#else
+#  define ASTERIA_DLLEXPORT
+#endif
+
 #include "../rocket/cow_string.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/cow_vector.hpp"
