@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.hpp"
+#include "../precompiled.ipp"
 #include "checksum.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/runtime_error.hpp"

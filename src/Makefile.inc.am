@@ -2,7 +2,6 @@ include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
   %D%/version.h  \
   %D%/fwd.hpp  \
-  %D%/precompiled.hpp  \
   %D%/utils.hpp  \
   %D%/recursion_sentry.hpp  \
   %D%/value.hpp  \
@@ -86,6 +85,7 @@ include_asteria_library_HEADERS =  \
 lib_LTLIBRARIES += lib/libasteria.la
 lib_libasteria_la_SOURCES =  \
   %D%/version.h.in  \
+  %D%/precompiled.ipp  \
   %D%/fwd.cpp  \
   %D%/utils.cpp  \
   %D%/recursion_sentry.cpp  \
