@@ -1,6 +1,6 @@
 include_asteriadir = ${includedir}/asteria
 include_asteria_HEADERS =  \
-  src/version.h  \
+  %D%/version.h  \
   %D%/fwd.hpp  \
   %D%/precompiled.hpp  \
   %D%/utils.hpp  \
