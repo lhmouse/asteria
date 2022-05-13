@@ -159,79 +159,86 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
   }
 
 template<typename ComparatorT>
-void
-do_merge_range(V_array::iterator& opos, ComparatorT&& compare, V_array::iterator ibegin,
-               V_array::iterator iend, bool unique)
-  {
-    for(auto ipos = ibegin;  ipos != iend;  ++ipos)
-      if(!unique || (compare(ipos[0], opos[-1]) != compare_equal))
-        *(opos++) = ::std::move(*ipos);
-  }
-
-template<typename ComparatorT>
 V_array::iterator
-do_merge_blocks(V_array& output, V_array& input, ComparatorT&& compare, ptrdiff_t bsize, bool unique)
+do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& compare, ptrdiff_t bsize)
   {
     ROCKET_ASSERT(output.size() >= input.size());
+    ROCKET_ASSERT(bsize > 0);
+    ROCKET_ASSERT(input.size() >= (size_t) bsize);
+    ROCKET_ASSERT(input.size() <= (size_t) bsize * 2);
 
     // Merge adjacent blocks of `bsize` elements.
-    auto opos = output.mut_begin();
-    auto ipos = input.mut_begin();
-    auto iend = input.mut_end();
+    auto bout = output.mut_begin();
+    auto bin = input.mut_begin();
+    auto ein = input.mut_end();
 
-    while(iend - ipos > bsize) {
-      // Get the ranges of the blocks to merge.
-      V_array::iterator bpos[2] = { ipos, ipos += bsize };
-      V_array::iterator bend[2] = { ipos, ipos += ::rocket::min(iend - ipos, bsize) };
-      size_t bi;
+    auto output_element = [&](Value& elem)
+      {
+        // Check for duplicates.
+        if(unique && (bout != output.begin())) {
+          auto cmp = compare(bout[-1], elem);
+          if(cmp == compare_unordered)
+            ASTERIA_THROW_RUNTIME_ERROR(
+                  "elements not comparable (operands were `$1` and `$2`)",
+                  bout[-1], elem);
 
-      for(;;) {
-        // Merge elements one by one, until either block has been exhausted, then store its index
-        // in `bi`.
-        auto cmp = compare(*(bpos[0]), *(bpos[1]));
+          if(cmp == compare_equal)
+            return;
+        }
+
+        // Move the element now.
+        bout += 1;
+        bout[-1] = ::std::move(elem);
+      };
+
+    // Input data are divided into blocks of `bsize` elements.
+    // First, repeat if there are at least two blocks.
+    while(ein - bin > bsize) {
+      V_array::iterator bpos[2];  // beginnings of blocks
+      V_array::iterator epos[2];  // ends of blocks
+      size_t tb;  // index of block that has just been taken
+
+      bpos[0] = bin;
+      bin += bsize;
+      bpos[1] = bin;
+
+      epos[0] = bin;
+      bin += ::rocket::min(ein - bin, bsize);
+      epos[1] = bin;
+
+      do {
+        // Compare the first elements from both blocks.
+        auto cmp = compare(bpos[0][0], bpos[1][0]);
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR(
-              "unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
+                "elements not comparable (operands were `$1` and `$2`)",
+                bpos[0][0], bpos[1][0]);
 
-        // For Merge Sort to be stable, the two elements will only be swapped if the first one
-        // is greater than the second one.
-        bi = (cmp == compare_greater);
-
-        // Move this element unless uniqueness is requested and it is equal to the previous
-        // output.
-        bool discard = false;
-        if(unique && (opos != output.begin()))
-          discard = (compare(*(bpos[bi]), opos[-1]) == compare_equal);
-
-        if(!discard)
-          *(opos++) = ::std::move(*(bpos[bi]));
-
-        bpos[bi]++;
-
-        // When uniqueness is requested, if elements from the two blocks are equal, discard the one
-        // from the second block. This may exhaust the second block.
-        if(unique && (cmp == compare_equal)) {
-          size_t oi = bi ^ 1;
-          bpos[oi]++;
-          if(bpos[oi] == bend[oi]) {
-            bi = oi;
-            break;
-          }
-        }
-        if(bpos[bi] == bend[bi])
-          break;
+        // Move the smaller element to the output array. For merge sorts to be
+        // stable, if the elements compare equal, the first one is taken.
+        tb = cmp == compare_greater;
+        bpos[tb] += 1;
+        output_element(bpos[tb][-1]);
       }
+      while(bpos[tb] != epos[tb]);
 
-      // Move all elements from the other block.
-      ROCKET_ASSERT(opos != output.begin());
-      bi ^= 1;
-      do_merge_range(opos, compare, bpos[bi], bend[bi], unique);
+      // The `tb` block has been exhausted. Move elements from the other block.
+      tb ^= 1;
+      ROCKET_ASSERT(bpos[tb] != epos[tb]);
+
+      do {
+        bpos[tb] += 1;
+        output_element(bpos[tb][-1]);
+      }
+      while(bpos[tb] != epos[tb]);
     }
 
-    // Copy all remaining elements.
-    ROCKET_ASSERT(opos != output.begin());
-    do_merge_range(opos, compare, ipos, iend, unique);
-    return opos;
+    // Move all remaining elements.
+    while(bin != ein) {
+      bin += 1;
+      output_element(bin[-1]);
+    }
+    return bout;
   }
 
 }  // namespace
@@ -452,7 +459,7 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
     while(bsize < data.ssize()) {
-      do_merge_blocks(temp, data, compare, bsize, false);
+      do_merge_blocks(temp, false, data, compare, bsize);
       data.swap(temp);
       bsize *= 2;
     }
@@ -474,11 +481,11 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
     while(bsize * 2 < data.ssize()) {
-      do_merge_blocks(temp, data, compare, bsize, false);
+      do_merge_blocks(temp, false, data, compare, bsize);
       data.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, data, compare, bsize, true);
+    auto epos = do_merge_blocks(temp, true, data, compare, bsize);
     temp.erase(epos, temp.end());
     return temp;
   }
@@ -510,7 +517,7 @@ std_array_ksort(Global_Context& global, V_object object, optV_function comparato
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
     while(bsize < data.ssize()) {
-      do_merge_blocks(temp, data, compare, bsize, false);
+      do_merge_blocks(temp, false, data, compare, bsize);
       data.swap(temp);
       bsize *= 2;
     }
