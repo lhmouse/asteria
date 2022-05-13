@@ -165,7 +165,6 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
     ROCKET_ASSERT(output.size() >= input.size());
     ROCKET_ASSERT(bsize > 0);
     ROCKET_ASSERT(input.size() >= (size_t) bsize);
-    ROCKET_ASSERT(input.size() <= (size_t) bsize * 2);
 
     // Merge adjacent blocks of `bsize` elements.
     auto bout = output.mut_begin();
