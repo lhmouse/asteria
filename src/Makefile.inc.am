@@ -157,10 +157,11 @@ bin_asteria_SOURCES =  \
   %D%/repl/editline.cpp  \
   ${NOTHING}
 
-BUILT_SOURCES += precompiled.xipp
-CLEANFILES += precompiled.xipp precompiled.xipp.gch
+AM_CXXFLAGS += -include %D%/precompiled.xipp
+BUILT_SOURCES += %D%/precompiled.xipp
+CLEANFILES += %D%/precompiled.xipp %D%/precompiled.xipp.gch
 
-%.xipp: %D%/%.ipp src/version.h config.h
+%.xipp: %.ipp %D%/version.h config.h
 	## Build the wrapper header, which contains the absolute path to the plain header.
 	${AM_V_GEN}printf '#include "%s"\n' $(abspath $<) > $@
 	## Compile the header. This must use LTCXXCOMPILE due to some nasty PIC flags...
