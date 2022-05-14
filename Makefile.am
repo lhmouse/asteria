@@ -21,6 +21,20 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 SUFFIXES = .xipp .xipp.gch
 LDADD = lib/libasteria.la
 
+## Initialization
+noinst_LIBRARIES =
+noinst_LTLIBRARIES =
+
+include_HEADERS =
+lib_LIBRARIES =
+lib_LTLIBRARIES =
+bin_PROGRAMS =
+
+check_HEADERS =
+check_LIBRARIES =
+check_LTLIBRARIES =
+check_PROGRAMS =
+
 BUILT_SOURCES =  \
   precompiled.xipp  \
   precompiled.xipp.gch  \
@@ -31,6 +45,11 @@ CLEANFILES =  \
   precompiled.xipp.gch  \
   precompiled.xipp.gch.lo  \
   ${NOTHING}
+
+EXTRA_DIST =  \
+  ${NOTHING}
+
+TESTS = ${check_PROGRAMS}
 
 ## Custome rules
 %.xipp: ${srcdir}/src/%.ipp
@@ -45,22 +64,6 @@ CLEANFILES =  \
 	@${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
 	## ..., then libtool creates another text file as the 'executable', so delete it.
 	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
-
-## Initialization
-EXTRA_DIST =
-noinst_LIBRARIES =
-noinst_LTLIBRARIES =
-TESTS = ${check_PROGRAMS}
-
-include_HEADERS =
-lib_LIBRARIES =
-lib_LTLIBRARIES =
-bin_PROGRAMS =
-
-check_HEADERS =
-check_LIBRARIES =
-check_LTLIBRARIES =
-check_PROGRAMS =
 
 ## Documentation
 include doc/Makefile.inc.am
