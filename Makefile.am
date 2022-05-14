@@ -35,35 +35,10 @@ check_LIBRARIES =
 check_LTLIBRARIES =
 check_PROGRAMS =
 
-BUILT_SOURCES =  \
-  precompiled.xipp  \
-  precompiled.xipp.gch  \
-  ${NOTHING}
-
-CLEANFILES =  \
-  precompiled.xipp  \
-  precompiled.xipp.gch  \
-  precompiled.xipp.gch.lo  \
-  ${NOTHING}
-
-EXTRA_DIST =  \
-  ${NOTHING}
-
+BUILT_SOURCES =
+CLEANFILES =
+EXTRA_DIST =
 TESTS = ${check_PROGRAMS}
-
-## Custome rules
-%.xipp: ${srcdir}/src/%.ipp
-	## Build the wrapper header, which contains the absolute path to the plain header.
-	${AM_V_GEN}echo "#include \"$$(readlink -f $<)\"" >$@
-
-%.xipp.gch: %.xipp src/version.h config.h
-	## Compile the header. This must use LTCXXCOMPILE due to some nasty PIC flags...
-	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
-	## ..., but it causes the 'real' output to go into './libs/' and leaves a text file
-	## outside, so move it to the correct location, ...
-	@${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
-	## ..., then libtool creates another text file as the 'executable', so delete it.
-	@test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
 ## Documentation
 include doc/Makefile.inc.am
