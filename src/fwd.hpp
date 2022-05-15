@@ -20,6 +20,7 @@
 #include "../rocket/tinyfmt.hpp"
 #include "../rocket/ascii_case.hpp"
 #include "../rocket/bit_mask.hpp"
+#include "../rocket/atomic.hpp"
 #include <utility>
 #include <stdexcept>
 #include <typeinfo>
