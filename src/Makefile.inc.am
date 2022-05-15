@@ -140,6 +140,8 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/library/csv.cpp  \
   ${END}
 
+lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
+
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la ${LTLIBICONV}
 
@@ -157,16 +159,16 @@ bin_asteria_SOURCES =  \
   %reldir%/repl/editline.cpp  \
   ${END}
 
+if enable_pch
+lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp -Winvalid-pch
+BUILT_SOURCES += %reldir%/precompiled.xipp
+CLEANFILES += %reldir%/precompiled.xipp %reldir%/precompiled.xipp.gch
+endif
+
 %.xipp: %.ipp %reldir%/version.h config.h
 	${AM_V_GEN}printf '#include "%s"\n' $(abspath $<) > $@
-	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header ${AM_CXXFLAGS} ${CXXFLAGS}  \
+	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header ${lib_libasteria_la_CXXFLAGS} ${CXXFLAGS}  \
 	             -Wno-error $< -o $@.o &&  \
 	  source $@.lo &&  \
 	  mv -f %reldir%/$${pic_object} $@.gch &&  \
 	  rm -f $@.lo
-
-if enable_pch
-AM_CXXFLAGS += -include %reldir%/precompiled.xipp -Winvalid-pch
-BUILT_SOURCES += %reldir%/precompiled.xipp
-CLEANFILES += %reldir%/precompiled.xipp %reldir%/precompiled.xipp.gch
-endif
