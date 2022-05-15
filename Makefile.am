@@ -9,7 +9,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -Isrc -U_FORTIFY_SOURCE  
   -fno-semantic-interposition  \
   -Werror={conversion,sign-{compare,conversion},write-strings,return-type}  \
   -Werror={double-promotion,aggressive-loop-optimizations}  \
-  -W{invalid-pch,switch-enum,suggest-attribute=noreturn,shadow,missing-field-initializers}  \
+  -W{switch-enum,suggest-attribute=noreturn,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 
 AM_CXXFLAGS = -std=gnu++14 -Wp,-std=c++11 -fno-gnu-keywords -fvisibility-inlines-hidden  \

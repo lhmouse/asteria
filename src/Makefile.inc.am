@@ -157,9 +157,9 @@ bin_asteria_SOURCES =  \
   %reldir%/repl/editline.cpp  \
   ${END}
 
-AM_CXXFLAGS += -include %reldir%/precompiled.xipp
+AM_CXXFLAGS += -include %reldir%/precompiled.xipp -Winvalid-pch
 BUILT_SOURCES += %reldir%/precompiled.xipp
-CLEANFILES += %reldir%/precompiled.xipp %D%/precompiled.xipp.gch
+CLEANFILES += %reldir%/precompiled.xipp %reldir%/precompiled.xipp.gch
 
 %.xipp: %.ipp %reldir%/version.h config.h
 	${AM_V_GEN}printf '#include "%s"\n' $(abspath $<) > $@
