@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
-NOTHING =
+END =
 
 ## Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -fPIC -DPIC -Isrc -U_FORTIFY_SOURCE  \

@@ -12,7 +12,6 @@
 *.exe
 *.dll
 
-/precompiled.*
 /aclocal.m4
 /autom4te.cache/
 /build-aux/
@@ -26,6 +25,7 @@
 /libtool
 /stamp-h1
 /src/version.h
+/src/precompiled.*
 
 /lib/
 /bin/

@@ -4,4 +4,4 @@ EXTRA_DIST +=  \
   doc/syntax.txt  \
   doc/examples.txt  \
   doc/asteria.nanorc  \
-  ${NOTHING}
+  ${END}
