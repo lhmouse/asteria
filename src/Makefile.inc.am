@@ -164,8 +164,8 @@ bin_asteria_SOURCES =  \
 	    mv -f %reldir%/$${pic_object} $@.gch &&  \
 	    rm -f $@.lo
 
-#if enable_pch
+if enable_pch
 AM_CXXFLAGS += -include %reldir%/precompiled.xipp -Winvalid-pch
 BUILT_SOURCES += %reldir%/precompiled.xipp
 CLEANFILES += %reldir%/precompiled.xipp %reldir%/precompiled.xipp.gch
-#endif
+endif
