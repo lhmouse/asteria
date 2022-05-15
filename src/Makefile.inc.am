@@ -167,8 +167,8 @@ endif
 
 %.xipp: %.ipp %reldir%/version.h config.h
 	${AM_V_GEN}printf '#include "%s"\n' $(abspath $<) > $@
-	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header ${lib_libasteria_la_CXXFLAGS} ${CXXFLAGS}  \
-	             -Wno-error $< -o $@.o &&  \
+	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header ${lib_libasteria_la_CXXFLAGS}  \
+	             ${CXXFLAGS} -Wno-error $< -o $@.o &&  \
 	  source $@.lo &&  \
 	  mv -f %reldir%/$${pic_object} $@.gch &&  \
 	  rm -f $@.lo
