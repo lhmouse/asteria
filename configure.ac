@@ -38,13 +38,16 @@ AM_ICONV_LINK()
 
 ## Check for assertions
 AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable assertions]))
-
 AM_CONDITIONAL([enable_debug_checks], [test "${enable_debug_checks}" == "yes"])
 AM_COND_IF([enable_debug_checks], [
   AC_DEFINE([_GLIBCXX_DEBUG], 1, [Define to 1 to enable debug checks of libstdc++.])
   AC_DEFINE([_LIBCPP_DEBUG], 1, [Define to 1 to enable debug checks of libc++.])
   AC_DEFINE([_DEBUG], 1, [Define to 1 to enable debug checks of MSVC standard library.])
 ])
+
+## Check for pre-compiled headers
+AC_ARG_ENABLE([pch], AS_HELP_STRING([--disable-pch], [do not use pre-compiled headers]))
+AM_CONDITIONAL([enable_pch], [test "${enable_pch}" != "no"])
 
 ## Check for sanitizers
 AC_ARG_ENABLE([sanitizer], AS_HELP_STRING([--enable-sanitizer=address|thread],
