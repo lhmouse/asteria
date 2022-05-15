@@ -159,10 +159,11 @@ bin_asteria_SOURCES =  \
 
 %.xipp: %.ipp %reldir%/version.h config.h
 	${AM_V_GEN}printf '#include "%s"\n' $(abspath $<) > $@
-	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o &&  \
-	    source $@.lo &&  \
-	    mv -f %reldir%/$${pic_object} $@.gch &&  \
-	    rm -f $@.lo
+	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header ${AM_CXXFLAGS} ${CXXFLAGS}  \
+	             -Wno-error $< -o $@.o &&  \
+	  source $@.lo &&  \
+	  mv -f %reldir%/$${pic_object} $@.gch &&  \
+	  rm -f $@.lo
 
 if enable_pch
 AM_CXXFLAGS += -include %reldir%/precompiled.xipp -Winvalid-pch
