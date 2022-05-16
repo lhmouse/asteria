@@ -112,6 +112,7 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
+
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0)
@@ -140,6 +141,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
+
     for(;;) {
       auto dist = epos - bpos;
       if(dist <= 0)
@@ -159,7 +161,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
   }
 
 template<typename ComparatorT>
-V_array::iterator
+V_array&
 do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& compare, ptrdiff_t bsize)
   {
     ROCKET_ASSERT(output.size() >= input.size());
@@ -237,7 +239,10 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
       bin += 1;
       output_element(bin[-1]);
     }
-    return bout;
+
+    // Erase invalid elements.
+    output.erase(bout, output.end());
+    return output;
   }
 
 }  // namespace
@@ -484,8 +489,7 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
       data.swap(temp);
       bsize *= 2;
     }
-    auto epos = do_merge_blocks(temp, true, data, compare, bsize);
-    temp.erase(epos, temp.end());
+    do_merge_blocks(temp, true, data, compare, bsize);
     return temp;
   }
 
