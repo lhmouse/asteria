@@ -1536,23 +1536,19 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
 
             // Multiply two 64-bit values and get the high-order half.
 #ifdef __SIZEOF_INT128__
-            {
-              ireg = (uint64_t)(((unsigned __int128)ireg * mult.mant) >> 64);
-            }
-#else  // __SIZEOF_INT128__
-            {
-              // This is inspired by `Emulate64x64to128` from
-              //   https://github.com/catid/fp61/blob/master/fp61.h
-              uint64_t xhi = ireg >> 32;
-              uint64_t xlo = ireg << 32 >> 32;
-              uint64_t yhi = mult.mant >> 32;
-              uint64_t ylo = mult.mant << 32 >> 32;
+            ireg = (uint64_t) (((unsigned __int128) ireg * mult.mant) >> 64);
+#else
+            // This is inspired by `Emulate64x64to128` from
+            //   https://github.com/catid/fp61/blob/master/fp61.h
+            uint64_t xhi = ireg >> 32;
+            uint64_t xlo = ireg << 32 >> 32;
+            uint64_t yhi = mult.mant >> 32;
+            uint64_t ylo = mult.mant << 32 >> 32;
 
-              ireg = (((xlo * ylo >> 32) + xhi * ylo + (uint32_t) (xlo * yhi)) >> 32)
-                   +   (xlo * yhi >> 32)
-                   +    xhi * yhi;
-            }
-#endif  // __SIZEOF_INT128__
+            ireg = (xlo * ylo >> 32) + xhi * ylo + (uint32_t) (xlo * yhi);
+            ireg >>= 32;
+            ireg += (xlo * yhi >> 32) + xhi * yhi
+#endif  // `__int128`
 
             // Convert the mantissa to a floating-point number.
             freg = do_xldexp_I(ireg, exp2, single);
