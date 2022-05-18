@@ -12,7 +12,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Isrc -U_FORTIFY_SOURCE  \
   -W{switch-enum,suggest-attribute=noreturn,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 
-AM_CXXFLAGS = -std=gnu++14 -Wp,-std=c++11 -fno-gnu-keywords -fvisibility-inlines-hidden  \
+AM_CXXFLAGS = -std=c++17 -fno-gnu-keywords -fvisibility-inlines-hidden  \
   -Wno-redundant-move -Werror={non-virtual-dtor,missing-declarations}
 
 AM_DEFAULT_SOURCE_EXT = .cpp

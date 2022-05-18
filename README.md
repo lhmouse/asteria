@@ -55,7 +55,7 @@ However, compared with typed languages such as **Java**, **JavaScript** has a fe
 4. Lightweight.
 5. Procedural.
 6. Dynamically typed.
-7. Easy to integrate in a C++ project. (C++14 and hexadecimal floating-point literals are required.)
+7. Easy to integrate in a C++ project. (C++17 hexadecimal floating-point literals are required.)
 8. Native to C++ exceptions, particularly `std::bad_alloc`.
 
 # Characteristics
