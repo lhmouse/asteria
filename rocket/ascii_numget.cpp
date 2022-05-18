@@ -1548,7 +1548,7 @@ cast_F(double& value, double lower, double upper, bool single) noexcept
               uint64_t yhi = mult.mant >> 32;
               uint64_t ylo = mult.mant << 32 >> 32;
 
-              ireg = (((xlo * ylo >> 32) + xhi * ylo + (xlo * yhi >> 32)) >> 32)
+              ireg = (((xlo * ylo >> 32) + xhi * ylo + (uint32_t) (xlo * yhi)) >> 32)
                    +   (xlo * yhi >> 32)
                    +    xhi * yhi;
             }
