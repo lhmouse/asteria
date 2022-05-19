@@ -167,13 +167,13 @@ endif
 
 %.xipp: %.ipp %reldir%/version.h config.h
 	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o  \
-	  && . $@.lo  \
 	  && rm -rf $@.gch  \
 	  && mkdir $@.gch  \
+	  && . $@.lo  \
 	  && test "$${pic_object}" == none || mv -f %reldir%/$${pic_object} $@.gch/pic  \
 	  && test "$${non_pic_object}" == none || mv -f %reldir%/$${non_pic_object} $@.gch/non_pic  \
 	  && rm -f $@.lo
-	${AM_V_GEN}echo '#error PCH unusable' > $@
+	  && echo '#error PCH unusable' > $@
 
 clean-local:
 	-rm -rf %reldir%/precompiled.xipp.gch
