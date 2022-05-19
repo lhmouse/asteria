@@ -16,6 +16,10 @@
 #  define ASTERIA_DLLEXPORT
 #endif
 
+#ifdef __FAST_MATH__
+#  error Please turn off `-ffast-math`.
+#endif
+
 #include "../rocket/cow_string.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/cow_vector.hpp"

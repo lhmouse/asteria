@@ -30,10 +30,6 @@
 #include <wchar.h>
 #include <endian.h>
 
-#ifdef __FAST_MATH__
-#  error Please turn off `-ffast-math`.
-#endif
-
 #define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
     C(const C&) = default;  \
     C(C&&) noexcept = default;  \
