@@ -160,15 +160,20 @@ bin_asteria_SOURCES =  \
   ${END}
 
 if enable_pch
-lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp -Winvalid-pch
+lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
 BUILT_SOURCES += %reldir%/precompiled.xipp
-CLEANFILES += %reldir%/precompiled.xipp %reldir%/precompiled.xipp.gch
+CLEANFILES += %reldir%/precompiled.xipp
 endif
 
 %.xipp: %.ipp %reldir%/version.h config.h
-	${AM_V_GEN}printf '#include "%s"\n' $(abspath $<) > $@
 	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o  \
 	  && . $@.lo  \
-	  && test "$${non_pic_object}" == none || mv -f %reldir%/$${non_pic_object} $@.gch  \
-	  && test "$${pic_object}" == none || mv -f %reldir%/$${pic_object} $@.gch  \
+	  && rm -rf $@.gch  \
+	  && mkdir $@.gch  \
+	  && test "$${pic_object}" == none || mv -f %reldir%/$${pic_object} $@.gch/pic  \
+	  && test "$${non_pic_object}" == none || mv -f %reldir%/$${non_pic_object} $@.gch/non_pic  \
 	  && rm -f $@.lo
+	${AM_V_GEN}echo '#error PCH unusable' > $@
+
+clean-local:
+	-rm -rf %reldir%/precompiled.xipp.gch
