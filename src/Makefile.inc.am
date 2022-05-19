@@ -162,7 +162,6 @@ bin_asteria_SOURCES =  \
 if enable_pch
 lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
 BUILT_SOURCES += %reldir%/precompiled.xipp
-CLEANFILES += %reldir%/precompiled.xipp
 endif
 
 %.xipp: %.ipp %reldir%/version.h config.h
@@ -176,4 +175,4 @@ endif
 	  && echo '#error PCH unusable' > $@
 
 clean-local:
-	-rm -rf %reldir%/precompiled.xipp.gch
+	-rm -rf %reldir%/precompiled.x*
