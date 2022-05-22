@@ -169,8 +169,8 @@ endif
 	  && rm -rf $@.gch  \
 	  && mkdir $@.gch  \
 	  && . $@.lo  \
-	  && test "$${pic_object}" == none || mv -f %reldir%/$${pic_object} $@.gch/pic  \
-	  && test "$${non_pic_object}" == none || mv -f %reldir%/$${non_pic_object} $@.gch/non_pic  \
+	  && (test "$${pic_object}" == none || mv -f %reldir%/$${pic_object} $@.gch/pic)  \
+	  && (test "$${non_pic_object}" == none || mv -f %reldir%/$${non_pic_object} $@.gch/non_pic)  \
 	  && rm -f $@.lo  \
 	  && echo '#error PCH unusable' > $@
 
