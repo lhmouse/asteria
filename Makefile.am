@@ -4,19 +4,21 @@ END =
 ## Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Isrc -U_FORTIFY_SOURCE  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE  \
-  -f{strict-{aliasing,overflow},merge-all-constants}  \
-  -fno-{math-errno,trapping-math,devirtualize-speculatively,stack-protector}  \
-  -fno-{semantic-interposition,ident}  \
-  -Werror={conversion,sign-{compare,conversion},write-strings,return-type}  \
-  -Werror={double-promotion,aggressive-loop-optimizations}  \
-  -W{switch-enum,suggest-attribute=noreturn,shadow,missing-field-initializers}  \
-  -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
+  -fstrict-{aliasing,overflow}  \
+  -f{visibility-inlines-hidden,merge-all-constants}  \
+  -fno-{stack-protector,align-{functions,jumps,loops},ident}  \
+  -fno-{math-errno,trapping-math,devirtualize-speculatively}  \
+  -Werror={conversion,sign-{compare,conversion},write-strings}  \
+  -Werror={return-type,double-promotion,missing-declarations}  \
+  -W{missing-field-initializers,suggest-attribute=noreturn,shadow}  \
+  -W{switch-enum,unused-{function,label,local-typedefs}}  \
+  -Wunused-but-set-{variable,parameter}
 
-AM_CXXFLAGS = -std=c++17 -fno-gnu-keywords -fvisibility-inlines-hidden  \
-  -Wno-redundant-move -Werror={non-virtual-dtor,missing-declarations}
+AM_CXXFLAGS = -std=c++17 -Wno-redundant-move  \
+  -Werror={non-virtual-dtor,missing-declarations}
 
 AM_DEFAULT_SOURCE_EXT = .cpp
-SUFFIXES = .xipp .xipp.gch
+SUFFIXES = .xipp
 LDADD = lib/libasteria.la
 
 ## Initialization
