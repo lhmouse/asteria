@@ -4,8 +4,7 @@ END =
 ## Compiler options
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Isrc -U_FORTIFY_SOURCE  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE  \
-  -fstrict-{aliasing,overflow}  \
-  -f{visibility-inlines-hidden,merge-all-constants}  \
+  -f{strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{stack-protector,align-{functions,jumps,loops},ident}  \
   -fno-{math-errno,trapping-math,devirtualize-speculatively}  \
   -Werror={conversion,sign-{compare,conversion},write-strings}  \
@@ -14,8 +13,8 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Isrc -U_FORTIFY_SOURCE  \
   -W{switch-enum,unused-{function,label,local-typedefs}}  \
   -Wunused-but-set-{variable,parameter}
 
-AM_CXXFLAGS = -std=c++17 -Wno-redundant-move  \
-  -Werror={non-virtual-dtor,missing-declarations}
+AM_CXXFLAGS = -std=c++17 -fvisibility-inlines-hidden  \
+  -Wno-redundant-move -Werror={non-virtual-dtor,missing-declarations}
 
 AM_DEFAULT_SOURCE_EXT = .cpp
 SUFFIXES = .xipp
