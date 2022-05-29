@@ -148,8 +148,7 @@ class Argument_Reader
 #define ASTERIA_BINDING(name, params, ...)  \
     ::asteria::details_argument_reader::Factory{  \
         ::rocket::sref("" name ""),  \
-        ::rocket::sref("`" name "(" params ")` "  \
-            "at '" __FILE__ ":" ROCKET_LAZY(ROCKET_QUOTE, __LINE__) "'")  \
+        ::rocket::sref("`" name "(" params ")` at '" ROCKET_SOURCE_LOCATION "'")  \
       }%*[](__VA_ARGS__)
 
 }  // namespace asteria

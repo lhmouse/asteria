@@ -20,14 +20,6 @@
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 
-// Utility macros
-#define ROCKET_CAR(x, ...)          x
-#define ROCKET_CDR(x, ...)          __VA_ARGS__
-#define ROCKET_QUOTE(...)           #__VA_ARGS__
-#define ROCKET_CAT2(x, y)           x##y
-#define ROCKET_CAT3(x, y, z)        x##y##z
-#define ROCKET_LAZY(f, ...)         f(__VA_ARGS__)
-
 namespace rocket {
 namespace noadl = rocket;
 
@@ -151,13 +143,23 @@ using ::std::memory_order_release;
 using ::std::memory_order_acq_rel;
 using ::std::memory_order_seq_cst;
 
-#define ROCKET_VOID_T(...)               typename ::std::conditional<1, void, __VA_ARGS__>::type
-#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
-#define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
+// Utility macros
+#define ROCKET_CAR(x, ...)     x
+#define ROCKET_CDR(x, ...)     __VA_ARGS__
+#define ROCKET_CAT2(x, y)      x##y
+#define ROCKET_CAT3(x, y, z)   x##y##z
 
-#define ROCKET_VOID_DECLTYPE(...)            ROCKET_VOID_T(decltype(__VA_ARGS__))
-#define ROCKET_ENABLE_IF_HAS_TYPE(...)       ROCKET_VOID_T(__VA_ARGS__)* = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)      ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
+#define ROCKET_STRINGIFY_NX(...)   #__VA_ARGS__
+#define ROCKET_STRINGIFY(...)      ROCKET_STRINGIFY_NX(__VA_ARGS__)
+#define ROCKET_SOURCE_LOCATION     __FILE__ ":" ROCKET_STRINGIFY(__LINE__)
+
+#define ROCKET_VOID_T(...)       typename ::std::conditional<1, void, __VA_ARGS__>::type
+#define ROCKET_ENABLE_IF(...)    typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
+#define ROCKET_DISABLE_IF(...)   typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
+
+#define ROCKET_VOID_DECLTYPE(...)         ROCKET_VOID_T(decltype(__VA_ARGS__))
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)    ROCKET_VOID_T(__VA_ARGS__)* = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)   ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 
 template<typename typeT>
 struct remove_cvref
