@@ -54,7 +54,7 @@ class condition_variable
           return ts;  // overflowed
 
         ts.tv_sec = (time_t) value;
-        ts.tv_nsec = (long) (value - (double) ts.tv_sec);
+        ts.tv_nsec = (long) ((value - (double) ts.tv_sec) * 1000000000);
         return ts;
       }
 
