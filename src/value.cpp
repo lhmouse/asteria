@@ -516,11 +516,11 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         Rbr_array elema = { &altr, altr.begin() };
         if(elema.curp != altr.end()) {
           // Open an array.
-          stack.emplace_back(::std::move(elema));
           fmt << '[';
-          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << pwrap(indent, hanging + indent * (stack.size() + 1));
           fmt << (elema.curp - altr.begin()) << " = ";
           qval = &*(elema.curp);
+          stack.emplace_back(::std::move(elema));
           goto r;
         }
 
@@ -535,11 +535,11 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         Rbr_object elemo = { &altr, altr.begin() };
         if(elemo.curp != altr.end()) {
           // Open an object.
-          stack.emplace_back(::std::move(elemo));
           fmt << '{';
-          fmt << pwrap(indent, hanging + indent * stack.size());
+          fmt << pwrap(indent, hanging + indent * (stack.size() + 1));
           fmt << quote(elemo.curp->first) << " = ";
           qval = &(elemo.curp->second);
+          stack.emplace_back(::std::move(elemo));
           goto r;
         }
 
