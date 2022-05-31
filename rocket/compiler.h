@@ -40,6 +40,10 @@
     && defined(ROCKET_TZCNT64)  \
     && defined(ROCKET_POPCNT32)  \
     && defined(ROCKET_POPCNT64)  \
+    \
+    && defined(ROCKET_ADD_OVERFLOW)  \
+    && defined(ROCKET_SUB_OVERFLOW)  \
+    && defined(ROCKET_MUL_OVERFLOW)  \
   )
 #  error Some macros are missing.
 #endif
