@@ -78,8 +78,10 @@ class optional
     // 19.6.3.3, assignment
     optional&
     operator=(nullopt_t) noexcept
-      { this->m_stor.clear();
-        return *this;  }
+      {
+        this->m_stor.clear();
+        return *this;
+      }
 
     optional&
     operator=(const value_type& value)
@@ -163,8 +165,10 @@ class optional
       noexcept(conjunction<is_nothrow_swappable<value_type>,
                            is_nothrow_move_constructible<value_type>,
                            is_nothrow_move_assignable<value_type>>::value)
-      { this->m_stor.swap(other.m_stor);
-        return *this;  }
+      {
+        this->m_stor.swap(other.m_stor);
+        return *this;
+      }
 
   private:
     [[noreturn]] ROCKET_NEVER_INLINE

@@ -186,8 +186,7 @@ struct basic_storage
     constexpr
     bool
     compatible(const basic_storage& other) const noexcept
-      { return static_cast<const allocator_type&>(*this) ==
-               static_cast<const allocator_type&>(other);  }
+      { return static_cast<const allocator_type&>(*this) == static_cast<const allocator_type&>(other);  }
 
     size_t
     bucket_count() const noexcept
@@ -199,8 +198,8 @@ struct basic_storage
       {
         auto qval = allocator_traits<allocator_type>::allocate(*this, size_type(1));
         try {
-          allocator_traits<allocator_type>::construct(*this,
-              noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
+          allocator_traits<allocator_type>::construct(
+                *this, noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
         }
         catch(...) {
           allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
@@ -851,10 +850,12 @@ class hashmap_iterator
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
     hashmap_iterator&
     operator=(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
-      { this->m_begin = other.m_begin;
+      {
+        this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
         this->m_end = other.m_end;
-        return *this;  }
+        return *this;
+      }
 
   private:
     bucketT*

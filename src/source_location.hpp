@@ -26,10 +26,12 @@ class Source_Location
 
     Source_Location&
     swap(Source_Location& other) noexcept
-      { this->m_file.swap(other.m_file);
+      {
+        this->m_file.swap(other.m_file);
         ::std::swap(this->m_line, other.m_line);
         ::std::swap(this->m_column, other.m_column);
-        return *this;  }
+        return *this;
+      }
 
   public:
     const cow_string&

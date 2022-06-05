@@ -29,30 +29,42 @@ class Token_Stream
     // This provides stack overflow protection.
     Recursion_Sentry
     copy_recursion_sentry() const
-      { return this->m_sentry;  }
+      {
+        return this->m_sentry;
+      }
 
     const void*
     get_recursion_base() const noexcept
-      { return this->m_sentry.get_base();  }
+      {
+        return this->m_sentry.get_base();
+      }
 
     Token_Stream&
     set_recursion_base(const void* base) noexcept
-      { this->m_sentry.set_base(base);
-        return *this;  }
+      {
+        this->m_sentry.set_base(base);
+        return *this;
+      }
 
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
     get_options() const noexcept
-      { return this->m_opts;  }
+      {
+        return this->m_opts;
+      }
 
     Compiler_Options&
     mut_options() noexcept
-      { return this->m_opts;  }
+      {
+        return this->m_opts;
+      }
 
     Token_Stream&
     set_options(const Compiler_Options& opts) noexcept
-      { this->m_opts = opts;
-        return *this;  }
+      {
+        this->m_opts = opts;
+        return *this;
+      }
 
     // These are accessors and modifiers of tokens in this stream.
     bool
@@ -69,13 +81,17 @@ class Token_Stream
 
     Token_Stream&
     shift(size_t count = 1) noexcept
-      { this->m_rtoks.pop_back(count);
-        return *this;  }
+      {
+        this->m_rtoks.pop_back(count);
+        return *this;
+      }
 
     Token_Stream&
     clear() noexcept
-      { this->m_rtoks.clear();
-        return *this;  }
+      {
+        this->m_rtoks.clear();
+        return *this;
+      }
 
     Source_Location
     next_sloc() const noexcept

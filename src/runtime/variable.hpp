@@ -36,12 +36,16 @@ class Variable final
     // GC interfaces
     long
     get_gc_ref() const noexcept
-      { return this->m_gc_ref;  }
+      {
+        return this->m_gc_ref;
+      }
 
     Variable&
     set_gc_ref(long ref) noexcept
-      { this->m_gc_ref = ref;
-        return *this;  }
+      {
+        this->m_gc_ref = ref;
+        return *this;
+      }
 
     // Accessors
     State

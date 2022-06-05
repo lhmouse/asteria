@@ -57,12 +57,16 @@ class basic_tinybuf_file
     explicit
     basic_tinybuf_file(const char* path, open_mode mode)
       : m_file(nullptr, nullptr)
-      { this->open(path, mode);  }
+      {
+        this->open(path, mode);
+      }
 
     basic_tinybuf_file&
     swap(basic_tinybuf_file& other) noexcept(is_nothrow_swappable<unique_posix_file>::value)
-      { noadl::xswap(this->m_file, other.m_file);
-        return *this;  }
+      {
+        noadl::xswap(this->m_file, other.m_file);
+        return *this;
+      }
 
   protected:
     void
@@ -181,18 +185,24 @@ class basic_tinybuf_file
 
     basic_tinybuf_file&
     reset() noexcept
-      { this->m_file.reset();
-        return *this;  }
+      {
+        this->m_file.reset();
+        return *this;
+      }
 
     basic_tinybuf_file&
     reset(unique_posix_file&& file) noexcept
-      { this->m_file = ::std::move(file);
-        return *this;  }
+      {
+        this->m_file = ::std::move(file);
+        return *this;
+      }
 
     basic_tinybuf_file&
     reset(handle_type fp, closer_type cl) noexcept
-      { this->m_file.reset(fp, cl);
-        return *this;  }
+      {
+        this->m_file.reset(fp, cl);
+        return *this;
+      }
 
     basic_tinybuf_file&
     open(const char* path, open_mode mode)

@@ -60,13 +60,17 @@ class PTC_Arguments final
     ASTERIA_INCOMPLET(Variadic_Arguer)
     rcptr<const Variadic_Arguer>
     caller_opt() const noexcept
-      { return unerase_pointer_cast<const Variadic_Arguer>(this->m_caller_opt);  }
+      {
+        return unerase_pointer_cast<const Variadic_Arguer>(this->m_caller_opt);
+      }
 
     template<typename ArguerT>
     PTC_Arguments&
     set_caller(const rcptr<ArguerT>& caller) noexcept
-      { this->m_caller_opt = ::std::move(caller);
-        return *this;  }
+      {
+        this->m_caller_opt = ::std::move(caller);
+        return *this;
+      }
 
     const cow_bivector<Source_Location, AVMC_Queue>&
     defer() const noexcept

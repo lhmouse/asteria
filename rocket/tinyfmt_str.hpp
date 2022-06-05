@@ -53,8 +53,10 @@ class basic_tinyfmt_str
 
     basic_tinyfmt_str&
     swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
-      { noadl::xswap(this->m_buf, other.m_buf);
-        return *this;  }
+      {
+        noadl::xswap(this->m_buf, other.m_buf);
+        return *this;
+      }
 
   public:
     ~basic_tinyfmt_str() override;

@@ -358,13 +358,17 @@ class AIR_Node
     AIR_Node&
     operator=(XNodeT&& xnode)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XNodeT&&>::value)
-      { this->m_stor = ::std::forward<XNodeT>(xnode);
-        return *this;  }
+      {
+        this->m_stor = ::std::forward<XNodeT>(xnode);
+        return *this;
+      }
 
     AIR_Node&
     swap(AIR_Node& other) noexcept
-      { this->m_stor.swap(other.m_stor);
-        return *this;  }
+      {
+        this->m_stor.swap(other.m_stor);
+        return *this;
+      }
 
   public:
     Index

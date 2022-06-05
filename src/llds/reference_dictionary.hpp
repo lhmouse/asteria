@@ -34,11 +34,13 @@ class Reference_Dictionary
 
     Reference_Dictionary&
     swap(Reference_Dictionary& other) noexcept
-      { ::std::swap(this->m_bptr, other.m_bptr);
+      {
+        ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_eptr, other.m_eptr);
         ::std::swap(this->m_head, other.m_head);
         ::std::swap(this->m_size, other.m_size);
-        return *this;  }
+        return *this;
+      }
 
   private:
     void

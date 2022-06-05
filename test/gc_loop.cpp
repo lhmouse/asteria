@@ -16,7 +16,7 @@ void* operator new(size_t cb)
     if(!ptr)
       throw ::std::bad_alloc();
 
-    bcnt.fetch_add(1);
+    bcnt.xadd(1);
     return ptr;
   }
 
@@ -25,7 +25,7 @@ void operator delete(void* ptr) noexcept
     if(!ptr)
       return;
 
-    bcnt.fetch_sub(1);
+    bcnt.xsub(1);
     ::std::free(ptr);
   }
 

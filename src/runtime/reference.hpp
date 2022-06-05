@@ -43,33 +43,43 @@ class Reference
     Reference(const Reference& other) noexcept
       : m_mods(other.m_mods),
         m_index(other.m_index)
-      { this->do_copy_partial(other);  }
+      {
+        this->do_copy_partial(other);
+      }
 
     Reference(Reference&& other) noexcept
       : m_mods(::std::move(other.m_mods)),
         m_index(other.m_index)
-      { this->do_swap_partial(other);  }
+      {
+        this->do_swap_partial(other);
+      }
 
     Reference&
     operator=(const Reference& other) noexcept
-      { this->do_copy_partial(other);
+      {
+        this->do_copy_partial(other);
         this->m_mods = other.m_mods;
         this->m_index = other.m_index;
-        return *this;  }
+        return *this;
+      }
 
     Reference&
     operator=(Reference&& other) noexcept
-      { this->do_swap_partial(other);
+      {
+        this->do_swap_partial(other);
         this->m_mods = ::std::move(other.m_mods);
         this->m_index = other.m_index;
-        return *this;  }
+        return *this;
+      }
 
     Reference&
     swap(Reference& other) noexcept
-      { this->do_swap_partial(other);
+      {
+        this->do_swap_partial(other);
         this->m_mods.swap(other.m_mods);
         ::std::swap(this->m_index, other.m_index);
-        return *this;  }
+        return *this;
+      }
 
   private:
     ROCKET_ALWAYS_INLINE

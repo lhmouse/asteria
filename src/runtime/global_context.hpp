@@ -54,34 +54,46 @@ class Global_Context
     // This provides stack overflow protection.
     Recursion_Sentry
     copy_recursion_sentry() const
-      { return this->m_sentry;  }
+      {
+        return this->m_sentry;
+      }
 
     const void*
     get_recursion_base() const noexcept
-      { return this->m_sentry.get_base();  }
+      {
+        return this->m_sentry.get_base();
+      }
 
     Global_Context&
     set_recursion_base(const void* base) noexcept
-      { this->m_sentry.set_base(base);
-        return *this;  }
+      {
+        this->m_sentry.set_base(base);
+        return *this;
+      }
 
     // This helps debugging and profiling.
     ASTERIA_INCOMPLET(Abstract_Hooks)
     rcptr<Abstract_Hooks>
     get_hooks_opt() const noexcept
-      { return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);  }
+      {
+        return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);
+      }
 
     ASTERIA_INCOMPLET(Abstract_Hooks)
     Global_Context&
     set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
-      { this->m_qhooks = ::std::move(hooks_opt);
-        return *this;  }
+      {
+        this->m_qhooks = ::std::move(hooks_opt);
+        return *this;
+      }
 
     // These are interfaces for individual global components.
     ASTERIA_INCOMPLET(Garbage_Collector)
     rcptr<Garbage_Collector>
     garbage_collector() const noexcept
-      { return unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);  }
+      {
+        return unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);
+      }
 
     ASTERIA_INCOMPLET(Random_Engine)
     rcptr<Random_Engine>
@@ -91,12 +103,16 @@ class Global_Context
     ASTERIA_INCOMPLET(Module_Loader)
     rcptr<Module_Loader>
     module_loader() const noexcept
-      { return unerase_pointer_cast<Module_Loader>(this->m_ldrlk);  }
+      {
+        return unerase_pointer_cast<Module_Loader>(this->m_ldrlk);
+      }
 
     ASTERIA_INCOMPLET(Variable)
     rcptr<Variable>
     std_variable() const noexcept
-      { return unerase_pointer_cast<Variable>(this->m_vstd);  }
+      {
+        return unerase_pointer_cast<Variable>(this->m_vstd);
+      }
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.

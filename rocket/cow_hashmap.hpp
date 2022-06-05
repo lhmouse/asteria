@@ -175,25 +175,34 @@ class cow_hashmap
 
     cow_hashmap&
     operator=(const cow_hashmap& other) noexcept
-      { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+      {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
-        return *this;  }
+        return *this;
+      }
 
     cow_hashmap&
     operator=(cow_hashmap&& other) noexcept
-      { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+      {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+        return *this;
+      }
 
     cow_hashmap&
     operator=(initializer_list<value_type> init)
-      { return this->assign(init.begin(), init.end());  }
+      {
+        this->assign(init.begin(), init.end());
+        return *this;
+      }
 
     cow_hashmap&
     swap(cow_hashmap& other) noexcept
-      { noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+      {
+        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+        return *this;
+      }
 
   private:
     cow_hashmap&
@@ -415,8 +424,7 @@ class cow_hashmap
     // N.B. The return type differs from `std::unordered_map`.
     double
     load_factor() const noexcept
-      { return static_cast<double>(this->ssize()) /
-                   static_cast<double>(static_cast<difference_type>(this->bucket_count()));  }
+      { return (double) this->ssize() / (double)(difference_type) this->bucket_count();  }
 
     // N.B. The return type differs from `std::unordered_map`.
     double
@@ -429,8 +437,7 @@ class cow_hashmap
       {
         // Calculate the minimum bucket count to reserve. This must include all existent elements.
         // Don't reallocate if the storage is unique and there is enough room.
-        size_type rcap = this->m_sth.round_up_capacity(noadl::max(
-                             this->size(), n / storage_handle::max_load_factor_reciprocal));
+        size_type rcap = this->m_sth.round_up_capacity(noadl::max(this->size(), n / storage_handle::max_load_factor_reciprocal));
         if(this->capacity() == rcap)
           return *this;
 
@@ -581,8 +588,9 @@ class cow_hashmap
     template<typename ykeyT, typename... paramsT>
     iterator
     try_emplace(const_iterator /*hint*/, ykeyT&& ykey, paramsT&&... params)
-      { return this->try_emplace(::std::forward<ykeyT>(ykey),
-                                 ::std::forward<paramsT>(params)...).first;  }
+      {
+        return this->try_emplace(::std::forward<ykeyT>(ykey), ::std::forward<paramsT>(params)...).first;
+      }
 
     template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
@@ -598,8 +606,9 @@ class cow_hashmap
     template<typename ykeyT, typename ymappedT>
     iterator
     insert_or_assign(const_iterator /*hint*/, ykeyT&& ykey, ymappedT&& ymapped)
-      { return this->insert_or_assign(::std::forward<ykeyT>(ykey),
-                                      ::std::forward<ymappedT>(ymapped)).first;  }
+      {
+        return this->insert_or_assign(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped)).first;
+      }
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.

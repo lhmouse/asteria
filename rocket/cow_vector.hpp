@@ -116,25 +116,34 @@ class cow_vector
 
     cow_vector&
     operator=(const cow_vector& other) noexcept
-      { noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+      {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
-        return *this;  }
+        return *this;
+      }
 
     cow_vector&
     operator=(cow_vector&& other) noexcept
-      { noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+      {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+        return *this;
+      }
 
     cow_vector&
     operator=(initializer_list<value_type> init)
-      { return this->assign(init.begin(), init.end());  }
+      {
+        this->assign(init.begin(), init.end());
+        return *this;
+      }
 
     cow_vector&
     swap(cow_vector& other) noexcept
-      { noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+      {
+        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+        return *this;
+      }
 
   private:
     cow_vector&

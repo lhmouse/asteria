@@ -161,13 +161,17 @@ class Expression_Unit
     Expression_Unit&
     operator=(XUnitT&& xunit)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
-      { this->m_stor = ::std::forward<XUnitT>(xunit);
-        return *this;  }
+      {
+        this->m_stor = ::std::forward<XUnitT>(xunit);
+        return *this;
+      }
 
     Expression_Unit&
     swap(Expression_Unit& other) noexcept
-      { this->m_stor.swap(other.m_stor);
-        return *this;  }
+      {
+        this->m_stor.swap(other.m_stor);
+        return *this;
+      }
 
   public:
     Index

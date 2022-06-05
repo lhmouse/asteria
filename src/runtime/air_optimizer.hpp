@@ -36,8 +36,10 @@ class AIR_Optimizer
 
     AIR_Optimizer&
     set_options(const Compiler_Options& opts) noexcept
-      { this->m_opts = opts;
-        return *this;  }
+      {
+        this->m_opts = opts;
+        return *this;
+      }
 
     // These are accessors and modifiers of tokens in this stream.
     bool
@@ -50,8 +52,10 @@ class AIR_Optimizer
 
     AIR_Optimizer&
     clear() noexcept
-      { this->m_code.clear();
-        return *this;  }
+      {
+        this->m_code.clear();
+        return *this;
+      }
 
     // This function performs code generation.
     // `ctx_opt` is the parent context this closure.

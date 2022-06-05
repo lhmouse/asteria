@@ -41,8 +41,7 @@ ascii_to_lower(char c) noexcept
 constexpr
 bool
 ascii_ci_equal(char x, char y) noexcept
-  { return details_ascii_case::to_lower(x) ==
-           details_ascii_case::to_lower(y);  }
+  { return details_ascii_case::to_lower(x) == details_ascii_case::to_lower(y);  }
 
 constexpr
 bool
@@ -64,8 +63,7 @@ ascii_ci_equal(const char* sx, size_t nx, const char* sy, size_t ny) noexcept
 constexpr
 int
 ascii_ci_compare(char x, char y) noexcept
-  { return static_cast<int>(details_ascii_case::to_lower(x)) -
-           static_cast<int>(details_ascii_case::to_lower(y));  }
+  { return (int) details_ascii_case::to_lower(x) - (int) details_ascii_case::to_lower(y);  }
 
 constexpr
 int

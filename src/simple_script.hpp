@@ -51,8 +51,10 @@ class Simple_Script
 
     Simple_Script&
     reset() noexcept
-      { this->m_func.reset();
-        return *this;  }
+      {
+        this->m_func.reset();
+        return *this;
+      }
 
     // Load something. Calling these functions directly is not recommended.
     Simple_Script&

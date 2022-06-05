@@ -403,10 +403,12 @@ class string_iterator
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     string_iterator&
     operator=(const string_iterator<stringT, ycharT>& other) noexcept
-      { this->m_begin = other.m_begin;
+      {
+        this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
         this->m_end = other.m_end;
-        return *this;  }
+        return *this;
+      }
 
   private:
     charT*

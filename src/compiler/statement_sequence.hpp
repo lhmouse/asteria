@@ -27,22 +27,28 @@ class Statement_Sequence
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
     get_options() const noexcept
-      { return this->m_opts;  }
+      {
+        return this->m_opts;
+      }
 
     Compiler_Options&
     mut_options() noexcept
-      { return this->m_opts;  }
+      {
+        return this->m_opts;
+      }
 
     Statement_Sequence&
     set_options(const Compiler_Options& opts) noexcept
-      { this->m_opts = opts;
-        return *this;  }
+      {
+        this->m_opts = opts;
+        return *this;
+      }
 
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
     bool
     empty() const noexcept
-      { return this->m_stmts.size();  }
+      { return this->m_stmts.empty();  }
 
     operator
     const cow_vector<Statement>&() const noexcept

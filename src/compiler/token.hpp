@@ -78,10 +78,12 @@ class Token
 
     Token&
     swap(Token& other) noexcept
-      { this->m_sloc.swap(other.m_sloc);
+      {
+        this->m_sloc.swap(other.m_sloc);
         ::std::swap(this->m_length, other.m_length);
         this->m_stor.swap(other.m_stor);
-        return *this;  }
+        return *this;
+      }
 
   public:
     const Source_Location&

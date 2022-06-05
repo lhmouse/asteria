@@ -69,13 +69,17 @@ class Reference_Modifier
     Reference_Modifier&
     operator=(XModT&& xmod)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XModT&&>::value)
-      { this->m_stor = ::std::forward<XModT>(xmod);
-        return *this;  }
+      {
+        this->m_stor = ::std::forward<XModT>(xmod);
+        return *this;
+      }
 
     Reference_Modifier&
     swap(Reference_Modifier& other) noexcept
-      { this->m_stor.swap(other.m_stor);
-        return *this;  }
+      {
+        this->m_stor.swap(other.m_stor);
+        return *this;
+      }
 
   public:
     Index

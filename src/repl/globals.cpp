@@ -43,7 +43,7 @@ struct Verbose_Hooks final
     void
     on_single_step_trap(const Source_Location& sloc) override
       {
-        int sig = repl_signal.exchange(0);
+        int sig = repl_signal.xchg(0);
         if(sig == 0)
           return;
 

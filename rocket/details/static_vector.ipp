@@ -288,10 +288,12 @@ class vector_iterator
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     vector_iterator&
     operator=(const vector_iterator<vectorT, yvalueT>& other) noexcept
-      { this->m_begin = other.m_begin;
+      {
+        this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
         this->m_end = other.m_end;
-        return *this;  }
+        return *this;
+      }
 
   private:
     valueT*

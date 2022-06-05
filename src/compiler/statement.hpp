@@ -199,13 +199,17 @@ class Statement
     Statement&
     operator=(XStmtT&& xstmt)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XStmtT&&>::value)
-      { this->m_stor = ::std::forward<XStmtT>(xstmt);
-        return *this;  }
+      {
+        this->m_stor = ::std::forward<XStmtT>(xstmt);
+        return *this;
+      }
 
     Statement&
     swap(Statement& other) noexcept
-      { this->m_stor.swap(other.m_stor);
-        return *this;  }
+      {
+        this->m_stor.swap(other.m_stor);
+        return *this;
+      }
 
   public:
     Index

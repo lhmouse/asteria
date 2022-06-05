@@ -31,11 +31,13 @@ class Reference_Stack
 
     Reference_Stack&
     swap(Reference_Stack& other) noexcept
-      { ::std::swap(this->m_bptr, other.m_bptr);
+      {
+        ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_etop, other.m_etop);
         ::std::swap(this->m_einit, other.m_einit);
         ::std::swap(this->m_estor, other.m_estor);
-        return *this;  }
+        return *this;
+      }
 
   private:
     void

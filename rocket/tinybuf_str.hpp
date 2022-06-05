@@ -59,10 +59,12 @@ class basic_tinybuf_str
 
     basic_tinybuf_str&
     swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
-      { noadl::xswap(this->m_str, other.m_str);
+      {
+        noadl::xswap(this->m_str, other.m_str);
         noadl::xswap(this->m_off, other.m_off);
         noadl::xswap(this->m_mode, other.m_mode);
-        return *this;  }
+        return *this;
+      }
 
   protected:
     void

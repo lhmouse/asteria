@@ -42,10 +42,12 @@ class AVMC_Queue
 
     AVMC_Queue&
     swap(AVMC_Queue& other) noexcept
-      { ::std::swap(this->m_bptr, other.m_bptr);
+      {
+        ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_estor, other.m_estor);
         ::std::swap(this->m_used, other.m_used);
-        return *this;  }
+        return *this;
+      }
 
   private:
     void

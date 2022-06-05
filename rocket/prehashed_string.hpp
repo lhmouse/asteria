@@ -129,25 +129,33 @@ class basic_prehashed_string
 
     basic_prehashed_string&
     operator=(initializer_list<value_type> init)
-      { this->m_sth.set_string(init);
-        return *this;  }
+      {
+        this->m_sth.set_string(init);
+        return *this;
+      }
 
     basic_prehashed_string&
     operator=(const basic_prehashed_string& other)
       noexcept(is_nothrow_copy_assignable<string_type>::value)
-      { this->m_sth.share_with(other.m_sth);
-        return *this;  }
+      {
+        this->m_sth.share_with(other.m_sth);
+        return *this;
+      }
 
     basic_prehashed_string&
     operator=(basic_prehashed_string&& other)
       noexcept(is_nothrow_move_assignable<string_type>::value)
-      { this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+      {
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;
+      }
 
     basic_prehashed_string&
     swap(basic_prehashed_string& other) noexcept(is_nothrow_swappable<string_type>::value)
-      { this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+      {
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;
+      }
 
   public:
     // getters

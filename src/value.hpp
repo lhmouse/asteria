@@ -59,8 +59,10 @@ class Value
     operator=(XValT&& xval)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                         typename details_value::Valuable<XValT>::via_type&&>::value)
-      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
-        return *this;  }
+      {
+        details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
+        return *this;
+      }
 
     Value(const Value& other) noexcept
       : m_stor(other.m_stor)
@@ -68,8 +70,10 @@ class Value
 
     Value&
     operator=(const Value& other) noexcept
-      { this->m_stor = other.m_stor;
-        return *this;  }
+      {
+        this->m_stor = other.m_stor;
+        return *this;
+      }
 
     Value(Value&& other) noexcept
       {
@@ -80,7 +84,10 @@ class Value
 
     Value&
     operator=(Value&& other) noexcept
-      { return this->swap(other);  }
+      {
+        this->swap(other);
+        return *this;
+      }
 
     Value&
     swap(Value& other) noexcept

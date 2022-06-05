@@ -70,7 +70,7 @@ read_execute_print_single()
       repl_printf("");
 
     // Discard this snippet if Ctrl-C was received.
-    if(repl_signal.exchange(0) != 0) {
+    if(repl_signal.xchg(0) != 0) {
       editline_reset();
       repl_printf("! interrupted (type `:exit` to quit)");
       return;

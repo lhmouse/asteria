@@ -53,22 +53,33 @@ class recursive_mutex::unique_lock
 
     explicit
     unique_lock(recursive_mutex& parent) noexcept
-      { this->lock(parent);  }
+      {
+        this->lock(parent);
+      }
 
     unique_lock(unique_lock&& other) noexcept
-      { this->swap(other);  }
+      {
+        this->swap(other);
+      }
 
     unique_lock&
     operator=(unique_lock&& other) noexcept
-      { return this->swap(other);  }
+      {
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;
+      }
 
     unique_lock&
     swap(unique_lock& other) noexcept
-      { this->m_sth.exchange_with(other.m_sth);
-        return *this;  }
+      {
+        this->m_sth.exchange_with(other.m_sth);
+        return *this;
+      }
 
     ~unique_lock()
-      { this->unlock();  }
+      {
+        this->unlock();
+      }
 
   public:
     explicit operator

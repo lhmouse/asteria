@@ -56,13 +56,18 @@ class Module_Loader::Unique_Stream
 
     Unique_Stream&
     operator=(Unique_Stream&& other) noexcept
-      { return this->swap(other);  }
+      {
+        this->swap(other);
+        return *this;
+      }
 
     Unique_Stream&
     swap(Unique_Stream& other) noexcept
-      { this->m_loader.swap(other.m_loader);
+      {
+        this->m_loader.swap(other.m_loader);
         ::std::swap(this->m_strm, other.m_strm);
-        return *this;  }
+        return *this;
+      }
 
   private:
     Unique_Stream&

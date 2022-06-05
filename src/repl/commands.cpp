@@ -279,7 +279,7 @@ struct Handler_source final
           int ch = file.getc();
           if(ch == EOF) {
             // Check for errors.
-            if(repl_signal.exchange(0) != 0) {
+            if(repl_signal.xchg(0) != 0) {
               repl_printf("\n! operation cancelled");
               return;
             }
