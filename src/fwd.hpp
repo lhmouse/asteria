@@ -51,6 +51,13 @@
     C& operator=(C&&) noexcept = delete;  \
     ~C()  // no semicolon
 
+#define ASTERIA_NONCOPYABLE_VIRTUAL_DESTRUCTOR(C)  \
+    C(const C&) = delete;  \
+    C(C&&) noexcept = delete;  \
+    C& operator=(const C&) = delete;  \
+    C& operator=(C&&) noexcept = delete;  \
+    virtual ~C()  // no semicolon
+
 #define ASTERIA_INCOMPLET(T)  \
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
 
