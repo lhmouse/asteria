@@ -169,7 +169,8 @@ struct Wrapped_Index
                         // `nprepend` and `nappend` are zeroes)
   };
 
-ROCKET_CONST Wrapped_Index
+ROCKET_CONST
+Wrapped_Index
 wrap_index(int64_t index, size_t size) noexcept;
 
 // Note that all bits in the result are filled.
