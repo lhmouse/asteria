@@ -263,7 +263,7 @@ struct Handler_source final
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
         if(!abspath)
           ASTERIA_THROW((
-              "Could not open script file '$2'\n"
+              "Could not open script file '$2'",
               "[`realpath()` failed: $1]"),
               format_errno(), args[0]);
 

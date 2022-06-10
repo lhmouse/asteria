@@ -91,7 +91,7 @@ do_write_utf8_common(::FILE* fp, const cow_string& text)
       // Insert it into the output stream.
       if(::fputwc_unlocked((wchar_t)cp, fp) == WEOF)
         ASTERIA_THROW_RUNTIME_ERROR((
-            "Error writing standard output\n"
+            "Error writing standard output",
             "[`fputwc_unlocked()` failed: $1]"),
             format_errno());
 
@@ -142,7 +142,7 @@ std_io_getc()
       int err = do_recover_unlocked(fp);
       if(err != 0)
         ASTERIA_THROW_RUNTIME_ERROR((
-            "Error reading standard input\n"
+            "Error reading standard input",
             "[`fgetwc_unlocked()` failed: $1]"),
             format_errno(err));
 
@@ -182,7 +182,7 @@ std_io_getln()
         int err = do_recover_unlocked(fp);
         if(err != 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Error reading standard input\n"
+              "Error reading standard input",
               "[`fgetwc_unlocked()` failed: $1]"),
               format_errno(err));
 
@@ -231,7 +231,7 @@ std_io_putc(V_integer value)
     // Write a UTF code point.
     if(::fputwc_unlocked((wchar_t)cp, fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Error writing standard output\n"
+          "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
           format_errno());
 
@@ -281,7 +281,7 @@ std_io_putln(V_string value)
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Error writing standard output\n"
+          "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
           format_errno());
 
@@ -331,7 +331,7 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
     // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Error writing standard output\n"
+          "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
           format_errno());
 
@@ -373,7 +373,7 @@ std_io_read(optV_integer limit)
         int err = do_recover_unlocked(fp);
         if(err != 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Error reading standard input\n"
+              "Error reading standard input",
               "[`fgetwc_unlocked()` failed: $1]"),
               format_errno(err));
 
@@ -409,7 +409,7 @@ std_io_write(V_string data)
         int err = do_recover_unlocked(fp);
         if(err != 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Error writing standard output\n"
+              "Error writing standard output",
               "[`fwrite_unlocked()` failed: $1]"),
               format_errno(err));
 
@@ -428,7 +428,7 @@ std_io_flush()
     // Flush standard output only.
     if(::fflush(stdout) == EOF)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Error flushing standard output\n"
+          "Error flushing standard output",
           "[`fflush()` failed: $1]"),
           format_errno());
   }

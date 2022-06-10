@@ -913,7 +913,7 @@ do_hash_file(const V_string& path)
     struct ::stat stb;
     if(::fstat(fd, &stb) != 0)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not get information about source file '$2'\n"
+          "Could not get information about source file '$2'",
           "[`fstat()` failed: $1]"),
           format_errno(), path);
 

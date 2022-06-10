@@ -448,7 +448,7 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not spawn process '$2'\n"
+          "Could not spawn process '$2'",
           "[`posix_spawnp()` failed: $1]"),
           format_errno(), cmd);
 
@@ -458,7 +458,7 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
         ASTERIA_THROW_RUNTIME_ERROR((
-            "Error awaiting child process '$2'\n"
+            "Error awaiting child process '$2'",
             "[`waitpid()` failed: $1]"),
             format_errno(), pid);
 
@@ -475,7 +475,7 @@ std_system_proc_daemonize()
   {
     if(::daemon(1, 0) != 0)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not daemonize process\n"
+          "Could not daemonize process",
           "[`daemon()` failed: $1]"),
           format_errno());
   }

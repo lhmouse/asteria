@@ -24,7 +24,7 @@ do_lock_stream(const char* path)
     ::rocket::unique_posix_file file(::fopen(path, "rb"), ::fclose);
     if(!file)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not open script file '$2'\n"
+          "Could not open script file '$2'",
           "[`fopen()` failed: $1]"),
           format_errno(), path);
 
@@ -33,7 +33,7 @@ do_lock_stream(const char* path)
     struct ::stat info;
     if(::fstat(fd, &info))
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not get properties of script file '$2'\n"
+          "Could not get properties of script file '$2'",
           "[`fstat()` failed: $1]"),
           format_errno(), path);
 
@@ -50,7 +50,7 @@ do_lock_stream(const char* path)
     // Keep in mind that `file` is now null.
     if(::flock(fd, LOCK_EX) != 0)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not lock script file '$2'\n"
+          "Could not lock script file '$2'",
           "[`fcntl()` failed: $1]"),
           format_errno(), path);
 

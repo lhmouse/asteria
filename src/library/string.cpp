@@ -390,7 +390,7 @@ class PCRE2_Matcher final
                       reinterpret_cast<const uint8_t*>(this->m_patt.data()),
                       this->m_patt.size(), this->m_opts, &err, &off, nullptr)))
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Invalid regular expression: $1\n"
+              "Invalid regular expression: $1",
               "[`pcre2_compile()` failed at offset `$2`: $3]"),
               this->m_patt, off, PCRE2_Error(err));
       }
@@ -403,7 +403,7 @@ class PCRE2_Matcher final
         // Copy the regular expression.
         if(!this->m_code.reset(::pcre2_code_copy(other.m_code)))
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Could not copy regular expression\n"
+              "Could not copy regular expression",
               "[`pcre2_code_copy()` failed]"));
       }
 
@@ -416,7 +416,7 @@ class PCRE2_Matcher final
 
         if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(this->m_code, nullptr)))
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Could not allocate `match_data` structure\n"
+              "Could not allocate `match_data` structure",
               "[`pcre2_match_data_create_from_pattern()` failed]"));
       }
 
@@ -437,7 +437,7 @@ class PCRE2_Matcher final
 
         if(err < 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Regular expression match failure\n"
+              "Regular expression match failure",
               "[`pcre2_match()` failed: $1]"),
               PCRE2_Error(err));
 
@@ -575,7 +575,7 @@ class PCRE2_Matcher final
 
         if(err < 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Regular expression substitution failure\n"
+              "Regular expression substitution failure",
               "[`pcre2_substitute()` failed: $1]"),
               PCRE2_Error(err));
 
@@ -1758,8 +1758,8 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
     ::rocket::unique_handle<::iconv_t, iconv_closer> qcd;
     if(!qcd.reset(::iconv_open(to_enc, from_enc)))
       ASTERIA_THROW_RUNTIME_ERROR((
-             "Could not create iconv context\n"
-             "[`iconv_open()` failed: $1]\n"
+             "Could not create iconv context",
+             "[`iconv_open()` failed: $1]",
              "[converting to encoding `$2` from `$3`]"),
              format_errno(), to_enc, from_enc);
 
@@ -1777,8 +1777,8 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
       output.append(temp, outp);
       if((r == (size_t)-1) && (errno != E2BIG))
         ASTERIA_THROW_RUNTIME_ERROR((
-               "Invalid input byte at offset `$4`\n"
-               "[`iconv()` failed: $1]\n"
+               "Invalid input byte at offset `$4`",
+               "[`iconv()` failed: $1]",
                "[converting to encoding `$2` from `$3`]"),
                format_errno(), to_enc, from_enc,
                inp - text.c_str());
