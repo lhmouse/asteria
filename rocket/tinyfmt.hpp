@@ -11,8 +11,7 @@
 
 namespace rocket {
 
-template<typename charT,
-         typename traitsT = char_traits<charT>>
+template<typename charT, typename traitsT = char_traits<charT>>
 class basic_tinyfmt;
 
 /* Differences from `std::basic_ostream`:
