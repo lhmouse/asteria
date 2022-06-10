@@ -32,11 +32,6 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const basic_cow_string<charT, traits
 
 template<typename charT, typename traitsT, typename... paramsT>
 basic_tinyfmt<charT, traitsT>&
-format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
-       const paramsT&... params);
-
-template<typename charT, typename traitsT, typename... paramsT>
-basic_tinyfmt<charT, traitsT>&
 format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
        const paramsT&... params);
 
@@ -133,7 +128,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
             char32_t dval = static_cast<char32_t>(ch - '0');
             if(dval > 9)
               noadl::sprintf_and_throw<invalid_argument>(
-                    "format: invalid digit `%c`", static_cast<int>(ch));
+                    "format: invalid digit `%c`", (int) ch);
 
             // Accumulate a digit.
             index = index * 10 + dval;
@@ -157,8 +152,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
 
         default:
           noadl::sprintf_and_throw<invalid_argument>(
-                "format: invalid placeholder `$%c`",
-                static_cast<int>(ch));
+                "format: invalid placeholder `$%c`", (int) ch);
       }
 
       // Replace the placeholder.
@@ -168,7 +162,7 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
         pinsts[index-1](fmt);
       else
         noadl::sprintf_and_throw<invalid_argument>(
-              "format: no enough arguments (`%zu` > `%zu`)", index, ninsts);
+              "format: no enough arguments (expecting at least `%zu`, got `%zu`)", index, ninsts);
     }
     return fmt;
   }
@@ -191,23 +185,14 @@ vformat(basic_tinyfmt<charT, traitsT>& fmt, const basic_cow_string<charT, traits
 
 template<typename charT, typename traitsT, typename... paramsT>
 basic_tinyfmt<charT, traitsT>&
-format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
-       const paramsT&... params)
-  {
-    basic_formatter<charT, traitsT> insts[] = {
-      { details_format::default_insert<charT, traitsT, paramsT>,
-        ::std::addressof(params) }...,
-      { nullptr, nullptr } };
-
-    return noadl::vformat(fmt, stempl, ntempl, insts, sizeof...(params));
-  }
-
-template<typename charT, typename traitsT, typename... paramsT>
-basic_tinyfmt<charT, traitsT>&
 format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
        const paramsT&... params)
   {
-    return noadl::format(fmt, stempl, traitsT::length(stempl), params...);
+    basic_formatter<charT, traitsT> insts[] =
+      { { details_format::default_insert<charT, traitsT, paramsT>, ::std::addressof(params) }...,
+        { nullptr, nullptr } };
+
+    return noadl::vformat(fmt, stempl, insts, sizeof...(params));
   }
 
 template<typename charT, typename traitsT, typename allocT, typename... paramsT>
@@ -215,7 +200,11 @@ basic_tinyfmt<charT, traitsT>&
 format(basic_tinyfmt<charT, traitsT>& fmt, const basic_cow_string<charT, traitsT, allocT>& stempl,
        const paramsT&... params)
   {
-    return noadl::format(fmt, stempl.c_str(), stempl.length(), params...);
+    basic_formatter<charT, traitsT> insts[] =
+      { { details_format::default_insert<charT, traitsT, paramsT>, ::std::addressof(params) }...,
+        { nullptr, nullptr } };
+
+    return noadl::vformat(fmt, stempl, insts, sizeof...(params));
   }
 
 using formatter   = basic_formatter<char>;
