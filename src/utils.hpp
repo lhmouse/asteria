@@ -29,7 +29,7 @@ format_string(const TemplT& templ, const ParamsT&... params)
 #define ASTERIA_TERMINATE(TEMPLATE, ...)  \
     (::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
        ::asteria::format_string(  \
-         (::asteria::details_utils::join_strings TEMPLATE).c_str()  \
+         (::asteria::details_utils::join_strings TEMPLATE)  \
          ,##__VA_ARGS__)  \
        ),  \
      ::std::terminate())
@@ -37,7 +37,7 @@ format_string(const TemplT& templ, const ParamsT&... params)
 #define ASTERIA_THROW(TEMPLATE, ...)  \
     (::asteria::throw_runtime_error(__FILE__, __LINE__, __func__,  \
        ::asteria::format_string(  \
-         (::asteria::details_utils::join_strings TEMPLATE).c_str()  \
+         (::asteria::details_utils::join_strings TEMPLATE)  \
          ,##__VA_ARGS__)  \
        ),  \
      __builtin_unreachable())
