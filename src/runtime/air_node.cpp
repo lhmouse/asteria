@@ -1517,11 +1517,12 @@ struct Traits_apply_xop_inc_post
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
 
-            if(val == INT64_MAX)
+            V_integer old = val;
+            if(ROCKET_ADD_OVERFLOW(old, V_integer(1), &val))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer increment overflow"));
 
-            ctx.stack().mut_top().set_temporary(val++);
+            ctx.stack().mut_top().set_temporary(old);
             return air_status_next;
           }
 
@@ -1534,8 +1535,8 @@ struct Traits_apply_xop_inc_post
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Postfix increment not applicable (operand type was `$1`)"),
-                describe_type(lhs.type()));
+                "Postfix increment not applicable (operand was `$1`)"),
+                lhs.type());
         }
       }
   };
@@ -1566,11 +1567,12 @@ struct Traits_apply_xop_dec_post
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
 
-            if(val == INT64_MIN)
+            V_integer old = val;
+            if(ROCKET_SUB_OVERFLOW(old, V_integer(1), &val))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer decrement overflow"));
 
-            ctx.stack().mut_top().set_temporary(val--);
+            ctx.stack().mut_top().set_temporary(old);
             return air_status_next;
           }
 
@@ -1583,8 +1585,8 @@ struct Traits_apply_xop_dec_post
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Postfix decrement not applicable (operand type was `$1`)"),
-                describe_type(lhs.type()));
+                "Postfix decrement not applicable (operand was `$1`)"),
+                lhs.type());
         }
       }
   };
@@ -1701,11 +1703,10 @@ struct Traits_apply_xop_neg
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
 
-            if(val == INT64_MIN)
+            if(ROCKET_SUB_OVERFLOW(V_integer(0), val, &val))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer negation overflow"));
 
-            val = -val;
             return air_status_next;
           }
 
@@ -1718,8 +1719,8 @@ struct Traits_apply_xop_neg
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Logical negation not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "Logical negation not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -1778,9 +1779,8 @@ struct Traits_apply_xop_notb
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                
-                "Bitwise NOT not applicable (operand type was `$1`)"),
-                                describe_type(rhs.type()));
+                "Bitwise NOT not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -1845,11 +1845,10 @@ struct Traits_apply_xop_inc_pre
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
 
-            if(val == INT64_MAX)
+            if(ROCKET_ADD_OVERFLOW(val, V_integer(1), &val))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer increment overflow"));
 
-            ++val;
             return air_status_next;
           }
 
@@ -1862,8 +1861,8 @@ struct Traits_apply_xop_inc_pre
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Prefix increment not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "Prefix increment not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -1893,11 +1892,10 @@ struct Traits_apply_xop_dec_pre
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
 
-            if(val == INT64_MIN)
+            if(ROCKET_SUB_OVERFLOW(val, V_integer(1), &val))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer decrement overflow"));
 
-            --val;
             return air_status_next;
           }
 
@@ -1910,8 +1908,8 @@ struct Traits_apply_xop_dec_pre
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Prefix decrement not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "Prefix decrement not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -1996,8 +1994,8 @@ struct Traits_apply_xop_countof
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`countof` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`countof` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2081,8 +2079,8 @@ struct Traits_apply_xop_sqrt
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__sqrt` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__sqrt` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2132,8 +2130,8 @@ struct Traits_apply_xop_isnan
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__isnan` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__isnan` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2183,8 +2181,8 @@ struct Traits_apply_xop_isinf
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__isinf` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__isinf` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2223,11 +2221,15 @@ struct Traits_apply_xop_abs
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
 
-            if(val == INT64_MIN)
+            V_integer mask;
+            if(ROCKET_SUB_OVERFLOW(V_integer(0), val, &mask))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer absolute value overflow"));
 
-            val = ::std::abs(val);
+            mask = val >> 63;
+            val ^= mask;
+            val -= mask;
+
             return air_status_next;
           }
 
@@ -2240,8 +2242,8 @@ struct Traits_apply_xop_abs
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__abs` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__abs` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2290,8 +2292,8 @@ struct Traits_apply_xop_sign
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__sign` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__sign` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2338,8 +2340,8 @@ struct Traits_apply_xop_round
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__round` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__round` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2386,8 +2388,8 @@ struct Traits_apply_xop_floor
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__floor` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__floor` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2434,8 +2436,8 @@ struct Traits_apply_xop_ceil
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__ceil` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__ceil` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2482,8 +2484,8 @@ struct Traits_apply_xop_trunc
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__trunc` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__trunc` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2530,8 +2532,8 @@ struct Traits_apply_xop_iround
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__iround` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__iround` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2578,8 +2580,8 @@ struct Traits_apply_xop_ifloor
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__ifloor` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__ifloor` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2626,8 +2628,8 @@ struct Traits_apply_xop_iceil
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__iceil` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__iceil` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2674,8 +2676,8 @@ struct Traits_apply_xop_itrunc
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__itrunc` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__itrunc` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -2791,7 +2793,7 @@ struct Traits_apply_xop_cmp_lt
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operand types were `$1` and `$2`)"),
+              "Values not comparable (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         lhs = cmp == compare_less;
@@ -2834,7 +2836,7 @@ struct Traits_apply_xop_cmp_gt
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operand types were `$1` and `$2`)"),
+              "Values not comparable (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         lhs = cmp == compare_greater;
@@ -2877,7 +2879,7 @@ struct Traits_apply_xop_cmp_lte
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operand types were `$1` and `$2`)"),
+              "Values not comparable (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         lhs = cmp != compare_greater;
@@ -2920,7 +2922,7 @@ struct Traits_apply_xop_cmp_gte
         auto cmp = lhs.compare(rhs);
         if(cmp == compare_unordered)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operand types were `$1` and `$2`)"),
+              "Values not comparable (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         lhs = cmp != compare_less;
@@ -3031,11 +3033,11 @@ struct Traits_apply_xop_add
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            V_integer t = x;
-            if(ROCKET_ADD_OVERFLOW(t, y, &x))
+            V_integer oldx = x;
+            if(ROCKET_ADD_OVERFLOW(oldx, y, &x))
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer addition overflow (operand types were `$1` and `$2`)"),
-                  t, y);
+                  "Integer addition overflow (operands were `$1` and `$2`)"),
+                  oldx, y);
 
             return air_status_next;
           }
@@ -3057,8 +3059,8 @@ struct Traits_apply_xop_add
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Addition not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Addition not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3109,11 +3111,11 @@ struct Traits_apply_xop_sub
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            V_integer t = x;
-            if(ROCKET_SUB_OVERFLOW(t, y, &x))
+            V_integer oldx = x;
+            if(ROCKET_SUB_OVERFLOW(oldx, y, &x))
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer subtraction overflow (operand types were `$1` and `$2`)"),
-                  t, y);
+                  "Integer subtraction overflow (operands were `$1` and `$2`)"),
+                  oldx, y);
 
             return air_status_next;
           }
@@ -3128,8 +3130,8 @@ struct Traits_apply_xop_sub
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Subtraction not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Subtraction not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3181,11 +3183,11 @@ struct Traits_apply_xop_mul
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            V_integer t = x;
-            if(ROCKET_MUL_OVERFLOW(t, y, &x))
+            V_integer oldx = x;
+            if(ROCKET_MUL_OVERFLOW(oldx, y, &x))
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer multiplication overflow (operand types were `$1` and `$2`)"),
-                  t, y);
+                  "Integer multiplication overflow (operands were `$1` and `$2`)"),
+                  oldx, y);
 
             return air_status_next;
           }
@@ -3237,8 +3239,8 @@ struct Traits_apply_xop_mul
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Multiplication not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Multiplication not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3283,15 +3285,16 @@ struct Traits_apply_xop_div
 
             if(y == 0)
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer division by zero (operand types were `$1` and `$2`)"),
-                  lhs, rhs);
+                  "Integer division by zero (operands were `$1` and `$2`)"),
+                  x, y);
 
             if((x == INT64_MIN) && (y == -1))
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer division overflow (operand types were `$1` and `$2`)"),
-                  lhs, rhs);
+                  "Integer division overflow (operands were `$1` and `$2`)"),
+                  x, y);
 
-            x /= y;
+            x = x / y;
+
             return air_status_next;
           }
 
@@ -3305,8 +3308,8 @@ struct Traits_apply_xop_div
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Division not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Division not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3351,15 +3354,16 @@ struct Traits_apply_xop_mod
 
             if(y == 0)
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer division by zero (operand types were `$1` and `$2`)"),
-                  lhs, rhs);
+                  "Integer division by zero (operands were `$1` and `$2`)"),
+                  x, y);
 
             if((x == INT64_MIN) && (y == -1))
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer division overflow (operand types were `$1` and `$2`)"),
-                  lhs, rhs);
+                  "Integer division overflow (operands were `$1` and `$2`)"),
+                  x, y);
 
-            x %= y;
+            x = x % y;
+
             return air_status_next;
           }
 
@@ -3373,8 +3377,8 @@ struct Traits_apply_xop_mod
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Modulo not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Modulo not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
    };
@@ -3412,13 +3416,13 @@ struct Traits_apply_xop_sll
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Shift count not valid (operand types were `$1` and `$2`)"),
+              "Shift count not valid (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Negative shift count (operand types were `$1` and `$2`)"),
+              "Negative shift count (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the left.
@@ -3456,8 +3460,8 @@ struct Traits_apply_xop_sll
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Logical left shift not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Logical left shift not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3495,13 +3499,13 @@ struct Traits_apply_xop_srl
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Shift count not valid (operand types were `$1` and `$2`)"),
+              "Shift count not valid (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Negative shift count (operand types were `$1` and `$2`)"),
+              "Negative shift count (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the right.
@@ -3539,8 +3543,8 @@ struct Traits_apply_xop_srl
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Logical right shift not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Logical right shift not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3578,13 +3582,13 @@ struct Traits_apply_xop_sla
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Shift count not valid (operand types were `$1` and `$2`)"),
+              "Shift count not valid (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Negative shift count (operand types were `$1` and `$2`)"),
+              "Negative shift count (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the left.
@@ -3599,8 +3603,8 @@ struct Traits_apply_xop_sla
 
             if(n >= 64) {
               ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer left shift overflow (operand types were `$1` and `$2`)"),
-                  lhs, rhs);
+                  "Integer left shift overflow (operands were `$1` and `$2`)"),
+                  val, n);
             }
             else {
               int bc = static_cast<int>(63 - n);
@@ -3609,8 +3613,8 @@ struct Traits_apply_xop_sla
 
               if(out != sgn)
                 ASTERIA_THROW_RUNTIME_ERROR((
-                    "Integer left shift overflow (operand types were `$1` and `$2`)"),
-                    lhs, rhs);
+                    "Integer left shift overflow (operands were `$1` and `$2`)"),
+                    val, n);
 
               reinterpret_cast<uint64_t&>(val) <<= n;
             }
@@ -3634,8 +3638,8 @@ struct Traits_apply_xop_sla
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Arithmetic left shift not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Arithmetic left shift not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3673,13 +3677,13 @@ struct Traits_apply_xop_sra
         // The shift chount must be a non-negative integer.
         if(!rhs.is_integer())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Shift count not valid (operand types were `$1` and `$2`)"),
+              "Shift count not valid (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         int64_t n = rhs.as_integer();
         if(n < 0)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Negative shift count (operand types were `$1` and `$2`)"),
+              "Negative shift count (operands were `$1` and `$2`)"),
               lhs, rhs);
 
         // If the LHS operand is of type `integer`, shift the LHS operand to the right.
@@ -3714,8 +3718,8 @@ struct Traits_apply_xop_sra
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Arithmetic right shift not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Arithmetic right shift not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3787,8 +3791,8 @@ struct Traits_apply_xop_andb
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Bitwise AND not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Bitwise AND not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3861,8 +3865,8 @@ struct Traits_apply_xop_orb
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Bitwise OR not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Bitwise OR not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -3935,8 +3939,8 @@ struct Traits_apply_xop_xorb
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Bitwise XOR not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Bitwise XOR not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -4097,8 +4101,8 @@ struct Traits_apply_xop_fma
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Fused multiply-add not applicable (operand types were `$1`, `$2` and `$3`)"),
-                describe_type(lhs.type()), describe_type(mid.type()), describe_type(rhs.type()));
+                "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)"),
+                lhs.type(), mid.type(), rhs.type());
         }
       }
   };
@@ -4773,8 +4777,8 @@ struct Traits_apply_xop_lzcnt
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__lzcnt` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__lzcnt` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -4818,8 +4822,8 @@ struct Traits_apply_xop_tzcnt
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__tzcnt` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__tzcnt` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -4863,8 +4867,8 @@ struct Traits_apply_xop_popcnt
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "`__popcnt` not applicable (operand type was `$1`)"),
-                describe_type(rhs.type()));
+                "`__popcnt` not applicable (operand was `$1`)"),
+                rhs.type());
         }
       }
   };
@@ -4913,8 +4917,8 @@ struct Traits_apply_xop_addm
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Modular addition not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Modular addition not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -4963,8 +4967,8 @@ struct Traits_apply_xop_subm
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Modular subtraction not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Modular subtraction not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -5013,8 +5017,8 @@ struct Traits_apply_xop_mulm
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Modular multiplication not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Modular multiplication not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -5074,8 +5078,8 @@ struct Traits_apply_xop_adds
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Saturation addition not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Saturation addition not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -5135,8 +5139,8 @@ struct Traits_apply_xop_subs
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Saturation subtraction not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Saturation subtraction not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
@@ -5196,8 +5200,8 @@ struct Traits_apply_xop_muls
 
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
-                "Saturation multiplication not applicable (operand types were `$1` and `$2`)"),
-                describe_type(lhs.type()), describe_type(rhs.type()));
+                "Saturation multiplication not applicable (operands were `$1` and `$2`)"),
+                lhs, rhs);
         }
       }
   };
