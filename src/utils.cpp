@@ -170,7 +170,7 @@ write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     char temp[64];
     ::strftime(temp, sizeof(temp), "%F %R", &tr);
     log_text += temp;
-    ::sprintf(temp, ":%2.9f", tr.tm_sec + double(ts.tv_nsec) / 1.0e9);
+    ::sprintf(temp, ":%2.9f", tr.tm_sec + (double)ts.tv_nsec / 1.0e9);
     log_text += temp;
 
     // Append the file name and line number, followed by a line feed.
@@ -188,7 +188,7 @@ write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
       else if(ch == 0x7F)
         log_text += "[DEL]";
       else
-        log_text += static_cast<char>(ch);
+        log_text += (char) ch;
     }
     log_text += "\n\n";
 
