@@ -131,11 +131,11 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
     // Perform normal exit if verbose mode is on.
     // This helps catching memory leaks upon exit.
     if(repl_verbose)
-      ::exit(static_cast<int>(stat));
+      ::exit((int) stat);
 
     // Perform fast exit by default.
     ::fflush(nullptr);
-    ::quick_exit(static_cast<int>(stat));
+    ::quick_exit((int) stat);
   }
 
 void

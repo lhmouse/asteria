@@ -28,15 +28,15 @@ load_and_execute_single_noreturn()
 
     // If the script exits without returning a value, success is assumed.
     if(ref.is_void())
-      exit_printf(exit_success);
+      ::quick_exit(exit_success);
 
     // Check whether the result is an integer.
     const auto& val = ref.dereference_readonly();
-    if(!val.is_integer())
-      exit_printf(exit_non_integer);
+    if(val.is_integer())
+      ::quick_exit((int) val.as_integer());
 
     // Exit with this code.
-    exit_printf(static_cast<Exit_Status>(val.as_integer()));
+    ::quick_exit(exit_non_integer);
   }
 
 }  // namespace asteria
