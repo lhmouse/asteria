@@ -262,9 +262,10 @@ struct Handler_source final
         ::rocket::unique_ptr<char, void (void*)> abspath(::free);
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
         if(!abspath)
-          ASTERIA_THROW("could not open script file '$2'\n"
-                        "[`realpath()` failed: $1]",
-                        format_errno(), args[0]);
+          ASTERIA_THROW((
+              "Could not open script file '$2'\n"
+              "[`realpath()` failed: $1]"),
+              format_errno(), args[0]);
 
         repl_printf("* loading file '%s'...", abspath.get());
         ::rocket::tinybuf_file file;
@@ -401,7 +402,7 @@ handle_repl_command(cow_string&& cmdline)
       if(quote) {
         if(pos >= cmdline.size())
           ::rocket::sprintf_and_throw<::std::invalid_argument>(
-                "unmatched %c", quote);
+                "Unmatched %c", quote);
 
         ch = cmdline[pos++];
 
@@ -438,7 +439,7 @@ handle_repl_command(cow_string&& cmdline)
       if((quote != '\'') && (ch == '\\')) {
         if(pos >= cmdline.size())
           ::rocket::sprintf_and_throw<::std::invalid_argument>(
-                "dangling \\ at end of command");
+                "Dangling \\ at end of command");
 
         ch = cmdline[pos++];
       }
@@ -458,7 +459,7 @@ handle_repl_command(cow_string&& cmdline)
     auto qhand = do_find_handler_opt(::std::move(cmd));
     if(!qhand)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-          "unknown command `%s` (type `:help` for available commands)",
+          "Unknown command `%s` (type `:help` for available commands)",
           cmd.c_str());
 
     qhand->handle(::std::move(args));

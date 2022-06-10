@@ -87,7 +87,9 @@ do_reserve_one(Uparam uparam, size_t size)
   {
     constexpr size_t size_max = UINT8_MAX * sizeof(Header) - 1;
     if(size > size_max)
-      ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", size, size_max);
+      ASTERIA_THROW((
+          "Invalid AVMC node size (`$1` > `$2`)"),
+          size, size_max);
 
     // Round the size up to the nearest number of headers.
     // This shall not result in overflows.
@@ -204,7 +206,7 @@ execute(Executive_Context& ctx) const
       }
       catch(exception& stdex) {
         // Replace the active exception.
-        Runtime_Error except(Runtime_Error::M_native(), stdex);
+        Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
         if(qnode->meta_ver >= 2)
           except.push_frame_plain(qnode->pv_meta->syms, sref(""));
         throw except;

@@ -905,16 +905,16 @@ do_hash_file(const V_string& path)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "could not open file '$2'\n[`open()` failed: $1]",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not open file '$2'\n[`open()` failed: $1]"),
           format_errno(), path);
 
     // Get the file mode and preferred I/O block size.
     struct ::stat stb;
     if(::fstat(fd, &stb) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "could not get information about source file '$2'\n"
-          "[`fstat()` failed: $1]",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not get information about source file '$2'\n"
+          "[`fstat()` failed: $1]"),
           format_errno(), path);
 
     // Allocate the I/O buffer.
@@ -931,8 +931,8 @@ do_hash_file(const V_string& path)
         if(nread == 0)
           break;
 
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "error reading file '$2'\n[`read()` failed: $1]",
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Error reading file '$2'\n[`read()` failed: $1]"),
             format_errno(), path);
       }
       h.update(pbuf, static_cast<size_t>(nread));
@@ -1620,7 +1620,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(sref("sha512_file"),
       ASTERIA_BINDING(
-        "td.checksum.sha512_file", "path",
+        "std.checksum.sha512_file", "path",
         Argument_Reader&& reader)
       {
         V_string path;

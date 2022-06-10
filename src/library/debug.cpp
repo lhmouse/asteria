@@ -8,27 +8,6 @@
 #include "../utils.hpp"
 
 namespace asteria {
-namespace {
-
-void
-do_print_value(tinyfmt& fmt, const void* ptr)
-  {
-    static_cast<const Value*>(ptr)->print(fmt);
-  }
-
-optV_integer
-do_write_stderr_common(::rocket::tinyfmt_str&& fmt)
-  {
-    // Try writing standard output. Errors are ignored.
-    auto nput = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    if(nput < 0)
-      return nullopt;
-
-    // Return the number of bytes that have been written.
-    return static_cast<int64_t>(nput);
-  }
-
-}  // namespace
 
 optV_integer
 std_debug_logf(V_string templ, cow_vector<Value> values)
@@ -37,12 +16,15 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
     for(const auto& val : values)
-      insts.push_back({ do_print_value, &val });
+      insts.push_back({
+          [](tinyfmt& fmt, const void* ptr) { ((const Value*) ptr)->print(fmt);  },
+          &val });
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
-    return do_write_stderr_common(::std::move(fmt));
+    ::ptrdiff_t nbytes = write_log_to_stderr(__FILE__, __LINE__, __func__, fmt.extract_string());
+    return (nbytes < 0) ? nullopt : optV_integer(nbytes);
   }
 
 optV_integer
@@ -54,7 +36,8 @@ std_debug_dump(Value value, optV_integer indent)
     // Format the value.
     ::rocket::tinyfmt_str fmt;
     value.dump(fmt, rindent);
-    return do_write_stderr_common(::std::move(fmt));
+    ::ptrdiff_t nbytes = write_log_to_stderr(__FILE__, __LINE__, __func__, fmt.extract_string());
+    return (nbytes < 0) ? nullopt : optV_integer(nbytes);
   }
 
 void

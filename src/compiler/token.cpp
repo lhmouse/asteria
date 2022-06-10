@@ -50,7 +50,9 @@ print(tinyfmt& fmt) const
                    << "`";
 
       default:
-        ASTERIA_TERMINATE("invalid token type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid token type (index `$1`)"),
+            this->index());
     }
   }
 

@@ -448,7 +448,9 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           default:
-            ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
+            ASTERIA_TERMINATE((
+                "Invalid target scope type (target `$1`)"),
+                altr.target);
         }
       }
 
@@ -464,7 +466,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           case jump_target_switch:
-            ASTERIA_TERMINATE("`target_switch` not allowed to follow `continue`");
+            ASTERIA_TERMINATE(("`target_switch` not allowed to follow `continue`"));
 
           case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
@@ -479,7 +481,9 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           default:
-            ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
+            ASTERIA_TERMINATE((
+                "Invalid target scope type (target `$1`)"),
+                altr.target);
         }
       }
 
@@ -578,7 +582,9 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       default:
-        ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid statement type (index `$1`)"),
+            this->index());
     }
   }
 

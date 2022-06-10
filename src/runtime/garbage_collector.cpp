@@ -218,7 +218,7 @@ finalize() noexcept
     // Ensure no garbage collection is in progress.
     const Sentry sentry(this->m_recur);
     if(!sentry)
-      ASTERIA_TERMINATE("garbage collector not finalizable while in use");
+      ASTERIA_TERMINATE(("Garbage collector not finalizable while in use"));
 
     size_t nvars = 0;
     rcptr<Variable> var;

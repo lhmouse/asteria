@@ -18,7 +18,6 @@ class Runtime_Error
     enum class M_throw;
     enum class M_assert;
     enum class M_native;
-    enum class M_format;
 
   private:
     Value m_value;
@@ -40,19 +39,9 @@ class Runtime_Error
       { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
 
     explicit
-    Runtime_Error(M_native, const exception& stdex)
-      : m_value(cow_string(stdex.what()))
+    Runtime_Error(M_native, const cow_string& msg)
+      : m_value(msg)
       { this->do_backtrace({ frame_type_native, { }, this->m_value });  }
-
-    template<typename... ParamsT>
-    explicit
-    Runtime_Error(M_format, const Source_Location& sloc, const char* templ,
-                  const ParamsT&... params)
-      {
-        format(this->m_fmt, templ, params...);
-        this->m_value = this->m_fmt.extract_string();
-        this->do_backtrace({ frame_type_native, sloc, this->m_value });
-      }
 
   private:
     void
@@ -143,11 +132,13 @@ class Runtime_Error
       }
   };
 
-// Note the format string must be a string literal.
-#define ASTERIA_THROW_RUNTIME_ERROR(...)  \
-    throw ::asteria::Runtime_Error(::asteria::Runtime_Error::M_format(),  \
-        ::asteria::Source_Location(::rocket::sref(__FILE__),  \
-           __LINE__, 0), "" __VA_ARGS__)
+// Note the string template must be parenthesized.
+#define ASTERIA_THROW_RUNTIME_ERROR(TEMPLATE, ...)  \
+    throw ::asteria::Runtime_Error(  \
+        ::asteria::Runtime_Error::M_native(),  \
+        ::asteria::format_string(  \
+          (::asteria::details_utils::join_strings TEMPLATE).c_str()  \
+          ,##__VA_ARGS__))
 
 }  // namespace asteria
 

@@ -8,7 +8,19 @@
 namespace asteria {
 namespace details_utils {
 
-extern const uint8_t cmask_table[128];
+extern const uint8_t cmask_table[];
+extern const char ctrl_char_names[][8];
+extern const char char_escapes[][8];
+
+template<typename... ParamsT>
+inline
+cow_string
+join_strings(const ParamsT&... params)
+  {
+    cow_string str;
+    (void) initializer_list<int> { ((str += params), (str += '\n'), 1)... };
+    return str;
+  }
 
 struct Quote_Wrapper
   {

@@ -29,7 +29,9 @@ do_format_check_scalar(const Value& value)
         return false;
 
       default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", value.type());
+        ASTERIA_TERMINATE((
+            "Invalid value type (type `$1`)"),
+            value.type());
     }
   }
 
@@ -125,7 +127,7 @@ do_csv_parse(tinybuf& buf)
     }
 
     if(quote_at_line != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("unmatched \" at line $1", quote_at_line);
+      ASTERIA_THROW_RUNTIME_ERROR(("Unmatched \" at line $1"), quote_at_line);
 
     return root;
   }
@@ -190,9 +192,10 @@ std_csv_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
     if(!fp)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "could not open file '$2'\n"
-          "[`fopen()` failed: $1]", format_errno(), path);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not open file '$2'\n"
+          "[`fopen()` failed: $1]"),
+          format_errno(), path);
 
     // Parse characters from the file.
     ::rocket::tinybuf_file cbuf(::std::move(fp));

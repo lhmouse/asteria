@@ -22,8 +22,8 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "integer subscript not applicable (parent type was `$1`; index was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
               describe_type(parent.type()), altr.index);
 
         const auto& arr = parent.as_array();
@@ -42,8 +42,8 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "string subscript not applicable (parent type was `$1`; key was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
               describe_type(parent.type()), altr.key);
 
         const auto& obj = parent.as_object();
@@ -57,8 +57,8 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "head operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Head operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
@@ -75,8 +75,8 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "tail operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Tail operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
@@ -94,8 +94,8 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "random operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Random operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
@@ -109,7 +109,9 @@ apply_read_opt(const Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid reference modifier type (index `$1`)"),
+            this->index());
     }
   }
 
@@ -126,8 +128,8 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "integer subscript not applicable (parent type was `$1`; index was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
@@ -146,8 +148,8 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "string subscript not applicable (parent type was `$1`; key was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
               describe_type(parent.type()), altr.key);
 
         auto& obj = parent.mut_object();
@@ -161,8 +163,8 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "head operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Head operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -179,8 +181,8 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "tail operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Tail operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -198,8 +200,8 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "random operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Random operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -213,7 +215,9 @@ apply_write_opt(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid reference modifier type (index `$1`)"),
+            this->index());
     }
   }
 
@@ -230,8 +234,8 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "integer subscript not applicable (parent type was `$1`; index was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
@@ -252,8 +256,8 @@ apply_open(Value& parent) const
           parent = V_object();
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "string subscript not applicable (parent type was `$1`; key was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
               describe_type(parent.type()), altr.key);
 
         auto& obj = parent.mut_object();
@@ -267,8 +271,8 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "head operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Head operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -287,8 +291,8 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "tail operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Tail operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -308,23 +312,25 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "random operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Random operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
         auto bptr = arr.mut_data();
         auto eptr = bptr + arr.size();
         if(bptr == eptr)
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "cannot write to random element of an empty array");
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Cannot write to random element of an empty array"));
 
         auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
         return *mptr;
       }
 
       default:
-        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid reference modifier type (index `$1`)"),
+            this->index());
     }
   }
 
@@ -341,8 +347,8 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "integer subscript not applicable (parent type was `$1`; index was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
@@ -363,8 +369,8 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "string subscript not applicable (parent type was `$1`; key was `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
               describe_type(parent.type()), altr.key);
 
         auto& obj = parent.mut_object();
@@ -384,8 +390,8 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "head operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Head operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -404,8 +410,8 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "tail operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Tail operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -425,8 +431,8 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "random operator not applicable (parent type was `$1`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Random operator not applicable (parent type was `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -442,7 +448,9 @@ apply_unset(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid reference modifier type (index `$1`)"),
+            this->index());
     }
   }
 

@@ -16,8 +16,8 @@ int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
     if(!(lower <= upper))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "bounds not valid (`$1` is not less than or equal to `$2`)",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Bounds not valid (`$1` is not less than or equal to `$2`)"),
           lower, upper);
 
     return upper;
@@ -27,8 +27,8 @@ double
 do_verify_bounds(double lower, double upper)
   {
     if(!::std::islessequal(lower, upper))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "bounds not valid (`$1` is not less than or equal to `$2`)",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Bounds not valid (`$1` is not less than or equal to `$2`)"),
           lower, upper);
 
     return upper;
@@ -223,8 +223,8 @@ do_unpack(void bswap(WordT&), const V_string& text)
     V_array values;
 
     if(text.size() / sizeof(un) * sizeof(un) != text.size())
-      ASTERIA_THROW_RUNTIME_ERROR(
-            "string length `$1` not divisible by `$2`",
+      ASTERIA_THROW_RUNTIME_ERROR((
+            "String length `$1` not divisible by `$2`"),
             text.size(), sizeof(un));
 
     values.reserve(text.size() / sizeof(un));
@@ -243,8 +243,8 @@ V_integer
 std_numeric_abs(V_integer value)
   {
     if(value == INT64_MIN)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "integer absolute value overflow (value `$1`)",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Integer absolute value overflow (value `$1`)"),
           value);
 
     return ::std::abs(value);
@@ -315,8 +315,8 @@ std_numeric_max(cow_vector<Value> values)
       if(!res.is_null()) {
         auto cmp = res.compare(val);
         if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "values not comparable (operands were `$1` and `$2`)",
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Values not comparable (operands were `$1` and `$2`)"),
               cmp, val);
 
         if(cmp != compare_less)
@@ -338,8 +338,9 @@ std_numeric_min(cow_vector<Value> values)
       if(!res.is_null()) {
         auto cmp = res.compare(val);
         if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "values not comparable (operands were `$1` and `$2`)", cmp, val);
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Values not comparable (operands were `$1` and `$2`)"),
+              cmp, val);
 
         if(cmp != compare_greater)
           continue;
@@ -473,13 +474,13 @@ std_numeric_random(Global_Context& global, optV_real limit)
     if(limit) {
       switch(::std::fpclassify(*limit)) {
         case FP_ZERO:
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "random number limit shall not be zero");
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Random number limit shall not be zero"));
 
         case FP_INFINITE:
         case FP_NAN:
-          ASTERIA_THROW_RUNTIME_ERROR(
-              "random number limit shall be finite (limit `$1`)", *limit);
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Random number limit shall be finite (limit `$1`)"), *limit);
 
         default:
           ratio *= *limit;
@@ -512,8 +513,8 @@ V_integer
 std_numeric_rotl(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "invalid modulo bit count (`$1` is not between 0 and 64)", m);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid modulo bit count (`$1` is not between 0 and 64)"), m);
 
     if(m == 0)
       return 0;
@@ -536,8 +537,8 @@ V_integer
 std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "invalid modulo bit count (`$1` is not between 0 and 64)", m);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid modulo bit count (`$1` is not between 0 and 64)"), m);
 
     if(m == 0)
       return 0;
@@ -578,8 +579,9 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid exponent base for binary notation (`$1` is not 2)", *ebase);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for binary notation (`$1` is not 2)"),
+            *ebase);
       }
 
       case 16: {
@@ -597,8 +599,9 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
+            *ebase);
       }
 
       case 10: {
@@ -616,13 +619,15 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for decimal notation (`$1` is not 10)"),
+            *ebase);
       }
 
       default:
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid number base (base `$1` is not one of { 2, 10, 16 })"),
+            *base);
     }
     return text;
   }
@@ -646,8 +651,9 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid exponent base for binary notation (`$1` is not 2)", *ebase);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for binary notation (`$1` is not 2)"),
+            *ebase);
       }
 
       case 16: {
@@ -663,8 +669,9 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
+            *ebase);
       }
 
       case 10: {
@@ -680,13 +687,15 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for decimal notation (`$1` is not 10)"),
+            *ebase);
       }
 
       default:
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid number base (base `$1` is not one of { 2, 10, 16 })"),
+            *base);
     }
     return text;
   }
@@ -697,7 +706,7 @@ std_numeric_parse(V_string text)
     static constexpr char s_spaces[] = " \f\n\r\t\v";
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
-      ASTERIA_THROW_RUNTIME_ERROR("blank string");
+      ASTERIA_THROW_RUNTIME_ERROR(("Blank string"));
 
     auto fbptr = text.data() + tpos;
     auto ibptr = fbptr;
@@ -706,12 +715,12 @@ std_numeric_parse(V_string text)
     // Try parsing the string as a real number first.
     ::rocket::ascii_numget numg;
     if(!numg.parse_F(fbptr, eptr))
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "string not convertible to a number (text `$1`)", text);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "String not convertible to a number (text `$1`)"), text);
 
     if(fbptr != eptr)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "non-numeric character in string (character `$1`)", *fbptr);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Non-numeric character in string (character `$1`)"), *fbptr);
 
     V_real fval;
     numg.cast_F(fval, -HUGE_VAL, HUGE_VAL);

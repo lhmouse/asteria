@@ -83,7 +83,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
               if(!qref)
                 throw Compiler_Error(Compiler_Error::M_format(),
                           compiler_status_undeclared_identifier, altr.sloc,
-                          "undeclared identifier `$1`", altr.name);
+                          "Undeclared identifier `$1`", altr.name);
             }
 
             AIR_Node::S_push_global_reference xnode = { altr.sloc, hint, altr.name };
@@ -241,7 +241,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       default:
-        ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
+        ASTERIA_TERMINATE((
+            "Invalid expression unit type (index `$1`)"),
+            this->index());
     }
   }
 

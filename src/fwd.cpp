@@ -58,7 +58,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
 
     ::rocket::sprintf_and_throw<::std::invalid_argument>(
-                  "cow_function: attempt to call a null function");
+                "cow_function: attempt to call a null function");
   }
 
 Reference&

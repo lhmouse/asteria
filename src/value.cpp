@@ -96,7 +96,9 @@ do_destroy_variant_slow() noexcept
         }
 
         default:
-          ASTERIA_TERMINATE("invalid value type (type `$1`)", this->type());
+          ASTERIA_TERMINATE((
+              "Invalid value type (type `$1`)"),
+              this->type());
       }
     }
     while(bytes.getn(this->m_bytes, sizeof(storage)) != 0);
@@ -179,7 +181,9 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
       }
 
       default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+        ASTERIA_TERMINATE((
+            "Invalid value type (type `$1`)"),
+            qval->type());
     }
 
     while(stack.size()) {
@@ -296,7 +300,9 @@ do_compare_slow(const Value& other) const noexcept
           return compare_unordered;
 
         default:
-          ASTERIA_TERMINATE("invalid value type (type `$1`)", qlhs->type());
+          ASTERIA_TERMINATE((
+              "Invalid value type (type `$1`)"),
+              qlhs->type());
       }
     }
 
@@ -413,7 +419,9 @@ print(tinyfmt& fmt, bool escape) const
       }
 
       default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+        ASTERIA_TERMINATE((
+            "Invalid value type (type `$1`)"),
+            qval->type());
     }
 
     while(stack.size()) {
@@ -548,7 +556,9 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       default:
-        ASTERIA_TERMINATE("invalid value type (type `$1`)", qval->type());
+        ASTERIA_TERMINATE((
+            "Invalid value type (type `$1`)"),
+            qval->type());
     }
 
     while(stack.size()) {

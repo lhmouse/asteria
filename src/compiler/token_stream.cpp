@@ -869,7 +869,7 @@ reload(const cow_string& file, int start_line, tinybuf&& cbuf)
     if(bcomm)
       throw Compiler_Error(Compiler_Error::M_format(),
                 compiler_status_block_comment_unclosed, reader.tell(),
-                "block comment unclosed\n[unmatched `/*` at '$1']", *bcomm);
+                "Block comment unclosed\n[unmatched `/*` at '$1']", *bcomm);
 
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());

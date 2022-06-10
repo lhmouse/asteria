@@ -7,193 +7,111 @@
 #include <unistd.h>  // ::write
 
 namespace asteria {
-namespace {
-
-constexpr char s_lcchars[][8] =
-  {
-    "[NUL]", "[SOH]", "[STX]", "[ETX]", "[EOT]", "[ENQ]", "[ACK]", "[BEL]",
-    "[BS]",  "\t",    "\n\t",  "[VT]",  "[FF]",  "",      "[SO]",  "[SI]",
-    "[DLE]", "[DC1]", "[DC2]", "[DC3]", "[DC4]", "[NAK]", "[SYN]", "[ETB]",
-    "[CAN]", "[EM]",  "[SUB]", "[ESC]", "[FS]",  "[GS]",  "[RS]",  "[US]",
-  };
-
-constexpr char s_escapes[][8] =
-  {
-    "\\0",   "\\x01", "\\x02", "\\x03", "\\x04", "\\x05", "\\x06", "\\a",
-    "\\b",   "\\t",   "\\n",   "\\v",   "\\f",   "\\r",   "\\x0E", "\\x0F",
-    "\\x10", "\\x11", "\\x12", "\\x13", "\\x14", "\\x15", "\\x16", "\\x17",
-    "\\x18", "\\x19", "\\Z",   "\\e",   "\\x1C", "\\x1D", "\\x1E", "\\x1F",
-    " ",     "!",     "\\\"",  "#",     "$",     "%",     "&",     "\\'",
-    "(",     ")",     "*",     "+",     ",",     "-",     ".",     "/",
-    "0",     "1",     "2",     "3",     "4",     "5",     "6",     "7",
-    "8",     "9",     ":",     ";",     "<",     "=",     ">",     "?",
-    "@",     "A",     "B",     "C",     "D",     "E",     "F",     "G",
-    "H",     "I",     "J",     "K",     "L",     "M",     "N",     "O",
-    "P",     "Q",     "R",     "S",     "T",     "U",     "V",     "W",
-    "X",     "Y",     "Z",     "[",     "\\\\",  "]",     "^",     "_",
-    "`",     "a",     "b",     "c",     "d",     "e",     "f",     "g",
-    "h",     "i",     "j",     "k",     "l",     "m",     "n",     "o",
-    "p",     "q",     "r",     "s",     "t",     "u",     "v",     "w",
-    "x",     "y",     "z",     "{",     "|",     "}",     "~",     "\\x7F",
-    "\\x80", "\\x81", "\\x82", "\\x83", "\\x84", "\\x85", "\\x86", "\\x87",
-    "\\x88", "\\x89", "\\x8A", "\\x8B", "\\x8C", "\\x8D", "\\x8E", "\\x8F",
-    "\\x90", "\\x91", "\\x92", "\\x93", "\\x94", "\\x95", "\\x96", "\\x97",
-    "\\x98", "\\x99", "\\x9A", "\\x9B", "\\x9C", "\\x9D", "\\x9E", "\\x9F",
-    "\\xA0", "\\xA1", "\\xA2", "\\xA3", "\\xA4", "\\xA5", "\\xA6", "\\xA7",
-    "\\xA8", "\\xA9", "\\xAA", "\\xAB", "\\xAC", "\\xAD", "\\xAE", "\\xAF",
-    "\\xB0", "\\xB1", "\\xB2", "\\xB3", "\\xB4", "\\xB5", "\\xB6", "\\xB7",
-    "\\xB8", "\\xB9", "\\xBA", "\\xBB", "\\xBC", "\\xBD", "\\xBE", "\\xBF",
-    "\\xC0", "\\xC1", "\\xC2", "\\xC3", "\\xC4", "\\xC5", "\\xC6", "\\xC7",
-    "\\xC8", "\\xC9", "\\xCA", "\\xCB", "\\xCC", "\\xCD", "\\xCE", "\\xCF",
-    "\\xD0", "\\xD1", "\\xD2", "\\xD3", "\\xD4", "\\xD5", "\\xD6", "\\xD7",
-    "\\xD8", "\\xD9", "\\xDA", "\\xDB", "\\xDC", "\\xDD", "\\xDE", "\\xDF",
-    "\\xE0", "\\xE1", "\\xE2", "\\xE3", "\\xE4", "\\xE5", "\\xE6", "\\xE7",
-    "\\xE8", "\\xE9", "\\xEA", "\\xEB", "\\xEC", "\\xED", "\\xEE", "\\xEF",
-    "\\xF0", "\\xF1", "\\xF2", "\\xF3", "\\xF4", "\\xF5", "\\xF6", "\\xF7",
-    "\\xF8", "\\xF9", "\\xFA", "\\xFB", "\\xFC", "\\xFD", "\\xFE", "\\xFF",
-  };
-
-// POSIX
-constexpr
-const char*
-do_result_of_strerror_r(int /*r*/, char* s) noexcept
-  {
-    return s;
-  }
-
-// GNU
-constexpr
-const char*
-do_result_of_strerror_r(char* r, char* /*s*/) noexcept
-  {
-    return r;
-  }
-
-inline
-const char*
-do_xstrerror_r(int errnum, char *strerrbuf, size_t buflen) noexcept
-  {
-    return do_result_of_strerror_r(
-               ::strerror_r(errnum, strerrbuf, buflen),
-               strerrbuf);
-  }
-
-}  // namespace
-
-namespace details_utils {
-
-const uint8_t cmask_table[128] =
-  {
-    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
-    0x40, 0x21, 0x61, 0x41, 0x41, 0x41, 0x40, 0x40,
-    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
-    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
-    0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C,
-    0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x10,
-    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
-    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x40,
-  };
-
-tinyfmt&
-operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
-  {
-    // Insert the leading quote mark.
-    fmt << '\"';
-
-    // Quote all bytes from the source string.
-    for(size_t i = 0;  i < q.len;  ++i) {
-      size_t ch = q.str[i] & 0xFF;
-      const auto& sq = s_escapes[ch];
-
-      // Insert this quoted sequence.
-      // Optimize the operation a little if it consists of only one character.
-      if(ROCKET_EXPECT(sq[1] == 0))
-        fmt << sq[0];
-      else
-        fmt << sq;
-    }
-
-    // Insert the trailing quote mark.
-    fmt << '\"';
-    return fmt;
-  }
-
-tinyfmt&
-operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
-  {
-    if(q.indent == 0) {
-      // Write everything in a single line, separated by spaces.
-      fmt << ' ';
-    }
-    else {
-      // Terminate the current line.
-      fmt << '\n';
-
-      // Indent the next line accordingly.
-      for(size_t i = 0;  i < q.hanging;  ++i)
-        fmt << ' ';
-    }
-    return fmt;
-  }
-
-tinyfmt&
-operator<<(tinyfmt& fmt, const Formatted_errno& e)
-  {
-    // Write the error number, followed by its description.
-    char sbuf[256];
-    return fmt << "error " << e.err << ": "
-         << do_xstrerror_r(e.err, sbuf, sizeof(sbuf));
-  }
-
-}  // namespace details_utils
 
 ptrdiff_t
-write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
+write_log_to_stderr(const char* file, long line, const char* func, cow_string&& msg)
   {
-    cow_string log_text;
-    log_text.reserve(1023);
+    // Compose the string to write.
+    cow_string data;
+    data.reserve(2047);
 
-    // Append the timestamp.
+    // Write the timestamp and tag for sorting.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
 
-    char temp[64];
-    ::strftime(temp, sizeof(temp), "%F %R", &tr);
-    log_text += temp;
-    ::sprintf(temp, ":%2.9f", tr.tm_sec + (double)ts.tv_nsec / 1.0e9);
-    log_text += temp;
+    ::rocket::ascii_numput nump;
+    uint64_t datetime = (uint32_t) tr.tm_year + 1900;
+    datetime *= 100;
+    datetime += (uint32_t) tr.tm_mon + 1;
+    datetime *= 100;
+    datetime += (uint32_t) tr.tm_mday;
+    datetime *= 100;
+    datetime += (uint32_t) tr.tm_hour;
+    datetime *= 100;
+    datetime += (uint32_t) tr.tm_min;
+    datetime *= 100;
+    datetime += (uint32_t) tr.tm_sec;
+    nump.put_DU(datetime);
 
-    // Append the file name and line number, followed by a line feed.
-    log_text += " @ ";
-    log_text += file;
-    ::sprintf(temp, ":%ld", line);
-    log_text += temp;
-    log_text += "\n\t";
+    data.append(nump.data() +  0, 4);
+    data.push_back('-');
+    data.append(nump.data() +  4, 2);
+    data.push_back('-');
+    data.append(nump.data() +  6, 2);
+    data.push_back(' ');
+    data.append(nump.data() +  8, 2);
+    data.push_back(':');
+    data.append(nump.data() + 10, 2);
+    data.push_back(':');
+    data.append(nump.data() + 12, 2);
 
-    // Neutralize control characters. That is ['\x00','\x1F'] and '\x7F'.
-    for(size_t i = 0;  i < msg.size();  ++i) {
-      size_t ch = msg[i] & 0xFF;
+    nump.put_DU((uint32_t) ts.tv_nsec, 9);
+    data.push_back('.');
+    data.append(nump.data(), 9);
+    data.push_back(' ');
+
+    // Append the function name and source location, followed by a line feed.
+    data += " (";
+    data += func;
+    data += ") @ ";
+    data += file;
+    data += ':';
+    nump.put_DU((unsigned long) line);
+    data.append(nump.data(), nump.size());
+    data += "\n\t";
+
+    // Neutralize control characters: ['\x00','\x1F'] and '\x7F'.
+    for(char c : msg) {
+      uint32_t ch = (unsigned char) c;
       if(ch <= 0x1F)
-        log_text += s_lcchars[ch];
+        data += details_utils::ctrl_char_names[ch];
       else if(ch == 0x7F)
-        log_text += "[DEL]";
+        data += "[DEL]";
       else
-        log_text += (char) ch;
+        data += (char) ch;
     }
-    log_text += "\n\n";
 
-    // Write the string now. If the operation fails, we don't retry.
-    return ::write(STDERR_FILENO, log_text.data(), log_text.size());
+    // Remove trailing space characters.
+    size_t pos = data.find_last_not_of(" \f\n\r\t\v");
+    data.erase(pos + 1);
+    data += "\n\n";
+
+    // Write the string now. Errors are ignored.
+    return ::write(STDERR_FILENO, data.data(), data.size());
+  }
+
+void
+throw_runtime_error(const char* file, long line, const char* func, cow_string&& msg)
+  {
+    // Compose the string to throw.
+    cow_string data;
+    data.reserve(2047);
+
+    // Append the function name.
+    data += func;
+    data += ": ";
+
+    // Append the user-provided exception message.
+    data.append(msg.begin(), msg.end());
+
+    // Remove trailing space characters.
+    size_t pos = data.find_last_not_of(" \f\n\r\t\v");
+    data.erase(pos + 1);
+    data += "\n";
+
+    // Append the source location.
+    data += "[thrown from '";
+    data += file;
+    data += ':';
+    ::rocket::ascii_numput nump;
+    nump.put_DU((unsigned long) line);
+    data.append(nump.data(), nump.size());
+    data += "']";
+
+    // Throw it.
+    throw ::std::runtime_error(data.c_str());
   }
 
 bool
@@ -201,7 +119,7 @@ utf8_encode(char*& pos, char32_t cp) noexcept
   {
     if(cp < 0x80) {
       // This character takes only one byte.
-      *(pos++) = static_cast<char>(cp);
+      *(pos++) = (char) cp;
       return true;
     }
 
@@ -215,7 +133,7 @@ utf8_encode(char*& pos, char32_t cp) noexcept
 
     // Encode bits into a byte.
     auto encode_one = [&](int sh, char32_t m)
-      { *(pos++) = static_cast<char>((~m << 1) | ((cp >> sh) & m));  };
+      { *(pos++) = (char) ((~m << 1) | (cp >> sh & m));  };
 
     // Encode the code point now. The result may be 2, 3 or 4 bytes.
     if(cp < 0x800) {
@@ -267,7 +185,7 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
       return false;
 
     // Calculate the number of bytes in this code point.
-    auto u8len = static_cast<size_t>(2 + (cp >= 0xE0) + (cp >= 0xF0));
+    uint32_t u8len = 2U + (cp >= 0xE0) + (cp >= 0xF0);
     ROCKET_ASSERT(u8len >= 2);
     ROCKET_ASSERT(u8len <= 4);
     if(u8len > avail)
@@ -295,7 +213,7 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
       return false;
 
     // Re-encode it and check for overlong sequences.
-    auto milen = static_cast<size_t>(1 + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000));
+    uint32_t milen = 1U + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000);
     if(milen != u8len)
       // Overlong sequences are not allowed.
       return false;
@@ -315,7 +233,7 @@ utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
       return false;
 
     // Update the offset.
-    offset = static_cast<size_t>(pos - text.data());
+    offset = (size_t) (pos - text.data());
     return true;
   }
 
@@ -328,7 +246,7 @@ utf16_encode(char16_t*& pos, char32_t cp) noexcept
 
     if(cp < 0x10000) {
       // This character takes only one code unit.
-      *(pos++) = static_cast<char16_t>(cp);
+      *(pos++) = (char16_t) cp;
       return true;
     }
 
@@ -337,8 +255,8 @@ utf16_encode(char16_t*& pos, char32_t cp) noexcept
       return false;
 
     // Write surrogates.
-    *(pos++) = static_cast<char16_t>(0xD800 + ((cp - 0x10000) >> 10));
-    *(pos++) = static_cast<char16_t>(0xDC00 + (cp & 0x3FF));
+    *(pos++) = (char16_t) (0xD800 + ((cp - 0x10000) >> 10));
+    *(pos++) = (char16_t) (0xDC00 + (cp & 0x3FF));
     return true;
   }
 
@@ -398,7 +316,7 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
       return false;
 
     // Update the offset.
-    offset = static_cast<size_t>(pos - text.data());
+    offset = (size_t) (pos - text.data());
     return true;
   }
 
@@ -409,25 +327,25 @@ wrap_index(int64_t index, size_t size) noexcept
 
     // The range of valid indices is (~size, size).
     Wrapped_Index w;
-    auto ssize = static_cast<int64_t>(size);
+    auto ssize = (int64_t) size;
     if(index >= 0) {
       // Append elements as needed.
       auto nappend = ::rocket::max(index, ssize - 1) - (ssize - 1);
       w.nprepend = 0;
-      w.nappend = static_cast<uint64_t>(nappend);
+      w.nappend = (uint64_t) nappend;
 
       // `index` is truncated if it does not fit in `size_t`, but in this case it
       // shouldn't be used.
-      w.rindex = static_cast<size_t>(index);
+      w.rindex = (size_t) index;
     }
     else {
       // Prepend elements as needed.
       auto nprepend = ::rocket::max(index - 1, ~ssize) - (index - 1);
-      w.nprepend = static_cast<uint64_t>(nprepend);
+      w.nprepend = (uint64_t) nprepend;
       w.nappend = 0;
 
       // `index + ssize` cannot overflow when `index` is negative and `ssize` is not.
-      w.rindex = static_cast<size_t>(index + ssize) + static_cast<size_t>(nprepend);
+      w.rindex = (size_t) (index + ssize) + (size_t) nprepend;
     }
     return w;
   }
@@ -438,16 +356,16 @@ generate_random_seed() noexcept
     // Get the system time of very high resolution.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t ireg = static_cast<uint64_t>(ts.tv_sec);
+    uint64_t ireg = (uint64_t) ts.tv_sec;
     ireg <<= 30;
-    ireg |= static_cast<uint32_t>(ts.tv_nsec);
+    ireg |= (uint32_t) ts.tv_nsec;
 
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The source value is read in little-endian byte order.
-    uint64_t seed = 0xCBF29CE484222325;
+    uint64_t seed = 0xCBF29CE484222325U;
     for(size_t i = 0;  i < 8;  ++i) {
-      seed = (seed ^ (ireg & 0xFF)) * 0x100000001B3;
+      seed = (seed ^ (ireg & 0xFF)) * 0x100000001B3U;
       ireg >>= 8;
     }
     return seed;

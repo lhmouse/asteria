@@ -40,7 +40,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else
-      ASTERIA_THROW_RUNTIME_ERROR("invalid `this` reference passed to `$1`", zvarg->func());
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid `this` reference passed to `$1`"),
+          zvarg->func());
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
@@ -68,7 +70,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // All arguments must have been consumed.
     if(nargs != 0)
-      ASTERIA_THROW_RUNTIME_ERROR("too many arguments passed to `$1`", zvarg->func());
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Too many arguments passed to `$1`"),
+          zvarg->func());
   }
 
 Executive_Context::

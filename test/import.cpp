@@ -27,7 +27,7 @@ int main()
           assert false;
         }
         catch(e)
-          assert std.string.find(e, "recursive import") != null;
+          assert std.string.find(e, "Recursive import") != null;
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"));

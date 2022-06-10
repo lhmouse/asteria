@@ -12,33 +12,42 @@
 
 namespace asteria {
 
-// Error handling
-ptrdiff_t
-write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
-
-template<typename... ParamsT>
+// Formatting
+template<typename TemplT, typename... ParamsT>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
-format_string(const char* templ, const ParamsT&... params)
+format_string(const TemplT& templ, const ParamsT&... params)
   {
     ::rocket::tinyfmt_str fmt;
+    using ::rocket::format;
     format(fmt, templ, params...);  // ADL intended
     return fmt.extract_string();
   }
 
-// Note the format string must be a string literal.
-#define ASTERIA_TERMINATE(...)  \
-    (::asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-       __func__ + ::asteria::format_string(": " __VA_ARGS__)   \
-         + "\nThis is likely a bug. Please report."),  \
+// Error handling
+// Note the string template must be parenthesized.
+#define ASTERIA_TERMINATE(TEMPLATE, ...)  \
+    (::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
+       ::asteria::format_string(  \
+         (::asteria::details_utils::join_strings TEMPLATE).c_str()  \
+         ,##__VA_ARGS__)  \
+       ),  \
      ::std::terminate())
 
-// Note the format string must be a string literal.
-#define ASTERIA_THROW(...)  \
-    (::rocket::sprintf_and_throw<::std::runtime_error>(  \
-       "%s: %s\n[thrown from native code at '%s:%d']", __func__,  \
-         ::asteria::format_string("" __VA_ARGS__).c_str(), __FILE__,  \
-         (int) __LINE__))
+#define ASTERIA_THROW(TEMPLATE, ...)  \
+    (::asteria::throw_runtime_error(__FILE__, __LINE__, __func__,  \
+       ::asteria::format_string(  \
+         (::asteria::details_utils::join_strings TEMPLATE).c_str()  \
+         ,##__VA_ARGS__)  \
+       ),  \
+     __builtin_unreachable())
+
+ptrdiff_t
+write_log_to_stderr(const char* file, long line, const char* func, cow_string&& msg);
+
+[[noreturn]]
+void
+throw_runtime_error(const char* file, long line, const char* func, cow_string&& msg);
 
 // UTF-8 conversion functions
 bool

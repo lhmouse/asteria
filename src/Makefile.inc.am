@@ -86,6 +86,7 @@ lib_LTLIBRARIES += lib/libasteria.la
 lib_libasteria_la_SOURCES =  \
   %reldir%/version.h.in  \
   %reldir%/precompiled.ipp  \
+  %reldir%/details/utils.cpp  \
   %reldir%/fwd.cpp  \
   %reldir%/utils.cpp  \
   %reldir%/recursion_sentry.cpp  \

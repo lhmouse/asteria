@@ -482,7 +482,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
       if(!qtok)
         throw Compiler_Error(Compiler_Error::M_format(),
                   compiler_status_expression_expected, tstrm.next_sloc(),
-                  "value expected");
+                  "Value expected");
 
       switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
@@ -525,7 +525,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
             default:
               throw Compiler_Error(Compiler_Error::M_format(),
                         compiler_status_expression_expected, tstrm.next_sloc(),
-                        "value expected");
+                        "Value expected");
           }
           break;
         }
@@ -536,7 +536,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           if(::rocket::is_none_of(name, { "null", "true", "false", "Infinity", "NaN" }))
             throw Compiler_Error(Compiler_Error::M_format(),
                       compiler_status_expression_expected, tstrm.next_sloc(),
-                      "value expected");
+                      "Value expected");
 
           switch(name[0]) {
             case 'n':
@@ -581,7 +581,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
         default:
           throw Compiler_Error(Compiler_Error::M_format(),
                     compiler_status_expression_expected, tstrm.next_sloc(),
-                    "value expected");
+                    "Value expected");
       }
 
       // A complete value has been accepted. Insert it into its parent array or object.
@@ -656,12 +656,12 @@ do_parse(tinybuf& cbuf)
     Token_Stream tstrm(opts);
     tstrm.reload(sref("[JSON text]"), 1, ::std::move(cbuf));
     if(tstrm.empty())
-      ASTERIA_THROW_RUNTIME_ERROR("empty JSON string");
+      ASTERIA_THROW_RUNTIME_ERROR(("Empty JSON string"));
 
     // Parse a single value.
     auto value = do_parse_nonrecursive(tstrm);
     if(!tstrm.empty())
-      ASTERIA_THROW_RUNTIME_ERROR("excess text at end of JSON string");
+      ASTERIA_THROW_RUNTIME_ERROR(("Excess text at end of JSON string"));
 
     return value;
   }
@@ -719,9 +719,10 @@ std_json_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
     if(!fp)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "could not open file '$2'\n"
-          "[`fopen()` failed: $1]", format_errno(), path);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not open file '$2'\n"
+          "[`fopen()` failed: $1]"),
+          format_errno(), path);
 
     // Parse characters from the file.
     ::rocket::tinybuf_file cbuf(::std::move(fp));

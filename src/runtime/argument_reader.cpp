@@ -19,7 +19,7 @@ do_prepare_parameter(const char* param)
   {
     // Ensure `end_overload()` has not been called for this overload.
     if(this->m_state.ended)
-      ASTERIA_THROW_RUNTIME_ERROR("current overload marked ended");
+      ASTERIA_THROW_RUNTIME_ERROR(("Current overload marked ended"));
 
     // Append the parameter.
     // If it is not the first one, insert a comma before it.
@@ -36,7 +36,7 @@ do_terminate_parameter_list()
   {
     // Ensure `end_overload()` has not been called for this overload.
     if(this->m_state.ended)
-      ASTERIA_THROW_RUNTIME_ERROR("current overload marked ended");
+      ASTERIA_THROW_RUNTIME_ERROR(("Current overload marked ended"));
 
     // Mark this overload ended.
     this->m_state.ended = true;
@@ -578,10 +578,10 @@ throw_no_matching_function_call() const
     }
 
     // Throw the exception now.
-    ASTERIA_THROW_RUNTIME_ERROR(
-           "no matching function call for `$1($2)`\n"
-           "[list of overloads:\n$3  -- end of list of overloads]",
-           this->m_name, arguments, overloads);
+    ASTERIA_THROW_RUNTIME_ERROR((
+        "No matching function call for `$1($2)`\n"
+        "[list of overloads:\n$3  -- end of list of overloads]"),
+        this->m_name, arguments, overloads);
   }
 
 // Binding factory operators

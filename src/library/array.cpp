@@ -122,7 +122,9 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
       auto mpos = bpos + dist / 2;
       auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
-        ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Unordered elements (operands were `$1` and `$2`)"),
+            target, *mpos);
 
       if(cmp == compare_equal)
         return { ::std::move(mpos), true };
@@ -151,7 +153,9 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
       auto mpos = bpos + dist / 2;
       auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
-        ASTERIA_THROW_RUNTIME_ERROR("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Unordered elements (operands were `$1` and `$2`)"),
+            target, *mpos);
 
       if(pred(cmp))
         epos = mpos;
@@ -179,9 +183,9 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
         if(unique && (bout != output.begin())) {
           auto cmp = compare(bout[-1], elem);
           if(cmp == compare_unordered)
-            ASTERIA_THROW_RUNTIME_ERROR(
-                  "elements not comparable (operands were `$1` and `$2`)",
-                  bout[-1], elem);
+            ASTERIA_THROW_RUNTIME_ERROR((
+                "Elements not comparable (operands were `$1` and `$2`)"),
+                bout[-1], elem);
 
           if(cmp == compare_equal)
             return;
@@ -211,9 +215,9 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
         // Compare the first elements from both blocks.
         auto cmp = compare(bpos[0][0], bpos[1][0]);
         if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR(
-                "elements not comparable (operands were `$1` and `$2`)",
-                bpos[0][0], bpos[1][0]);
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Elements not comparable (operands were `$1` and `$2`)"),
+              bpos[0][0], bpos[1][0]);
 
         // Move the smaller element to the output array. For merge sorts to be
         // stable, if the elements compare equal, the first one is taken.

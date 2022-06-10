@@ -10,6 +10,7 @@
 #include <stdarg.h>  // va_list, va_start(), va_end()
 #include <stdlib.h>  // exit(), quick_exit()
 #include <stdio.h>  // fflush(), fprintf(), stderr
+#include <signal.h>  // sys_siglist
 
 namespace asteria {
 namespace {
@@ -34,7 +35,7 @@ struct Verbose_Hooks final
         // Extract the string and write it to standard error.
         // Errors are ignored.
         auto str = this->m_fmt.extract_string();
-        write_log_to_stderr(__FILE__, __LINE__, ::std::move(str));
+        write_log_to_stderr(__FILE__, __LINE__, __func__, ::std::move(str));
 
         // Reuse the storage.
         this->m_fmt.set_string(::std::move(str));
@@ -43,28 +44,31 @@ struct Verbose_Hooks final
     void
     on_single_step_trap(const Source_Location& sloc) override
       {
-        int sig = repl_signal.xchg(0);
+        uint32_t sig = (uint32_t) repl_signal.xchg(0);
         if(sig == 0)
           return;
 
         this->do_verbose_trace(sloc,
-            "received signal $1: $2", sig, ::strsignal(sig));
+            "Received signal $1: $2", sig, ::sys_siglist[sig]);
 
-        ASTERIA_THROW("signal $1 received", sig);
+        ASTERIA_THROW((
+            "Signal $1 received: $2",
+            "[thrown from '$3']"),
+            sig, ::sys_siglist[sig], sloc);
       }
 
     void
     on_variable_declare(const Source_Location& sloc, const phsh_string& name) override
       {
         this->do_verbose_trace(sloc,
-            "declaring variable `$1`", name);
+            "Declaring variable `$1`", name);
       }
 
     void
     on_function_call(const Source_Location& sloc, const cow_function& target) override
       {
         this->do_verbose_trace(sloc,
-            "initiating function call: $1", target);
+            "Initiating function call: $1", target);
       }
 
     void
@@ -72,7 +76,7 @@ struct Verbose_Hooks final
                        const Reference&) override
       {
         this->do_verbose_trace(sloc,
-            "returned from function call: $1", target);
+            "Returned from function call: $1", target);
       }
 
     void
@@ -80,7 +84,7 @@ struct Verbose_Hooks final
                        const Runtime_Error&) override
       {
         this->do_verbose_trace(sloc,
-            "caught an exception inside function call: $1", target);
+            "Caught an exception inside function call: $1", target);
       }
   };
 

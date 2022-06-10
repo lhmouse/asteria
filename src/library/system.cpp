@@ -103,7 +103,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
       if(!qtok)
         throw Compiler_Error(Compiler_Error::M_format(),
                   compiler_status_expression_expected, tstrm.next_sloc(),
-                  "value expected");
+                  "Value expected");
 
       switch(weaken_enum(qtok->index())) {
         case Token::index_punctuator: {
@@ -146,7 +146,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
             default:
               throw Compiler_Error(Compiler_Error::M_format(),
                         compiler_status_expression_expected, tstrm.next_sloc(),
-                        "value expected");
+                        "Value expected");
           }
           break;
         }
@@ -157,7 +157,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           if(::rocket::is_none_of(name, { "null", "true", "false", "infinity", "nan" }))
             throw Compiler_Error(Compiler_Error::M_format(),
                       compiler_status_expression_expected, tstrm.next_sloc(),
-                      "value expected");
+                      "Value expected");
 
           switch(name[3]) {
             case 'l':
@@ -208,7 +208,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
         default:
           throw Compiler_Error(Compiler_Error::M_format(),
                     compiler_status_expression_expected, tstrm.next_sloc(),
-                    "value expected");
+                    "Value expected");
       }
 
       // A complete value has been accepted. Insert it into its parent array or object.
@@ -261,7 +261,9 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid generation `$1`"),
+          generation);
 
     // Get the current number of variables being tracked.
     const auto gcoll = global.garbage_collector();
@@ -274,7 +276,9 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid generation `$1`"),
+          generation);
 
     // Get the current number of variables being tracked.
     const auto gcoll = global.garbage_collector();
@@ -287,7 +291,9 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW_RUNTIME_ERROR("invalid generation `$1`", generation);
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid generation `$1`"),
+          generation);
 
     // Set the threshold and return its old value.
     const auto gcoll = global.garbage_collector();
@@ -303,7 +309,9 @@ std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
     if(generation_limit) {
       rglimit = ::rocket::clamp_cast<GC_Generation>(*generation_limit, 0, 2);
       if(rglimit != *generation_limit)
-        ASTERIA_THROW_RUNTIME_ERROR("invalid generation limit `$1`", *generation_limit);
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid generation limit `$1`"),
+            *generation_limit);
     }
 
     // Perform garbage collection up to the generation specified.
@@ -439,9 +447,9 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "could not spawn process '$2'\n"
-          "[`posix_spawnp()` failed: $1]",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not spawn process '$2'\n"
+          "[`posix_spawnp()` failed: $1]"),
           format_errno(), cmd);
 
     for(;;) {
@@ -449,9 +457,9 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
       // Note: `waitpid()` may return if the child has been stopped or continued.
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
-        ASTERIA_THROW_RUNTIME_ERROR(
-            "error awaiting child process '$2'\n"
-            "[`waitpid()` failed: $1]",
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Error awaiting child process '$2'\n"
+            "[`waitpid()` failed: $1]"),
             format_errno(), pid);
 
       if(WIFEXITED(wstat))
@@ -466,9 +474,9 @@ void
 std_system_proc_daemonize()
   {
     if(::daemon(1, 0) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR(
-          "could not daemonize process\n"
-          "[`daemon()` failed: $1]",
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not daemonize process\n"
+          "[`daemon()` failed: $1]"),
           format_errno());
   }
 
