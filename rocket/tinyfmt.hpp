@@ -191,6 +191,22 @@ basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
   { return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";  }
 
+// std support
+template<typename charT, typename traitsT, typename ytraitsT, typename yallocT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::basic_string<charT, ytraitsT, yallocT>& str)
+  { return fmt.putn(str.data(), str.size());  }
+
+template<typename charT, typename traitsT, typename elementT, typename deleteT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::unique_ptr<elementT, deleteT>& ptr)
+  { return fmt << ptr.get();  }
+
+template<typename charT, typename traitsT, typename elementT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::shared_ptr<elementT>& ptr)
+  { return fmt << ptr.get();  }
+
 // rvalue inserter
 template<typename charT, typename traitsT, typename xvalueT>
 basic_tinyfmt<charT, traitsT>&

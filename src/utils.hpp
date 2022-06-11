@@ -13,41 +13,84 @@
 namespace asteria {
 
 // Formatting
-template<typename TemplT, typename... ParamsT>
+template<typename... TemplT>
+constexpr
+array<cow_string::shallow_type, sizeof...(TemplT)>
+make_string_template(const TemplT&... templs)
+  {
+    return { ::rocket::sref(templs)... };
+  }
+
+template<size_t N, typename... ParamsT>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
-format_string(const TemplT& templ, const ParamsT&... params)
+format_string(const array<cow_string::shallow_type, N>& templs, const ParamsT&... params)
   {
+    // Make stream inserters.
     ::rocket::tinyfmt_str fmt;
-    using ::rocket::format;
-    format(fmt, templ, params...);  // ADL intended
+    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
+
+    // Write all strings, seaprated by line feeds.
+    if(N != 0) {
+      ::rocket::vformat(fmt, templs[0].c_str(), templs[0].size(), insts, sizeof...(params));
+
+      for(size_t k = 1;  k < N;  ++k)
+        fmt << '\n',
+          ::rocket::vformat(fmt, templs[k].c_str(), templs[k].size(), insts, sizeof...(params));
+    }
+    return fmt.extract_string();
+  }
+
+template<typename... ParamsT>
+ROCKET_NEVER_INLINE ROCKET_FLATTEN
+cow_string
+format_string(const char* templ, const ParamsT&... params)
+  {
+    // Make stream inserters.
+    ::rocket::tinyfmt_str fmt;
+    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
+
+    // Write the string as is.
+    ::rocket::vformat(fmt, templ, ::strlen(templ), insts, sizeof...(params));
+    return fmt.extract_string();
+  }
+
+template<typename... ParamsT>
+ROCKET_NEVER_INLINE ROCKET_FLATTEN
+cow_string
+format_string(const cow_string& templ, const ParamsT&... params)
+  {
+    // Make stream inserters.
+    ::rocket::tinyfmt_str fmt;
+    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
+
+    // Write the string as is.
+    ::rocket::vformat(fmt, templ.c_str(), templ.length(), insts, sizeof...(params));
     return fmt.extract_string();
   }
 
 // Error handling
-// Note the string template must be parenthesized.
-#define ASTERIA_TERMINATE(TEMPLATE, ...)  \
-    (::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
-       ::asteria::format_string(  \
-         (::asteria::details_utils::join_strings TEMPLATE)  \
-         ,##__VA_ARGS__)  \
-       ),  \
-     ::std::terminate())
-
-#define ASTERIA_THROW(TEMPLATE, ...)  \
-    (::asteria::throw_runtime_error(__FILE__, __LINE__, __func__,  \
-       ::asteria::format_string(  \
-         (::asteria::details_utils::join_strings TEMPLATE)  \
-         ,##__VA_ARGS__)  \
-       ),  \
-     __builtin_unreachable())
-
+// Note string templates must be parenthesized.
 ptrdiff_t
 write_log_to_stderr(const char* file, long line, const char* func, cow_string&& msg);
 
 [[noreturn]]
 void
 throw_runtime_error(const char* file, long line, const char* func, cow_string&& msg);
+
+#define ASTERIA_TERMINATE(TEMPLATE, ...)  \
+    (::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
+       ::asteria::format_string(  \
+         (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
+       ),  \
+     ::std::terminate())
+
+#define ASTERIA_THROW(TEMPLATE, ...)  \
+    (::asteria::throw_runtime_error(__FILE__, __LINE__, __func__,  \
+       ::asteria::format_string(  \
+         (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
+       ),  \
+     __builtin_unreachable())
 
 // UTF-8 conversion functions
 bool
@@ -174,8 +217,7 @@ struct Wrapped_Index
   {
     uint64_t nprepend;  // number of elements to prepend
     uint64_t nappend;   // number of elements to append
-    size_t rindex;      // the wrapped index (valid if both
-                        // `nprepend` and `nappend` are zeroes)
+    size_t rindex;      // the wrapped index (valid if both `nprepend` and `nappend` are 0s)
   };
 
 ROCKET_CONST

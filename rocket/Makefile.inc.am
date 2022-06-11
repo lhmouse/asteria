@@ -66,7 +66,6 @@ include_rocket_details_HEADERS =  \
   %reldir%/details/mutex.ipp  \
   %reldir%/details/recursive_mutex.ipp  \
   %reldir%/details/once_flag.ipp  \
-  %reldir%/details/format.ipp  \
   ${END}
 
 noinst_LTLIBRARIES += lib/librocket.la

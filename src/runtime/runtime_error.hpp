@@ -137,8 +137,7 @@ class Runtime_Error
     throw ::asteria::Runtime_Error(  \
         ::asteria::Runtime_Error::M_native(),  \
         ::asteria::format_string(  \
-          (::asteria::details_utils::join_strings TEMPLATE).c_str()  \
-          ,##__VA_ARGS__))
+          (::asteria::make_string_template TEMPLATE) ,##__VA_ARGS__))
 
 }  // namespace asteria
 
