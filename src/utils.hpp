@@ -34,7 +34,7 @@ format_string(const array<cow_string::shallow_type, N>& templs, const ParamsT&..
     if(N != 0) {
       ::rocket::vformat(fmt, templs[0].c_str(), templs[0].size(), insts, sizeof...(params));
 
-      for(size_t k = 1;  k < N;  ++k)
+      for(size_t k = 1;  k != N;  ++k)
         fmt << '\n',
           ::rocket::vformat(fmt, templs[k].c_str(), templs[k].size(), insts, sizeof...(params));
     }
