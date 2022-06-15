@@ -57,7 +57,7 @@ do_insert_frame(Backtrace_Frame&& new_frm)
 
     // Get the width of the frame number colomn.
     ::rocket::ascii_numput nump;
-    nump.put(this->m_frames.size() - 1);
+    nump.put_DU(this->m_frames.size());
 
     sso_vector<char, 24> sbuf(nump.size(), ' ');
     sbuf.emplace_back();
@@ -66,7 +66,7 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     this->m_fmt << "\n[backtrace frames:\n";
     for(size_t k = 0;  k < this->m_frames.size();  ++k) {
       const auto& frm = this->m_frames[k];
-      nump.put(k);
+      nump.put_DU(k + 1);
       ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
       format(this->m_fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
       frm.value().print(this->m_fmt, true);
