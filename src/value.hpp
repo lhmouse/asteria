@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "details/value.ipp"
+#include <cmath>
 
 namespace asteria {
 
@@ -374,9 +375,10 @@ class Value
           static_assert(compare_less == 2);
           static_assert(compare_equal == 3);
 
-          return static_cast<Compare>(
-              ::std::islessequal(this->as_real(), other.as_real()) * 2 +
-              ::std::isgreaterequal(this->as_real(), other.as_real()));
+          int comp = ::std::islessequal(this->as_real(), other.as_real());
+          comp <<= 1;
+          comp |= ::std::isgreaterequal(this->as_real(), other.as_real());
+          return static_cast<Compare>(comp);
         }
 
         // Non-arithmetic values of different types can't be compared.
