@@ -13,12 +13,17 @@ class posix_file_closer
   {
   public:
     using handle_type  = ::FILE*;
-    using closer_type  = decltype(::fclose)*;
+    using closer_type  = int (*)(::FILE*);  // ::fclose()
 
   private:
     closer_type m_cl;
 
   public:
+    constexpr
+    posix_file_closer() noexcept
+      : m_cl(::fclose)
+      { }
+
     constexpr
     posix_file_closer(closer_type cl) noexcept
       : m_cl(cl)

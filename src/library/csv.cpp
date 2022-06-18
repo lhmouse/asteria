@@ -190,7 +190,7 @@ V_array
 std_csv_parse_file(V_string path)
   {
     // Try opening the file.
-    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"), ::fclose);
+    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
     if(!fp)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open file '$2'",

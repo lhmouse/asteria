@@ -5,7 +5,7 @@
 #include "random_engine.hpp"
 #include "../utils.hpp"
 #include <fcntl.h>  // ::open()
-#include <unistd.h>  // ::close(), ::read()
+#include <unistd.h>  // ::read()
 
 namespace asteria {
 
@@ -67,7 +67,7 @@ init() noexcept
     ::std::memset(this->m_randrsl, 0, sizeof(m_randrsl));
 
     // Read some random bytes. Errors are ignored.
-    ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
+    ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY));
     if(fd)
       (void)!::read(fd, this->m_randrsl, sizeof(m_randrsl));
 

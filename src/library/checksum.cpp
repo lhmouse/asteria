@@ -903,7 +903,7 @@ decltype(::std::declval<HasherT&>().finish())
 do_hash_file(const V_string& path)
   {
     // Open the file for reading.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open file '$2'\n[`open()` failed: $1]"),

@@ -9,7 +9,7 @@
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
 #include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
-#include <dirent.h>  // ::opendir(), ::closedir()
+#include <dirent.h>  // ::opendir()
 #include <fcntl.h>  // ::open()
 #include <stdio.h>  // ::rename()
 #include <errno.h>  // errno
@@ -87,7 +87,7 @@ do_remove_recursive(const char* path)
           stack.push_back({ rm_disp_rmdir, elem.path });
 
           // Open the directory for listing.
-          ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()), ::closedir);
+          ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()));
           if(!dp)
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Could not open directory '$2'",
@@ -309,7 +309,7 @@ V_object
 std_filesystem_dir_list(V_string path)
   {
     // Try opening t he directory.
-    ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()), ::closedir);
+    ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()));
     if(!dp)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open directory '$2'",
@@ -435,7 +435,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
           "Negative file offset (offset `$1`)"), *offset);
 
     // Open the file for reading.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open file '$2'",
@@ -494,7 +494,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
           "Negative file offset (offset `$1`)"), *offset);
 
     // Open the file for reading.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY), ::close);
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open file '$2'",
@@ -569,7 +569,7 @@ std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
       flags |= O_TRUNC;
 
     // Open the file for writing.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666));
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open file '$2'",
@@ -600,7 +600,7 @@ std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
       flags |= O_EXCL;
 
     // Open the file for appending.
-    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666), ::close);
+    ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), flags, 0666));
     if(!fd)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open file '$2'",
@@ -615,7 +615,7 @@ void
 std_filesystem_file_copy_from(V_string path_new, V_string path_old)
   {
     // Open the old file.
-    ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY), ::close);
+    ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY));
     if(!fd_old)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open source file '$2'",
@@ -625,7 +625,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
     // Create the new file, discarding its contents.
     // The file is initially write-only.
     int flags = O_WRONLY | O_CREAT | O_TRUNC | O_APPEND;
-    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(), flags, 0200), ::close);
+    ::rocket::unique_posix_fd fd_new(::open(path_new.safe_c_str(), flags, 0200));
     if(!fd_new)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not create destination file '$2'",

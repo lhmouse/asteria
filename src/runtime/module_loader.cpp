@@ -21,7 +21,7 @@ Module_Loader::
 do_lock_stream(const char* path)
   {
     // Open the file first.
-    ::rocket::unique_posix_file file(::fopen(path, "rb"), ::fclose);
+    ::rocket::unique_posix_file file(::fopen(path, "rb"));
     if(!file)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not open script file '$2'",

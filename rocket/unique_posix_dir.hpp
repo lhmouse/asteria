@@ -13,12 +13,17 @@ class posix_dir_closer
   {
   public:
     using handle_type  = ::DIR*;
-    using closer_type  = decltype(::closedir)*;
+    using closer_type  = int (*)(::DIR*);  // ::closedir()
 
   private:
     closer_type m_cl;
 
   public:
+    constexpr
+    posix_dir_closer() noexcept
+      : m_cl(::closedir)
+      { }
+
     constexpr
     posix_dir_closer(closer_type cl) noexcept
       : m_cl(cl)
