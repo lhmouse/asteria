@@ -37,8 +37,7 @@ class once_flag
       {
         // Load the first byte with acquire semantics.
         // The value is 0 prior to any initialization and 1 afterwards.
-        const volatile uint8_t* bytes = this->m_guard->bytes;
-        if(ROCKET_EXPECT(__atomic_load_n(bytes, __ATOMIC_ACQUIRE) & 1))
+        if(ROCKET_EXPECT(__atomic_load_n(this->m_guard->bytes, __ATOMIC_ACQUIRE)))
           return;
 
         // Try acquiring the guard.
