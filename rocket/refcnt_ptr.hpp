@@ -330,8 +330,12 @@ inline
 refcnt_ptr<targetT>
 static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+    refcnt_ptr<targetT> dptr(static_cast<targetT*>(sptr.get()));
+    if(!dptr)
+      return dptr;
+
+    dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
+    return dptr;
   }
 
 template<typename targetT, typename sourceT>
@@ -339,8 +343,12 @@ inline
 refcnt_ptr<targetT>
 dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+    refcnt_ptr<targetT> dptr(dynamic_cast<targetT*>(sptr.get()));
+    if(!dptr)
+      return dptr;
+
+    dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
+    return dptr;
   }
 
 template<typename targetT, typename sourceT>
@@ -348,8 +356,12 @@ inline
 refcnt_ptr<targetT>
 const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+    refcnt_ptr<targetT> dptr(const_cast<targetT*>(sptr.get()));
+    if(!dptr)
+      return dptr;
+
+    dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
+    return dptr;
   }
 
 template<typename targetT, typename sourceT>
@@ -357,8 +369,12 @@ inline
 refcnt_ptr<targetT>
 static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+    refcnt_ptr<targetT> dptr(static_cast<targetT*>(sptr.get()));
+    if(!dptr)
+      return dptr;
+
+    sptr.release();
+    return dptr;
   }
 
 template<typename targetT, typename sourceT>
@@ -366,8 +382,12 @@ inline
 refcnt_ptr<targetT>
 dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+    refcnt_ptr<targetT> dptr(dynamic_cast<targetT*>(sptr.get()));
+    if(!dptr)
+      return dptr;
+
+    sptr.release();
+    return dptr;
   }
 
 template<typename targetT, typename sourceT>
@@ -375,8 +395,12 @@ inline
 refcnt_ptr<targetT>
 const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(::std::move(sptr),
-               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+    refcnt_ptr<targetT> dptr(const_cast<targetT*>(sptr.get()));
+    if(!dptr)
+      return dptr;
+
+    sptr.release();
+    return dptr;
   }
 
 }  // namespace rocket

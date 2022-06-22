@@ -20,32 +20,94 @@ struct pointer_of<elementT, deleterT, ROCKET_VOID_T(typename deleterT::pointer)>
 template<typename deleterT>
 struct deleter_reference
   {
-    typename remove_reference<deleterT>::type* m_qdel;
+    typename remove_reference<deleterT>::type* m_del;
 
     constexpr
     deleter_reference(deleterT& del) noexcept
-      : m_qdel(::std::addressof(del))
+      : m_del(::std::addressof(del))
       { }
 
     constexpr operator
     deleterT&() const noexcept
-      { return *(this->m_qdel);  }
+      { return *(this->m_del);  }
 
     constexpr
     deleterT&
     get() const noexcept
-      { return *(this->m_qdel);  }
+      { return *(this->m_del);  }
   };
 
 // deleter base wrapper
-template<typename pointerT, typename deleterT,
-         bool objT = is_object<deleterT>::value,
-         bool refT = disjunction<is_function<deleterT>, is_reference<deleterT>>::value>
-class stored_pointer;
+template<typename pointerT, typename deleterT, bool ptrT, bool objT, bool refT>
+struct stored_pointer_impl;
 
-// deleter of object types
+// deleter of pointer types
 template<typename pointerT, typename deleterT>
-class stored_pointer<pointerT, deleterT, true, false>
+class stored_pointer_impl<pointerT, deleterT, true, true, false>
+  {
+  public:
+    using pointer       = pointerT;
+    using deleter_type  = deleterT;
+
+  private:
+    deleter_type m_del;
+    pointer m_ptr;
+
+  public:
+    constexpr
+    stored_pointer_impl() noexcept
+      : m_del(), m_ptr()
+      { }
+
+    explicit constexpr
+    stored_pointer_impl(pointer ptr, deleter_type del = nullptr) noexcept
+      : m_del(del), m_ptr(::std::move(ptr))
+      { }
+
+    ~stored_pointer_impl()
+      { this->reset(nullptr);  }
+
+    stored_pointer_impl(const stored_pointer_impl&)
+      = delete;
+
+    stored_pointer_impl&
+    operator=(const stored_pointer_impl&)
+      = delete;
+
+  public:
+    const deleter_type&
+    as_deleter() const noexcept
+      { return this->m_del;  }
+
+    deleter_type&
+    as_deleter() noexcept
+      { return this->m_del;  }
+
+    constexpr
+    pointer
+    get() const noexcept
+      { return this->m_ptr;  }
+
+    pointer
+    release() noexcept
+      { return ::std::exchange(this->m_ptr, nullptr);  }
+
+    void
+    reset(pointer ptr_new) noexcept
+      {
+        auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
+        if(ptr)
+          (*(this->as_deleter()))(ptr);
+      }
+
+    void
+    exchange_with(stored_pointer_impl& other) noexcept
+      { ::std::swap(this->m_ptr, other.m_ptr);  }
+  };
+
+// deleter of non-pointer object types
+template<typename pointerT, typename deleterT>
+class stored_pointer_impl<pointerT, deleterT, false, true, false>
   : private allocator_wrapper_base_for<deleterT>::type
   {
   public:
@@ -54,33 +116,29 @@ class stored_pointer<pointerT, deleterT, true, false>
 
   private:
     using deleter_base = typename allocator_wrapper_base_for<deleterT>::type;
-
-  private:
     pointer m_ptr;
 
   public:
     constexpr
-    stored_pointer() noexcept(is_nothrow_constructible<deleter_type>::value)
-      : deleter_base(),
-        m_ptr()
+    stored_pointer_impl() noexcept(is_nothrow_constructible<deleter_type>::value)
+      : deleter_base(), m_ptr()
       { }
 
     template<typename... dparamsT>
     explicit constexpr
-    stored_pointer(pointer ptr, dparamsT&&... dparams)
+    stored_pointer_impl(pointer ptr, dparamsT&&... dparams)
       noexcept(is_nothrow_constructible<deleter_type, dparamsT&&...>::value)
-      : deleter_base(::std::forward<dparamsT>(dparams)...),
-        m_ptr(::std::move(ptr))
+      : deleter_base(::std::forward<dparamsT>(dparams)...), m_ptr(::std::move(ptr))
       { }
 
-    ~stored_pointer()
+    ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
-    stored_pointer(const stored_pointer&)
+    stored_pointer_impl(const stored_pointer_impl&)
       = delete;
 
-    stored_pointer&
-    operator=(const stored_pointer&)
+    stored_pointer_impl&
+    operator=(const stored_pointer_impl&)
       = delete;
 
   public:
@@ -110,13 +168,13 @@ class stored_pointer<pointerT, deleterT, true, false>
       }
 
     void
-    exchange_with(stored_pointer& other) noexcept
+    exchange_with(stored_pointer_impl& other) noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
 // deleter of reference types
 template<typename pointerT, typename deleterT>
-class stored_pointer<pointerT, deleterT, false, true>
+class stored_pointer_impl<pointerT, deleterT, false, false, true>
   : private deleter_reference<deleterT>
   {
   public:
@@ -125,25 +183,22 @@ class stored_pointer<pointerT, deleterT, false, true>
 
   private:
     using deleter_base = deleter_reference<deleterT>;
-
-  private:
     pointer m_ptr = nullptr;
 
   public:
     explicit constexpr
-    stored_pointer(pointer ptr, deleterT& del) noexcept
-      : deleter_base(del),
-        m_ptr(::std::move(ptr))
+    stored_pointer_impl(pointer ptr, deleterT& del) noexcept
+      : deleter_base(del), m_ptr(::std::move(ptr))
       { }
 
-    ~stored_pointer()
+    ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
-    stored_pointer(const stored_pointer&)
+    stored_pointer_impl(const stored_pointer_impl&)
       = delete;
 
-    stored_pointer&
-    operator=(const stored_pointer&)
+    stored_pointer_impl&
+    operator=(const stored_pointer_impl&)
       = delete;
 
   public:
@@ -173,18 +228,14 @@ class stored_pointer<pointerT, deleterT, false, true>
       }
 
     void
-    exchange_with(stored_pointer& other) noexcept
+    exchange_with(stored_pointer_impl& other) noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
-template<typename targetT, typename sourceT, typename casterT>
-unique_ptr<targetT>
-pointer_cast_aux(unique_ptr<sourceT>&& uptr, casterT&& caster)
-  {
-    unique_ptr<targetT> dptr(::std::forward<casterT>(caster)(uptr.get()));
-    if(dptr)
-      uptr.release();
-    return dptr;
-  }
+template<typename pointerT, typename deleterT>
+using stored_pointer
+  = stored_pointer_impl<pointerT, deleterT,
+        is_pointer<deleterT>::value, is_object<deleterT>::value,
+        is_function<deleterT>::value || is_reference<deleterT>::value>;
 
 }  // namespace details_unique_ptr

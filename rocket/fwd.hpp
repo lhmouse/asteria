@@ -74,6 +74,7 @@ using ::std::add_volatile;
 using ::std::remove_volatile;
 using ::std::add_cv;
 using ::std::remove_cv;
+using ::std::is_pointer;
 using ::std::is_reference;
 using ::std::is_lvalue_reference;
 using ::std::is_rvalue_reference;

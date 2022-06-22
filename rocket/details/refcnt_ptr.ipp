@@ -119,24 +119,4 @@ class stored_pointer
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 
-template<typename targetT, typename sourceT, typename casterT>
-refcnt_ptr<targetT>
-pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
-  {
-    refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
-    if(dptr)
-      dptr.get()->refcnt_cJveMKH5bI7L::add_reference();
-    return dptr;
-  }
-
-template<typename targetT, typename sourceT, typename casterT>
-refcnt_ptr<targetT>
-pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
-  {
-    refcnt_ptr<targetT> dptr(::std::forward<casterT>(caster)(sptr.get()));
-    if(dptr)
-      sptr.release();
-    return dptr;
-  }
-
 }  // namespace details_refcnt_ptr
