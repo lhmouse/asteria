@@ -191,7 +191,9 @@ class basic_tinybuf
     basic_tinybuf&
     puts(const char_type* s)
       {
-        this->do_putn(s, traits_type::length(s));
+        static constexpr char_type xnull[] = { '(','n','u','l','l',')',0 };
+        const char_type* p = s ? s : xnull;
+        this->do_putn(p, traits_type::length(p));
         return *this;
       }
   };
