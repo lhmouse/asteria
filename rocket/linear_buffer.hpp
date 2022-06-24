@@ -189,7 +189,7 @@ class basic_linear_buffer
 
     size_type
     capacity() const noexcept
-      { return this->m_stor.capacity();  }
+      { return this->m_stor.capacity() - this->m_eoff;  }
 
     basic_linear_buffer&
     clear() noexcept
@@ -285,7 +285,7 @@ class basic_linear_buffer
     size_type
     reserve(size_type nbump)
       {
-        if(ROCKET_UNEXPECT(nbump > this->m_stor.capacity() - this->m_eoff)) {
+        if(ROCKET_UNEXPECT(nbump > this->capacity())) {
           // Reallocate the buffer.
           auto nused = this->m_stor.reserve(this->m_goff, this->m_eoff, nbump);
           // Set up the new offsets as the contents have now been moved to the beginning.
@@ -295,14 +295,14 @@ class basic_linear_buffer
 #ifdef ROCKET_DEBUG
         traits_type::assign(this->mut_end(), nbump, value_type(0xD3D3D3D3));
 #endif
-        return this->m_stor.capacity() - this->m_eoff;
+        return this->capacity();
       }
 
     ROCKET_ALWAYS_INLINE
     basic_linear_buffer&
     accept(size_type nbump) noexcept
       {
-        ROCKET_ASSERT(nbump <= this->m_stor.capacity() - this->m_eoff);
+        ROCKET_ASSERT(nbump <= this->capacity());
         this->m_eoff += nbump;
         return *this;
       }
