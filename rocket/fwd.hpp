@@ -256,12 +256,32 @@ min(lhsT&& lhs, rhsT&& rhs)
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
   }
 
+template<typename lhsT, typename rhsT, typename... restT>
+constexpr
+decltype(noadl::min(noadl::min(::std::declval<lhsT&&>(), ::std::declval<rhsT&&>()),
+                    ::std::declval<restT&&>()...))
+min(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
+  {
+    return noadl::min(noadl::min(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
+                      ::std::forward<restT>(rest)...);
+  }
+
 template<typename lhsT, typename rhsT>
 constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
   {
     return (lhs < rhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
+  }
+
+template<typename lhsT, typename rhsT, typename... restT>
+constexpr
+decltype(noadl::max(noadl::max(::std::declval<lhsT&&>(), ::std::declval<rhsT&&>()),
+                    ::std::declval<restT&&>()...))
+max(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
+  {
+    return noadl::max(noadl::max(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
+                      ::std::forward<restT>(rest)...);
   }
 
 template<typename xvT, typename loT, typename upT>
