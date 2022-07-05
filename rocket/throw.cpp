@@ -14,17 +14,17 @@ template<typename exceptT>
 void
 sprintf_and_throw(const char* fmt, ...)
   {
-    ::va_list ap;
-    char* str;
-    int ret;
-
     // Compose the error message in allocated storage.
+    ::va_list ap;
     va_start(ap, fmt);
-    ret = ::vasprintf(&str, fmt, ap);
+    char* str;
+    int ret = ::vasprintf(&str, fmt, ap);
     va_end(ap);
 
     if(ret < 0)
       throw ::std::bad_alloc();
+
+    unique_ptr<char, void (void*)> uptr(str, ::free);
 
     // Remove trailing new line characters.
     size_t off = (uint32_t) ret;
@@ -32,8 +32,7 @@ sprintf_and_throw(const char* fmt, ...)
       str[off] = 0;
 
     // Construct the exception object and throw it.
-    unique_ptr<char, void (void*)> uptr(str, ::free);
-    throw exceptT(uptr);
+    throw exceptT(str);
   }
 
 // Define specializations.
