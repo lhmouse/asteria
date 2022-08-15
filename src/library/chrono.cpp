@@ -171,9 +171,9 @@ std_chrono_local_from_utc(V_integer time_utc)
       return INT64_MAX;
 
     // Calculate the local time.
-    ::time_t tp = 0;
+    ::time_t tp = (::time_t) time_utc;
     ::tm tr;
-    ::localtime_r(&tp, &tr);
+    ::gmtime_r(&tp, &tr);
     int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
 
     // Ensure the value is within the range of finite values.
@@ -197,7 +197,7 @@ std_chrono_utc_from_local(V_integer time_local)
       return INT64_MAX;
 
     // Calculate the local time.
-    ::time_t tp = 0;
+    ::time_t tp = (::time_t) time_local;
     ::tm tr;
     ::localtime_r(&tp, &tr);
     int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
