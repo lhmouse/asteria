@@ -112,8 +112,8 @@ std_chrono_utc_now()
     ::clock_gettime(CLOCK_REALTIME, &ts);
 
     // We return the time in milliseconds rather than seconds.
-    int64_t secs = static_cast<int64_t>(ts.tv_sec);
-    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
+    int64_t secs = (int64_t) ts.tv_sec;
+    int64_t msecs = (int64_t) ((uint32_t) ts.tv_nsec / 1000'000);
     return secs * 1000 + msecs;
   }
 
@@ -127,8 +127,8 @@ std_chrono_local_now()
     ::localtime_r(&(ts.tv_sec), &tr);
 
     // We return the time in milliseconds rather than seconds.
-    int64_t secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
-    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
+    int64_t secs = (int64_t) (ts.tv_sec + tr.tm_gmtoff);
+    int64_t msecs = (int64_t) ((uint32_t) ts.tv_nsec / 1000'000);
     return secs * 1000 + msecs;
   }
 
@@ -141,8 +141,8 @@ std_chrono_hires_now()
 
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
-    double secs = static_cast<double>(ts.tv_sec);
-    double msecs = static_cast<double>(ts.tv_nsec) / 1000'000.0;
+    double secs = (double) ts.tv_sec;
+    double msecs = (double) ts.tv_nsec * 0.000'001;
     return secs * 1000 + msecs + 1234567890123;
   }
 
@@ -155,8 +155,8 @@ std_chrono_steady_now()
 
     // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
-    int64_t secs = static_cast<int64_t>(ts.tv_sec);
-    int64_t msecs = static_cast<int64_t>(ts.tv_nsec / 1000'000);
+    int64_t secs = (int64_t) ts.tv_sec;
+    int64_t msecs = (int64_t) ((uint32_t) ts.tv_nsec / 1000'000);
     return secs * 1000 + msecs + 3210987654321;
   }
 
@@ -225,7 +225,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms)
       return sref(s_strings_max[pms]);
 
     // Convert the timestamp to the number of milliseconds since 1600-03-01.
-    uint64_t temp = static_cast<uint64_t>(time_point - s_timestamp_1600_03_01);
+    uint64_t temp = (uint64_t) (time_point - s_timestamp_1600_03_01);
 
     // Get subday parts.
     uint64_t msec = temp % 1000;
@@ -297,7 +297,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms)
 
     if(pms) {
       do_put_00_99(wpos + 20, msec / 10);
-      wpos[22] = static_cast<char>('0' + msec % 10);
+      wpos[22] = (char) ('0' + msec % 10);
     }
     return time_str;
   }
@@ -312,9 +312,9 @@ std_chrono_utc_parse(V_string time_str)
           "Blank time string"));
 
     // Get the start and end of the non-empty sequence.
-    auto rpos = time_str.begin() + static_cast<ptrdiff_t>(off);
+    auto rpos = time_str.begin() + (ptrdiff_t) off;
     off = time_str.find_last_not_of(s_spaces) + 1;
-    const auto epos = time_str.begin() + static_cast<ptrdiff_t>(off);
+    const auto epos = time_str.begin() + (ptrdiff_t) off;
 
     // Parse individual parts.
     uint64_t year = 0;
@@ -349,7 +349,7 @@ std_chrono_utc_parse(V_string time_str)
 
     // Get the maximum value of the day of month.
     uint32_t mday_max;
-    size_t mon_sh = static_cast<size_t>(month + 9) % 12;
+    size_t mon_sh = ((size_t) month + 9) % 12;
     if(mon_sh != 11) {
       mday_max = s_month_days[mon_sh];
     }
@@ -477,7 +477,7 @@ std_chrono_utc_parse(V_string time_str)
     temp += msec;
 
     // Shift the timestamp back.
-    return static_cast<int64_t>(temp) + s_timestamp_1600_03_01;
+    return (int64_t) temp + s_timestamp_1600_03_01;
   }
 
 void
