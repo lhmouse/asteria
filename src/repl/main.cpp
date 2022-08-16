@@ -199,7 +199,9 @@ main(int argc, char** argv)
   try {
     // Select the C locale.
     // UTF-8 is required for wide-oriented standard streams.
-    const char* current_locale = ::setlocale(LC_ALL, "C.UTF-8");
+    const char* const current_locale = ::setlocale(LC_ALL, "C.UTF-8");
+    ::srandom((unsigned) ::clock());
+    ::tzset();
 
     // Note that this function shall not return in case of errors.
     do_parse_command_line(argc, argv);
