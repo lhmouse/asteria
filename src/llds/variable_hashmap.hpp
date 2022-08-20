@@ -96,7 +96,7 @@ class Variable_HashMap
       }
 
     void
-    do_attach(Bucket* qbkt, const void* key_p, const rcptr<Variable>& var) noexcept
+    do_attach(Bucket* qbkt, const void* key_p, const refcnt_ptr<Variable>& var) noexcept
       {
         // Construct the node, then attach it.
         ROCKET_ASSERT(!*qbkt);
@@ -158,7 +158,7 @@ class Variable_HashMap
         return *this;
       }
 
-    const rcptr<Variable>*
+    const refcnt_ptr<Variable>*
     find_opt(const void* key_p) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the
@@ -183,7 +183,7 @@ class Variable_HashMap
       }
 
     bool
-    insert(const void* key_p, const rcptr<Variable>& var_opt)
+    insert(const void* key_p, const refcnt_ptr<Variable>& var_opt)
       {
         // Reserve more room by rehashing if the load factor would
         // exceed 0.5.
@@ -219,7 +219,7 @@ class Variable_HashMap
       }
 
     bool
-    erase_random(const void** key_p_out_opt, rcptr<Variable>* var_out_opt)
+    erase_random(const void** key_p_out_opt, refcnt_ptr<Variable>* var_out_opt)
       {
         // Get a random bucket that contains a variable.
         auto qbkt = this->m_head;

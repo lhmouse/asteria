@@ -10,7 +10,7 @@
 namespace asteria {
 
 class Module_Loader final
-  : public Rcfwd<Module_Loader>
+  : public rcfwd<Module_Loader>
   {
   public:
     class Unique_Stream;  // RAII wrapper
@@ -38,7 +38,7 @@ class Module_Loader final
 class Module_Loader::Unique_Stream
   {
   private:
-    rcptr<Module_Loader> m_loader;
+    refcnt_ptr<Module_Loader> m_loader;
     locked_stream_pair* m_strm = nullptr;
 
   public:
@@ -47,7 +47,7 @@ class Module_Loader::Unique_Stream
       = default;
 
     explicit
-    Unique_Stream(const rcptr<Module_Loader>& loader, const char* path)
+    Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const char* path)
       { this->reset(loader, path);  }
 
     explicit
@@ -71,7 +71,7 @@ class Module_Loader::Unique_Stream
 
   private:
     Unique_Stream&
-    do_reset(const rcptr<Module_Loader>& loader, locked_stream_pair* strm) noexcept
+    do_reset(const refcnt_ptr<Module_Loader>& loader, locked_stream_pair* strm) noexcept
       {
         auto qloader = ::std::exchange(this->m_loader, loader);
         auto qstrm = ::std::exchange(this->m_strm, strm);
@@ -105,7 +105,7 @@ class Module_Loader::Unique_Stream
       { return this->do_reset(nullptr, nullptr);  }
 
     Unique_Stream&
-    reset(const rcptr<Module_Loader>& loader, const char* path)
+    reset(const refcnt_ptr<Module_Loader>& loader, const char* path)
       {
         // Lock the stream. If an exception is thrown, there is no effect.
         ROCKET_ASSERT(loader);

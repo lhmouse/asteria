@@ -82,7 +82,7 @@ class Deflator final
       { }
 
     Deflator*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new Deflator(*this, 42);
         out.reset(ptr);
@@ -282,7 +282,7 @@ class Inflator final
       { }
 
     Inflator*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new Inflator(*this, 42);
         out.reset(ptr);

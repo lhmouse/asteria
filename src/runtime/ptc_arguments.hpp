@@ -11,7 +11,7 @@
 namespace asteria {
 
 class PTC_Arguments final
-  : public Rcfwd<PTC_Arguments>
+  : public rcfwd<PTC_Arguments>
   {
   private:
     // These describe characteristics of the function call.
@@ -23,7 +23,7 @@ class PTC_Arguments final
     Reference_Stack m_stack;
 
     // These are captured data.
-    rcfwdp<const Variadic_Arguer> m_caller_opt;
+    rcfwd_ptr<const Variadic_Arguer> m_caller_opt;
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
 
   public:
@@ -58,7 +58,7 @@ class PTC_Arguments final
       { return this->m_stack;  }
 
     ASTERIA_INCOMPLET(Variadic_Arguer)
-    rcptr<const Variadic_Arguer>
+    refcnt_ptr<const Variadic_Arguer>
     caller_opt() const noexcept
       {
         return unerase_pointer_cast<const Variadic_Arguer>(this->m_caller_opt);
@@ -66,7 +66,7 @@ class PTC_Arguments final
 
     template<typename ArguerT>
     PTC_Arguments&
-    set_caller(const rcptr<ArguerT>& caller) noexcept
+    set_caller(const refcnt_ptr<ArguerT>& caller) noexcept
       {
         this->m_caller_opt = ::std::move(caller);
         return *this;

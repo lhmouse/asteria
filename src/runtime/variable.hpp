@@ -10,7 +10,7 @@
 namespace asteria {
 
 class Variable final
-  : public Rcfwd<Variable>
+  : public rcfwd<Variable>
   {
   public:
     enum State : uint8_t

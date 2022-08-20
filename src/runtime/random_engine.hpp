@@ -9,7 +9,7 @@
 namespace asteria {
 
 class Random_Engine final
-  : public Rcfwd<Random_Engine>
+  : public rcfwd<Random_Engine>
   {
   public:
     // This implements the ISAAC PRNG that is cryptographically secure.

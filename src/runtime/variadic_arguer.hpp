@@ -11,7 +11,7 @@
 namespace asteria {
 
 class Variadic_Arguer final
-  : public Rcfwd<Variadic_Arguer>,
+  : public rcfwd<Variadic_Arguer>,
     public Abstract_Function
   {
   private:

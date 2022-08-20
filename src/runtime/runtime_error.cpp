@@ -59,7 +59,7 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     ::rocket::ascii_numput nump;
     nump.put_DU(this->m_frames.size());
 
-    sso_vector<char, 24> sbuf(nump.size(), ' ');
+    static_vector<char, 24> sbuf(nump.size(), ' ');
     sbuf.emplace_back();
 
     // Append stack frames.

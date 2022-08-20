@@ -36,7 +36,7 @@ struct Handler
       = 0;
   };
 
-cow_vector<uptr<Handler>> s_handlers;
+cow_vector<unique_ptr<Handler>> s_handlers;
 
 Handler*
 do_find_handler_opt(cow_string&& cmd)

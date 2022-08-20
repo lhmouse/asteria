@@ -16,11 +16,11 @@ class Global_Context
   private:
     Recursion_Sentry m_sentry;
 
-    rcfwdp<Abstract_Hooks> m_qhooks;
-    rcfwdp<Garbage_Collector> m_gcoll;
-    rcfwdp<Random_Engine> m_prng;
-    rcfwdp<Module_Loader> m_ldrlk;
-    rcfwdp<Variable> m_vstd;
+    rcfwd_ptr<Abstract_Hooks> m_qhooks;
+    rcfwd_ptr<Garbage_Collector> m_gcoll;
+    rcfwd_ptr<Random_Engine> m_prng;
+    rcfwd_ptr<Module_Loader> m_ldrlk;
+    rcfwd_ptr<Variable> m_vstd;
 
   public:
     // A global context has no parent.
@@ -73,7 +73,7 @@ class Global_Context
 
     // This helps debugging and profiling.
     ASTERIA_INCOMPLET(Abstract_Hooks)
-    rcptr<Abstract_Hooks>
+    refcnt_ptr<Abstract_Hooks>
     get_hooks_opt() const noexcept
       {
         return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);
@@ -81,7 +81,7 @@ class Global_Context
 
     ASTERIA_INCOMPLET(Abstract_Hooks)
     Global_Context&
-    set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
+    set_hooks(refcnt_ptr<Abstract_Hooks> hooks_opt) noexcept
       {
         this->m_qhooks = ::std::move(hooks_opt);
         return *this;
@@ -89,26 +89,26 @@ class Global_Context
 
     // These are interfaces for individual global components.
     ASTERIA_INCOMPLET(Garbage_Collector)
-    rcptr<Garbage_Collector>
+    refcnt_ptr<Garbage_Collector>
     garbage_collector() const noexcept
       {
         return unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);
       }
 
     ASTERIA_INCOMPLET(Random_Engine)
-    rcptr<Random_Engine>
+    refcnt_ptr<Random_Engine>
     random_engine() const noexcept
       { return unerase_pointer_cast<Random_Engine>(this->m_prng);  }
 
     ASTERIA_INCOMPLET(Module_Loader)
-    rcptr<Module_Loader>
+    refcnt_ptr<Module_Loader>
     module_loader() const noexcept
       {
         return unerase_pointer_cast<Module_Loader>(this->m_ldrlk);
       }
 
     ASTERIA_INCOMPLET(Variable)
-    rcptr<Variable>
+    refcnt_ptr<Variable>
     std_variable() const noexcept
       {
         return unerase_pointer_cast<Variable>(this->m_vstd);

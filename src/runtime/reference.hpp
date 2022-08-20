@@ -24,8 +24,8 @@ class Reference
 
   private:
     Value m_value;
-    rcfwdp<Variable> m_var;
-    rcfwdp<PTC_Arguments> m_ptca;
+    rcfwd_ptr<Variable> m_var;
+    rcfwd_ptr<PTC_Arguments> m_ptca;
     cow_vector<Reference_Modifier> m_mods;
 
     union {
@@ -168,7 +168,7 @@ class Reference
       { return this->index() == index_variable;  }
 
     ASTERIA_INCOMPLET(Variable)
-    rcptr<Variable>
+    refcnt_ptr<Variable>
     get_variable_opt() const noexcept
       {
         return this->is_variable()
@@ -178,7 +178,7 @@ class Reference
 
     ASTERIA_INCOMPLET(Variable)
     Reference&
-    set_variable(const rcptr<Variable>& var) noexcept
+    set_variable(const refcnt_ptr<Variable>& var) noexcept
       {
         this->m_var = var;
         this->m_mods.clear();
@@ -191,7 +191,7 @@ class Reference
       { return this->index() == index_ptc_args;  }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
-    rcptr<PTC_Arguments>
+    refcnt_ptr<PTC_Arguments>
     get_ptc_args_opt() const noexcept
       {
         return this->is_ptc_args()
@@ -201,7 +201,7 @@ class Reference
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     Reference&
-    set_ptc_args(const rcptr<PTC_Arguments>& ptca) noexcept
+    set_ptc_args(const refcnt_ptr<PTC_Arguments>& ptca) noexcept
       {
         this->m_ptca = ptca;
         this->m_index = index_ptc_args;

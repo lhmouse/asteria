@@ -9,8 +9,8 @@
 
 using namespace ::asteria;
 
-sso_vector<void*, 10000> alloc_list;
-sso_vector<void*, 10000> free_list;
+static_vector<void*, 10000> alloc_list;
+static_vector<void*, 10000> free_list;
 
 void* operator new(size_t cb)
   {

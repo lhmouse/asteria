@@ -87,6 +87,7 @@ using ::std::size_t;
 using ::std::wint_t;
 using ::std::exception;
 using ::std::type_info;
+using ::std::pair;
 
 using ::rocket::nullopt_t;
 using ::rocket::cow_string;
@@ -110,6 +111,13 @@ using ::rocket::isnt;
 using ::rocket::are;
 using ::rocket::arent;
 
+using ::rocket::unique_ptr;
+using ::rocket::refcnt_ptr;
+using ::rocket::cow_vector;
+using ::rocket::cow_hashmap;
+using ::rocket::static_vector;
+using ::rocket::array;
+
 using ::rocket::atomic;
 using ::rocket::memory_order;
 using ::rocket::atomic_relaxed;
@@ -119,36 +127,16 @@ using ::rocket::atomic_release;
 using ::rocket::atomic_acq_rel;
 using ::rocket::atomic_seq_cst;
 
-// Aliases
 using phsh_string = ::rocket::prehashed_string;
 using bmask32 = ::rocket::bit_mask<uint32_t>;
 using bmask64 = ::rocket::bit_mask<uint64_t>;
 using bmword = ::rocket::bit_mask<uintptr_t>;
 
-template<typename E, typename D = ::std::default_delete<const E>>
-using uptr = ::rocket::unique_ptr<E, D>;
+template<typename T, typename U>
+using cow_bivector = cow_vector<pair<T, U>>;
 
 template<typename E>
-using rcptr = ::rocket::refcnt_ptr<E>;
-
-template<typename E>
-using cow_vector = ::rocket::cow_vector<E>;
-
-template<typename E>
-using cow_dictionary = ::rocket::cow_hashmap<::rocket::prehashed_string, E,
-                           ::rocket::prehashed_string::hash, ::std::equal_to<void>>;
-
-template<typename E, size_t k>
-using sso_vector = ::rocket::static_vector<E, k>;
-
-template<typename F, typename S>
-using pair = ::std::pair<F, S>;
-
-template<typename F, typename S>
-using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
-
-template<typename E, size_t... k>
-using array = ::rocket::array<E, k...>;
+using cow_dictionary = cow_hashmap<phsh_string, E, phsh_string::hash>;
 
 template<typename T>
 using opt = ::rocket::optional<T>;
@@ -168,6 +156,7 @@ class AVMC_Queue;
 // Runtime
 enum AIR_Status : uint8_t;
 enum PTC_Aware : int8_t;  // this is a bitmask!
+
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
@@ -194,6 +183,7 @@ enum Keyword : uint8_t;
 enum Jump_Target : uint8_t;
 enum Precedence : uint8_t;
 enum Xop : uint8_t;
+
 class Compiler_Error;
 class Token;
 class Token_Stream;
@@ -233,18 +223,18 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
   };
 
 template<typename RealT>
-struct Rcfwd : virtual Rcbase
+struct rcfwd : virtual Rcbase
   {
     explicit
-    Rcfwd() noexcept
+    rcfwd() noexcept
       = default;
 
     explicit
-    Rcfwd(const Rcfwd&) noexcept
+    rcfwd(const rcfwd&) noexcept
       = default;
 
-    Rcfwd&
-    operator=(const Rcfwd&) noexcept
+    rcfwd&
+    operator=(const rcfwd&) noexcept
       = default;
 
     virtual
@@ -252,54 +242,54 @@ struct Rcfwd : virtual Rcbase
     vtable_key_function_GklPAslB() noexcept;
 
     template<typename XRealT = RealT>
-    rcptr<const XRealT>
+    refcnt_ptr<const XRealT>
     share_this() const
-      { return this->Rcbase::template share_this<XRealT, Rcfwd>();  }
+      { return this->Rcbase::template share_this<XRealT, rcfwd>();  }
 
     template<typename XRealT = RealT>
-    rcptr<XRealT>
+    refcnt_ptr<XRealT>
     share_this()
-      { return this->Rcbase::template share_this<XRealT, Rcfwd>();  }
+      { return this->Rcbase::template share_this<XRealT, rcfwd>();  }
   };
 
 template<typename RealT>
 void
-Rcfwd<RealT>::
+rcfwd<RealT>::
 vtable_key_function_GklPAslB() noexcept
   {
   }
 
 template<typename RealT>
-using rcfwdp = rcptr<typename ::rocket::copy_cv<
-          Rcfwd<typename ::std::remove_cv<RealT>::type>, RealT>::type>;
+using rcfwd_ptr = refcnt_ptr<typename ::rocket::copy_cv<
+        rcfwd<typename ::std::remove_cv<RealT>::type>, RealT>::type>;
 
 template<typename TargetT, typename RealT>
 constexpr
 TargetT
-unerase_cast(const rcptr<Rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
+unerase_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
   { return static_cast<TargetT>(ptr.get());  }
 
 template<typename TargetT, typename RealT>
 constexpr
 TargetT
-unerase_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
+unerase_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
   { return static_cast<TargetT>(ptr.get());  }
 
 template<typename TargetT, typename RealT>
 constexpr
-rcptr<TargetT>
-unerase_pointer_cast(const rcptr<Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
+refcnt_ptr<TargetT>
+unerase_pointer_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<TargetT>(ptr);  }
 
 template<typename TargetT, typename RealT>
 constexpr
-rcptr<TargetT>
-unerase_pointer_cast(const rcptr<const Rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
+refcnt_ptr<TargetT>
+unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<TargetT>(ptr);  }
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque
-  : public Rcfwd<Abstract_Opaque>
+  : public rcfwd<Abstract_Opaque>
   {
     explicit
     Abstract_Opaque() noexcept
@@ -327,7 +317,7 @@ struct Abstract_Opaque
     // are not copyable should throw an exception in this function.
     virtual
     Abstract_Opaque*
-    clone_opt(rcptr<Abstract_Opaque>& out) const
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const
       = 0;
   };
 
@@ -337,7 +327,7 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
 struct Abstract_Function
-  : public Rcfwd<Abstract_Function>
+  : public rcfwd<Abstract_Function>
   {
     explicit
     Abstract_Function() noexcept
@@ -374,7 +364,7 @@ operator<<(tinyfmt& fmt, const Abstract_Function& func)
 class cow_opaque
   {
   private:
-    rcptr<Abstract_Opaque> m_sptr;
+    refcnt_ptr<Abstract_Opaque> m_sptr;
 
   public:
     constexpr
@@ -382,12 +372,12 @@ class cow_opaque
       { }
 
     template<typename OpaqT>
-    cow_opaque(const rcptr<OpaqT>& sptr) noexcept
+    cow_opaque(const refcnt_ptr<OpaqT>& sptr) noexcept
       : m_sptr(sptr)
       { }
 
     template<typename OpaqT>
-    cow_opaque(rcptr<OpaqT>&& sptr) noexcept
+    cow_opaque(refcnt_ptr<OpaqT>&& sptr) noexcept
       : m_sptr(::std::move(sptr))
       { }
 
@@ -413,7 +403,7 @@ class cow_opaque
 
     template<typename OpaqT>
     cow_opaque&
-    reset(const rcptr<OpaqT>& sptr) noexcept
+    reset(const refcnt_ptr<OpaqT>& sptr) noexcept
       {
         this->m_sptr = sptr;
         return *this;
@@ -421,7 +411,7 @@ class cow_opaque
 
     template<typename OpaqT>
     cow_opaque&
-    reset(rcptr<OpaqT>&& sptr) noexcept
+    reset(refcnt_ptr<OpaqT>&& sptr) noexcept
       {
         this->m_sptr = ::std::move(sptr);
         return *this;
@@ -502,7 +492,7 @@ open()
       // Clone the existent instance if it is shared. A final overrider
       // should return a null pointer to request that the shared instance
       // be used. Note the covariance of the return type of `clone_opt()`.
-      rcptr<Abstract_Opaque> csptr;
+      refcnt_ptr<Abstract_Opaque> csptr;
       OpaqueT* coptr = toptr->clone_opt(csptr);
       if(coptr) {
         ROCKET_ASSERT(coptr == csptr.get());
@@ -522,7 +512,7 @@ class cow_function
   private:
     const char* m_desc = nullptr;
     simple_function* m_fptr = nullptr;
-    rcptr<const Abstract_Function> m_sptr;
+    refcnt_ptr<const Abstract_Function> m_sptr;
 
   public:
     constexpr
@@ -535,12 +525,12 @@ class cow_function
       { }
 
     template<typename FuncT>
-    cow_function(const rcptr<FuncT>& sptr) noexcept
+    cow_function(const refcnt_ptr<FuncT>& sptr) noexcept
       : m_sptr(sptr)
       { }
 
     template<typename FuncT>
-    cow_function(rcptr<FuncT>&& sptr) noexcept
+    cow_function(refcnt_ptr<FuncT>&& sptr) noexcept
       : m_sptr(::std::move(sptr))
       { }
 
@@ -577,7 +567,7 @@ class cow_function
 
     template<typename FuncT>
     cow_function&
-    reset(const rcptr<FuncT>& sptr) noexcept
+    reset(const refcnt_ptr<FuncT>& sptr) noexcept
       {
         this->m_desc = nullptr;
         this->m_fptr = nullptr;
@@ -587,7 +577,7 @@ class cow_function
 
     template<typename FuncT>
     cow_function&
-    reset(rcptr<FuncT>&& sptr) noexcept
+    reset(refcnt_ptr<FuncT>&& sptr) noexcept
       {
         this->m_desc = nullptr;
         this->m_fptr = nullptr;

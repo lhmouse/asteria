@@ -38,7 +38,7 @@ class CRC32_Hasher final
       { }
 
     CRC32_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -152,7 +152,7 @@ class FNV1a32_Hasher final
       { }
 
     FNV1a32_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -276,7 +276,7 @@ class MD5_Hasher final
       { }
 
     MD5_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -382,7 +382,7 @@ class SHA1_Hasher final
       { }
 
     SHA1_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -488,7 +488,7 @@ class SHA224_Hasher final
       { }
 
     SHA224_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -594,7 +594,7 @@ class SHA256_Hasher final
       { }
 
     SHA256_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -700,7 +700,7 @@ class SHA384_Hasher final
       { }
 
     SHA384_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -806,7 +806,7 @@ class SHA512_Hasher final
       { }
 
     SHA512_Hasher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);

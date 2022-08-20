@@ -10,7 +10,7 @@
 namespace asteria {
 
 class Garbage_Collector final
-  : public Rcfwd<Garbage_Collector>
+  : public rcfwd<Garbage_Collector>
   {
   private:
     long m_recur = 0;
@@ -73,7 +73,7 @@ class Garbage_Collector final
       }
 
     // Allocation and collection
-    rcptr<Variable>
+    refcnt_ptr<Variable>
     create_variable(GC_Generation gen_hint = gc_generation_newest);
 
     size_t

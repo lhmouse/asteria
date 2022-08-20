@@ -23,7 +23,7 @@ class Executive_Context
     Reference_Stack* m_alt_stack;  // for nested calls
 
     cow_bivector<Source_Location, AVMC_Queue> m_defer;
-    rcptr<Variadic_Arguer> m_zvarg;
+    refcnt_ptr<Variadic_Arguer> m_zvarg;
     cow_vector<Reference> m_lazy_args;
 
   public:
@@ -54,7 +54,7 @@ class Executive_Context
     // shall outlast this context.
     explicit
     Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
-                      Reference_Stack& alt_stack, const rcptr<Variadic_Arguer>& zvarg,
+                      Reference_Stack& alt_stack, const refcnt_ptr<Variadic_Arguer>& zvarg,
                       const cow_vector<phsh_string>& params, Reference&& self);
 
   private:

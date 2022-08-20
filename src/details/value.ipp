@@ -118,7 +118,7 @@ struct Valuable_impl<cow_opaque>
   };
 
 template<typename OpaqueT>
-struct Valuable_impl<rcptr<OpaqueT>, typename ::std::enable_if<
+struct Valuable_impl<refcnt_ptr<OpaqueT>, typename ::std::enable_if<
             ::std::is_convertible<OpaqueT*,
                                   Abstract_Opaque*>::value
         >::type>
@@ -157,7 +157,7 @@ struct Valuable_impl<cow_function>
   };
 
 template<typename FunctionT>
-struct Valuable_impl<rcptr<FunctionT>, typename ::std::enable_if<
+struct Valuable_impl<refcnt_ptr<FunctionT>, typename ::std::enable_if<
             ::std::is_convertible<FunctionT*,
                                   const Abstract_Function*>::value
         >::type>

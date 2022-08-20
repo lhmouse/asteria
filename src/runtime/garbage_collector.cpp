@@ -31,7 +31,7 @@ class Sentry
   };
 
 bool
-do_pop_variable(rcptr<Variable>& var, Variable_HashMap& map)
+do_pop_variable(refcnt_ptr<Variable>& var, Variable_HashMap& map)
   {
     for(;;)
       if(!map.erase_random(nullptr, &var))
@@ -57,7 +57,7 @@ do_collect_generation(size_t gen)
       return 0;
 
     size_t nvars = 0;
-    rcptr<Variable> var;
+    refcnt_ptr<Variable> var;
 
     auto& tracked = this->m_tracked.mut(gMax-gen);
     const auto next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
@@ -173,7 +173,7 @@ do_collect_generation(size_t gen)
     return nvars;
   }
 
-rcptr<Variable>
+refcnt_ptr<Variable>
 Garbage_Collector::
 create_variable(GC_Generation gen_hint)
   {
@@ -184,7 +184,7 @@ create_variable(GC_Generation gen_hint)
 
     // Get a cached variable.
     // If the pool has been exhausted, allocate a new one.
-    rcptr<Variable> var;
+    refcnt_ptr<Variable> var;
     this->m_pool.erase_random(nullptr, &var);
     if(!var)
       var = ::rocket::make_refcnt<Variable>();
@@ -221,7 +221,7 @@ finalize() noexcept
       ASTERIA_TERMINATE(("Garbage collector not finalizable while in use"));
 
     size_t nvars = 0;
-    rcptr<Variable> var;
+    refcnt_ptr<Variable> var;
 
     this->m_staged.clear();
     this->m_temp_1.clear();

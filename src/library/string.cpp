@@ -353,8 +353,8 @@ class PCRE2_Matcher final
   private:
     cow_string m_patt;
     uint32_t m_opts;
-    uptr<::pcre2_code, void (::pcre2_code*)> m_code;
-    uptr<::pcre2_match_data, void (::pcre2_match_data*)> m_match;
+    unique_ptr<::pcre2_code, void (::pcre2_code*)> m_code;
+    unique_ptr<::pcre2_match_data, void (::pcre2_match_data*)> m_match;
 
     const uint8_t* m_name_table = nullptr;
     uint32_t m_name_size = UINT32_MAX;
@@ -456,7 +456,7 @@ class PCRE2_Matcher final
       { }
 
     PCRE2_Matcher*
-    clone_opt(rcptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new PCRE2_Matcher(*this, 42);
         out.reset(ptr);

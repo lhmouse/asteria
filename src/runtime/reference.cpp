@@ -21,7 +21,7 @@ namespace {
 inline
 bool
 do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
-                    const rcfwdp<Variable>& fwdp_opt)
+                    const rcfwd_ptr<Variable>& fwdp_opt)
   {
     auto var = unerase_pointer_cast<Variable>(fwdp_opt);
     if(!var)
@@ -37,7 +37,7 @@ do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
 inline
 void
 do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
-                    const rcfwdp<Variable>&& fwdp_opt)
+                    const rcfwd_ptr<Variable>&& fwdp_opt)
   = delete;
 
 }  // namespace
@@ -112,8 +112,8 @@ Reference::
 do_finish_call_slow(Global_Context& global)
   {
     // We must rebuild the backtrace using this queue if an exception is thrown.
-    cow_vector<rcptr<PTC_Arguments>> frames;
-    rcptr<PTC_Arguments> ptca;
+    cow_vector<refcnt_ptr<PTC_Arguments>> frames;
+    refcnt_ptr<PTC_Arguments> ptca;
     int ptc_conj = ptc_aware_by_ref;
     Reference_Stack alt_stack;
 

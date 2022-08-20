@@ -16,7 +16,7 @@ struct Bucket
                    // used to mark whether this bucket is empty or not
 
     const void* key_p;
-    union { rcptr<Variable> vstor[1];  };  // initialized iff `prev` is non-null
+    union { refcnt_ptr<Variable> vstor[1];  };  // initialized iff `prev` is non-null
 
     Bucket() noexcept { }
     ~Bucket() noexcept { }
