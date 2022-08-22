@@ -119,7 +119,7 @@ class atomic
     bool
     cmpxchg(value_type& cmp, value_type xchg) noexcept
       {
-        return this->m_val.compare_exchange(cmp, xchg, this->do_order_acq_rel());
+        return this->m_val.compare_exchange_strong(cmp, xchg, this->do_order_acq_rel());
       }
 
     template<typename otherT>
