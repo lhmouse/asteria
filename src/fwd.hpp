@@ -300,16 +300,14 @@ struct Abstract_Opaque
     // This function is called to convert this object to a human-readble string.
     virtual
     tinyfmt&
-    describe(tinyfmt& fmt) const
-      = 0;
+    describe(tinyfmt& fmt) const = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
     virtual
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
-      = 0;
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const = 0;
 
     // This function is called when a mutable reference is requested and the current instance
     // is shared. If this function returns a null pointer, the shared instance is used. If this
@@ -317,8 +315,7 @@ struct Abstract_Opaque
     // are not copyable should throw an exception in this function.
     virtual
     Abstract_Opaque*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const
-      = 0;
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const = 0;
   };
 
 inline
@@ -338,22 +335,19 @@ struct Abstract_Function
     // This function is called to convert this object to a human-readble string.
     virtual
     tinyfmt&
-    describe(tinyfmt& fmt) const
-      = 0;
+    describe(tinyfmt& fmt) const = 0;
 
     // This function is called during garbage collection to mark variables that are not
     // directly reachable. Although strong exception safety is guaranteed, it is discouraged
     // to throw exceptions in this function, as it prevents garbage collection from running.
     virtual
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
-      = 0;
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const = 0;
 
     // This function may return a proper tail call wrapper.
     virtual
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const
-      = 0;
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const = 0;
   };
 
 inline

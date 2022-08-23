@@ -56,8 +56,7 @@ class basic_tinyfmt
     // buffer interfaces
     virtual
     tinybuf_type&
-    get_tinybuf() const
-      = 0;
+    get_tinybuf() const = 0;
 
     // unformatted output functions
     basic_tinyfmt&

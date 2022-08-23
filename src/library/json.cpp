@@ -21,23 +21,19 @@ struct Indenter
 
     virtual
     tinyfmt&
-    break_line(tinyfmt& fmt) const
-      = 0;
+    break_line(tinyfmt& fmt) const = 0;
 
     virtual
     void
-    increment_level()
-      = 0;
+    increment_level() = 0;
 
     virtual
     void
-    decrement_level()
-      = 0;
+    decrement_level() = 0;
 
     virtual
     bool
-    has_indention() const noexcept
-      = 0;
+    has_indention() const noexcept = 0;
   };
 
 Indenter::

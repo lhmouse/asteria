@@ -17,23 +17,19 @@ struct Handler
 
     virtual
     const char*
-    cmd() const  // the name of this command
-      = 0;
+    cmd() const = 0;  // the name of this command
 
     virtual
     const char*
-    oneline() const  // the one-line description for `help`
-      = 0;
+    oneline() const = 0;  // the one-line description for `help`
 
     virtual
     const char*
-    help() const  // the long description for `help [cmd]`
-      = 0;
+    help() const = 0;  // the long description for `help [cmd]`
 
     virtual
     void
-    handle(cow_vector<cow_string>&& args)  // do something
-      = 0;
+    handle(cow_vector<cow_string>&& args) = 0;  // do something
   };
 
 cow_vector<unique_ptr<Handler>> s_handlers;
