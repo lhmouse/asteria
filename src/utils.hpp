@@ -23,11 +23,12 @@ make_string_template(const TemplT&... templs)
 
 template<size_t N, typename... ParamsT>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
-cow_string
-format_string(const array<cow_string::shallow_type, N>& templs, const ParamsT&... params)
+cow_string&
+format(cow_string& str, const array<cow_string::shallow_type, N>& templs, const ParamsT&... params)
   {
     // Make stream inserters.
-    ::rocket::tinyfmt_str fmt;
+    str.clear();
+    ::rocket::tinyfmt_str fmt(::std::move(str));
     ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
 
     // Write all strings, seaprated by line feeds.
@@ -38,7 +39,50 @@ format_string(const array<cow_string::shallow_type, N>& templs, const ParamsT&..
         fmt << '\n',
           ::rocket::vformat(fmt, templs[k].c_str(), templs[k].size(), insts, sizeof...(params));
     }
-    return fmt.extract_string();
+    str = fmt.extract_string();
+    return str;
+  }
+
+template<typename... ParamsT>
+ROCKET_NEVER_INLINE ROCKET_FLATTEN
+cow_string&
+format(cow_string& str, const char* templ, const ParamsT&... params)
+  {
+    // Make stream inserters.
+    str.clear();
+    ::rocket::tinyfmt_str fmt(::std::move(str));
+    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
+
+    // Write the string as is.
+    ::rocket::vformat(fmt, templ, ::strlen(templ), insts, sizeof...(params));
+    str = fmt.extract_string();
+    return str;
+  }
+
+template<typename... ParamsT>
+ROCKET_NEVER_INLINE ROCKET_FLATTEN
+cow_string&
+format(cow_string& str, const cow_string& templ, const ParamsT&... params)
+  {
+    // Make stream inserters.
+    str.clear();
+    ::rocket::tinyfmt_str fmt(::std::move(str));
+    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
+
+    // Write the string as is.
+    ::rocket::vformat(fmt, templ.c_str(), templ.length(), insts, sizeof...(params));
+    str = fmt.extract_string();
+    return str;
+  }
+
+template<size_t N, typename... ParamsT>
+ROCKET_NEVER_INLINE ROCKET_FLATTEN
+cow_string
+format_string(const array<cow_string::shallow_type, N>& templs, const ParamsT&... params)
+  {
+    cow_string str;
+    noadl::format(str, templs, params...);
+    return str;
   }
 
 template<typename... ParamsT>
@@ -46,13 +90,9 @@ ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
 format_string(const char* templ, const ParamsT&... params)
   {
-    // Make stream inserters.
-    ::rocket::tinyfmt_str fmt;
-    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
-
-    // Write the string as is.
-    ::rocket::vformat(fmt, templ, ::strlen(templ), insts, sizeof...(params));
-    return fmt.extract_string();
+    cow_string str;
+    noadl::format(str, templ, params...);
+    return str;
   }
 
 template<typename... ParamsT>
@@ -60,13 +100,9 @@ ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
 format_string(const cow_string& templ, const ParamsT&... params)
   {
-    // Make stream inserters.
-    ::rocket::tinyfmt_str fmt;
-    ::rocket::formatter insts[] = { ::rocket::make_default_formatter(fmt, params)..., { } };
-
-    // Write the string as is.
-    ::rocket::vformat(fmt, templ.c_str(), templ.length(), insts, sizeof...(params));
-    return fmt.extract_string();
+    cow_string str;
+    noadl::format(str, templ, params...);
+    return str;
   }
 
 // Error handling
