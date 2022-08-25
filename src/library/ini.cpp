@@ -170,7 +170,12 @@ std_ini_format(V_object value)
       // Write a top-level property.
       do_format_key(fmt, r.first);
       fmt << "=";
-      r.second.print(fmt, false);
+
+      if(r.second.is_string())
+        fmt << r.second.as_string();
+      else
+        r.second.print(fmt);
+
       fmt << "\r\n";
       nlines ++;
     }
@@ -196,7 +201,12 @@ std_ini_format(V_object value)
         // Write a key-value pair.
         do_format_key(fmt, r.first);
         fmt << "=";
-        r.second.print(fmt, false);
+
+        if(r.second.is_string())
+          fmt << r.second.as_string();
+        else
+          r.second.print(fmt);
+
         fmt << "\r\n";
         nlines ++;
       }

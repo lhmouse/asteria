@@ -216,12 +216,6 @@ do_get_padding(const optV_string& padding)
     return *padding;
   }
 
-void
-do_print_value(tinyfmt& fmt, const void* ptr)
-  {
-    static_cast<const Value*>(ptr)->print(fmt);
-  }
-
 // These are strings of single characters.
 constexpr char s_char_table[][2] =
   {
@@ -1672,7 +1666,15 @@ std_string_format(V_string templ, cow_vector<Value> values)
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
     for(const auto& val : values)
-      insts.push_back({ do_print_value, &val });
+      insts.push_back({
+        [](tinyfmt& fmt, const void* ptr) {
+          const auto& r = *(const Value*) ptr;
+          if(r.is_string())
+            fmt << r.as_string();
+          else
+            r.print(fmt);
+        },
+        &val });
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;

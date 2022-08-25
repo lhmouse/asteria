@@ -343,7 +343,7 @@ do_throw_type_mismatch(const char* desc) const
 
 tinyfmt&
 Value::
-print(tinyfmt& fmt, bool escape) const
+print(tinyfmt& fmt) const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -368,14 +368,7 @@ print(tinyfmt& fmt, bool escape) const
         break;
 
       case type_string:
-        if(escape) {
-          // Escape the string.
-          fmt << quote(qval->as_string());
-        }
-        else {
-          // Write the string verbatim.
-          fmt << qval->as_string();
-        }
+        fmt << quote(qval->as_string());
         break;
 
       case type_opaque:
@@ -466,10 +459,10 @@ print(tinyfmt& fmt, bool escape) const
 
 bool
 Value::
-print_to_stderr(bool escape) const
+print_to_stderr() const
   {
     ::rocket::tinyfmt_file fmt(stderr, nullptr);
-    this->print(fmt, escape);
+    this->print(fmt);
     return ::ferror(fmt.get_handle());
   }
 

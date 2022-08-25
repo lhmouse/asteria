@@ -409,10 +409,10 @@ class Value
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
-    print(tinyfmt& fmt, bool escape = false) const;
+    print(tinyfmt& fmt) const;
 
     bool
-    print_to_stderr(bool escape = false) const;
+    print_to_stderr() const;
 
     tinyfmt&
     dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0) const;

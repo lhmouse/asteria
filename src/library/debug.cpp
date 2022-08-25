@@ -17,8 +17,14 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
     insts.reserve(values.size());
     for(const auto& val : values)
       insts.push_back({
-          [](tinyfmt& fmt, const void* ptr) { ((const Value*) ptr)->print(fmt);  },
-          &val });
+        [](tinyfmt& fmt, const void* ptr) {
+          const auto& r = *(const Value*) ptr;
+          if(r.is_string())
+            fmt << r.as_string();
+          else
+            r.print(fmt);
+        },
+        &val });
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
