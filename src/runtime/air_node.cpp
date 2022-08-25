@@ -1536,7 +1536,7 @@ struct Traits_apply_xop_inc_post
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Postfix increment not applicable (operand was `$1`)"),
-                lhs.type());
+                lhs);
         }
       }
   };
@@ -1586,7 +1586,7 @@ struct Traits_apply_xop_dec_post
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Postfix decrement not applicable (operand was `$1`)"),
-                lhs.type());
+                lhs);
         }
       }
   };
@@ -1720,7 +1720,7 @@ struct Traits_apply_xop_neg
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Logical negation not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -1780,7 +1780,7 @@ struct Traits_apply_xop_notb
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Bitwise NOT not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -1862,7 +1862,7 @@ struct Traits_apply_xop_inc_pre
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Prefix increment not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -1909,7 +1909,7 @@ struct Traits_apply_xop_dec_pre
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Prefix decrement not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -1995,7 +1995,7 @@ struct Traits_apply_xop_countof
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`countof` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2080,7 +2080,7 @@ struct Traits_apply_xop_sqrt
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__sqrt` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2131,7 +2131,7 @@ struct Traits_apply_xop_isnan
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__isnan` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2182,7 +2182,7 @@ struct Traits_apply_xop_isinf
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__isinf` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2243,7 +2243,7 @@ struct Traits_apply_xop_abs
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__abs` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2293,7 +2293,7 @@ struct Traits_apply_xop_sign
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__sign` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2341,7 +2341,7 @@ struct Traits_apply_xop_round
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__round` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2389,7 +2389,7 @@ struct Traits_apply_xop_floor
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__floor` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2437,7 +2437,7 @@ struct Traits_apply_xop_ceil
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__ceil` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2485,7 +2485,7 @@ struct Traits_apply_xop_trunc
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__trunc` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2533,7 +2533,7 @@ struct Traits_apply_xop_iround
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__iround` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2581,7 +2581,7 @@ struct Traits_apply_xop_ifloor
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__ifloor` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2629,7 +2629,7 @@ struct Traits_apply_xop_iceil
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__iceil` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -2677,7 +2677,7 @@ struct Traits_apply_xop_itrunc
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__itrunc` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -4102,7 +4102,7 @@ struct Traits_apply_xop_fma
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)"),
-                lhs.type(), mid.type(), rhs.type());
+                lhs, mid, rhs);
         }
       }
   };
@@ -4778,7 +4778,7 @@ struct Traits_apply_xop_lzcnt
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__lzcnt` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -4823,7 +4823,7 @@ struct Traits_apply_xop_tzcnt
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__tzcnt` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
@@ -4868,7 +4868,7 @@ struct Traits_apply_xop_popcnt
           default:
             ASTERIA_THROW_RUNTIME_ERROR((
                 "`__popcnt` not applicable (operand was `$1`)"),
-                rhs.type());
+                rhs);
         }
       }
   };
