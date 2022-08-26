@@ -106,12 +106,13 @@ class AVMC_Queue
         static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
         using Traits = details_avmc_queue::Sparam_traits<Sparam>;
 
-        if(::std::is_trivial<Sparam>::value && !Traits::vget_opt && !sloc_opt)
+        Var_Getter* vget_opt = Traits::vget_opt;
+        if(::std::is_trivial<Sparam>::value && !vget_opt && !sloc_opt)
           return this->do_append_trivial(up, exec, sizeof(sp), ::std::addressof(sp));
 
-        return this->do_append_nontrivial(up, exec, sloc_opt,
-                          Traits::vget_opt, Traits::reloc_opt, Traits::dtor_opt,
-                          sizeof(sp), details_avmc_queue::do_forward_ctor<XSparamT>,
+        return this->do_append_nontrivial(up, exec, sloc_opt, vget_opt,
+                          Traits::reloc_opt, Traits::dtor_opt, sizeof(sp),
+                          details_avmc_queue::do_forward_ctor<XSparamT>,
                           reinterpret_cast<intptr_t>(::std::addressof(sp)));
       }
 

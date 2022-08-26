@@ -44,17 +44,19 @@ struct Verbose_Hooks final
     void
     on_single_step_trap(const Source_Location& sloc) override
       {
-        uint32_t sig = (uint32_t) repl_signal.xchg(0);
+        int sig = repl_signal.xchg(0);
         if(sig == 0)
           return;
 
-        this->do_verbose_trace(sloc,
-            "Received signal $1: $2", sig, ::sys_siglist[sig]);
+#if defined(__GLIBC__) && (__GLIBC__ * 10000 + __GLIBC_MINOR__ >= 20032)
+        const char* sigdescr = ::sigdescr_np(sig);
+#else
+        const char* sigdescr = ::sys_siglist[sig];
+#endif  // GLIBC
 
-        ASTERIA_THROW((
-            "Signal $1 received: $2",
-            "[thrown from '$3']"),
-            sig, ::sys_siglist[sig], sloc);
+        this->do_verbose_trace(sloc, "Received signal $1: $2", sig, sigdescr);
+
+        ASTERIA_THROW(("Signal $1 received: $2", "[thrown from '$3']"), sig, sigdescr, sloc);
       }
 
     void
