@@ -74,7 +74,7 @@ class unique_ptr
 
     // 23.11.1.2.3, assignment
     unique_ptr&
-    operator=(unique_ptr&& other) noexcept
+    operator=(unique_ptr&& other) & noexcept
       {
         this->m_sth.as_deleter() = ::std::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
@@ -85,7 +85,7 @@ class unique_ptr
     ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value),
     ROCKET_ENABLE_IF(is_assignable<deleter_type&, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr&
-    operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
+    operator=(unique_ptr<yelementT, ydeleterT>&& other) & noexcept
       {
         this->m_sth.as_deleter() = ::std::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());

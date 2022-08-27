@@ -77,7 +77,7 @@ class unique_handle
 
     // 23.11.1.2.3, assignment
     unique_handle&
-    operator=(unique_handle&& other) noexcept
+    operator=(unique_handle&& other) & noexcept
       {
         this->m_sth.as_closer() = ::std::move(other.m_sth.as_closer());
         this->reset(other.m_sth.release());

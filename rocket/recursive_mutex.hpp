@@ -27,12 +27,10 @@ class recursive_mutex
     recursive_mutex() noexcept
       { }
 
-    recursive_mutex(const recursive_mutex&)
-      = delete;
+    recursive_mutex(const recursive_mutex&) = delete;
 
     recursive_mutex&
-    operator=(const recursive_mutex&)
-      = delete;
+    operator=(const recursive_mutex&) = delete;
 
     ~recursive_mutex()
       {
@@ -63,7 +61,7 @@ class recursive_mutex::unique_lock
       }
 
     unique_lock&
-    operator=(unique_lock&& other) noexcept
+    operator=(unique_lock&& other) & noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -91,8 +89,7 @@ class recursive_mutex::unique_lock
       { return this->m_sth.get() == m.m_mutex;  }
 
     bool
-    is_locking(const recursive_mutex&&) const noexcept
-      = delete;
+    is_locking(const recursive_mutex&&) const noexcept = delete;
 
     unique_lock&
     unlock() noexcept

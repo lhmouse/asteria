@@ -35,12 +35,10 @@ class string_storage
         m_hval(this->as_hasher()(this->m_str))
       { }
 
-    string_storage(const string_storage&)
-      = delete;
+    string_storage(const string_storage&) = delete;
 
     string_storage&
-    operator=(const string_storage&)
-      = delete;
+    operator=(const string_storage&) = delete;
 
   public:
     constexpr

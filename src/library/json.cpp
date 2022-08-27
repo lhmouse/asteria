@@ -46,8 +46,7 @@ class Indenter_none final
   {
   public:
     explicit
-    Indenter_none()
-      = default;
+    Indenter_none() = default;
 
   public:
     tinyfmt&

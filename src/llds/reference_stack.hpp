@@ -26,7 +26,7 @@ class Reference_Stack
       { this->swap(other);  }
 
     Reference_Stack&
-    operator=(Reference_Stack&& other) noexcept
+    operator=(Reference_Stack&& other) & noexcept
       { return this->swap(other);  }
 
     Reference_Stack&

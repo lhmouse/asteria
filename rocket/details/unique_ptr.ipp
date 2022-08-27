@@ -67,12 +67,10 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
-    stored_pointer_impl(const stored_pointer_impl&)
-      = delete;
+    stored_pointer_impl(const stored_pointer_impl&) = delete;
 
     stored_pointer_impl&
-    operator=(const stored_pointer_impl&)
-      = delete;
+    operator=(const stored_pointer_impl&) = delete;
 
   public:
     const deleter_type&
@@ -134,12 +132,10 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
-    stored_pointer_impl(const stored_pointer_impl&)
-      = delete;
+    stored_pointer_impl(const stored_pointer_impl&) = delete;
 
     stored_pointer_impl&
-    operator=(const stored_pointer_impl&)
-      = delete;
+    operator=(const stored_pointer_impl&) = delete;
 
   public:
     const deleter_type&
@@ -194,12 +190,10 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
-    stored_pointer_impl(const stored_pointer_impl&)
-      = delete;
+    stored_pointer_impl(const stored_pointer_impl&) = delete;
 
     stored_pointer_impl&
-    operator=(const stored_pointer_impl&)
-      = delete;
+    operator=(const stored_pointer_impl&) = delete;
 
   public:
     const deleter_base&

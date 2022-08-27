@@ -37,7 +37,7 @@ class AVMC_Queue
       { this->swap(other);  }
 
     AVMC_Queue&
-    operator=(AVMC_Queue&& other) noexcept
+    operator=(AVMC_Queue&& other) & noexcept
       { return this->swap(other);  }
 
     AVMC_Queue&

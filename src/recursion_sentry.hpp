@@ -34,7 +34,7 @@ class Recursion_Sentry
       { this->do_check();  }
 
     Recursion_Sentry&
-    operator=(const Recursion_Sentry& other)  // copy assignment
+    operator=(const Recursion_Sentry& other) &  // copy assignment
       {
         this->m_base = other.m_base;
         this->do_check();

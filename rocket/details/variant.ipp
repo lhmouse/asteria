@@ -88,8 +88,7 @@ class const_bitset
   {
   public:
     constexpr
-    const_bitset() noexcept
-      = default;
+    const_bitset() noexcept = default;
 
     constexpr
     bool
@@ -105,8 +104,7 @@ class const_func_table
 
   public:
     constexpr
-    const_func_table() noexcept
-      = default;
+    const_func_table() noexcept = default;
 
     template<typename... argsT>
     constexpr

@@ -60,12 +60,10 @@ class stored_pointer
     ~stored_pointer()
       { this->reset(nullptr);  }
 
-    stored_pointer(const stored_pointer&)
-      = delete;
+    stored_pointer(const stored_pointer&) = delete;
 
     stored_pointer&
-    operator=(const stored_pointer&)
-      = delete;
+    operator=(const stored_pointer&) = delete;
 
   public:
     bool

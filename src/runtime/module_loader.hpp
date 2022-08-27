@@ -43,8 +43,7 @@ class Module_Loader::Unique_Stream
 
   public:
     explicit constexpr
-    Unique_Stream() noexcept
-      = default;
+    Unique_Stream() noexcept = default;
 
     explicit
     Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const char* path)
@@ -55,7 +54,7 @@ class Module_Loader::Unique_Stream
       { this->swap(other);  }
 
     Unique_Stream&
-    operator=(Unique_Stream&& other) noexcept
+    operator=(Unique_Stream&& other) & noexcept
       {
         this->swap(other);
         return *this;

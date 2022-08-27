@@ -74,7 +74,7 @@ class basic_linear_buffer
       { }
 
     basic_linear_buffer&
-    operator=(const basic_linear_buffer& other)
+    operator=(const basic_linear_buffer& other) &
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == other.m_stor.as_allocator())) {
           // If the allocators compare equal, they can deallocate memory allocated by each other.
@@ -97,7 +97,7 @@ class basic_linear_buffer
       }
 
     basic_linear_buffer&
-    operator=(basic_linear_buffer&& other)
+    operator=(basic_linear_buffer&& other) &
       noexcept(is_always_equal_allocator<allocator_type>::value ||
                allocator_traits<allocator_type>::propagate_on_container_move_assignment::value)
       {

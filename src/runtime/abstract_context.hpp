@@ -24,8 +24,7 @@ class Abstract_Context
 
   protected:
     explicit
-    Abstract_Context() noexcept
-      = default;
+    Abstract_Context() noexcept = default;
 
   protected:
     virtual

@@ -66,15 +66,12 @@ class basic_bucket
 
   public:
     constexpr
-    basic_bucket() noexcept
-      = default;
+    basic_bucket() noexcept = default;
 
-    basic_bucket(const basic_bucket&)
-      = delete;
+    basic_bucket(const basic_bucket&) = delete;
 
     basic_bucket&
-    operator=(const basic_bucket&)
-      = delete;
+    operator=(const basic_bucket&) = delete;
 
   public:
     constexpr
@@ -176,12 +173,10 @@ struct basic_storage
 #endif
       }
 
-    basic_storage(const basic_storage&)
-      = delete;
+    basic_storage(const basic_storage&) = delete;
 
     basic_storage&
-    operator=(const basic_storage&)
-      = delete;
+    operator=(const basic_storage&) = delete;
 
     constexpr
     bool
@@ -395,12 +390,10 @@ class storage_handle
     ~storage_handle()
       { this->deallocate();  }
 
-    storage_handle(const storage_handle&)
-      = delete;
+    storage_handle(const storage_handle&) = delete;
 
     storage_handle&
-    operator=(const storage_handle&)
-      = delete;
+    operator=(const storage_handle&) = delete;
 
   private:
     void
@@ -849,7 +842,7 @@ class hashmap_iterator
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
     hashmap_iterator&
-    operator=(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
+    operator=(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;

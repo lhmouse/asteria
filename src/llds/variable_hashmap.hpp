@@ -29,7 +29,7 @@ class Variable_HashMap
       { this->swap(other);  }
 
     Variable_HashMap&
-    operator=(Variable_HashMap&& other) noexcept
+    operator=(Variable_HashMap&& other) & noexcept
       { return this->swap(other);  }
 
     Variable_HashMap&

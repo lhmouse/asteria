@@ -356,7 +356,7 @@ class AIR_Node
     template<typename XNodeT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XNodeT&&>::value)>
     AIR_Node&
-    operator=(XNodeT&& xnode)
+    operator=(XNodeT&& xnode) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XNodeT&&>::value)
       {
         this->m_stor = ::std::forward<XNodeT>(xnode);

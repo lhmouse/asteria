@@ -67,7 +67,7 @@ class Reference_Modifier
     template<typename XModT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XModT&&>::value)>
     Reference_Modifier&
-    operator=(XModT&& xmod)
+    operator=(XModT&& xmod) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XModT&&>::value)
       {
         this->m_stor = ::std::forward<XModT>(xmod);

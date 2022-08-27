@@ -76,15 +76,12 @@ class basic_tinybuf
     using size_type  = size_t;
 
   protected:
-    basic_tinybuf() noexcept
-      = default;
+    basic_tinybuf() noexcept = default;
 
-    basic_tinybuf(const basic_tinybuf&) noexcept
-      = default;
+    basic_tinybuf(const basic_tinybuf&) noexcept = default;
 
     basic_tinybuf&
-    operator=(const basic_tinybuf&) noexcept
-      = default;
+    operator=(const basic_tinybuf&) & noexcept = default;
 
   protected:
     // These can be overridden by derived buffer classes.

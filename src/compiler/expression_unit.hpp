@@ -159,7 +159,7 @@ class Expression_Unit
     template<typename XUnitT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XUnitT&&>::value)>
     Expression_Unit&
-    operator=(XUnitT&& xunit)
+    operator=(XUnitT&& xunit) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
       {
         this->m_stor = ::std::forward<XUnitT>(xunit);

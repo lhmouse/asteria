@@ -28,12 +28,10 @@ class mutex
     mutex() noexcept
       { }
 
-    mutex(const mutex&)
-      = delete;
+    mutex(const mutex&) = delete;
 
     mutex&
-    operator=(const mutex&)
-      = delete;
+    operator=(const mutex&) = delete;
 
     ~mutex()
       {
@@ -66,7 +64,7 @@ class mutex::unique_lock
       }
 
     unique_lock&
-    operator=(unique_lock&& other) noexcept
+    operator=(unique_lock&& other) & noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -94,8 +92,7 @@ class mutex::unique_lock
       { return this->m_sth.get() == m.m_mutex;  }
 
     bool
-    is_locking(const mutex&&) const noexcept
-      = delete;
+    is_locking(const mutex&&) const noexcept = delete;
 
     unique_lock&
     unlock() noexcept

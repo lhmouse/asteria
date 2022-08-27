@@ -83,12 +83,10 @@ struct basic_storage
 #endif
       }
 
-    basic_storage(const basic_storage&)
-      = delete;
+    basic_storage(const basic_storage&) = delete;
 
     basic_storage&
-    operator=(const basic_storage&)
-      = delete;
+    operator=(const basic_storage&) = delete;
 
     template<typename... paramsT>
     value_type&
@@ -236,12 +234,10 @@ class storage_handle
     ~storage_handle()
       { this->deallocate();  }
 
-    storage_handle(const storage_handle&)
-      = delete;
+    storage_handle(const storage_handle&) = delete;
 
     storage_handle&
-    operator=(const storage_handle&)
-      = delete;
+    operator=(const storage_handle&) = delete;
 
   private:
     void
@@ -534,7 +530,7 @@ class vector_iterator
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     vector_iterator&
-    operator=(const vector_iterator<vectorT, yvalueT>& other) noexcept
+    operator=(const vector_iterator<vectorT, yvalueT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;

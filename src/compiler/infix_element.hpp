@@ -89,7 +89,7 @@ class Infix_Element
     template<typename XElemT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XElemT&&>::value)>
     Infix_Element&
-    operator=(XElemT&& xelem)
+    operator=(XElemT&& xelem) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XElemT&&>::value)
       {
         this->m_stor = ::std::forward<XElemT>(xelem);

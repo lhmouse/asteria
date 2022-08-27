@@ -77,14 +77,14 @@ class optional
 
     // 19.6.3.3, assignment
     optional&
-    operator=(nullopt_t) noexcept
+    operator=(nullopt_t) & noexcept
       {
         this->m_stor.clear();
         return *this;
       }
 
     optional&
-    operator=(const value_type& value)
+    operator=(const value_type& value) &
       noexcept(conjunction<is_nothrow_copy_constructible<value_type>,
                            is_nothrow_copy_assignable<value_type>>::value)
       {
@@ -96,7 +96,7 @@ class optional
       }
 
     optional&
-    operator=(value_type&& value)
+    operator=(value_type&& value) &
       noexcept(conjunction<is_nothrow_move_constructible<value_type>,
                            is_nothrow_move_assignable<value_type>>::value)
       {
@@ -110,7 +110,7 @@ class optional
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_assignable<value_type&, yvalueT&&>::value)>
     optional&
-    operator=(yvalueT&& yvalue)
+    operator=(yvalueT&& yvalue) &
       noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>,
                            is_nothrow_assignable<value_type&, yvalueT&&>>::value)
       {
@@ -125,7 +125,7 @@ class optional
     ROCKET_ENABLE_IF(is_assignable<value_type&,
                           const typename optional<yvalueT>::value_type&>::value)>
     optional&
-    operator=(const optional<yvalueT>& other)
+    operator=(const optional<yvalueT>& other) &
       noexcept(conjunction<is_nothrow_constructible<value_type,
                                  const typename optional<yvalueT>::value_type&>,
                            is_nothrow_assignable<value_type&,
@@ -144,7 +144,7 @@ class optional
     ROCKET_ENABLE_IF(is_assignable<value_type&,
                          typename optional<yvalueT>::value_type&&>::value)>
     optional&
-    operator=(optional<yvalueT>&& other)
+    operator=(optional<yvalueT>&& other) &
       noexcept(conjunction<is_nothrow_constructible<value_type,
                                 typename optional<yvalueT>::value_type&&>,
                            is_nothrow_assignable<value_type&,

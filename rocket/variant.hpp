@@ -131,7 +131,7 @@ class variant
     template<typename paramT,
     ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
     variant&
-    operator=(const paramT& param)
+    operator=(const paramT& param) &
       noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
                            is_nothrow_copy_constructible<paramT>>::value)
       {
@@ -174,7 +174,7 @@ class variant
     template<typename paramT,
     ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
     variant&
-    operator=(paramT&& param) noexcept(is_nothrow_move_assignable<paramT>::value)
+    operator=(paramT&& param) & noexcept(is_nothrow_move_assignable<paramT>::value)
       {
         auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -194,7 +194,7 @@ class variant
       }
 
     variant&
-    operator=(const variant& other)
+    operator=(const variant& other) &
       noexcept(conjunction<is_nothrow_copy_assignable<altsT>...,
                            is_nothrow_copy_constructible<altsT>...>::value)
       {
@@ -238,7 +238,7 @@ class variant
       }
 
     variant&
-    operator=(variant&& other)
+    operator=(variant&& other) &
       noexcept(conjunction<is_nothrow_move_assignable<altsT>...>::value)
       {
         auto index_old = this->m_index;

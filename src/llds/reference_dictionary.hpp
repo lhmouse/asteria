@@ -29,7 +29,7 @@ class Reference_Dictionary
       { this->swap(other);  }
 
     Reference_Dictionary&
-    operator=(Reference_Dictionary&& other) noexcept
+    operator=(Reference_Dictionary&& other) & noexcept
       { return this->swap(other);  }
 
     Reference_Dictionary&

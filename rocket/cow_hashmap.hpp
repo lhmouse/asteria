@@ -174,7 +174,7 @@ class cow_hashmap
       { }
 
     cow_hashmap&
-    operator=(const cow_hashmap& other) noexcept
+    operator=(const cow_hashmap& other) & noexcept
       {
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
@@ -182,7 +182,7 @@ class cow_hashmap
       }
 
     cow_hashmap&
-    operator=(cow_hashmap&& other) noexcept
+    operator=(cow_hashmap&& other) & noexcept
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
@@ -190,7 +190,7 @@ class cow_hashmap
       }
 
     cow_hashmap&
-    operator=(initializer_list<value_type> init)
+    operator=(initializer_list<value_type> init) &
       {
         this->assign(init.begin(), init.end());
         return *this;

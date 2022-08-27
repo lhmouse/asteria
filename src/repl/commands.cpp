@@ -12,8 +12,7 @@ namespace {
 struct Handler
   {
     virtual
-    ~Handler()
-      = default;
+    ~Handler() = default;
 
     virtual
     const char*

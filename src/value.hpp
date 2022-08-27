@@ -57,7 +57,7 @@ class Value
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
     Value&
-    operator=(XValT&& xval)
+    operator=(XValT&& xval) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                         typename details_value::Valuable<XValT>::via_type&&>::value)
       {
@@ -70,7 +70,7 @@ class Value
       { }
 
     Value&
-    operator=(const Value& other) noexcept
+    operator=(const Value& other) & noexcept
       {
         this->m_stor = other.m_stor;
         return *this;
@@ -84,7 +84,7 @@ class Value
       }
 
     Value&
-    operator=(Value&& other) noexcept
+    operator=(Value&& other) & noexcept
       {
         this->swap(other);
         return *this;

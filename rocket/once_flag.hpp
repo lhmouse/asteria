@@ -23,12 +23,10 @@ class once_flag
     once_flag() noexcept
       { }
 
-    once_flag(const once_flag&)
-      = delete;
+    once_flag(const once_flag&) = delete;
 
     once_flag&
-    operator=(const once_flag&)
-      = delete;
+    operator=(const once_flag&) = delete;
 
   public:
     template<typename funcT, typename... paramsT>

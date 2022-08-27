@@ -32,12 +32,10 @@ class atomic
       : m_val(val)
       { }
 
-    atomic(const atomic&)
-      = delete;
+    atomic(const atomic&) = delete;
 
     atomic&
-    operator=(const atomic&)
-      = delete;
+    operator=(const atomic&) = delete;
 
   private:
     static constexpr

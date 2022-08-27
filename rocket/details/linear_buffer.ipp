@@ -39,12 +39,10 @@ class basic_storage
     ~basic_storage()
       { this->deallocate();  }
 
-    basic_storage(const basic_storage&)
-      = delete;
+    basic_storage(const basic_storage&) = delete;
 
     basic_storage&
-    operator=(const basic_storage&)
-      = delete;
+    operator=(const basic_storage&) = delete;
 
   public:
     const allocator_type&

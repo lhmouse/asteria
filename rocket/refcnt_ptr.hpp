@@ -146,7 +146,7 @@ class refcnt_ptr
       { }
 
     refcnt_ptr&
-    operator=(nullptr_t) noexcept
+    operator=(nullptr_t) & noexcept
       {
         this->reset();
         return *this;
@@ -156,7 +156,7 @@ class refcnt_ptr
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr&
-    operator=(const refcnt_ptr<yelementT>& other) noexcept
+    operator=(const refcnt_ptr<yelementT>& other) & noexcept
       {
         this->reset(other.m_sth.fork());
         return *this;
@@ -166,21 +166,21 @@ class refcnt_ptr
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr&
-    operator=(refcnt_ptr<yelementT>&& other) noexcept
+    operator=(refcnt_ptr<yelementT>&& other) & noexcept
       {
         this->reset(other.m_sth.release());
         return *this;
       }
 
     refcnt_ptr&
-    operator=(const refcnt_ptr& other) noexcept
+    operator=(const refcnt_ptr& other) & noexcept
       {
         this->reset(other.m_sth.fork());
         return *this;
       }
 
     refcnt_ptr&
-    operator=(refcnt_ptr&& other) noexcept
+    operator=(refcnt_ptr&& other) & noexcept
       {
         this->reset(other.m_sth.release());
         return *this;

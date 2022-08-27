@@ -74,12 +74,10 @@ class storage_handle
 #endif
       }
 
-    storage_handle(const storage_handle&)
-      = delete;
+    storage_handle(const storage_handle&) = delete;
 
     storage_handle&
-    operator=(const storage_handle&)
-      = delete;
+    operator=(const storage_handle&) = delete;
 
   public:
     constexpr
@@ -287,7 +285,7 @@ class vector_iterator
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     vector_iterator&
-    operator=(const vector_iterator<vectorT, yvalueT>& other) noexcept
+    operator=(const vector_iterator<vectorT, yvalueT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;

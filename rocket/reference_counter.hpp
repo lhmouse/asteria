@@ -43,7 +43,7 @@ class reference_counter
       { }
 
     reference_counter&
-    operator=(const reference_counter&) noexcept
+    operator=(const reference_counter&) & noexcept
       { return *this;  }
 
     ~reference_counter()

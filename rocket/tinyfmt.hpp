@@ -38,15 +38,12 @@ class basic_tinyfmt
 
   protected:
     // This interface class is stateless.
-    basic_tinyfmt() noexcept
-      = default;
+    basic_tinyfmt() noexcept = default;
 
-    basic_tinyfmt(const basic_tinyfmt&) noexcept
-      = default;
+    basic_tinyfmt(const basic_tinyfmt&) noexcept = default;
 
     basic_tinyfmt&
-    operator=(const basic_tinyfmt&) noexcept
-      = default;
+    operator=(const basic_tinyfmt&) & noexcept = default;
 
   public:
     virtual

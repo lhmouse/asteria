@@ -55,7 +55,7 @@ class Reference
       }
 
     Reference&
-    operator=(const Reference& other) noexcept
+    operator=(const Reference& other) & noexcept
       {
         this->do_copy_partial(other);
         this->m_mods = other.m_mods;
@@ -64,7 +64,7 @@ class Reference
       }
 
     Reference&
-    operator=(Reference&& other) noexcept
+    operator=(Reference&& other) & noexcept
       {
         this->do_swap_partial(other);
         this->m_mods = ::std::move(other.m_mods);

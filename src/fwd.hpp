@@ -34,28 +34,28 @@
     C(const C&) = default;  \
     C(C&&) noexcept = default;  \
     C& operator=(const C&) = default;  \
-    C& operator=(C&&) noexcept = default;  \
+    C& operator=(C&&) & noexcept = default;  \
     ~C()  // no semicolon
 
 #define ASTERIA_MOVABLE_DESTRUCTOR(C)  \
     C(const C&) = delete;  \
     C(C&&) noexcept = default;  \
     C& operator=(const C&) = delete;  \
-    C& operator=(C&&) noexcept = default;  \
+    C& operator=(C&&) & noexcept = default;  \
     ~C()  // no semicolon
 
 #define ASTERIA_NONCOPYABLE_DESTRUCTOR(C)  \
     C(const C&) = delete;  \
     C(C&&) noexcept = delete;  \
     C& operator=(const C&) = delete;  \
-    C& operator=(C&&) noexcept = delete;  \
+    C& operator=(C&&) & noexcept = delete;  \
     ~C()  // no semicolon
 
 #define ASTERIA_NONCOPYABLE_VIRTUAL_DESTRUCTOR(C)  \
     C(const C&) = delete;  \
     C(C&&) noexcept = delete;  \
     C& operator=(const C&) = delete;  \
-    C& operator=(C&&) noexcept = delete;  \
+    C& operator=(C&&) & noexcept = delete;  \
     virtual ~C()  // no semicolon
 
 #define ASTERIA_INCOMPLET(T)  \
@@ -202,20 +202,16 @@ using simple_function = Reference& (Reference& self,  // `this` (in) and return 
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
     explicit
-    Rcbase() noexcept
-      = default;
+    Rcbase() noexcept = default;
 
     explicit
-    Rcbase(const Rcbase&) noexcept
-      = default;
+    Rcbase(const Rcbase&) noexcept = default;
 
     Rcbase&
-    operator=(const Rcbase&) noexcept
-      = default;
+    operator=(const Rcbase&) & noexcept = default;
 
     virtual
-    ~Rcbase()
-      = default;
+    ~Rcbase() = default;
 
     virtual
     void
@@ -226,16 +222,13 @@ template<typename RealT>
 struct rcfwd : virtual Rcbase
   {
     explicit
-    rcfwd() noexcept
-      = default;
+    rcfwd() noexcept = default;
 
     explicit
-    rcfwd(const rcfwd&) noexcept
-      = default;
+    rcfwd(const rcfwd&) noexcept = default;
 
     rcfwd&
-    operator=(const rcfwd&) noexcept
-      = default;
+    operator=(const rcfwd&) & noexcept = default;
 
     virtual
     void
@@ -292,8 +285,7 @@ struct Abstract_Opaque
   : public rcfwd<Abstract_Opaque>
   {
     explicit
-    Abstract_Opaque() noexcept
-      = default;
+    Abstract_Opaque() noexcept = default;
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
 
@@ -327,8 +319,7 @@ struct Abstract_Function
   : public rcfwd<Abstract_Function>
   {
     explicit
-    Abstract_Function() noexcept
-      = default;
+    Abstract_Function() noexcept = default;
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
 
@@ -376,7 +367,7 @@ class cow_opaque
       { }
 
     cow_opaque&
-    operator=(nullptr_t)
+    operator=(nullptr_t) &
       { return this->reset();  }
 
   public:
@@ -529,7 +520,7 @@ class cow_function
       { }
 
     cow_function&
-    operator=(nullptr_t)
+    operator=(nullptr_t) &
       { return this->reset();  }
 
   public:

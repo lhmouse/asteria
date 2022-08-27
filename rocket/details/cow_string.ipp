@@ -63,12 +63,10 @@ struct basic_storage
 #endif
       }
 
-    basic_storage(const basic_storage&)
-      = delete;
+    basic_storage(const basic_storage&) = delete;
 
     basic_storage&
-    operator=(const basic_storage&)
-      = delete;
+    operator=(const basic_storage&) = delete;
   };
 
 template<typename allocT, typename traitsT>
@@ -106,12 +104,10 @@ class storage_handle
     ~storage_handle()
       { this->deallocate();  }
 
-    storage_handle(const storage_handle&)
-      = delete;
+    storage_handle(const storage_handle&) = delete;
 
     storage_handle&
-    operator=(const storage_handle&)
-      = delete;
+    operator=(const storage_handle&) = delete;
 
   private:
     void
@@ -402,7 +398,7 @@ class string_iterator
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     string_iterator&
-    operator=(const string_iterator<stringT, ycharT>& other) noexcept
+    operator=(const string_iterator<stringT, ycharT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;

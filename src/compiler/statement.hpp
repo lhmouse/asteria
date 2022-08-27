@@ -197,7 +197,7 @@ class Statement
     template<typename XStmtT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XStmtT&&>::value)>
     Statement&
-    operator=(XStmtT&& xstmt)
+    operator=(XStmtT&& xstmt) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XStmtT&&>::value)
       {
         this->m_stor = ::std::forward<XStmtT>(xstmt);

@@ -37,8 +37,7 @@ do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
 inline
 void
 do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
-                    const rcfwd_ptr<Variable>&& fwdp_opt)
-  = delete;
+                    const rcfwd_ptr<Variable>&& fwdp_opt) = delete;
 
 }  // namespace
 

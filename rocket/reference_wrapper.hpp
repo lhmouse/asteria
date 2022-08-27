@@ -74,8 +74,7 @@ cref(reference_wrapper<valueT> value) noexcept
 template<typename valueT>
 constexpr
 reference_wrapper<const valueT>
-cref(valueT&& value)
-  = delete;
+cref(valueT&& value) = delete;
 
 template<typename valueT>
 constexpr
@@ -92,8 +91,7 @@ ref(reference_wrapper<valueT> value) noexcept
 template<typename valueT>
 constexpr
 reference_wrapper<valueT>
-ref(valueT&& value)
-  = delete;
+ref(valueT&& value) = delete;
 
 }  // namespace rocket
 

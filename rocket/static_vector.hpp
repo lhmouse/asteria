@@ -113,7 +113,7 @@ class static_vector
       { this->append(init.begin(), init.end());  }
 
     static_vector&
-    operator=(const static_vector& other)
+    operator=(const static_vector& other) &
       noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                            is_nothrow_copy_constructible<value_type>>::value)
       {
@@ -123,7 +123,7 @@ class static_vector
       }
 
     static_vector&
-    operator=(static_vector&& other)
+    operator=(static_vector&& other) &
       noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                            is_nothrow_move_constructible<value_type>>::value)
       {
@@ -133,7 +133,7 @@ class static_vector
       }
 
     static_vector&
-    operator=(initializer_list<value_type> init)
+    operator=(initializer_list<value_type> init) &
       {
         return this->assign(init.begin(), init.end());
       }
