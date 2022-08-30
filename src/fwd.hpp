@@ -156,7 +156,6 @@ class AVMC_Queue;
 // Runtime
 enum AIR_Status : uint8_t;
 enum PTC_Aware : int8_t;  // this is a bitmask!
-
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
@@ -183,7 +182,6 @@ enum Keyword : uint8_t;
 enum Jump_Target : uint8_t;
 enum Precedence : uint8_t;
 enum Xop : uint8_t;
-
 class Compiler_Error;
 class Token;
 class Token_Stream;
