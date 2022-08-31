@@ -1523,7 +1523,7 @@ std_string_url_encode_query(V_string data)
         text.mut(nread - 1) = '+';
         continue;
       }
-      else if(do_is_url_query_char(c))
+      else if(do_is_url_query_char(c) && (c != '~'))
         continue;
 
       // Escape it.
