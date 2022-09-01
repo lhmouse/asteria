@@ -258,44 +258,6 @@ constexpr char s_base32_table[] = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvW
 constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
 constexpr char s_spaces[] = " \f\n\r\t\v";
 
-// http://www.faqs.org/rfcs/rfc3986.html
-// * Bit 0 indicates whether the character is a reserved character.
-// * Bit 1 indicates whether the character is allowed unencoded in queries.
-constexpr char s_url_chars[256] =
-  {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 3, 0, 1, 3, 1, 3, 3, 3, 3, 3, 1, 3, 2, 2, 3,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 0, 1, 0, 3,
-    3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 1, 0, 2,
-    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  };
-
-constexpr
-bool
-do_is_url_invalid_char(char c) noexcept
-  { return s_url_chars[uint8_t(c)] == 0;  }
-
-constexpr
-bool
-do_is_url_unreserved_char(char c) noexcept
-  { return s_url_chars[uint8_t(c)] == 2;  }
-
-constexpr
-bool
-do_is_url_query_char(char c) noexcept
-  { return s_url_chars[uint8_t(c)] & 2;  }
-
 const char*
 do_xstrchr(const char* str, char c) noexcept
   {
@@ -1448,20 +1410,21 @@ std_string_url_encode(V_string data)
   {
     // Only modify the string as needed, without causing copies on write.
     V_string text = data;
+    char pseq[4] = { "%" };
     size_t nread = 0;
     while(nread != text.size()) {
-      // Check whether this character has no special meaning.
       char c = text[nread++];
-      if(do_is_url_unreserved_char(c))
+
+      // Check for characters that don't need escaping.
+      if(((c >= '0') && (c <= '9')) || ((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z')))
+        continue;
+
+      if((c == '-') || (c == '_') || (c == '~') || (c == '.'))
         continue;
 
       // Escape it.
-      char pseq[3];
-      pseq[0] = '%';
       pseq[1] = s_base16_table[(c >> 3) & 0x1E];
       pseq[2] = s_base16_table[(c << 1) & 0x1E];
-
-      // Replace this character with the escape string.
       text.replace(nread - 1, 1, pseq, 3);
       nread += 2;
     }
@@ -1475,15 +1438,17 @@ std_string_url_decode(V_string text)
     V_string data = text;
     size_t nread = 0;
     while(nread != data.size()) {
-      // Look for a character.
       char c = data[nread++];
-      if(do_is_url_invalid_char(c)) {
-        ASTERIA_THROW_RUNTIME_ERROR(("Invalid character in URL (character `$1`)"), c);
-      }
-      else if(c != '%')
+
+      // Check for control characters.
+      if(((c >= 0x00) && (c <= 0x1F)) || (c == 0x7F))
+        ASTERIA_THROW_RUNTIME_ERROR(("Invalid character in URL (character `$1`)"), (int) c);
+
+      // Check for a percent sign followed by two hexadecimal characters.
+      // Everything else is left intact.
+      if(c != '%')
         continue;
 
-      // Two hexadecimal characters shall follow.
       if(data.size() - nread < 2)
         ASTERIA_THROW_RUNTIME_ERROR(("No enough hexadecimal digits after `%`"));
 
@@ -1515,25 +1480,28 @@ std_string_url_encode_query(V_string data)
   {
     // Only modify the string as needed, without causing copies on write.
     V_string text = data;
+    char pseq[4] = { "%" };
     size_t nread = 0;
     while(nread != text.size()) {
-      // Check whether this character has no special meaning.
       char c = text[nread++];
+
+      // Check for characters that don't need escaping.
+      if(((c >= '0') && (c <= '9')) || ((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z')))
+        continue;
+
+      if((c == '-') || (c == '_') || (c == '.'))
+        continue;
+
+      // Encode spaces specially.
       if(c == ' ') {
         text.mut(nread - 1) = '+';
         continue;
       }
-      else if(do_is_url_query_char(c) && (c != '~'))
-        continue;
 
       // Escape it.
-      char rep[3];
-      rep[0] = '%';
-      rep[1] = s_base16_table[(c >> 3) & 0x1E];
-      rep[2] = s_base16_table[(c << 1) & 0x1E];
-
-      // Replace this character with the escape string.
-      text.replace(nread - 1, 1, rep, 3);
+      pseq[1] = s_base16_table[(c >> 3) & 0x1E];
+      pseq[2] = s_base16_table[(c << 1) & 0x1E];
+      text.replace(nread - 1, 1, pseq, 3);
       nread += 2;
     }
     return text;
@@ -1546,16 +1514,21 @@ std_string_url_decode_query(V_string text)
     V_string data = text;
     size_t nread = 0;
     while(nread != data.size()) {
-      // Look for a character.
       char c = data[nread++];
+
+      // Check for control characters.
+      if(((c >= 0x00) && (c <= 0x1F)) || (c == 0x7F))
+        ASTERIA_THROW_RUNTIME_ERROR(("Invalid character in URL (character `$1`)"), (int) c);
+
+      // Decode spaces specially.
       if(c == '+') {
         data.mut(nread - 1) = ' ';
         continue;
       }
-      else if(do_is_url_invalid_char(c)) {
-        ASTERIA_THROW_RUNTIME_ERROR(("Invalid character in URL (character `$1`)"), c);
-      }
-      else if(c != '%')
+
+      // Check for a percent sign followed by two hexadecimal characters.
+      // Everything else is left intact.
+      if(c != '%')
         continue;
 
       // Two hexadecimal characters shall follow.
