@@ -267,8 +267,9 @@ int main()
         assert std.string.url_decode("abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcdАВГД甲乙丙丁";
         assert std.string.url_decode("%20%09%60~%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F") == " \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./";
         assert std.string.url_decode("+%09%60%7E%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F") == "+\t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./";
-        assert catch( std.string.url_decode("not valid \x1F") ) != null;
-        assert catch( std.string.url_decode("not valid \x7F") ) != null;
+        assert catch( std.string.url_decode("invalid ") ) != null;
+        assert catch( std.string.url_decode("invalid\x1F") ) != null;
+        assert catch( std.string.url_decode("invalid\x7F") ) != null;
 
         assert std.string.url_encode_query("") == "";
         assert std.string.url_encode_query("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
@@ -278,8 +279,9 @@ int main()
         assert std.string.url_decode_query("abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcdАВГД甲乙丙丁";
         assert std.string.url_decode_query("%20%09%60~%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F") == " \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./";
         assert std.string.url_decode_query("+%09%60%7E%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F") == " \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./";
-        assert catch( std.string.url_decode_query("not valid \x1F") ) != null;
-        assert catch( std.string.url_decode_query("not valid \x7F") ) != null;
+        assert catch( std.string.url_decode_query("invalid ") ) != null;
+        assert catch( std.string.url_decode_query("invalid\x1F") ) != null;
+        assert catch( std.string.url_decode_query("invalid\x7F") ) != null;
 
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";

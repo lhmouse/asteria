@@ -1440,8 +1440,8 @@ std_string_url_decode(V_string text)
     while(nread != data.size()) {
       char c = data[nread++];
 
-      // Check for control characters.
-      if(((c >= 0x00) && (c <= 0x1F)) || (c == 0x7F))
+      // Check for control characters and spaces.
+      if(((c >= 0) && (c <= ' ')) || (c == '\x7F') || (c == '\xFF'))
         ASTERIA_THROW_RUNTIME_ERROR(("Invalid character in URL (character `$1`)"), (int) c);
 
       // Check for a percent sign followed by two hexadecimal characters.
@@ -1516,8 +1516,8 @@ std_string_url_decode_query(V_string text)
     while(nread != data.size()) {
       char c = data[nread++];
 
-      // Check for control characters.
-      if(((c >= 0x00) && (c <= 0x1F)) || (c == 0x7F))
+      // Check for control characters and spaces.
+      if(((c >= 0) && (c <= ' ')) || (c == '\x7F') || (c == '\xFF'))
         ASTERIA_THROW_RUNTIME_ERROR(("Invalid character in URL (character `$1`)"), (int) c);
 
       // Decode spaces specially.
