@@ -271,9 +271,9 @@ int main()
         assert catch( std.string.url_decode("invalid\x1F") ) != null;
         assert catch( std.string.url_decode("invalid\x7F") ) != null;
 
-        assert std.string.url_encode_query("") == "";
-        assert std.string.url_encode_query("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
-        assert std.string.url_encode_query(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "+%09%60%7E%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F";
+        assert std.string.url_query_encode("") == "";
+        assert std.string.url_query_encode("abcdАВГД甲乙丙丁") == "abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81";
+        assert std.string.url_query_encode(" \t`~!@#$%^&*()_+-={}|[]\\:\";\'<>?,./") == "+%09%60%7E%21%40%23%24%25%5E%26%2A%28%29_%2B-%3D%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.%2F";
 
         assert std.string.url_decode_query("") == "";
         assert std.string.url_decode_query("abcd%D0%90%D0%92%D0%93%D0%94%E7%94%B2%E4%B9%99%E4%B8%99%E4%B8%81") == "abcdАВГД甲乙丙丁";

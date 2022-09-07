@@ -567,7 +567,7 @@
 
 	* Throws an exception if the string contains invalid characters.
 
-`std.string.url_encode_query(data)`
+`std.string.url_query_encode(data)`
 
 	* Encodes bytes in `data` according to IETF RFC 3986. This
 	  function behaves like `url_encode()`, except that characters
