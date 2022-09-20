@@ -40,9 +40,9 @@ class Abstract_Context
     // mentioned.
     virtual
     Reference*
-    do_create_lazy_reference(Reference* hint_opt, const phsh_string& name) const = 0;
+    do_create_lazy_reference_opt(Reference* hint_opt, const phsh_string& name) const = 0;
 
-    // This function is called by `do_create_lazy_reference()` to avoid
+    // This function is called by `do_create_lazy_reference_opt()` to avoid
     // possibility of infinite recursion, which would otherwise be caused
     // if `mut_named_reference()` was called instead.
     Reference&
@@ -78,7 +78,7 @@ class Abstract_Context
         if(!name.rdstr().starts_with(sref("__")))
           return nullptr;
 
-        qref = this->do_create_lazy_reference(nullptr, name);
+        qref = this->do_create_lazy_reference_opt(nullptr, name);
         return qref;
       }
 
@@ -93,7 +93,7 @@ class Abstract_Context
         if(!name.rdstr().starts_with(sref("__")))
           return nullptr;
 
-        qref = this->do_create_lazy_reference(nullptr, name);
+        qref = this->do_create_lazy_reference_opt(nullptr, name);
         return qref;
       }
 
@@ -108,7 +108,7 @@ class Abstract_Context
         if(!name.rdstr().starts_with(sref("__")))
           return pair;
 
-        this->do_create_lazy_reference(pair.first, name);
+        this->do_create_lazy_reference_opt(pair.first, name);
         return pair;
       }
 
