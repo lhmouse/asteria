@@ -154,6 +154,7 @@ void
 install_verbose_hooks()
   {
     repl_script.global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
+    repl_script.options().verbose_single_step_traps = true;
   }
 
 }  // namespace asteria

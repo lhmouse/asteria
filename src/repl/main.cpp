@@ -224,9 +224,6 @@ main(int argc, char** argv)
       install_verbose_hooks();
     }
 
-    if(repl_verbose)
-      repl_script.options().verbose_single_step_traps = true;
-
     // In non-interactive mode, read the script, execute it, then exit.
     if(!repl_interactive)
       load_and_execute_single_noreturn();
