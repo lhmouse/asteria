@@ -16,30 +16,6 @@
 #include "../utils.hpp"
 
 namespace asteria {
-namespace {
-
-inline
-bool
-do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
-                    const rcfwd_ptr<Variable>& fwdp_opt)
-  {
-    auto var = unerase_pointer_cast<Variable>(fwdp_opt);
-    if(!var)
-      return false;
-
-    if(!staged.insert(&fwdp_opt, var))
-      return false;  // already added.
-
-    temp.insert(var.get(), var);
-    return true;
-  }
-
-inline
-void
-do_add_variable_aux(Variable_HashMap& staged, Variable_HashMap& temp,
-                    const rcfwd_ptr<Variable>&& fwdp_opt) = delete;
-
-}  // namespace
 
 const Value&
 Reference::
@@ -209,7 +185,10 @@ Reference::
 get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     this->m_value.get_variables(staged, temp);
-    do_add_variable_aux(staged, temp, this->m_var);
+
+    if(auto var = unerase_pointer_cast<Variable>(this->m_var))
+      if(staged.insert(&(this->m_var), var))
+        temp.insert(var.get(), var);
   }
 
 Value&

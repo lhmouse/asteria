@@ -102,16 +102,19 @@ class Value
       }
 
   private:
-    ROCKET_COLD void
+    ROCKET_COLD
+    void
     do_destroy_variant_slow() noexcept;
 
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
-    ROCKET_COLD ROCKET_PURE Compare
+    ROCKET_COLD ROCKET_PURE
+    Compare
     do_compare_slow(const Value& other) const noexcept;
 
-    [[noreturn]] void
+    [[noreturn]]
+    void
     do_throw_type_mismatch(const char* desc) const;
 
   public:
@@ -386,25 +389,23 @@ class Value
           return compare_unordered;
 
         // Compare values of the same type.
-        switch((uint32_t) this->type()) {
-          case type_boolean:
-            return details_value::do_3way_compare<int>(
-                             this->as_boolean(), other.as_boolean());
+        if(this->type() == type_boolean)
+          return details_value::do_3way_compare<int>(
+                           this->as_boolean(), other.as_boolean());
 
-          case type_integer:
-            return details_value::do_3way_compare<V_integer>(
-                             this->as_integer(), other.as_integer());
+        if(this->type() == type_integer)
+          return details_value::do_3way_compare<V_integer>(
+                           this->as_integer(), other.as_integer());
 
-          case type_string:
-            return details_value::do_3way_compare<int>(
-                          this->as_string().compare(other.as_string()), 0);
+        if(this->type() == type_string)
+          return details_value::do_3way_compare<int>(
+                        this->as_string().compare(other.as_string()), 0);
 
-          case type_array:
-            return this->do_compare_slow(other);
+        if(this->type() == type_array)
+          return this->do_compare_slow(other);
 
-          default:  // opaque, function, object
-            return compare_unordered;
-        }
+        // All the others are uncomparable.
+        return compare_unordered;
       }
 
     // These are miscellaneous interfaces for debugging.

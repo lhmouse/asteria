@@ -138,6 +138,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         if(!staged.insert(qval, nullptr))
           break;
 
+        // Collect variables recursively.
         qval->as_opaque().get_variables(staged, temp);
         break;
 
@@ -145,6 +146,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         if(!staged.insert(qval, nullptr))
           break;
 
+        // Collect variables recursively.
         qval->as_function().get_variables(staged, temp);
         break;
 
@@ -152,6 +154,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         if(!staged.insert(qval, nullptr))
           break;
 
+        // Push this element onto `stack`.
         const auto& altr = qval->as_array();
         Rbr_array elema = { &altr, altr.begin() };
         if(elema.curp != altr.end()) {
@@ -168,6 +171,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         if(!staged.insert(qval, nullptr))
           break;
 
+        // Push this element onto `stack`.
         const auto& altr = qval->as_object();
         Rbr_object elemo = { &altr, altr.begin() };
         if(elemo.curp != altr.end()) {
