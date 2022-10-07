@@ -115,14 +115,14 @@ void
 throw_runtime_error(const char* file, long line, const char* func, cow_string&& msg);
 
 #define ASTERIA_TERMINATE(TEMPLATE, ...)  \
-    (::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
+    (::asteria::write_log_to_stderr(__FILE_NAME__, __LINE__, __FUNCTION__,  \
        ::asteria::format_string(  \
          (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
        ),  \
      ::std::terminate())
 
 #define ASTERIA_THROW(TEMPLATE, ...)  \
-    (::asteria::throw_runtime_error(__FILE__, __LINE__, __func__,  \
+    (::asteria::throw_runtime_error(__FILE_NAME__, __LINE__, __FUNCTION__,  \
        ::asteria::format_string(  \
          (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
        ),  \
