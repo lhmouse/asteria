@@ -1,12 +1,12 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../src/precompiled.ipp"
 #include "fwd.hpp"
-#include "../simple_script.hpp"
-#include "../source_location.hpp"
-#include "../runtime/abstract_hooks.hpp"
-#include "../utils.hpp"
+#include "../src/simple_script.hpp"
+#include "../src/source_location.hpp"
+#include "../src/runtime/abstract_hooks.hpp"
+#include "../src/utils.hpp"
 #include <stdarg.h>  // va_list, va_start(), va_end()
 #include <stdlib.h>  // exit(), quick_exit()
 #include <stdio.h>  // fflush(), fprintf(), stderr

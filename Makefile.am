@@ -46,6 +46,7 @@ include doc/Makefile.inc.am
 ## Programs and libraries
 include rocket/Makefile.inc.am
 include src/Makefile.inc.am
+include repl/Makefile.inc.am
 
 ## Tests
 include test/Makefile.inc.am

@@ -1,0 +1,10 @@
+bin_PROGRAMS += bin/asteria
+bin_asteria_SOURCES =  \
+  %reldir%/fwd.hpp  \
+  %reldir%/globals.cpp  \
+  %reldir%/single.cpp  \
+  %reldir%/interact.cpp  \
+  %reldir%/commands.cpp  \
+  %reldir%/main.cpp  \
+  %reldir%/editline.cpp  \
+  ${END}

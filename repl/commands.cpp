@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../src/precompiled.ipp"
 #include "fwd.hpp"
-#include "../utils.hpp"
-#include "../../rocket/tinybuf_file.hpp"
+#include "../src/utils.hpp"
+#include "../rocket/tinybuf_file.hpp"
 
 namespace asteria {
 namespace {

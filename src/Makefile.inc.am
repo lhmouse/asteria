@@ -149,16 +149,6 @@ lib_libasteria_la_LIBADD =  \
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info @abi_major@:@abi_minor@
 
-bin_PROGRAMS += bin/asteria
-bin_asteria_SOURCES =  \
-  %reldir%/repl/globals.cpp  \
-  %reldir%/repl/single.cpp  \
-  %reldir%/repl/interact.cpp  \
-  %reldir%/repl/commands.cpp  \
-  %reldir%/repl/main.cpp  \
-  %reldir%/repl/editline.cpp  \
-  ${END}
-
 if enable_pch
 lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
 BUILT_SOURCES += %reldir%/precompiled.xipp
