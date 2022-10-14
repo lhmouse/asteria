@@ -36,7 +36,6 @@ class cow_hashmap;
  * 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
  *    nor move-assignable.
  * 8. `erase()` may move elements around and invalidate iterators.
- * 9. `operator[]()` is not provided.
 **/
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
@@ -608,6 +607,13 @@ class cow_hashmap
     insert_or_assign(const_iterator /*hint*/, ykeyT&& ykey, ymappedT&& ymapped)
       {
         return this->insert_or_assign(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped)).first;
+      }
+
+    template<typename ykeyT>
+    mapped_type&
+    operator[](ykeyT&& ykey)
+      {
+        return this->try_emplace(::std::forward<ykeyT>(ykey)).first->second;
       }
 
     // N.B. This function may throw `std::bad_alloc`.
