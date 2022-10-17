@@ -440,7 +440,7 @@ class cow_hashmap
       {
         // Calculate the minimum bucket count to reserve. This must include all existent elements.
         // Don't reallocate if the storage is unique and there is enough room.
-        size_type rcap = this->m_sth.round_up_capacity(noadl::max(this->size(), n / storage_handle::max_load_factor_reciprocal));
+        size_type rcap = this->m_sth.round_up_capacity(noadl::max(this->size(), n));
         if(this->capacity() == rcap)
           return *this;
 
