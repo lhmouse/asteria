@@ -29,10 +29,9 @@ autoreconf -ifv
 cd $(mktemp -d)
 trap 'rm -rf ~+ || true' EXIT
 ~-/configure --disable-silent-rules --enable-debug-checks --disable-static
-make -j$(nproc)
 
 # test
-if ! make -j$(nproc) check
+if ! make -j$(nproc) distcheck
 then
   cat ./test-suite.log
   exit ${_fail}
