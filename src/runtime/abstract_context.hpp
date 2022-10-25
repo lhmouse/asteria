@@ -127,5 +127,4 @@ class Abstract_Context
   };
 
 }  // namespace asteria
-
 #endif

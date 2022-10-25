@@ -120,5 +120,4 @@ swap(Module_Loader::Unique_Stream& lhs, Module_Loader::Unique_Stream& rhs) noexc
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

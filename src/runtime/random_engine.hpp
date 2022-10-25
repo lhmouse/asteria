@@ -72,5 +72,4 @@ class Random_Engine final
   };
 
 }  // namespace asteria
-
 #endif

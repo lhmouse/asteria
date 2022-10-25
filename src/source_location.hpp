@@ -65,5 +65,4 @@ operator<<(tinyfmt& fmt, const Source_Location& sloc)
   { return sloc.print(fmt);  }
 
 }  // namespace asteria
-
 #endif

@@ -152,5 +152,4 @@ class Argument_Reader
       }%*[](__VA_ARGS__)
 
 }  // namespace asteria
-
 #endif

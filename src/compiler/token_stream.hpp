@@ -109,5 +109,4 @@ class Token_Stream
   };
 
 }  // namespace asteria
-
 #endif

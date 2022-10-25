@@ -433,5 +433,4 @@ operator<<(tinyfmt& fmt, const Value& value)
   { return value.print(fmt);  }
 
 }  // namespace asteria
-
 #endif

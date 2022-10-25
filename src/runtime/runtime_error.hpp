@@ -140,5 +140,4 @@ class Runtime_Error
           (::asteria::make_string_template TEMPLATE) ,##__VA_ARGS__))
 
 }  // namespace asteria
-
 #endif

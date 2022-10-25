@@ -205,5 +205,4 @@ void
 create_bindings_checksum(V_object& result, API_Version version);
 
 }  // namespace asteria
-
 #endif

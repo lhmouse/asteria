@@ -56,5 +56,4 @@ class Analytic_Context
   };
 
 }  // namespace asteria
-
 #endif

@@ -100,5 +100,4 @@ enum PTC_Aware : int8_t
   };
 
 }  // namespace asteria
-
 #endif

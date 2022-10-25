@@ -170,5 +170,4 @@ enum Precedence : uint8_t
   };
 
 }  // namespace asteria
-
 #endif

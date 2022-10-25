@@ -127,5 +127,4 @@ swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

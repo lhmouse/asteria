@@ -112,5 +112,4 @@ operator!=(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 
 }  // namespace asteria
-
 #endif

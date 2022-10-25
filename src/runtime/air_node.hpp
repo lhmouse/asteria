@@ -399,5 +399,4 @@ swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

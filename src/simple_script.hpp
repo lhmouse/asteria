@@ -97,5 +97,4 @@ class Simple_Script
   };
 
 }  // namespace asteria
-
 #endif

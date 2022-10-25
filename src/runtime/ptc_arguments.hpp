@@ -82,5 +82,4 @@ class PTC_Arguments final
   };
 
 }  // namespace asteria
-
 #endif

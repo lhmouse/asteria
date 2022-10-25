@@ -237,5 +237,4 @@ swap(Statement& lhs, Statement& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

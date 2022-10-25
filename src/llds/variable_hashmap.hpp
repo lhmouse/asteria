@@ -252,5 +252,4 @@ swap(Variable_HashMap& lhs, Variable_HashMap& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

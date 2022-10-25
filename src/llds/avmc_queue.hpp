@@ -145,5 +145,4 @@ swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

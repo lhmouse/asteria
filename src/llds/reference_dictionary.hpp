@@ -263,5 +263,4 @@ swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

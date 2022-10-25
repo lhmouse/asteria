@@ -55,5 +55,4 @@ class Backtrace_Frame
   };
 
 }  // namespace asteria
-
 #endif

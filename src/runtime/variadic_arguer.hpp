@@ -74,5 +74,4 @@ class Variadic_Arguer final
   };
 
 }  // namespace asteria
-
 #endif

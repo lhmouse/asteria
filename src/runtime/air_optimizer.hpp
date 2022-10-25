@@ -75,5 +75,4 @@ class AIR_Optimizer
   };
 
 }  // namespace asteria
-
 #endif

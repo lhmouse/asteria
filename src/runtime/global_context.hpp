@@ -121,5 +121,4 @@ class Global_Context
   };
 
 }  // namespace asteria
-
 #endif

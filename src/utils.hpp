@@ -265,5 +265,4 @@ uint64_t
 generate_random_seed() noexcept;
 
 }  // namespace asteria
-
 #endif

@@ -88,5 +88,4 @@ class Variable final
   };
 
 }  // namespace asteria
-
 #endif

@@ -76,5 +76,4 @@ class Statement_Sequence
   };
 
 }  // namespace asteria
-
 #endif

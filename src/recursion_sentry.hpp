@@ -75,5 +75,4 @@ class Recursion_Sentry
   };
 
 }  // namespace asteria
-
 #endif

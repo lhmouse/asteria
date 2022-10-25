@@ -43,5 +43,4 @@ class Instantiated_Function final
   };
 
 }  // namespace asteria
-
 #endif

@@ -71,5 +71,4 @@ struct Abstract_Hooks
   };
 
 }  // namespace asteria
-
 #endif

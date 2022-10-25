@@ -842,5 +842,4 @@ extern const unsigned char null_value_storage[];
 static const Value& null_value = reinterpret_cast<const Value&>(null_value_storage);
 
 }  // namespace asteria
-
 #endif

@@ -52,5 +52,4 @@ void
 create_bindings_io(V_object& result, API_Version version);
 
 }  // namespace asteria
-
 #endif

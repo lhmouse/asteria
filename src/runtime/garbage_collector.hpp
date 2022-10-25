@@ -84,5 +84,4 @@ class Garbage_Collector final
   };
 
 }  // namespace asteria
-
 #endif

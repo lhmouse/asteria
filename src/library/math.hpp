@@ -111,5 +111,4 @@ void
 create_bindings_math(V_object& result, API_Version version);
 
 }  // namespace asteria
-
 #endif

@@ -173,5 +173,4 @@ operator<<(tinyfmt& fmt, const Token& token)
   { return token.print(fmt);  }
 
 }  // namespace asteria
-
 #endif

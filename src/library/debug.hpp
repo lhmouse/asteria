@@ -21,5 +21,4 @@ void
 create_bindings_debug(V_object& result, API_Version version);
 
 }  // namespace asteria
-
 #endif

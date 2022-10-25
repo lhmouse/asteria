@@ -126,5 +126,4 @@ class Executive_Context
   };
 
 }  // namespace asteria
-
 #endif

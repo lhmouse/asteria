@@ -189,5 +189,4 @@ swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif

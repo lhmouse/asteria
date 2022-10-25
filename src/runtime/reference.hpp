@@ -335,5 +335,4 @@ swap(Reference& lhs, Reference& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
-
 #endif
