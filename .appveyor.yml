@@ -3,7 +3,8 @@ image:
 
 environment:
   PATH: C:\msys64\usr\bin
-  CXX: g++
+  CONFIGURE_HOST: x86_64-pc-linux
+  CONFIGURE_OPTS: --disable-static
 
 install:
   - cmd: pacman -S --noconfirm autoconf automake libtool gcc gettext make python3 parallel libiconv-devel

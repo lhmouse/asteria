@@ -5,6 +5,8 @@ task:
   environment:
     LANG: C.UTF-8
     DEBIAN_FRONTEND: noninteractive
+    CONFIGURE_HOST: x86_64-pc-linux
+    CONFIGURE_OPTS: --disable-static
 
   build_script:
     - apt-get update
