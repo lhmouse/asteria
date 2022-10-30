@@ -14,7 +14,7 @@ trap 'rm -rf ~+ || true' EXIT
 ~-/configure --disable-silent-rules --enable-debug-checks --{build,host}=${CONFIGURE_HOST} ${CONFIGURE_OPTS}
 
 # test
-if ! make -j$(nproc) distcheck
+if ! make -j$(nproc) distcheck DISTCHECK_CONFIGURE_FLAGS=${CONFIGURE_OPTS}
 then
   cat ./test-suite.log
   exit 1
