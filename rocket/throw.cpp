@@ -24,14 +24,13 @@ sprintf_and_throw(const char* fmt, ...)
     if(ret < 0)
       throw ::std::bad_alloc();
 
-    unique_ptr<char, void (void*)> uptr(str, ::free);
-
     // Remove trailing new line characters.
-    size_t off = (uint32_t) ret;
-    while((off != 0) && (str[--off] == '\n'))
-      str[off] = 0;
+    size_t ep = (uint32_t) ret;
+    while((ep != 0) && (str[--ep] == '\n'))
+      str[ep] = 0;
 
     // Construct the exception object and throw it.
+    unique_ptr<char, void (void*)> uptr(str, ::free);
     throw exceptT(str);
   }
 
