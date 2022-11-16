@@ -2,7 +2,7 @@
 
 # setup
 export CXX=${CXX:-"g++"}
-export CXXFLAGS='-O2 -g0'
+export CXXFLAGS='-O0 -g0'
 
 # build
 ${CXX} --version
