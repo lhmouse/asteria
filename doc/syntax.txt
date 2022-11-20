@@ -183,12 +183,12 @@ prefix-operator ::=
 	"__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" | "__popcnt"
 
 primary-expression ::=
-	identifier | global-identifier | literal | "this" | closure-function | unnamed-array |
+	identifier | extern-identifier | literal | "this" | closure-function | unnamed-array |
 	unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
 	catch-expression | variadic-function-call | import-function-call
 
-global-identifier ::=
-	"__global" identifier
+extern-identifier ::=
+	"extern" identifier
 
 closure-function ::=
 	"func" "(" parameter-list ? ")" closure-body

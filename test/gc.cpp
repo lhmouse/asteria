@@ -51,7 +51,7 @@ int main()
         sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-          ref gr -> __global foreign_variable;
+          ref gr -> extern foreign_variable;
 
           (func() {
             (func() {

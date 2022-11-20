@@ -337,8 +337,8 @@ stringify_keyword(Keyword kwrd) noexcept
       case keyword_fma:
         return "__fma";
 
-      case keyword_global:
-        return "__global";
+      case keyword_extern:
+        return "extern";
 
       case keyword_vcall:
         return "__vcall";

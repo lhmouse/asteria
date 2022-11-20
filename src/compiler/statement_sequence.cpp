@@ -1572,10 +1572,10 @@ do_accept_local_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstr
 bool
 do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    // global-identifier ::=
-    //   "__global" identifier
+    // extern-identifier ::=
+    //   "extern" identifier
     auto sloc = tstrm.next_sloc();
-    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_global });
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_extern });
     if(!qkwrd)
       return false;
 
@@ -2060,7 +2060,7 @@ bool
 do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
-    //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array |
+    //   identifier | extern-identifier | literal | "this" | closure-function | unnamed-array |
     //   unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
     //   catch-expression | variadic-function-call | import-function-call
     if(do_accept_local_reference(units, tstrm))

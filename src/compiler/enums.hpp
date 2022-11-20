@@ -126,7 +126,7 @@ enum Keyword : uint8_t
     keyword_iceil     = 43,  // __iceil
     keyword_itrunc    = 44,  // __itrunc
     keyword_fma       = 45,  // __fma
-    keyword_global    = 46,  // __global
+    keyword_extern    = 46,  // extern
     keyword_vcall     = 47,  // __vcall
     keyword_lzcnt     = 48,  // __lzcnt
     keyword_tzcnt     = 49,  // __tzcnt
