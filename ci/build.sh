@@ -16,6 +16,6 @@ trap 'rm -rf ~+ || true' EXIT
 # test
 if ! make -j$(nproc) distcheck DISTCHECK_CONFIGURE_FLAGS=${CONFIGURE_OPTS}
 then
-  cat ./test-suite.log
+  find . -name 'test-suite.log' -exec cat '{}' ';'
   exit 1
 fi
