@@ -7,7 +7,7 @@ environment:
   CONFIGURE_OPTS: --disable-static
 
 install:
-  - cmd: pacman -S --noconfirm autoconf automake libtool gcc gettext make python3 parallel libiconv-devel
+  - cmd: pacman -S --noconfirm autoconf automake libtool parallel libiconv-devel
   - cmd: pacman -S --noconfirm libedit-devel pcre2-devel openssl-devel zlib-devel
 
 build:
