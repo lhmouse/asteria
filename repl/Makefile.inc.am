@@ -1,4 +1,5 @@
 bin_PROGRAMS += bin/asteria
+
 bin_asteria_SOURCES =  \
   %reldir%/fwd.hpp  \
   %reldir%/globals.cpp  \

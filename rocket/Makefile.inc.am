@@ -1,3 +1,5 @@
+noinst_LTLIBRARIES += lib/librocket.la
+
 nobase_include_HEADERS +=  \
   %reldir%/details/compiler_clang.i  \
   %reldir%/details/compiler_gcc.i  \
@@ -63,7 +65,6 @@ nobase_include_HEADERS +=  \
   %reldir%/bit_mask.hpp  \
   ${END}
 
-noinst_LTLIBRARIES += lib/librocket.la
 lib_librocket_la_SOURCES =  \
   %reldir%/assert.cpp  \
   %reldir%/throw.cpp  \
@@ -80,5 +81,3 @@ lib_librocket_la_SOURCES =  \
   %reldir%/format.cpp  \
   %reldir%/prehashed_string.cpp  \
   ${END}
-
-lib_librocket_la_CXXFLAGS = ${AM_CXXFLAGS}

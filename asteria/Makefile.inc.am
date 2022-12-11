@@ -1,3 +1,5 @@
+lib_LTLIBRARIES += lib/libasteria.la
+
 nobase_include_HEADERS +=  \
   %reldir%/details/utils.ipp  \
   %reldir%/details/value.ipp  \
@@ -60,8 +62,6 @@ nobase_include_HEADERS +=  \
   %reldir%/library/ini.hpp  \
   %reldir%/library/csv.hpp  \
   ${END}
-
-lib_LTLIBRARIES += lib/libasteria.la
 
 lib_libasteria_la_SOURCES =  \
   %reldir%/version.h.in  \

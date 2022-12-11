@@ -1,16 +1,3 @@
-check_HEADERS +=  \
-  %reldir%/utils.hpp  \
-  ${END}
-
-EXTRA_DIST +=  \
-  %reldir%/checksum.txt  \
-  %reldir%/import_recursive.txt  \
-  %reldir%/import_sub.txt  \
-  %reldir%/sample.conf  \
-  %reldir%/test.ini  \
-  %reldir%/test.csv  \
-  ${END}
-
 check_PROGRAMS +=  \
   %reldir%/utils.test  \
   %reldir%/value.test  \
@@ -60,4 +47,14 @@ check_PROGRAMS +=  \
   %reldir%/var_mod.test  \
   %reldir%/ini.test  \
   %reldir%/csv.test  \
+  ${END}
+
+EXTRA_DIST +=  \
+  %reldir%/utils.hpp  \
+  %reldir%/checksum.txt  \
+  %reldir%/import_recursive.txt  \
+  %reldir%/import_sub.txt  \
+  %reldir%/sample.conf  \
+  %reldir%/test.ini  \
+  %reldir%/test.csv  \
   ${END}
