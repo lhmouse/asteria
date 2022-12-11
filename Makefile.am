@@ -17,9 +17,6 @@ AM_CPPFLAGS = -pipe -Wall -Wextra -Iasteria -U_FORTIFY_SOURCE  \
 AM_CXXFLAGS = -std=c++17 -fvisibility-inlines-hidden  \
   -Wno-redundant-move -Werror={non-virtual-dtor,missing-declarations}
 
-AM_LDFLAGS =  \
-  -Wl,--no-undefined
-
 AM_DEFAULT_SOURCE_EXT = .cpp
 SUFFIXES = .xipp
 LDADD = lib/libasteria.la
