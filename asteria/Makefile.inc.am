@@ -156,3 +156,6 @@ bin_asteria_SOURCES =  \
   %reldir%/repl/main.cpp  \
   %reldir%/repl/editline.cpp  \
   ${END}
+
+bin_asteria_CXXFLAGS = ${AM_CXXFLAGS}
+bin_asteria_LDADD = lib/libasteria.la
