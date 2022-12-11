@@ -1,4 +1,5 @@
 lib_LTLIBRARIES += lib/libasteria.la
+bin_PROGRAMS += bin/asteria
 
 nobase_include_HEADERS +=  \
   %reldir%/details/utils.ipp  \
@@ -145,3 +146,13 @@ endif
 
 clean-local:
 	-rm -rf %reldir%/precompiled.x*
+
+bin_asteria_SOURCES =  \
+  %reldir%/repl/fwd.hpp  \
+  %reldir%/repl/globals.cpp  \
+  %reldir%/repl/single.cpp  \
+  %reldir%/repl/interact.cpp  \
+  %reldir%/repl/commands.cpp  \
+  %reldir%/repl/main.cpp  \
+  %reldir%/repl/editline.cpp  \
+  ${END}
