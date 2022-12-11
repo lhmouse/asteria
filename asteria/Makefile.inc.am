@@ -123,7 +123,8 @@ lib_libasteria_la_SOURCES =  \
 
 lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
 lib_libasteria_la_LIBADD = lib/librocket.la ${LTLIBICONV}
-lib_libasteria_la_LDFLAGS = -Wl,--no-undefined -version-info @abi_major@:@abi_minor@
+lib_libasteria_la_LDFLAGS = -Wl,--no-undefined -no-undefined  \
+  -version-info @abi_major@:@abi_minor@
 
 if enable_pch
 lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
@@ -135,8 +136,10 @@ endif
 	  && rm -rf $@.gch  \
 	  && mkdir $@.gch  \
 	  && . $@.lo  \
-	  && (test "$${pic_object}" == none || mv -f %reldir%/$${pic_object} $@.gch/pic)  \
-	  && (test "$${non_pic_object}" == none || mv -f %reldir%/$${non_pic_object} $@.gch/non_pic)  \
+	  && (test "$${pic_object}" == none ||  \
+	      mv -f %reldir%/$${pic_object} $@.gch/pic)  \
+	  && (test "$${non_pic_object}" == none ||  \
+	      mv -f %reldir%/$${non_pic_object} $@.gch/non_pic)  \
 	  && rm -f $@.lo  \
 	  && echo '#error PCH unusable' > $@
 
