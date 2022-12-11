@@ -2,8 +2,8 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../src/runtime/reference.hpp"
-#include "../src/runtime/variable.hpp"
+#include "../asteria/runtime/reference.hpp"
+#include "../asteria/runtime/variable.hpp"
 
 using namespace ::asteria;
 

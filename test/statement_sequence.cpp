@@ -2,14 +2,14 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../src/compiler/statement_sequence.hpp"
-#include "../src/compiler/statement.hpp"
-#include "../src/compiler/expression_unit.hpp"
-#include "../src/compiler/token_stream.hpp"
-#include "../src/runtime/executive_context.hpp"
-#include "../src/runtime/reference.hpp"
-#include "../src/runtime/variadic_arguer.hpp"
-#include "../src/llds/avmc_queue.hpp"
+#include "../asteria/compiler/statement_sequence.hpp"
+#include "../asteria/compiler/statement.hpp"
+#include "../asteria/compiler/expression_unit.hpp"
+#include "../asteria/compiler/token_stream.hpp"
+#include "../asteria/runtime/executive_context.hpp"
+#include "../asteria/runtime/reference.hpp"
+#include "../asteria/runtime/variadic_arguer.hpp"
+#include "../asteria/llds/avmc_queue.hpp"
 
 using namespace ::asteria;
 

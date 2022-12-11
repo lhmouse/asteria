@@ -24,8 +24,8 @@
 /config.status
 /libtool
 /stamp-h1
-/src/version.h
-/src/precompiled.x*
+/asteria/version.h
+/asteria/precompiled.x*
 
 /lib/
 /bin/

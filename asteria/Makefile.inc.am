@@ -1,5 +1,10 @@
-include_asteriadir = ${includedir}/asteria
-include_asteria_HEADERS =  \
+nobase_include_HEADERS +=  \
+  %reldir%/details/utils.ipp  \
+  %reldir%/details/value.ipp  \
+  %reldir%/details/variable_hashmap.ipp  \
+  %reldir%/details/reference_dictionary.ipp  \
+  %reldir%/details/avmc_queue.ipp  \
+  %reldir%/details/argument_reader.ipp  \
   %reldir%/version.h  \
   %reldir%/fwd.hpp  \
   %reldir%/utils.hpp  \
@@ -7,28 +12,10 @@ include_asteria_HEADERS =  \
   %reldir%/value.hpp  \
   %reldir%/source_location.hpp  \
   %reldir%/simple_script.hpp  \
-  ${END}
-
-include_asteria_detailsdir = ${includedir}/asteria/details
-include_asteria_details_HEADERS =  \
-  %reldir%/details/utils.ipp  \
-  %reldir%/details/value.ipp  \
-  %reldir%/details/variable_hashmap.ipp  \
-  %reldir%/details/reference_dictionary.ipp  \
-  %reldir%/details/avmc_queue.ipp  \
-  %reldir%/details/argument_reader.ipp  \
-  ${END}
-
-include_asteria_lldsdir = ${includedir}/asteria/llds
-include_asteria_llds_HEADERS =  \
   %reldir%/llds/variable_hashmap.hpp  \
   %reldir%/llds/reference_dictionary.hpp  \
   %reldir%/llds/reference_stack.hpp  \
   %reldir%/llds/avmc_queue.hpp  \
-  ${END}
-
-include_asteria_runtimedir = ${includedir}/asteria/runtime
-include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/enums.hpp  \
   %reldir%/runtime/abstract_hooks.hpp  \
   %reldir%/runtime/reference.hpp  \
@@ -49,10 +36,6 @@ include_asteria_runtime_HEADERS =  \
   %reldir%/runtime/air_node.hpp  \
   %reldir%/runtime/air_optimizer.hpp  \
   %reldir%/runtime/argument_reader.hpp  \
-  ${END}
-
-include_asteria_compilerdir = ${includedir}/asteria/compiler
-include_asteria_compiler_HEADERS =  \
   %reldir%/compiler/enums.hpp  \
   %reldir%/compiler/compiler_error.hpp  \
   %reldir%/compiler/token.hpp  \
@@ -61,10 +44,6 @@ include_asteria_compiler_HEADERS =  \
   %reldir%/compiler/statement.hpp  \
   %reldir%/compiler/infix_element.hpp  \
   %reldir%/compiler/statement_sequence.hpp  \
-  ${END}
-
-include_asteria_librarydir = ${includedir}/asteria/library
-include_asteria_library_HEADERS =  \
   %reldir%/library/version.hpp  \
   %reldir%/library/system.hpp  \
   %reldir%/library/debug.hpp  \

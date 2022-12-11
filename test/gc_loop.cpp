@@ -2,9 +2,9 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../src/simple_script.hpp"
-#include "../src/runtime/garbage_collector.hpp"
-#include "../src/runtime/variable.hpp"
+#include "../asteria/simple_script.hpp"
+#include "../asteria/runtime/garbage_collector.hpp"
+#include "../asteria/runtime/variable.hpp"
 
 using namespace ::asteria;
 

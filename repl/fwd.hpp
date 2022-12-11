@@ -4,8 +4,8 @@
 #ifndef ASTERIA_REPL_FWD_
 #define ASTERIA_REPL_FWD_
 
-#include "../src/fwd.hpp"
-#include "../src/value.hpp"
+#include "../asteria/fwd.hpp"
+#include "../asteria/value.hpp"
 
 namespace asteria {
 

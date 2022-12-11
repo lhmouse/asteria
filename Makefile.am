@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 END =
 
 ## Compiler options
-AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Isrc -U_FORTIFY_SOURCE  \
+AM_CPPFLAGS = -pipe -Wall -Wextra -Iasteria -U_FORTIFY_SOURCE  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE  \
   -f{strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{stack-protector,align-{functions,jumps,loops}}  \
@@ -25,7 +25,7 @@ LDADD = lib/libasteria.la
 noinst_LIBRARIES =
 noinst_LTLIBRARIES =
 
-include_HEADERS =
+nobase_include_HEADERS =
 lib_LIBRARIES =
 lib_LTLIBRARIES =
 bin_PROGRAMS =
@@ -45,7 +45,7 @@ include doc/Makefile.inc.am
 
 ## Programs and libraries
 include rocket/Makefile.inc.am
-include src/Makefile.inc.am
+include asteria/Makefile.inc.am
 include repl/Makefile.inc.am
 
 ## Tests

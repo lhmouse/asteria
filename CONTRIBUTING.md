@@ -4,7 +4,7 @@
 
 This document describes the coding style requirements of **Asteria**.
 
-These rules cover all files in the `src` directory, save for those in `src/rocket`.
+These rules cover all files in the `src` directory, save for those in `asteria/rocket`.
 
 ### Standard Conformance
 

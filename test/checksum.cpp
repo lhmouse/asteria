@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../src/simple_script.hpp"
+#include "../asteria/simple_script.hpp"
 
 using namespace ::asteria;
 

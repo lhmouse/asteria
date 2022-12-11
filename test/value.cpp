@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../src/value.hpp"
+#include "../asteria/value.hpp"
 #include <cmath>
 
 using namespace ::asteria;

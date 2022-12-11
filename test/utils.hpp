@@ -4,8 +4,8 @@
 #ifndef ASTERIA_TEST_UTILS_
 #define ASTERIA_TEST_UTILS_
 
-#include "../src/fwd.hpp"
-#include "../src/utils.hpp"
+#include "../asteria/fwd.hpp"
+#include "../asteria/utils.hpp"
 #include <unistd.h>   // ::alarm()
 
 #define ASTERIA_TEST_CHECK(expr)  \

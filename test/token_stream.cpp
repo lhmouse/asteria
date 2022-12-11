@@ -2,9 +2,9 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "utils.hpp"
-#include "../src/compiler/token_stream.hpp"
-#include "../src/compiler/token.hpp"
-#include "../src/compiler/enums.hpp"
+#include "../asteria/compiler/token_stream.hpp"
+#include "../asteria/compiler/token.hpp"
+#include "../asteria/compiler/enums.hpp"
 
 using namespace ::asteria;
 

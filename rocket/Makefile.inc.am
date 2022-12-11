@@ -1,5 +1,25 @@
-include_rocketdir = ${includedir}/rocket
-include_rocket_HEADERS =  \
+nobase_include_HEADERS +=  \
+  %reldir%/details/compiler_clang.i  \
+  %reldir%/details/compiler_gcc.i  \
+  %reldir%/details/compiler_msvc.i  \
+  %reldir%/details/fwd.ipp  \
+  %reldir%/details/xallocator.ipp  \
+  %reldir%/details/variant.ipp  \
+  %reldir%/details/unique_handle.ipp  \
+  %reldir%/details/char_traits.ipp  \
+  %reldir%/details/cow_string.ipp  \
+  %reldir%/details/cow_vector.ipp  \
+  %reldir%/details/cow_hashmap.ipp  \
+  %reldir%/details/prehashed_string.ipp  \
+  %reldir%/details/unique_ptr.ipp  \
+  %reldir%/details/refcnt_ptr.ipp  \
+  %reldir%/details/static_vector.ipp  \
+  %reldir%/details/array.ipp  \
+  %reldir%/details/linear_buffer.ipp  \
+  %reldir%/details/ascii_case.ipp  \
+  %reldir%/details/mutex.ipp  \
+  %reldir%/details/recursive_mutex.ipp  \
+  %reldir%/details/once_flag.ipp  \
   %reldir%/compiler.h  \
   %reldir%/assert.hpp  \
   %reldir%/fwd.hpp  \
@@ -41,31 +61,6 @@ include_rocket_HEADERS =  \
   %reldir%/condition_variable.hpp  \
   %reldir%/once_flag.hpp  \
   %reldir%/bit_mask.hpp  \
-  ${END}
-
-include_rocket_detailsdir = ${includedir}/rocket/details
-include_rocket_details_HEADERS =  \
-  %reldir%/details/compiler_clang.i  \
-  %reldir%/details/compiler_gcc.i  \
-  %reldir%/details/compiler_msvc.i  \
-  %reldir%/details/fwd.ipp  \
-  %reldir%/details/xallocator.ipp  \
-  %reldir%/details/variant.ipp  \
-  %reldir%/details/unique_handle.ipp  \
-  %reldir%/details/char_traits.ipp  \
-  %reldir%/details/cow_string.ipp  \
-  %reldir%/details/cow_vector.ipp  \
-  %reldir%/details/cow_hashmap.ipp  \
-  %reldir%/details/prehashed_string.ipp  \
-  %reldir%/details/unique_ptr.ipp  \
-  %reldir%/details/refcnt_ptr.ipp  \
-  %reldir%/details/static_vector.ipp  \
-  %reldir%/details/array.ipp  \
-  %reldir%/details/linear_buffer.ipp  \
-  %reldir%/details/ascii_case.ipp  \
-  %reldir%/details/mutex.ipp  \
-  %reldir%/details/recursive_mutex.ipp  \
-  %reldir%/details/once_flag.ipp  \
   ${END}
 
 noinst_LTLIBRARIES += lib/librocket.la
