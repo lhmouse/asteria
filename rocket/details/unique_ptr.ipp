@@ -39,7 +39,7 @@ struct deleter_reference
 
 // deleter base wrapper
 template<typename pointerT, typename deleterT, bool ptrT, bool objT, bool refT>
-struct stored_pointer_impl;
+class stored_pointer_impl;
 
 // deleter of pointer types
 template<typename pointerT, typename deleterT>

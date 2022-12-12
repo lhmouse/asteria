@@ -108,7 +108,11 @@ class const_func_table
 
     template<typename... argsT>
     constexpr
-    typename ::std::result_of<targetT*(argsT&&...)>::type
+#ifdef __cpp_lib_is_invocable
+    typename ::std::invoke_result<targetT*, argsT&&...>::type
+#else
+    typename ::std::result_of<targetT* (argsT&&...)>::type
+#endif
     operator()(size_t k, argsT&&... args) const
       noexcept(noexcept(::std::declval<targetT*>()(args...)))
       { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
