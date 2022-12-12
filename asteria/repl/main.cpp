@@ -1,9 +1,9 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#include "../asteria/precompiled.ipp"
+#include "../precompiled.ipp"
 #include "fwd.hpp"
-#include "../asteria/simple_script.hpp"
+#include "../simple_script.hpp"
 #include <locale.h>  // setlocale()
 #include <unistd.h>  // isatty()
 #include <signal.h>  // sigaction()

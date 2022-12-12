@@ -1,13 +1,13 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#include "../asteria/precompiled.ipp"
+#include "../precompiled.ipp"
 #include "fwd.hpp"
-#include "../asteria/compiler/compiler_error.hpp"
-#include "../asteria/compiler/token_stream.hpp"
-#include "../asteria/compiler/statement_sequence.hpp"
-#include "../asteria/simple_script.hpp"
-#include "../asteria/value.hpp"
+#include "../compiler/compiler_error.hpp"
+#include "../compiler/token_stream.hpp"
+#include "../compiler/statement_sequence.hpp"
+#include "../simple_script.hpp"
+#include "../value.hpp"
 
 namespace asteria {
 
