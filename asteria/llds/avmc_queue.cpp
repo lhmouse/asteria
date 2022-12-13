@@ -182,19 +182,20 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
+    AIR_Status status = air_status_next;
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      // Get the executor, which must always exist.
-      Executor* executor = qnode->pv_exec;
-      if(qnode->meta_ver != 0)
-        executor = qnode->pv_meta->exec;
-
       try {
-        auto status = executor(ctx, qnode);
+        // Get the executor, which must always exist.
+        if(qnode->meta_ver != 0)
+          status = qnode->pv_meta->exec(ctx, qnode);
+        else
+          status = qnode->pv_exec(ctx, qnode);
+
         if(status != air_status_next)
           return status;
       }
@@ -212,7 +213,7 @@ execute(Executive_Context& ctx) const
         throw except;
       }
     }
-    return air_status_next;
+    return status;
   }
 
 void
