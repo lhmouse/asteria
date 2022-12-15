@@ -182,38 +182,69 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
-    AIR_Status status = air_status_next;
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
+      AIR_Status status;
 
-      try {
-        // Get the executor, which must always exist.
-        if(qnode->meta_ver != 0)
-          status = qnode->pv_meta->exec(ctx, qnode);
-        else
-          status = qnode->pv_exec(ctx, qnode);
+      switch(qnode->meta_ver) {
+        case 0:
+          // There is no metadata or symbols.
+          try {
+            status = qnode->pv_exec(ctx, qnode);
+            break;
+          }
+          catch(Runtime_Error& except) {
+            // Forward the exception.
+            throw;
+          }
+          catch(exception& stdex) {
+            // Replace the active exception.
+            Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
+            throw except;
+          }
 
-        if(status != air_status_next)
-          return status;
+        case 1:
+          // There is metadata without symbols.
+          try {
+            status = qnode->pv_meta->exec(ctx, qnode);
+            break;
+          }
+          catch(Runtime_Error& except) {
+            // Forward the exception.
+            throw;
+          }
+          catch(exception& stdex) {
+            // Replace the active exception.
+            Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
+            throw except;
+          }
+
+        default:
+          // There is metadata and symbols.
+          try {
+            status = qnode->pv_meta->exec(ctx, qnode);
+            break;
+          }
+          catch(Runtime_Error& except) {
+            // Modify the exception in place and rethrow it without copying it.
+            except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+            throw;
+          }
+          catch(exception& stdex) {
+            // Replace the active exception.
+            Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
+            except.push_frame_plain(qnode->pv_meta->syms, sref(""));
+            throw except;
+          }
       }
-      catch(Runtime_Error& except) {
-        // Modify the exception in place and rethrow it without copying it.
-        if(qnode->meta_ver >= 2)
-          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
-        throw;
-      }
-      catch(exception& stdex) {
-        // Replace the active exception.
-        Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
-        if(qnode->meta_ver >= 2)
-          except.push_frame_plain(qnode->pv_meta->syms, sref(""));
-        throw except;
-      }
+
+      if(status != air_status_next)
+        return status;
     }
-    return status;
+    return air_status_next;
   }
 
 void
@@ -226,13 +257,12 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      // Get the variable enumeration callback, which is optional.
-      Var_Getter* vgetter = nullptr;
       if(qnode->meta_ver != 0)
-        vgetter = qnode->pv_meta->vget_opt;
+        continue;
 
-      if(vgetter)
-        vgetter(staged, temp, qnode);
+      // Invoke the variable enumeration callback.
+      if(qnode->pv_meta->vget_opt)
+        qnode->pv_meta->vget_opt(staged, temp, qnode);
     }
   }
 
