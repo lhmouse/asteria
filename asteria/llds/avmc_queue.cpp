@@ -257,7 +257,7 @@ get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       auto qnode = next;
       next += UINT32_C(1) + qnode->nheaders;
 
-      if(qnode->meta_ver != 0)
+      if(qnode->meta_ver == 0)
         continue;
 
       // Invoke the variable enumeration callback.
