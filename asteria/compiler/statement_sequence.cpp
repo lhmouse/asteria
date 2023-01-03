@@ -2418,7 +2418,7 @@ constexpr s_infix_punctuator_xop[] =
     { punctuator_cmp_gt,     xop_cmp_gt,    0 },
     { punctuator_cmp_lte,    xop_cmp_lte,   0 },
     { punctuator_cmp_gte,    xop_cmp_gte,   0 },
-    { punctuator_spaceship,  xop_cmp_3way,  0 },
+    { punctuator_cmp_3way,   xop_cmp_3way,  0 },
   };
 
 constexpr

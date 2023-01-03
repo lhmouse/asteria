@@ -443,7 +443,7 @@ constexpr s_punctuators[] =
     { "<<<=",  punctuator_sll_eq      },
     { "<<=",   punctuator_sla_eq      },
     { "<=",    punctuator_cmp_lte     },
-    { "<=>",   punctuator_spaceship   },
+    { "<=>",   punctuator_cmp_3way    },
     { "=",     punctuator_assign      },
     { "==",    punctuator_cmp_eq      },
     { ">",     punctuator_cmp_gt      },

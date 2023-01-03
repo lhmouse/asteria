@@ -163,7 +163,7 @@ stringify_punctuator(Punctuator punct) noexcept
       case punctuator_semicol:
         return ";";
 
-      case punctuator_spaceship:
+      case punctuator_cmp_3way:
         return "<=>";
 
       case punctuator_coales:
