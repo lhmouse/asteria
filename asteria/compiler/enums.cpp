@@ -160,9 +160,9 @@ stringify_punctuator(Punctuator punct) noexcept
       case punctuator_colon:
         return ":";
 
-      case punctuator_semicol: {
+      case punctuator_semicol:
         return ";";
-      }
+
       case punctuator_spaceship:
         return "<=>";
 
