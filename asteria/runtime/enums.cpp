@@ -184,6 +184,9 @@ describe_xop(Xop xop) noexcept
       case xop_random:
         return "postfix `[?]`";
 
+      case xop_cmp_un:
+        return "infix `</>`";
+
       default:
         return "[unknown operator]";
     }

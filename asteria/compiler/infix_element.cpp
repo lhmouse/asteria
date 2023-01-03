@@ -67,6 +67,7 @@ tell_precedence() const noexcept
           case xop_cmp_eq:
           case xop_cmp_ne:
           case xop_cmp_3way:
+          case xop_cmp_un:
             return precedence_equality;
 
           case xop_andb:

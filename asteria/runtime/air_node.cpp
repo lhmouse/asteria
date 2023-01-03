@@ -2986,6 +2986,43 @@ struct Traits_apply_xop_cmp_3way
       }
   };
 
+struct Traits_apply_xop_cmp_un
+  {
+    // `up` is `assign`.
+    // `sp` is unused.
+
+    static
+    const Source_Location&
+    get_symbols(const AIR_Node::S_apply_operator& altr)
+      {
+        return altr.sloc;
+      }
+
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
+    ROCKET_FLATTEN static
+    AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        // This operator is binary.
+        const auto& rhs = ctx.stack().top().dereference_readonly();
+        ctx.stack().pop();
+        auto& lhs = do_get_first_operand(ctx.stack(), up.u8v[0]);  // assign
+
+        // Check whether the two operands are unordered.
+        // N.B. This is one of the few operators that work on all types.
+        lhs = lhs.compare(rhs) == compare_unordered;
+        return air_status_next;
+      }
+  };
+
 struct Traits_apply_xop_add
   {
     // `up` is `assign`.
@@ -5850,6 +5887,9 @@ solidify(AVMC_Queue& queue) const
 
           case xop_cmp_3way:
             return do_solidify<Traits_apply_xop_cmp_3way>(queue, altr);
+
+          case xop_cmp_un:
+            return do_solidify<Traits_apply_xop_cmp_un>(queue, altr);
 
           case xop_add:
             return do_solidify<Traits_apply_xop_add>(queue, altr);

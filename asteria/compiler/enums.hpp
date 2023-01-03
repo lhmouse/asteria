@@ -71,6 +71,7 @@ enum Punctuator : uint8_t
     punctuator_arrow       = 57,  // ->
     punctuator_scope       = 58,  // ::
     punctuator_random      = 59,  // [?]
+    punctuator_cmp_un      = 60,  // </>
   };
 
 ROCKET_CONST

@@ -69,6 +69,7 @@ enum Xop : uint8_t
     xop_subs      = 55,  // __subs
     xop_muls      = 56,  // __muls
     xop_random    = 57,  // [?]
+    xop_cmp_un    = 58,  // </>
   };
 
 ROCKET_CONST

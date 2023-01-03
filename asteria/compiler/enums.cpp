@@ -190,6 +190,9 @@ stringify_punctuator(Punctuator punct) noexcept
       case punctuator_random:
         return "[?]";
 
+      case punctuator_cmp_un:
+        return "</>";
+
       default:
         return "[unknown punctuator]";
     }

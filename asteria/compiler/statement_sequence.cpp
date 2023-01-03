@@ -2419,6 +2419,7 @@ constexpr s_infix_punctuator_xop[] =
     { punctuator_cmp_lte,    xop_cmp_lte,   0 },
     { punctuator_cmp_gte,    xop_cmp_gte,   0 },
     { punctuator_cmp_3way,   xop_cmp_3way,  0 },
+    { punctuator_cmp_un,     xop_cmp_un,    0 },
   };
 
 constexpr
@@ -2434,7 +2435,7 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
     // infix-operator-general ::=
     //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
     //   "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
-    //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
+    //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  | "</>"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;

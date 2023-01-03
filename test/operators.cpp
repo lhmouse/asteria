@@ -321,6 +321,14 @@ int main()
         assert (nan <=> 1.0) == "[unordered]";
         assert (nan <=> 1) == "[unordered]";
 
+        assert (1 </> 2) == false;
+        assert ("b" </> "a") == false;
+        assert (true </> true) == false;
+        assert ("false" </> false) == true;
+        assert (1 </> 1.0) == false;
+        assert (nan </> 1.0) == true;
+        assert (nan </> 1) == true;
+
         assert (true & true) == true;
         assert (false & true) == false;
         assert (true & false) == false;
