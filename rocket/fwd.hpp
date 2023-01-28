@@ -407,9 +407,9 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
     auto bot = begin;
     auto brk = seek;
 
-    //   |<- isl ->|<- isr ->|
-    //   bot       brk       end
-    // > 0 1 2 3 4 5 6 7 8 9 -
+    //     |<- isl ->|<- isr ->|
+    //     bot       brk       end
+    //   > 0 1 2 3 4 5 6 7 8 9 -
     auto isl = brk - bot;
     if(isl == 0)
       return;
@@ -421,10 +421,15 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
     auto stp = brk;
   r:
     if(isl < isr) {
-      // Before:  bot   brk           end
-      //        > 0 1 2 3 4 5 6 7 8 9 -
-      // After:         bot   brk     end
-      //        > 3 4 5 0 1 2 6 7 8 9 -
+      // Before:
+      //           stp           end
+      //     bot   brk
+      //   > 0 1 2 3 4 5 6 7 8 9 -
+      //
+      // After:
+      //           stp           end
+      //           bot   brk
+      //   > 3 4 5 0 1 2 6 7 8 9 -
       do
         swap(ptr[bot++], ptr[brk++]);
       while(bot != stp);
@@ -436,10 +441,15 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
       goto r;
     }
     if(isl > isr) {
-      // Before:  bot           brk   end
-      //        > 0 1 2 3 4 5 6 7 8 9 -
-      // After:       bot       brk   end
-      //        > 7 8 9 3 4 5 6 0 1 2 -
+      // Before:
+      //                   stp   end
+      //     bot           brk
+      //   > 0 1 2 3 4 5 6 7 8 9 -
+      //
+      // After:
+      //                   stp   end
+      //         bot             brk
+      //   > 7 8 9 3 4 5 6 0 1 2 -
       do
         swap(ptr[bot++], ptr[brk++]);
       while(brk != end);
@@ -451,10 +461,15 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
       goto r;
     }
 
-    // Before:  bot       brk       end
-    //        > 0 1 2 3 4 5 6 7 8 9 -
-    // After:             bot       brk
-    //        > 5 6 7 8 9 0 1 2 3 4 -
+    // Before:
+    //               stp       end
+    //     bot       brk
+    //   > 0 1 2 3 4 5 6 7 8 9 -
+    //
+    // After:
+    //               stp       end
+    //               bot       brk
+    //   > 5 6 7 8 9 0 1 2 3 4 -
     do
       swap(ptr[bot++], ptr[brk++]);
     while(bot != stp);
