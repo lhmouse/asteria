@@ -406,10 +406,11 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
   {
     auto bot = begin;
     auto brk = seek;
+    auto stp = seek;
 
-    //     |<- isl ->|<- isr ->|
-    //     bot       brk       end
+    //     bot     brk         end
     //   > 0 1 2 3 4 5 6 7 8 9 -
+    //     ^- isl -^--- isr ---^
     auto isl = brk - bot;
     if(isl == 0)
       return;
@@ -418,61 +419,62 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
     if(isr == 0)
       return;
 
-    auto stp = brk;
-  r:
-    if(isl < isr) {
-      // Before:
-      //           stp           end
-      //     bot   brk
-      //   > 0 1 2 3 4 5 6 7 8 9 -
-      //
-      // After:
-      //           stp           end
-      //           bot   brk
-      //   > 3 4 5 0 1 2 6 7 8 9 -
-      do
-        swap(ptr[bot++], ptr[brk++]);
-      while(bot != stp);
+    for(;;)
+      if(isl < isr) {
+        // Before:
+        //           stp           end
+        //     bot   brk
+        //   > 0 1 2 3 4 5 6 7 8 9 -
+        //
+        // After:
+        //           stp           end
+        //           bot   brk
+        //   > 3 4 5 0 1 2 6 7 8 9 -
+        do
+          swap(ptr[bot++], ptr[brk++]);
+        while(bot != stp);
 
-      // `isr` will have been decreased by `isl`, which will not result in zero.
-      isr = end - brk;
-      // `isl` is unchanged.
-      stp = brk;
-      goto r;
-    }
-    if(isl > isr) {
-      // Before:
-      //                   stp   end
-      //     bot           brk
-      //   > 0 1 2 3 4 5 6 7 8 9 -
-      //
-      // After:
-      //                   stp   end
-      //         bot             brk
-      //   > 7 8 9 3 4 5 6 0 1 2 -
-      do
-        swap(ptr[bot++], ptr[brk++]);
-      while(brk != end);
+        // `isr` will have been decreased by `isl`, which will
+        // not yield zero. `isl` is unchanged.
+        stp = brk;
+        isr = end - brk;
+      }
+      else if(isl > isr) {
+        // Before:
+        //                   stp   end
+        //     bot           brk
+        //   > 0 1 2 3 4 5 6 7 8 9 -
+        //
+        // After:
+        //                   stp   end
+        //           bot           brk
+        //   > 7 8 9 3 4 5 6 0 1 2 -
+        do
+          swap(ptr[bot++], ptr[brk++]);
+        while(brk != end);
 
-      // `isl` will have been decreased by `isr`, which will not result in zero.
-      isl = stp - bot;
-      // `isr` is unchanged.
-      brk = stp;
-      goto r;
-    }
+        // `isl` will have been decreased by `isr`, which will
+        // not yield zero. `isr` is unchanged.
+        brk = stp;
+        isl = stp - bot;
+      }
+      else {
+        // Before:
+        //               stp       end
+        //     bot       brk
+        //   > 0 1 2 3 4 5 6 7 8 9 -
+        //
+        // After:
+        //               stp       end
+        //               bot       brk
+        //   > 5 6 7 8 9 0 1 2 3 4 -
+        do
+          swap(ptr[bot++], ptr[brk++]);
+        while(bot != stp);
 
-    // Before:
-    //               stp       end
-    //     bot       brk
-    //   > 0 1 2 3 4 5 6 7 8 9 -
-    //
-    // After:
-    //               stp       end
-    //               bot       brk
-    //   > 5 6 7 8 9 0 1 2 3 4 -
-    do
-      swap(ptr[bot++], ptr[brk++]);
-    while(bot != stp);
+        // `brk` equals `end` so there is no more work to do.
+        break;
+      }
   }
 
 template<typename containerT, typename callbackT>
