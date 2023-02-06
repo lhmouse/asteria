@@ -81,3 +81,5 @@ lib_librocket_la_SOURCES =  \
   %reldir%/format.cpp  \
   %reldir%/prehashed_string.cpp  \
   ${END}
+
+lib_librocket_la_LDFLAGS =
