@@ -24,20 +24,15 @@ class mutex
     ::pthread_mutex_t m_mutex[1] = { PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP };
 
   public:
-    constexpr
-    mutex() noexcept
-      { }
+#ifdef __linux__
+    constexpr mutex() noexcept = default;
+#else
+    mutex() noexcept = default;
+    ~mutex() { ::pthread_mutex_destroy(this->m_mutex);  }
+#endif
 
     mutex(const mutex&) = delete;
-
-    mutex&
-    operator=(const mutex&) = delete;
-
-    ~mutex()
-      {
-        int r = ::pthread_mutex_destroy(this->m_mutex);
-        ROCKET_ASSERT(r == 0);
-      }
+    mutex& operator=(const mutex&) = delete;
   };
 
 class mutex::unique_lock

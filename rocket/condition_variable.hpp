@@ -19,20 +19,15 @@ class condition_variable
     ::pthread_cond_t m_cond[1] = { PTHREAD_COND_INITIALIZER };
 
   public:
-    constexpr
-    condition_variable() noexcept
-      { }
+#ifdef __linux__
+    constexpr condition_variable() noexcept = default;
+#else
+    condition_variable() noexcept = default;
+    ~condition_variable() { ::pthread_cond_destroy(this->m_cond);  }
+#endif
 
     condition_variable(const condition_variable&) = delete;
-
-    condition_variable&
-    operator=(const condition_variable&) = delete;
-
-    ~condition_variable()
-      {
-        int r = ::pthread_cond_destroy(this->m_cond);
-        ROCKET_ASSERT(r == 0);
-      }
+    condition_variable& operator=(const condition_variable&) = delete;
 
   private:
     ::timespec

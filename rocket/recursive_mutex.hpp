@@ -23,20 +23,15 @@ class recursive_mutex
     ::pthread_mutex_t m_mutex[1] = { PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP };
 
   public:
-    constexpr
-    recursive_mutex() noexcept
-      { }
+#ifdef __linux__
+    constexpr recursive_mutex() noexcept = default;
+#else
+    recursive_mutex() noexcept = default;
+    ~recursive_mutex() { ::pthread_mutex_destroy(this->m_mutex);  }
+#endif
 
     recursive_mutex(const recursive_mutex&) = delete;
-
-    recursive_mutex&
-    operator=(const recursive_mutex&) = delete;
-
-    ~recursive_mutex()
-      {
-        int r = ::pthread_mutex_destroy(this->m_mutex);
-        ROCKET_ASSERT(r == 0);
-      }
+    recursive_mutex& operator=(const recursive_mutex&) = delete;
   };
 
 class recursive_mutex::unique_lock

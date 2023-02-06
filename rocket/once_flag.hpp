@@ -19,14 +19,10 @@ class once_flag
     details_once_flag::guard m_guard[1] = { };
 
   public:
-    constexpr
-    once_flag() noexcept
-      { }
+    constexpr once_flag() noexcept = default;
 
     once_flag(const once_flag&) = delete;
-
-    once_flag&
-    operator=(const once_flag&) = delete;
+    once_flag& operator=(const once_flag&) = delete;
 
   public:
     template<typename funcT, typename... paramsT>
