@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 END =
 
-## Compiler options
+## Compiler & linker options
 AM_CPPFLAGS = -pipe -Wall -Wextra -Iasteria -U_FORTIFY_SOURCE  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE  \
   -f{strict-{aliasing,overflow},merge-all-constants}  \
@@ -16,6 +16,8 @@ AM_CPPFLAGS = -pipe -Wall -Wextra -Iasteria -U_FORTIFY_SOURCE  \
 
 AM_CXXFLAGS = -std=c++17 -fvisibility-inlines-hidden  \
   -Wno-redundant-move -Werror={non-virtual-dtor,missing-declarations}
+
+AM_LDFLAGS = -Wl,--no-undefined -no-undefined
 
 AM_DEFAULT_SOURCE_EXT = .cpp
 SUFFIXES = .xipp
