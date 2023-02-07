@@ -75,7 +75,7 @@ class Indenter_string final
 
   public:
     explicit
-    Indenter_string(const cow_string& add)
+    Indenter_string(stringR add)
       : m_add(add), m_cur(sref("\n"))
       { }
 
@@ -129,7 +129,7 @@ class Indenter_spaces final
   };
 
 tinyfmt&
-do_quote_string(tinyfmt& fmt, const cow_string& str)
+do_quote_string(tinyfmt& fmt, stringR str)
   {
     // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
     fmt << '\"';
@@ -200,7 +200,7 @@ do_quote_string(tinyfmt& fmt, const cow_string& str)
   }
 
 tinyfmt&
-do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, const cow_string& name)
+do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, stringR name)
   {
     // Write the key.
     if(json5 && name.size() && is_cmask(name[0], cmask_namei) &&

@@ -993,7 +993,7 @@ struct Traits_push_global_reference
 
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const phsh_string& name)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, phsh_stringR name)
       {
         // Look for the name in the global context.
         size_t hint = up.u16;
@@ -1039,7 +1039,7 @@ struct Traits_push_local_reference
 
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const phsh_string& name)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, phsh_stringR name)
       {
         // Get the context.
         Executive_Context* qctx = &ctx;
@@ -1347,7 +1347,7 @@ struct Traits_member_access
 
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx, const phsh_string& name)
+    execute(Executive_Context& ctx, phsh_stringR name)
       {
         auto& ref = ctx.stack().mut_top();
         ref.push_modifier_object_key(name);

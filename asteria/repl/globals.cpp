@@ -60,7 +60,7 @@ struct Verbose_Hooks final
       }
 
     void
-    on_variable_declare(const Source_Location& sloc, const phsh_string& name) override
+    on_variable_declare(const Source_Location& sloc, phsh_stringR name) override
       {
         this->do_verbose_trace(sloc,
             "Declaring variable `$1`", name);

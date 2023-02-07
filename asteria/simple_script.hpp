@@ -58,20 +58,20 @@ class Simple_Script
 
     // Load something. Calling these functions directly is not recommended.
     Simple_Script&
-    reload(const cow_string& name, Statement_Sequence&& stmtq);
+    reload(stringR name, Statement_Sequence&& stmtq);
 
     Simple_Script&
-    reload(const cow_string& name, Token_Stream&& tstrm);
+    reload(stringR name, Token_Stream&& tstrm);
 
     Simple_Script&
-    reload(const cow_string& name, int line, tinybuf&& cbuf);
+    reload(stringR name, int line, tinybuf&& cbuf);
 
     // Load a script.
     Simple_Script&
-    reload_string(const cow_string& name, int line, const cow_string& code);
+    reload_string(stringR name, int line, stringR code);
 
     Simple_Script&
-    reload_string(const cow_string& name, const cow_string& code);
+    reload_string(stringR name, stringR code);
 
     Simple_Script&
     reload_stdin(int line);
@@ -83,7 +83,7 @@ class Simple_Script
     reload_file(const char* path);
 
     Simple_Script&
-    reload_file(const cow_string& path);
+    reload_file(stringR path);
 
     // Execute the script that has been loaded.
     Reference

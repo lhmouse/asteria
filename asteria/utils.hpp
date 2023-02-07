@@ -62,7 +62,7 @@ format(cow_string& str, const char* templ, const ParamsT&... params)
 template<typename... ParamsT>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string&
-format(cow_string& str, const cow_string& templ, const ParamsT&... params)
+format(cow_string& str, stringR templ, const ParamsT&... params)
   {
     // Make stream inserters.
     str.clear();
@@ -98,7 +98,7 @@ format_string(const char* templ, const ParamsT&... params)
 template<typename... ParamsT>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
-format_string(const cow_string& templ, const ParamsT&... params)
+format_string(stringR templ, const ParamsT&... params)
   {
     cow_string str;
     noadl::format(str, templ, params...);
@@ -139,7 +139,7 @@ bool
 utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
 
 bool
-utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
+utf8_decode(char32_t& cp, stringR text, size_t& offset);
 
 // UTF-16 conversion functions
 bool
@@ -233,7 +233,7 @@ quote(const char* str) noexcept
 
 inline
 details_utils::Quote_Wrapper
-quote(const cow_string& str) noexcept
+quote(stringR str) noexcept
   { return noadl::quote(str.data(), str.size());  }
 
 // Justifying

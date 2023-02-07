@@ -71,7 +71,7 @@ class AIR_Optimizer
 
     // Create a closure value that can be assigned to a variable.
     cow_function
-    create_function(const Source_Location& sloc, const cow_string& name);
+    create_function(const Source_Location& sloc, stringR name);
   };
 
 }  // namespace asteria

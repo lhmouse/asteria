@@ -40,13 +40,13 @@ class Abstract_Context
     // mentioned.
     virtual
     Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, const phsh_string& name) const = 0;
+    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const = 0;
 
     // This function is called by `do_create_lazy_reference_opt()` to avoid
     // possibility of infinite recursion, which would otherwise be caused
     // if `mut_named_reference()` was called instead.
     Reference&
-    do_open_named_reference(Reference* hint_opt, const phsh_string& name) const
+    do_open_named_reference(Reference* hint_opt, phsh_stringR name) const
       {
         return hint_opt ? *hint_opt  // hint valid
             : *(this->m_named_refs.insert(name).first);  // insert a new one
@@ -68,7 +68,7 @@ class Abstract_Context
       { return this->do_get_parent_opt();  }
 
     const Reference*
-    get_named_reference_opt(const phsh_string& name) const
+    get_named_reference_opt(phsh_stringR name) const
       {
         auto qref = this->m_named_refs.find_opt(name);
         if(qref)
@@ -83,7 +83,7 @@ class Abstract_Context
       }
 
     const Reference*
-    get_named_reference_with_hint_opt(size_t& hint, const phsh_string& name) const
+    get_named_reference_with_hint_opt(size_t& hint, phsh_stringR name) const
       {
         auto qref = this->m_named_refs.find_with_hint_opt(hint, name);
         if(qref)
@@ -98,7 +98,7 @@ class Abstract_Context
       }
 
     pair<Reference*, bool>
-    insert_named_reference(const phsh_string& name)
+    insert_named_reference(phsh_stringR name)
       {
         auto pair = this->m_named_refs.insert(name);
         if(!pair.second)
@@ -113,14 +113,14 @@ class Abstract_Context
       }
 
     Reference&
-    mut_named_reference(const phsh_string& name)
+    mut_named_reference(phsh_stringR name)
       {
         auto pair = this->insert_named_reference(name);
         return *(pair.first);
       }
 
     bool
-    erase_named_reference(const phsh_string& name) noexcept
+    erase_named_reference(phsh_stringR name) noexcept
       {
         return this->m_named_refs.erase(name);
       }

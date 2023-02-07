@@ -127,7 +127,9 @@ using ::rocket::atomic_release;
 using ::rocket::atomic_acq_rel;
 using ::rocket::atomic_seq_cst;
 
+using stringR = const cow_string&;
 using phsh_string = ::rocket::prehashed_string;
+using phsh_stringR = const phsh_string&;
 using bmask32 = ::rocket::bit_mask<uint32_t>;
 using bmask64 = ::rocket::bit_mask<uint64_t>;
 using bmword = ::rocket::bit_mask<uintptr_t>;

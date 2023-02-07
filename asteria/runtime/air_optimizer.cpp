@@ -78,7 +78,7 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
 cow_function
 AIR_Optimizer::
-create_function(const Source_Location& sloc, const cow_string& name)
+create_function(const Source_Location& sloc, stringR name)
   {
     // Compose the function signature.
     // We only do this if `name` really looks like a function name.

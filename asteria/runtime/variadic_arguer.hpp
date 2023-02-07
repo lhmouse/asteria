@@ -21,7 +21,7 @@ class Variadic_Arguer final
 
   public:
     explicit
-    Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc)
+    Variadic_Arguer(const Source_Location& xsloc, stringR xfunc)
       : m_sloc(xsloc), m_func(xfunc)
       { }
 

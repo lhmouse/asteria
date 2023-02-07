@@ -243,7 +243,7 @@ class Reference
       }
 
     Reference&
-    push_modifier_object_key(const phsh_string& key)
+    push_modifier_object_key(phsh_stringR key)
       {
         Reference_Modifier::S_object_key xmod = { key };
         this->m_mods.emplace_back(::std::move(xmod));

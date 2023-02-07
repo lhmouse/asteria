@@ -82,7 +82,7 @@ Executive_Context::
 
 Reference*
 Executive_Context::
-do_create_lazy_reference_opt(Reference* hint_opt, const phsh_string& name) const
+do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update

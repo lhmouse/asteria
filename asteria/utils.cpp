@@ -222,7 +222,7 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
   }
 
 bool
-utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
+utf8_decode(char32_t& cp, stringR text, size_t& offset)
   {
     if(offset >= text.size())
       return false;

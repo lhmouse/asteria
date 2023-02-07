@@ -84,7 +84,7 @@ void
 editline_reset();
 
 void
-editline_add_history(const cow_string& text);
+editline_add_history(stringR text);
 
 }  // namespace asteria
 #endif

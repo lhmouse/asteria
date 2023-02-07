@@ -34,12 +34,12 @@ class Runtime_Error
       { this->do_backtrace({ frame_type_throw, sloc, this->m_value });  }
 
     explicit
-    Runtime_Error(M_assert, const Source_Location& sloc, const cow_string& msg)
+    Runtime_Error(M_assert, const Source_Location& sloc, stringR msg)
       : m_value("assertion failure: " + msg)
       { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
 
     explicit
-    Runtime_Error(M_native, const cow_string& msg)
+    Runtime_Error(M_native, stringR msg)
       : m_value(msg)
       { this->do_backtrace({ frame_type_native, { }, this->m_value });  }
 
@@ -96,7 +96,7 @@ class Runtime_Error
       }
 
     Runtime_Error&
-    push_frame_plain(const Source_Location& sloc, const cow_string& remarks)
+    push_frame_plain(const Source_Location& sloc, stringR remarks)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_plain, sloc, remarks });
@@ -104,7 +104,7 @@ class Runtime_Error
       }
 
     Runtime_Error&
-    push_frame_func(const Source_Location& sloc, const cow_string& func)
+    push_frame_func(const Source_Location& sloc, stringR func)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_func, sloc, func });

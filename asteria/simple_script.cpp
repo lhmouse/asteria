@@ -15,7 +15,7 @@ namespace asteria {
 
 Simple_Script&
 Simple_Script::
-reload(const cow_string& name, Statement_Sequence&& stmtq)
+reload(stringR name, Statement_Sequence&& stmtq)
   {
     // Initialize the argument list. This is done only once.
     if(this->m_params.empty())
@@ -32,7 +32,7 @@ reload(const cow_string& name, Statement_Sequence&& stmtq)
 
 Simple_Script&
 Simple_Script::
-reload(const cow_string& name, Token_Stream&& tstrm)
+reload(stringR name, Token_Stream&& tstrm)
   {
     Statement_Sequence stmtq(this->m_opts);
     stmtq.reload(::std::move(tstrm));
@@ -41,7 +41,7 @@ reload(const cow_string& name, Token_Stream&& tstrm)
 
 Simple_Script&
 Simple_Script::
-reload(const cow_string& name, int line, tinybuf&& cbuf)
+reload(stringR name, int line, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, line, ::std::move(cbuf));
@@ -50,7 +50,7 @@ reload(const cow_string& name, int line, tinybuf&& cbuf)
 
 Simple_Script&
 Simple_Script::
-reload_string(const cow_string& name, int line, const cow_string& code)
+reload_string(stringR name, int line, stringR code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
@@ -59,7 +59,7 @@ reload_string(const cow_string& name, int line, const cow_string& code)
 
 Simple_Script&
 Simple_Script::
-reload_string(const cow_string& name, const cow_string& code)
+reload_string(stringR name, stringR code)
   {
     return this->reload_string(name, 1, code);
   }
@@ -99,7 +99,7 @@ reload_file(const char* path)
 
 Simple_Script&
 Simple_Script::
-reload_file(const cow_string& path)
+reload_file(stringR path)
   {
     return this->reload_file(path.safe_c_str());
   }
