@@ -6,7 +6,6 @@
 
 #include "tinyfmt.hpp"
 #include "throw.hpp"
-
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>>

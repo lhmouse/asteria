@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_NUMERIC_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.numeric.abs`

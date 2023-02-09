@@ -9,7 +9,6 @@
 #include <string.h>  // ::memcpy() etc
 #include <wchar.h>  // ::fgetwc() etc, WEOF
 #include <stdio.h>  // ::fgetc() etc, ::FILE, EOF
-
 namespace rocket {
 
 template<typename charT>

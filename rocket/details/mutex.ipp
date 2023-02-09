@@ -4,7 +4,6 @@
 #ifndef ROCKET_MUTEX_
 #  error Please include <rocket/mutex.hpp> instead.
 #endif
-
 namespace details_mutex {
 
 class stored_pointer

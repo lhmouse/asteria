@@ -3,7 +3,6 @@
 
 #include "utils.hpp"
 #include "../asteria/utils.hpp"
-
 using namespace ::asteria;
 
 int main()

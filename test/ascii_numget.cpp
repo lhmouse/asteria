@@ -3,7 +3,6 @@
 
 #include "utils.hpp"
 #include "../rocket/ascii_numget.hpp"
-
 using namespace ::asteria;
 
 // Test cases of known-bad strtod conversions that motivated the use of dmg_fp.

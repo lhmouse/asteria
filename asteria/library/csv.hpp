@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_CSV_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.csv.format`

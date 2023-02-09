@@ -20,7 +20,6 @@
 #include <memory>  // std::unqiue_ptr, std::shared_ptr
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
-
 namespace rocket {
 namespace noadl = rocket;
 

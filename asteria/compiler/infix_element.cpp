@@ -8,7 +8,6 @@
 #include "enums.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Precedence

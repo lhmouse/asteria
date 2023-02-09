@@ -5,7 +5,6 @@
 #include "garbage_collector.hpp"
 #include "variable.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

@@ -10,7 +10,6 @@
 #include "../runtime/air_optimizer.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

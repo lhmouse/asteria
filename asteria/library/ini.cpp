@@ -5,7 +5,6 @@
 #include "ini.hpp"
 #include "../runtime/argument_reader.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

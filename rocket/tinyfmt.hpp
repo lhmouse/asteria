@@ -8,7 +8,6 @@
 #include "throw.hpp"
 #include "tinybuf.hpp"
 #include "ascii_numput.hpp"
-
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>>

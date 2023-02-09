@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "details/value.ipp"
 #include <cmath>
-
 namespace asteria {
 
 class Value

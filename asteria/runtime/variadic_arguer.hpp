@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "reference.hpp"
 #include "../source_location.hpp"
-
 namespace asteria {
 
 class Variadic_Arguer final

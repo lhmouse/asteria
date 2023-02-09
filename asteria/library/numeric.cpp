@@ -8,7 +8,6 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/random_engine.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

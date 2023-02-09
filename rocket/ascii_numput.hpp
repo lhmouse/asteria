@@ -5,7 +5,6 @@
 #define ROCKET_ASCII_NUMPUT_
 
 #include "fwd.hpp"
-
 namespace rocket {
 
 class ascii_numput

@@ -6,7 +6,6 @@
 
 #include "unique_handle.hpp"
 #include <unistd.h>  // ::close()
-
 namespace rocket {
 
 class posix_fd_closer

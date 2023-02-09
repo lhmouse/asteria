@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "analytic_context.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Analytic_Context::

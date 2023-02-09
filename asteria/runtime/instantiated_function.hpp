@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "variadic_arguer.hpp"
 #include "../llds/avmc_queue.hpp"
-
 namespace asteria {
 
 class Instantiated_Function final

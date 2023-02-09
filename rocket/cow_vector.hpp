@@ -9,7 +9,6 @@
 #include "throw.hpp"
 #include "reference_counter.hpp"
 #include "xallocator.hpp"
-
 namespace rocket {
 
 template<typename valueT,

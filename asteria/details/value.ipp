@@ -4,7 +4,6 @@
 #ifndef ASTERIA_VALUE_
 #  error Please include <asteria/value.hpp> instead.
 #endif
-
 namespace asteria {
 namespace details_value {
 

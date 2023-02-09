@@ -5,7 +5,6 @@
 #define ROCKET_ASCII_CASE_
 
 #include "fwd.hpp"
-
 namespace rocket {
 
 #include "details/ascii_case.ipp"

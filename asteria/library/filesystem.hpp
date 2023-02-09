@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_FILESYSTEM_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.filesystem.get_working_directory`

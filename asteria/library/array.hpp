@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_ARRAY_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.array.slice`

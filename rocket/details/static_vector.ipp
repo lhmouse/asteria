@@ -4,7 +4,6 @@
 #ifndef ROCKET_STATIC_VECTOR_
 #  error Please include <rocket/static_vector.hpp> instead.
 #endif
-
 namespace details_static_vector {
 
 template<typename allocT, size_t capacityT>

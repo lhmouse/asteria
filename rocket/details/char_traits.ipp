@@ -4,7 +4,6 @@
 #ifndef ROCKET_CHAR_TRAITS_
 #  error Please include <rocket/char_traits.hpp> instead.
 #endif
-
 namespace details_char_traits {
 
 template<typename charT>

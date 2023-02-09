@@ -16,7 +16,6 @@
 #include <sys/wait.h>  // ::waitpid()
 #include <unistd.h>  // ::daemon()
 #include <time.h>  // ::clock_gettime()
-
 namespace asteria {
 namespace {
 

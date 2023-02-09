@@ -4,7 +4,6 @@
 #ifndef ROCKET_COW_HASHMAP_
 #  error Please include <rocket/cow_hashmap.hpp> instead.
 #endif
-
 namespace details_cow_hashmap {
 
 using unknown_function  = void (...);

@@ -5,7 +5,6 @@
 #include "utils.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <unistd.h>  // ::write
-
 namespace asteria {
 
 ptrdiff_t

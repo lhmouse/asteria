@@ -5,7 +5,6 @@
 #define ROCKET_REFERENCE_WRAPPER_
 
 #include "fwd.hpp"
-
 namespace rocket {
 
 template<typename valueT>

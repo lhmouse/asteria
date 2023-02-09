@@ -6,7 +6,6 @@
 
 #include "unique_handle.hpp"
 #include <stdio.h>  // ::FILE, ::fclose()
-
 namespace rocket {
 
 class posix_file_closer

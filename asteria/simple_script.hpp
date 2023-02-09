@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "runtime/global_context.hpp"
-
 namespace asteria {
 
 class Simple_Script

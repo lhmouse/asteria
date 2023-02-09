@@ -6,7 +6,6 @@
 #include <stdlib.h>  // ::free()
 #include <stdarg.h>  // ::va_list
 #include <stdio.h>  // ::vasprintf()
-
 namespace rocket {
 
 // Define the main template.

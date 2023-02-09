@@ -5,7 +5,6 @@
 #include "../asteria/simple_script.hpp"
 #include "../asteria/runtime/garbage_collector.hpp"
 #include "../asteria/runtime/variable.hpp"
-
 using namespace ::asteria;
 
 atomic_relaxed<long> bcnt;

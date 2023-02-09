@@ -7,7 +7,6 @@
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 void

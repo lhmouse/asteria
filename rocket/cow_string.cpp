@@ -2,7 +2,6 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "cow_string.hpp"
-
 namespace rocket {
 
 template

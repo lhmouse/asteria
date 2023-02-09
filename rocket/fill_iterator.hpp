@@ -5,7 +5,6 @@
 #define ROCKET_FILL_ITERATOR_
 
 #include "fwd.hpp"
-
 namespace rocket {
 
 template<typename elementT>

@@ -8,7 +8,6 @@
 #include "reference.hpp"
 #include "../value.hpp"
 #include "../source_location.hpp"
-
 namespace asteria {
 
 class AIR_Node

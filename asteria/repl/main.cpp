@@ -7,7 +7,6 @@
 #include <locale.h>  // setlocale()
 #include <unistd.h>  // isatty()
 #include <signal.h>  // sigaction()
-
 namespace {
 using namespace ::asteria;
 

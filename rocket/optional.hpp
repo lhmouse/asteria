@@ -5,7 +5,6 @@
 #define ROCKET_OPTIONAL_
 
 #include "static_vector.hpp"
-
 namespace rocket {
 
 template<typename valueT>

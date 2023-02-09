@@ -4,7 +4,6 @@
 #ifndef ROCKET_REFCNT_PTR_
 #  error Please include <rocket/refcnt_ptr.hpp> instead.
 #endif
-
 namespace details_refcnt_ptr {
 
 class refcnt_cJveMKH5bI7L

@@ -4,7 +4,6 @@
 #ifndef ASTERIA_LLDS_VARIABLE_HASHMAP_
 #  error Please include <asteria/llds/variable_hashmap.hpp> instead.
 #endif
-
 namespace asteria {
 namespace details_variable_hashmap {
 

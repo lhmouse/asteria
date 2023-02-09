@@ -8,7 +8,6 @@
 #include "../compiler/statement_sequence.hpp"
 #include "../simple_script.hpp"
 #include "../value.hpp"
-
 namespace asteria {
 
 void

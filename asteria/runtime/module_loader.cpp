@@ -8,7 +8,6 @@
 #include <sys/stat.h>
 #include <sys/file.h>  // ::flock()
 #include <unistd.h>  // ::fstat()
-
 namespace asteria {
 
 Module_Loader::

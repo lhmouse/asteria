@@ -5,7 +5,6 @@
 #include "version.hpp"
 #include "../value.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 void

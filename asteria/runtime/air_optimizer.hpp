@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "air_node.hpp"
-
 namespace asteria {
 
 class AIR_Optimizer

@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "abstract_context.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Abstract_Context::

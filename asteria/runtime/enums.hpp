@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_ENUMS_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // Operators

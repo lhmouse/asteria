@@ -9,7 +9,6 @@
 #include "../compiler/statement.hpp"
 #include "../compiler/expression_unit.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 AIR_Optimizer::

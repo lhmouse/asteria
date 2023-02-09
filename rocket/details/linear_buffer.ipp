@@ -4,7 +4,6 @@
 #ifndef ROCKET_LINEAR_BUFFER_
 #  error Please include <rocket/linear_buffer.hpp> instead.
 #endif
-
 namespace details_linear_buffer {
 
 template<typename allocT, typename traitsT>

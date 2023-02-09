@@ -12,7 +12,6 @@
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include <zlib.h>
-
 namespace asteria {
 namespace {
 

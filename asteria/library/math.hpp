@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_MATH_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.math.exp`

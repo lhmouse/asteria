@@ -7,7 +7,6 @@
 #include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
 #include <time.h>  // ::clock_gettime(), ::timespec
-
 namespace asteria {
 namespace {
 

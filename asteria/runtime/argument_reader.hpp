@@ -9,7 +9,6 @@
 #include "runtime_error.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../details/argument_reader.ipp"
-
 namespace asteria {
 
 class Argument_Reader

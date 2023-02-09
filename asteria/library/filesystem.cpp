@@ -13,7 +13,6 @@
 #include <fcntl.h>  // ::open()
 #include <stdio.h>  // ::rename()
 #include <errno.h>  // errno
-
 namespace asteria {
 namespace {
 

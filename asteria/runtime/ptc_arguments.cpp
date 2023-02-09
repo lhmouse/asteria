@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "ptc_arguments.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 PTC_Arguments::

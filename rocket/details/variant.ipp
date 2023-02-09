@@ -4,7 +4,6 @@
 #ifndef ROCKET_VARIANT_
 #  error Please include <rocket/variant.hpp> instead.
 #endif
-
 namespace details_variant {
 
 // Get the index of `T` in `S`.

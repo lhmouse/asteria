@@ -24,7 +24,6 @@
 #include "../library/ini.hpp"
 #include "../library/csv.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

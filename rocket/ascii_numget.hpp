@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include <climits>
 #include <cmath>
-
 namespace rocket {
 
 class ascii_numget

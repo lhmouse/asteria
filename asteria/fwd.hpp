@@ -60,7 +60,6 @@
 
 #define ASTERIA_INCOMPLET(T)  \
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
-
 namespace asteria {
 namespace noadl = asteria;
 

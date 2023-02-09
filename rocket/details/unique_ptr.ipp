@@ -4,7 +4,6 @@
 #ifndef ROCKET_UNIQUE_PTR_
 #  error Please include <rocket/unique_ptr.hpp> instead.
 #endif
-
 namespace details_unique_ptr {
 
 template<typename elementT, typename deleterT, typename = void>

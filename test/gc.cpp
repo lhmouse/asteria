@@ -6,7 +6,6 @@
 #include "../asteria/runtime/garbage_collector.hpp"
 #include "../asteria/runtime/variable.hpp"
 #include <algorithm>
-
 using namespace ::asteria;
 
 static_vector<void*, 10000> alloc_list;

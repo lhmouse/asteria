@@ -6,7 +6,6 @@
 #include "runtime_error.hpp"
 #include "../value.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 const Value*

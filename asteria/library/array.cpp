@@ -8,7 +8,6 @@
 #include "../runtime/global_context.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

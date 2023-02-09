@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "abstract_hooks.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Abstract_Hooks::

@@ -4,7 +4,6 @@
 #ifndef ROCKET_COW_VECTOR_
 #  error Please include <rocket/cow_vector.hpp> instead.
 #endif
-
 namespace details_cow_vector {
 
 using unknown_function  = void (...);

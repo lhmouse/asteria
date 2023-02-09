@@ -8,7 +8,6 @@
 #include "assert.hpp"
 #include "mutex.hpp"
 #include <time.h>
-
 namespace rocket {
 
 class condition_variable;

@@ -8,7 +8,6 @@
 #include "assert.hpp"
 #include "throw.hpp"
 #include "xallocator.hpp"
-
 namespace rocket {
 
 template<typename valueT, size_t capacityT,

@@ -12,7 +12,6 @@
 #include "xhashtable.hpp"
 #include <tuple>  // std::forward_as_tuple()
 #include <cstdio>  // std::sprintf()
-
 namespace rocket {
 
 template<typename keyT, typename mappedT,

@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../runtime/variable.hpp"
 #include "../details/variable_hashmap.ipp"
-
 namespace asteria {
 
 class Variable_HashMap

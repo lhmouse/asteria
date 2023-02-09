@@ -5,7 +5,6 @@
 #define ROCKET_THROW_
 
 #include "fwd.hpp"
-
 namespace rocket {
 
 // Don't define this template here.

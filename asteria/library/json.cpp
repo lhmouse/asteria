@@ -10,7 +10,6 @@
 #include "../compiler/compiler_error.hpp"
 #include "../compiler/enums.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

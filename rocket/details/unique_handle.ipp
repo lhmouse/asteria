@@ -4,7 +4,6 @@
 #ifndef ROCKET_UNIQUE_HANDLE_
 #  error Please include <rocket/unique_handle.hpp> instead.
 #endif
-
 namespace details_unique_handle {
 
 template<typename handleT, typename closerT>

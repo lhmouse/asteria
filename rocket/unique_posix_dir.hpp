@@ -6,7 +6,6 @@
 
 #include "unique_handle.hpp"
 #include <dirent.h>  // ::DIR, ::closedir()
-
 namespace rocket {
 
 class posix_dir_closer

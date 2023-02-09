@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../llds/reference_dictionary.hpp"
-
 namespace asteria {
 
 class Abstract_Context

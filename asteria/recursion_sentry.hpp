@@ -5,7 +5,6 @@
 #define ASTERIA_RECURSION_SENTRY_
 
 #include "fwd.hpp"
-
 namespace asteria {
 
 class Recursion_Sentry

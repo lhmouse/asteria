@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_INI_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.ini.format`

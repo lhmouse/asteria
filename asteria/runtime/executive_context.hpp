@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 #include "variadic_arguer.hpp"
-
 namespace asteria {
 
 class Executive_Context

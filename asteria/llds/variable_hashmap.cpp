@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "variable_hashmap.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 void

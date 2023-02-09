@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <histedit.h>
-
 namespace asteria {
 namespace {
 

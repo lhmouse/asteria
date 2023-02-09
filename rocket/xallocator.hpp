@@ -5,7 +5,6 @@
 #define ROCKET_XALLOCATOR_
 
 #include "fwd.hpp"
-
 namespace rocket {
 
 #include "details/xallocator.ipp"

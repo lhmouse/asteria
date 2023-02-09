@@ -5,7 +5,6 @@
 #include "argument_reader.hpp"
 #include "runtime_error.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Argument_Reader::

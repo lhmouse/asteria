@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 #include "../recursion_sentry.hpp"
-
 namespace asteria {
 
 class Global_Context

@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "../utils.hpp"
 #include <string.h>  // strerror_r
-
 namespace asteria {
 namespace details_utils {
 

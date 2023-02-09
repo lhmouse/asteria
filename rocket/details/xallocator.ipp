@@ -4,7 +4,6 @@
 #ifndef ROCKET_XALLOCATOR_
 #  error Please include <rocket/xallocator.hpp> instead.
 #endif
-
 namespace details_xallocator {
 
 template<typename allocT>

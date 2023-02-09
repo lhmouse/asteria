@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_CHECKSUM_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.checksum.CRC32`

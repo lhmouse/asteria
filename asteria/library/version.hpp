@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_VERSION_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // Create an object that is to be referenced as `std.version`.

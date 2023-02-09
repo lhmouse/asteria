@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "assert.hpp"
-
 namespace rocket {
 
 class once_flag;

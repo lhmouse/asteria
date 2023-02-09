@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_STRING_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.string.slice`

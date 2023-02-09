@@ -2,7 +2,6 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "tinyfmt.hpp"
-
 namespace rocket {
 
 template

@@ -4,7 +4,6 @@
 #include "ascii_numput.hpp"
 #include "assert.hpp"
 #include <cmath>
-
 namespace rocket {
 namespace {
 

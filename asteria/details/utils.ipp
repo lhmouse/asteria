@@ -4,7 +4,6 @@
 #ifndef ASTERIA_UTILS_
 #  error Please include <asteria/utils.hpp> instead.
 #endif
-
 namespace asteria {
 namespace details_utils {
 

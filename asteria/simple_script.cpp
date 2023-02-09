@@ -10,7 +10,6 @@
 #include "runtime/air_optimizer.hpp"
 #include "llds/reference_stack.hpp"
 #include "utils.hpp"
-
 namespace asteria {
 
 Simple_Script&

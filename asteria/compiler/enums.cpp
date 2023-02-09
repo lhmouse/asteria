@@ -3,7 +3,6 @@
 
 #include "../precompiled.ipp"
 #include "enums.hpp"
-
 namespace asteria {
 
 const char*

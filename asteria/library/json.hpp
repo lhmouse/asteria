@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_JSON_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.json.format`

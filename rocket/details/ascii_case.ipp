@@ -4,7 +4,6 @@
 #ifndef ROCKET_ASCII_CASE_
 #  error Please include <rocket/ascii_case.hpp> instead.
 #endif
-
 namespace details_ascii_case {
 
 constexpr uint8_t case_table[128] =

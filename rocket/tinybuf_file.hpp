@@ -11,7 +11,6 @@
 #include <unistd.h>  // ::close()
 #include <stdio.h>  // ::fdopen(), ::fclose()
 #include <errno.h>  // errno
-
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>>

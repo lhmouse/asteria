@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_DEBUG_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.debug.logf`

@@ -6,7 +6,6 @@
 
 #include "assert.hpp"
 #include <atomic>  // std::atomic<>
-
 namespace rocket {
 
 template<typename valueT, memory_order memorderT = memory_order_acq_rel>

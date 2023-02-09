@@ -8,7 +8,6 @@
 #include "../value.hpp"
 #include "../source_location.hpp"
 #include <exception>
-
 namespace asteria {
 
 class Backtrace_Frame

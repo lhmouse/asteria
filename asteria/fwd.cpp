@@ -5,7 +5,6 @@
 #include "fwd.hpp"
 #include "runtime/reference.hpp"
 #include "utils.hpp"
-
 namespace asteria {
 
 void

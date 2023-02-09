@@ -8,7 +8,6 @@
 #include "assert.hpp"
 #include "throw.hpp"
 #include <cstring>  // std::memset()
-
 namespace rocket {
 
 template<typename... altsT>

@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "reference_dictionary.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 void

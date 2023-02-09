@@ -4,7 +4,6 @@
 #ifndef ROCKET_ARRAY_
 #  error Please include <rocket/array.hpp> instead.
 #endif
-
 namespace details_array {
 
 template<typename valueT, size_t capT, size_t... nestedT>

@@ -7,7 +7,6 @@
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 V_real

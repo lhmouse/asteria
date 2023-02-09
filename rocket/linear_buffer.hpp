@@ -8,7 +8,6 @@
 #include "assert.hpp"
 #include "char_traits.hpp"
 #include "xallocator.hpp"
-
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>

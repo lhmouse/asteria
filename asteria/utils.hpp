@@ -9,7 +9,6 @@
 #include "../rocket/format.hpp"
 #include "details/utils.ipp"
 #include <cmath>
-
 namespace asteria {
 
 // Formatting

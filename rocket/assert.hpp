@@ -3,8 +3,6 @@
 
 #ifndef ROCKET_ASSERT_
 #define ROCKET_ASSERT_
-
-
 namespace rocket {
 
 // `report_assertion_failure()` is always provided even when assertions are disabled.

@@ -4,7 +4,6 @@
 #ifndef ASTERIA_RUNTIME_ARGUMENT_READER_
 #  error Please include <asteria/runtime/argument_reader.hpp> instead.
 #endif
-
 namespace asteria {
 namespace details_argument_reader {
 

@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "variable.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Variable::

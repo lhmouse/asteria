@@ -8,7 +8,6 @@
 #include "assert.hpp"
 #include "throw.hpp"
 #include "char_traits.hpp"
-
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>>

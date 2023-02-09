@@ -5,7 +5,6 @@
 #include "../asteria/compiler/token_stream.hpp"
 #include "../asteria/compiler/token.hpp"
 #include "../asteria/compiler/enums.hpp"
-
 using namespace ::asteria;
 
 int main()

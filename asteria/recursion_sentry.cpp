@@ -4,7 +4,6 @@
 #include "precompiled.ipp"
 #include "recursion_sentry.hpp"
 #include "utils.hpp"
-
 namespace asteria {
 
 void

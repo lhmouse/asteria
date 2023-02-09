@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 class Random_Engine final

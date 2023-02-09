@@ -11,7 +11,6 @@
 #include "../llds/avmc_queue.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 ROCKET_FLATTEN

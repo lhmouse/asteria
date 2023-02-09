@@ -5,7 +5,6 @@
 #include "variadic_arguer.hpp"
 #include "argument_reader.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 tinyfmt&

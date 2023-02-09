@@ -4,7 +4,6 @@
 #ifndef ROCKET_RECURSIVE_MUTEX_
 #  error Please include <rocket/recursive_mutex.hpp> instead.
 #endif
-
 namespace details_recursive_mutex {
 
 class stored_pointer

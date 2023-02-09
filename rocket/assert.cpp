@@ -4,7 +4,6 @@
 #include "assert.hpp"
 #include <exception>
 #include <cstdio>
-
 namespace rocket {
 
 void

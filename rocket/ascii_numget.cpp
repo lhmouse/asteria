@@ -5,7 +5,6 @@
 #include "assert.hpp"
 #include "throw.hpp"
 #include <cmath>
-
 namespace rocket {
 namespace {
 

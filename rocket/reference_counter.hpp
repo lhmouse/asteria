@@ -8,7 +8,6 @@
 #include "assert.hpp"
 #include <atomic>  // std::atomic<>
 #include <exception>  // std::terminate()
-
 namespace rocket {
 
 template<typename valueT = long>

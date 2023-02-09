@@ -4,7 +4,6 @@
 #ifndef ASTERIA_LLDS_AVMC_QUEUE_
 #  error Please include <asteria/llds/avmc_queue.hpp> instead.
 #endif
-
 namespace asteria {
 namespace details_avmc_queue {
 

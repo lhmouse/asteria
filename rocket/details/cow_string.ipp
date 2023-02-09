@@ -4,7 +4,6 @@
 #ifndef ROCKET_COW_STRING_
 #  error Please include <rocket/cow_string.hpp> instead.
 #endif
-
 namespace details_cow_string {
 
 struct storage_header

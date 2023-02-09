@@ -8,7 +8,6 @@
 #include "backtrace_frame.hpp"
 #include "../../rocket/tinyfmt_str.hpp"
 #include <exception>
-
 namespace asteria {
 
 class Runtime_Error

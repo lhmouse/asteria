@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../value.hpp"
-
 namespace asteria {
 
 // These are process exit status codes.

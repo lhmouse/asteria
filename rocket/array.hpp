@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "assert.hpp"
 #include "throw.hpp"
-
 namespace rocket {
 
 template<typename valueT, size_t capacityT, size_t... nestedT>

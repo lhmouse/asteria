@@ -4,7 +4,6 @@
 #ifndef ASTERIA_LLDS_REFERENCE_DICTIONARY_
 #  error Please include <asteria/llds/reference_dictionary.hpp> instead.
 #endif
-
 namespace asteria {
 namespace details_reference_dictionary {
 

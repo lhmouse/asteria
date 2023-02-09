@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_ABSTRACT_HOOKS_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 struct Abstract_Hooks

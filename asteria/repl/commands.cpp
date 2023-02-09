@@ -5,7 +5,6 @@
 #include "fwd.hpp"
 #include "../utils.hpp"
 #include "../../rocket/tinybuf_file.hpp"
-
 namespace asteria {
 namespace {
 

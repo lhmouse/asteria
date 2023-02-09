@@ -4,7 +4,6 @@
 #ifndef ROCKET_ONCE_FLAG_
 #  error Please include <rocket/once_flag.hpp> instead.
 #endif
-
 namespace details_once_flag {
 
 // Note these conforms to Itanium ABI.

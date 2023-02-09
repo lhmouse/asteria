@@ -11,7 +11,6 @@
 #include "enums.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 Instantiated_Function::

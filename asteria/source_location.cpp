@@ -3,7 +3,6 @@
 
 #include "precompiled.ipp"
 #include "source_location.hpp"
-
 namespace asteria {
 
 tinyfmt&

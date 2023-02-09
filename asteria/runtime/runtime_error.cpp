@@ -4,7 +4,6 @@
 #include "../precompiled.ipp"
 #include "runtime_error.hpp"
 #include "enums.hpp"
-
 namespace asteria {
 
 static_assert(

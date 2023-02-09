@@ -6,7 +6,6 @@
 #include "../utils.hpp"
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::read()
-
 namespace asteria {
 
 Random_Engine::

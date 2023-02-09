@@ -5,7 +5,6 @@
 #define ROCKET_PREHASHED_STRING_
 
 #include "cow_string.hpp"
-
 namespace rocket {
 
 template<typename stringT, typename hashT = hash<stringT>, typename eqT = equal_to<void>>

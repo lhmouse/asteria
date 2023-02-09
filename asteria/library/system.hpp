@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_SYSTEM_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.system.gc_count_variables`

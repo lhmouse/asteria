@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_REFERENCE_MODIFIER_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 class Reference_Modifier

@@ -4,7 +4,6 @@
 #include "utils.hpp"
 #include "../asteria/value.hpp"
 #include <cmath>
-
 using namespace ::asteria;
 
 int main()

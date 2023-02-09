@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "assert.hpp"
 #include "xallocator.hpp"
-
 namespace rocket {
 
 template<typename handleT, typename closerT>

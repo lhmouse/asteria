@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../source_location.hpp"
-
 namespace asteria {
 
 class Statement

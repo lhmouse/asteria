@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_CHRONO_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.chrono.utc_now`

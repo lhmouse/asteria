@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../value.hpp"
 #include "reference_modifier.hpp"
-
 namespace asteria {
 
 class Reference

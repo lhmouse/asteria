@@ -11,7 +11,6 @@
 #include <stdlib.h>  // exit(), quick_exit()
 #include <stdio.h>  // fflush(), fprintf(), stderr
 #include <signal.h>  // sys_siglist
-
 namespace asteria {
 namespace {
 

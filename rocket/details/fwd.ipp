@@ -4,7 +4,6 @@
 #ifndef ROCKET_FWD_
 #  error Please include <rocket/fwd.hpp> instead.
 #endif
-
 namespace details_fwd {
 
 // `is_input_iterator`

@@ -5,7 +5,6 @@
 #define ASTERIA_COMPILER_ENUMS_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // Punctuators

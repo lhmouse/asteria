@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_ZLIB_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.zlib.Deflator`

@@ -10,7 +10,6 @@
 #include "char_traits.hpp"
 #include "reference_counter.hpp"
 #include "xallocator.hpp"
-
 namespace rocket {
 
 template<typename charT,

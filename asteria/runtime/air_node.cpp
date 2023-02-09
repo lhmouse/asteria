@@ -21,7 +21,6 @@
 #include "../compiler/expression_unit.hpp"
 #include "../llds/avmc_queue.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 namespace {
 

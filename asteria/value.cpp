@@ -7,7 +7,6 @@
 #include "llds/variable_hashmap.hpp"
 #include "../rocket/linear_buffer.hpp"
 #include "../rocket/tinyfmt_file.hpp"
-
 namespace asteria {
 namespace {
 

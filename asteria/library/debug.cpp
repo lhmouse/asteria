@@ -6,7 +6,6 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 optV_integer

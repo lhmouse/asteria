@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../value.hpp"
-
 namespace asteria {
 
 class Variable final

@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "assert.hpp"
 #include <pthread.h>
-
 namespace rocket {
 
 class mutex;

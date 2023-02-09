@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../recursion_sentry.hpp"
 #include "token.hpp"
-
 namespace asteria {
 
 class Token_Stream

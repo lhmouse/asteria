@@ -4,7 +4,6 @@
 #ifndef ROCKET_PREHASHED_STRING_
 #  error Please include <rocket/prehashed_string.hpp> instead.
 #endif
-
 namespace details_prehashed_string {
 
 template<typename stringT, typename hashT, typename eqT>

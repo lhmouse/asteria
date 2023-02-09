@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../../rocket/tinybuf_file.hpp"
-
 namespace asteria {
 
 class Module_Loader final

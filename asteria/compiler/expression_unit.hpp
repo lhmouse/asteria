@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../value.hpp"
 #include "../source_location.hpp"
-
 namespace asteria {
 
 class Expression_Unit

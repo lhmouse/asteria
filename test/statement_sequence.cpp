@@ -10,7 +10,6 @@
 #include "../asteria/runtime/reference.hpp"
 #include "../asteria/runtime/variadic_arguer.hpp"
 #include "../asteria/llds/avmc_queue.hpp"
-
 using namespace ::asteria;
 
 int main()

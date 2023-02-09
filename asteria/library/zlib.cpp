@@ -9,7 +9,6 @@
 #include "../utils.hpp"
 #define ZLIB_CONST 1
 #include <zlib.h>
-
 namespace asteria {
 namespace {
 

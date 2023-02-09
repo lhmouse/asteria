@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-
 namespace asteria {
 
 class Analytic_Context

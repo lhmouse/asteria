@@ -6,7 +6,6 @@
 
 #include "tinybuf.hpp"
 #include "cow_string.hpp"
-
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>

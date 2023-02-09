@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../source_location.hpp"
-
 namespace asteria {
 
 class PTC_Arguments final

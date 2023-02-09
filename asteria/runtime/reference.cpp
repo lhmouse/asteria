@@ -14,7 +14,6 @@
 #include "../llds/reference_stack.hpp"
 #include "../llds/variable_hashmap.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 const Value&

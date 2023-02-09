@@ -2,7 +2,6 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "format.hpp"
-
 namespace rocket {
 
 template

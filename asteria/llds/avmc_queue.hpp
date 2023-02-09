@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../source_location.hpp"
 #include "../details/avmc_queue.ipp"
-
 namespace asteria {
 
 class AVMC_Queue

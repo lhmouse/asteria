@@ -5,7 +5,6 @@
 #define ASTERIA_LIBRARY_IO_
 
 #include "../fwd.hpp"
-
 namespace asteria {
 
 // `std.io.getc`

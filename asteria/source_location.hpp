@@ -5,7 +5,6 @@
 #define ASTERIA_SOURCE_LOCATION_
 
 #include "fwd.hpp"
-
 namespace asteria {
 
 class Source_Location

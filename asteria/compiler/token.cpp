@@ -5,7 +5,6 @@
 #include "token.hpp"
 #include "enums.hpp"
 #include "../utils.hpp"
-
 namespace asteria {
 
 tinyfmt&

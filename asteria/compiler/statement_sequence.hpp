@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "statement.hpp"
-
 namespace asteria {
 
 class Statement_Sequence
