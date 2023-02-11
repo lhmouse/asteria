@@ -27,7 +27,12 @@ class atomic
 
   public:
     constexpr
-    atomic(value_type val = { }) noexcept
+    atomic() noexcept
+      : m_val()
+      { }
+
+    constexpr
+    atomic(value_type val) noexcept
       : m_val(val)
       { }
 
