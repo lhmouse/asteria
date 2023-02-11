@@ -250,8 +250,8 @@ main(int argc, char** argv)
     do {
       // Discard unread input data. Flush buffered output data.
       // Clear EOF and error bits. Clear orientation. Errors are ignored.
-      (void)!!::freopen(nullptr, "r", stdin);
-      (void)!!::freopen(nullptr, "w", stdout);
+      (void) !::freopen(nullptr, "r", stdin);
+      (void) !::freopen(nullptr, "w", stdout);
 
       // Read a snippet and execute it.
       // In case of read errors, this function shall not return.

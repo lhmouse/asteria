@@ -68,7 +68,7 @@ init() noexcept
     // Read some random bytes. Errors are ignored.
     ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY));
     if(fd)
-      (void)!::read(fd, this->m_randrsl, sizeof(m_randrsl));
+      (void) !::read(fd, this->m_randrsl, sizeof(m_randrsl));
 
     ///////////////////////////////////////////////////////////////////////////
     // Below is a direct copy with a few fixups.
