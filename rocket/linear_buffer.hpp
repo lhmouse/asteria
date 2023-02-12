@@ -305,6 +305,18 @@ class basic_linear_buffer
         return *this;
       }
 
+    ROCKET_ALWAYS_INLINE
+    basic_linear_buffer&
+    unaccept(size_type nbump) noexcept
+      {
+        ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
+#ifdef ROCKET_DEBUG
+        traits_type::assign(this->mut_end() - nbump, nbump, value_type(0xD9D9D9D9));
+#endif
+        this->m_eoff -= nbump;
+        return *this;
+      }
+
     basic_linear_buffer&
     putc(value_type c)
       {
@@ -334,7 +346,9 @@ class basic_linear_buffer
 
     basic_linear_buffer&
     puts(const value_type* s)
-      { return this->putn(s, traits_type::length(s));  }
+      {
+        return this->putn(s, traits_type::length(s));
+      }
   };
 
 template<typename charT, typename traitsT, typename allocT>
