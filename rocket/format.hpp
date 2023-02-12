@@ -62,6 +62,11 @@ struct basic_formatter
     callback_type* ifunc;
     const void* param;
 
+    constexpr
+    basic_formatter(callback_type* xifunc = nullptr, const void* xparam = nullptr) noexcept
+      : ifunc(xifunc), param(xparam)
+      { }
+
     void
     operator()(tinyfmt_type& fmt) const
       { this->ifunc(fmt, this->param);  }
@@ -72,10 +77,7 @@ constexpr
 basic_formatter<charT, traitsT>
 make_default_formatter(basic_tinyfmt<charT, traitsT>& /*fmt*/, valueT& value) noexcept
   {
-    basic_formatter<charT, traitsT> r;
-    r.ifunc = [](auto& fmt, auto* ptr) { fmt << *static_cast<valueT*>(ptr);  };
-    r.param = ::std::addressof(value);
-    return r;
+    return { [](auto& fmt, const void* ptr) { fmt << *(valueT*) ptr;  }, ::std::addressof(value) };
   }
 
 template<typename charT, typename traitsT>
