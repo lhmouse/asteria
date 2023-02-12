@@ -186,10 +186,6 @@ class basic_linear_buffer
     max_size() const noexcept
       { return this->m_stor.max_size();  }
 
-    size_type
-    capacity() const noexcept
-      { return this->m_stor.capacity() - this->m_eoff;  }
-
     basic_linear_buffer&
     clear() noexcept
       {
@@ -282,26 +278,29 @@ class basic_linear_buffer
       { return this->m_stor.mut_data() + this->m_goff;  }
 
     size_type
-    reserve(size_type nbump)
+    capacity_after_end() const noexcept
+      { return this->m_stor.capacity() - this->m_eoff;  }
+
+    size_type
+    reserve_after_end(size_type nbump)
       {
-        if(ROCKET_UNEXPECT(nbump > this->capacity())) {
-          // Reallocate the buffer.
-          auto nused = this->m_stor.reserve(this->m_goff, this->m_eoff, nbump);
-          // Set up the new offsets as the contents have now been moved to the beginning.
+        if(ROCKET_UNEXPECT(nbump > this->capacity_after_end())) {
+          // Relocate existent data.
+          size_type nused = this->m_stor.reserve(this->m_goff, this->m_eoff, nbump);
           this->m_goff = 0;
           this->m_eoff = nused;
         }
 #ifdef ROCKET_DEBUG
         traits_type::assign(this->mut_end(), nbump, value_type(0xD3D3D3D3));
 #endif
-        return this->capacity();
+        return this->capacity_after_end();
       }
 
     ROCKET_ALWAYS_INLINE
     basic_linear_buffer&
     accept(size_type nbump) noexcept
       {
-        ROCKET_ASSERT(nbump <= this->capacity());
+        ROCKET_ASSERT(nbump <= this->capacity_after_end());
         this->m_eoff += nbump;
         return *this;
       }
@@ -309,7 +308,7 @@ class basic_linear_buffer
     basic_linear_buffer&
     putc(value_type c)
       {
-        this->reserve(1);
+        this->reserve_after_end(1);
         traits_type::assign(this->mut_end()[0], c);
         this->accept(1);
         return *this;
@@ -318,7 +317,7 @@ class basic_linear_buffer
     basic_linear_buffer&
     putn(size_type n, value_type c)
       {
-        this->reserve(n);
+        this->reserve_after_end(n);
         traits_type::assign(this->mut_end(), n, c);
         this->accept(n);
         return *this;
@@ -327,7 +326,7 @@ class basic_linear_buffer
     basic_linear_buffer&
     putn(const value_type* s, size_type n)
       {
-        this->reserve(n);
+        this->reserve_after_end(n);
         traits_type::copy(this->mut_end(), s, n);
         this->accept(n);
         return *this;
