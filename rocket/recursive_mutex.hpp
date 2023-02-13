@@ -9,11 +9,111 @@
 #include <mutex>
 namespace rocket {
 
-struct recursive_mutex : ::std::recursive_mutex
+class recursive_mutex
   {
-    using unique_lock = ::std::unique_lock<recursive_mutex>;
-    using lock_guard = ::std::lock_guard<recursive_mutex>;
+    friend class condition_variable;
+
+  private:
+    ::std::recursive_mutex m_mtx;
+
+  public:
+    recursive_mutex() = default;
+
+    recursive_mutex(const recursive_mutex&) = delete;
+    recursive_mutex& operator=(const recursive_mutex&) = delete;
+
+  public:
+    // This is the only public interface, other than constructors
+    // and the destructor.
+    class unique_lock
+      {
+        friend class condition_variable;
+
+      private:
+        ::std::recursive_mutex* m_mtx = nullptr;
+
+      public:
+        constexpr
+        unique_lock() noexcept = default;
+
+        unique_lock(recursive_mutex& m) noexcept
+          {
+            m.m_mtx.lock();
+            this->m_mtx = &(m.m_mtx);
+          }
+
+        unique_lock(unique_lock&& other) noexcept
+          {
+            this->m_mtx = other.m_mtx;
+            other.m_mtx = nullptr;
+          }
+
+        unique_lock&
+        operator=(unique_lock&& other) & noexcept
+          {
+            if(this->m_mtx == other.m_mtx)
+              return *this;
+
+            this->do_unlock_if();
+            this->m_mtx = other.m_mtx;
+            other.m_mtx = nullptr;
+            return *this;
+          }
+
+        ~unique_lock()
+          {
+            this->do_unlock_if();
+          }
+
+      private:
+        void
+        do_unlock_if() const noexcept
+          {
+            if(this->m_mtx)
+              this->m_mtx->unlock();
+          }
+
+      public:
+        explicit constexpr operator
+        bool() const noexcept
+          { return this->m_mtx != nullptr;  }
+
+        unique_lock&
+        lock(recursive_mutex& m) noexcept
+          {
+            if(this->m_mtx == &(m.m_mtx))
+              return *this;
+
+            m.m_mtx.lock();
+            this->do_unlock_if();
+            this->m_mtx = &(m.m_mtx);
+            return *this;
+          }
+
+        unique_lock&
+        unlock() noexcept
+          {
+            ROCKET_ASSERT(this->m_mtx != nullptr);
+            this->m_mtx->unlock();
+            this->m_mtx = nullptr;
+            return *this;
+          }
+
+        unique_lock&
+        swap(unique_lock& other) noexcept
+          {
+            ::std::swap(this->m_mtx, other.m_mtx);
+            return *this;
+          }
+      };
   };
+
+inline
+void
+swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace rocket
 #endif
