@@ -6,16 +6,13 @@
 
 #include "fwd.hpp"
 #include "assert.hpp"
+#include <cxxabi.h>
 namespace rocket {
-
-class once_flag;
-
-#include "details/once_flag.ipp"
 
 class once_flag
   {
   private:
-    details_once_flag::guard m_guard[1] = { };
+    ::__cxxabiv1::__guard m_guard[1] = { };
 
   public:
     constexpr once_flag() noexcept = default;
@@ -30,12 +27,12 @@ class once_flag
       {
         // Load the first byte with acquire semantics.
         // The value is 0 prior to any initialization and 1 afterwards.
-        if(ROCKET_EXPECT(__atomic_load_n(this->m_guard->bytes, __ATOMIC_ACQUIRE)))
+        if(__atomic_load_n((char*) this->m_guard, __ATOMIC_ACQUIRE))
           return;
 
         // Try acquiring the guard.
         // If 0 is returned, another thread will have finished initialization.
-        int status = details_once_flag::__cxa_guard_acquire(this->m_guard);
+        int status = ::__cxxabiv1::__cxa_guard_acquire(this->m_guard);
         if(ROCKET_EXPECT(status == 0))
           return;
 
@@ -44,10 +41,10 @@ class once_flag
           ::std::forward<funcT>(func)(::std::forward<paramsT>(params)...);
         }
         catch(...) {
-          details_once_flag::__cxa_guard_abort(this->m_guard);
+          ::__cxxabiv1::__cxa_guard_abort(this->m_guard);
           throw;
         }
-        details_once_flag::__cxa_guard_release(this->m_guard);
+        ::__cxxabiv1::__cxa_guard_release(this->m_guard);
       }
   };
 
