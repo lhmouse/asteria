@@ -19,8 +19,6 @@ nobase_include_HEADERS +=  \
   %reldir%/details/array.ipp  \
   %reldir%/details/linear_buffer.ipp  \
   %reldir%/details/ascii_case.ipp  \
-  %reldir%/details/mutex.ipp  \
-  %reldir%/details/recursive_mutex.ipp  \
   %reldir%/compiler.h  \
   %reldir%/assert.hpp  \
   %reldir%/fwd.hpp  \
