@@ -831,5 +831,4 @@ swap(cow_vector<valueT, allocT>& lhs, cow_vector<valueT, allocT>& rhs) noexcept(
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
-
 #endif

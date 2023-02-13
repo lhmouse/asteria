@@ -69,5 +69,4 @@ struct is_always_equal_allocator
   { };
 
 }  // namespace rocket
-
 #endif

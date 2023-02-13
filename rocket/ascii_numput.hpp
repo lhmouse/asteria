@@ -218,5 +218,4 @@ class ascii_numput
   };
 
 }  // namespace rocket
-
 #endif

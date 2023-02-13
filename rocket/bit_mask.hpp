@@ -143,5 +143,4 @@ operator!=(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
   { return lhs.value() != rhs.value();  }
 
 }  // namespace rocket
-
 #endif

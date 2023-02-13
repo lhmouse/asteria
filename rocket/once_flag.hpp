@@ -49,5 +49,4 @@ class once_flag
   };
 
 }  // namespace rocket
-
 #endif

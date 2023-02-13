@@ -206,5 +206,4 @@ make_unique_handle(handleT hv, closerT&& cl) noexcept
   { return { hv, ::std::forward<closerT>(cl) };  }
 
 }  // namespace rocket
-
 #endif

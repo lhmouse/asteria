@@ -235,5 +235,4 @@ using tinybuf_str   = basic_tinybuf_str<char>;
 using wtinybuf_str  = basic_tinybuf_str<wchar_t>;
 
 }  // namespace rocket
-
 #endif

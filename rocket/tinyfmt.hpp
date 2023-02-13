@@ -399,5 +399,4 @@ wtinyfmt&
 operator<<(wtinyfmt&, const exception&);
 
 }  // namespace rocket
-
 #endif

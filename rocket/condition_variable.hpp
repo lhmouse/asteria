@@ -16,5 +16,4 @@ struct condition_variable : ::std::condition_variable
   };
 
 }  // namespace rocket
-
 #endif

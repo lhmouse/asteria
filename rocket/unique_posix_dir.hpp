@@ -60,5 +60,4 @@ class posix_dir_closer
 using unique_posix_dir  = unique_handle<::DIR*, posix_dir_closer>;
 
 }  // namespace rocket
-
 #endif

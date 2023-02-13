@@ -16,5 +16,4 @@ struct recursive_mutex : ::std::recursive_mutex
   };
 
 }  // namespace rocket
-
 #endif

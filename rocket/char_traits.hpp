@@ -445,5 +445,4 @@ struct char_traits<char32_t>
   };
 
 }  // namespace rocket
-
 #endif

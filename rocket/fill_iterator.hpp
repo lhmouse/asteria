@@ -157,5 +157,4 @@ operator>=(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rh
   { return lhs.tell() >= rhs.tell();  }
 
 }  // namespace rocket
-
 #endif

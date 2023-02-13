@@ -281,5 +281,4 @@ const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   }
 
 }  // namespace rocket
-
 #endif

@@ -64,5 +64,4 @@ class posix_file_closer
 using unique_posix_file  = unique_handle<::FILE*, posix_file_closer>;
 
 }  // namespace rocket
-
 #endif

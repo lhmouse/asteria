@@ -267,5 +267,4 @@ class ascii_numget
   };
 
 }  // namespace rocket
-
 #endif

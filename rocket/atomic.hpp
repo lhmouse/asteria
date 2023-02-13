@@ -158,5 +158,4 @@ template<typename valueT>
 using atomic_seq_cst = atomic<valueT, memory_order_seq_cst>;
 
 }  // namespace rocket
-
 #endif

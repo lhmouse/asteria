@@ -60,5 +60,4 @@ class posix_fd_closer
 using unique_posix_fd  = unique_handle<int, posix_fd_closer>;
 
 }  // namespace rocket
-
 #endif

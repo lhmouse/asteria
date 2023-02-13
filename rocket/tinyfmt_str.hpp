@@ -122,5 +122,4 @@ using tinyfmt_str   = basic_tinyfmt_str<char>;
 using wtinyfmt_str  = basic_tinyfmt_str<wchar_t>;
 
 }  // namespace rocket
-
 #endif

@@ -22,5 +22,4 @@ report_assertion_failure(const char* expr, const char* file, long line, const ch
 #define ROCKET_ASSERT_MSG(expr, mt)     ROCKET_XASSERT_(expr, #expr, mt)
 
 }  // namespace rocket
-
 #endif

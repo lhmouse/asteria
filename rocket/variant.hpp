@@ -499,5 +499,4 @@ swap(variant<altsT...>& lhs, variant<altsT...>& rhs)
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
-
 #endif

@@ -93,5 +93,4 @@ reference_wrapper<valueT>
 ref(valueT&& value) = delete;
 
 }  // namespace rocket
-
 #endif

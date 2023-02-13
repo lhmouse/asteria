@@ -121,5 +121,4 @@ template
 class reference_counter<long>;
 
 }  // namespace rocket
-
 #endif

@@ -98,5 +98,4 @@ ascii_ci_hash(const char* s, size_t n) noexcept
   }
 
 }  // namespace rocket
-
 #endif

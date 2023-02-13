@@ -16,5 +16,4 @@ struct mutex : ::std::mutex
   };
 
 }  // namespace rocket
-
 #endif

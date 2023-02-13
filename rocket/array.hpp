@@ -296,5 +296,4 @@ swap(array<valueT, capacityT, nestedT...>& lhs, array<valueT, capacityT, nestedT
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
-
 #endif

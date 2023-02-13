@@ -736,5 +736,4 @@ static_or_dynamic_cast(sourceT&& src)
   }
 
 }  // namespace rocket
-
 #endif

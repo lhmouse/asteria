@@ -370,5 +370,4 @@ using linear_buffer   = basic_linear_buffer<char>;
 using linear_wbuffer  = basic_linear_buffer<wchar_t>;
 
 }  // namespace rocket
-
 #endif

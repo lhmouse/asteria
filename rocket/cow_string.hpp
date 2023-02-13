@@ -2179,5 +2179,4 @@ using cow_u16string  = basic_cow_string<char16_t>;
 using cow_u32string  = basic_cow_string<char32_t>;
 
 }  // namespace rocket
-
 #endif

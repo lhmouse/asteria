@@ -381,5 +381,4 @@ using prehashed_u16string  = basic_prehashed_string<cow_u16string, cow_u16string
 using prehashed_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
 }  // namespace rocket
-
 #endif

@@ -222,5 +222,4 @@ wtinyfmt&
 vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
 
 }  // namespace rocket
-
 #endif

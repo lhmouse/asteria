@@ -60,5 +60,4 @@ void
 sprintf_and_throw<underflow_error>(const char*, ...);
 
 }  // namespace rocket
-
 #endif

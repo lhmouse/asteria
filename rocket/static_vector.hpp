@@ -718,5 +718,4 @@ swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capaci
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
-
 #endif

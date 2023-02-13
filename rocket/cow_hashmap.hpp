@@ -804,5 +804,4 @@ swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
   { lhs.swap(rhs);  }
 
 }  // namespace rocket
-
 #endif

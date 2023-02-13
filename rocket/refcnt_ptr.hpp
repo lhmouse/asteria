@@ -403,5 +403,4 @@ const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   }
 
 }  // namespace rocket
-
 #endif
