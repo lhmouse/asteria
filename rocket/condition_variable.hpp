@@ -37,14 +37,13 @@ class condition_variable
       }
 
     void
-    wait_for(mutex::unique_lock& lock, double timeout_ms)
+    wait_for(mutex::unique_lock& lock, int64_t timeout_ms)
       {
         ROCKET_ASSERT(lock.m_mtx != nullptr);
         ::std::unique_lock<::std::mutex> sl(*(lock.m_mtx), ::std::adopt_lock);
         lock.m_mtx = nullptr;
 
-        ::std::chrono::duration<double, ::std::milli> timeout(timeout_ms);
-        this->m_cond.wait_for(sl, timeout);
+        this->m_cond.wait_for(sl, ::std::chrono::milliseconds(timeout_ms));
 
         lock.do_unlock_if();
         lock.m_mtx = sl.release();
