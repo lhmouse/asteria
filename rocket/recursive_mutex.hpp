@@ -54,7 +54,7 @@ class recursive_mutex
             if(this->m_mtx == other.m_mtx)
               return *this;
 
-            this->do_unlock_if();
+            this->unlock();
             this->m_mtx = other.m_mtx;
             other.m_mtx = nullptr;
             return *this;
@@ -62,15 +62,7 @@ class recursive_mutex
 
         ~unique_lock()
           {
-            this->do_unlock_if();
-          }
-
-      private:
-        void
-        do_unlock_if() const noexcept
-          {
-            if(this->m_mtx)
-              this->m_mtx->unlock();
+            this->unlock();
           }
 
       public:
@@ -84,8 +76,8 @@ class recursive_mutex
             if(this->m_mtx == &(m.m_mtx))
               return *this;
 
-            m.m_mtx.lock();
-            this->do_unlock_if();
+            m.m_mtx.lock();  // note lock first
+            this->unlock();
             this->m_mtx = &(m.m_mtx);
             return *this;
           }
@@ -93,7 +85,9 @@ class recursive_mutex
         unique_lock&
         unlock() noexcept
           {
-            ROCKET_ASSERT(this->m_mtx != nullptr);
+            if(this->m_mtx == nullptr)
+              return *this;
+
             this->m_mtx->unlock();
             this->m_mtx = nullptr;
             return *this;

@@ -32,7 +32,7 @@ class condition_variable
 
         this->m_cond.wait(sl);
 
-        lock.do_unlock_if();
+        lock.unlock();
         lock.m_mtx = sl.release();
       }
 
@@ -45,7 +45,7 @@ class condition_variable
 
         this->m_cond.wait_for(sl, ::std::chrono::milliseconds(timeout_ms));
 
-        lock.do_unlock_if();
+        lock.unlock();
         lock.m_mtx = sl.release();
       }
 
