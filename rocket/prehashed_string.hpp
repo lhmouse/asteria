@@ -293,20 +293,16 @@ struct basic_prehashed_string<stringT, hashT, eqT>::hash
       { return str.rdhash();  }
   };
 
-extern
-template
+extern template
 class basic_prehashed_string<cow_string, cow_string::hash>;
 
-extern
-template
+extern template
 class basic_prehashed_string<cow_wstring, cow_wstring::hash>;
 
-extern
-template
+extern template
 class basic_prehashed_string<cow_u16string, cow_u16string::hash>;
 
-extern
-template
+extern template
 class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
 template<typename stringT, typename hashT, typename eqT>

@@ -114,12 +114,10 @@ swap(basic_tinyfmt_file<charT, traitsT>& lhs, basic_tinyfmt_file<charT, traitsT>
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-extern
-template
+extern template
 class basic_tinyfmt_file<char>;
 
-extern
-template
+extern template
 class basic_tinyfmt_file<wchar_t>;
 
 using tinyfmt_file   = basic_tinyfmt_file<char>;

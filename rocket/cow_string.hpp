@@ -1816,20 +1816,16 @@ struct basic_cow_string<charT, traitsT, allocT>::hash
       }
   };
 
-extern
-template
+extern template
 class basic_cow_string<char>;
 
-extern
-template
+extern template
 class basic_cow_string<wchar_t>;
 
-extern
-template
+extern template
 class basic_cow_string<char16_t>;
 
-extern
-template
+extern template
 class basic_cow_string<char32_t>;
 
 template<typename charT, typename traitsT, typename allocT>

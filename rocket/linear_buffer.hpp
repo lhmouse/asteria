@@ -356,12 +356,10 @@ swap(basic_linear_buffer<charT, traitsT, allocT>& lhs, basic_linear_buffer<charT
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-extern
-template
+extern template
 class basic_linear_buffer<char>;
 
-extern
-template
+extern template
 class basic_linear_buffer<wchar_t>;
 
 using linear_buffer   = basic_linear_buffer<char>;

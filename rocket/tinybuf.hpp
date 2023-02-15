@@ -205,12 +205,10 @@ swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
-extern
-template
+extern template
 class basic_tinybuf<char>;
 
-extern
-template
+extern template
 class basic_tinybuf<wchar_t>;
 
 using tinybuf   = basic_tinybuf<char>;
