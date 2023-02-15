@@ -162,4 +162,28 @@ template
 wtinyfmt&
 operator<<(wtinyfmt&, const exception&);
 
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::nanoseconds&);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::microseconds&);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::milliseconds&);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::seconds&);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::minutes&);
+
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::hours&);
+
 }  // namespace rocket

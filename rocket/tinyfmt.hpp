@@ -8,6 +8,7 @@
 #include "throw.hpp"
 #include "tinybuf.hpp"
 #include "ascii_numput.hpp"
+#include <chrono>
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>>
@@ -201,6 +202,36 @@ template<typename charT, typename traitsT, typename elementT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::shared_ptr<elementT>& ptr)
   { return fmt << ptr.get();  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& ns)
+  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " nanosecond" : " nanoseconds");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& ns)
+  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " microsecond" : " microseconds");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& ns)
+  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " millisecond" : " milliseconds");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& ns)
+  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " second" : " seconds");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& ns)
+  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " minute" : " minutes");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& ns)
+  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " hour" : " hours");  }
 
 // rvalue inserter
 template<typename charT, typename traitsT, typename xvalueT>
@@ -397,6 +428,36 @@ extern
 template
 wtinyfmt&
 operator<<(wtinyfmt&, const exception&);
+
+extern
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::nanoseconds&);
+
+extern
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::microseconds&);
+
+extern
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::milliseconds&);
+
+extern
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::seconds&);
+
+extern
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::minutes&);
+
+extern
+template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::hours&);
 
 }  // namespace rocket
 #endif
