@@ -41,7 +41,9 @@ template<typename charT>
 constexpr
 typename make_unsigned<charT>::type
 ucast(charT c) noexcept
-  { return static_cast<typename make_unsigned<charT>::type>(c);  }
+  {
+    return static_cast<typename make_unsigned<charT>::type>(c);
+  }
 
 template<typename charT>
 constexpr

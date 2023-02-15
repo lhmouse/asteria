@@ -15,7 +15,8 @@ class basic_tinyfmt;
 
 enum class nullopt_t
   : uintptr_t
-  { }
+  {
+  }
   constexpr nullopt = { };
 
 template<typename valueT>
@@ -303,79 +304,103 @@ template<typename valueT>
 inline
 void
 swap(optional<valueT>& lhs, optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator==(const optional<valueT>& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
-  { return (lhs && rhs) ? (*lhs == *rhs) : (!lhs == !rhs);  }
+  {
+    return (lhs && rhs) ? (*lhs == *rhs) : (!lhs == !rhs);
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator!=(const optional<valueT>& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
-  { return (lhs && rhs) ? (*lhs != *rhs) : (!lhs != !rhs);  }
+  {
+    return (lhs && rhs) ? (*lhs != *rhs) : (!lhs != !rhs);
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator==(const optional<valueT>& lhs, nullopt_t) noexcept
-  { return !lhs;  }
+  {
+    return !lhs;
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator!=(const optional<valueT>& lhs, nullopt_t) noexcept
-  { return !!lhs;  }
+  {
+    return !!lhs;
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator==(nullopt_t, const optional<valueT>& rhs) noexcept
-  { return !rhs;  }
+  {
+    return !rhs;
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator!=(nullopt_t, const optional<valueT>& rhs) noexcept
-  { return !!rhs;  }
+  {
+    return !!rhs;
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator==(const optional<valueT>& lhs, const valueT& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
-  { return !!lhs && (*lhs == rhs);  }
+  {
+    return !!lhs && (*lhs == rhs);
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator!=(const optional<valueT>& lhs, const valueT& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
-  { return !lhs || (*lhs != rhs);  }
+  {
+    return !lhs || (*lhs != rhs);
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator==(const valueT& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
-  { return !!rhs && (lhs == *rhs);  }
+  {
+    return !!rhs && (lhs == *rhs);
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator!=(const valueT& lhs, const optional<valueT>& rhs)
   noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
-  { return !rhs || (lhs != *rhs);  }
+  {
+    return !rhs || (lhs != *rhs);
+  }
 
 template<typename charT, typename traitsT, typename valueT>
 inline
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const optional<valueT>& rhs)
-  { return rhs ? (fmt << *rhs) : (fmt << "[no value]");  }
+  {
+    return rhs ? (fmt << *rhs) : (fmt << "[no value]");
+  }
 
 }  // namespace rocket
 #endif

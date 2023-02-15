@@ -56,12 +56,16 @@ class fill_iterator
 template<typename elementT>
 fill_iterator<elementT>&
 operator++(fill_iterator<elementT>& rhs) noexcept
-  { return rhs.seek(rhs.tell() + 1);  }
+  {
+    return rhs.seek(rhs.tell() + 1);
+  }
 
 template<typename elementT>
 fill_iterator<elementT>&
 operator--(fill_iterator<elementT>& rhs) noexcept
-  { return rhs.seek(rhs.tell() - 1);  }
+  {
+    return rhs.seek(rhs.tell() - 1);
+  }
 
 template<typename elementT>
 fill_iterator<elementT>
@@ -84,12 +88,16 @@ operator--(fill_iterator<elementT>& lhs, int) noexcept
 template<typename elementT>
 fill_iterator<elementT>&
 operator+=(fill_iterator<elementT>& lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept
-  { return lhs.seek(lhs.tell() + rhs);  }
+  {
+    return lhs.seek(lhs.tell() + rhs);
+  }
 
 template<typename elementT>
 fill_iterator<elementT>&
 operator-=(fill_iterator<elementT>& lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept
-  { return lhs.seek(lhs.tell() - rhs);  }
+  {
+    return lhs.seek(lhs.tell() - rhs);
+  }
 
 template<typename elementT>
 fill_iterator<elementT>
@@ -128,32 +136,44 @@ operator-(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs
 template<typename elementT>
 bool
 operator==(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs) noexcept
-  { return lhs.tell() == rhs.tell();  }
+  {
+    return lhs.tell() == rhs.tell();
+  }
 
 template<typename elementT>
 bool
 operator!=(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs) noexcept
-  { return lhs.tell() != rhs.tell();  }
+  {
+    return lhs.tell() != rhs.tell();
+  }
 
 template<typename elementT>
 bool
 operator<(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs) noexcept
-  { return lhs.tell() < rhs.tell();  }
+  {
+    return lhs.tell() < rhs.tell();
+  }
 
 template<typename elementT>
 bool
 operator>(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs) noexcept
-  { return lhs.tell() > rhs.tell();  }
+  {
+    return lhs.tell() > rhs.tell();
+  }
 
 template<typename elementT>
 bool
 operator<=(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs) noexcept
-  { return lhs.tell() <= rhs.tell();  }
+  {
+    return lhs.tell() <= rhs.tell();
+  }
 
 template<typename elementT>
 bool
 operator>=(const fill_iterator<elementT>& lhs, const fill_iterator<elementT>& rhs) noexcept
-  { return lhs.tell() >= rhs.tell();  }
+  {
+    return lhs.tell() >= rhs.tell();
+  }
 
 }  // namespace rocket
 #endif

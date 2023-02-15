@@ -141,7 +141,9 @@ class AVMC_Queue
 inline
 void
 swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace asteria
 #endif

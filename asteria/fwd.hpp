@@ -259,25 +259,33 @@ template<typename TargetT, typename RealT>
 constexpr
 TargetT
 unerase_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
-  { return static_cast<TargetT>(ptr.get());  }
+  {
+    return static_cast<TargetT>(ptr.get());
+  }
 
 template<typename TargetT, typename RealT>
 constexpr
 TargetT
 unerase_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
-  { return static_cast<TargetT>(ptr.get());  }
+  {
+    return static_cast<TargetT>(ptr.get());
+  }
 
 template<typename TargetT, typename RealT>
 constexpr
 refcnt_ptr<TargetT>
 unerase_pointer_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
-  { return static_pointer_cast<TargetT>(ptr);  }
+  {
+    return static_pointer_cast<TargetT>(ptr);
+  }
 
 template<typename TargetT, typename RealT>
 constexpr
 refcnt_ptr<TargetT>
 unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
-  { return static_pointer_cast<TargetT>(ptr);  }
+  {
+    return static_pointer_cast<TargetT>(ptr);
+  }
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque
@@ -312,7 +320,9 @@ struct Abstract_Opaque
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
-  { return opaq.describe(fmt);  }
+  {
+    return opaq.describe(fmt);
+  }
 
 struct Abstract_Function
   : public rcfwd<Abstract_Function>
@@ -343,7 +353,9 @@ struct Abstract_Function
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Function& func)
-  { return func.describe(fmt);  }
+  {
+    return func.describe(fmt);
+  }
 
 class cow_opaque
   {
@@ -429,7 +441,9 @@ class cow_opaque
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const cow_opaque& opaq)
-  { return opaq.describe(fmt);  }
+  {
+    return opaq.describe(fmt);
+  }
 
 template<typename OpaqueT>
 inline
@@ -595,7 +609,9 @@ class cow_function
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const cow_function& func)
-  { return func.describe(fmt);  }
+  {
+    return func.describe(fmt);
+  }
 
 // Fundamental types
 using V_null      = nullopt_t;

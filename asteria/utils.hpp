@@ -158,7 +158,9 @@ template<typename enumT>
 ROCKET_CONST constexpr
 typename ::std::underlying_type<enumT>::type
 weaken_enum(enumT value) noexcept
-  { return static_cast<typename ::std::underlying_type<enumT>::type>(value);  }
+  {
+    return static_cast<typename ::std::underlying_type<enumT>::type>(value);
+  }
 
 // Saturation subtraction
 template<typename uintT,
@@ -166,7 +168,9 @@ ROCKET_ENABLE_IF(::std::is_unsigned<uintT>::value && !::std::is_same<uintT, bool
 constexpr
 uintT
 subsat(uintT x, uintT y) noexcept
-  { return (x < y) ? 0 : (x - y);  }
+  {
+    return (x < y) ? 0 : (x - y);
+  }
 
 // C character types
 enum : uint8_t
@@ -183,23 +187,31 @@ enum : uint8_t
 ROCKET_CONST inline
 uint8_t
 get_cmask(char ch) noexcept
-  { return ((ch & 0x7F) == ch) ? details_utils::cmask_table[(uint8_t)ch] : 0;  }
+  {
+    return ((ch & 0x7F) == ch) ? details_utils::cmask_table[(uint8_t)ch] : 0;
+  }
 
 ROCKET_CONST inline
 bool
 is_cmask(char ch, uint8_t mask) noexcept
-  { return noadl::get_cmask(ch) & mask;  }
+  {
+    return noadl::get_cmask(ch) & mask;
+  }
 
 // Numeric conversion
 ROCKET_CONST inline
 bool
 is_convertible_to_int64(double val) noexcept
-  { return (-0x1p63 <= val) && (val < 0x1p63);  }
+  {
+    return (-0x1p63 <= val) && (val < 0x1p63);
+  }
 
 ROCKET_CONST inline
 bool
 is_exact_int64(double val) noexcept
-  { return noadl::is_convertible_to_int64(val) && (::std::trunc(val) == val);  }
+  {
+    return noadl::is_convertible_to_int64(val) && (::std::trunc(val) == val);
+  }
 
 inline
 int64_t
@@ -223,29 +235,39 @@ safe_double_to_int64(double val)
 constexpr
 details_utils::Quote_Wrapper
 quote(const char* str, size_t len) noexcept
-  { return { str, len };  }
+  {
+    return { str, len };
+  }
 
 inline
 details_utils::Quote_Wrapper
 quote(const char* str) noexcept
-  { return noadl::quote(str, ::std::strlen(str));  }
+  {
+    return noadl::quote(str, ::std::strlen(str));
+  }
 
 inline
 details_utils::Quote_Wrapper
 quote(stringR str) noexcept
-  { return noadl::quote(str.data(), str.size());  }
+  {
+    return noadl::quote(str.data(), str.size());
+  }
 
 // Justifying
 constexpr
 details_utils::Paragraph_Wrapper
 pwrap(size_t indent, size_t hanging) noexcept
-  { return { indent, hanging };  }
+  {
+    return { indent, hanging };
+  }
 
 // Error numbers
 constexpr
 details_utils::Formatted_errno
 format_errno(int err = errno) noexcept
-  { return { err };  }
+  {
+    return { err };
+  }
 
 // Negative array index wrapper
 struct Wrapped_Index

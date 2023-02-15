@@ -101,7 +101,8 @@ class basic_tinyfmt
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>::
 ~basic_tinyfmt()
-  { }
+  {
+  }
 
 extern template
 class basic_tinyfmt<char>;
@@ -160,92 +161,126 @@ ROCKET_ENABLE_IF(is_arithmetic<valueT>::value),
 ROCKET_DISABLE_IF(is_same<const volatile valueT, const volatile charT>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
-  { return fmt << ascii_numput(value);  }
+  {
+    return fmt << ascii_numput(value);
+  }
 
 template<typename charT, typename traitsT, typename valueT,
 ROCKET_ENABLE_IF(is_enum<valueT>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
-  { return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));  }
+  {
+    return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));
+  }
 
 template<typename charT, typename traitsT, typename valueT,
 ROCKET_DISABLE_IF(is_convertible<valueT*, const charT*>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
-  { return fmt << ascii_numput(reinterpret_cast<const void*>(value));  }
+  {
+    return fmt << ascii_numput(reinterpret_cast<const void*>(value));
+  }
 
 template<typename charT, typename traitsT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const type_info& value)
-  { return fmt << value.name();  }
+  {
+    return fmt << value.name();
+  }
 
 template<typename charT, typename traitsT, typename valueT,
 ROCKET_ENABLE_IF(is_base_of<exception, typename remove_cv<valueT>::type>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
-  { return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";  }
+  {
+    return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";
+  }
 
 // std support
 template<typename charT, typename traitsT, typename ytraitsT, typename yallocT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::basic_string<charT, ytraitsT, yallocT>& str)
-  { return fmt.putn(str.data(), str.size());  }
+  {
+    return fmt.putn(str.data(), str.size());
+  }
 
 template<typename charT, typename traitsT, typename elementT, typename deleteT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::unique_ptr<elementT, deleteT>& ptr)
-  { return fmt << ptr.get();  }
+  {
+    return fmt << ptr.get();
+  }
 
 template<typename charT, typename traitsT, typename elementT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::shared_ptr<elementT>& ptr)
-  { return fmt << ptr.get();  }
+  {
+    return fmt << ptr.get();
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " nanosecond" : " nanoseconds");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " nanosecond" : " nanoseconds");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " microsecond" : " microseconds");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " microsecond" : " microseconds");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " millisecond" : " milliseconds");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " millisecond" : " milliseconds");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " second" : " seconds");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " second" : " seconds");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " minute" : " minutes");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " minute" : " minutes");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " hour" : " hours");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " hour" : " hours");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<86400>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " day" : " days");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " day" : " days");
+  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<604800>>& dur)
-  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " week" : " weeks");  }
+  {
+    return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " week" : " weeks");
+  }
 
 // rvalue inserter
 template<typename charT, typename traitsT, typename xvalueT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
-  { return fmt << ::std::forward<xvalueT>(xvalue);  }
+  {
+    return fmt << ::std::forward<xvalueT>(xvalue);
+  }
 
 // Explicit instantiations
 extern template tinyfmt& operator<<(tinyfmt&, char);

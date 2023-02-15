@@ -45,22 +45,30 @@ struct tinybuf_base
 constexpr
 tinybuf_base::open_mode
 operator~(tinybuf_base::open_mode rhs) noexcept
-  { return (tinybuf_base::open_mode)~(uint32_t)rhs;  }
+  {
+    return (tinybuf_base::open_mode)~(uint32_t)rhs;
+  }
 
 constexpr
 tinybuf_base::open_mode
 operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  { return (tinybuf_base::open_mode)((uint32_t)lhs & (uint32_t)rhs);  }
+  {
+    return (tinybuf_base::open_mode)((uint32_t)lhs & (uint32_t)rhs);
+  }
 
 constexpr
 tinybuf_base::open_mode
 operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  { return (tinybuf_base::open_mode)((uint32_t)lhs | (uint32_t)rhs);  }
+  {
+    return (tinybuf_base::open_mode)((uint32_t)lhs | (uint32_t)rhs);
+  }
 
 constexpr
 tinybuf_base::open_mode
 operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  { return (tinybuf_base::open_mode)((uint32_t)lhs ^ (uint32_t)rhs);  }
+  {
+    return (tinybuf_base::open_mode)((uint32_t)lhs ^ (uint32_t)rhs);
+  }
 
 template<typename charT, typename traitsT>
 class basic_tinybuf
@@ -203,7 +211,9 @@ inline
 void
 swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 extern template
 class basic_tinybuf<char>;

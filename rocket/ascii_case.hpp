@@ -13,34 +13,46 @@ namespace rocket {
 constexpr
 bool
 ascii_is_alpha(char c) noexcept
-  { return details_ascii_case::cmask_of(c) != 0;  }
+  {
+    return details_ascii_case::cmask_of(c) != 0;
+  }
 
 constexpr
 bool
 ascii_is_upper(char c) noexcept
-  { return details_ascii_case::cmask_of(c) == 1;  }
+  {
+    return details_ascii_case::cmask_of(c) == 1;
+  }
 
 constexpr
 bool
 ascii_is_lower(char c) noexcept
-  { return details_ascii_case::cmask_of(c) == 2;  }
+  {
+    return details_ascii_case::cmask_of(c) == 2;
+  }
 
 // Conversion
 constexpr
 char
 ascii_to_upper(char c) noexcept
-  { return static_cast<char>(details_ascii_case::to_upper(c));  }
+  {
+    return static_cast<char>(details_ascii_case::to_upper(c));
+  }
 
 constexpr
 char
 ascii_to_lower(char c) noexcept
-  { return static_cast<char>(details_ascii_case::to_lower(c));  }
+  {
+    return static_cast<char>(details_ascii_case::to_lower(c));
+  }
 
 // Comparison
 constexpr
 bool
 ascii_ci_equal(char x, char y) noexcept
-  { return details_ascii_case::to_lower(x) == details_ascii_case::to_lower(y);  }
+  {
+    return details_ascii_case::to_lower(x) == details_ascii_case::to_lower(y);
+  }
 
 constexpr
 bool
@@ -62,7 +74,9 @@ ascii_ci_equal(const char* sx, size_t nx, const char* sy, size_t ny) noexcept
 constexpr
 int
 ascii_ci_compare(char x, char y) noexcept
-  { return (int) details_ascii_case::to_lower(x) - (int) details_ascii_case::to_lower(y);  }
+  {
+    return (int) details_ascii_case::to_lower(x) - (int) details_ascii_case::to_lower(y);
+  }
 
 constexpr
 int

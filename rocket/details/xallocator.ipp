@@ -31,42 +31,53 @@ class final_wrapper
 
 // don't propagate
 struct propagate_none_tag
-  { }
+  {
+  }
   constexpr propagate_none;
 
 template<typename allocT>
 void
 propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/) noexcept
-  { }
+  {
+  }
 
 // propagate_on_container_copy_assignment
 struct propagate_copy_tag
-  { }
+  {
+  }
   constexpr propagate_copy;
 
 template<typename allocT>
 void
 propagate(propagate_copy_tag, allocT& lhs, const allocT& rhs) noexcept
-  { lhs = rhs;  }
+  {
+    lhs = rhs;
+  }
 
 // propagate_on_container_move_assignment
 struct propagate_move_tag
-  { }
+  {
+  }
   constexpr propagate_move;
 
 template<typename allocT>
 void
 propagate(propagate_move_tag, allocT& lhs, allocT& rhs) noexcept
-  { lhs = ::std::move(rhs);  }
+  {
+    lhs = ::std::move(rhs);
+  }
 
 // propagate_on_container_swap
 struct propagate_swap_tag
-  { }
+  {
+  }
   constexpr propagate_swap;
 
 template<typename allocT>
 void
 propagate(propagate_swap_tag, allocT& lhs, allocT& rhs) noexcept
-  { noadl::xswap(lhs, rhs);  }
+  {
+    noadl::xswap(lhs, rhs);
+  }
 
 }  // namespace details_xallocator

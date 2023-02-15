@@ -181,13 +181,17 @@ template<typename containerT>
 constexpr
 decltype(::std::declval<const containerT&>().size())
 size(const containerT& cont) noexcept(noexcept(cont.size()))
-  { return cont.size();  }
+  {
+    return cont.size();
+  }
 
 template<typename elementT, size_t countT>
 constexpr
 size_t
 size(const elementT (&)[countT]) noexcept
-  { return countT;  }
+  {
+    return countT;
+  }
 
 template<typename... typesT>
 struct conjunction
@@ -235,7 +239,9 @@ template<typename typeT>
 inline
 void
 xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
-  { swap(lhs, rhs);  }
+  {
+    swap(lhs, rhs);
+  }
 
 template<typename firstT, typename secondT, typename... restT>
 struct select_type
@@ -354,13 +360,17 @@ template<typename elementT>
 ROCKET_ALWAYS_INLINE
 elementT*
 allocN(size_t n)
-  { return allocator<elementT>().allocate(n);  }
+  {
+    return allocator<elementT>().allocate(n);
+  }
 
 template<typename elementT>
 ROCKET_ALWAYS_INLINE
 void
 freeN(typename identity<elementT>::type* p, size_t n) noexcept
-  { allocator<elementT>().deallocate(p, n);  }
+  {
+    allocator<elementT>().deallocate(p, n);
+  }
 
 template<typename elementT, typename... paramsT>
 ROCKET_ALWAYS_INLINE
@@ -678,25 +688,33 @@ template<typename xvalueT>
 constexpr
 details_fwd::binder_eq<typename decay<xvalueT>::type>
 is(xvalueT&& xval)
-  { return ::std::forward<xvalueT>(xval);  }
+  {
+    return ::std::forward<xvalueT>(xval);
+  }
 
 template<typename xvalueT>
 constexpr
 details_fwd::binder_ne<typename decay<xvalueT>::type>
 isnt(xvalueT&& xval)
-  { return ::std::forward<xvalueT>(xval);  }
+  {
+    return ::std::forward<xvalueT>(xval);
+  }
 
 template<typename xvalueT>
 constexpr
 details_fwd::binder_eq<typename decay<xvalueT>::type>
 are(xvalueT&& xval)
-  { return ::std::forward<xvalueT>(xval);  }
+  {
+    return ::std::forward<xvalueT>(xval);
+  }
 
 template<typename xvalueT>
 constexpr
 details_fwd::binder_ne<typename decay<xvalueT>::type>
 arent(xvalueT&& xval)
-  { return ::std::forward<xvalueT>(xval);  }
+  {
+    return ::std::forward<xvalueT>(xval);
+  }
 
 template<intmax_t valueT>
 struct lowest_signed
@@ -723,7 +741,9 @@ template<typename pointerT>
 constexpr
 typename remove_reference<decltype(*(::std::declval<pointerT&>()))>::type*
 unfancy(pointerT&& ptr)
-  { return ptr ? ::std::addressof(*ptr) : nullptr;  }
+  {
+    return ptr ? ::std::addressof(*ptr) : nullptr;
+  }
 
 template<typename targetT, typename sourceT>
 constexpr

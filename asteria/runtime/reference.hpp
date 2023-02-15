@@ -330,7 +330,9 @@ class Reference
 inline
 void
 swap(Reference& lhs, Reference& rhs) noexcept
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace asteria
 #endif

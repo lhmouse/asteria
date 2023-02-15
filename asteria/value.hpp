@@ -421,12 +421,16 @@ class Value
 inline
 void
 swap(Value& lhs, Value& rhs) noexcept
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
-  { return value.print(fmt);  }
+  {
+    return value.print(fmt);
+  }
 
 }  // namespace asteria
 #endif

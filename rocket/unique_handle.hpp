@@ -143,61 +143,79 @@ constexpr
 bool
 operator==(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
-  { return lhs.get() == rhs.get();  }
+  {
+    return lhs.get() == rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
 operator!=(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
-  { return lhs.get() != rhs.get();  }
+  {
+    return lhs.get() != rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
 operator<(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
-  { return lhs.get() < rhs.get();  }
+  {
+    return lhs.get() < rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
 operator>(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
-  { return lhs.get() > rhs.get();  }
+  {
+    return lhs.get() > rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
 operator<=(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
-  { return lhs.get() <= rhs.get();  }
+  {
+    return lhs.get() <= rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 constexpr
 bool
 operator>=(const unique_handle<handleT, closerT>& lhs,
            const unique_handle<handleT, closerT>& rhs)
-  { return lhs.get() >= rhs.get();  }
+  {
+    return lhs.get() >= rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 inline
 void
 swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 template<typename charT, typename traitsT, typename handleT, typename closerT>
 inline
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const unique_handle<handleT, closerT>& rhs)
-  { return fmt << rhs.get();  }
+  {
+    return fmt << rhs.get();
+  }
 
 template<typename handleT, typename closerT>
 inline
 unique_handle<handleT, details_unique_handle::default_closer_wrapper<handleT, closerT>>
 make_unique_handle(handleT hv, closerT&& cl) noexcept
-  { return { hv, ::std::forward<closerT>(cl) };  }
+  {
+    return { hv, ::std::forward<closerT>(cl) };
+  }
 
 }  // namespace rocket
 #endif

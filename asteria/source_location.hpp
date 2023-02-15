@@ -54,12 +54,16 @@ class Source_Location
 inline
 void
 swap(Source_Location& lhs, Source_Location& rhs) noexcept
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Source_Location& sloc)
-  { return sloc.print(fmt);  }
+  {
+    return sloc.print(fmt);
+  }
 
 }  // namespace asteria
 #endif

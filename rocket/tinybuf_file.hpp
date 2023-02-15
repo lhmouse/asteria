@@ -271,14 +271,17 @@ class basic_tinybuf_file
 template<typename charT, typename traitsT>
 basic_tinybuf_file<charT, traitsT>::
 ~basic_tinybuf_file()
-  { }
+  {
+  }
 
 template<typename charT, typename traitsT>
 inline
 void
 swap(basic_tinybuf_file<charT, traitsT>& lhs, basic_tinybuf_file<charT, traitsT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 extern template
 class basic_tinybuf_file<char>;

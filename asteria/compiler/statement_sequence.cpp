@@ -330,12 +330,16 @@ enum Scope_Flags : uint32_t
 constexpr
 Scope_Flags
 operator&(Scope_Flags x, Scope_Flags y) noexcept
-  { return Scope_Flags(uint32_t(x) & uint32_t(y));  }
+  {
+    return Scope_Flags(uint32_t(x) & uint32_t(y));
+  }
 
 constexpr
 Scope_Flags
 operator|(Scope_Flags x, Scope_Flags y) noexcept
-  { return Scope_Flags(uint32_t(x) | uint32_t(y));  }
+  {
+    return Scope_Flags(uint32_t(x) | uint32_t(y));
+  }
 
 // Accept a statement; a blockt is converted to a single statement.
 opt<Statement>

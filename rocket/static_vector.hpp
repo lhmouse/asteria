@@ -713,7 +713,9 @@ inline
 void
 swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capacityT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace rocket
 #endif

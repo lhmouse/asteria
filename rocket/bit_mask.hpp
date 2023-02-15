@@ -134,13 +134,17 @@ template<typename valueT>
 constexpr
 bool
 operator==(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
-  { return lhs.value() == rhs.value();  }
+  {
+    return lhs.value() == rhs.value();
+  }
 
 template<typename valueT>
 constexpr
 bool
 operator!=(const bit_mask<valueT>& lhs, const bit_mask<valueT>& rhs) noexcept
-  { return lhs.value() != rhs.value();  }
+  {
+    return lhs.value() != rhs.value();
+  }
 
 }  // namespace rocket
 #endif

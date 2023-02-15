@@ -21,16 +21,22 @@ constexpr uint8_t case_table[128] =
 constexpr
 uint32_t
 cmask_of(char c) noexcept
-  { return (uint8_t(c) < 128) ? case_table[uint8_t(c)] : uint32_t(0);  }
+  {
+    return (uint8_t(c) < 128) ? case_table[uint8_t(c)] : uint32_t(0);
+  }
 
 constexpr
 uint32_t
 to_upper(char c) noexcept
-  { return uint8_t(c) & ~((cmask_of(c) & uint32_t(2)) << 4);  }
+  {
+    return uint8_t(c) & ~((cmask_of(c) & uint32_t(2)) << 4);
+  }
 
 constexpr
 uint32_t
 to_lower(char c) noexcept
-  { return uint8_t(c) |  ((cmask_of(c) & uint32_t(1)) << 5);  }
+  {
+    return uint8_t(c) |  ((cmask_of(c) & uint32_t(1)) << 5);
+  }
 
 }  // namespace details_mutex

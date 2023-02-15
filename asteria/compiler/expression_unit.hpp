@@ -184,7 +184,9 @@ class Expression_Unit
 inline
 void
 swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
-  { lhs.swap(rhs);  }
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace asteria
 #endif

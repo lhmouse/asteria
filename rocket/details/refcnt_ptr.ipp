@@ -33,7 +33,9 @@ template<typename elementT, typename deleterT>
 constexpr
 deleterT
 copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
-  { return base.as_deleter();  }
+  {
+    return base.as_deleter();
+  }
 
 template<typename elementT>
 class stored_pointer

@@ -158,7 +158,9 @@ class BMH_Searcher
 template<typename IterT>
 BMH_Searcher<IterT>
 do_create_searcher_for_pattern(IterT pbegin, IterT pend)
-  { return BMH_Searcher<IterT>(pbegin, pend);  }
+  {
+    return BMH_Searcher<IterT>(pbegin, pend);
+  }
 
 template<typename IterT>
 opt<IterT>
@@ -300,7 +302,9 @@ class PCRE2_Error
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const PCRE2_Error& err)
-  { return fmt << err.c_str();  }
+  {
+    return fmt << err.c_str();
+  }
 
 class PCRE2_Matcher final
   : public Abstract_Opaque
