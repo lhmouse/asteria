@@ -4,12 +4,8 @@
 #include "format.hpp"
 namespace rocket {
 
-template
-tinyfmt&
-vformat(tinyfmt&, const char*, size_t, const formatter*, size_t);
-
-template
-wtinyfmt&
-vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
+template tinyfmt& vformat(tinyfmt&, const char*, size_t, const formatter*, size_t);
+template tinyfmt& vformat(tinyfmt&, const char*, const formatter*, size_t);
+template tinyfmt& vformat(tinyfmt&, const cow_string&, const formatter*, size_t);
 
 }  // namespace rocket
