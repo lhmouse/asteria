@@ -203,33 +203,43 @@ operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::shared_ptr<elementT>
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& ns)
-  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " nanosecond" : " nanoseconds");  }
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " nanosecond" : " nanoseconds");  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& ns)
-  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " microsecond" : " microseconds");  }
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " microsecond" : " microseconds");  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& ns)
-  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " millisecond" : " milliseconds");  }
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " millisecond" : " milliseconds");  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& ns)
-  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " second" : " seconds");  }
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " second" : " seconds");  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& ns)
-  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " minute" : " minutes");  }
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " minute" : " minutes");  }
 
 template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& ns)
-  { return fmt << ns.count() << (((ns.count() > 0) && (ns.count() <= 1)) ? " hour" : " hours");  }
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " hour" : " hours");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<86400>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " day" : " days");  }
+
+template<typename charT, typename traitsT, typename repT>
+basic_tinyfmt<charT, traitsT>&
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<604800>>& dur)
+  { return fmt << dur.count() << (((dur.count() > 0) && (dur.count() <= 1)) ? " week" : " weeks");  }
 
 // rvalue inserter
 template<typename charT, typename traitsT, typename xvalueT>
@@ -412,6 +422,14 @@ operator<<(wtinyfmt&, const ::std::chrono::minutes&);
 extern template
 wtinyfmt&
 operator<<(wtinyfmt&, const ::std::chrono::hours&);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::days&);
+
+extern template
+wtinyfmt&
+operator<<(wtinyfmt&, const ::std::chrono::weeks&);
 
 }  // namespace rocket
 #endif
