@@ -247,181 +247,42 @@ basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
   { return fmt << ::std::forward<xvalueT>(xvalue);  }
 
-extern template
-tinyfmt&
-operator<<(tinyfmt&, char);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, const char*);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, const ascii_numput&);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, signed char);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, signed short);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, signed);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, signed long);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, signed long long);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, unsigned char);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, unsigned short);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, unsigned);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, unsigned long);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, unsigned long long);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, float);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, double);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, const void*);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, void*);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, const type_info&);
-
-extern template
-tinyfmt&
-operator<<(tinyfmt&, const exception&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, wchar_t);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const wchar_t*);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ascii_numput&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, signed char);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, signed short);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, signed);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, signed long);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, signed long long);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, unsigned char);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, unsigned short);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, unsigned);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, unsigned long);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, unsigned long long);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, float);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, double);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const void*);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, void*);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const type_info&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const exception&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::nanoseconds&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::microseconds&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::milliseconds&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::seconds&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::minutes&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::hours&);
+// Explicit instantiations
+extern template tinyfmt& operator<<(tinyfmt&, char);
+extern template tinyfmt& operator<<(tinyfmt&, const char*);
+extern template tinyfmt& operator<<(tinyfmt&, const ascii_numput&);
+extern template tinyfmt& operator<<(tinyfmt&, signed char);
+extern template tinyfmt& operator<<(tinyfmt&, signed short);
+extern template tinyfmt& operator<<(tinyfmt&, signed);
+extern template tinyfmt& operator<<(tinyfmt&, signed long);
+extern template tinyfmt& operator<<(tinyfmt&, signed long long);
+extern template tinyfmt& operator<<(tinyfmt&, unsigned char);
+extern template tinyfmt& operator<<(tinyfmt&, unsigned short);
+extern template tinyfmt& operator<<(tinyfmt&, unsigned);
+extern template tinyfmt& operator<<(tinyfmt&, unsigned long);
+extern template tinyfmt& operator<<(tinyfmt&, unsigned long long);
+extern template tinyfmt& operator<<(tinyfmt&, float);
+extern template tinyfmt& operator<<(tinyfmt&, double);
+extern template tinyfmt& operator<<(tinyfmt&, const void*);
+extern template tinyfmt& operator<<(tinyfmt&, void*);
+extern template tinyfmt& operator<<(tinyfmt&, const type_info&);
+extern template tinyfmt& operator<<(tinyfmt&, const exception&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<60>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<3600>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<86400>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<604800>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 
 extern template
 wtinyfmt&
