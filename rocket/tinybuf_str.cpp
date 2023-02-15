@@ -4,10 +4,6 @@
 #include "tinybuf_str.hpp"
 namespace rocket {
 
-template
-class basic_tinybuf_str<char>;
-
-template
-class basic_tinybuf_str<wchar_t>;
+template class basic_tinybuf_str<char>;
 
 }  // namespace rocket

@@ -4,10 +4,6 @@
 #include "tinyfmt_file.hpp"
 namespace rocket {
 
-template
-class basic_tinyfmt_file<char>;
-
-template
-class basic_tinyfmt_file<wchar_t>;
+template class basic_tinyfmt_file<char>;
 
 }  // namespace rocket

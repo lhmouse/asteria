@@ -104,14 +104,12 @@ basic_tinyfmt<charT, traitsT>::
   {
   }
 
-extern template
-class basic_tinyfmt<char>;
+using tinyfmt     = basic_tinyfmt<char>;
+using wtinyfmt    = basic_tinyfmt<wchar_t>;
+using u16tinyfmt  = basic_tinyfmt<char16_t>;
+using u32tinyfmt  = basic_tinyfmt<char32_t>;
 
-extern template
-class basic_tinyfmt<wchar_t>;
-
-using tinyfmt   = basic_tinyfmt<char>;
-using wtinyfmt  = basic_tinyfmt<wchar_t>;
+extern template class basic_tinyfmt<char>;
 
 // zero-conversion inserters
 template<typename charT, typename traitsT>
@@ -282,7 +280,6 @@ operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
     return fmt << ::std::forward<xvalueT>(xvalue);
   }
 
-// Explicit instantiations
 extern template tinyfmt& operator<<(tinyfmt&, char);
 extern template tinyfmt& operator<<(tinyfmt&, const char*);
 extern template tinyfmt& operator<<(tinyfmt&, const ascii_numput&);
@@ -303,29 +300,21 @@ extern template tinyfmt& operator<<(tinyfmt&, void*);
 extern template tinyfmt& operator<<(tinyfmt&, const type_info&);
 extern template tinyfmt& operator<<(tinyfmt&, const exception&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000000>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<60>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<3600>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<86400>>&);
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<604800>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
 extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::days&);
-
-extern template
-wtinyfmt&
-operator<<(wtinyfmt&, const ::std::chrono::weeks&);
 
 }  // namespace rocket
 #endif

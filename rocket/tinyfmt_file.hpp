@@ -117,14 +117,12 @@ swap(basic_tinyfmt_file<charT, traitsT>& lhs, basic_tinyfmt_file<charT, traitsT>
     lhs.swap(rhs);
   }
 
-extern template
-class basic_tinyfmt_file<char>;
+using tinyfmt_file     = basic_tinyfmt_file<char>;
+using wtinyfmt_file    = basic_tinyfmt_file<wchar_t>;
+using u16tinyfmt_file  = basic_tinyfmt_file<char16_t>;
+using u32tinyfmt_file  = basic_tinyfmt_file<char32_t>;
 
-extern template
-class basic_tinyfmt_file<wchar_t>;
-
-using tinyfmt_file   = basic_tinyfmt_file<char>;
-using wtinyfmt_file  = basic_tinyfmt_file<wchar_t>;
+extern template class basic_tinyfmt_file<char>;
 
 }  // namespace rocket
 #endif

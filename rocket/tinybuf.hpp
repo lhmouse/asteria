@@ -215,14 +215,12 @@ swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs)
     lhs.swap(rhs);
   }
 
-extern template
-class basic_tinybuf<char>;
+using tinybuf     = basic_tinybuf<char>;
+using wtinybuf    = basic_tinybuf<wchar_t>;
+using u16tinybuf  = basic_tinybuf<char16_t>;
+using u32tinybuf  = basic_tinybuf<char32_t>;
 
-extern template
-class basic_tinybuf<wchar_t>;
-
-using tinybuf   = basic_tinybuf<char>;
-using wtinybuf  = basic_tinybuf<wchar_t>;
+extern template class basic_tinybuf<char>;
 
 }  // namespace rocket
 #endif

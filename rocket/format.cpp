@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #include "format.hpp"
+#include "cow_string.hpp"
 namespace rocket {
 
 template tinyfmt& vformat(tinyfmt&, const char*, size_t, const formatter*, size_t);

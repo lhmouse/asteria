@@ -197,16 +197,14 @@ format(basic_tinyfmt<charT, traitsT>& fmt, const basic_cow_string<charT, traitsT
     return noadl::vformat(fmt, stempl, insts, sizeof...(params));
   }
 
-using formatter   = basic_formatter<char>;
-using wformatter  = basic_formatter<wchar_t>;
+using formatter     = basic_formatter<char>;
+using wformatter    = basic_formatter<wchar_t>;
+using u16formatter  = basic_formatter<char16_t>;
+using u32formatter  = basic_formatter<char32_t>;
 
-using cow_string   = basic_cow_string<char>;
-using cow_wstring  = basic_cow_string<wchar_t>;
-
-// Explicit instantiations
 extern template tinyfmt& vformat(tinyfmt&, const char*, size_t, const formatter*, size_t);
 extern template tinyfmt& vformat(tinyfmt&, const char*, const formatter*, size_t);
-extern template tinyfmt& vformat(tinyfmt&, const cow_string&, const formatter*, size_t);
+extern template tinyfmt& vformat(tinyfmt&, const basic_cow_string<char, char_traits<char>, allocator<char>>&, const formatter*, size_t);
 
 }  // namespace rocket
 #endif
