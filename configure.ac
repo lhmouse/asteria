@@ -60,6 +60,7 @@ AS_VAR_SET([sanitizer_flags])
 AM_CONDITIONAL([enable_address_sanitizer], [test "${enable_sanitizer}" == "address"])
 AM_COND_IF([enable_address_sanitizer], [
   AC_CHECK_LIB([asan], [__asan_report_error], [], [AC_MSG_ERROR([address sanitizer not found])])
+  AC_CHECK_LIB([ubsan], [__ubsan_on_report], [], [AC_MSG_ERROR([undefined behavior sanitizer not found])])
   AC_DEFINE([POSEIDON_ENABLE_ADDRESS_SANITIZER], [1], [Define to 1 to enable address sanitizer.])
   AS_VAR_APPEND([sanitizer_flags], [" -fsanitize=address,undefined"])
 ])
