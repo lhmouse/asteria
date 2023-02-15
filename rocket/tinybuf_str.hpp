@@ -36,25 +36,21 @@ class basic_tinybuf_str
 
   public:
     basic_tinybuf_str() noexcept(is_nothrow_constructible<string_type>::value)
-      : m_str(), m_off(), m_mode()
-      { }
+      : m_str(), m_off(), m_mode()  { }
 
     explicit
     basic_tinybuf_str(const allocator_type& alloc) noexcept
-      : m_str(alloc), m_off(), m_mode()
-      { }
+      : m_str(alloc), m_off(), m_mode()  { }
 
     explicit
     basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
-      : m_str(alloc), m_off(), m_mode(mode)
-      { }
+      : m_str(alloc), m_off(), m_mode(mode)  { }
 
     template<typename xstrT,
     ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&>::value)>
     explicit
     basic_tinybuf_str(xstrT&& xstr, open_mode mode, const allocator_type& alloc = allocator_type())
-      : m_str(::std::forward<xstrT>(xstr), alloc), m_off(), m_mode(mode)
-      { }
+      : m_str(::std::forward<xstrT>(xstr), alloc), m_off(), m_mode(mode)  { }
 
     basic_tinybuf_str&
     swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)

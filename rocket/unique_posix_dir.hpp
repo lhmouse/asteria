@@ -20,13 +20,11 @@ class posix_dir_closer
   public:
     constexpr
     posix_dir_closer() noexcept
-      : m_cl(::closedir)
-      { }
+      : m_cl(::closedir)  { }
 
     constexpr
     posix_dir_closer(closer_type cl) noexcept
-      : m_cl(cl)
-      { }
+      : m_cl(cl)  { }
 
   public:
     constexpr operator

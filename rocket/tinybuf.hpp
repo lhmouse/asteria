@@ -196,8 +196,7 @@ class basic_tinybuf
 
 template<typename charT, typename traitsT>
 basic_tinybuf<charT, traitsT>::
-~basic_tinybuf()
-  { }
+~basic_tinybuf()  { }
 
 template<typename charT, typename traitsT>
 inline

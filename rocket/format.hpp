@@ -64,8 +64,7 @@ struct basic_formatter
 
     constexpr
     basic_formatter(callback_type* xifunc = nullptr, const void* xparam = nullptr) noexcept
-      : ifunc(xifunc), param(xparam)
-      { }
+      : ifunc(xifunc), param(xparam)  { }
 
     void
     operator()(tinyfmt_type& fmt) const

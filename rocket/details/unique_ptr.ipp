@@ -23,8 +23,7 @@ struct deleter_reference
 
     constexpr
     deleter_reference(deleterT& del) noexcept
-      : m_del(::std::addressof(del))
-      { }
+      : m_del(::std::addressof(del))  { }
 
     constexpr operator
     deleterT&() const noexcept
@@ -55,13 +54,11 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
   public:
     constexpr
     stored_pointer_impl() noexcept
-      : m_del(), m_ptr()
-      { }
+      : m_del(), m_ptr()  { }
 
     explicit constexpr
     stored_pointer_impl(pointer ptr, deleter_type del = nullptr) noexcept
-      : m_del(del), m_ptr(::std::move(ptr))
-      { }
+      : m_del(del), m_ptr(::std::move(ptr))  { }
 
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
@@ -118,15 +115,13 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
   public:
     constexpr
     stored_pointer_impl() noexcept(is_nothrow_constructible<deleter_type>::value)
-      : deleter_base(), m_ptr()
-      { }
+      : deleter_base(), m_ptr()  { }
 
     template<typename... dparamsT>
     explicit constexpr
     stored_pointer_impl(pointer ptr, dparamsT&&... dparams)
       noexcept(is_nothrow_constructible<deleter_type, dparamsT&&...>::value)
-      : deleter_base(::std::forward<dparamsT>(dparams)...), m_ptr(::std::move(ptr))
-      { }
+      : deleter_base(::std::forward<dparamsT>(dparams)...), m_ptr(::std::move(ptr))  { }
 
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
@@ -183,8 +178,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
   public:
     explicit constexpr
     stored_pointer_impl(pointer ptr, deleterT& del) noexcept
-      : deleter_base(del), m_ptr(::std::move(ptr))
-      { }
+      : deleter_base(del), m_ptr(::std::move(ptr))  { }
 
     ~stored_pointer_impl()
       { this->reset(nullptr);  }

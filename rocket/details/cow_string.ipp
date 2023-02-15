@@ -12,8 +12,7 @@ struct storage_header
 
     explicit
     storage_header() noexcept
-      : nref()
-      { }
+      : nref()  { }
   };
 
 template<typename allocT>
@@ -92,13 +91,11 @@ class storage_handle
   public:
     explicit constexpr
     storage_handle(const allocator_type& alloc) noexcept
-      : allocator_base(alloc)
-      { }
+      : allocator_base(alloc)  { }
 
     explicit constexpr
     storage_handle(allocator_type&& alloc) noexcept
-      : allocator_base(::std::move(alloc))
-      { }
+      : allocator_base(::std::move(alloc))  { }
 
     ~storage_handle()
       { this->deallocate();  }
@@ -376,14 +373,12 @@ class string_iterator
     // This constructor is called by the container.
     constexpr
     string_iterator(charT* begin, size_t ncur, size_t nend) noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
-      { }
+      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)  { }
 
   public:
     constexpr
     string_iterator() noexcept
-      : m_begin(), m_cur(), m_end()
-      { }
+      : m_begin(), m_cur(), m_end()  { }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
@@ -391,8 +386,7 @@ class string_iterator
     string_iterator(const string_iterator<stringT, ycharT>& other) noexcept
       : m_begin(other.m_begin),
         m_cur(other.m_cur),
-        m_end(other.m_end)
-      { }
+        m_end(other.m_end)  { }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>

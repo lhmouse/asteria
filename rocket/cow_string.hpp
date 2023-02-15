@@ -53,19 +53,16 @@ class basic_shallow_string
   public:
     explicit constexpr
     basic_shallow_string(const charT* ptr) noexcept
-      : m_ptr(ptr), m_len(traitsT::length(ptr))
-      { }
+      : m_ptr(ptr), m_len(traitsT::length(ptr))  { }
 
     constexpr
     basic_shallow_string(const charT* ptr, size_t len) noexcept
-      : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
-      { }
+      : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))  { }
 
     template<typename allocT>
     explicit
     basic_shallow_string(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
-      : m_ptr(str.c_str()), m_len(str.length())
-      { }
+      : m_ptr(str.c_str()), m_len(str.length())  { }
 
   public:
     constexpr
@@ -181,14 +178,12 @@ class basic_cow_string
     constexpr
     basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
       : m_sth(alloc),
-        m_ptr(sh.c_str()), m_len(sh.length())
-      { }
+        m_ptr(sh.c_str()), m_len(sh.length())  { }
 
     explicit constexpr
     basic_cow_string(const allocator_type& alloc) noexcept
       : m_sth(alloc),
-        m_ptr(storage_handle::null_char), m_len()
-      { }
+        m_ptr(storage_handle::null_char), m_len()  { }
 
     basic_cow_string(const basic_cow_string& other) noexcept
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
@@ -215,8 +210,7 @@ class basic_cow_string
 
     constexpr
     basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : basic_cow_string(allocator_type())
-      { }
+      : basic_cow_string(allocator_type())  { }
 
     basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
                      const allocator_type& alloc = allocator_type())

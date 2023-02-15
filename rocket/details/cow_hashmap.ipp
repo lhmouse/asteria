@@ -17,8 +17,7 @@ struct storage_header
 
     explicit
     storage_header() noexcept
-      : nref()
-      { }
+      : nref()  { }
   };
 
 // This struct is used as placeholders for EBO'd bases that would otherwise
@@ -376,15 +375,13 @@ class storage_handle
     storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
       : allocator_base(alloc),
         ebo_select<hashT, allocT>(hf),
-        ebo_select<eqT, allocT, hashT>(eq)
-      { }
+        ebo_select<eqT, allocT, hashT>(eq)  { }
 
     constexpr
     storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
       : allocator_base(::std::move(alloc)),
         ebo_select<hashT, allocT>(hf),
-        ebo_select<eqT, allocT, hashT>(eq)
-      { }
+        ebo_select<eqT, allocT, hashT>(eq)  { }
 
     ~storage_handle()
       { this->deallocate();  }
@@ -826,8 +823,7 @@ class hashmap_iterator
   public:
     constexpr
     hashmap_iterator() noexcept
-      : m_begin(), m_cur(), m_end()
-      { }
+      : m_begin(), m_cur(), m_end()  { }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
@@ -835,8 +831,7 @@ class hashmap_iterator
     hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
       : m_begin(other.m_begin),
         m_cur(other.m_cur),
-        m_end(other.m_end)
-      { }
+        m_end(other.m_end)  { }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>

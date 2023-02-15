@@ -38,38 +38,31 @@ class unique_ptr
     // 23.11.1.2.1, constructors
     constexpr
     unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
-      : m_sth()
-      { }
+      : m_sth()  { }
 
     explicit constexpr
     unique_ptr(const deleter_type& del) noexcept
-      : m_sth(nullptr, del)
-      { }
+      : m_sth(nullptr, del)  { }
 
     explicit constexpr
     unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
-      : m_sth(ptr)
-      { }
+      : m_sth(ptr)  { }
 
     constexpr
     unique_ptr(pointer ptr, const deleter_type& del) noexcept
-      : m_sth(ptr, del)
-      { }
+      : m_sth(ptr, del)  { }
 
     template<typename yelementT, typename ydeleterT,
     ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value),
     ROCKET_ENABLE_IF(is_constructible<deleter_type, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
-      : m_sth(other.m_sth.release(), ::std::move(other.m_sth.as_deleter()))
-      { }
+      : m_sth(other.m_sth.release(), ::std::move(other.m_sth.as_deleter()))  { }
 
     unique_ptr(unique_ptr&& other) noexcept
-      : m_sth(other.m_sth.release(), ::std::move(other.m_sth.as_deleter()))
-      { }
+      : m_sth(other.m_sth.release(), ::std::move(other.m_sth.as_deleter()))  { }
 
     unique_ptr(unique_ptr&& other, const deleter_type& del) noexcept
-      : m_sth(other.m_sth.release(), del)
-      { }
+      : m_sth(other.m_sth.release(), del)  { }
 
     // 23.11.1.2.3, assignment
     unique_ptr&

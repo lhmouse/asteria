@@ -32,8 +32,7 @@ class Executive_Context
     Executive_Context(M_plain, Executive_Context& parent)
       : m_parent_opt(&parent),
         m_global(parent.m_global), m_stack(parent.m_stack),
-        m_alt_stack(parent.m_alt_stack)
-      { }
+        m_alt_stack(parent.m_alt_stack)  { }
 
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
@@ -45,8 +44,7 @@ class Executive_Context
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
       : m_parent_opt(),
         m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
-        m_defer(::std::move(defer))
-      { }
+        m_defer(::std::move(defer))  { }
 
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which

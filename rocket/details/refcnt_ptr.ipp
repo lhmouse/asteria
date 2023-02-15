@@ -48,13 +48,11 @@ class stored_pointer
   public:
     constexpr
     stored_pointer() noexcept
-      : m_ptr()
-      { }
+      : m_ptr()  { }
 
     explicit constexpr
     stored_pointer(pointer ptr) noexcept
-      : m_ptr(::std::move(ptr))
-      { }
+      : m_ptr(::std::move(ptr))  { }
 
     ~stored_pointer()
       { this->reset(nullptr);  }

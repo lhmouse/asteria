@@ -28,13 +28,11 @@ class atomic
   public:
     constexpr
     atomic() noexcept
-      : m_val()
-      { }
+      : m_val()  { }
 
     constexpr
     atomic(value_type val) noexcept
-      : m_val(val)
-      { }
+      : m_val(val)  { }
 
     atomic(const atomic&) = delete;
 

@@ -17,8 +17,7 @@ class Statement_Sequence
   public:
     explicit constexpr
     Statement_Sequence(const Compiler_Options& opts) noexcept
-      : m_opts(opts)
-      { }
+      : m_opts(opts)  { }
 
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(Statement_Sequence);
