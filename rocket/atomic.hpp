@@ -23,21 +23,17 @@ class atomic
     using value_type  = valueT;
 
   private:
-    ::std::atomic<value_type> m_val;
+    ::std::atomic<value_type> m_val = { value_type() };
 
   public:
-    constexpr
-    atomic() noexcept
-      : m_val()  { }
+    atomic() noexcept = default;
 
-    constexpr
+    explicit
     atomic(value_type val) noexcept
       : m_val(val)  { }
 
     atomic(const atomic&) = delete;
-
-    atomic&
-    operator=(const atomic&) = delete;
+    atomic& operator=(const atomic&) = delete;
 
   private:
     static constexpr
