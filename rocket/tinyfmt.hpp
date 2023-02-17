@@ -261,7 +261,7 @@ template<typename charT, typename traitsT, typename repT>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " day");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " minute");
   }
 
 template<typename charT, typename traitsT, typename repT>
