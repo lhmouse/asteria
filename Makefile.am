@@ -29,8 +29,8 @@ AM_CPPFLAGS = -pipe -Wall -Wextra -Iasteria -U_FORTIFY_SOURCE  \
   -Wunused-but-set-{variable,parameter}
 
 AM_CXXFLAGS = -std=c++17 @sanitizer_flags@  \
-  -fvisibility-inlines-hidden  \
-  -Wno-redundant-move  \
+  -fvisibility-inlines-hidden -Wno-redundant-move  \
+  -Werror=zero-as-null-pointer-constant  \
   -Werror={non-virtual-dtor,missing-declarations}
 
 AM_LDFLAGS = -no-undefined
