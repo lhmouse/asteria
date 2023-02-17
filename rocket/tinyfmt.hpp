@@ -160,7 +160,9 @@ ROCKET_DISABLE_IF(is_same<const volatile valueT, const volatile charT>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   {
-    return fmt << ascii_numput(value);
+    ascii_numput nump;
+    nump.put(value);
+    return fmt << nump;
   }
 
 template<typename charT, typename traitsT, typename valueT,
@@ -168,7 +170,9 @@ ROCKET_ENABLE_IF(is_enum<valueT>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   {
-    return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));
+    ascii_numput nump;
+    nump.put(static_cast<typename underlying_type<valueT>::type>(value));
+    return fmt << nump;
   }
 
 template<typename charT, typename traitsT, typename valueT,
@@ -176,7 +180,9 @@ ROCKET_DISABLE_IF(is_convertible<valueT*, const charT*>::value)>
 basic_tinyfmt<charT, traitsT>&
 operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   {
-    return fmt << ascii_numput(reinterpret_cast<const void*>(value));
+    ascii_numput nump;
+    nump.put(reinterpret_cast<const void*>(value));
+    return fmt << nump;
   }
 
 template<typename charT, typename traitsT>

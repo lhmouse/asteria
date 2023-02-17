@@ -42,13 +42,11 @@ class ascii_numget
     uint64_t m_mant;  // the mantissa (see `m_base`)
 
   public:
+    // Initializes the value zero.
     ascii_numget() noexcept
-      { this->clear();  }
-
-    template<typename valueT,
-    ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
-    ascii_numget(valueT& value, const char*& bptr, const char* eptr)
-      { this->get(value, bptr, eptr);  }
+      {
+        this->clear();
+      }
 
   public:
     // accessors

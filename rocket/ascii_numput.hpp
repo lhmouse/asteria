@@ -14,22 +14,19 @@ class ascii_numput
     const char* m_bptr;
     const char* m_eptr;
 
-    // This storage must be sufficient for the longest result, which at the moment
-    // is signed 64-bit integer in binary (`"-0b111...1"` takes 68 bytes along with
-    // the null terminator).
+    // This storage must be sufficient for the longest result, which
+    // at the moment is signed 64-bit integer in binary (`"-0b111...1"`
+    // takes 68 bytes along with the null terminator).
     // The size is a multiple of eight to prevent padding bytes.
     static constexpr size_t M = 71;
     char m_stor[M+1];
 
   public:
+    // Initializes an empty string.
     ascii_numput() noexcept
-      { this->clear();  }
-
-    template<typename valueT,
-    ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
-    explicit
-    ascii_numput(const valueT& value) noexcept
-      { this->put(value);  }
+      {
+         this->clear();
+      }
 
   public:
     // accessors
