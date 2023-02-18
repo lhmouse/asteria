@@ -125,7 +125,7 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
        ::asteria::format_string(  \
          (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
        ),  \
-     __builtin_unreachable())
+     ROCKET_UNREACHABLE())
 
 // UTF-8 conversion functions
 bool
