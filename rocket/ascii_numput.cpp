@@ -1249,7 +1249,7 @@ do_frexp10(double value)
     else
       bits = (bits - bound_lo < bound_hi - bits) ? bound_lo : bound_hi;
 
-    if(bits >= 1000000000000000000) {
+    if(bits >= 1000000000000000000ULL) {
       // If this has resulted in a carry, fix it.
       bits /= 10;
       bpos ++;
