@@ -1628,6 +1628,7 @@ put_DF(float value) noexcept
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
+    frx.mant +=  50000000U;
     frx.mant /= 100000000U;
     frx.mant *= 100000000U;
 
@@ -1671,6 +1672,7 @@ put_DEF(float value) noexcept
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
+    frx.mant +=  50000000U;
     frx.mant /= 100000000U;
     frx.mant *= 100000000U;
 
