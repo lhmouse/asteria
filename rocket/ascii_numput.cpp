@@ -3,11 +3,10 @@
 
 #include "ascii_numput.hpp"
 #include "assert.hpp"
-#include <cmath>
 namespace rocket {
 namespace {
 
-constexpr char s_decimals[][6] =
+constexpr char s_small_decimals[][6] =
   {
     "-0", "-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10", "-11",
     "-12", "-13", "-14", "-15", "-16", "-17", "-18", "-19", "-20", "-21",
@@ -253,192 +252,48 @@ constexpr char s_decimals[][6] =
   };
 
 inline
-size_t
-do_small_strlen(const char* str) noexcept
+void
+do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
   {
-    // Load 8 bytes at once.
-    // This works because no constant string above is longer than 6.
-    uint64_t bytes;
-    ::std::memcpy(&bytes, str, sizeof(bytes));
-    bytes = htole64(bytes);
+    // Get the string for a non-negative value.
+    str_out = s_small_decimals[value] + 1;
+    uint32_t bytes;
+    ::memcpy(&bytes, str_out, sizeof(bytes));
+    bytes = le32toh(bytes);
 
     // Now see whether `bytes` contains a zero byte. The condition
     // is that there shall be a byte whose MSB becomes one after the
     // subtraction below, but was zero before it.
-    constexpr uint64_t bmask = UINT64_MAX / 0xFF;
+    constexpr uint32_t bmask = UINT32_MAX / 0xFFU;
     bytes = (bytes - bmask) & (bytes ^ (bmask << 7)) & (bmask << 7);
-    return (size_t) ROCKET_TZCNT64(bytes) / 8;
+    len_out = ROCKET_TZCNT32(bytes) / 8U;
   }
 
-template<typename valueT>
-constexpr typename make_unsigned<valueT>::type
-do_cast_U(valueT value) noexcept
+ROCKET_ALWAYS_INLINE
+uint32_t
+do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t precision)
   {
-    return static_cast<typename make_unsigned<valueT>::type>(value);
-  }
+    uint64_t reg = value;
+    uint32_t len = 0;
 
-constexpr
-char
-do_pdigit_D(uint32_t dval)
-  {
-    return static_cast<char>('0' + dval);
-  }
+    while(reg != 0) {
+      // Shift a digit from `reg` and write it.
+      uint64_t digit = reg % base;
+      reg /= base;
 
-constexpr
-char
-do_pdigit_X(uint32_t dval)
-  {
-    return static_cast<char>('0' + dval + ((9 - dval) >> 29));
-  }
-
-void
-do_xput_U_bkwd(char*& bp, uint64_t value, uint8_t base, size_t precision)
-  {
-    // Write digits backwards.
-    ROCKET_ASSERT(precision <= 64);
-    char* fp = bp - precision;
-
-    uint64_t ireg = value;
-    while(ireg != 0) {
-      // Shift a digit out.
-      uint8_t dval = static_cast<uint8_t>(ireg % base);
-      ireg /= base;
-
-      // Write this digit.
-      *(--bp) = do_pdigit_X(dval);
+      wptr --;
+      *wptr = (char) ('0' + digit + ((9U - digit) >> 61));
+      len ++;
     }
 
-    // Pad the string to at least the precision requested.
-    while(bp > fp)
-      *(--bp) = '0';
-  }
-
-template<typename valueT>
-char*
-do_check_special(char*& bp, char*& ep, valueT value)
-  {
-    switch(::std::fpclassify(value)) {
-      case FP_INFINITE:
-        bp = const_cast<char*>("-infinity");
-        ep = bp + 9;
-        return bp;
-
-      case FP_NAN:
-        bp = const_cast<char*>("-nan");
-        ep = bp + 4;
-        return bp;
-
-      case FP_ZERO:
-        bp = const_cast<char*>("-0");
-        ep = bp + 2;
-        return bp;
-
-      default:
-        return nullptr;
-    }
-  }
-
-void
-do_xfrexp_F_bin(uint64_t& mant, int& exp, double value)
-  {
-    // Note if `value` is not finite then the behavior is undefined.
-    // Get the first digit.
-    double freg = ::std::fabs(value);
-
-    // Extract the biased exponent and mantissa without the hidden bit.
-    // This function requires `freg` to be normalized, finite and positive.
-    uint64_t ireg;
-    ::std::memcpy(&ireg, &freg, sizeof(double));
-    int bexp = (int)(ireg >> 52) & 0x7FF;
-    ireg &= (UINT64_C(1) << 52) - 1;
-
-    if(bexp == 0) {
-      // Normalize the denormal value.
-      int sh = ROCKET_LZCNT64(ireg) - 11;
-      ireg <<= sh;
-      bexp -= sh - 1;
-
-      // Check the hidden bit.
-      ROCKET_ASSERT((ireg >> 52) == 1);
+    while(len < precision) {
+      // Prepend zeroes up to `precision`.
+      wptr --;
+      *wptr = '0';
+      len ++;
     }
 
-    // Recover the hidden bit.
-    ireg |= (UINT64_C(1) << 52);
-
-    // Bias the exponent back and normalize the mantissa.
-    exp = bexp - 0x3FF;
-    mant = ireg << 11;
-  }
-
-void
-do_xput_M_bin(char*& ep, uint64_t mant, const char* rdxp)
-  {
-    // Write digits in normal order.
-    uint64_t ireg = mant;
-    while(ireg != 0) {
-      uint8_t dval = static_cast<uint8_t>(ireg >> 63);
-      ireg <<= 1;
-
-      // Insert a decimal point before `rdxp`.
-      if(ep == rdxp)
-        *(ep++) = '.';
-
-      // Write this digit.
-      *(ep++) = do_pdigit_D(dval);
-    }
-
-    // If `rdxp` is set, fill zeroes until it is reached,
-    // if no decimal point has been added so far.
-    if(rdxp)
-      while(ep < rdxp)
-        *(ep++) = '0';
-  }
-
-void
-do_xput_M_hex(char*& ep, uint64_t mant, const char* rdxp)
-  {
-    // Write digits in normal order.
-    uint64_t ireg = mant;
-    while(ireg != 0) {
-      uint8_t dval = static_cast<uint8_t>(ireg >> 60);
-      ireg <<= 4;
-
-      // Insert a decimal point before `rdxp`.
-      if(ep == rdxp)
-        *(ep++) = '.';
-
-      // Write this digit.
-      *(ep++) = do_pdigit_X(dval);
-    }
-
-    // If `rdxp` is set, fill zeroes until it is reached,
-    // if no decimal point has been added so far.
-    if(rdxp)
-      while(ep < rdxp)
-        *(ep++) = '0';
-  }
-
-void
-do_xput_I_exp(char*& ep, int exp)
-  {
-    // Append the sign symbol, always.
-    if(exp < 0)
-      *(ep++) = '-';
-    else
-      *(ep++) = '+';
-
-    // Get a static string for the absolute value of `exp`.
-    // This starts with a minus sign that has to be skipped.
-    size_t absval = do_cast_U(::std::abs(exp));
-    ROCKET_ASSERT(absval < noadl::size(s_decimals));
-    const char* rp = s_decimals[absval] + 1;
-
-    // ... well, ensure at least two significant figures, like POSIX.
-    if(absval < 10)
-      *(ep++) = '0';
-
-    while(*rp != 0)
-      *(ep++) = *(rp++);
+    return len;
   }
 
 #if 0
@@ -479,12 +334,11 @@ do_print_one(int e)
       frac = ldexpq(frac, 53 - b);
       frac = ceilq(frac);
       frac = ldexpq(frac, b);
-      mant = (long long)frac;
+      mant = (long long) frac;
       exp2 = exp2 - 1;
 
       // Print the higher part in fixed-point format.
-      printf("\t{ 0x1.%.13llXp%+.4d, ",
-             mant & 0xFFFFFFFFFFFFF, exp2);
+      printf("\t{ 0x1.%.13llXp%+.4d, ", mant & 0xFFFFFFFFFFFFF, exp2);
     }
 
     // Calculate the reciprocal of the boundary.
@@ -496,7 +350,7 @@ do_print_one(int e)
 
     // The fraction is in 63-bit mantissa format.
     frac = ldexpq(frac, 63);
-    mant = (long long)frac;
+    mant = (long long) frac;
     exp2 = exp2 + 1;
 
     // Print the mantissa in fixed-point format.
@@ -522,13 +376,13 @@ main(void)
 #endif
 
 // These are generated data. Do not edit by hand!
-struct decmult_F
+struct dec_mult
   {
     double bound;
     uint64_t mant;
     int exp2;
   }
-constexpr s_decmult_F[] =
+constexpr s_dec_mult[] =
   {
     {                       0,  0x6DB4616541769502, +1134 },  // 1.0e-324
     { 0x1.8000000000000p-1073,  0x57C3811DCDF87735, +1131 },  // 1.0e-323
@@ -1165,124 +1019,205 @@ constexpr s_decmult_F[] =
     { 0x1.1CCF385EBC8A0p+1023,  0x4FD5679EFB9B04D8,  -965 },  // 1.0e+308
   };
 
-inline
-uint64_t
-do_get_max_bias(uint64_t ireg, uint32_t add, bool single)
+enum fpclass : uint8_t
   {
-    uint64_t m = ireg >> (single ? 24 : 53);
-    m |= m >> 1;
-    m |= m >> 2;
-    m |= m >> 4;
-    return m * (55 + add) / 256;
+    fpclass_norm  = 0,
+    fpclass_inf   = 1,
+    fpclass_nan   = 2,
+    fpclass_zero  = 3,
+    fpclass_sub   = 4,
+  };
+
+struct frexp
+  {
+    fpclass cls;
+    bool sign;
+    int exp;
+    uint64_t mant;
+  };
+
+inline
+bool
+do_get_special_class(const char*& data, uint32_t& size, const frexp& frx)
+  {
+    switch((uint32_t) frx.cls) {
+      case fpclass_inf:
+        data = "-infinity" + (1U - frx.sign);
+        size = 8U + frx.sign;
+        return true;
+
+      case fpclass_nan:
+        data = "-nan" + (1U - frx.sign);
+        size = 3U + frx.sign;
+        return true;
+
+      case fpclass_zero:
+        data = s_small_decimals[0] + (1U - frx.sign);
+        size = 1U + frx.sign;
+        return true;
+
+      default:
+        return false;
+    }
   }
 
-void
-do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
+inline
+frexp
+do_frexp2(double value)
   {
-    // Note if `value` is not finite then the behavior is undefined.
-    // Get the first digit.
-    double freg = ::std::fabs(value);
+    // Extract the biased exponent and mantissa without hidden bits.
+    uint64_t bits;
+    static_assert(sizeof(bits) == sizeof(value));
+    ::memcpy(&bits, &value, sizeof(bits));
 
-    // Locate the last number in the table that is <= `freg`.
+    frexp frx;
+    frx.cls = fpclass_norm;
+    frx.sign = (bits >> 63) & 1U;
+    frx.exp = (bits >> 52) & 0x7FFU;
+    frx.mant = bits & 0xFFFFFFFFFFFFFULL;
+
+    if(frx.exp == 0x7FFU) {
+      // This may be an infinity or a NaN.
+      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      return frx;
+    }
+
+    if(frx.exp == 0) {
+      // This may be a subnormal value or zero.
+      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
+
+      if(frx.cls == fpclass_zero)
+        return frx;
+
+      // Normalize the subnormal value.
+      int sh = ROCKET_LZCNT64(frx.mant) - 11;
+      frx.exp -= sh - 1;
+      frx.mant <<= sh;
+    }
+
+    // Convert the exponent and mantissa back. The number will be
+    // interpreted as `sign 0x0. mant P (1 + exp)` in C99 hexadecimal
+    // floating-point notation. The most significant bit of `mant` is
+    // always set.
+    frx.exp -= 0x3FF;
+    frx.mant |= 0x10000000000000ULL;
+    frx.mant <<= 11;
+    return frx;
+  }
+
+inline
+frexp
+do_frexp10(double value)
+  {
+    // Extract the biased exponent and mantissa without hidden bits.
+    uint64_t bits;
+    static_assert(sizeof(bits) == sizeof(value));
+    ::memcpy(&bits, &value, sizeof(bits));
+
+    frexp frx;
+    frx.cls = fpclass_norm;
+    frx.sign = (bits >> 63) & 1U;
+    frx.exp = (bits >> 52) & 0x7FFU;
+    frx.mant = bits & 0xFFFFFFFFFFFFFULL;
+
+    if(frx.exp == 0x7FFU) {
+      // This may be an infinity or a NaN.
+      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      return frx;
+    }
+
+    if(frx.exp == 0) {
+      // This may be a subnormal value or zero.
+      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
+
+      if(frx.cls == fpclass_zero)
+        return frx;
+
+      // Normalize the subnormal value.
+      int sh = ROCKET_LZCNT64(frx.mant) - 11;
+      frx.exp -= sh - 1;
+      frx.mant <<= sh;
+
+      // Remove the hidden bit.
+      ROCKET_ASSERT(frx.mant >> 52 == 1U);
+      frx.mant &= 0xFFFFFFFFFFFFFULL;
+    }
+
+    // Get the multiplier for this value, using binary search.
+    double abs_value;
+    bits &= 0x7FFFFFFFFFFFFFFFULL;
+    ::memcpy(&abs_value, &bits, sizeof(bits));
+
     uint32_t bpos = 1;
-    uint32_t epos = (uint32_t) noadl::size(s_decmult_F);
+    uint32_t epos = (uint32_t) ::std::size(s_dec_mult);
 
-    for(;;) {
-      // Stop if the range is empty.
-      if(bpos == epos) {
-        bpos = epos - 1;
-        break;
-      }
-
-      // Get the median.
+    while(bpos != epos) {
+      // book moves...
       uint32_t mpos = (bpos + epos) / 2;
-      const auto& bound = s_decmult_F[mpos].bound;
-
-      // Stops immediately if `freg` equals `bound`.
-      if(::std::memcmp(&freg, &bound, sizeof(double)) == 0) {
-        bpos = mpos;
-        break;
-      }
-
-      // Decend into either subrange.
-      if(freg < bound)
+      if(abs_value < s_dec_mult[mpos].bound)
         epos = mpos;
       else
         bpos = mpos + 1;
     }
 
-    // Extract the biased exponent and mantissa without the hidden bit.
-    // This function requires `freg` to be normalized, finite and positive.
-    uint64_t ireg;
-    ::std::memcpy(&ireg, &freg, sizeof(double));
-    int bexp = (int)(ireg >> 52) & 0x7FF;
-    ireg &= 0xFFFFF'FFFFFFFF;
+    bpos --;
+    const auto& mult = s_dec_mult[bpos];
 
-    if(bexp == 0) {
-      // The value is denormal.
-      // Adjust `ireg` such that its MSB is non-zero.
-      int sh = ROCKET_LZCNT64(ireg) - 11;
-      ireg <<= sh;
-      bexp -= sh - 1;
+    // Raise the value to (0,0x1p53).
+    bits = (uint64_t)(uint32_t) (frx.exp + mult.exp2) << 52 | frx.mant;
+    ::memcpy(&abs_value, &bits, sizeof(bits));
+    bits = (uint64_t)(int64_t) abs_value;
 
-      // Remove the hidden bit.
-      ROCKET_ASSERT((ireg >> 52) == 1);
-      ireg &= 0xFFFFF'FFFFFFFF;
-    }
+    // Calculate maximum tolerable rounding-off errors. Note `error_lo`
+    // is a bit smaller because `bits` was truncated towards zero.
+    uint64_t error_lo = (bits - 1) >> 53;
+    error_lo |= error_lo >> 1;
+    error_lo |= error_lo >> 2;
+    error_lo |= error_lo >> 4;
+    error_lo *= 55;
+    error_lo >>= 8;
 
-    // Adjust the exponent.
-    // This shall not cause overflows.
-    const auto& mult = s_decmult_F[bpos];
-    bexp += mult.exp2;
+    uint64_t error_hi = (bits + 1) >> 53;
+    error_hi |= error_hi >> 1;
+    error_hi |= error_hi >> 2;
+    error_hi |= error_hi >> 4;
+    error_hi *= 56;
+    error_hi >>= 8;
 
-    // Compose the new value.
-    ireg |= (uint64_t)(uint32_t)bexp << 52;
-    ::std::memcpy(&freg, &ireg, sizeof(double));
-
-    // On x86, conversion from `double` to `int64_t` is very inefficient.
-    // We make use of only 63 bits, so this can be optimized by casting the
-    // floating-point number to `int64_t`, followed by conversion to `uint64_t`.
-    ireg = (uint64_t)(int64_t)freg;
-
-    // Calculate the max tolerable bias of the final digits.
-    // Note `mbias_lo` is a bit smaller because `ireg` was truncated towards zero.
-    uint64_t mbias_lo = do_get_max_bias(ireg - 1, 0, single);
-    uint64_t mbias_hi = do_get_max_bias(ireg + 1, 1, single);
-
-    // Multiply two 64-bit values and get the high-order half.
-    // This produces 18 significant figures.
+    // Multiply two 64-bit values and get the high-order half. This
+    // produces 18 significant figures.
 #ifdef __SIZEOF_INT128__
-    ireg = (uint64_t) (((unsigned __int128) ireg * mult.mant) >> 64);
+    bits = (uint64_t) (((unsigned __int128) bits * mult.mant) >> 64);
 #else
     // This is inspired by `Emulate64x64to128` from
     //   https://github.com/catid/fp61/blob/master/fp61.h
-    uint64_t xhi = ireg >> 32;
-    uint64_t xlo = ireg << 32 >> 32;
+    uint64_t xhi = bits >> 32;
+    uint64_t xlo = bits << 32 >> 32;
     uint64_t yhi = mult.mant >> 32;
     uint64_t ylo = mult.mant << 32 >> 32;
 
-    ireg = (xlo * ylo >> 32) + xhi * ylo + (uint32_t) (xlo * yhi);
-    ireg >>= 32;
-    ireg += (xlo * yhi >> 32) + xhi * yhi
-#endif  // `__int128`
+    bits = (xlo * ylo >> 32) + xhi * ylo + (uint32_t) (xlo * yhi);
+    bits >>= 32;
+    bits += (xlo * yhi >> 32) + xhi * yhi;
+#endif  // __int128
 
-    // Round the mantissa. We now have 18 digits.
-    uint64_t tz_mult = single ? UINT64_C(1000000000) : UINT64_C(10);
-    uint64_t next = ireg / tz_mult;
+    // Round the mantissa.
+    uint64_t tz_next = bits / 10U;
+    uint64_t tz_mult = 10U;
 
     int tzcnt_lo = -1;
-    uint64_t bound_lo = ireg;
+    uint64_t bound_lo = bits;
     int tzcnt_hi = -1;
-    uint64_t bound_hi = ireg;
+    uint64_t bound_hi = bits;
 
-    for(;;) {
-      uint64_t bound_next = next * tz_mult;
+    while((tzcnt_lo | tzcnt_hi) < 0) {
+      uint64_t bound_next = tz_next * tz_mult;
       if(tzcnt_lo < 0) {
-        // Try removing a trailing zero from the lower bound.
-        ROCKET_ASSERT(ireg >= bound_next);
-        if(ireg - bound_next <= mbias_lo) {
-          // Record a digit if the result is close enough.
-          tzcnt_lo -= 1;
+        ROCKET_ASSERT(bits >= bound_next);
+
+        if(bits - bound_next <= error_lo) {
+          // This trailing zero can be removed, so record this bound.
+          tzcnt_lo --;
           bound_lo = bound_next;
         }
         else
@@ -1291,69 +1226,112 @@ do_xfrexp_F_dec(uint64_t& mant, int& exp, double value, bool single)
 
       bound_next += tz_mult;
       if(tzcnt_hi < 0) {
-        // Try removing a trailing zero from the upper bound.
-        ROCKET_ASSERT(bound_next >= ireg);
-        if(bound_next - ireg <= mbias_hi) {
-          // Record a digit if the result is close enough.
-          tzcnt_hi -= 1;
+        ROCKET_ASSERT(bound_next >= bits);
+
+        if(bound_next - bits <= error_hi) {
+          // This trailing zero can be removed, so record this bound.
+          tzcnt_hi --;
           bound_hi = bound_next;
         }
         else
           tzcnt_hi ^= -1;
       }
 
-      // If neither bound can be ajusted any further, stop.
-      if((tzcnt_lo | tzcnt_hi) >= 0)
-        break;
-
-      next /= 10;
-      tz_mult *= 10;
+      tz_next /= 10U;
+      tz_mult *= 10U;
     }
 
-    // Pick the bound with more trailing zeroes if their counts don't equal.
-    // Pick the nestest bound otherwise, rounding upwards on a par.
+    // If the bounds don't have the same number of trailing zeroes, pick
+    // the one with more. Otherwise, pick the nearer one, rounding up if
+    // on a par.
     if(tzcnt_lo != tzcnt_hi)
-      next = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
+      bits = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
     else
-      next = (ireg - bound_lo < bound_hi - ireg) ? bound_lo : bound_hi;
+      bits = (bits - bound_lo < bound_hi - bits) ? bound_lo : bound_hi;
 
-    // Check for carries.
-    if(next >= 1000'00000'00000'00000) {
-      ireg = next / 10;
-      bpos += 1;
+    if(bits >= 1000000000000000000) {
+      // If this has resulted in a carry, fix it.
+      bits /= 10;
+      bpos ++;
     }
-    else
-      ireg = next;
 
     // Return the mantissa and exponent.
-    mant = ireg;
-    exp = static_cast<int>(bpos) - 324;
+    frx.mant = bits;
+    frx.exp = (int) bpos - 324;
+    return frx;
   }
 
-void
-do_xput_M_dec(char*& ep, uint64_t mant, const char* rdxp)
+ROCKET_ALWAYS_INLINE
+uint32_t
+do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxp_opt)
   {
-    // Write digits in normal order.
-    uint64_t ireg = mant;
-    while(ireg != 0) {
-      uint64_t quo = ireg / 100'00000'00000'00000;
-      ireg %= 100'00000'00000'00000;
-      uint8_t dval = static_cast<uint8_t>(quo);
-      ireg *= 10;
+    uint64_t reg = mant;
+    uint32_t len = 0;
 
-      // Insert a decimal point before `rdxp`.
-      if(ep == rdxp)
-        *(ep++) = '.';
+    while(reg != 0) {
+      // Pop a digit from `reg` and write it.
+      uint64_t digit = reg / divisor;
+      reg %= divisor;
+      reg *= base;
 
-      // Write this digit.
-      *(ep++) = do_pdigit_X(dval);
+      if(wptr == rdxp_opt) {
+        // Insert a radix point before this digit.
+        *wptr = '.';
+        wptr ++;
+        len ++;
+      }
+
+      *wptr = (char) ('0' + digit + ((9U - digit) >> 61));
+      wptr ++;
+      len ++;
     }
 
-    // If `rdxp` is set and no decimal point has been added so far,
-    // fill zeroes until it is reached.
-    if(rdxp)
-      while(ep < rdxp)
-        *(ep++) = '0';
+    while(rdxp_opt && (wptr < rdxp_opt)) {
+      // Append zeroes up to `rdxp_opt`, but don't write a radix
+      // point there.
+      *wptr = '0';
+      wptr ++;
+      len ++;
+    }
+
+    return len;
+  }
+
+inline
+uint32_t
+do_write_exp(char*& wptr, int exp)
+  {
+    uint32_t abs_exp = (uint32_t) ::std::abs(exp);
+    uint32_t len = 0;
+
+    // The exponent always has a sign symbol.
+    *wptr = (exp == (int) abs_exp) ? '+' : '-';
+    wptr ++;
+    len ++;
+
+    // Get the static string.
+    const char* digits;
+    uint32_t ndigits;
+
+    if(abs_exp < 100U) {
+      // Ensure at least two significant digits, like POSIX.
+      do_get_small_decimal(digits, ndigits, 100U + abs_exp);
+      digits ++;
+      ndigits --;
+    }
+    else
+      do_get_small_decimal(digits, ndigits, abs_exp);
+
+    while(ndigits != 0) {
+      // Copy a significant digit, in normal order.
+      *wptr = *digits;
+      digits ++;
+      ndigits --;
+      wptr ++;
+      len ++;
+    }
+
+    return len;
   }
 
 }  // namespace
@@ -1362,517 +1340,555 @@ ascii_numput&
 ascii_numput::
 put_TB(bool value) noexcept
   {
-    this->clear();
+    this->m_data = "false\0true" + 6U * value;
+    this->m_size = 5U - value;
+    return *this;
+  }
 
-    // Get the template string literal. The internal storage is unused.
-    if(value) {
-      char* str = const_cast<char*>("true");
-      this->m_bptr = str;
-      this->m_eptr = str + 4;
+ascii_numput&
+ascii_numput::
+put_XP(const volatile void* value) noexcept
+  {
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, (uintptr_t) value, 16, 1);
+    wptr -= 2;
+    ::memcpy(wptr, "0x", 2);
+    ntotal += 2;
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_BU(uint64_t value, uint32_t precision) noexcept
+  {
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, value, 2, precision);
+    wptr -= 2;
+    ::memcpy(wptr, "0b", 2);
+    ntotal += 2;
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_XU(uint64_t value, uint32_t precision) noexcept
+  {
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, value, 16, precision);
+    wptr -= 2;
+    ::memcpy(wptr, "0x", 2);
+    ntotal += 2;
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_DU(uint64_t value, uint32_t precision) noexcept
+  {
+    if((precision == 1) && (value < ::std::size(s_small_decimals))) {
+      // Get the static string.
+      do_get_small_decimal(this->m_data, this->m_size, (uint32_t) value);
+      return *this;
+    }
+
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, value, 10, precision);
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_BI(int64_t value, uint32_t precision) noexcept
+  {
+    if(value >= 0)
+      return this->put_BU((uint64_t) value, precision);
+
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, -(uint64_t) value, 2, precision);
+    wptr -= 3;
+    ::memcpy(wptr, "-0b", 3);
+    ntotal += 3;
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_XI(int64_t value, uint32_t precision) noexcept
+  {
+    if(value >= 0)
+      return this->put_XU((uint64_t) value, precision);
+
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, -(uint64_t) value, 16, precision);
+    wptr -= 3;
+    ::memcpy(wptr, "-0x", 3);
+    ntotal += 3;
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_DI(int64_t value, uint32_t precision) noexcept
+  {
+    if(value >= 0)
+      return this->put_DU((uint64_t) value, precision);
+
+    if((precision == 1) && (-(uint64_t) value < ::std::size(s_small_decimals))) {
+      // Get the static string.
+      do_get_small_decimal(this->m_data, this->m_size, -(uint32_t) value);
+      this->m_data -= 1;
+      this->m_size += 1;
+      return *this;
+    }
+
+    char* wptr = ::std::end(this->m_stor);
+    *--wptr = 0;
+
+    uint32_t ntotal = do_write_digits_backwards(wptr, -(uint64_t) value, 10, precision);
+    wptr -= 1;
+    wptr[0] = '-';
+    ntotal += 1;
+
+    this->m_data = wptr;
+    this->m_size = ntotal;
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_BF(float value) noexcept
+  {
+    frexp frx = do_frexp2((double) value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
+
+    ::memcpy(this->m_stor, "-0b0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
+
+    if((frx.exp < -4) || (frx.exp >= 24)) {
+      // Write the number in scientific notation.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+      *wptr = 'p';
+      wptr += 1;
+      do_write_exp(wptr, frx.exp);
+    }
+    else if(frx.exp < 0) {
+      // Write the number in plain format. The number starts with
+      // `0.` and zeroes are filled as necessary.
+      wptr += 2;
+      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
+      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, nullptr);
     }
     else {
-      char* str = const_cast<char*>("false");
-      this->m_bptr = str;
-      this->m_eptr = str + 5;
+      // Write the number in plain format. A decimal point will be
+      // inserted in the middle.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + (uint32_t) (frx.exp + 1));
     }
+
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_XP(const void* value) noexcept
+put_BEF(float value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
+    frexp frx = do_frexp2((double) value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Append a null terminator.
-    *bp = 0;
+    ::memcpy(this->m_stor, "-0b0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
-    // Write digits backwards.
-    do_xput_U_bkwd(bp, reinterpret_cast<uintptr_t>(value), 16, 1);
+    // Write the number in scientific notation.
+    do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+    *wptr = 'p';
+    wptr += 1;
+    do_write_exp(wptr, frx.exp);
 
-    // Prepend the hexadecimal prefix.
-    *(--bp) = 'x';
-    *(--bp) = '0';
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
 
-    // Set the string, which resides in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_BU(uint64_t value, size_t precision) noexcept
+put_XF(float value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
+    frexp frx = do_frexp2((double) value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Append a null terminator.
-    *bp = 0;
+    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp >>= 2;
 
-    // Write digits backwards.
-    do_xput_U_bkwd(bp, value, 2, precision);
+    ::memcpy(this->m_stor, "-0x0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
-    // Prepend the binary prefix.
-    *(--bp) = 'b';
-    *(--bp) = '0';
-
-    // Set the string, which resides in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
-    return *this;
-  }
-
-ascii_numput&
-ascii_numput::
-put_XU(uint64_t value, size_t precision) noexcept
-  {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
-
-    // Append a null terminator.
-    *bp = 0;
-
-    // Write digits backwards.
-    do_xput_U_bkwd(bp, value, 16, precision);
-
-    // Prepend the hexadecimal prefix.
-    *(--bp) = 'x';
-    *(--bp) = '0';
-
-    // Set the string, which resides in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
-    return *this;
-  }
-
-ascii_numput&
-ascii_numput::
-put_DU(uint64_t value, size_t precision) noexcept
-  {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
-
-    if((value < noadl::size(s_decimals)) && (precision == 1)) {
-      // Get the template string literal. The internal storage is unused.
-      // This starts with a minus sign that has to be skipped.
-      bp = const_cast<char*>(s_decimals[value]) + 1;
-      ep = bp + do_small_strlen(bp);
+    if((frx.exp < -4) || (frx.exp >= 6)) {
+      // Write the number in scientific notation.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+      *wptr = 'p';
+      wptr += 1;
+      do_write_exp(wptr, frx.exp * 4);
+    }
+    else if(frx.exp < 0) {
+      // Write the number in plain format. The number starts with
+      // `0.` and zeroes are filled as necessary.
+      wptr += 2;
+      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
+      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, nullptr);
     }
     else {
-      // Append a null terminator.
-      *bp = 0;
-
-      // Write digits backwards.
-      do_xput_U_bkwd(bp, value, 10, precision);
+      // Write the number in plain format. A decimal point will be
+      // inserted in the middle.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + (uint32_t) (frx.exp + 1));
     }
 
-    // Set the string, which may or may not reside in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_BI(int64_t value, size_t precision) noexcept
+put_XEF(float value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
-    uint64_t sign = do_cast_U(value >> 63);
-    uint64_t absval = (do_cast_U(value) ^ sign) - sign;
+    frexp frx = do_frexp2((double) value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Append a null terminator.
-    *bp = 0;
+    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp >>= 2;
 
-    // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd(bp, absval, 2, precision);
+    ::memcpy(this->m_stor, "-0x0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
-    // Prepend the binary prefix.
-    *(--bp) = 'b';
-    *(--bp) = '0';
+    // Write the number in scientific notation.
+    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+    *wptr = 'p';
+    wptr += 1;
+    do_write_exp(wptr, frx.exp * 4);
 
-    // If the number is negative, prepend a minus sign.
-    if(sign)
-      *(--bp) = '-';
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
 
-    // Set the string, which resides in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_XI(int64_t value, size_t precision) noexcept
+put_DF(float value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
-    uint64_t sign = do_cast_U(value >> 63);
-    uint64_t absval = (do_cast_U(value) ^ sign) - sign;
+    frexp frx = do_frexp10((double) value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Append a null terminator.
-    *bp = 0;
+    frx.mant /= 100000000U;
+    frx.mant *= 100000000U;
 
-    // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd(bp, absval, 16, precision);
+    ::memcpy(this->m_stor, "-0.", 4);
+    char* wptr = ::std::begin(this->m_stor) + 1;
 
-    // Prepend the hexadecimal prefix.
-    *(--bp) = 'x';
-    *(--bp) = '0';
-
-    // If the number is negative, prepend a minus sign.
-    if(sign)
-      *(--bp) = '-';
-
-    // Set the string, which resides in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
-    return *this;
-  }
-
-ascii_numput&
-ascii_numput::
-put_DI(int64_t value, size_t precision) noexcept
-  {
-    this->clear();
-    char* bp = this->m_stor + M;
-    char* ep = bp;
-    uint64_t sign = do_cast_U(value >> 63);
-    uint64_t absval = (do_cast_U(value) ^ sign) - sign;
-
-    if((absval < noadl::size(s_decimals)) && (precision == 1)) {
-      // Get the template string literal. The internal storage is unused.
-      // This starts with a minus sign that has to be skipped for non-negative numbers.
-      bp = const_cast<char*>(s_decimals[absval]) + 1 + sign;
-      ep = bp + do_small_strlen(bp);
+    if((frx.exp < -4) || (frx.exp >= 9)) {
+      // Write the number in scientific notation.
+      do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, wptr + 1);
+      *wptr = 'e';
+      wptr += 1;
+      do_write_exp(wptr, frx.exp);
+    }
+    else if(frx.exp < 0) {
+      // Write the number in plain format. The number starts with
+      // `0.` and zeroes are filled as necessary.
+      wptr += 2;
+      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
+      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, nullptr);
     }
     else {
-      // Append a null terminator.
-      *bp = 0;
-
-      // Write digits backwards using its absolute value without causing overflows.
-      do_xput_U_bkwd(bp, absval, 10, precision);
-
-      // If the number is negative, prepend a minus sign.
-      if(sign)
-        *(--bp) = '-';
+      // Write the number in plain format. A decimal point will be
+      // inserted in the middle.
+      do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, wptr + (uint32_t) (frx.exp + 1));
     }
 
-    // Set the string, which may or may not reside in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_BF(double value, bool single) noexcept
+put_DEF(float value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    int sign = ::std::signbit(value) ? -1 : 0;
+    frexp frx = do_frexp10((double) value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Treat non-finite values and zeroes specially.
-    if(do_check_special(bp, ep, value)) {
-      // Use the template string literal, which is immutable.
-      // Skip the minus sign if the sign bit is clear.
-      bp += do_cast_U(sign + 1);
-    }
-    else {
-      // Prepend a minus sign if the number is negative.
-      if(sign)
-        *(ep++) = '-';
+    frx.mant /= 100000000U;
+    frx.mant *= 100000000U;
 
-      // Prepend the binary prefix.
-      *(ep++) = '0';
-      *(ep++) = 'b';
+    ::memcpy(this->m_stor, "-0.", 4);
+    char* wptr = ::std::begin(this->m_stor) + 1;
 
-      // Break the number down into fractional and exponential parts. This result is exact.
-      uint64_t mant;
-      int exp;
-      do_xfrexp_F_bin(mant, exp, value);
+    // Write the number in scientific notation.
+    do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, wptr + 1);
+    *wptr = 'e';
+    wptr += 1;
+    do_write_exp(wptr, frx.exp);
 
-      // Write the broken-down number...
-      if((exp < -4) || ((single ? 24 : 53) <= exp)) {
-        // ... in scientific notation.
-        do_xput_M_bin(ep, mant, ep + 1);
-        *(ep++) = 'p';
-        do_xput_I_exp(ep, exp);
-      }
-      else if(exp < 0) {
-        // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
-        *(ep++) = '0';
-        *(ep++) = '.';
-        for_range(exp, -1, [&](int) { *(ep++) = '0';  });
-        do_xput_M_bin(ep, mant, nullptr);
-      }
-      else {
-        // ... in plain format; the decimal point is inserted in the middle.
-        do_xput_M_bin(ep, mant, ep + 1 + do_cast_U(exp));
-      }
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
 
-      // Append a null terminator.
-      *ep = 0;
-    }
-
-    // Set the string. The internal storage is used for finite values only.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_BE(double value, bool /*single*/) noexcept
+put_BD(double value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    int sign = ::std::signbit(value) ? -1 : 0;
+    frexp frx = do_frexp2(value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Treat non-finite values and zeroes specially.
-    if(do_check_special(bp, ep, value)) {
-      // Use the template string literal, which is immutable.
-      // Skip the minus sign if the sign bit is clear.
-      bp += do_cast_U(sign + 1);
+    ::memcpy(this->m_stor, "-0b0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
+
+    if((frx.exp < -4) || (frx.exp >= 53)) {
+      // Write the number in scientific notation.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+      *wptr = 'p';
+      wptr += 1;
+      do_write_exp(wptr, frx.exp);
+    }
+    else if(frx.exp < 0) {
+      // Write the number in plain format. The number starts with
+      // `0.` and zeroes are filled as necessary.
+      wptr += 2;
+      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
+      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, nullptr);
     }
     else {
-      // Prepend a minus sign if the number is negative.
-      if(sign)
-        *(ep++) = '-';
-
-      // Prepend the binary prefix.
-      *(ep++) = '0';
-      *(ep++) = 'b';
-
-      // Break the number down into fractional and exponential parts. This result is exact.
-      uint64_t mant;
-      int exp;
-      do_xfrexp_F_bin(mant, exp, value);
-
-      // Write the broken-down number in scientific notation.
-      do_xput_M_bin(ep, mant, ep + 1);
-      *(ep++) = 'p';
-      do_xput_I_exp(ep, exp);
-
-      // Append a null terminator.
-      *ep = 0;
+      // Write the number in plain format. A decimal point will be
+      // inserted in the middle.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + (uint32_t) (frx.exp + 1));
     }
 
-    // Set the string. The internal storage is used for finite values only.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_XF(double value, bool single) noexcept
+put_BED(double value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    int sign = ::std::signbit(value) ? -1 : 0;
+    frexp frx = do_frexp2(value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Treat non-finite values and zeroes specially.
-    if(do_check_special(bp, ep, value)) {
-      // Use the template string literal, which is immutable.
-      // Skip the minus sign if the sign bit is clear.
-      bp += do_cast_U(sign + 1);
-    }
-    else {
-      // Prepend a minus sign if the number is negative.
-      if(sign)
-        *(ep++) = '-';
+    ::memcpy(this->m_stor, "-0b0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
-      // Prepend the hexadecimal prefix.
-      *(ep++) = '0';
-      *(ep++) = 'x';
+    // Write the number in scientific notation.
+    do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+    *wptr = 'p';
+    wptr += 1;
+    do_write_exp(wptr, frx.exp);
 
-      // Break the number down into fractional and exponential parts. This result is exact.
-      uint64_t mant;
-      int exp;
-      do_xfrexp_F_bin(mant, exp, value);
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
 
-      // Normalize the integral part so it is the maximum value in the range [0,16).
-      mant >>= ~exp & 3;
-      exp >>= 2;
-
-      // Write the broken-down number...
-      if((exp < -4) || ((single ? 6 : 14) <= exp)) {
-        // ... in scientific notation.
-        do_xput_M_hex(ep, mant, ep + 1);
-        *(ep++) = 'p';
-        do_xput_I_exp(ep, exp * 4);
-      }
-      else if(exp < 0) {
-        // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
-        *(ep++) = '0';
-        *(ep++) = '.';
-        for_range(exp, -1, [&](int) { *(ep++) = '0';  });
-        do_xput_M_hex(ep, mant, nullptr);
-      }
-      else
-        // ... in plain format; the decimal point is inserted in the middle.
-        do_xput_M_hex(ep, mant, ep + 1 + do_cast_U(exp));
-
-      // Append a null terminator.
-      *ep = 0;
-    }
-
-    // Set the string. The internal storage is used for finite values only.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_XE(double value, bool /*single*/) noexcept
+put_XD(double value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    int sign = ::std::signbit(value) ? -1 : 0;
+    frexp frx = do_frexp2(value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Treat non-finite values and zeroes specially.
-    if(do_check_special(bp, ep, value)) {
-      // Use the template string literal, which is immutable.
-      // Skip the minus sign if the sign bit is clear.
-      bp += do_cast_U(sign + 1);
+    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp >>= 2;
+
+    ::memcpy(this->m_stor, "-0x0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
+
+    if((frx.exp < -4) || (frx.exp >= 14)) {
+      // Write the number in scientific notation.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+      *wptr = 'p';
+      wptr += 1;
+      do_write_exp(wptr, frx.exp * 4);
+    }
+    else if(frx.exp < 0) {
+      // Write the number in plain format. The number starts with
+      // `0.` and zeroes are filled as necessary.
+      wptr += 2;
+      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
+      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, nullptr);
     }
     else {
-      // Prepend a minus sign if the number is negative.
-      if(sign)
-        *(ep++) = '-';
-
-      // Prepend the hexadecimal prefix.
-      *(ep++) = '0';
-      *(ep++) = 'x';
-
-      // Break the number down into fractional and exponential parts. This result is exact.
-      uint64_t mant;
-      int exp;
-      do_xfrexp_F_bin(mant, exp, value);
-
-      // Normalize the integral part so it is the maximum value in the range [0,16).
-      mant >>= ~exp & 3;
-      exp >>= 2;
-
-      // Write the broken-down number in scientific notation.
-      do_xput_M_hex(ep, mant, ep + 1);
-      *(ep++) = 'p';
-      do_xput_I_exp(ep, exp * 4);
-
-      // Append a null terminator.
-      *ep = 0;
+      // Write the number in plain format. A decimal point will be
+      // inserted in the middle.
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + (uint32_t) (frx.exp + 1));
     }
 
-    // Set the string. The internal storage is used for finite values only.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_DF(double value, bool single) noexcept
+put_XED(double value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    int sign = ::std::signbit(value) ? -1 : 0;
+    frexp frx = do_frexp2(value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Treat non-finite values and zeroes specially.
-    if(do_check_special(bp, ep, value)) {
-      // Use the template string literal, which is immutable.
-      // Skip the minus sign if the sign bit is clear.
-      bp += do_cast_U(sign + 1);
-    }
-    else {
-      // Prepend a minus sign if the number is negative.
-      if(sign)
-        *(ep++) = '-';
+    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp >>= 2;
 
-      // Break the number down into fractional and exponential parts. This result is approximate.
-      uint64_t mant;
-      int exp;
-      do_xfrexp_F_dec(mant, exp, value, single);
+    ::memcpy(this->m_stor, "-0x0.**", 8);
+    char* wptr = ::std::begin(this->m_stor) + 3;
 
-      // Write the broken-down number...
-      if((exp < -4) || ((single ? 9 : 17) <= exp)) {
-        // ... in scientific notation.
-        do_xput_M_dec(ep, mant, ep + 1);
-        *(ep++) = 'e';
-        do_xput_I_exp(ep, exp);
-      }
-      else if(exp < 0) {
-        // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
-        *(ep++) = '0';
-        *(ep++) = '.';
-        for_range(exp, -1, [&](int) { *(ep++) = '0';  });
-        do_xput_M_dec(ep, mant, nullptr);
-      }
-      else
-        // ... in plain format; the decimal point is inserted in the middle.
-        do_xput_M_dec(ep, mant, ep + 1 + do_cast_U(exp));
+    // Write the number in scientific notation.
+    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+    *wptr = 'p';
+    wptr += 1;
+    do_write_exp(wptr, frx.exp * 4);
 
-      // Append a null terminator.
-      *ep = 0;
-    }
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
 
-    // Set the string. The internal storage is used for finite values only.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 
 ascii_numput&
 ascii_numput::
-put_DE(double value, bool single) noexcept
+put_DD(double value) noexcept
   {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    int sign = ::std::signbit(value) ? -1 : 0;
+    frexp frx = do_frexp10(value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
 
-    // Treat non-finite values and zeroes specially.
-    if(do_check_special(bp, ep, value)) {
-      // Use the template string literal, which is immutable.
-      // Skip the minus sign if the sign bit is clear.
-      bp += do_cast_U(sign + 1);
+    ::memcpy(this->m_stor, "-0.", 4);
+    char* wptr = ::std::begin(this->m_stor) + 1;
+
+    if((frx.exp < -4) || (frx.exp >= 17)) {
+      // Write the number in scientific notation.
+      do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, wptr + 1);
+      *wptr = 'e';
+      wptr += 1;
+      do_write_exp(wptr, frx.exp);
+    }
+    else if(frx.exp < 0) {
+      // Write the number in plain format. The number starts with
+      // `0.` and zeroes are filled as necessary.
+      wptr += 2;
+      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
+      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, nullptr);
     }
     else {
-      // Prepend a minus sign if the number is negative.
-      if(sign)
-        *(ep++) = '-';
-
-      // Break the number down into fractional and exponential parts. This result is approximate.
-      uint64_t mant;
-      int exp;
-      do_xfrexp_F_dec(mant, exp, value, single);
-
-      // Write the broken-down number in scientific notation.
-      do_xput_M_dec(ep, mant, ep + 1);
-      *(ep++) = 'e';
-      do_xput_I_exp(ep, exp);
-
-      // Append a null terminator.
-      *ep = 0;
+      // Write the number in plain format. A decimal point will be
+      // inserted in the middle.
+      do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, wptr + (uint32_t) (frx.exp + 1));
     }
 
-    // Set the string. The internal storage is used for finite values only.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
+    return *this;
+  }
+
+ascii_numput&
+ascii_numput::
+put_DED(double value) noexcept
+  {
+    frexp frx = do_frexp10(value);
+    if(do_get_special_class(this->m_data, this->m_size, frx))
+      return *this;
+
+    ::memcpy(this->m_stor, "-0.", 4);
+    char* wptr = ::std::begin(this->m_stor) + 1;
+
+    // Write the number in scientific notation.
+    do_write_mantissa(wptr, frx.mant, 100000000000000000U, 10, wptr + 1);
+    *wptr = 'e';
+    wptr += 1;
+    do_write_exp(wptr, frx.exp);
+
+    ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
+    *wptr = 0;
+
+    this->m_data = this->m_stor + (1U - frx.sign);
+    this->m_size = (uint32_t) (wptr - this->m_data);
     return *this;
   }
 

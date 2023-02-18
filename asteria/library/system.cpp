@@ -360,10 +360,10 @@ std_system_uuid(Global_Context& global)
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
 
-    uint64_t x = uint64_t(ts.tv_sec) * 30518 + uint64_t(ts.tv_nsec) / 32768;
-    uint64_t y = uint32_t(::getpid());
-    uint64_t z = uint64_t((void*)&global) >> 12;
-    uint64_t w = uint64_t(prng->bump()) << 32 | prng->bump();
+    uint64_t x = (uint64_t) ts.tv_sec * 30518 + (uint32_t) ts.tv_nsec / 32768;
+    uint64_t y = (uint32_t) ::getpid();
+    uint64_t z = (uint64_t)(void*) &global >> 12;
+    uint64_t w = (uint64_t) prng->bump() << 32 | prng->bump();
 
     // Set version and variant.
     y &= 0x0FFF;
@@ -378,19 +378,19 @@ std_system_uuid(Global_Context& global)
       {
         uint32_t ch;
         for(int k = 3;  k >= 0;  --k)
-          ch = (value >> k * 4) & 0x0F,
-            *(wpos++) = static_cast<char>('0' + ch + ((9 - ch) >> 29));
+          ch = (uint32_t) (value >> k * 4) & 0x0F,
+            *(wpos++) = (char) ('0' + ch + ((9 - ch) >> 29));
       };
 
     put_hex_uint16(x >> 32);
     put_hex_uint16(x >> 16);
-    ++wpos;
+    wpos++;
     put_hex_uint16(x);
-    ++wpos;
+    wpos++;
     put_hex_uint16(y);
-    ++wpos;
+    wpos++;
     put_hex_uint16(z);
-    ++wpos;
+    wpos++;
     put_hex_uint16(w >> 32);
     put_hex_uint16(w >> 32);
     put_hex_uint16(w);
