@@ -376,13 +376,13 @@ main(void)
 #endif
 
 // These are generated data. Do not edit by hand!
-struct dec_mult
+struct decimal_multiplier
   {
     double bound;
     uint64_t mant;
     int exp2;
   }
-constexpr s_dec_mult[] =
+constexpr s_decimal_multipliers[] =
   {
     {                       0,  0x6DB4616541769502, +1134 },  // 1.0e-324
     { 0x1.8000000000000p-1073,  0x57C3811DCDF87735, +1131 },  // 1.0e-323
@@ -1149,19 +1149,19 @@ do_frexp10(double value)
     ::memcpy(&abs_value, &bits, sizeof(bits));
 
     uint32_t bpos = 1;
-    uint32_t epos = (uint32_t) ::std::size(s_dec_mult);
+    uint32_t epos = (uint32_t) ::std::size(s_decimal_multipliers);
 
     while(bpos != epos) {
       // book moves...
       uint32_t mpos = (bpos + epos) / 2;
-      if(abs_value < s_dec_mult[mpos].bound)
+      if(abs_value < s_decimal_multipliers[mpos].bound)
         epos = mpos;
       else
         bpos = mpos + 1;
     }
 
     bpos --;
-    const auto& mult = s_dec_mult[bpos];
+    const auto& mult = s_decimal_multipliers[bpos];
 
     // Raise the value to (0,0x1p53).
     bits = (uint64_t)(uint32_t) (frx.exp + mult.exp2) << 52 | frx.mant;
