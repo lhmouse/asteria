@@ -184,7 +184,7 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "integer literal too large";
 
       case compiler_status_integer_literal_inexact:
-        return "fraction as an integer literal";
+        return "integer literal yielding a fraction";
 
       case compiler_status_real_literal_overflow:
         return "real literal too large";
