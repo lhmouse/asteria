@@ -316,18 +316,15 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     // Convert the token to a literal.
     // We always parse the literal as a floating-point number.
     ::rocket::ascii_numget numg;
-    const char* bp = tstr.c_str();
-    const char* ep = bp + tstr.size();
-    if(!numg.parse_F(bp, ep))
-      throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_numeric_literal_invalid, reader.tell());
+    size_t outlen;
 
-    if(bp != ep)
+    numg.parse_D(tstr.data(), tstr.size(), &outlen);
+    if(outlen != tstr.size())
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_numeric_literal_suffix_invalid, reader.tell());
 
-    // It is cast to an integer only when `integers_as_reals` is `false` and it does not
-    // contain a radix point.
+    // It is cast to an integer only when `integers_as_reals` is `false` and
+    // it does not contain a radix point.
     if(!integers_as_reals && !has_point) {
       // Try casting the value to an `integer`.
       Token::S_integer_literal xtoken;
@@ -342,19 +339,15 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_integer_literal_inexact, reader.tell());
 
-      if(!numg)
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_numeric_literal_invalid, reader.tell());
-
       // Accept the integral value.
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
     }
     else {
       // Try casting the value to a `real`.
       Token::S_real_literal xtoken;
-      numg.cast_F(xtoken.val, -DBL_MAX, DBL_MAX);
+      numg.cast_D(xtoken.val, -DBL_MAX, DBL_MAX);
 
-      // Check for errors. Note that integer casts are never inexact.
+      // Check for errors. Note that floating-point casts are never inexact.
       if(numg.overflowed())
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_real_literal_overflow, reader.tell());
@@ -362,10 +355,6 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       if(numg.underflowed())
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_real_literal_underflow, reader.tell());
-
-      if(!numg)
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_numeric_literal_invalid, reader.tell());
 
       // Accept the real value.
       return do_push_token(tokens, reader, tlen, ::std::move(xtoken));

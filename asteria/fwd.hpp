@@ -705,7 +705,7 @@ enum Compiler_Status : uint32_t
     compiler_status_escape_sequence_incomplete                 = 1009,
     compiler_status_escape_sequence_invalid_hex                = 1010,
     compiler_status_escape_utf_code_point_invalid              = 1011,
-    compiler_status_numeric_literal_invalid                    = 1012,
+    compiler_status_reserved_1012                              = 1012,
     compiler_status_integer_literal_overflow                   = 1013,
     compiler_status_integer_literal_inexact                    = 1014,
     compiler_status_real_literal_overflow                      = 1015,

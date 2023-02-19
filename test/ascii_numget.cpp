@@ -61,21 +61,20 @@ int main()
       ::std::memcpy(&exp, &r.expected, sizeof(double));
       ::printf("--------------->   exp: %.17g\n", exp);
 
-      const char* p = r.input;
-      const char* e = p + ::std::strlen(p);
-
       ::rocket::ascii_numget numg;
-      ASTERIA_TEST_CHECK(numg.parse_F(p, e));
-      ASTERIA_TEST_CHECK(p == e);
+      size_t inlen = ::std::strlen(r.input);
+      size_t outlen;
+      ASTERIA_TEST_CHECK(numg.parse_D(r.input, inlen, &outlen));
+      ASTERIA_TEST_CHECK(outlen == inlen);
 
       double val;
-      ASTERIA_TEST_CHECK(numg.cast_F(val, -HUGE_VAL, +HUGE_VAL, false));
+      ASTERIA_TEST_CHECK(numg.cast_D(val, -HUGE_VAL, +HUGE_VAL));
       uint64_t bits;
       ::std::memcpy(&bits, &val, sizeof(double));
-      int err = static_cast<int>(bits - r.expected);
+      int err = (int) (bits - r.expected);
 
       ::printf("--------------->   got: %.17g (%+d ULP)\n\n", val, err);
       ASTERIA_TEST_CHECK(::std::abs(err) <= 1);
-      // TODO: ASTERIA_TEST_CHECK(err == 0);
+      // ASTERIA_TEST_CHECK(err == 0);
     }
   }

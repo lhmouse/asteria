@@ -177,8 +177,8 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_escape_utf_code_point_invalid:
         return "UTF code point value invalid";
 
-      case compiler_status_numeric_literal_invalid:
-        return "numeric literal invalid";
+      case compiler_status_reserved_1012:
+        return "";
 
       case compiler_status_integer_literal_overflow:
         return "integer literal too large";

@@ -703,35 +703,37 @@ Value
 std_numeric_parse(V_string text)
   {
     static constexpr char s_spaces[] = " \f\n\r\t\v";
-    auto tpos = text.find_first_not_of(s_spaces);
+    size_t tpos = text.find_first_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR(("Blank string"));
 
-    auto fbptr = text.data() + tpos;
-    auto ibptr = fbptr;
-    auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
+    V_integer ival;
+    V_real fval;
+
+    ::rocket::ascii_numget numg;
+    size_t tlen = text.find_last_not_of(s_spaces) + 1 - tpos;
+    size_t outlen;
 
     // Try parsing the string as a real number first.
-    ::rocket::ascii_numget numg;
-    if(!numg.parse_F(fbptr, eptr))
+    numg.parse_D(text.data() + tpos, tlen, &outlen);
+    if(outlen != tlen)
       ASTERIA_THROW_RUNTIME_ERROR((
           "String not convertible to a number (text `$1`)"), text);
 
-    if(fbptr != eptr)
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Non-numeric character in string (character `$1`)"), *fbptr);
-
-    V_real fval;
-    numg.cast_F(fval, -HUGE_VAL, HUGE_VAL);
+    // Cast the result to a floating-point value, ignoring overflows.
+    numg.cast_D(fval, -HUGE_VAL, HUGE_VAL);
 
     // Check whether the value fits in an integer.
-    V_integer ival;
-    if(numg.parse_I(ibptr, eptr)  // accepted?
-       && (ibptr == eptr)         // no junk character?
-       && numg.cast_I(ival, INT64_MIN, INT64_MAX))  // within range?
-      return ival;
+    numg.parse_I(text.data() + tpos, tlen, &outlen);
+    if(outlen == tlen) {
+      numg.cast_I(ival, INT64_MIN, INT64_MAX);
 
-    // Accept any underflowed or overflowed result as a real.
+      // If the result can be represented an integer, return it exact.
+      if(!numg.overflowed() && !numg.underflowed() && !numg.inexact())
+        return ival;
+    }
+
+    // ... no, so return a (maybe approximate) real number.
     return fval;
   }
 

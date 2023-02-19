@@ -1064,7 +1064,7 @@ inline
 frexp
 do_frexp2(double value)
   {
-    // Extract the biased exponent and mantissa without hidden bits.
+    // Extract the biased exponent and mantissa without the hidden bit.
     uint64_t bits;
     static_assert(sizeof(bits) == sizeof(value));
     ::memcpy(&bits, &value, sizeof(bits));
@@ -1108,7 +1108,7 @@ inline
 frexp
 do_frexp10(double value)
   {
-    // Extract the biased exponent and mantissa without hidden bits.
+    // Extract the biased exponent and mantissa without the hidden bit.
     uint64_t bits;
     static_assert(sizeof(bits) == sizeof(value));
     ::memcpy(&bits, &value, sizeof(bits));
