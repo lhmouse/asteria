@@ -145,14 +145,19 @@ using ::std::memory_order_acq_rel;
 using ::std::memory_order_seq_cst;
 
 // Utility macros
-#define ROCKET_CAR(x, ...)     x
-#define ROCKET_CDR(x, ...)     __VA_ARGS__
-#define ROCKET_CAT2(x, y)      x##y
-#define ROCKET_CAT3(x, y, z)   x##y##z
+#define ROCKET_CAR(x, ...)   x
+#define ROCKET_CDR(x, ...)   __VA_ARGS__
+#define ROCKET_CAT2(x,y)     x##y
+#define ROCKET_CAT3(x,y,z)   x##y##z
 
 #define ROCKET_STRINGIFY_NX(...)   #__VA_ARGS__
 #define ROCKET_STRINGIFY(...)      ROCKET_STRINGIFY_NX(__VA_ARGS__)
 #define ROCKET_SOURCE_LOCATION     __FILE__ ":" ROCKET_STRINGIFY(__LINE__)
+
+#define ROCKET_MUL_ADD_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_ADD_OVERFLOW(*(r),z,r))
+#define ROCKET_ADD_MUL_OVERFLOW(x,y,z,r)   (ROCKET_ADD_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
+#define ROCKET_MUL_SUB_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_SUB_OVERFLOW(*(r),z,r))
+#define ROCKET_SUB_MUL_OVERFLOW(x,y,z,r)   (ROCKET_SUB_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
 
 #define ROCKET_VOID_T(...)       typename ::std::conditional<1, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)    typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
