@@ -26,6 +26,11 @@ class ascii_numput
          this->clear();
       }
 
+    ascii_numput(const ascii_numput&) = delete;
+
+    ascii_numput&
+    operator=(const ascii_numput&) = delete;
+
   public:
     // accessors
     const char*
