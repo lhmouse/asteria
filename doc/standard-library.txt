@@ -1336,8 +1336,8 @@
 	* Returns a string converted from `value`.
 
 	* Throws an exception if `base` is neither `2` nor `10` nor `16`,
-	  or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
-	  but `ebase` is `10`.
+	  or if `ebase` is not `10` for base-10, or if `ebase` is not `2`
+	  for base -2 or base-16.
 
 `std.numeric.parse(text)`
 
@@ -1352,9 +1352,9 @@
 	  * NaNs:
 	    `[+-]?nan`
 	  * Binary (base-2):
-	    `[+-]?0[bB][01]+(\.[01]+)?([epEP][-+]?[0-9]+)?`
+	    `[+-]?0[bB][01]+(\.[01]+)?([eE][-+]?[0-9]+)?`
 	  * Hexadecimal (base-16):
-	    `[+-]?0x[0-9a-fA-F]+(\.[0-9a-fA-F]+)?([epEP][-+]?[0-9]+)?`
+	    `[+-]?0x[0-9a-fA-F]+(\.[0-9a-fA-F]+)?([pP][-+]?[0-9]+)?`
 	  * Decimal (base-10):
 	    `[+-]?[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?`
 

@@ -634,47 +634,69 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
 V_string
 std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
   {
+    V_string text;
     ::rocket::ascii_numput nump;
+
     switch(base.value_or(10)) {
-      case 2:
-        if(!ebase)
-          nump.put_BD(value);  // binary, double
-        else if(*ebase == 2)
-          nump.put_BED(value);  // binary, scientific, double
-        else
-          ASTERIA_THROW_RUNTIME_ERROR((
-               "Invalid exponent base for binary notation (`$1` is not 2)"),
-                 *ebase);
-        break;
+      case 2: {
+        if(!ebase) {
+          nump.put_BD(value);  // binary, float
+          text.append(nump.begin(), nump.end());
+          break;
+        }
 
-      case 16:
-        if(!ebase)
-          nump.put_XD(value);  // hexadecimal, double
-        else if(*ebase == 2)
-          nump.put_XED(value);  // hexadecimal, scientific, double
-        else
-          ASTERIA_THROW_RUNTIME_ERROR((
-               "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
-                 *ebase);
-        break;
+        if(*ebase == 2) {
+          nump.put_BED(value);  // binary, scientific
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for binary notation (`$1` is not 2)"),
+            *ebase);
+      }
 
-      case 10:
-        if(!ebase)
-          nump.put_DD(value);  // decimal, double
-        else if(*ebase == 10)
-          nump.put_DED(value);  // decimal, scientific, double
-        else
-          ASTERIA_THROW_RUNTIME_ERROR((
-               "Invalid exponent base for decimal notation (`$1` is not 10)"),
-                 *ebase);
-        break;
+      case 16: {
+        if(!ebase) {
+          nump.put_XD(value);  // hexadecimal, float
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+
+        if(*ebase == 2) {
+          nump.put_XED(value);  // hexadecimal, scientific
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
+            *ebase);
+      }
+
+      case 10: {
+        if(!ebase) {
+          nump.put_DD(value);  // decimal, float
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+
+        if(*ebase == 10) {
+          nump.put_DED(value);  // decimal, scientific
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Invalid exponent base for decimal notation (`$1` is not 10)"),
+            *ebase);
+      }
 
       default:
         ASTERIA_THROW_RUNTIME_ERROR((
-             "Invalid number base (base `$1` is not one of { 2, 10, 16 })"),
-               *base);
+            "Invalid number base (base `$1` is not one of { 2, 10, 16 })"),
+            *base);
     }
-    return V_string(nump.begin(), nump.end());
+    return text;
   }
 
 Value
