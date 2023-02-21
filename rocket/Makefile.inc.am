@@ -79,4 +79,10 @@ lib_librocket_la_SOURCES =  \
   %reldir%/prehashed_string.cpp  \
   ${END}
 
+lib_librocket_la_CXXFLAGS = ${AM_CXXFLAGS}
 lib_librocket_la_LDFLAGS =
+
+if enable_pch
+lib_librocket_la_CXXFLAGS += -include %reldir%/../asteria/precompiled.xipp
+BUILT_SOURCES += %reldir%/../asteria/precompiled.xipp
+endif
