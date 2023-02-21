@@ -100,6 +100,7 @@ using ::rocket::end;
 using ::rocket::xswap;
 using ::rocket::swap;
 using ::rocket::size;
+using ::rocket::ssize;
 using ::rocket::static_pointer_cast;
 using ::rocket::dynamic_pointer_cast;
 using ::rocket::const_pointer_cast;

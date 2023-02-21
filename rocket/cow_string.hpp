@@ -124,7 +124,7 @@ sref(const charT* ptr) noexcept
 template<typename charT>
 constexpr
 basic_shallow_string<charT, char_traits<charT>>
-sref(const charT* ptr, ::std::size_t len) noexcept
+sref(const charT* ptr, size_t len) noexcept
   {
     return basic_shallow_string<charT, char_traits<charT>>(ptr, len);
   }

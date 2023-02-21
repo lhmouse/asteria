@@ -198,6 +198,22 @@ size(const elementT (&)[countT]) noexcept
     return countT;
   }
 
+template<typename containerT>
+constexpr
+decltype(static_cast<ptrdiff_t>(::std::declval<const containerT&>().size()))
+ssize(const containerT& cont) noexcept(noexcept(static_cast<ptrdiff_t>(cont.size())))
+  {
+    return static_cast<ptrdiff_t>(cont.size());
+  }
+
+template<typename elementT, size_t countT>
+constexpr
+ptrdiff_t
+ssize(const elementT (&)[countT]) noexcept
+  {
+    return static_cast<ptrdiff_t>(countT);
+  }
+
 template<typename... typesT>
 struct conjunction
   : true_type
