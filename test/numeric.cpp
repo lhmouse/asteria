@@ -397,9 +397,9 @@ int main()
         assert __isnan std.numeric.parse(" nan") == true;
         assert __isnan std.numeric.parse("+nan") == true;
         assert __isnan std.numeric.parse("-nan") == true;
-        assert catch( std.numeric.parse(" NaN") ) != null;
-        assert catch( std.numeric.parse("+NaN") ) != null;
-        assert catch( std.numeric.parse("-NaN") ) != null;
+        assert catch( std.numeric.parse(" Nan") ) != null;
+        assert catch( std.numeric.parse("+Nan") ) != null;
+        assert catch( std.numeric.parse("-Nan") ) != null;
         assert std.numeric.parse(" 0x43.21  ") == +67.12890625;
         assert std.numeric.parse("+0x43.21  ") == +67.12890625;
         assert std.numeric.parse("-0x43.21  ") == -67.12890625;
