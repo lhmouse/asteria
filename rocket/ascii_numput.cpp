@@ -1075,7 +1075,7 @@ do_frexp2(double value)
     frx.exp = (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFF;
 
-    if(frx.exp == 0x7FFU) {
+    if(frx.exp == 0x7FF) {
       // This may be an infinity or a NaN.
       frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
       return frx;
@@ -1098,7 +1098,7 @@ do_frexp2(double value)
     // interpreted as `sign 0x0. mant P (1 + exp)` in C99 hexadecimal
     // floating-point notation. The most significant bit of `mant` is
     // always set.
-    frx.exp -= 0x3FF;
+    frx.exp -= 1023;
     frx.mant |= 0x10000000000000;
     frx.mant <<= 11;
     return frx;
@@ -1119,7 +1119,7 @@ do_frexp10(double value)
     frx.exp = (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFF;
 
-    if(frx.exp == 0x7FFU) {
+    if(frx.exp == 0x7FF) {
       // This may be an infinity or a NaN.
       frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
       return frx;
