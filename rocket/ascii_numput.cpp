@@ -356,10 +356,10 @@ do_print_one(int e)
     // Print the mantissa in fixed-point format.
     printf(" 0x%.16llX, ", mant);
 
-    // Print the exponent in binary.
+    // Print the binary exponent.
     printf("%+5d },", exp2);
 
-    // Print some comments.
+    // Print the decimal exponent comments.
     printf("  // 1.0e%+.3d\n", e);
   }
 
