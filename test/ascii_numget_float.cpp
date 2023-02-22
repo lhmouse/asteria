@@ -22,6 +22,8 @@ constexpr cases[] =
     { FLT_MAX,    "0x1.fffffep+127",  0, 0, 0 }, { FLT_MAX,    "3.40282347e+38", 0, 0, 1 },  // exact, max
     { 0x1p127F,   "0x1p127",          0, 0, 0 }, { 0x1p127F,   "1.70141183e+38", 0, 0, 1 },  // exact, normal
     { 1.2578125F, "0x1.42p0",         0, 0, 0 }, { 1.2578125F, "1.2578125",      0, 0, 0 },  // exact, normal
+    { 0x1.d6f346p+29F, "0x1.d6f346p+29", 0, 0, 0 }, { 0x1.d6f346p+29F, "987654321", 0, 0, 1 },  // normal
+    { 0x1.e240cap+19F, "0x1.e240cap+19", 0, 0, 0 }, { 0x1.e240cap+19F, "987654.321", 0, 0, 1 },  // normal
     { FLT_MIN,    "0x1.000001p-126",  0, 0, 1 }, { FLT_MIN,    "1.17549442e-38", 0, 0, 1 },  // truncated, min normal
     { FLT_MIN,    "0x1p-126",         0, 0, 0 }, { FLT_MIN,    "1.17549435e-38", 0, 0, 1 },  // exact, min normal
     { FLT_MIN,    "0x0.ffffffp-126",  0, 0, 1 }, { FLT_MIN,    "1.17549429e-38", 0, 0, 1 },  // ceiled, min normal
