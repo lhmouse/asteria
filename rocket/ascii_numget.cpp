@@ -945,6 +945,12 @@ parse_TB(const char* str, size_t len, size_t* outlen_opt) noexcept
     size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
     outlen = 0;
 
+    this->m_sign = 0;
+    this->m_cls = value_class_finite;
+    this->m_base = 2;
+    this->m_exp = 0;
+    this->m_more = false;
+
     if(do_subseq(rptr, eptr, "true")) {
       // `true` is treated as the integer one.
       this->m_mant = 1;
