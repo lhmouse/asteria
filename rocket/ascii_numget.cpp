@@ -1596,12 +1596,12 @@ cast_F(float& value, float min, float max) noexcept
           break;
         }
 
-        int exp = (int) this->m_exp;
-        uint32_t bits = (uint32_t) this->m_mant;
-
         // Align the mantissa to the left, so its MSB is non-zero.
-        int sh = ROCKET_LZCNT32(bits);
-        bits <<= sh;
+        int exp = (int) this->m_exp;
+        int sh = ROCKET_LZCNT64(this->m_mant);
+        uint32_t bits = (uint32_t) (this->m_mant << sh);  // lower
+        this->m_inxct |= bits != 0;
+        bits = (uint32_t) ((this->m_mant << sh) >> 32) | (bits >> 31); // upper
 
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
@@ -1631,7 +1631,7 @@ cast_F(float& value, float min, float max) noexcept
         }
 
         // Get the biased base-2 exponent.
-        exp = exp - sh + 158;
+        exp = exp - sh + 190;
 
         if(ROCKET_EXPECT(exp >= 1)) {
           // This value is at least normal, so round the mantissa.
@@ -1779,12 +1779,10 @@ cast_D(double& value, double min, double max) noexcept
           break;
         }
 
-        int exp = (int) this->m_exp;
-        uint64_t bits = this->m_mant;
-
         // Align the mantissa to the left, so its MSB is non-zero.
-        int sh = ROCKET_LZCNT64(bits);
-        bits <<= sh;
+        int exp = (int) this->m_exp;
+        int sh = ROCKET_LZCNT64(this->m_mant);
+        uint64_t bits = this->m_mant << sh;
 
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
