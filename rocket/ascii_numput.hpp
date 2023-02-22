@@ -10,20 +10,23 @@ namespace rocket {
 class ascii_numput
   {
   private:
-    // These pointers may point to static, immutable storage.
-    const char* m_data;
-    uint32_t m_size;
+    // Configuration
+    char m_rdxp = '.';
 
     // This storage must be sufficient for the longest result, which
     // at the moment is signed 64-bit integer in binary (`-0b111...1`
     // takes 68 bytes along with the null terminator).
-    char m_stor[72];
+    char m_stor[71];
+
+    // These pointers may point to static, immutable storage.
+    const char* m_data;
+    uint32_t m_size;
 
   public:
     // Initializes an empty string.
     ascii_numput() noexcept
       {
-         this->clear();
+        this->clear();
       }
 
     ascii_numput(const ascii_numput&) = delete;
@@ -59,6 +62,18 @@ class ascii_numput
         this->m_data = this->m_stor;
         this->m_size = 0;
         this->m_stor[0] = 0;
+        return *this;
+      }
+
+    // Gets and sets the radix point.
+    char
+    radix_point() const noexcept
+      { return this->m_rdxp;  }
+
+    ascii_numput&
+    set_radix_point(char rdxp) noexcept
+      {
+        this->m_rdxp = rdxp;
         return *this;
       }
 

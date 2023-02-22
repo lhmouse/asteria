@@ -1266,7 +1266,7 @@ do_frexp10(double value)
 
 ROCKET_ALWAYS_INLINE
 uint32_t
-do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxp_opt)
+do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxpp_opt)
   {
     uint64_t reg = mant;
     uint32_t len = 0;
@@ -1277,9 +1277,8 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       reg %= divisor;
       reg *= base;
 
-      if(wptr == rdxp_opt) {
-        // Insert a radix point before this digit.
-        *wptr = '.';
+      if(wptr == rdxpp_opt) {
+        // Skip the radix point which is set by the caller.
         wptr ++;
         len ++;
       }
@@ -1289,9 +1288,9 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       len ++;
     }
 
-    while(rdxp_opt && (wptr < rdxp_opt)) {
-      // Append zeroes up to `rdxp_opt`, but don't write a radix
-      // point there.
+    while(rdxpp_opt && (wptr < rdxpp_opt)) {
+      // Append zeroes up to `rdxp_opt`. The string will end there so
+      // don't write a radix point.
       *wptr = '0';
       wptr ++;
       len ++;
@@ -1500,7 +1499,9 @@ put_BF(float value) noexcept
 
     if((frx.exp < -4) || (frx.exp >= 24)) {
       // Write the number in scientific notation.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+      char* rdxpp = wptr + 1;
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1516,7 +1517,9 @@ put_BF(float value) noexcept
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + (uint32_t) (frx.exp + 1));
+      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1539,7 +1542,9 @@ put_BEF(float value) noexcept
     char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
-    do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+    char* rdxpp = wptr + 1;
+    *rdxpp = this->m_rdxp;
+    do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
@@ -1568,7 +1573,9 @@ put_XF(float value) noexcept
 
     if((frx.exp < -4) || (frx.exp >= 6)) {
       // Write the number in scientific notation.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+      char* rdxpp = wptr + 1;
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp * 4);
@@ -1584,7 +1591,9 @@ put_XF(float value) noexcept
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + (uint32_t) (frx.exp + 1));
+      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1610,7 +1619,9 @@ put_XEF(float value) noexcept
     char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
-    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+    char* rdxpp = wptr + 1;
+    *rdxpp = this->m_rdxp;
+    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp * 4);
@@ -1640,7 +1651,9 @@ put_DF(float value) noexcept
 
     if((frx.exp < -4) || (frx.exp >= 9)) {
       // Write the number in scientific notation.
-      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, wptr + 1);
+      char* rdxpp = wptr + 1;
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1656,7 +1669,9 @@ put_DF(float value) noexcept
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, wptr + (uint32_t) (frx.exp + 1));
+      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1683,7 +1698,9 @@ put_DEF(float value) noexcept
     char* wptr = ::std::begin(this->m_stor) + 1;
 
     // Write the number in scientific notation.
-    do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, wptr + 1);
+    char* rdxpp = wptr + 1;
+    *rdxpp = this->m_rdxp;
+    do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
@@ -1709,7 +1726,9 @@ put_BD(double value) noexcept
 
     if((frx.exp < -4) || (frx.exp >= 53)) {
       // Write the number in scientific notation.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+      char* rdxpp = wptr + 1;
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1725,7 +1744,9 @@ put_BD(double value) noexcept
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + (uint32_t) (frx.exp + 1));
+      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1748,7 +1769,9 @@ put_BED(double value) noexcept
     char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
-    do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, wptr + 1);
+    char* rdxpp = wptr + 1;
+    *rdxpp = this->m_rdxp;
+    do_write_mantissa(wptr, frx.mant, 1ULL << 63, 2, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
@@ -1777,7 +1800,9 @@ put_XD(double value) noexcept
 
     if((frx.exp < -4) || (frx.exp >= 14)) {
       // Write the number in scientific notation.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+      char* rdxpp = wptr + 1;
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp * 4);
@@ -1793,7 +1818,9 @@ put_XD(double value) noexcept
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + (uint32_t) (frx.exp + 1));
+      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1819,7 +1846,9 @@ put_XED(double value) noexcept
     char* wptr = ::std::begin(this->m_stor) + 3;
 
     // Write the number in scientific notation.
-    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, wptr + 1);
+    char* rdxpp = wptr + 1;
+    *rdxpp = this->m_rdxp;
+    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp * 4);
@@ -1845,7 +1874,9 @@ put_DD(double value) noexcept
 
     if((frx.exp < -4) || (frx.exp >= 17)) {
       // Write the number in scientific notation.
-      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, wptr + 1);
+      char* rdxpp = wptr + 1;
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1861,7 +1892,9 @@ put_DD(double value) noexcept
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
-      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, wptr + (uint32_t) (frx.exp + 1));
+      char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
+      *rdxpp = this->m_rdxp;
+      do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1884,7 +1917,9 @@ put_DED(double value) noexcept
     char* wptr = ::std::begin(this->m_stor) + 1;
 
     // Write the number in scientific notation.
-    do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, wptr + 1);
+    char* rdxpp = wptr + 1;
+    *rdxpp = this->m_rdxp;
+    do_write_mantissa(wptr, frx.mant, 100000000000000000, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
     do_write_exp(wptr, frx.exp);

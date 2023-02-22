@@ -10,21 +10,22 @@ namespace rocket {
 class ascii_numget
   {
   private:
-    // Parsing results
-    int64_t m_exp;
-    uint64_t m_mant;
-
-    bool m_sign;
-    uint8_t m_cls;
-    uint8_t m_base;
-    bool m_more;
+    // Configuration
+    char m_rdxp = '.';
 
     // Casting results
     bool m_ovfl;  // out of range; MSB lost
     bool m_udfl;  // too small; truncated to zero
     bool m_inxct;  // LSB lost
 
-    uint8_t m_reserved;
+    // Parsing results
+    bool m_sign;
+    uint8_t m_cls;
+    uint8_t m_base;
+    bool m_more;
+
+    int64_t m_exp;
+    uint64_t m_mant;
 
   public:
     // Initializes the value zero.
@@ -65,12 +66,21 @@ class ascii_numget
         this->m_exp = 0;
         this->m_mant = 0;
         this->m_more = false;
-
         this->m_ovfl = false;
         this->m_udfl = false;
         this->m_inxct = false;
+        return *this;
+      }
 
-        this->m_reserved = 0;
+    // Gets and sets the radix point.
+    char
+    radix_point() const noexcept
+      { return this->m_rdxp;  }
+
+    ascii_numget&
+    set_radix_point(char rdxp) noexcept
+      {
+        this->m_rdxp = rdxp;
         return *this;
       }
 

@@ -98,7 +98,7 @@ constexpr int8_t s_digit_values[256] =
 
 inline
 xuint
-do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, bool allow_point)
+do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, int rdxp)
   {
     xuint xu;
     xu.exp = 0;
@@ -112,12 +112,8 @@ do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, bool allow
     uint64_t next_mant;
 
     while(rptr != eptr) {
-      // Check the next character.
-      if(*rptr == '.') {
-        if(!allow_point || xu.has_point)
-          break;
-
-        // Accept this radix point.
+      // The significand part allows digits with at most one radix point.
+      if(!xu.has_point && ((uint8_t) *rptr == rdxp)) {
         rptr ++;
         xu.has_point = true;
         continue;
@@ -136,8 +132,6 @@ do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, bool allow
         mant_ovfl = ROCKET_MUL_ADD_OVERFLOW(xu.mant, base, digit, &next_mant);
 
       if(mant_ovfl) {
-        // No more digit can be pushed into `mant`, so bump `exp` instead.
-        // If the dropped digit is non-zero, turn on the `more` flag.
         xu.exp ++;
         xu.more |= digit != 0;
       }
@@ -173,7 +167,7 @@ do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, bool allow
     int64_t exp_orig = xu.exp;
 
     while(rptr != eptr) {
-      // Check whether it is a digit.
+      // The exponent part only allows decimal digits.
       uint32_t digit = (uint32_t) s_digit_values[(uint8_t) *rptr];
       if(digit >= 10)
         break;
@@ -983,7 +977,7 @@ parse_BU(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 2, false);
+    xuint xu = do_collect_digits(rptr, eptr, 2, -1);
     if(!xu.valid)
       return *this;
 
@@ -1014,7 +1008,7 @@ parse_XU(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 16, false);
+    xuint xu = do_collect_digits(rptr, eptr, 16, -1);
     if(!xu.valid)
       return *this;
 
@@ -1043,7 +1037,7 @@ parse_DU(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 10, false);
+    xuint xu = do_collect_digits(rptr, eptr, 10, -1);
     if(!xu.valid)
       return *this;
 
@@ -1074,7 +1068,7 @@ parse_BI(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 2, false);
+    xuint xu = do_collect_digits(rptr, eptr, 2, -1);
     if(!xu.valid)
       return *this;
 
@@ -1105,7 +1099,7 @@ parse_XI(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 16, false);
+    xuint xu = do_collect_digits(rptr, eptr, 16, -1);
     if(!xu.valid)
       return *this;
 
@@ -1134,7 +1128,7 @@ parse_DI(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 10, false);
+    xuint xu = do_collect_digits(rptr, eptr, 10, -1);
     if(!xu.valid)
       return *this;
 
@@ -1171,7 +1165,7 @@ parse_BD(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 2, true);
+    xuint xu = do_collect_digits(rptr, eptr, 2, this->m_rdxp);
     if(!xu.valid)
       return *this;
 
@@ -1208,7 +1202,7 @@ parse_XD(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 16, true);
+    xuint xu = do_collect_digits(rptr, eptr, 16, this->m_rdxp);
     if(!xu.valid)
       return *this;
 
@@ -1243,7 +1237,7 @@ parse_DD(const char* str, size_t len, size_t* outlen_opt) noexcept
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
-    xuint xu = do_collect_digits(rptr, eptr, 10, true);
+    xuint xu = do_collect_digits(rptr, eptr, 10, this->m_rdxp);
     if(!xu.valid)
       return *this;
 
