@@ -1786,8 +1786,8 @@ cast_D(double& value, double min, double max) noexcept
 
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
-          //   `exp10 = FLOOR(exp2 * LOG2)` where `LOG2 = 0.30102999`
-          constexpr int exp_min = s_decimal_multipliers[0].exp2 * 30102999LL / 100000000LL - 1;
+          //   `exp10 = TRUNC((exp2 - 1) * LOG2)` where `LOG2 = 0.30103`
+          constexpr int exp_min = (s_decimal_multipliers[0].exp2 - 1) * 30103LL / 100000LL;
 
           if(exp < exp_min) {
             this->m_udfl = true;

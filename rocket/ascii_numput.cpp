@@ -1254,9 +1254,13 @@ do_frexp10(double value)
       bpos ++;
     }
 
-    // Return the mantissa and exponent.
+    // Convert the base-2 exponent to a base-10 exponent.
+    //   `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
+    constexpr int exp_min = ((s_decimal_multipliers[0].exp2 - 57) * 30103LL + 50000LL) / 100000LL;
+
+    // Return the mantissa and base-10 exponent.
     frx.mant = bits;
-    frx.exp = (int) bpos - 324;
+    frx.exp = (int) bpos - exp_min;
     return frx;
   }
 
