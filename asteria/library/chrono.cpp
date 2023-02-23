@@ -88,8 +88,9 @@ std_chrono_now()
 V_string
 std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_offset)
   {
-    uint32_t gmtoff_neg = 0, gmtoff_abs = 0;
     uint32_t year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0, ms = 0;
+    int gmtoff_sign = 0;
+    uint32_t gmtoff_abs = 0;
 
     if(time_point < 0) {
       // min
@@ -105,14 +106,13 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
     }
     else {
       // Break the time point down.
-      ::time_t tp = (::time_t) ((uint64_t) time_point / 1000);
-      ms = (uint32_t) ((uint64_t) time_point % 1000);
       ::tm tr;
 
       if(!utc_offset) {
         // Obtain GMT offset from the system.
+        ::time_t tp = (::time_t) ((uint64_t) time_point / 1000);
         ::localtime_r(&tp, &tr);
-        gmtoff_neg = tr.tm_gmtoff < 0;
+        gmtoff_sign = (int) (tr.tm_gmtoff >> 31 | 1);
         gmtoff_abs = (uint32_t) ::std::abs(tr.tm_gmtoff) / 60;
       }
       else {
@@ -122,9 +122,9 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
               "UTC time offset out of range (`$1` exceeds 1440 minutes)"),
               utc_offset);
 
-        tp += (::time_t) *utc_offset * 60;
+        ::time_t tp = (::time_t) ((uint64_t) time_point / 1000) + (::time_t) *utc_offset * 60;
         ::gmtime_r(&tp, &tr);
-        gmtoff_neg = *utc_offset < 0;
+        gmtoff_sign = (int) (*utc_offset >> 63 | 1);
         gmtoff_abs = (uint32_t) ::std::abs(*utc_offset);
       }
 
@@ -134,6 +134,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
       hour = (uint32_t) tr.tm_hour;
       min = (uint32_t) tr.tm_min;
       sec = (uint32_t) tr.tm_sec;
+      ms = (uint32_t) ((uint64_t) time_point % 1000);
     }
 
     // Make the string from decomposed parts.
@@ -167,11 +168,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
     }
     else {
       // numeric
-      if(!gmtoff_neg)
-        do_mempcpy(wptr, " +", 2);
-      else
-        do_mempcpy(wptr, " -", 2);
-
+      do_mempcpy(wptr, " +\0 -" + (gmtoff_sign >> 1 & 3), 2);
       do_mempcpy(wptr, s_2digit[gmtoff_abs / 60], 2);
       do_mempcpy(wptr, ":", 1);
       do_mempcpy(wptr, s_2digit[gmtoff_abs % 60], 2);
@@ -183,13 +180,13 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
 V_integer
 std_chrono_parse(V_string time_str)
   {
-    uint32_t gmtoff_neg = 0, gmtoff_abs = 0;
     uint32_t year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0, ms = 0;
+    int gmtoff_sign = 0;
+    uint32_t gmtoff_abs = 0;
 
     // Collect date/time parts.
     const char* rptr = time_str.c_str();
     const char* eptr = rptr + time_str.length();
-    bool has_tz = false;
 
     while(*rptr == ' ')
       rptr ++;
@@ -221,16 +218,16 @@ std_chrono_parse(V_string time_str)
 
     if(rptr && (*rptr == ' ')) {
       rptr ++;
+
       if((eptr - rptr >= 3) && ((::memcmp(rptr, "GMT", 3) == 0) || (::memcmp(rptr, "UTC", 3) == 0))) {
         // UTC
         rptr += 3;
-        has_tz = true;
+        gmtoff_sign = 1;
       }
       else if((eptr - rptr >= 1) && ((*rptr == '+') || (*rptr == '-'))) {
         // Use the given GMT offset.
-        gmtoff_neg = *rptr == '-';
+        gmtoff_sign = -(uint8_t) (*rptr - '+') >> 8 | 1;
         rptr += 1;
-        has_tz = true;
 
         do_match(rptr, gmtoff_abs, s_2digit, 2);
         gmtoff_abs *= 60;
@@ -251,7 +248,8 @@ std_chrono_parse(V_string time_str)
           time_str);
 
     // Assembly parts.
-    ::time_t tp;
+    int64_t time_point = ms;
+
     ::tm tr;
     tr.tm_year = (int) year - 1900;
     tr.tm_mon = (int) mon - 1;
@@ -260,23 +258,18 @@ std_chrono_parse(V_string time_str)
     tr.tm_min = (int) min;
     tr.tm_sec = (int) sec;
 
-    if(!has_tz) {
-      // Use local time.
+    if(gmtoff_sign == 0) {
+      // Obtain GMT offset from the system.
       tr.tm_isdst = -1;
-      tp = ::mktime(&tr);
+      time_point += (int64_t) ::mktime(&tr) * 1000;
     }
     else {
       // Use the given GMT offset.
       tr.tm_isdst = 0;
-      tp = ::timegm(&tr);
-
-      if(!gmtoff_neg)
-        tp -= (::time_t) gmtoff_abs * 60;
-      else
-        tp += (::time_t) gmtoff_abs * 60;
+      time_point += (int64_t) ::timegm(&tr) * 1000;
+      time_point -= gmtoff_sign * (int32_t) gmtoff_abs * 60000;
     }
 
-    int64_t time_point = (int64_t) tp * 1000 + ms;
     if(time_point < 0)
       return 0;
     else if(time_point > 253370764800000)
