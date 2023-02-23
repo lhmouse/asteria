@@ -10,17 +10,7 @@
 namespace asteria {
 namespace {
 
-constexpr int64_t s_timestamp_min = -11644473600'000;
-constexpr int64_t s_timestamp_max = 253370764800'000;
-
-constexpr char s_strings_min[][24] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
-constexpr char s_strings_max[][24] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
-
-constexpr int64_t s_timestamp_1600_03_01 = -11670912000'000;
-constexpr uint8_t s_month_days[] = { 31,30,31,30,31,31,30,31,30,31,31,29 };  // from March
-constexpr char s_spaces[] = " \f\n\r\t\v";
-
-constexpr char s_nums_00_99[100][2] =
+constexpr char s_2digit[100][2] =
   {
     '0','0','0','1','0','2','0','3','0','4','0','5','0','6','0','7','0','8','0','9',
     '1','0','1','1','1','2','1','3','1','4','1','5','1','6','1','7','1','8','1','9',
@@ -36,472 +26,326 @@ constexpr char s_nums_00_99[100][2] =
 
 inline
 void
-do_put_00_99(cow_string::iterator wpos, uint64_t value)
+do_mempcpy(char*& wptr_out, const char* cstr, size_t len)
   {
-    ROCKET_ASSERT(value <= 99);
-    for(long k = 0;  k != 2;  ++k)
-      wpos[k] = s_nums_00_99[value][k];
+    ::memcpy(wptr_out, cstr, len);
+    wptr_out += len;
   }
 
 inline
 bool
-do_get_integer(cow_string::const_iterator& rpos, cow_string::const_iterator epos,
-               uint64_t& value, uint64_t lim_lo, uint64_t lim_hi)
+do_match(const char*& rptr_out, const char* cstr, size_t len)
   {
-    value = 0;
-    ptrdiff_t ndigits = 0;
-
-    // Parse an integer. Leading whitespace is ignored.
-    while(rpos != epos) {
-      uint32_t ch = *rpos & 0xFF;
-      if((ch == ' ') && (ndigits == 0)) {
-        ++rpos;
-        continue;
-      }
-
-      // Check for a digit.
-      uint32_t dval = ch - '0';
-      if(dval > 9)
-        break;
-
-      value = value * 10 + dval;
-      if(value > lim_hi)
-        return false;
-
-      ++ndigits;
-      ++rpos;
-    }
-    if(ndigits == 0)
+    // If a previous match has failed, don't do anything.
+    if(rptr_out == nullptr)
       return false;
 
-    return value >= lim_lo;
+    if(::memcmp(rptr_out, cstr, len) == 0) {
+      // A match has been found, so move the read pointer past it.
+      rptr_out += len;
+      return true;
+    }
+
+    // No match has been found, so mark this as a failure.
+    rptr_out = nullptr;
+    return false;
   }
 
+template<uint32_t N, uint32_t S>
 inline
 bool
-do_get_separator(cow_string::const_iterator& rpos, cow_string::const_iterator epos,
-                 ::std::initializer_list<uint8_t> seps)
+do_match(const char*& rptr_out, uint32_t& add_to_value, const char (&cstrs)[N][S], int limit)
   {
-    ptrdiff_t ndigits = 0;
+    // If a previous match has failed, don't do anything.
+    if(rptr_out == nullptr)
+      return false;
 
-    // Look for one of the separators. Leading whitespace is ignored.
-    while(rpos != epos) {
-      uint32_t ch = *rpos & 0xFF;
-      if(::rocket::is_any_of(ch, seps)) {
-        ++rpos;
+    for(uint32_t k = 0;  k != N;  ++k) {
+      size_t len = (limit >= 0) ? (uint32_t) limit : ::strlen(cstrs[k]);
+      if(::memcmp(rptr_out, cstrs[k], len) == 0) {
+        // A match has been found, so move the read pointer past it.
+        rptr_out += len;
+        add_to_value += k;
         return true;
       }
-
-      if((ch != ' ') || (ndigits != 0))
-        break;
-
-      ++ndigits;
-      ++rpos;
     }
+
+    // No match has been found, so mark this as a failure.
+    rptr_out = nullptr;
     return false;
   }
 
 }  // namespace
 
 V_integer
-std_chrono_utc_now()
+std_chrono_now()
   {
-    // Get UTC time from the system.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
+    return (int64_t) ts.tv_sec * 1000 + (uint32_t) ts.tv_nsec / 1000000;
+  }
 
-    // We return the time in milliseconds rather than seconds.
-    int64_t secs = (int64_t) ts.tv_sec;
-    int64_t msecs = (int64_t) ((uint32_t) ts.tv_nsec / 1000'000);
-    return secs * 1000 + msecs;
+V_string
+std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_offset)
+  {
+    uint32_t gmtoff_neg = 0, gmtoff_abs = 0;
+    uint32_t year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0, ms = 0;
+
+    if(time_point < 0) {
+      // min
+      year = 0;
+      mon = 1;
+      day = 1;
+    }
+    else if(time_point > 253370764800000) {
+      // max
+      year = 9999;
+      mon = 1;
+      day = 1;
+    }
+    else {
+      // Break the time point down.
+      ::time_t tp = (::time_t) ((uint64_t) time_point / 1000);
+      ms = (uint32_t) ((uint64_t) time_point % 1000);
+      ::tm tr;
+
+      if(!utc_offset) {
+        // Obtain GMT offset from the system.
+        ::localtime_r(&tp, &tr);
+        gmtoff_neg = tr.tm_gmtoff < 0;
+        gmtoff_abs = (uint32_t) ::std::abs(tr.tm_gmtoff) / 60;
+      }
+      else {
+        // Use the given GMT offset.
+        if((*utc_offset <= -1440) || (*utc_offset >= +1440))
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "UTC time offset out of range (`$1` exceeds 1440 minutes)"),
+              utc_offset);
+
+        tp += (::time_t) *utc_offset * 60;
+        ::gmtime_r(&tp, &tr);
+        gmtoff_neg = *utc_offset < 0;
+        gmtoff_abs = (uint32_t) ::std::abs(*utc_offset);
+      }
+
+      year = (uint32_t) tr.tm_year + 1900;
+      mon = (uint32_t) tr.tm_mon + 1;
+      day = (uint32_t) tr.tm_mday;
+      hour = (uint32_t) tr.tm_hour;
+      min = (uint32_t) tr.tm_min;
+      sec = (uint32_t) tr.tm_sec;
+    }
+
+    // Make the string from decomposed parts.
+    char time_str[64];
+    char* wptr = time_str;
+
+    do_mempcpy(wptr, s_2digit[year / 100], 2);
+    do_mempcpy(wptr, s_2digit[year % 100], 2);
+    do_mempcpy(wptr, "-", 1);
+    do_mempcpy(wptr, s_2digit[mon], 2);
+    do_mempcpy(wptr, "-", 1);
+    do_mempcpy(wptr, s_2digit[day], 2);
+    do_mempcpy(wptr, " ", 1);
+    do_mempcpy(wptr, s_2digit[hour], 2);
+    do_mempcpy(wptr, ":", 1);
+    do_mempcpy(wptr, s_2digit[min], 2);
+    do_mempcpy(wptr, ":", 1);
+    do_mempcpy(wptr, s_2digit[sec], 2);
+
+    if(with_ms == true) {
+      // Output four digits, then overwrite the first one with
+      // a decimal point.
+      do_mempcpy(wptr, s_2digit[ms / 100], 2);
+      wptr[-2] = '.';
+      do_mempcpy(wptr, s_2digit[ms % 100], 2);
+    }
+
+    if(gmtoff_abs == 0) {
+      // UTC (or conventionally, GMT)
+      do_mempcpy(wptr, " UTC", 4);
+    }
+    else {
+      // numeric
+      if(!gmtoff_neg)
+        do_mempcpy(wptr, " +", 2);
+      else
+        do_mempcpy(wptr, " -", 2);
+
+      do_mempcpy(wptr, s_2digit[gmtoff_abs / 60], 2);
+      do_mempcpy(wptr, ":", 1);
+      do_mempcpy(wptr, s_2digit[gmtoff_abs % 60], 2);
+    }
+
+    return cow_string(time_str, wptr);
   }
 
 V_integer
-std_chrono_local_now()
+std_chrono_parse(V_string time_str)
   {
-    // Get local time and GMT offset from the system.
-    ::timespec ts;
-    ::clock_gettime(CLOCK_REALTIME, &ts);
-    ::tm tr;
-    ::localtime_r(&(ts.tv_sec), &tr);
+    uint32_t gmtoff_neg = 0, gmtoff_abs = 0;
+    uint32_t year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0, ms = 0;
 
-    // We return the time in milliseconds rather than seconds.
-    int64_t secs = (int64_t) (ts.tv_sec + tr.tm_gmtoff);
-    int64_t msecs = (int64_t) ((uint32_t) ts.tv_nsec / 1000'000);
-    return secs * 1000 + msecs;
+    // Collect date/time parts.
+    const char* rptr = time_str.c_str();
+    const char* eptr = rptr + time_str.length();
+    bool has_tz = false;
+
+    while(*rptr == ' ')
+      rptr ++;
+
+    do_match(rptr, year, s_2digit, 2);
+    year *= 100;
+    do_match(rptr, year, s_2digit, 2);
+    do_match(rptr, "-", 1);
+    do_match(rptr, mon, s_2digit, 2);
+    do_match(rptr, "-", 1);
+    do_match(rptr, day, s_2digit, 2);
+    do_match(rptr, " ", 1);
+    do_match(rptr, hour, s_2digit, 2);
+    do_match(rptr, ":", 1);
+    do_match(rptr, min, s_2digit, 2);
+    do_match(rptr, ":", 1);
+    do_match(rptr, sec, s_2digit, 2);
+
+    if(rptr && (*rptr == '.')) {
+      rptr ++;
+
+      uint32_t weight = 100;
+      while((*rptr >= '0') && (*rptr <= '9')) {
+        ms += (uint8_t) (*rptr - '0') * weight;
+        rptr ++;
+        weight /= 10;
+      }
+    }
+
+    if(rptr && (*rptr == ' ')) {
+      rptr ++;
+      if((eptr - rptr >= 3) && ((::memcmp(rptr, "GMT", 3) == 0) || (::memcmp(rptr, "UTC", 3) == 0))) {
+        // UTC
+        rptr += 3;
+        has_tz = true;
+      }
+      else if((eptr - rptr >= 1) && ((*rptr == '+') || (*rptr == '-'))) {
+        // Use the given GMT offset.
+        gmtoff_neg = *rptr == '-';
+        rptr += 1;
+        has_tz = true;
+
+        do_match(rptr, gmtoff_abs, s_2digit, 2);
+        gmtoff_abs *= 60;
+
+        if(rptr && (*rptr == ':')) {
+          rptr ++;
+          do_match(rptr, gmtoff_abs, s_2digit, 2);
+        }
+      }
+    }
+
+    while(rptr && (*rptr == ' '))
+      rptr ++;
+
+    if(rptr != eptr)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Invalid date/time string `$1`"),
+          time_str);
+
+    // Assembly parts.
+    ::time_t tp;
+    ::tm tr;
+    tr.tm_year = (int) year - 1900;
+    tr.tm_mon = (int) mon - 1;
+    tr.tm_mday = (int) day;
+    tr.tm_hour = (int) hour;
+    tr.tm_min = (int) min;
+    tr.tm_sec = (int) sec;
+
+    if(!has_tz) {
+      // Use local time.
+      tr.tm_isdst = -1;
+      tp = ::mktime(&tr);
+    }
+    else {
+      // Use the given GMT offset.
+      tr.tm_isdst = 0;
+      tp = ::timegm(&tr);
+
+      if(!gmtoff_neg)
+        tp -= (::time_t) gmtoff_abs * 60;
+      else
+        tp += (::time_t) gmtoff_abs * 60;
+    }
+
+    int64_t time_point = (int64_t) tp * 1000 + ms;
+    if(time_point < 0)
+      return 0;
+    else if(time_point > 253370764800000)
+      return INT64_MAX;
+    else
+      return time_point;
   }
 
 V_real
 std_chrono_hires_now()
   {
-    // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-
-    // We return the time in milliseconds rather than seconds.
-    // Add a random offset to the result to help debugging.
-    double secs = (double) ts.tv_sec;
-    double msecs = (double) ts.tv_nsec * 0.000'001;
-    return secs * 1000 + msecs + 1234567890123;
+    return (double) ts.tv_sec * 1000 + (double) ts.tv_nsec / 1000000 + 123456789;
   }
 
 V_integer
 std_chrono_steady_now()
   {
-    // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
-
-    // We return the time in milliseconds rather than seconds.
-    // Add a random offset to the result to help debugging.
-    int64_t secs = (int64_t) ts.tv_sec;
-    int64_t msecs = (int64_t) ((uint32_t) ts.tv_nsec / 1000'000);
-    return secs * 1000 + msecs + 3210987654321;
-  }
-
-V_integer
-std_chrono_local_from_utc(V_integer time_utc)
-  {
-    // Handle special time values.
-    if(time_utc <= s_timestamp_min)
-      return INT64_MIN;
-
-    if(time_utc >= s_timestamp_max)
-      return INT64_MAX;
-
-    // Calculate the local time.
-    ::time_t tp = (::time_t) ((uint64_t) time_utc / 1000);
-    ::tm tr;
-    ::gmtime_r(&tp, &tr);
-    int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
-
-    // Ensure the value is within the range of finite values.
-    if(time_local <= s_timestamp_min)
-      return INT64_MIN;
-
-    if(time_local >= s_timestamp_max)
-      return INT64_MAX;
-
-    return time_local;
-  }
-
-V_integer
-std_chrono_utc_from_local(V_integer time_local)
-  {
-    // Handle special time values.
-    if(time_local <= s_timestamp_min)
-      return INT64_MIN;
-
-    if(time_local >= s_timestamp_max)
-      return INT64_MAX;
-
-    // Calculate the local time.
-    ::time_t tp = (::time_t) ((uint64_t) time_local / 1000);
-    ::tm tr;
-    ::localtime_r(&tp, &tr);
-    int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
-
-    // Ensure the value is within the range of finite values.
-    if(time_utc <= s_timestamp_min)
-      return INT64_MIN;
-
-    if(time_utc >= s_timestamp_max)
-      return INT64_MAX;
-
-    return time_utc;
-  }
-
-V_string
-std_chrono_format(V_integer time_point, optV_boolean with_ms)
-  {
-    // No millisecond part is added by default.
-    bool pms = with_ms.value_or(false);
-    // Handle special time points.
-    if(time_point <= s_timestamp_min)
-      return sref(s_strings_min[pms]);
-
-    if(time_point >= s_timestamp_max)
-      return sref(s_strings_max[pms]);
-
-    // Convert the timestamp to the number of milliseconds since 1600-03-01.
-    uint64_t temp = (uint64_t) (time_point - s_timestamp_1600_03_01);
-
-    // Get subday parts.
-    uint64_t msec = temp % 1000;
-    temp /= 1000;
-    uint64_t sec = temp % 60;
-    temp /= 60;
-    uint64_t min = temp % 60;
-    temp /= 60;
-    uint64_t hour = temp % 24;
-    temp /= 24;
-
-    // There are 146097 days in every 400 years.
-    uint64_t y400 = temp / 146097;
-    temp %= 146097;
-    // There are 36524 days in every 100 years.
-    uint64_t y100 = temp / 36524;
-    temp %= 36524;
-    if(y100 == 4) {  // leap
-      y100 = 3;
-      temp = 36524;
-    }
-    // There are 1461 days in every 4 years.
-    uint64_t y4 = temp / 1461;
-    temp %= 1461;
-
-    // There are 365 days in every year.
-    // Note we count from 03-01. The extra day of a leap year will be appended to the end.
-    uint64_t year = temp / 365;
-    temp %= 365;
-    if(year == 4) {  // leap
-      year = 3;
-      temp = 365;
-    }
-    // Sum them up to get the number of years.
-    year += y400 * 400;
-    year += y100 * 100;
-    year += y4   *   4;
-    year += 1600;
-
-    // Calculate the shifted month index, which counts from March.
-    uint32_t mday_max;
-    size_t mon_sh = 0;
-    while(temp >= (mday_max = s_month_days[mon_sh])) {
-      temp -= mday_max;
-      mon_sh += 1;
-    }
-    uint64_t month = (mon_sh + 2) % 12 + 1;
-    // Note our 'years' start from March.
-    if(month < 3) {
-      year += 1;
-    }
-    if(year > 9999) {
-      year = 9999;
-    }
-    // `temp` now contains the number of days in the last month.
-    uint64_t mday = temp + 1;
-
-    // Format it now.
-    cow_string time_str;
-    auto wpos = time_str.insert(time_str.begin(), s_strings_max[pms]);
-
-    do_put_00_99(wpos +  0, year / 100);
-    do_put_00_99(wpos +  2, year % 100);
-    do_put_00_99(wpos +  5, month);
-    do_put_00_99(wpos +  8, mday);
-    do_put_00_99(wpos + 11, hour);
-    do_put_00_99(wpos + 14, min);
-    do_put_00_99(wpos + 17, sec);
-
-    if(pms) {
-      do_put_00_99(wpos + 20, msec / 10);
-      wpos[22] = (char) ('0' + msec % 10);
-    }
-    return time_str;
-  }
-
-V_integer
-std_chrono_utc_parse(V_string time_str)
-  {
-    // Trim leading and trailing spaces. Fail if the string becomes empty.
-    size_t off = time_str.find_first_not_of(s_spaces);
-    if(off == V_string::npos)
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Blank time string"));
-
-    // Get the start and end of the non-empty sequence.
-    auto rpos = time_str.begin() + (ptrdiff_t) off;
-    off = time_str.find_last_not_of(s_spaces) + 1;
-    const auto epos = time_str.begin() + (ptrdiff_t) off;
-
-    // Parse individual parts.
-    uint64_t year = 0;
-    uint64_t month = 0;
-    uint64_t mday = 0;
-    uint64_t hour = 0;
-    uint64_t min = 0;
-    uint64_t sec = 0;
-    uint64_t msec = 0;
-
-    // Parse the year.
-    if(!do_get_integer(rpos, epos, year, 0, 9999))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid date-time string (expecting year in `$1`)"),
-          time_str);
-
-    if(!do_get_separator(rpos, epos, { '-', '/' }))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid date-time string (expecting year-month separator in `$1`)"),
-          time_str);
-
-    // Parse the month.
-    if(!do_get_integer(rpos, epos, month, 1, 12))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid date-time string (expecting month in `$1`)"),
-          time_str);
-
-    if(!do_get_separator(rpos, epos, { '-', '/' }))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid date-time string (expecting month-day separator in `$1`)"),
-          time_str);
-
-    // Get the maximum value of the day of month.
-    uint32_t mday_max;
-    size_t mon_sh = ((size_t) month + 9) % 12;
-    if(mon_sh != 11) {
-      mday_max = s_month_days[mon_sh];
-    }
-    else {
-      mday_max = 28;
-      if((year % 100 == 0) ? (year % 400 == 0) : (year % 4 == 0))
-        mday_max += 1;
-    }
-    // Parse the day of month as at most two digits.
-    if(!do_get_integer(rpos, epos, mday, 1, mday_max))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid date-time string (expecting day of month in `$1`)"),
-          time_str);
-
-    // Parse the day-hour separator, which may be a space or the letter `T`.
-    // The subday part is optional.
-    if(do_get_separator(rpos, epos, { ' ', '\t', 'T' })) {
-      // Parse the number of hours.
-      if(!do_get_integer(rpos, epos, hour, 0, 23))
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Invalid date-time string (expecting hours in `$1`)"),
-            time_str);
-
-      if(!do_get_separator(rpos, epos, { ':' }))
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Invalid date-time string (expecting hour-minute separator in `$1`)"),
-            time_str);
-
-      // Parse the number of minutes.
-      if(!do_get_integer(rpos, epos, min, 0, 59))
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Invalid date-time string (expecting minutes in `$1`)"),
-            time_str);
-
-      if(!do_get_separator(rpos, epos, { ':' }))
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Invalid date-time string (expecting minute-second separator in `$1`)"),
-            time_str);
-
-      // Parse the number of seconds.
-      // Note leap seconds.
-      if(!do_get_integer(rpos, epos, sec, 0, 60))
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Invalid date-time string (expecting seconds in `$1`)"),
-            time_str);
-
-      // Parse the second-subsecond separator, which may be a point or a comma.
-      // The subsecond part is optional.
-      if(do_get_separator(rpos, epos, { '.', ',' })) {
-        // Parse at most three digits. Excess digits are ignored.
-        uint32_t weight = 100;
-
-        // Parse an integer. Leading whitespace is ignored.
-        while(rpos != epos) {
-          uint32_t ch = *rpos & 0xFF;
-          if((ch == ' ') && (weight == 100)) {
-            ++rpos;
-            continue;
-          }
-
-          // Check for a digit.
-          uint64_t dval = ch - '0';
-          if(dval > 9)
-            ASTERIA_THROW_RUNTIME_ERROR((
-                "Invalid date-time string (invalid subsecond digit in `$1`)"),
-                time_str);
-
-          msec += dval * weight;
-          weight /= 10;
-          ++rpos;
-        }
-      }
-    }
-
-    // Ensure all characters have been consumed.
-    if(rpos != epos)
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid date-time string (excess characters in `$1`)"),
-          time_str);
-
-    // Handle special time values.
-    if(year <= 1600)
-      return INT64_MIN;
-
-    if(year >= 9999)
-      return INT64_MAX;
-
-    // Calculate the number of days since 1600-03-01.
-    // Note our 'years' start from March.
-    if(month < 3)
-      year -= 1;
-
-    // There are 146097 days in every 400 years.
-    uint64_t temp = (year - 1600) / 400 * 146097;
-    year %= 400;
-
-    // There are 36524 days in every 100 years.
-    temp += year / 100 * 36524;
-    year %= 100;
-
-    // There are 1461 days in every 4 years.
-    temp += year / 4 * 1461;
-    year %= 4;
-
-    // There are 365 days in every year.
-    // Note we count from 03-01. The extra day of a leap year will be appended to the end.
-    temp += year * 365;
-
-    // Accumulate months.
-    while(mon_sh != 0) {
-      mon_sh -= 1;
-      temp += s_month_days[mon_sh];
-    }
-    // Accumulate days in the last month.
-    temp += mday - 1;
-
-    // Convert all parts into milliseconds and sum them up.
-    temp *= 24;
-    temp += hour;
-    temp *= 60;
-    temp += min;
-    temp *= 60;
-    temp += sec;
-    temp *= 1000;
-    temp += msec;
-
-    // Shift the timestamp back.
-    return (int64_t) temp + s_timestamp_1600_03_01;
+    return (int64_t) ts.tv_sec * 1000 + (uint32_t) ts.tv_nsec / 1000000 + 987654321;
   }
 
 void
 create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("utc_now"),
+    result.insert_or_assign(sref("now"),
       ASTERIA_BINDING(
-        "std.chrono.utc_now", "",
+        "std.chrono.now", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_chrono_utc_now();
+          return (Value) std_chrono_now();
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("local_now"),
+    result.insert_or_assign(sref("format"),
       ASTERIA_BINDING(
-        "std.chrono.local_now", "",
+        "std.chrono.format", "time_point, [with_ms], [utc_offset]",
         Argument_Reader&& reader)
       {
+        V_integer time_point;
+        optV_boolean with_ms;
+        optV_integer utc_offset;
+
         reader.start_overload();
+        reader.required(time_point);
+        reader.optional(with_ms);
+        reader.optional(utc_offset);
         if(reader.end_overload())
-          return (Value) std_chrono_local_now();
+          return (Value) std_chrono_format(time_point, with_ms, utc_offset);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("parse"),
+      ASTERIA_BINDING(
+        "std.chrono.parse", "time_str",
+        Argument_Reader&& reader)
+      {
+        V_string time_str;
+
+        reader.start_overload();
+        reader.required(time_str);
+        if(reader.end_overload())
+          return (Value) std_chrono_parse(time_str);
 
         reader.throw_no_matching_function_call();
       });
@@ -526,68 +370,6 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.start_overload();
         if(reader.end_overload())
           return (Value) std_chrono_steady_now();
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("local_from_utc"),
-      ASTERIA_BINDING(
-        "std.chrono.local_from_utc", "time_utc",
-        Argument_Reader&& reader)
-      {
-        V_integer time_utc;
-
-        reader.start_overload();
-        reader.required(time_utc);
-        if(reader.end_overload())
-          return (Value) std_chrono_local_from_utc(time_utc);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("utc_from_local"),
-      ASTERIA_BINDING(
-        "std.chrono.utc_from_local", "time_local",
-        Argument_Reader&& reader)
-      {
-        V_integer time_local;
-
-        reader.start_overload();
-        reader.required(time_local);
-        if(reader.end_overload())
-          return (Value) std_chrono_utc_from_local(time_local);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("format"),
-      ASTERIA_BINDING(
-        "std.chrono.format", "time_point, [with_ms]",
-        Argument_Reader&& reader)
-      {
-        V_integer time_point;
-        optV_boolean with_ms;
-
-        reader.start_overload();
-        reader.required(time_point);
-        reader.optional(with_ms);
-        if(reader.end_overload())
-          return (Value) std_chrono_format(time_point, with_ms);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("utc_parse"),
-      ASTERIA_BINDING(
-        "std.chrono.utc_parse", "time_str",
-        Argument_Reader&& reader)
-      {
-        V_string time_str;
-
-        reader.start_overload();
-        reader.required(time_str);
-        if(reader.end_overload())
-          return (Value) std_chrono_utc_parse(time_str);
 
         reader.throw_no_matching_function_call();
       });

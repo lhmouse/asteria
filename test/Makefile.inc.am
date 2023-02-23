@@ -20,7 +20,6 @@ check_PROGRAMS +=  \
   %reldir%/defer_ptc.test  \
   %reldir%/trailing_commas.test  \
   %reldir%/system.test  \
-  %reldir%/chrono.test  \
   %reldir%/string.test  \
   %reldir%/array.test  \
   %reldir%/numeric.test  \

@@ -180,19 +180,40 @@
 
 ### `std.chrono`
 
-`std.chrono.utc_now()`
+`std.chrono.now()`
 
-	* Retrieves the wall clock time in UTC.
+	* Retrieves the wall clock time.
 
 	* Returns the number of milliseconds since the Unix epoch,
-	  represented as an integer.
+	  `1970-01-01 00:00:00 UTC`, represented as an integer.
 
-`std.chrono.local_now()`
+`std.chrono.format(time_point, [with_ms], [utc_offset])`
 
-	* Retrieves the wall clock time in the local time zone.
+	* Converts `time_point`, which shall be an integer represents the
+	  number of milliseconds since `1970-01-01 00:00:00 UTC`, to an
+	  ASCII string in the aforementioned format, according to the ISO
+	  8601 standard. If `with_ms` is set to `true`, the string will
+	  have a 3-digit decimal part. `utc_offset` can be specified as
+	  an integer, representing the number of minutes of local time
+	  ahead of UTC time. If `utc_offset` is absent, it is obtained
+	  from the local system.
 
-	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  in the local time zone, represented as an integer.
+	* Returns a string representing the time point.
+
+`std.chrono.parse(time_str)`
+
+	* Parses `time_str`, which is an ASCII string representing a time
+	  point in the format `1970-01-01 00:00:00.000 UTC`, according to
+	  the ISO 8601 standard. The decimal part is optional and may
+	  have fewer or more digits. The timezone part may be `"UTC"` or
+	  `"GMT"` for UTC, or an explicit value such as `"+04:00"`, or
+	  absent if local time is desired. Leading or trailing spaces are
+	  allowed.
+
+	* Returns an integer representing the number of milliseconds
+	  since `1970-01-01 00:00:00 UTC`.
+
+	* Throws an exception if the string is invalid.
 
 `std.chrono.hires_now()`
 
@@ -213,44 +234,6 @@
 
 	* Returns the number of milliseconds since an unspecified time
 	  point, represented as an integer.
-
-`std.chrono.local_from_utc(time_utc)`
-
-	* Converts a UTC time point to a local one. `time_utc` shall be
-	  the number of milliseconds since the Unix epoch.
-
-	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  in the local time zone, represented as an integer.
-
-`std.chrono.utc_from_local(time_local)`
-
-	* Converts a local time point to a UTC one. `time_local` shall
-	  be the number of milliseconds since `1970-01-01 00:00:00` in
-	  the local time zone.
-
-	* Returns the number of milliseconds since the Unix epoch,
-	  represented as an integer.
-
-`std.chrono.format(time_point, [with_ms])`
-
-	* Converts `time_point`, which represents the number of
-	  milliseconds since `1970-01-01 00:00:00`, to an ASCII string in
-	  the aforementioned format, according to the ISO 8601 standard.
-	  If `with_ms` is set to `true`, the string will have a 3-digit
-	  fractional part. By default, no fractional part is added.
-
-	* Returns a string representing the time point.
-
-`std.chrono.utc_parse(time_str)`
-
-	* Parses `time_str`, which is an ASCII string representing a time
-	  point in the format `1970-01-01 00:00:00.000`, according to the
-	  ISO 8601 standard. The subsecond part is optional and may have
-	  fewer or more digits. There may be leading or trailing spaces.
-
-	* Returns the number of milliseconds since `1970-01-01 00:00:00`.
-
-	* Throws an exception if the string is invalid.
 
 ### `std.string`
 
