@@ -661,39 +661,21 @@ do_parse(tinybuf& cbuf)
 }  // namespace
 
 V_string
-std_json_format(Value value, optV_string indent)
+std_json_format(Value value, optV_string indent, optV_boolean json5)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty())
-               ? do_format_nonrecursive(value, false, Indenter_none())
-               : do_format_nonrecursive(value, false, Indenter_string(*indent));
+        ? do_format_nonrecursive(value, json5 == true, Indenter_none())
+        : do_format_nonrecursive(value, json5 == true, Indenter_string(*indent));
   }
 
 V_string
-std_json_format(Value value, V_integer indent)
+std_json_format(Value value, V_integer indent, optV_boolean json5)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0)
-               ? do_format_nonrecursive(value, false, Indenter_none())
-               : do_format_nonrecursive(value, false, Indenter_spaces(indent));
-  }
-
-V_string
-std_json_format5(Value value, optV_string indent)
-  {
-    // No line break is inserted if `indent` is null or empty.
-    return (!indent || indent->empty())
-               ? do_format_nonrecursive(value, true, Indenter_none())
-               : do_format_nonrecursive(value, true, Indenter_string(*indent));
-  }
-
-V_string
-std_json_format5(Value value, V_integer indent)
-  {
-    // No line break is inserted if `indent` is non-positive.
-    return (indent <= 0)
-               ? do_format_nonrecursive(value, true, Indenter_none())
-               : do_format_nonrecursive(value, true, Indenter_spaces(indent));
+        ? do_format_nonrecursive(value, json5 == true, Indenter_none())
+        : do_format_nonrecursive(value, json5 == true, Indenter_spaces(indent));
   }
 
 Value
@@ -732,40 +714,21 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         Value value;
         optV_string sind;
         V_integer iind;
+        optV_boolean json5;
 
         reader.start_overload();
         reader.optional(value);
         reader.save_state(0);
         reader.optional(sind);
+        reader.optional(json5);
         if(reader.end_overload())
-          return (Value) std_json_format(value, sind);
+          return (Value) std_json_format(value, sind, json5);
 
         reader.load_state(0);
         reader.required(iind);
-          return (Value) std_json_format(value, iind);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("format5"),
-      ASTERIA_BINDING(
-        "std.json.format5", "[value], [indent]",
-        Argument_Reader&& reader)
-      {
-        Value value;
-        optV_string sind;
-        V_integer iind;
-
-        reader.start_overload();
-        reader.optional(value);
-        reader.save_state(0);
-        reader.optional(sind);
+        reader.optional(json5);
         if(reader.end_overload())
-          return (Value) std_json_format5(value, sind);
-
-        reader.load_state(0);
-        reader.required(iind);
-          return (Value) std_json_format5(value, iind);
+          return (Value) std_json_format(value, iind, json5);
 
         reader.throw_no_matching_function_call();
       });

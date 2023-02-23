@@ -2437,7 +2437,7 @@
 
 ### `std.json`
 
-`std.json.format([value], [indent])`
+`std.json.format([value], [indent], [json5])`
 
 	* Converts a value to a string in the JSON format, according to
 	  IETF RFC 7159. This function generates text that conforms to
@@ -2446,22 +2446,10 @@
 	  `null` otherwise. If `indent` is set to a string, it is used as
 	  each level of indention following a line break, unless it is
 	  empty, in which case no line break is inserted. If `indent` is
-	  set to an integer, it is clamped between `0` and `10`
+	  specified as an integer, it is clamped between `0` and `10`
 	  inclusively and this function behaves as if a string consisting
-	  of this number of spaces was set. Its default value is an empty
-	  string.
-
-	* Returns the formatted text as a string.
-
-`std.json.format5([value], [indent])`
-
-	* Converts a value to a string in the JSON5 format. In addition
-	  to IETF RFC 7159, a few extensions in ECMAScript 5.1 have been
-	  introduced to make the syntax more human-readable. Infinities
-	  and NaNs are preserved. Object keys that are valid identifiers
-	  are not quoted. Trailing commas of array and object members are
-	  appended if `indent` is neither null nor zero nor an empty
-	  string. This function is otherwise identical to `format()`.
+	  of this number of spaces was set. If `json5` is set to `true`,
+	  the JSON5 alternative format is used.
 
 	* Returns the formatted text as a string.
 
