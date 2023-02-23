@@ -1199,8 +1199,9 @@ do_frexp10(double value)
       if(tzcnt_lo < 0) {
         ROCKET_ASSERT(bits >= bound_next);
 
-        if(bits - bound_next <= half_ulp) {
-          // This trailing zero can be removed, so record this bound.
+        // `bits` was truncated, so the distance from the lower bound to
+        // the original value may be at most one bit longer.
+        if(bits - bound_next < half_ulp) {
           tzcnt_lo --;
           bound_lo = bound_next;
         }
@@ -1212,8 +1213,9 @@ do_frexp10(double value)
       if(tzcnt_hi < 0) {
         ROCKET_ASSERT(bound_next >= bits);
 
-        if(bound_next - bits < half_ulp) {
-          // This trailing zero can be removed, so record this bound.
+        // `bits` was truncated, so the distance from the original value
+        // to the upper bound may be at most one bit shorter.
+        if(bound_next - bits <= half_ulp) {
           tzcnt_hi --;
           bound_hi = bound_next;
         }
