@@ -1166,15 +1166,7 @@ do_frexp10(double value)
     bits = (uint64_t)(uint32_t) (frx.exp + mult.exp2) << 52 | frx.mant;
     ::memcpy(&abs_value, &bits, sizeof(bits));
     bits = (uint64_t)(int64_t) abs_value;
-
-    // Calculate maximum tolerable rounding-off errors. `error_lo` is a
-    // bit smaller because `bits` was truncated towards zero.
-    uint64_t error_lo = (bits >> 54) - 1;
-
-    // Ideally this should be `(bits + 1) >> 54` but incrementing `bits`
-    // might result in a carry, so it has to be done in a complex way.
-    uint64_t blo = bits & ((1ULL << 54) - 1);
-    uint64_t error_hi = (bits >> 54) + (-blo >> 63);
+    uint64_t half_ulp = bits >> 54;
 
     // Multiply two 64-bit values and get the high-order half. This
     // produces 18 significant figures.
@@ -1207,7 +1199,7 @@ do_frexp10(double value)
       if(tzcnt_lo < 0) {
         ROCKET_ASSERT(bits >= bound_next);
 
-        if(bits - bound_next <= error_lo) {
+        if(bits - bound_next <= half_ulp) {
           // This trailing zero can be removed, so record this bound.
           tzcnt_lo --;
           bound_lo = bound_next;
@@ -1220,7 +1212,7 @@ do_frexp10(double value)
       if(tzcnt_hi < 0) {
         ROCKET_ASSERT(bound_next >= bits);
 
-        if(bound_next - bits <= error_hi) {
+        if(bound_next - bits < half_ulp) {
           // This trailing zero can be removed, so record this bound.
           tzcnt_hi --;
           bound_hi = bound_next;
