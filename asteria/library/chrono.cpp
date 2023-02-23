@@ -98,7 +98,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
       mon = 1;
       day = 1;
     }
-    else if(time_point > 253370764800000) {
+    else if(time_point >= 253370764800000) {
       // max
       year = 9999;
       mon = 1;
@@ -271,8 +271,8 @@ std_chrono_parse(V_string time_str)
     }
 
     if(time_point < 0)
-      return 0;
-    else if(time_point > 253370764800000)
+      return INT64_MIN;
+    else if(time_point >= 253370764800000)
       return INT64_MAX;
     else
       return time_point;
