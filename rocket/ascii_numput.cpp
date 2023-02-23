@@ -1167,21 +1167,14 @@ do_frexp10(double value)
     ::memcpy(&abs_value, &bits, sizeof(bits));
     bits = (uint64_t)(int64_t) abs_value;
 
-    // Calculate maximum tolerable rounding-off errors. Note `error_lo`
-    // is a bit smaller because `bits` was truncated towards zero.
-    uint64_t error_lo = (bits - 1) >> 53;
-    error_lo |= error_lo >> 1;
-    error_lo |= error_lo >> 2;
-    error_lo |= error_lo >> 4;
-    error_lo *= 55;
-    error_lo >>= 8;
+    // Calculate maximum tolerable rounding-off errors. `error_lo` is a
+    // bit smaller because `bits` was truncated towards zero.
+    uint64_t error_lo = (bits >> 54) - 1;
 
-    uint64_t error_hi = (bits + 1) >> 53;
-    error_hi |= error_hi >> 1;
-    error_hi |= error_hi >> 2;
-    error_hi |= error_hi >> 4;
-    error_hi *= 56;
-    error_hi >>= 8;
+    // Ideally this should be `(bits + 1) >> 54` but incrementing `bits`
+    // might result in a carry, so it has to be done in a complex way.
+    uint64_t blo = bits & ((1ULL << 54) - 1);
+    uint64_t error_hi = (bits >> 54) + (-blo >> 63);
 
     // Multiply two 64-bit values and get the high-order half. This
     // produces 18 significant figures.
