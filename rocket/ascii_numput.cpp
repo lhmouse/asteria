@@ -1203,9 +1203,8 @@ do_frexp10_8(float value)
 
     // Raise the value to (0,0x1p24) and convert it to an integer. This
     // produces 18 significant digits.
-    xbits = (uint64_t)(uint32_t) (frx.exp + 864 + mult.exp2) << 52 | frx.mant << 29;
-    ::memcpy(&abs_value, &xbits, sizeof(xbits));
-    frx.mant = (uint64_t)(int64_t) abs_value * ((mult.mant + UINT32_MAX) >> 32);
+    xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
+    frx.mant = xbits * ((mult.mant + UINT32_MAX) >> 32);
 
     // Round the mantissa.
     frx.exp = (int) bpos - s_decimal_exp_min - 8;
@@ -1270,9 +1269,8 @@ do_frexp10_16(double value)
 
     // Raise the value to (0,0x1p53) and convert it to an integer. This
     // produces 18 significant digits.
-    bits = (uint64_t)(uint32_t) (frx.exp + mult.exp2) << 52 | frx.mant;
-    ::memcpy(&abs_value, &bits, sizeof(bits));
-    frx.mant = mulh128((uint64_t)(int64_t) abs_value, mult.mant);
+    bits = (0x10000000000000ULL | frx.mant) << (frx.exp + mult.exp2 - 1075);
+    frx.mant = mulh128(bits, mult.mant);
 
     // Round the mantissa.
     frx.exp = (int) bpos - s_decimal_exp_min - 16;
