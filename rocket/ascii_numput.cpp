@@ -1202,7 +1202,7 @@ do_frexp10_8(float value)
     const auto& mult = s_decimal_multipliers[bpos];
 
     // Raise the value to (0,0x1p24) and convert it to an integer. This
-    // produces 18 significant digits.
+    // produces 9 significant digits.
     xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
     frx.mant = xbits * ((mult.mant + UINT32_MAX) >> 32);
 
