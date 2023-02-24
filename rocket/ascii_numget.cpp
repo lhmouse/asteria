@@ -1335,7 +1335,6 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max) noexcept
         this->m_ovfl = true;
         this->m_udfl = false;
         this->m_inxct = false;
-
         value = 0;
         break;
 
