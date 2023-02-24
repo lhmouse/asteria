@@ -51,6 +51,16 @@ if(::strtod(nump.begin(), &eptr) != value)
       numg.get(t, nump.begin(), nump.size());
       ASTERIA_TEST_CHECK(t == value);
 
+      // binary plain
+      nump.put_XD(value);
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
+      // binary scientific
+      nump.put_XED(value);
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
       if(value == HUGE_VAL)
         break;
 
@@ -86,6 +96,16 @@ if(::strtod(nump.begin(), &eptr) != value)
       nump.put_XED(value);
       ASTERIA_TEST_CHECK(::strtod(nump.begin(), &eptr) == value);
       ASTERIA_TEST_CHECK(eptr == nump.end());
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
+      // binary plain
+      nump.put_XD(value);
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
+      // binary scientific
+      nump.put_XED(value);
       numg.get(t, nump.begin(), nump.size());
       ASTERIA_TEST_CHECK(t == value);
 

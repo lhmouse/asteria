@@ -45,6 +45,16 @@ int main()
       numg.get(t, nump.begin(), nump.size());
       ASTERIA_TEST_CHECK(t == value);
 
+      // binary plain
+      nump.put_XF(value);
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
+      // binary scientific
+      nump.put_XEF(value);
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
       if(value == HUGE_VALF)
         break;
 
@@ -80,6 +90,16 @@ int main()
       nump.put_XEF(value);
       ASTERIA_TEST_CHECK(::strtof(nump.begin(), &eptr) == value);
       ASTERIA_TEST_CHECK(eptr == nump.end());
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
+      // binary plain
+      nump.put_XF(value);
+      numg.get(t, nump.begin(), nump.size());
+      ASTERIA_TEST_CHECK(t == value);
+
+      // binary scientific
+      nump.put_XEF(value);
       numg.get(t, nump.begin(), nump.size());
       ASTERIA_TEST_CHECK(t == value);
 
