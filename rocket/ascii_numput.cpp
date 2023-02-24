@@ -1165,68 +1165,7 @@ do_frexp10(double value)
     // Raise the value to (0,0x1p53).
     bits = (uint64_t)(uint32_t) (frx.exp + mult.exp2) << 52 | frx.mant;
     ::memcpy(&abs_value, &bits, sizeof(bits));
-    bits = (uint64_t)(int64_t) abs_value;
-    uint64_t half_ulp = bits >> 54;
-
-    // Multiply two 64-bit values and get the high-order half. This
-    // produces 18 significant figures.
-    bits = mulh128(bits, mult.mant);
-
-    // Round the mantissa.
-    uint64_t tz_next = bits / 10U;
-    uint64_t tz_mult = 10U;
-
-    int tzcnt_lo = -1;
-    uint64_t bound_lo = bits;
-    int tzcnt_hi = -1;
-    uint64_t bound_hi = bits;
-
-    while((tzcnt_lo | tzcnt_hi) < 0) {
-      uint64_t bound_next = tz_next * tz_mult;
-      if(tzcnt_lo < 0) {
-        ROCKET_ASSERT(bits >= bound_next);
-
-        // `bits` was truncated, so the distance from the lower bound to
-        // the original value may be at most one bit longer.
-        if(bits - bound_next < half_ulp) {
-          tzcnt_lo --;
-          bound_lo = bound_next;
-        }
-        else
-          tzcnt_lo ^= -1;
-      }
-
-      bound_next += tz_mult;
-      if(tzcnt_hi < 0) {
-        ROCKET_ASSERT(bound_next >= bits);
-
-        // `bits` was truncated, so the distance from the original value
-        // to the upper bound may be at most one bit shorter.
-        if(bound_next - bits <= half_ulp) {
-          tzcnt_hi --;
-          bound_hi = bound_next;
-        }
-        else
-          tzcnt_hi ^= -1;
-      }
-
-      tz_next /= 10U;
-      tz_mult *= 10U;
-    }
-
-    // If the bounds don't have the same number of trailing zeroes, pick
-    // the one with more. Otherwise, pick the nearer one, rounding up if
-    // on a par.
-    if(tzcnt_lo != tzcnt_hi)
-      bits = (tzcnt_lo > tzcnt_hi) ? bound_lo : bound_hi;
-    else
-      bits = (bits - bound_lo < bound_hi - bits) ? bound_lo : bound_hi;
-
-    if(bits >= 1000000000000000000ULL) {
-      // If this has resulted in a carry, fix it.
-      bits /= 10;
-      bpos ++;
-    }
+    bits = mulh128((uint64_t)(int64_t) abs_value, mult.mant);
 
     // Convert the base-2 exponent to a base-10 exponent.
     //   `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
