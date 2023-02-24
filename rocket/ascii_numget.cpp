@@ -1800,9 +1800,6 @@ cast_D(double& value, double min, double max) noexcept
 
           const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
           exp = mult.exp2;
-
-          // Multiply two 64-bit values and get the high-order half. This
-          // produces 18 significant figures.
           bits = mulh128(bits, mult.mant);
 
           // Re-align the mantissa, so its MSB is non-zero.
