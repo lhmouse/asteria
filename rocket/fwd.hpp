@@ -776,5 +776,23 @@ static_or_dynamic_cast(sourceT&& src)
                      ::std::forward<sourceT>(src));
   }
 
+ROCKET_ALWAYS_INLINE
+uint64_t
+mulh128(uint64_t x, uint64_t y, uint64_t* lo = nullptr) noexcept
+  {
+#ifdef __SIZEOF_INT128__
+    unsigned __int128 r = (unsigned __int128) x * y;
+    lo && (*lo = (uint64_t) r);
+    return (uint64_t) (r >> 64);
+#else
+    // https://github.com/catid/fp61/blob/master/fp61.h
+    static constexpr uint64_t M32 = 1ULL << 32;
+    lo && (*lo = x * y);
+    uint64_t xl = x % M32, xh = x / M32;
+    uint64_t yl = y % M32, yh = y / M32;
+    return (xl * yl / M32 + xh * yl + xl * yh % M32) / M32 + xl * yh / M32 + xh * yh;
+#endif
+  }
+
 }  // namespace rocket
 #endif

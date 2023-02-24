@@ -1170,20 +1170,7 @@ do_frexp10(double value)
 
     // Multiply two 64-bit values and get the high-order half. This
     // produces 18 significant figures.
-#ifdef __SIZEOF_INT128__
-    bits = (uint64_t) (((unsigned __int128) bits * mult.mant) >> 64);
-#else
-    // This is inspired by `Emulate64x64to128` from
-    //   https://github.com/catid/fp61/blob/master/fp61.h
-    uint64_t xhi = bits >> 32;
-    uint64_t xlo = bits << 32 >> 32;
-    uint64_t yhi = mult.mant >> 32;
-    uint64_t ylo = mult.mant << 32 >> 32;
-
-    bits = (xlo * ylo >> 32) + xhi * ylo + (uint32_t) (xlo * yhi);
-    bits >>= 32;
-    bits += (xlo * yhi >> 32) + xhi * yhi;
-#endif  // __int128
+    bits = mulh128(bits, mult.mant);
 
     // Round the mantissa.
     uint64_t tz_next = bits / 10U;
