@@ -900,6 +900,9 @@ constexpr s_decimal_multipliers[] =
     { 0x8E679C2F5E44FF90, +1024 },  // 1.0e+308
   };
 
+// `exp10 = FLOOR(exp2 * LOG2)` where `LOG2 = 0.30102999`
+constexpr int s_decimal_exp_min = s_decimal_multipliers[0].exp2 * 30102999LL / 100000000LL - 1;
+
 template<typename valueT>
 inline
 bool
@@ -1604,22 +1607,19 @@ cast_F(float& value, float min, float max) noexcept
 
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
-          //   `exp10 = FLOOR(exp2 * LOG2)` where `LOG2 = 0.30102999`
-          constexpr int exp_min = s_decimal_multipliers[0].exp2 * 30102999LL / 100000000LL - 1;
-
-          if(exp < exp_min) {
+          if(exp < s_decimal_exp_min) {
             this->m_udfl = true;
             this->m_inxct = true;
             ::memcpy(&value, ss_zero + this->m_sign, sizeof(float));
             break;
           }
-          else if(exp >= exp_min + (int) noadl::size(s_decimal_multipliers)) {
+          else if(exp >= s_decimal_exp_min + (int) noadl::size(s_decimal_multipliers)) {
             this->m_ovfl = true;
             ::memcpy(&value, ss_inf + this->m_sign, sizeof(float));
             break;
           }
 
-          const auto& mult = s_decimal_multipliers[(uint32_t) (exp - exp_min)];
+          const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
           exp = mult.exp2;
           bits = (uint32_t) ((bits * ((mult.mant + UINT32_MAX) >> 32)) >> 32);
 
@@ -1786,21 +1786,19 @@ cast_D(double& value, double min, double max) noexcept
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
           //   `exp10 = TRUNC((exp2 - 1) * LOG2)` where `LOG2 = 0.30103`
-          constexpr int exp_min = (s_decimal_multipliers[0].exp2 - 1) * 30103LL / 100000LL;
-
-          if(exp < exp_min) {
+          if(exp < s_decimal_exp_min) {
             this->m_udfl = true;
             this->m_inxct = true;
             ::memcpy(&value, sd_zero + this->m_sign, sizeof(double));
             break;
           }
-          else if(exp >= exp_min + (int) noadl::size(s_decimal_multipliers)) {
+          else if(exp >= s_decimal_exp_min + (int) noadl::size(s_decimal_multipliers)) {
             this->m_ovfl = true;
             ::memcpy(&value, sd_inf + this->m_sign, sizeof(double));
             break;
           }
 
-          const auto& mult = s_decimal_multipliers[(uint32_t) (exp - exp_min)];
+          const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
           exp = mult.exp2;
 
           // Multiply two 64-bit values and get the high-order half. This
