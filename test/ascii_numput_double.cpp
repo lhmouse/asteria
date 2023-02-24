@@ -19,12 +19,6 @@ int main()
     for(;;) {
       // decimal plain
       nump.put_DD(value);
-if(::strtod(nump.begin(), &eptr) != value)
-{
-  ::printf("value %.18g\n", value);
-  ::printf("   => %s\n", nump.begin());
-}
-
       ASTERIA_TEST_CHECK(::strtod(nump.begin(), &eptr) == value);
       ASTERIA_TEST_CHECK(eptr == nump.end());
       numg.get(t, nump.begin(), nump.size());
