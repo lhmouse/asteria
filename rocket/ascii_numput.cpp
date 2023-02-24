@@ -269,7 +269,7 @@ do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
     len_out = ROCKET_TZCNT32(bytes) / 8U;
   }
 
-ROCKET_ALWAYS_INLINE
+inline
 uint32_t
 do_write_digits_backwards(char*& wptr, uint64_t value, uint32_t base, uint32_t precision)
   {
@@ -1018,6 +1018,9 @@ constexpr s_decimal_multipliers[] =
     { 0x1.1CCF385EBC8A0p+1023,  0x9FAACF3DF73609B1,  -966 },  // 1.0e+308
   };
 
+// `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
+constexpr int s_decimal_exp_min = ((s_decimal_multipliers[0].exp2 - 57) * 30103LL + 50000LL) / 100000LL;
+
 enum fpclass : uint8_t
   {
     fpclass_norm  = 0,
@@ -1062,7 +1065,48 @@ do_get_special_class(const char*& data, uint32_t& size, const frexp& frx)
 
 inline
 frexp
-do_frexp2(double value)
+do_frexp2_23(float value)
+  {
+    // Extract the biased exponent and mantissa without the hidden bit.
+    uint32_t bits;
+    static_assert(sizeof(bits) == sizeof(value));
+    ::memcpy(&bits, &value, sizeof(bits));
+
+    frexp frx;
+    frx.cls = fpclass_norm;
+    frx.sign = (int32_t) bits < 0;
+    frx.exp = (int) (bits >> 23) & 0xFF;
+    frx.mant = bits & 0x7FFFFFULL;
+
+    if(frx.exp == 0xFF) {
+      // This may be an infinity or a NaN.
+      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      return frx;
+    }
+
+    if(frx.exp == 0) {
+      // This may be a subnormal value or zero.
+      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
+      if(frx.cls == fpclass_zero)
+        return frx;
+
+      // Normalize the subnormal value.
+      int sh = ROCKET_LZCNT64(frx.mant) - 40;
+      frx.exp -= sh - 1;
+      frx.mant <<= sh;
+    }
+
+    // Convert the exponent and mantissa back. The number will be
+    // interpreted as `sign 0x mant P (1 + exp)` in C99 hexadecimal
+    // floating-point notation.
+    frx.exp -= 150;
+    frx.mant |= 0x800000ULL;
+    return frx;
+  }
+
+inline
+frexp
+do_frexp2_52(double value)
   {
     // Extract the biased exponent and mantissa without the hidden bit.
     uint64_t bits;
@@ -1071,8 +1115,8 @@ do_frexp2(double value)
 
     frexp frx;
     frx.cls = fpclass_norm;
-    frx.sign = (bits >> 63) & 1;
-    frx.exp = (bits >> 52) & 0x7FF;
+    frx.sign = (int64_t) bits < 0;
+    frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
     if(frx.exp == 0x7FF) {
@@ -1084,7 +1128,6 @@ do_frexp2(double value)
     if(frx.exp == 0) {
       // This may be a subnormal value or zero.
       frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
-
       if(frx.cls == fpclass_zero)
         return frx;
 
@@ -1095,18 +1138,84 @@ do_frexp2(double value)
     }
 
     // Convert the exponent and mantissa back. The number will be
-    // interpreted as `sign 0x0. mant P (1 + exp)` in C99 hexadecimal
-    // floating-point notation. The most significant bit of `mant` is
-    // always set.
-    frx.exp -= 1023;
+    // interpreted as `sign 0x mant P (1 + exp)` in C99 hexadecimal
+    // floating-point notation.
+    frx.exp -= 1075;
     frx.mant |= 0x10000000000000ULL;
-    frx.mant <<= 11;
     return frx;
   }
 
 inline
 frexp
-do_frexp10(double value)
+do_frexp10_8(float value)
+  {
+    // Extract the biased exponent and mantissa without the hidden bit.
+    uint32_t bits;
+    static_assert(sizeof(bits) == sizeof(value));
+    ::memcpy(&bits, &value, sizeof(bits));
+
+    frexp frx;
+    frx.cls = fpclass_norm;
+    frx.sign = (int32_t) bits < 0;
+    frx.exp = (int) (bits >> 23) & 0xFF;
+    frx.mant = bits & 0x7FFFFFULL;
+
+    if(frx.exp == 0xFF) {
+      // This may be an infinity or a NaN.
+      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      return frx;
+    }
+
+    if(frx.exp == 0) {
+      // This may be a subnormal value or zero.
+      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
+      if(frx.cls == fpclass_zero)
+        return frx;
+
+      // Normalize the subnormal value and remove the hidden bit.
+      int sh = ROCKET_LZCNT64(frx.mant) - 40;
+      frx.exp -= sh - 1;
+      frx.mant <<= sh;
+      frx.mant &= 0x7FFFFFULL;
+    }
+
+    // Get the multiplier for this value, using binary search. This
+    // will not become a subnormal double; no need to check that.
+    double abs_value;
+    uint64_t xbits = (uint64_t)(uint32_t) (frx.exp + 896) << 52 | frx.mant << 29;
+    ::memcpy(&abs_value, &xbits, sizeof(xbits));
+
+    uint32_t bpos = 1;
+    uint32_t epos = (uint32_t) noadl::size(s_decimal_multipliers);
+
+    while(bpos != epos) {
+      // book moves...
+      uint32_t mpos = (bpos + epos) / 2;
+      if(abs_value < s_decimal_multipliers[mpos].bound)
+        epos = mpos;
+      else
+        bpos = mpos + 1;
+    }
+
+    bpos --;
+    const auto& mult = s_decimal_multipliers[bpos];
+
+    // Raise the value to (0,0x1p24) and convert it to an integer. This
+    // produces 18 significant digits.
+    xbits = (uint64_t)(uint32_t) (frx.exp + 864 + mult.exp2) << 52 | frx.mant << 29;
+    ::memcpy(&abs_value, &xbits, sizeof(xbits));
+    frx.mant = (uint64_t)(int64_t) abs_value * ((mult.mant + UINT32_MAX) >> 32);
+
+    // Round the mantissa.
+    frx.exp = (int) bpos - s_decimal_exp_min - 8;
+    frx.mant += 500000000ULL;
+    frx.mant /= 1000000000ULL;
+    return frx;
+  }
+
+inline
+frexp
+do_frexp10_16(double value)
   {
     // Extract the biased exponent and mantissa without the hidden bit.
     uint64_t bits;
@@ -1115,8 +1224,8 @@ do_frexp10(double value)
 
     frexp frx;
     frx.cls = fpclass_norm;
-    frx.sign = (bits >> 63) & 1;
-    frx.exp = (bits >> 52) & 0x7FF;
+    frx.sign = (int64_t) bits < 0;
+    frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
     if(frx.exp == 0x7FF) {
@@ -1128,17 +1237,13 @@ do_frexp10(double value)
     if(frx.exp == 0) {
       // This may be a subnormal value or zero.
       frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
-
       if(frx.cls == fpclass_zero)
         return frx;
 
-      // Normalize the subnormal value.
+      // Normalize the subnormal value and remove the hidden bit.
       int sh = ROCKET_LZCNT64(frx.mant) - 11;
       frx.exp -= sh - 1;
       frx.mant <<= sh;
-
-      // Remove the hidden bit.
-      ROCKET_ASSERT(frx.mant >> 52 == 1U);
       frx.mant &= 0xFFFFFFFFFFFFFULL;
     }
 
@@ -1162,22 +1267,20 @@ do_frexp10(double value)
     bpos --;
     const auto& mult = s_decimal_multipliers[bpos];
 
-    // Raise the value to (0,0x1p53).
+    // Raise the value to (0,0x1p53) and convert it to an integer. This
+    // produces 18 significant digits.
     bits = (uint64_t)(uint32_t) (frx.exp + mult.exp2) << 52 | frx.mant;
     ::memcpy(&abs_value, &bits, sizeof(bits));
-    bits = mulh128((uint64_t)(int64_t) abs_value, mult.mant);
+    frx.mant = mulh128((uint64_t)(int64_t) abs_value, mult.mant);
 
-    // Convert the base-2 exponent to a base-10 exponent.
-    //   `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
-    constexpr int exp_min = ((s_decimal_multipliers[0].exp2 - 57) * 30103LL + 50000LL) / 100000LL;
-
-    // Return the mantissa and base-10 exponent.
-    frx.mant = bits;
-    frx.exp = (int) bpos - exp_min;
+    // Round the mantissa.
+    frx.exp = (int) bpos - s_decimal_exp_min - 16;
+    frx.mant += 5ULL;
+    frx.mant /= 10ULL;
     return frx;
   }
 
-ROCKET_ALWAYS_INLINE
+inline
 uint32_t
 do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxpp_opt)
   {
@@ -1403,9 +1506,11 @@ ascii_numput&
 ascii_numput::
 put_BF(float value) noexcept
   {
-    frexp frx = do_frexp2((double) value);
+    frexp frx = do_frexp2_23(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
+
+    frx.exp += 23;
 
     ::memcpy(this->m_stor, "-0b0.**", 8);
     char* wptr = ::std::begin(this->m_stor) + 3;
@@ -1414,7 +1519,7 @@ put_BF(float value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1425,14 +1530,14 @@ put_BF(float value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, nullptr);
+      do_write_mantissa(wptr, frx.mant, 0x1p23, 2, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1447,9 +1552,11 @@ ascii_numput&
 ascii_numput::
 put_BEF(float value) noexcept
   {
-    frexp frx = do_frexp2((double) value);
+    frexp frx = do_frexp2_23(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
+
+    frx.exp += 23;
 
     ::memcpy(this->m_stor, "-0b0.**", 8);
     char* wptr = ::std::begin(this->m_stor) + 3;
@@ -1457,7 +1564,7 @@ put_BEF(float value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 0x1p23, 2, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
@@ -1474,11 +1581,12 @@ ascii_numput&
 ascii_numput::
 put_XF(float value) noexcept
   {
-    frexp frx = do_frexp2((double) value);
+    frexp frx = do_frexp2_23(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp += 23;
+    frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0.**", 8);
@@ -1488,7 +1596,7 @@ put_XF(float value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp * 4);
@@ -1499,14 +1607,14 @@ put_XF(float value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, nullptr);
+      do_write_mantissa(wptr, frx.mant, 0x1p23, 16, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1521,11 +1629,12 @@ ascii_numput&
 ascii_numput::
 put_XEF(float value) noexcept
   {
-    frexp frx = do_frexp2((double) value);
+    frexp frx = do_frexp2_23(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp += 23;
+    frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0.**", 8);
@@ -1534,7 +1643,7 @@ put_XEF(float value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 0x1p23, 16, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp * 4);
@@ -1551,13 +1660,11 @@ ascii_numput&
 ascii_numput::
 put_DF(float value) noexcept
   {
-    frexp frx = do_frexp10((double) value);
+    frexp frx = do_frexp10_8(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.mant +=  50000000ULL;
-    frx.mant /= 100000000ULL;
-    frx.mant *= 100000000ULL;
+    frx.exp += 8;
 
     ::memcpy(this->m_stor, "-0.", 4);
     char* wptr = ::std::begin(this->m_stor) + 1;
@@ -1566,7 +1673,7 @@ put_DF(float value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1577,14 +1684,14 @@ put_DF(float value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, nullptr);
+      do_write_mantissa(wptr, frx.mant, 1e8, 10, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1599,13 +1706,11 @@ ascii_numput&
 ascii_numput::
 put_DEF(float value) noexcept
   {
-    frexp frx = do_frexp10((double) value);
+    frexp frx = do_frexp10_8(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.mant +=  50000000ULL;
-    frx.mant /= 100000000ULL;
-    frx.mant *= 100000000ULL;
+    frx.exp += 8;
 
     ::memcpy(this->m_stor, "-0.", 4);
     char* wptr = ::std::begin(this->m_stor) + 1;
@@ -1613,7 +1718,7 @@ put_DEF(float value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 1e8, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
@@ -1630,9 +1735,11 @@ ascii_numput&
 ascii_numput::
 put_BD(double value) noexcept
   {
-    frexp frx = do_frexp2(value);
+    frexp frx = do_frexp2_52(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
+
+    frx.exp += 52;
 
     ::memcpy(this->m_stor, "-0b0.**", 8);
     char* wptr = ::std::begin(this->m_stor) + 3;
@@ -1641,7 +1748,7 @@ put_BD(double value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1652,14 +1759,14 @@ put_BD(double value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, nullptr);
+      do_write_mantissa(wptr, frx.mant, 0x1p52, 2, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1674,9 +1781,11 @@ ascii_numput&
 ascii_numput::
 put_BED(double value) noexcept
   {
-    frexp frx = do_frexp2(value);
+    frexp frx = do_frexp2_52(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
+
+    frx.exp += 52;
 
     ::memcpy(this->m_stor, "-0b0.**", 8);
     char* wptr = ::std::begin(this->m_stor) + 3;
@@ -1684,7 +1793,7 @@ put_BED(double value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 0x8000000000000000ULL, 2, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 0x1p52, 2, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
@@ -1701,11 +1810,12 @@ ascii_numput&
 ascii_numput::
 put_XD(double value) noexcept
   {
-    frexp frx = do_frexp2(value);
+    frexp frx = do_frexp2_52(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp += 52;
+    frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0.**", 8);
@@ -1715,7 +1825,7 @@ put_XD(double value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
       *wptr = 'p';
       wptr += 1;
       do_write_exp(wptr, frx.exp * 4);
@@ -1726,14 +1836,14 @@ put_XD(double value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, nullptr);
+      do_write_mantissa(wptr, frx.mant, 0x1p52, 16, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1748,11 +1858,12 @@ ascii_numput&
 ascii_numput::
 put_XED(double value) noexcept
   {
-    frexp frx = do_frexp2(value);
+    frexp frx = do_frexp2_52(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.mant >>= 3 - (frx.exp & 3);
+    frx.exp += 52;
+    frx.mant <<= frx.exp & 3;
     frx.exp >>= 2;
 
     ::memcpy(this->m_stor, "-0x0.**", 8);
@@ -1761,7 +1872,7 @@ put_XED(double value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 1ULL << 60, 16, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 0x1p52, 16, rdxpp);
     *wptr = 'p';
     wptr += 1;
     do_write_exp(wptr, frx.exp * 4);
@@ -1778,9 +1889,11 @@ ascii_numput&
 ascii_numput::
 put_DD(double value) noexcept
   {
-    frexp frx = do_frexp10(value);
+    frexp frx = do_frexp10_16(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
+
+    frx.exp += 16;
 
     ::memcpy(this->m_stor, "-0.", 4);
     char* wptr = ::std::begin(this->m_stor) + 1;
@@ -1789,7 +1902,7 @@ put_DD(double value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 1e16, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1800,14 +1913,14 @@ put_DD(double value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, nullptr);
+      do_write_mantissa(wptr, frx.mant, 1e16, 10, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 1e16, 10, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1822,9 +1935,11 @@ ascii_numput&
 ascii_numput::
 put_DED(double value) noexcept
   {
-    frexp frx = do_frexp10(value);
+    frexp frx = do_frexp10_16(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
+
+    frx.exp += 16;
 
     ::memcpy(this->m_stor, "-0.", 4);
     char* wptr = ::std::begin(this->m_stor) + 1;
@@ -1832,7 +1947,7 @@ put_DED(double value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 100000000000000000ULL, 10, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 1e16, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
