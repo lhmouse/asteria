@@ -1204,10 +1204,8 @@ do_frexp10_8(float value)
     // Raise the value to (0,0x1p24) and convert it to an integer. This
     // produces 9 significant digits.
     xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
-    frx.mant = xbits * ((mult.mant + UINT32_MAX) >> 32);
-
-    // Round the mantissa.
     frx.exp = (int) bpos - s_decimal_exp_min - 8;
+    frx.mant = xbits * ((mult.mant + UINT32_MAX) >> 32);
     frx.mant += 500000000ULL;
     frx.mant /= 1000000000ULL;
     return frx;
@@ -1270,11 +1268,9 @@ do_frexp10_16(double value)
     // Raise the value to (0,0x1p53) and convert it to an integer. This
     // produces 18 significant digits.
     bits = (0x10000000000000ULL | frx.mant) << (frx.exp + mult.exp2 - 1075);
-    frx.mant = mulh128(bits, mult.mant);
-
-    // Round the mantissa.
     frx.exp = (int) bpos - s_decimal_exp_min - 16;
-    frx.mant += 5ULL;
+    frx.mant = mulh128(bits, mult.mant, &bits);
+    frx.mant += 5ULL + (bits >> 63);
     frx.mant /= 10ULL;
     return frx;
   }
