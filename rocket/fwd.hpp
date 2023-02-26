@@ -787,10 +787,11 @@ mulh128(uint64_t x, uint64_t y, uint64_t* lo = nullptr) noexcept
 #else
     // https://github.com/catid/fp61/blob/master/fp61.h
     static constexpr uint64_t M32 = 1ULL << 32;
-    lo && (*lo = x * y);
     uint64_t xl = x % M32, xh = x / M32;
     uint64_t yl = y % M32, yh = y / M32;
-    return (xl * yl / M32 + xh * yl + xl * yh % M32) / M32 + xl * yh / M32 + xh * yh;
+    uint64_t xlyl = xl * yl, xhyl = xh * yl, xlyh = xl * yh, xhyh = xh * yh;
+    lo && (*lo = xlyl + xhyl / M32 + xlyh / M32);
+    return (xlyl / M32 + xhyl + xlyh % M32) / M32 + xlyh / M32 + xhyh;
 #endif
   }
 
