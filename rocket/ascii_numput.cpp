@@ -1204,16 +1204,32 @@ do_frexp10_8(float value)
     // Raise the value to (0,0x1p24) and convert it to an integer. This
     // produces 9 significant digits.
     xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
+    uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 183);
+    uint32_t my_mant_min = (uint32_t) ((xbits - half_ulp) * ((mult.mant + UINT32_MAX) >> 32) / 1000000000ULL + 1ULL);
+    uint32_t my_mant_max = (uint32_t) ((xbits + half_ulp - 1ULL) * ((mult.mant + UINT32_MAX) >> 32) / 1000000000ULL);
+
+    // Round the mantissa to shortest. This is done by removing trailing
+    // digits one by one, until the result would be out of range.
+    uint32_t dec_mult = 1U;
+    bits = my_mant_min + (my_mant_max - my_mant_min) / 2;
+    do {
+      frx.mant = bits;
+
+      uint32_t out_digit = bits / dec_mult % 10U;
+      dec_mult *= 10U;
+      bits /= dec_mult;
+      bits += (4U - out_digit) >> 31;
+      bits *= dec_mult;
+    }
+    while((bits >= my_mant_min) && (bits <= my_mant_max));
+
     frx.exp = (int) bpos - s_decimal_exp_min - 8;
-    frx.mant = xbits * ((mult.mant + UINT32_MAX) >> 32);
-    frx.mant += 500000000ULL;
-    frx.mant /= 1000000000ULL;
     return frx;
   }
 
 inline
 frexp
-do_frexp10_16(double value)
+do_frexp10_17(double value)
   {
     // Extract the biased exponent and mantissa without the hidden bit.
     uint64_t bits;
@@ -1268,10 +1284,26 @@ do_frexp10_16(double value)
     // Raise the value to (0,0x1p53) and convert it to an integer. This
     // produces 18 significant digits.
     bits = (0x10000000000000ULL | frx.mant) << (frx.exp + mult.exp2 - 1075);
-    frx.exp = (int) bpos - s_decimal_exp_min - 16;
-    frx.mant = mulh128(bits, mult.mant, &bits);
-    frx.mant += 5ULL + (bits >> 63);
-    frx.mant /= 10ULL;
+    uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 1076);
+    uint64_t my_mant_min = mulh128(bits - half_ulp, mult.mant) + 1ULL;
+    uint64_t my_mant_max = mulh128(bits + half_ulp - 1ULL, mult.mant);
+
+    // Round the mantissa to shortest. This is done by removing trailing
+    // digits one by one, until the result would be out of range.
+    uint32_t dec_mult = 1U;
+    bits = my_mant_min + (my_mant_max - my_mant_min) / 2;
+    do {
+      frx.mant = bits;
+
+      uint64_t out_digit = bits / dec_mult % 10U;
+      dec_mult *= 10U;
+      bits /= dec_mult;
+      bits += (4U - out_digit) >> 63;
+      bits *= dec_mult;
+    }
+    while((bits >= my_mant_min) && (bits <= my_mant_max));
+
+    frx.exp = (int) bpos - s_decimal_exp_min - 17;
     return frx;
   }
 
@@ -1884,11 +1916,11 @@ ascii_numput&
 ascii_numput::
 put_DD(double value) noexcept
   {
-    frexp frx = do_frexp10_16(value);
+    frexp frx = do_frexp10_17(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.exp += 16;
+    frx.exp += 17;
 
     ::memcpy(this->m_stor, "-0.", 4);
     char* wptr = ::std::begin(this->m_stor) + 1;
@@ -1897,7 +1929,7 @@ put_DD(double value) noexcept
       // Write the number in scientific notation.
       char* rdxpp = wptr + 1;
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 1e16, 10, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
       *wptr = 'e';
       wptr += 1;
       do_write_exp(wptr, frx.exp);
@@ -1908,14 +1940,14 @@ put_DD(double value) noexcept
       wptr += 2;
       ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
       wptr += -(uint32_t) (frx.exp + 1);
-      do_write_mantissa(wptr, frx.mant, 1e16, 10, nullptr);
+      do_write_mantissa(wptr, frx.mant, 1e17, 10, nullptr);
     }
     else {
       // Write the number in plain format. A decimal point will be
       // inserted in the middle.
       char* rdxpp = wptr + (uint32_t) (frx.exp + 1);
       *rdxpp = this->m_rdxp;
-      do_write_mantissa(wptr, frx.mant, 1e16, 10, rdxpp);
+      do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
     }
 
     ROCKET_ASSERT(wptr < ::std::end(this->m_stor));
@@ -1930,11 +1962,11 @@ ascii_numput&
 ascii_numput::
 put_DED(double value) noexcept
   {
-    frexp frx = do_frexp10_16(value);
+    frexp frx = do_frexp10_17(value);
     if(do_get_special_class(this->m_data, this->m_size, frx))
       return *this;
 
-    frx.exp += 16;
+    frx.exp += 17;
 
     ::memcpy(this->m_stor, "-0.", 4);
     char* wptr = ::std::begin(this->m_stor) + 1;
@@ -1942,7 +1974,7 @@ put_DED(double value) noexcept
     // Write the number in scientific notation.
     char* rdxpp = wptr + 1;
     *rdxpp = this->m_rdxp;
-    do_write_mantissa(wptr, frx.mant, 1e16, 10, rdxpp);
+    do_write_mantissa(wptr, frx.mant, 1e17, 10, rdxpp);
     *wptr = 'e';
     wptr += 1;
     do_write_exp(wptr, frx.exp);
