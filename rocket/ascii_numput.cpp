@@ -1315,6 +1315,17 @@ do_frexp10_17(double value)
 
 inline
 void
+do_write_zeroes(char*& wptr, uint32_t len)
+  {
+    for(uint32_t k = len;  k != 0;  --k) {
+      // Prevent optimization...
+      (volatile char&) *wptr = '0';
+      wptr ++;
+    }
+  }
+
+inline
+void
 do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxpp_opt)
   {
     uint64_t reg = mant;
@@ -1557,8 +1568,7 @@ put_BF(float value) noexcept
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       wptr += 2;
-      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
-      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p23, 2, nullptr);
     }
     else {
@@ -1634,8 +1644,7 @@ put_XF(float value) noexcept
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       wptr += 2;
-      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
-      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p23, 16, nullptr);
     }
     else {
@@ -1711,8 +1720,7 @@ put_DF(float value) noexcept
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       wptr += 2;
-      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
-      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 1e8, 10, nullptr);
     }
     else {
@@ -1786,8 +1794,7 @@ put_BD(double value) noexcept
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       wptr += 2;
-      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
-      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p52, 2, nullptr);
     }
     else {
@@ -1863,8 +1870,7 @@ put_XD(double value) noexcept
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       wptr += 2;
-      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
-      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 0x1p52, 16, nullptr);
     }
     else {
@@ -1940,8 +1946,7 @@ put_DD(double value) noexcept
       // Write the number in plain format. The number starts with
       // `0.` and zeroes are filled as necessary.
       wptr += 2;
-      ::memset(wptr, '0', -(uint32_t) (frx.exp + 1));
-      wptr += -(uint32_t) (frx.exp + 1);
+      do_write_zeroes(wptr, -(uint32_t) (frx.exp + 1));
       do_write_mantissa(wptr, frx.mant, 1e17, 10, nullptr);
     }
     else {
