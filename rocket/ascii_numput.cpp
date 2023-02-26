@@ -1210,20 +1210,23 @@ do_frexp10_8(float value)
 
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
-    uint32_t dec_mult = 1U;
     bits = mant_min + (mant_max - mant_min) / 2;
-    do {
-      frx.mant = bits;
+    uint32_t mant_next = bits;
+    uint32_t next_digits = bits;
+    uint32_t next_mult = 1U;
 
-      uint32_t out_digit = bits / dec_mult % 10U;
-      dec_mult *= 10U;
-      bits /= dec_mult;
-      bits += (4U - out_digit) >> 31;
-      bits *= dec_mult;
+    while((mant_next >= mant_min) && (mant_next <= mant_max)) {
+      // Shift one digit from `next_digits` to `next_mult`.
+      bits = mant_next;
+      uint32_t carry = (4U - next_digits % 10U) >> 31;
+      next_digits /= 10U;
+      next_digits += carry;
+      next_mult *= 10U;
+      mant_next = next_digits * next_mult;
     }
-    while((bits >= mant_min) && (bits <= mant_max));
 
     frx.exp = (int) bpos - s_decimal_exp_min - 8;
+    frx.mant = bits;
     return frx;
   }
 
@@ -1290,20 +1293,23 @@ do_frexp10_17(double value)
 
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
-    uint32_t dec_mult = 1U;
     bits = mant_min + (mant_max - mant_min) / 2;
-    do {
-      frx.mant = bits;
+    uint64_t mant_next = bits;
+    uint64_t next_digits = bits;
+    uint64_t next_mult = 1U;
 
-      uint64_t out_digit = bits / dec_mult % 10U;
-      dec_mult *= 10U;
-      bits /= dec_mult;
-      bits += (4U - out_digit) >> 63;
-      bits *= dec_mult;
+    while((mant_next >= mant_min) && (mant_next <= mant_max)) {
+      // Shift one digit from `next_digits` to `next_mult`.
+      bits = mant_next;
+      uint64_t carry = (4ULL - next_digits % 10U) >> 63;
+      next_digits /= 10U;
+      next_digits += carry;
+      next_mult *= 10U;
+      mant_next = next_digits * next_mult;
     }
-    while((bits >= mant_min) && (bits <= mant_max));
 
     frx.exp = (int) bpos - s_decimal_exp_min - 17;
+    frx.mant = bits;
     return frx;
   }
 
