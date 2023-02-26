@@ -1314,7 +1314,7 @@ do_frexp10_17(double value)
   }
 
 inline
-uint32_t
+void
 do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxpp_opt)
   {
     uint64_t reg = mant;
@@ -1344,12 +1344,10 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       wptr ++;
       len ++;
     }
-
-    return len;
   }
 
 inline
-uint32_t
+void
 do_write_exp(char*& wptr, int exp)
   {
     uint32_t abs_exp = (uint32_t) ::std::abs(exp);
@@ -1381,8 +1379,6 @@ do_write_exp(char*& wptr, int exp)
       wptr ++;
       len ++;
     }
-
-    return len;
   }
 
 }  // namespace
