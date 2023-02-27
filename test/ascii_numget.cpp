@@ -62,10 +62,7 @@ int main()
       ::printf("--------------->   exp: %.17g\n", exp);
 
       ::rocket::ascii_numget numg;
-      size_t inlen = ::std::strlen(r.input);
-      size_t outlen;
-      ASTERIA_TEST_CHECK(numg.parse_D(r.input, inlen, &outlen));
-      ASTERIA_TEST_CHECK(outlen == inlen);
+      ASTERIA_TEST_CHECK(numg.parse_D(r.input, ::strlen(r.input)) == ::strlen(r.input));
 
       double val;
       ASTERIA_TEST_CHECK(numg.cast_D(val, -HUGE_VAL, +HUGE_VAL));

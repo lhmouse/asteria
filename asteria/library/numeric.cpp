@@ -707,33 +707,24 @@ std_numeric_parse(V_string text)
     if(tpos == V_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR(("Blank string"));
 
-    V_integer ival;
-    V_real fval;
-
+    // Try parsing the string as a real number first.
     ::rocket::ascii_numget numg;
     size_t tlen = text.find_last_not_of(s_spaces) + 1 - tpos;
-    size_t outlen;
-
-    // Try parsing the string as a real number first.
-    numg.parse_D(text.data() + tpos, tlen, &outlen);
-    if(outlen != tlen)
+    if(numg.parse_D(text.data() + tpos, tlen) != tlen)
       ASTERIA_THROW_RUNTIME_ERROR((
           "String not convertible to a number (text `$1`)"), text);
 
-    // Cast the result to a floating-point value, ignoring overflows.
-    numg.cast_D(fval, -HUGE_VAL, HUGE_VAL);
-
-    // Check whether the value fits in an integer.
-    numg.parse_I(text.data() + tpos, tlen, &outlen);
-    if(outlen == tlen) {
+    if(text.find('.') == V_string::npos) {
+      // Check whether the value fits in an integer. If so, return it exact.
+      V_integer ival;
       numg.cast_I(ival, INT64_MIN, INT64_MAX);
-
-      // If the result can be represented an integer, return it exact.
       if(!numg.overflowed() && !numg.underflowed() && !numg.inexact())
         return ival;
     }
 
     // ... no, so return a (maybe approximate) real number.
+    V_real fval;
+    numg.cast_D(fval, -HUGE_VAL, HUGE_VAL);
     return fval;
   }
 

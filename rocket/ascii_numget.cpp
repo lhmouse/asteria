@@ -932,46 +932,40 @@ const uint64_t sd_qnan [2] = { 0b0'11111111111'1ULL << 51, 0b1'11111111111'1ULL 
 
 }  // namespace
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_TB(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_TB(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
-    this->m_sign = 0;
     this->m_cls = value_class_finite;
     this->m_base = 2;
     this->m_exp = 0;
     this->m_more = false;
 
     if(do_subseq(rptr, eptr, "true")) {
-      // `true` is treated as the integer one.
+      // `true` is treated as the integer negative one.
+      this->m_sign = 1;
       this->m_mant = 1;
     }
     else if(do_subseq(rptr, eptr, "false")) {
       // `false` is treated as the integer zero.
+      this->m_sign = 0;
       this->m_mant = 0;
     }
     else
-      return *this;
+      return 0;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_BU(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_BU(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = 0;
     this->m_cls = value_class_finite;
@@ -982,7 +976,7 @@ parse_BU(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 2, -1);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 2;
@@ -990,19 +984,15 @@ parse_BU(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_XU(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_XU(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = 0;
     this->m_cls = value_class_finite;
@@ -1013,7 +1003,7 @@ parse_XU(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 16, -1);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 2;
@@ -1021,19 +1011,15 @@ parse_XU(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_DU(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_DU(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = 0;
     this->m_cls = value_class_finite;
@@ -1042,7 +1028,7 @@ parse_DU(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 10, -1);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 10;
@@ -1050,19 +1036,15 @@ parse_DU(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_BI(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_BI(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = value_class_finite;
@@ -1073,7 +1055,7 @@ parse_BI(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 2, -1);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 2;
@@ -1081,19 +1063,15 @@ parse_BI(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_XI(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_XI(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = value_class_finite;
@@ -1104,7 +1082,7 @@ parse_XI(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 16, -1);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 2;
@@ -1112,19 +1090,15 @@ parse_XI(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_DI(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_DI(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = value_class_finite;
@@ -1133,7 +1107,7 @@ parse_DI(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 10, -1);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 10;
@@ -1141,28 +1115,21 @@ parse_DI(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_BD(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_BD(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = do_get_special_value(rptr, eptr);
 
-    if(this->m_cls != value_class_finite) {
-      // Accept this special value without digits.
-      outlen = (size_t) (rptr - str);
-      return *this;
-    }
+    if(this->m_cls != value_class_finite)
+      return (size_t) (rptr - str);
 
     do_skip_base_prefix(rptr, eptr, 'b');
 
@@ -1170,7 +1137,7 @@ parse_BD(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 2, this->m_rdxp);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 2;
@@ -1178,28 +1145,21 @@ parse_BD(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_XD(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_XD(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = do_get_special_value(rptr, eptr);
 
-    if(this->m_cls != value_class_finite) {
-      // Accept this special value without digits.
-      outlen = (size_t) (rptr - str);
-      return *this;
-    }
+    if(this->m_cls != value_class_finite)
+      return (size_t) (rptr - str);
 
     do_skip_base_prefix(rptr, eptr, 'x');
 
@@ -1207,7 +1167,7 @@ parse_XD(const char* str, size_t len, size_t* outlen_opt) noexcept
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 16, this->m_rdxp);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 2;
@@ -1215,34 +1175,27 @@ parse_XD(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_DD(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_DD(const char* str, size_t len) noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
-    size_t temp_outlen;
-    size_t& outlen = outlen_opt ? *outlen_opt : temp_outlen;
-    outlen = 0;
 
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = do_get_special_value(rptr, eptr);
 
-    if(this->m_cls != value_class_finite) {
-      // Accept this special value without digits.
-      outlen = (size_t) (rptr - str);
-      return *this;
-    }
+    if(this->m_cls != value_class_finite)
+      return (size_t) (rptr - str);
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
     xuint xu = do_collect_digits(rptr, eptr, 10, this->m_rdxp);
     if(!xu.valid)
-      return *this;
+      return 0;
 
     // Copy all digits from `xu`.
     this->m_base = 10;
@@ -1250,85 +1203,84 @@ parse_DD(const char* str, size_t len, size_t* outlen_opt) noexcept
     this->m_mant = xu.mant;
     this->m_more = xu.more;
 
-    outlen = (size_t) (rptr - str);
-    return *this;
+    return (size_t) (rptr - str);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_U(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_U(const char* str, size_t len) noexcept
   {
     if((len >= 2) && (str[0] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
       // hexadecimal. Prefixes are case-insensitive.
       if((str[1] | 0x20) == 'b')
-        return this->parse_BU(str, len, outlen_opt);
+        return this->parse_BU(str, len);
 
       if((str[1] | 0x20) == 'x')
-        return this->parse_XU(str, len, outlen_opt);
+        return this->parse_XU(str, len);
     }
 
     // Assume decimal.
-    return this->parse_DU(str, len, outlen_opt);
+    return this->parse_DU(str, len);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_I(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_I(const char* str, size_t len) noexcept
   {
     if((len >= 2) && (str[0] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
       // hexadecimal. Prefixes are case-insensitive.
       if((str[1] | 0x20) == 'b')
-        return this->parse_BI(str, len, outlen_opt);
+        return this->parse_BI(str, len);
 
       if((str[1] | 0x20) == 'x')
-        return this->parse_XI(str, len, outlen_opt);
+        return this->parse_XI(str, len);
     }
 
     if((len >= 3) && ((str[0] == '+') || (str[0] == '-')) && (str[1] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
       // hexadecimal. Prefixes are case-insensitive.
       if((str[2] | 0x20) == 'b')
-        return this->parse_BI(str, len, outlen_opt);
+        return this->parse_BI(str, len);
 
       if((str[2] | 0x20) == 'x')
-        return this->parse_XI(str, len, outlen_opt);
+        return this->parse_XI(str, len);
     }
 
     // Assume decimal.
-    return this->parse_DI(str, len, outlen_opt);
+    return this->parse_DI(str, len);
   }
 
-ascii_numget&
+size_t
 ascii_numget::
-parse_D(const char* str, size_t len, size_t* outlen_opt) noexcept
+parse_D(const char* str, size_t len) noexcept
   {
     if((len >= 2) && (str[0] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
       // hexadecimal. Prefixes are case-insensitive.
       if((str[1] | 0x20) == 'b')
-        return this->parse_BD(str, len, outlen_opt);
+        return this->parse_BD(str, len);
 
       if((str[1] | 0x20) == 'x')
-        return this->parse_XD(str, len, outlen_opt);
+        return this->parse_XD(str, len);
     }
 
     if((len >= 3) && ((str[0] == '+') || (str[0] == '-')) && (str[1] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
       // hexadecimal. Prefixes are case-insensitive.
       if((str[2] | 0x20) == 'b')
-        return this->parse_BD(str, len, outlen_opt);
+        return this->parse_BD(str, len);
 
       if((str[2] | 0x20) == 'x')
-        return this->parse_XD(str, len, outlen_opt);
+        return this->parse_XD(str, len);
     }
 
     // Assume decimal.
-    return this->parse_DD(str, len, outlen_opt);
+    return this->parse_DD(str, len);
   }
 
-ascii_numget&
+void
 ascii_numget::
 cast_U(uint64_t& value, uint64_t min, uint64_t max) noexcept
   {
@@ -1429,10 +1381,9 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max) noexcept
     }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
-    return *this;
   }
 
-ascii_numget&
+void
 ascii_numget::
 cast_I(int64_t& value, int64_t min, int64_t max) noexcept
   {
@@ -1536,10 +1487,9 @@ cast_I(int64_t& value, int64_t min, int64_t max) noexcept
     }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
-    return *this;
   }
 
-ascii_numget&
+void
 ascii_numget::
 cast_F(float& value, float min, float max) noexcept
   {
@@ -1717,10 +1667,9 @@ cast_F(float& value, float min, float max) noexcept
     }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
-    return *this;
   }
 
-ascii_numget&
+void
 ascii_numget::
 cast_D(double& value, double min, double max) noexcept
   {
@@ -1896,7 +1845,6 @@ cast_D(double& value, double min, double max) noexcept
     }
 
     this->m_ovfl |= do_is_value_out_of_range(value, min, max);
-    return *this;
   }
 
 }  // namespace rocket

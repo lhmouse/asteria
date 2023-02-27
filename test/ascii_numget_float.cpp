@@ -43,9 +43,7 @@ int main()
       ASTERIA_TEST_CHECK(::std::strtof(r.text, nullptr) == r.value);
 
       ::rocket::ascii_numget numg;
-      size_t outlen;
-      numg.parse_D(r.text, ::strlen(r.text), &outlen);
-      ASTERIA_TEST_CHECK(outlen == ::strlen(r.text));
+      ASTERIA_TEST_CHECK(numg.parse_D(r.text, ::strlen(r.text)) == ::strlen(r.text));
 
       float result;
       numg.cast_F(result, -HUGE_VALF, HUGE_VALF);

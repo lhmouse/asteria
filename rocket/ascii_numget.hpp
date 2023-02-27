@@ -14,25 +14,22 @@ class ascii_numget
     char m_rdxp = '.';
 
     // Casting results
-    bool m_ovfl;  // out of range; MSB lost
-    bool m_udfl;  // too small; truncated to zero
-    bool m_inxct;  // LSB lost
+    bool m_ovfl = false;  // out of range; MSB lost
+    bool m_udfl = false;  // too small; truncated to zero
+    bool m_inxct = false;  // LSB lost
 
     // Parsing results
-    bool m_sign;
-    uint8_t m_cls;
-    uint8_t m_base;
-    bool m_more;
+    bool m_sign = false;
+    uint8_t m_cls = 0;
+    uint8_t m_base = 0;
+    bool m_more = false;
 
-    int64_t m_exp;
-    uint64_t m_mant;
+    int64_t m_exp = 0;
+    uint64_t m_mant = 0;
 
   public:
     // Initializes the value zero.
-    ascii_numget() noexcept
-      {
-        this->clear();
-      }
+    ascii_numget() noexcept = default;
 
     ascii_numget(const ascii_numget&) = delete;
 
@@ -85,92 +82,101 @@ class ascii_numget
       }
 
     // * boolean as `true` or `false`
-    ascii_numget&
-    parse_TB(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_TB(const char* str, size_t len) noexcept;
 
     // * unsigned 64-bit integer in binary
-    ascii_numget&
-    parse_BU(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_BU(const char* str, size_t len) noexcept;
 
     // * unsigned 64-bit integer in hexadecimal
-    ascii_numget&
-    parse_XU(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_XU(const char* str, size_t len) noexcept;
 
     // * unsigned 64-bit integer in decimal
-    ascii_numget&
-    parse_DU(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_DU(const char* str, size_t len) noexcept;
 
     // * signed 64-bit integer in binary
-    ascii_numget&
-    parse_BI(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_BI(const char* str, size_t len) noexcept;
 
     // * signed 64-bit integer in hexadecimal
-    ascii_numget&
-    parse_XI(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_XI(const char* str, size_t len) noexcept;
 
     // * signed 64-bit integer in decimal
-    ascii_numget&
-    parse_DI(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_DI(const char* str, size_t len) noexcept;
 
     // * IEEE-754 double-precision floating-point number in binary
-    ascii_numget&
-    parse_BD(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_BD(const char* str, size_t len) noexcept;
 
     // * IEEE-754 double-precision floating-point number in hexadecimal
-    ascii_numget&
-    parse_XD(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_XD(const char* str, size_t len) noexcept;
 
     // * IEEE-754 double-precision floating-point number in decimal
-    ascii_numget&
-    parse_DD(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_DD(const char* str, size_t len) noexcept;
 
     // * unsigned 64-bit integer in any format
-    ascii_numget&
-    parse_U(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_U(const char* str, size_t len) noexcept;
 
     // * signed 64-bit integer in any format
-    ascii_numget&
-    parse_I(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_I(const char* str, size_t len) noexcept;
 
     // * IEEE-754 double-precision in any format
-    ascii_numget&
-    parse_D(const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept;
+    size_t
+    parse_D(const char* str, size_t len) noexcept;
 
     // * unsigned 64-bit integer
-    ascii_numget&
+    void
     cast_U(uint64_t& value, uint64_t min, uint64_t max) noexcept;
 
     // * signed 64-bit integer
-    ascii_numget&
+    void
     cast_I(int64_t& value, int64_t min, int64_t max) noexcept;
 
     // * IEEE-754 single-precision floating-point
-    ascii_numget&
+    void
     cast_F(float& value, float min, float max) noexcept;
 
     // * IEEE-754 double-precision floating-point
-    ascii_numget&
+    void
     cast_D(double& value, double min, double max) noexcept;
 
-    // These are easy functions that delegate to those above, passing
-    // their default arguments. These functions are designed to take
-    // strings in any format.
+    // These functions delegate to those above. These are designed to
+    // take strings in any format, and return the number of characters
+    // that have been parsed successfully. Zero is returned if an input
+    // string doesn't contain a number.
     ascii_numget&
-    get(bool& value, const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept
+    get(bool& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        uint64_t temp;
-        this->parse_TB(str, len, outlen_opt);
-        this->cast_U(temp, 0, 1);
-        value = temp & 1;
+        size_t acclen_temp;
+        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
+        acclen = this->parse_TB(str, len);
+
+        int64_t temp;
+        this->cast_I(temp, -1, 0);
+        value = temp < 0;
         return *this;
       }
 
     ascii_numget&
-    get(void*& value, const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept
+    get(void*& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
+        size_t acclen_temp;
+        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
+        acclen = this->parse_XU(str, len);
+
         uint64_t temp;
-        this->parse_XU(str, len, outlen_opt);
-        this->cast_U(temp, 0U, numeric_limits<uintptr_t>::max());
+        constexpr auto min = numeric_limits<uintptr_t>::min();
+        constexpr auto max = numeric_limits<uintptr_t>::max();
+        this->cast_U(temp, min, max);
         value = (void*)(uintptr_t) temp;
         return *this;
       }
@@ -178,11 +184,16 @@ class ascii_numget
     template<typename valueT,
     ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
     ascii_numget&
-    get(valueT& value, const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept
+    get(valueT& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
+        size_t acclen_temp;
+        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
+        acclen = this->parse_U(str, len);
+
         uint64_t temp;
-        this->parse_U(str, len, outlen_opt);
-        this->cast_U(temp, numeric_limits<valueT>::min(), numeric_limits<valueT>::max());
+        constexpr auto min = numeric_limits<valueT>::min();
+        constexpr auto max = numeric_limits<valueT>::max();
+        this->cast_U(temp, min, max);
         value = (valueT) temp;
         return *this;
       }
@@ -190,28 +201,41 @@ class ascii_numget
     template<typename valueT,
     ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
     ascii_numget&
-    get(valueT& value, const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept
+    get(valueT& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
+        size_t acclen_temp;
+        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
+        acclen = this->parse_I(str, len);
+
         int64_t temp;
-        this->parse_I(str, len, outlen_opt);
-        this->cast_I(temp, numeric_limits<valueT>::min(), numeric_limits<valueT>::max());
+        constexpr auto min = numeric_limits<valueT>::min();
+        constexpr auto max = numeric_limits<valueT>::max();
+        this->cast_I(temp, min, max);
         value = (valueT) temp;
         return *this;
       }
 
     ascii_numget&
-    get(float& value, const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept
+    get(float& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        this->parse_D(str, len, outlen_opt);
-        this->cast_F(value, - numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
+        size_t acclen_temp;
+        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
+        acclen = this->parse_D(str, len);
+
+        constexpr auto inf = numeric_limits<float>::infinity();
+        this->cast_F(value, -inf, +inf);
         return *this;
       }
 
     ascii_numget&
-    get(double& value, const char* str, size_t len, size_t* outlen_opt = nullptr) noexcept
+    get(double& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        this->parse_D(str, len, outlen_opt);
-        this->cast_D(value, - numeric_limits<double>::infinity(), numeric_limits<double>::infinity());
+        size_t acclen_temp;
+        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
+        acclen = this->parse_D(str, len);
+
+        constexpr auto inf = numeric_limits<double>::infinity();
+        this->cast_D(value, -inf, +inf);
         return *this;
       }
   };

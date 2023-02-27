@@ -43,9 +43,7 @@ int main()
       ASTERIA_TEST_CHECK(::std::strtod(r.text, nullptr) == r.value);
 
       ::rocket::ascii_numget numg;
-      size_t outlen;
-      numg.parse_D(r.text, ::strlen(r.text), &outlen);
-      ASTERIA_TEST_CHECK(outlen == ::strlen(r.text));
+      ASTERIA_TEST_CHECK(numg.parse_D(r.text, ::strlen(r.text)) == ::strlen(r.text));
 
       double result = 12345;
       numg.cast_D(result, -HUGE_VAL, HUGE_VAL);

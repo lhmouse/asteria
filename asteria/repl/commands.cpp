@@ -94,10 +94,12 @@ struct Handler_exit final
         const auto& s = args.at(0);
 
         ::rocket::ascii_numget numg;
-        uint8_t num;
-        size_t outlen;
-        if(numg.get(num, s.data(), s.size(), &outlen) && (outlen == s.size()))
-          stat = (Exit_Status) num;
+        if(numg.parse_U(s.data(), s.size()) == s.size()) {
+          // Get exit status from the argument.
+          uint64_t temp;
+          numg.cast_U(temp, 0, UINT8_MAX);
+          stat = (Exit_Status) temp;
+        }
         else
           repl_printf("! warning: invalid exit status: %s", s.c_str());
 

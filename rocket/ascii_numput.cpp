@@ -1040,31 +1040,6 @@ struct frexp
   };
 
 inline
-bool
-do_get_special_class(const char*& data, uint32_t& size, const frexp& frx)
-  {
-    switch((uint32_t) frx.cls) {
-      case fpclass_inf:
-        data = "-infinity" + (1U - frx.sign);
-        size = 8U + frx.sign;
-        return true;
-
-      case fpclass_nan:
-        data = "-nan" + (1U - frx.sign);
-        size = 3U + frx.sign;
-        return true;
-
-      case fpclass_zero:
-        data = s_small_decimals[0] + (1U - frx.sign);
-        size = 1U + frx.sign;
-        return true;
-
-      default:
-        return false;
-    }
-  }
-
-inline
 frexp
 do_frexp2_23(float value)
   {
@@ -1315,6 +1290,31 @@ do_frexp10_17(double value)
   }
 
 inline
+bool
+do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
+  {
+    switch((uint32_t) frx.cls) {
+      case fpclass_inf:
+        str_out = "-infinity" + (1U - frx.sign);
+        len_out = 8U + frx.sign;
+        return true;
+
+      case fpclass_nan:
+        str_out = "-nan" + (1U - frx.sign);
+        len_out = 3U + frx.sign;
+        return true;
+
+      case fpclass_zero:
+        str_out = s_small_decimals[0] + (1U - frx.sign);
+        len_out = 1U + frx.sign;
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
+inline
 void
 do_write_zeroes(char*& wptr, uint32_t len)
   {
@@ -1395,16 +1395,15 @@ do_write_exp(char*& wptr, int exp)
 
 }  // namespace
 
-ascii_numput&
+void
 ascii_numput::
 put_TB(bool value) noexcept
   {
     this->m_data = "false\0true" + 6U * value;
     this->m_size = 5U - value;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XP(const volatile void* value) noexcept
   {
@@ -1418,10 +1417,9 @@ put_XP(const volatile void* value) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_BU(uint64_t value, uint32_t precision) noexcept
   {
@@ -1435,10 +1433,9 @@ put_BU(uint64_t value, uint32_t precision) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XU(uint64_t value, uint32_t precision) noexcept
   {
@@ -1452,17 +1449,16 @@ put_XU(uint64_t value, uint32_t precision) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_DU(uint64_t value, uint32_t precision) noexcept
   {
     if((precision == 1) && (value < noadl::size(s_small_decimals))) {
       // Get the static string.
       do_get_small_decimal(this->m_data, this->m_size, (uint32_t) value);
-      return *this;
+      return;
     }
 
     char* wptr = ::std::end(this->m_stor);
@@ -1472,10 +1468,9 @@ put_DU(uint64_t value, uint32_t precision) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_BI(int64_t value, uint32_t precision) noexcept
   {
@@ -1492,10 +1487,9 @@ put_BI(int64_t value, uint32_t precision) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XI(int64_t value, uint32_t precision) noexcept
   {
@@ -1512,10 +1506,9 @@ put_XI(int64_t value, uint32_t precision) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_DI(int64_t value, uint32_t precision) noexcept
   {
@@ -1527,7 +1520,7 @@ put_DI(int64_t value, uint32_t precision) noexcept
       do_get_small_decimal(this->m_data, this->m_size, -(uint32_t) value);
       this->m_data -= 1;
       this->m_size += 1;
-      return *this;
+      return;
     }
 
     char* wptr = ::std::end(this->m_stor);
@@ -1540,16 +1533,15 @@ put_DI(int64_t value, uint32_t precision) noexcept
 
     this->m_data = wptr;
     this->m_size = ntotal;
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_BF(float value) noexcept
   {
     frexp frx = do_frexp2_23(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 23;
 
@@ -1585,16 +1577,15 @@ put_BF(float value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_BEF(float value) noexcept
   {
     frexp frx = do_frexp2_23(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 23;
 
@@ -1614,16 +1605,15 @@ put_BEF(float value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XF(float value) noexcept
   {
     frexp frx = do_frexp2_23(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 23;
     frx.mant <<= frx.exp & 3;
@@ -1661,16 +1651,15 @@ put_XF(float value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XEF(float value) noexcept
   {
     frexp frx = do_frexp2_23(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 23;
     frx.mant <<= frx.exp & 3;
@@ -1692,16 +1681,15 @@ put_XEF(float value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_DF(float value) noexcept
   {
     frexp frx = do_frexp10_8(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 8;
 
@@ -1737,16 +1725,15 @@ put_DF(float value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_DEF(float value) noexcept
   {
     frexp frx = do_frexp10_8(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 8;
 
@@ -1766,16 +1753,15 @@ put_DEF(float value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_BD(double value) noexcept
   {
     frexp frx = do_frexp2_52(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 52;
 
@@ -1811,16 +1797,15 @@ put_BD(double value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_BED(double value) noexcept
   {
     frexp frx = do_frexp2_52(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 52;
 
@@ -1840,16 +1825,15 @@ put_BED(double value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XD(double value) noexcept
   {
     frexp frx = do_frexp2_52(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 52;
     frx.mant <<= frx.exp & 3;
@@ -1887,16 +1871,15 @@ put_XD(double value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_XED(double value) noexcept
   {
     frexp frx = do_frexp2_52(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 52;
     frx.mant <<= frx.exp & 3;
@@ -1918,16 +1901,15 @@ put_XED(double value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_DD(double value) noexcept
   {
     frexp frx = do_frexp10_17(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 17;
 
@@ -1963,16 +1945,15 @@ put_DD(double value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
-ascii_numput&
+void
 ascii_numput::
 put_DED(double value) noexcept
   {
     frexp frx = do_frexp10_17(value);
-    if(do_get_special_class(this->m_data, this->m_size, frx))
-      return *this;
+    if(do_is_special_class(this->m_data, this->m_size, frx))
+      return;
 
     frx.exp += 17;
 
@@ -1992,7 +1973,6 @@ put_DED(double value) noexcept
 
     this->m_data = this->m_stor + (1U - frx.sign);
     this->m_size = (uint32_t) (wptr - this->m_data);
-    return *this;
   }
 
 }  // namespace rocket
