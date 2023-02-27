@@ -1205,8 +1205,8 @@ do_frexp10_8(float value)
     // produces 9 significant digits.
     xbits = (0x800000ULL | frx.mant) << (frx.exp + mult.exp2 - 182);
     uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 183);
-    uint32_t mant_min = (uint32_t) ((xbits - half_ulp) * ((mult.mant + UINT32_MAX) >> 32) / 1000000000ULL + 1ULL);
-    uint32_t mant_max = (uint32_t) ((xbits + half_ulp - 1ULL) * ((mult.mant + UINT32_MAX) >> 32) / 1000000000ULL);
+    uint32_t mant_min = (uint32_t) ((xbits - half_ulp) * ((mult.mant) >> 32) / 1000000000ULL + 1ULL);
+    uint32_t mant_max = (uint32_t) ((xbits + half_ulp) * ((mult.mant - 1ULL) >> 32) / 1000000000ULL);
 
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
@@ -1289,7 +1289,7 @@ do_frexp10_17(double value)
     bits = (0x10000000000000ULL | frx.mant) << (frx.exp + mult.exp2 - 1075);
     uint64_t half_ulp = 1ULL << (frx.exp + mult.exp2 - 1076);
     uint64_t mant_min = mulh128(bits - half_ulp, mult.mant) + 1ULL;
-    uint64_t mant_max = mulh128(bits + half_ulp - 1ULL, mult.mant);
+    uint64_t mant_max = mulh128(bits + half_ulp, mult.mant - 1ULL);
 
     // Round the mantissa to shortest. This is done by removing trailing
     // digits one by one, until the result would be out of range.
