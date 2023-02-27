@@ -160,7 +160,6 @@ class ascii_numget
       {
         uint64_t temp;
         this->parse_TB(str, len, outlen_opt);
-
         this->cast_U(temp, 0, 1);
         value = temp & 1;
         return *this;
