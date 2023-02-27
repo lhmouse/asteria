@@ -1621,7 +1621,8 @@ cast_F(float& value, float min, float max) noexcept
 
           const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
           exp = mult.exp2;
-          bits = (uint32_t) ((bits * ((mult.mant + UINT32_MAX) >> 32)) >> 32);
+          uint64_t ceiled_mult_mant = (mult.mant + UINT32_MAX) >> 32;
+          bits = (uint32_t) (bits * ceiled_mult_mant >> 32);
 
           // Re-align the mantissa, so its MSB is non-zero.
           int rsh = ROCKET_LZCNT32(bits);
