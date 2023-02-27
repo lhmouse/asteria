@@ -170,7 +170,6 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
       // numeric
       do_mempcpy(wptr, " +\0 -" + (gmtoff_sign >> 1 & 3), 2);
       do_mempcpy(wptr, s_2digit[gmtoff_abs / 60], 2);
-      do_mempcpy(wptr, ":", 1);
       do_mempcpy(wptr, s_2digit[gmtoff_abs % 60], 2);
     }
 
@@ -231,11 +230,7 @@ std_chrono_parse(V_string time_str)
 
         do_match(rptr, gmtoff_abs, s_2digit, 2);
         gmtoff_abs *= 60;
-
-        if(rptr && (*rptr == ':')) {
-          rptr ++;
-          do_match(rptr, gmtoff_abs, s_2digit, 2);
-        }
+        do_match(rptr, gmtoff_abs, s_2digit, 2);
       }
     }
 
