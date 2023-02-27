@@ -69,7 +69,7 @@ class Runtime_Error
       { return this->m_frames.at(index);  }
 
     template<typename XValT>
-    Runtime_Error&
+    void
     push_frame_throw(const Source_Location& sloc, XValT&& xval)
       {
         // Start a new backtrace.
@@ -78,11 +78,10 @@ class Runtime_Error
 
         // Append the first frame to the current backtrace.
         this->do_insert_frame({ frame_type_throw, sloc, this->m_value });
-        return *this;
       }
 
     template<typename XValT>
-    Runtime_Error&
+    void
     push_frame_catch(const Source_Location& sloc, XValT&& xval)
       {
         // Append a new frame to the current backtrace.
@@ -91,26 +90,23 @@ class Runtime_Error
         // This means an exception was thrown again from a `catch` block.
         // Subsequent frames shoud be appended to its parent.
         this->m_ins_at = this->m_frames.size();
-        return *this;
       }
 
-    Runtime_Error&
+    void
     push_frame_plain(const Source_Location& sloc, stringR remarks)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_plain, sloc, remarks });
-        return *this;
       }
 
-    Runtime_Error&
+    void
     push_frame_func(const Source_Location& sloc, stringR func)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_func, sloc, func });
-        return *this;
       }
 
-    Runtime_Error&
+    void
     push_frame_defer(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.
@@ -119,15 +115,13 @@ class Runtime_Error
         // This means an exception was thrown again during execution of deferred
         // expression. Subsequent frames shoud be appended to its parent.
         this->m_ins_at = this->m_frames.size();
-        return *this;
       }
 
-    Runtime_Error&
+    void
     push_frame_try(const Source_Location& sloc)
       {
         // Append a new frame to the current backtrace.
         this->do_insert_frame({ frame_type_try, sloc, this->m_value });
-        return *this;
       }
   };
 

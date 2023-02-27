@@ -380,6 +380,13 @@ class cow_opaque
     operator=(nullptr_t) &
       { return this->reset();  }
 
+    cow_opaque&
+    swap(cow_opaque& other) noexcept
+      {
+        this->m_sptr.swap(other.m_sptr);
+        return *this;
+      }
+
   public:
     bool
     unique() const noexcept
@@ -439,13 +446,6 @@ class cow_opaque
     open();
   };
 
-inline
-tinyfmt&
-operator<<(tinyfmt& fmt, const cow_opaque& opaq)
-  {
-    return opaq.describe(fmt);
-  }
-
 template<typename OpaqueT>
 inline
 const OpaqueT&
@@ -503,6 +503,20 @@ open()
     return *toptr;
   }
 
+inline
+void
+swap(cow_opaque& lhs, cow_opaque& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
+
+inline
+tinyfmt&
+operator<<(tinyfmt& fmt, const cow_opaque& opaq)
+  {
+    return opaq.describe(fmt);
+  }
+
 // Function type support
 class cow_function
   {
@@ -531,6 +545,13 @@ class cow_function
     cow_function&
     operator=(nullptr_t) &
       { return this->reset();  }
+
+    cow_function&
+    swap(cow_function& other) noexcept
+      {
+        this->m_sptr.swap(other.m_sptr);
+        return *this;
+      }
 
   public:
     bool
@@ -606,6 +627,13 @@ class cow_function
     Reference&
     invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const;
   };
+
+inline
+void
+swap(cow_function& lhs, cow_function& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 inline
 tinyfmt&

@@ -50,11 +50,7 @@ class ascii_numget
     inexact() const noexcept
       { return this->m_inxct;  }
 
-    explicit operator
-    bool() const noexcept
-      { return this->m_ovfl == false;  }
-
-    ascii_numget&
+    void
     clear() noexcept
       {
         this->m_sign = false;
@@ -66,7 +62,6 @@ class ascii_numget
         this->m_ovfl = false;
         this->m_udfl = false;
         this->m_inxct = false;
-        return *this;
       }
 
     // Gets and sets the radix point.
@@ -74,12 +69,9 @@ class ascii_numget
     radix_point() const noexcept
       { return this->m_rdxp;  }
 
-    ascii_numget&
+    void
     set_radix_point(char rdxp) noexcept
-      {
-        this->m_rdxp = rdxp;
-        return *this;
-      }
+      { this->m_rdxp = rdxp;  }
 
     // * boolean as `true` or `false`
     size_t
@@ -153,7 +145,7 @@ class ascii_numget
     // take strings in any format, and return the number of characters
     // that have been parsed successfully. Zero is returned if an input
     // string doesn't contain a number.
-    ascii_numget&
+    void
     get(bool& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
         size_t acclen_temp;
@@ -163,10 +155,9 @@ class ascii_numget
         int64_t temp;
         this->cast_I(temp, -1, 0);
         value = temp < 0;
-        return *this;
       }
 
-    ascii_numget&
+    void
     get(void*& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
         size_t acclen_temp;
@@ -178,12 +169,11 @@ class ascii_numget
         constexpr auto max = numeric_limits<uintptr_t>::max();
         this->cast_U(temp, min, max);
         value = (void*)(uintptr_t) temp;
-        return *this;
       }
 
     template<typename valueT,
     ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
-    ascii_numget&
+    void
     get(valueT& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
         size_t acclen_temp;
@@ -195,12 +185,11 @@ class ascii_numget
         constexpr auto max = numeric_limits<valueT>::max();
         this->cast_U(temp, min, max);
         value = (valueT) temp;
-        return *this;
       }
 
     template<typename valueT,
     ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
-    ascii_numget&
+    void
     get(valueT& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
         size_t acclen_temp;
@@ -212,10 +201,9 @@ class ascii_numget
         constexpr auto max = numeric_limits<valueT>::max();
         this->cast_I(temp, min, max);
         value = (valueT) temp;
-        return *this;
       }
 
-    ascii_numget&
+    void
     get(float& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
         size_t acclen_temp;
@@ -224,10 +212,9 @@ class ascii_numget
 
         constexpr auto inf = numeric_limits<float>::infinity();
         this->cast_F(value, -inf, +inf);
-        return *this;
       }
 
-    ascii_numget&
+    void
     get(double& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
         size_t acclen_temp;
@@ -236,7 +223,6 @@ class ascii_numget
 
         constexpr auto inf = numeric_limits<double>::infinity();
         this->cast_D(value, -inf, +inf);
-        return *this;
       }
   };
 

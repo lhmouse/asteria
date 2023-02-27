@@ -99,7 +99,7 @@ class Executive_Context
 
     // Defer an expression which will be evaluated at scope exit.
     // The result of such expressions are discarded.
-    Executive_Context&
+    void
     defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
 
     // These functions must be called before exiting a scope.

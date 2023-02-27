@@ -60,6 +60,13 @@ class recursive_mutex
             return *this;
           }
 
+        unique_lock&
+        swap(unique_lock& other) noexcept
+          {
+            ::std::swap(this->m_mtx, other.m_mtx);
+            return *this;
+          }
+
         ~unique_lock()
           {
             this->unlock();
@@ -70,34 +77,25 @@ class recursive_mutex
         bool() const noexcept
           { return this->m_mtx != nullptr;  }
 
-        unique_lock&
+        void
         lock(recursive_mutex& m) noexcept
           {
             if(this->m_mtx == &(m.m_mtx))
-              return *this;
+              return;
 
             m.m_mtx.lock();  // note lock first
             this->unlock();
             this->m_mtx = &(m.m_mtx);
-            return *this;
           }
 
-        unique_lock&
+        void
         unlock() noexcept
           {
             if(this->m_mtx == nullptr)
-              return *this;
+              return;
 
             this->m_mtx->unlock();
             this->m_mtx = nullptr;
-            return *this;
-          }
-
-        unique_lock&
-        swap(unique_lock& other) noexcept
-          {
-            ::std::swap(this->m_mtx, other.m_mtx);
-            return *this;
           }
       };
   };

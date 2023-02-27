@@ -48,6 +48,7 @@ class array
       {
         for(size_type i = 0; i != capacityT; ++i)
           noadl::xswap(this->m_stor[i], other.m_stor[i]);
+
         return *this;
       }
 
@@ -152,12 +153,11 @@ class array
 
     // N.B. The template parameter is a non-standard extension.
     template<typename otherT>
-    array&
+    void
     fill(const otherT& other)
       {
         for(size_type i = 0; i != capacityT; ++i)
           this->m_stor[i] = other;
-        return *this;
       }
 
     // N.B. This is a non-standard extension.

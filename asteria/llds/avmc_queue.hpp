@@ -85,7 +85,7 @@ class AVMC_Queue
     empty() const noexcept
       { return this->m_used == 0;  }
 
-    AVMC_Queue&
+    void
     clear() noexcept
       {
         if(this->m_used)
@@ -93,7 +93,6 @@ class AVMC_Queue
 
         // Clean invalid data up.
         this->m_used = 0;
-        return *this;
       }
 
     // Append a node. This allows you to bind an arbitrary function.
@@ -127,7 +126,7 @@ class AVMC_Queue
 
     // Mark this queue ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.
-    AVMC_Queue&
+    void
     finalize();
 
     // These are interfaces called by the runtime.

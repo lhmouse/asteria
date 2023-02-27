@@ -53,13 +53,12 @@ class ascii_numput
     data() const noexcept
       { return this->m_data;  }
 
-    ascii_numput&
+    void
     clear() noexcept
       {
         this->m_data = this->m_stor;
         this->m_size = 0;
         this->m_stor[0] = 0;
-        return *this;
       }
 
     // Gets and sets the radix point.
@@ -67,12 +66,9 @@ class ascii_numput
     radix_point() const noexcept
       { return this->m_rdxp;  }
 
-    ascii_numput&
+    void
     set_radix_point(char rdxp) noexcept
-      {
-        this->m_rdxp = rdxp;
-        return *this;
-      }
+      { this->m_rdxp = rdxp;  }
 
     // * boolean as `true` or `false`
     void
@@ -157,50 +153,44 @@ class ascii_numput
     // These are easy functions that delegate to those above, passing
     // their default arguments. These functions are designed to produce
     // lossless outputs.
-    ascii_numput&
+    void
     put(bool value) noexcept
       {
         this->put_TB(value);
-        return *this;
       }
 
-    ascii_numput&
+    void
     put(const volatile void* value) noexcept
       {
         this->put_XP(value);
-        return *this;
       }
 
     template<typename valueT,
     ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
-    ascii_numput&
+    void
     put(valueT value) noexcept
       {
         this->put_DU(value);
-        return *this;
       }
 
     template<typename valueT,
     ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
-    ascii_numput&
+    void
     put(valueT value) noexcept
       {
         this->put_DI(value);
-        return *this;
       }
 
-    ascii_numput&
+    void
     put(float value) noexcept
       {
         this->put_DF(value);
-        return *this;
       }
 
-    ascii_numput&
+    void
     put(double value) noexcept
       {
         this->put_DD(value);
-        return *this;
       }
   };
 

@@ -168,13 +168,12 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
     return qnode;
   }
 
-AVMC_Queue&
+void
 AVMC_Queue::
 finalize()
   {
     // TODO: Add JIT support.
     this->do_reallocate(0);
-    return *this;
   }
 
 AIR_Status

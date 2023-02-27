@@ -2538,7 +2538,7 @@ Statement_Sequence::
   {
   }
 
-Statement_Sequence&
+void
 Statement_Sequence::
 reload(Token_Stream&& tstrm)
   {
@@ -2559,10 +2559,9 @@ reload(Token_Stream&& tstrm)
 
     // Succeed.
     this->m_stmts = ::std::move(stmts);
-    return *this;
   }
 
-Statement_Sequence&
+void
 Statement_Sequence::
 reload_oneline(Token_Stream&& tstrm)
   {
@@ -2591,7 +2590,6 @@ reload_oneline(Token_Stream&& tstrm)
 
     // Succeed.
     this->m_stmts = ::std::move(stmts);
-    return *this;
   }
 
 }  // namespace asteria

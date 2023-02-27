@@ -55,7 +55,9 @@ class Recursion_Sentry
   public:
     // Make this class non-trivial.
     ~Recursion_Sentry()
-      { }
+      {
+        __asm__ ("");
+      }
 
     const void*
     get_base() const noexcept

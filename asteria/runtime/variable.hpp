@@ -35,16 +35,11 @@ class Variable final
     // GC interfaces
     long
     get_gc_ref() const noexcept
-      {
-        return this->m_gc_ref;
-      }
+      { return this->m_gc_ref;  }
 
-    Variable&
+    void
     set_gc_ref(long ref) noexcept
-      {
-        this->m_gc_ref = ref;
-        return *this;
-      }
+      { this->m_gc_ref = ref;  }
 
     // Accessors
     State
@@ -69,20 +64,18 @@ class Variable final
 
     // Modifiers
     template<typename XValT>
-    Variable&
+    void
     initialize(XValT&& xval, State xstat = state_mutable)
       {
         this->m_value = ::std::forward<XValT>(xval);
         this->m_state = xstat;
-        return *this;
       }
 
-    Variable&
+    void
     uninitialize() noexcept
       {
         this->m_value = ::rocket::sref("[[`dead value`]]");
         this->m_state = state_invalid;
-        return *this;
       }
   };
 

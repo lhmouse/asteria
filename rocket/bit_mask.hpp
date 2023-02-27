@@ -48,13 +48,12 @@ class bit_mask
       }
 
     constexpr
-    bit_mask&
+    void
     set(size_t b, bool v = true) noexcept
       {
         ROCKET_ASSERT(b < bit_count);
         this->m_value &= ~(valueT(1) << b);
         this->m_value |= valueT(v) << b;
-        return *this;
       }
 
     constexpr

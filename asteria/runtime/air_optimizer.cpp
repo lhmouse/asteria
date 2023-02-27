@@ -16,7 +16,7 @@ AIR_Optimizer::
   {
   }
 
-AIR_Optimizer&
+void
 AIR_Optimizer::
 reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
        const Global_Context& global, const cow_vector<Statement>& stmts)
@@ -25,7 +25,7 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     this->m_params = params;
 
     if(stmts.empty())
-      return *this;
+      return;
 
     // Create a context of the function body.
     Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
@@ -40,13 +40,12 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
     // Check whether optimization is enabled during translation.
     if(this->m_opts.optimization_level < 2)
-      return *this;
+      return;
 
     // TODO: Insert optimization passes
-    return *this;
   }
 
-AIR_Optimizer&
+void
 AIR_Optimizer::
 rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
        const cow_vector<AIR_Node>& code)
@@ -55,7 +54,7 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     this->m_params = params;
 
     if(code.empty())
-      return *this;
+      return;
 
     // Create a context of the function body.
     Analytic_Context ctx_func(Analytic_Context::M_function(),
@@ -69,10 +68,9 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
     // Check whether optimization is enabled during execution.
     if(this->m_opts.optimization_level < 3)
-      return *this;
+      return;
 
     // TODO: Insert optimization passes
-    return *this;
   }
 
 cow_function

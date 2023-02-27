@@ -60,11 +60,10 @@ class Reference_Stack
     size() const noexcept
       { return this->m_etop;  }
 
-    Reference_Stack&
+    void
     clear() noexcept
       {
         this->m_etop = 0;
-        return *this;
       }
 
     void
@@ -72,20 +71,21 @@ class Reference_Stack
       {
         auto bptr = this->m_bptr;
         auto eptr = this->m_bptr + this->m_einit;
+
         while(eptr != bptr)
           (--eptr)->get_variables(staged, temp);
       }
 
-    Reference_Stack&
+    void
     clear_cache() noexcept
       {
         auto tptr = this->m_bptr + this->m_etop;
         auto eptr = this->m_bptr + this->m_einit;
+
         while(eptr != tptr)
           ::rocket::destroy(--eptr);
 
         this->m_einit = this->m_etop;
-        return *this;
       }
 
     const Reference&
@@ -121,12 +121,11 @@ class Reference_Stack
         return this->m_bptr[ki];
       }
 
-    Reference_Stack&
+    void
     pop(size_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->m_etop);
         this->m_etop -= (uint32_t)count;
-        return *this;
       }
   };
 

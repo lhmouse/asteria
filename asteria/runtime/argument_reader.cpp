@@ -44,13 +44,12 @@ do_terminate_parameter_list()
             this->m_state.params.size() + 1);  // null terminator included
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 do_mark_match_failure() noexcept
   {
     // Set the current overload as unmatched.
     this->m_state.matched = false;
-    return *this;
   }
 
 const Reference*
@@ -69,23 +68,22 @@ do_peek_argument() const
     return &(this->m_stack.top(rindex));
   }
 
-Argument_Reader&
-Argument_Reader::load_state(size_t index)
+void
+Argument_Reader::
+load_state(size_t index)
   {
     this->m_state = this->m_saved_states.at(index);
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 save_state(size_t index)
   {
     this->m_saved_states.append(subsat(index + 1, this->m_saved_states.size()));
     this->m_saved_states.mut(index) = this->m_state;
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 start_overload() noexcept
   {
@@ -93,10 +91,9 @@ start_overload() noexcept
     this->m_state.nparams = 0;
     this->m_state.ended = false;
     this->m_state.matched = true;
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(Reference& out)
   {
@@ -105,14 +102,13 @@ optional(Reference& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Copy the argument reference as is.
     out = *qref;
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(Value& out)
   {
@@ -121,14 +117,13 @@ optional(Value& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and copy the value as is.
     out = qref->dereference_readonly();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_boolean& out)
   {
@@ -137,21 +132,20 @@ optional(optV_boolean& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_boolean())
       return this->do_mark_match_failure();
 
     out = val.as_boolean();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_integer& out)
   {
@@ -160,21 +154,20 @@ optional(optV_integer& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_integer())
       return this->do_mark_match_failure();
 
     out = val.as_integer();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_real& out)
   {
@@ -183,21 +176,20 @@ optional(optV_real& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_real())
       return this->do_mark_match_failure();
 
     out = val.as_real();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_string& out)
   {
@@ -206,21 +198,20 @@ optional(optV_string& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_string())
       return this->do_mark_match_failure();
 
     out = val.as_string();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_opaque& out)
   {
@@ -229,21 +220,20 @@ optional(optV_opaque& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_opaque())
       return this->do_mark_match_failure();
 
     out = val.as_opaque();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_function& out)
   {
@@ -252,21 +242,20 @@ optional(optV_function& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_function())
       return this->do_mark_match_failure();
 
     out = val.as_function();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_array& out)
   {
@@ -275,21 +264,20 @@ optional(optV_array& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_array())
       return this->do_mark_match_failure();
 
     out = val.as_array();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 optional(optV_object& out)
   {
@@ -298,21 +286,20 @@ optional(optV_object& out)
 
     auto qref = this->do_peek_argument();
     if(!qref)
-      return *this;
+      return;
 
     // Dereference the argument and check its type.
     const auto& val = qref->dereference_readonly();
     if(val.is_null())
-      return *this;
+      return;
 
     if(!val.is_object())
       return this->do_mark_match_failure();
 
     out = val.as_object();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_boolean& out)
   {
@@ -329,10 +316,9 @@ required(V_boolean& out)
       return this->do_mark_match_failure();
 
     out = val.as_boolean();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_integer& out)
   {
@@ -349,10 +335,9 @@ required(V_integer& out)
       return this->do_mark_match_failure();
 
     out = val.as_integer();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_real& out)
   {
@@ -369,10 +354,9 @@ required(V_real& out)
       return this->do_mark_match_failure();
 
     out = val.as_real();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_string& out)
   {
@@ -389,10 +373,9 @@ required(V_string& out)
       return this->do_mark_match_failure();
 
     out = val.as_string();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_opaque& out)
   {
@@ -409,10 +392,9 @@ required(V_opaque& out)
       return this->do_mark_match_failure();
 
     out = val.as_opaque();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_function& out)
   {
@@ -429,10 +411,9 @@ required(V_function& out)
       return this->do_mark_match_failure();
 
     out = val.as_function();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_array& out)
   {
@@ -449,10 +430,9 @@ required(V_array& out)
       return this->do_mark_match_failure();
 
     out = val.as_array();
-    return *this;
   }
 
-Argument_Reader&
+void
 Argument_Reader::
 required(V_object& out)
   {
@@ -469,7 +449,6 @@ required(V_object& out)
       return this->do_mark_match_failure();
 
     out = val.as_object();
-    return *this;
   }
 
 bool

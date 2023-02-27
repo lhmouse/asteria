@@ -111,7 +111,7 @@ class Infix_Element
     tell_precedence() const noexcept;
 
     // Moves all units into `units`.
-    Infix_Element&
+    void
     extract(cow_vector<Expression_Unit>& units);
 
     // Returns a reference where new units will be appended.

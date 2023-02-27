@@ -88,7 +88,7 @@ class Module_Loader::Unique_Stream
 
     explicit operator
     bool() const noexcept
-      { return bool(this->m_strm);  }
+      { return this->m_strm != nullptr;  }
 
     ::rocket::tinybuf_file&
     get() const noexcept

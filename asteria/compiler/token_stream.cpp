@@ -743,7 +743,7 @@ Token_Stream::
   {
   }
 
-Token_Stream&
+void
 Token_Stream::
 reload(stringR file, int start_line, tinybuf&& cbuf)
   {
@@ -857,7 +857,6 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());
     this->m_rtoks = ::std::move(tokens);
-    return *this;
   }
 
 }  // namespace asteria

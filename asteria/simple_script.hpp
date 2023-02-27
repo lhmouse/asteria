@@ -47,40 +47,37 @@ class Simple_Script
     const cow_function&() const noexcept
       { return this->m_func;  }
 
-    Simple_Script&
+    void
     reset() noexcept
-      {
-        this->m_func.reset();
-        return *this;
-      }
+      { this->m_func.reset();  }
 
     // Load something. Calling these functions directly is not recommended.
-    Simple_Script&
+    void
     reload(stringR name, Statement_Sequence&& stmtq);
 
-    Simple_Script&
+    void
     reload(stringR name, Token_Stream&& tstrm);
 
-    Simple_Script&
+    void
     reload(stringR name, int line, tinybuf&& cbuf);
 
     // Load a script.
-    Simple_Script&
+    void
     reload_string(stringR name, int line, stringR code);
 
-    Simple_Script&
+    void
     reload_string(stringR name, stringR code);
 
-    Simple_Script&
+    void
     reload_stdin(int line);
 
-    Simple_Script&
+    void
     reload_stdin();
 
-    Simple_Script&
+    void
     reload_file(const char* path);
 
-    Simple_Script&
+    void
     reload_file(stringR path);
 
     // Execute the script that has been loaded.

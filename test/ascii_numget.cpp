@@ -65,7 +65,7 @@ int main()
       ASTERIA_TEST_CHECK(numg.parse_D(r.input, ::strlen(r.input)) == ::strlen(r.input));
 
       double val;
-      ASTERIA_TEST_CHECK(numg.cast_D(val, -HUGE_VAL, +HUGE_VAL));
+      numg.cast_D(val, -HUGE_VAL, +HUGE_VAL);
       uint64_t bits;
       ::std::memcpy(&bits, &val, sizeof(double));
       int err = (int) (bits - r.expected);

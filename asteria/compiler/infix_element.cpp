@@ -93,7 +93,7 @@ tell_precedence() const noexcept
     }
   }
 
-Infix_Element&
+void
 Infix_Element::
 extract(cow_vector<Expression_Unit>& units)
   {
@@ -103,7 +103,7 @@ extract(cow_vector<Expression_Unit>& units)
 
         // Move-append all units into `units`.
         units.append(altr.units.move_begin(), altr.units.move_end());
-        return *this;
+        return;
       }
 
       case index_ternary: {
@@ -113,7 +113,7 @@ extract(cow_vector<Expression_Unit>& units)
         Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true),
                                             ::std::move(altr.branch_false), altr.assign };
         units.emplace_back(::std::move(xunit));
-        return *this;
+        return;
       }
 
       case index_logical_and: {
@@ -124,7 +124,7 @@ extract(cow_vector<Expression_Unit>& units)
         Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), { },
                                             altr.assign };
         units.emplace_back(::std::move(xunit));
-        return *this;
+        return;
       }
 
       case index_logical_or: {
@@ -135,7 +135,7 @@ extract(cow_vector<Expression_Unit>& units)
         Expression_Unit::S_branch xunit = { altr.sloc, { }, ::std::move(altr.branch_false),
                                             altr.assign };
         units.emplace_back(::std::move(xunit));
-        return *this;
+        return;
       }
 
       case index_coalescence: {
@@ -145,7 +145,7 @@ extract(cow_vector<Expression_Unit>& units)
         Expression_Unit::S_coalescence xunit = { altr.sloc, ::std::move(altr.branch_null),
                                                  altr.assign };
         units.emplace_back(::std::move(xunit));
-        return *this;
+        return;
       }
 
       case index_general: {
@@ -159,7 +159,7 @@ extract(cow_vector<Expression_Unit>& units)
         // Append the operator itself.
         Expression_Unit::S_operator_rpn xunit = { altr.sloc, altr.xop, altr.assign };
         units.emplace_back(::std::move(xunit));
-        return *this;
+        return;
       }
 
       default:

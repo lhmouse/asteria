@@ -32,16 +32,11 @@ class fill_iterator
     constexpr
     difference_type
     tell() const noexcept
-      {
-        return this->m_pos;
-      }
+      { return this->m_pos;  }
 
-    fill_iterator&
+    void
     seek(difference_type pos) noexcept
-      {
-        this->m_pos = pos;
-        return *this;
-      }
+      { this->m_pos = pos;  }
 
     constexpr
     reference

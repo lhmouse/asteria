@@ -120,12 +120,11 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     return nullptr;
   }
 
-Executive_Context&
+void
 Executive_Context::
 defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
   {
     this->m_defer.emplace_back(sloc, ::std::move(queue));
-    return *this;
   }
 
 AIR_Status

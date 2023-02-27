@@ -36,7 +36,7 @@ class Argument_Reader
     do_terminate_parameter_list();
 
     inline
-    Argument_Reader&
+    void
     do_mark_match_failure() noexcept;
 
     inline
@@ -56,71 +56,71 @@ class Argument_Reader
     // states to eliminate the overhead of re-parsing this sequence. The
     // `index` argument is a subscript of `m_saved_states`, which is
     // resized by `save_state()` as necessary.
-    Argument_Reader&
+    void
     load_state(size_t index);
 
-    Argument_Reader&
+    void
     save_state(size_t index);
 
     // Start an overload. Effectively, this function clears `m_state`.
-    Argument_Reader&
+    void
     start_overload() noexcept;
 
     // Gets an optional argument. The argument may be of the desired type
     // or null.
-    Argument_Reader&
+    void
     optional(Reference& out);
 
-    Argument_Reader&
+    void
     optional(Value& out);
 
-    Argument_Reader&
+    void
     optional(optV_boolean& out);
 
-    Argument_Reader&
+    void
     optional(optV_integer& out);
 
-    Argument_Reader&
+    void
     optional(optV_real& out);
 
-    Argument_Reader&
+    void
     optional(optV_string& out);
 
-    Argument_Reader&
+    void
     optional(optV_opaque& out);
 
-    Argument_Reader&
+    void
     optional(optV_function& out);
 
-    Argument_Reader&
+    void
     optional(optV_array& out);
 
-    Argument_Reader&
+    void
     optional(optV_object& out);
 
     // Gets a required argument. The argument must be of the desired type.
-    Argument_Reader&
+    void
     required(V_boolean& out);
 
-    Argument_Reader&
+    void
     required(V_integer& out);
 
-    Argument_Reader&
+    void
     required(V_real& out);
 
-    Argument_Reader&
+    void
     required(V_string& out);
 
-    Argument_Reader&
+    void
     required(V_opaque& out);
 
-    Argument_Reader&
+    void
     required(V_function& out);
 
-    Argument_Reader&
+    void
     required(V_array& out);
 
-    Argument_Reader&
+    void
     required(V_object& out);
 
     // Terminate the current overload. The return value indicates whether

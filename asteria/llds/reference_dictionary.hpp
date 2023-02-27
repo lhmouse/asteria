@@ -171,7 +171,7 @@ class Reference_Dictionary
     size() const noexcept
       { return this->m_size;  }
 
-    Reference_Dictionary&
+    void
     clear() noexcept
       {
         if(this->m_head)
@@ -180,7 +180,6 @@ class Reference_Dictionary
         // Clean invalid data up.
         this->m_head = nullptr;
         this->m_size = 0;
-        return *this;
       }
 
     const Reference*

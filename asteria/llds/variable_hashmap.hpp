@@ -145,7 +145,7 @@ class Variable_HashMap
     capacity() const noexcept
       { return static_cast<size_t>(this->m_eptr - this->m_bptr) / 2;  }
 
-    Variable_HashMap&
+    void
     clear() noexcept
       {
         if(this->m_head)
@@ -154,7 +154,6 @@ class Variable_HashMap
         // Clean invalid data up.
         this->m_head = nullptr;
         this->m_size = 0;
-        return *this;
       }
 
     const refcnt_ptr<Variable>*
@@ -174,11 +173,10 @@ class Variable_HashMap
         return qbkt->vstor;
       }
 
-    Variable_HashMap&
+    void
     reserve_more(size_t nadd)
       {
         this->do_rehash_more(nadd);
-        return *this;
       }
 
     bool
