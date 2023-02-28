@@ -184,13 +184,13 @@ template<typename IterT>
 opt<IterT>
 do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
   {
-    // Make a lookup table.
-    array<bool, 256> table = { };
-    ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
+    bool table[256] = { };
 
-    // Search the range.
+    for(char c : set)
+      table[(uint8_t)c] = true;
+
     for(auto it = begin;  it != end;  ++it)
-      if(table[uint8_t(*it)] == match)
+      if(table[(uint8_t)*it] == match)
         return ::std::move(it);
 
     return nullopt;

@@ -341,7 +341,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
       auto& ctx = stack.mut_back();
       switch(ctx.index()) {
         case 0: {
-          auto& ctxa = ctx.as<0>();
+          auto& ctxa = ctx.mut<0>();
           if(++(ctxa.curp) != ctxa.refa->end()) {
             fmt << ',';
             indent.break_line(fmt);
@@ -362,7 +362,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         }
 
         case 1: {
-          auto& ctxo = ctx.as<1>();
+          auto& ctxo = ctx.mut<1>();
           if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
             fmt << ',';
             indent.break_line(fmt);
@@ -505,7 +505,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
               if(!kpunct) {
                 // Descend into the new object.
                 stack.emplace_back(S_xparse_object());
-                do_accept_object_key(stack.mut_back().as<1>(), tstrm);
+                do_accept_object_key(stack.mut_back().mut<1>(), tstrm);
                 continue;
               }
 
@@ -582,7 +582,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           return value;
 
         if(stack.back().index() == 0) {
-          auto& ctxa = stack.mut_back().as<0>();
+          auto& ctxa = stack.mut_back().mut<0>();
           ctxa.arr.emplace_back(::std::move(value));
 
           // Look for the next element.
@@ -604,7 +604,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           value = ::std::move(ctxa.arr);
         }
         else {
-          auto& ctxo = stack.mut_back().as<1>();
+          auto& ctxo = stack.mut_back().mut<1>();
           auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
           if(!pair.second)
             throw Compiler_Error(Compiler_Error::M_status(),

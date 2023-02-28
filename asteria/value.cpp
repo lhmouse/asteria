@@ -57,19 +57,19 @@ do_destroy_variant_slow() noexcept
           break;
 
         case type_string:
-          this->m_stor.as<type_string>().~V_string();
+          this->m_stor.mut<type_string>().~V_string();
           break;
 
         case type_opaque:
-          this->m_stor.as<type_opaque>().~V_opaque();
+          this->m_stor.mut<type_opaque>().~V_opaque();
           break;
 
         case type_function:
-          this->m_stor.as<type_function>().~V_function();
+          this->m_stor.mut<type_function>().~V_function();
           break;
 
         case type_array: {
-          auto& altr = this->m_stor.as<type_array>();
+          auto& altr = this->m_stor.mut<type_array>();
           if(altr.unique() && !altr.empty()) {
             // Move raw bytes into `bytes`.
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
@@ -82,7 +82,7 @@ do_destroy_variant_slow() noexcept
         }
 
         case type_object: {
-          auto& altr = this->m_stor.as<type_object>();
+          auto& altr = this->m_stor.mut<type_object>();
           if(altr.unique() && !altr.empty()) {
             // Move raw bytes into `bytes`.
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
@@ -194,7 +194,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
       auto& elem = stack.mut_back();
       switch(elem.index()) {
         case 0: {
-          auto& elema = elem.as<0>();
+          auto& elema = elem.mut<0>();
           if(++(elema.curp) != elema.refa->end()) {
             qval = &*(elema.curp);
             goto r;
@@ -205,7 +205,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
         }
 
         case 1: {
-          auto& elemo = elem.as<1>();
+          auto& elemo = elem.mut<1>();
           if(++(elemo.curp) != elemo.refo->end()) {
             qval = &(elemo.curp->second);
             goto r;
@@ -425,7 +425,7 @@ print(tinyfmt& fmt) const
       auto& elem = stack.mut_back();
       switch(elem.index()) {
         case 0: {
-          auto& elema = elem.as<0>();
+          auto& elema = elem.mut<0>();
           if(++(elema.curp) != elema.refa->end()) {
             fmt << ", ";
             qval = &*(elema.curp);
@@ -438,7 +438,7 @@ print(tinyfmt& fmt) const
         }
 
         case 1: {
-          auto& elemo = elem.as<1>();
+          auto& elemo = elem.mut<1>();
           if(++(elemo.curp) != elemo.refo->end()) {
             fmt << ", " << quote(elemo.curp->first) << ": ";
             qval = &(elemo.curp->second);
@@ -562,7 +562,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       auto& elem = stack.mut_back();
       switch(elem.index()) {
         case 0: {
-          auto& elema = elem.as<0>();
+          auto& elema = elem.mut<0>();
           if(++(elema.curp) != elema.refa->end()) {
             fmt << pwrap(indent, hanging + indent * stack.size());
             fmt << (elema.curp - elema.refa->begin()) << " = ";
@@ -577,7 +577,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         }
 
         case 1: {
-          auto& elemo = elem.as<1>();
+          auto& elemo = elem.mut<1>();
           if(++(elemo.curp) != elemo.refo->end()) {
             fmt << pwrap(indent, hanging + indent * stack.size());
             fmt << quote(elemo.curp->first) << " = ";

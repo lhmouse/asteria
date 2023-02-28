@@ -133,7 +133,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
               if(!kpunct) {
                 // Descend into the new object.
                 stack.emplace_back(S_xparse_object());
-                do_accept_object_key(stack.mut_back().as<1>(), tstrm, scope_node);
+                do_accept_object_key(stack.mut_back().mut<1>(), tstrm, scope_node);
                 continue;
               }
 
@@ -216,7 +216,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           return value;
 
         if(stack.back().index() == 0) {
-          auto& ctxa = stack.mut_back().as<0>();
+          auto& ctxa = stack.mut_back().mut<0>();
           ctxa.arr.emplace_back(::std::move(value));
 
           // Check for termination of this array.
@@ -230,7 +230,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           value = ::std::move(ctxa.arr);
         }
         else {
-          auto& ctxo = stack.mut_back().as<1>();
+          auto& ctxo = stack.mut_back().mut<1>();
           auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
           if(!pair.second)
             throw Compiler_Error(Compiler_Error::M_status(),

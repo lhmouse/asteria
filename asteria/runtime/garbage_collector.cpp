@@ -58,9 +58,9 @@ do_collect_generation(size_t gen)
     size_t nvars = 0;
     refcnt_ptr<Variable> var;
 
-    auto& tracked = this->m_tracked.mut(gMax-gen);
-    const auto next_opt = this->m_tracked.mut_ptr(gMax-gen-1);
-    const auto count_opt = this->m_counts.mut_ptr(gMax-gen-1);
+    auto& tracked = this->m_tracked.at(gMax - gen);
+    const auto next_opt = (gen >= gMax) ? nullptr : &(this->m_tracked.at(gMax - gen - 1));
+    const auto count_opt = (gen >= gMax) ? nullptr : &(this->m_counts.at(gMax - gen - 1));
 
     this->m_staged.clear();
     this->m_temp_1.clear();
@@ -69,8 +69,6 @@ do_collect_generation(size_t gen)
 
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
-
-    // Collect all variables from `tracked` into `m_staged`.
     this->m_temp_1.merge(tracked);
 
     while(do_pop_variable(var, this->m_temp_1)) {
@@ -190,7 +188,7 @@ create_variable(GC_Generation gen_hint)
 
     // Track it.
     size_t gen = gMax - gen_hint;
-    this->m_tracked.mut(gen).insert(var.get(), var);
+    this->m_tracked.at(gen).insert(var.get(), var);
     this->m_counts[gen] += 1;
     return var;
   }
@@ -230,7 +228,7 @@ finalize() noexcept
     // Wipe out all tracked variables. Indirect ones may be foreign so they
     // must not be wiped.
     for(size_t gen = 0;  gen <= gMax;  ++gen) {
-      auto& tracked = this->m_tracked.mut(gMax-gen);
+      auto& tracked = this->m_tracked.at(gMax-gen);
       nvars += tracked.size();
 
       while(tracked.erase_random(nullptr, &var))

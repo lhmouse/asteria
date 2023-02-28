@@ -172,10 +172,10 @@ do_for_each_get_variables(ContainerT& cont, Variable_HashMap& staged,
       r.get_variables(staged, temp);
   }
 
-template<size_t sizeT>
+template<size_t N>
 struct Sparam_queues
   {
-    array<AVMC_Queue, sizeT> queues;
+    AVMC_Queue queues[N];
 
     void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const

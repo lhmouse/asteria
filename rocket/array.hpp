@@ -193,7 +193,11 @@ class array
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     const_reference
     operator[](subscriptT pos) const noexcept
-      { return this->operator[](static_cast<size_type>(pos));  }
+      {
+        ROCKET_ASSERT(pos >= 0);
+        ROCKET_ASSERT(static_cast<size_type>(pos) < this->size());
+        return this->data()[pos];
+      }
 
     const_reference
     front() const noexcept
@@ -235,20 +239,6 @@ class array
     reference
     mut(subscriptT pos)
       { return this->mut(static_cast<size_type>(pos));  }
-
-    reference
-    operator[](size_type pos)
-      {
-        ROCKET_ASSERT(pos < this->size());
-        return this->mut_data()[pos];
-      }
-
-    // N.B. This is a non-standard extension.
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    reference
-    operator[](subscriptT pos)
-      { return this->operator[](static_cast<size_type>(pos));  }
 
     // N.B. This is a non-standard extension.
     reference

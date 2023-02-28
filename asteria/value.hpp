@@ -152,7 +152,7 @@ class Value
     mut_boolean()
       {
         if(this->type() == type_boolean)
-          return this->m_stor.as<V_boolean>();
+          return this->m_stor.mut<V_boolean>();
 
         this->do_throw_type_mismatch("`boolean`");
       }
@@ -174,7 +174,7 @@ class Value
     mut_integer()
       {
         if(this->type() == type_integer)
-          return this->m_stor.as<V_integer>();
+          return this->m_stor.mut<V_integer>();
 
         this->do_throw_type_mismatch("`integer`");
       }
@@ -199,11 +199,11 @@ class Value
     mut_real()
       {
         if(this->type() == type_real)
-          return this->m_stor.as<V_real>();
+          return this->m_stor.mut<V_real>();
 
         if(this->type() == type_integer)
           return this->m_stor.emplace<V_real>(
-                static_cast<V_real>(this->m_stor.as<V_integer>()));
+                static_cast<V_real>(this->m_stor.mut<V_integer>()));
 
         this->do_throw_type_mismatch("`integer` or `real`");
       }
@@ -225,7 +225,7 @@ class Value
     mut_string()
       {
         if(this->type() == type_string)
-          return this->m_stor.as<V_string>();
+          return this->m_stor.mut<V_string>();
 
         this->do_throw_type_mismatch("`string`");
       }
@@ -247,7 +247,7 @@ class Value
     mut_function()
       {
         if(this->type() == type_function)
-          return this->m_stor.as<V_function>();
+          return this->m_stor.mut<V_function>();
 
         this->do_throw_type_mismatch("`function`");
       }
@@ -269,7 +269,7 @@ class Value
     mut_opaque()
       {
         if(this->type() == type_opaque)
-          return this->m_stor.as<V_opaque>();
+          return this->m_stor.mut<V_opaque>();
 
         this->do_throw_type_mismatch("`opaque`");
       }
@@ -291,7 +291,7 @@ class Value
     mut_array()
       {
         if(this->type() == type_array)
-          return this->m_stor.as<V_array>();
+          return this->m_stor.mut<V_array>();
 
         this->do_throw_type_mismatch("`array`");
       }
@@ -313,7 +313,7 @@ class Value
     mut_object()
       {
         if(this->type() == type_object)
-          return this->m_stor.as<V_object>();
+          return this->m_stor.mut<V_object>();
 
         this->do_throw_type_mismatch("`object`");
       }

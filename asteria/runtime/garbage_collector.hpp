@@ -16,9 +16,9 @@ class Garbage_Collector final
     Variable_HashMap m_pool;  // key is a pointer to the `Variable` itself
 
     static constexpr size_t gMax = gc_generation_oldest;
-    array<size_t, gMax+1> m_counts = { };
-    array<size_t, gMax+1> m_thres = { 10, 70, 500 };
-    array<Variable_HashMap, gMax+1> m_tracked;
+    ::std::array<size_t, gMax+1> m_counts = { };
+    ::std::array<size_t, gMax+1> m_thres = { 10, 70, 500 };
+    ::std::array<Variable_HashMap, gMax+1> m_tracked;
 
     Variable_HashMap m_staged;  // key is address of the owner of a `Variable`
     Variable_HashMap m_temp_1;  // key is address to a `Variable`
@@ -45,7 +45,7 @@ class Garbage_Collector final
 
     void
     set_threshold(GC_Generation gen, size_t thres)
-      { this->m_thres.mut(gMax-gen) = thres;  }
+      { this->m_thres.at(gMax-gen) = thres;  }
 
     size_t
     count_tracked_variables(GC_Generation gen) const
