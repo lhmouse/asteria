@@ -24,6 +24,7 @@ class Runtime_Error
     size_t m_ins_at = 0;  // where to insert new frames
 
     ::rocket::tinyfmt_str m_fmt;  // human-readable message
+    ::rocket::tinyfmt_str m_frame_fmt;
 
   public:
     template<typename XValT>

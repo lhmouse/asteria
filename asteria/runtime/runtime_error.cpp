@@ -68,8 +68,18 @@ do_insert_frame(Backtrace_Frame&& new_frm)
       nump.put_DU(k + 1);
       ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
       format(this->m_fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
-      frm.value().print(this->m_fmt);
-      this->m_fmt << '\n';
+
+      this->m_frame_fmt.clear_string();
+      frm.value().print(this->m_frame_fmt);
+
+      if(this->m_frame_fmt.length() > 120) {
+        size_t nchars_omitted = this->m_frame_fmt.length() - 100;
+        this->m_fmt.putn(this->m_frame_fmt.c_str(), this->m_frame_fmt.length() - nchars_omitted);
+        nump.put_DU(nchars_omitted);
+        format(this->m_fmt, " ... ($1 characters omitted)\n", nchars_omitted);
+      }
+      else
+        this->m_fmt << this->m_frame_fmt.get_string() << '\n';
     }
     this->m_fmt << "  -- end of backtrace frames]";
   }
