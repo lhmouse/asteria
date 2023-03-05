@@ -66,7 +66,7 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     for(size_t k = 0;  k < this->m_frames.size();  ++k) {
       const auto& frm = this->m_frames[k];
       nump.put_DU(k + 1);
-      ::std::reverse_copy(nump.begin(), nump.end(), sbuf.mut_rbegin() + 1);
+      ::std::copy_backward(nump.begin(), nump.end(), sbuf.mut_end() - 1);
       format(this->m_fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
 
       this->m_frame_fmt.clear_string();
