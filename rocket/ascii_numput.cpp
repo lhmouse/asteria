@@ -1073,7 +1073,7 @@ do_frexp2_23(float value)
     }
 
     // Convert the exponent and mantissa back. The number will be
-    // interpreted as `sign 0x mant P (1 + exp)` in C99 hexadecimal
+    // interpreted as `sign 0x mant P exp` in C99 hexadecimal
     // floating-point notation.
     frx.exp -= 150;
     frx.mant |= 0x800000ULL;
@@ -1114,7 +1114,7 @@ do_frexp2_52(double value)
     }
 
     // Convert the exponent and mantissa back. The number will be
-    // interpreted as `sign 0x mant P (1 + exp)` in C99 hexadecimal
+    // interpreted as `sign 0x mant P exp` in C99 hexadecimal
     // floating-point notation.
     frx.exp -= 1075;
     frx.mant |= 0x10000000000000ULL;
@@ -1201,6 +1201,9 @@ do_frexp10_8(float value)
       mant_next = next_digits * next_mult;
     }
 
+    // Convert the exponent and mantissa back. The number will be
+    // interpreted as `sign mant E exp` in scientific floating-point
+    // notation.
     frx.exp = (int) bpos - s_decimal_exp_min - 8;
     frx.mant = bits;
     return frx;
@@ -1284,6 +1287,9 @@ do_frexp10_17(double value)
       mant_next = next_digits * next_mult;
     }
 
+    // Convert the exponent and mantissa back. The number will be
+    // interpreted as `sign mant E exp` in scientific floating-point
+    // notation.
     frx.exp = (int) bpos - s_decimal_exp_min - 17;
     frx.mant = bits;
     return frx;
