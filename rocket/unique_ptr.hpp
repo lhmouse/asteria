@@ -235,8 +235,7 @@ operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
 template<typename elementT, typename deleterT>
 inline
 void
-swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

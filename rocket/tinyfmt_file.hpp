@@ -111,8 +111,7 @@ basic_tinyfmt_file<charT, traitsT>::
 template<typename charT, typename traitsT>
 inline
 void
-swap(basic_tinyfmt_file<charT, traitsT>& lhs, basic_tinyfmt_file<charT, traitsT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinyfmt_file<charT, traitsT>& lhs, basic_tinyfmt_file<charT, traitsT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

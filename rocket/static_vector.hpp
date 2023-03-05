@@ -711,8 +711,7 @@ class static_vector
 template<typename valueT, size_t capacityT, typename allocT>
 inline
 void
-swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capacityT, allocT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

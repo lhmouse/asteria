@@ -493,8 +493,7 @@ const size_t variant<altsT...>::alternative_size;
 template<typename... altsT>
 inline
 void
-swap(variant<altsT...>& lhs, variant<altsT...>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(variant<altsT...>& lhs, variant<altsT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

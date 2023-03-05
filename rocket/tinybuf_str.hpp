@@ -201,8 +201,10 @@ class basic_tinybuf_str
     string_type
     extract_string(open_mode mode)
       {
-        string_type r = ::std::move(this->m_str);
-        this->clear_string(mode);
+        string_type r;
+        r.swap(this->m_str);
+        this->m_off = 0;
+        this->m_mode = mode;
         return r;
       }
   };
@@ -216,8 +218,7 @@ basic_tinybuf_str<charT, traitsT, allocT>::
 template<typename charT, typename traitsT, typename allocT>
 inline
 void
-swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs, basic_tinybuf_str<charT, traitsT, allocT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs, basic_tinybuf_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

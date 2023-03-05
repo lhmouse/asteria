@@ -301,8 +301,7 @@ extern template class basic_prehashed_string<cow_u32string, cow_u32string::hash>
 template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
-  noexcept(noexcept(lhs.equals(rhs)))
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.equals(rhs)))
   {
     return lhs.equals(rhs);
   }
@@ -310,8 +309,7 @@ operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_p
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
-  noexcept(noexcept(lhs.equals(rhs)))
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs) noexcept(noexcept(lhs.equals(rhs)))
   {
     return lhs.equals(rhs);
   }
@@ -319,8 +317,7 @@ operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT&
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
-  noexcept(noexcept(rhs.equals(lhs)))
+operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(rhs.equals(lhs)))
   {
     return rhs.equals(lhs);
   }
@@ -328,8 +325,7 @@ operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>&
 template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
-  noexcept(noexcept(lhs.equals(rhs)))
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.equals(rhs)))
   {
     return !lhs.equals(rhs);
   }
@@ -337,8 +333,7 @@ operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_p
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
-  noexcept(noexcept(lhs.equals(rhs)))
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs) noexcept(noexcept(lhs.equals(rhs)))
   {
     return !lhs.equals(rhs);
   }
@@ -346,8 +341,7 @@ operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT&
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
-  noexcept(noexcept(rhs.equals(lhs)))
+operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(rhs.equals(lhs)))
   {
     return !rhs.equals(lhs);
   }
@@ -355,8 +349,7 @@ operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>&
 template<typename stringT, typename hashT, typename eqT>
 inline
 void
-swap(basic_prehashed_string<stringT, hashT, eqT>& lhs, basic_prehashed_string<stringT, hashT, eqT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_prehashed_string<stringT, hashT, eqT>& lhs, basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }
