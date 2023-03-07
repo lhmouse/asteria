@@ -36,11 +36,12 @@ class once_flag
         if(ROCKET_EXPECT(status == 0))
           return;
 
-        // Perform initialization the now.
         try {
+          // Perform the initialization now.
           ::std::forward<funcT>(func)(::std::forward<paramsT>(params)...);
         }
         catch(...) {
+          // ... undo it.
           ::__cxxabiv1::__cxa_guard_abort(this->m_guard);
           throw;
         }
