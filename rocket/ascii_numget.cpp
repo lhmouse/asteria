@@ -1606,7 +1606,7 @@ cast_F(float& value, float min, float max) noexcept
 
           // If the exponent has been incremented, nudge the mantissa.
           bits >>= sh;
-          bits &= (1U << 23) - 1;
+          bits &= 0x7FFFFF;
         }
         else if(exp >= -22) {
           // This value is subnormal, so round the mantissa.
@@ -1630,14 +1630,14 @@ cast_F(float& value, float min, float max) noexcept
           // from zero to one, the other bits of the mantissa will not
           // change, and is not therefore nudged.
           bits >>= sh & (exp >> 15);
-          bits &= (1U << 23) - 1;
+          bits &= 0x7FFFFF;
         }
         else if(exp == -23) {
           // This is a special case. All bits are below the minimum
           // subnormal value. The only chance that this very tiny value
           // will become representable is when a carry happens. That is,
-          // the mantissa is at least 0x8000000000000001. Being equal to
-          // it will not work, as it's rounded to even.
+          // the mantissa is at least 0x8000000000000001. Being equal
+          // will not work, as it's rounded to even.
           this->m_inxct = true;
 
           if(bits <= 0x80000000U) {
@@ -1763,7 +1763,7 @@ cast_D(double& value, double min, double max) noexcept
 
         if(ROCKET_EXPECT(exp >= 1)) {
           // This value is at least normal, so round the mantissa.
-          constexpr uint64_t ulp = 1UL << 11;
+          constexpr uint64_t ulp = 1ULL << 11;
           uint64_t bits_out = bits & (ulp - 1);
           this->m_inxct |= (bits_out != 0) && (bits_out != (ulp - 1));
           bits_out <<= 1;
@@ -1784,7 +1784,7 @@ cast_D(double& value, double min, double max) noexcept
 
           // If the exponent has been incremented, nudge the mantissa.
           bits >>= sh;
-          bits &= (1ULL << 52) - 1;
+          bits &= 0xFFFFFFFFFFFFF;
         }
         else if(exp >= -51) {
           // This value is subnormal, so round the mantissa.
@@ -1808,14 +1808,14 @@ cast_D(double& value, double min, double max) noexcept
           // from zero to one, the other bits of the mantissa will not
           // change, and is not therefore nudged.
           bits >>= sh & (exp >> 15);
-          bits &= (1ULL << 52) - 1;
+          bits &= 0xFFFFFFFFFFFFF;
         }
         else if(exp == -52) {
           // This is a special case. All bits are below the minimum
           // subnormal value. The only chance that this very tiny value
           // will become representable is when a carry happens. That is,
-          // the mantissa is at least 0x8000000000000001. Being equal to
-          // it will not work, as it's rounded to even.
+          // the mantissa is at least 0x8000000000000001. Being equal
+          // will not work, as it's rounded to even.
           this->m_inxct = true;
 
           if(bits <= 0x8000000000000000ULL) {
