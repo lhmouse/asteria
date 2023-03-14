@@ -8,7 +8,6 @@ nobase_include_HEADERS +=  \
   %reldir%/details/xallocator.ipp  \
   %reldir%/details/variant.ipp  \
   %reldir%/details/unique_handle.ipp  \
-  %reldir%/details/char_traits.ipp  \
   %reldir%/details/cow_string.ipp  \
   %reldir%/details/cow_vector.ipp  \
   %reldir%/details/cow_hashmap.ipp  \

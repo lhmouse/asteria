@@ -147,7 +147,7 @@ class Deflator final
 void
 do_construct_Deflator(V_object& result, V_string format, optV_integer level)
   {
-    static constexpr auto s_uuid = sref("{2D32F5E5-DECB-4A8C-0612-290629069F9C}");
+    static const auto s_uuid = sref("{2D32F5E5-DECB-4A8C-0612-290629069F9C}");
     result.insert_or_assign(s_uuid, std_zlib_Deflator_private(format, level));
     result.insert_or_assign(sref("output"), V_string());
 
@@ -349,7 +349,7 @@ class Inflator final
 void
 do_construct_Inflator(V_object& result, V_string format)
   {
-    static constexpr auto s_uuid = sref("{2D372D3E-4E40-4D8B-0632-19C519C5682D}");
+    static const auto s_uuid = sref("{2D372D3E-4E40-4D8B-0632-19C519C5682D}");
     result.insert_or_assign(s_uuid, std_zlib_Inflator_private(format));
     result.insert_or_assign(sref("output"), V_string());
 
