@@ -247,7 +247,7 @@ main(int argc, char** argv)
       current_locale,
       repl_cmd_char, repl_cmd_char);
 
-    do {
+    for(;;) {
       // Discard unread input data. Flush buffered output data.
       // Clear EOF and error bits. Clear orientation. Errors are ignored.
       (void) !::freopen(nullptr, "r", stdin);
@@ -256,10 +256,9 @@ main(int argc, char** argv)
       // Read a snippet and execute it.
       // In case of read errors, this function shall not return.
       read_execute_print_single();
-      repl_printf("");
       ::fflush(nullptr);
+      ::fputc('\n', stderr);
     }
-    while(true);
   }
   catch(exception& stdex) {
     // Print a message followed by the backtrace if it is available.
