@@ -15,7 +15,7 @@ do_strlen_maybe_constexpr(const typename traitsT::char_type* ptr) noexcept
     auto k = (typename traitsT::size_type) -1;
 
     while(ROCKET_CONSTANT_P(ptr[++k]))
-      if(traitsT::eq(ptr[k], nul))
+      if(((ptr[k]) == nul) || traitsT::eq(ptr[k], nul))
         return k;
 
     return traitsT::length(ptr);
