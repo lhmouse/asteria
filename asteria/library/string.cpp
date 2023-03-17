@@ -552,7 +552,7 @@ class PCRE2_Matcher final
 void
 do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
   {
-    static const auto s_uuid = sref("{2D86F6E8-8927-4A26-062F-77EB77EB23E7}");
+    static constexpr auto s_uuid = sref("{2D86F6E8-8927-4A26-062F-77EB77EB23E7}");
     result.insert_or_assign(s_uuid, std_string_PCRE_private(pattern, options));
 
     result.insert_or_assign(sref("find"),

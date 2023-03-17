@@ -53,14 +53,14 @@ class basic_shallow_string
   public:
     explicit constexpr
     basic_shallow_string(const charT* ptr) noexcept
-      : m_ptr(ptr), m_len(traitsT::length(ptr))  { }
+      : m_ptr(ptr), m_len(details_cow_string::do_strlen_maybe_constexpr<traitsT>(ptr))  { }
 
     constexpr
     basic_shallow_string(const charT* ptr, size_t len) noexcept
       : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))  { }
 
     template<typename allocT>
-    explicit
+    explicit constexpr
     basic_shallow_string(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
       : m_ptr(str.c_str()), m_len(str.length())  { }
 

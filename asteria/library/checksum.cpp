@@ -78,7 +78,7 @@ class CRC32_Hasher final
 void
 do_construct_CRC32(V_object& result)
   {
-    static const auto s_uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
+    static constexpr auto s_uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
     result.insert_or_assign(s_uuid, std_checksum_CRC32_private());
 
     result.insert_or_assign(sref("update"),
@@ -186,7 +186,7 @@ class FNV1a32_Hasher final
 void
 do_construct_FNV1a32(V_object& result)
   {
-    static const auto s_uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
+    static constexpr auto s_uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
     result.insert_or_assign(s_uuid, std_checksum_FNV1a32_private());
 
     result.insert_or_assign(sref("update"),
@@ -308,7 +308,7 @@ class MD5_Hasher final
 void
 do_construct_MD5(V_object& result)
   {
-    static const auto s_uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
+    static constexpr auto s_uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
     result.insert_or_assign(s_uuid, std_checksum_MD5_private());
 
     result.insert_or_assign(sref("update"),
@@ -414,7 +414,7 @@ class SHA1_Hasher final
 void
 do_construct_SHA1(V_object& result)
   {
-    static const auto s_uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
+    static constexpr auto s_uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
     result.insert_or_assign(s_uuid, std_checksum_SHA1_private());
 
     result.insert_or_assign(sref("update"),
@@ -520,7 +520,7 @@ class SHA224_Hasher final
 void
 do_construct_SHA224(V_object& result)
   {
-    static const auto s_uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
+    static constexpr auto s_uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
     result.insert_or_assign(s_uuid, std_checksum_SHA224_private());
 
     result.insert_or_assign(sref("update"),
@@ -626,7 +626,7 @@ class SHA256_Hasher final
 void
 do_construct_SHA256(V_object& result)
   {
-    static const auto s_uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
+    static constexpr auto s_uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
     result.insert_or_assign(s_uuid, std_checksum_SHA256_private());
 
     result.insert_or_assign(sref("update"),
@@ -732,7 +732,7 @@ class SHA384_Hasher final
 void
 do_construct_SHA384(V_object& result)
   {
-    static const auto s_uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
+    static constexpr auto s_uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
     result.insert_or_assign(s_uuid, std_checksum_SHA384_private());
 
     result.insert_or_assign(sref("update"),
@@ -838,7 +838,7 @@ class SHA512_Hasher final
 void
 do_construct_SHA512(V_object& result)
   {
-    static const auto s_uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
+    static constexpr auto s_uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
     result.insert_or_assign(s_uuid, std_checksum_SHA512_private());
 
     result.insert_or_assign(sref("update"),

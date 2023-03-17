@@ -6,6 +6,21 @@
 #endif
 namespace details_cow_string {
 
+template<typename traitsT>
+constexpr ROCKET_ALWAYS_INLINE
+typename traitsT::size_type
+do_strlen_maybe_constexpr(const typename traitsT::char_type* ptr) noexcept
+  {
+    constexpr auto nul = (typename traitsT::char_type) 0;
+    auto k = (typename traitsT::size_type) -1;
+
+    while(ROCKET_CONSTANT_P(ptr[++k]))
+      if(traitsT::eq(ptr[k], nul))
+        return k;
+
+    return traitsT::length(ptr);
+  }
+
 struct storage_header
   {
     mutable reference_counter<long> nref;
