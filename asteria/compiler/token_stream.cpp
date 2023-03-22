@@ -361,17 +361,17 @@ struct Prefix_Comparator
     template<typename ElementT>
     bool
     operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
-      { return ::rocket::char_traits<char>::compare(lhs.str, rhs.str, ::rocket::size(lhs.str)) < 0;  }
+      { return ::memcmp(lhs.str, rhs.str, sizeof(lhs.str)) < 0;  }
 
     template<typename ElementT>
     bool
     operator()(char lhs, const ElementT& rhs) const noexcept
-      { return ::rocket::char_traits<char>::lt(lhs, rhs.str[0]);  }
+      { return (uint8_t) lhs < (uint8_t) rhs.str[0];  }
 
     template<typename ElementT>
     bool
     operator()(const ElementT& lhs, char rhs) const noexcept
-      { return ::rocket::char_traits<char>::lt(lhs.str[0], rhs);  }
+      { return (uint8_t) lhs.str[0] < (uint8_t) rhs;  }
   };
 
 template<typename ElementT, size_t N>
