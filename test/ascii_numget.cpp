@@ -3,7 +3,7 @@
 
 #include "utils.hpp"
 #include "../rocket/ascii_numget.hpp"
-using namespace ::asteria;
+using namespace ::rocket;
 
 // Test cases of known-bad strtod conversions that motivated the use of dmg_fp.
 // See https://bugs.chromium.org/p/chromium/issues/detail?id=593512.
@@ -61,7 +61,7 @@ int main()
       ::std::memcpy(&exp, &r.expected, sizeof(double));
       ::printf("--------------->   exp: %.17g\n", exp);
 
-      ::rocket::ascii_numget numg;
+      ascii_numget numg;
       ASTERIA_TEST_CHECK(numg.parse_D(r.input, ::strlen(r.input)) == ::strlen(r.input));
 
       double val;

@@ -4,7 +4,7 @@
 #include "utils.hpp"
 #include "../rocket/ascii_numget.hpp"
 #include <float.h>
-using namespace ::asteria;
+using namespace ::rocket;
 
 struct
   {
@@ -42,7 +42,7 @@ int main()
 
       ASTERIA_TEST_CHECK(::std::strtof(r.text, nullptr) == r.value);
 
-      ::rocket::ascii_numget numg;
+      ascii_numget numg;
       ASTERIA_TEST_CHECK(numg.parse_D(r.text, ::strlen(r.text)) == ::strlen(r.text));
 
       float result;

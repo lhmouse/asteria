@@ -4,12 +4,12 @@
 #include "utils.hpp"
 #include "../rocket/ascii_numput.hpp"
 #include "../rocket/ascii_numget.hpp"
-using namespace ::asteria;
+using namespace ::rocket;
 
 int main()
   {
-    ::rocket::ascii_numput nump;
-    ::rocket::ascii_numget numg;
+    ascii_numput nump;
+    ascii_numget numg;
     char* eptr;
     double value, t;
 
