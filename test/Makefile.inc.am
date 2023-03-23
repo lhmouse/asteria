@@ -1,4 +1,10 @@
 check_PROGRAMS +=  \
+  %reldir%/xstring.test  \
+  %reldir%/ascii_numget.test  \
+  %reldir%/ascii_numget_float.test  \
+  %reldir%/ascii_numget_double.test  \
+  %reldir%/ascii_numput_float.test  \
+  %reldir%/ascii_numput_double.test  \
   %reldir%/utils.test  \
   %reldir%/value.test  \
   %reldir%/variable.test  \
@@ -38,11 +44,6 @@ check_PROGRAMS +=  \
   %reldir%/github_101.test  \
   %reldir%/ref.test  \
   %reldir%/github_105.test  \
-  %reldir%/ascii_numget.test  \
-  %reldir%/ascii_numget_float.test  \
-  %reldir%/ascii_numget_double.test  \
-  %reldir%/ascii_numput_float.test  \
-  %reldir%/ascii_numput_double.test  \
   %reldir%/github_108.test  \
   %reldir%/github_113.test  \
   %reldir%/github_116.test  \

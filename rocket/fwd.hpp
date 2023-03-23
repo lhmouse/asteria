@@ -284,8 +284,7 @@ min(lhsT&& lhs, rhsT&& rhs)
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
-decltype(noadl::min(noadl::min(::std::declval<lhsT&&>(), ::std::declval<rhsT&&>()),
-                    ::std::declval<restT&&>()...))
+decltype(noadl::min(noadl::min(::std::declval<lhsT&&>(), ::std::declval<rhsT&&>()), ::std::declval<restT&&>()...))
 min(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
   {
     return noadl::min(noadl::min(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
@@ -302,8 +301,7 @@ max(lhsT&& lhs, rhsT&& rhs)
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
-decltype(noadl::max(noadl::max(::std::declval<lhsT&&>(), ::std::declval<rhsT&&>()),
-                    ::std::declval<restT&&>()...))
+decltype(noadl::max(noadl::max(::std::declval<lhsT&&>(), ::std::declval<rhsT&&>()), ::std::declval<restT&&>()...))
 max(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
   {
     return noadl::max(noadl::max(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),

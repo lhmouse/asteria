@@ -6,6 +6,7 @@ nobase_include_HEADERS +=  \
   %reldir%/details/compiler_msvc.i  \
   %reldir%/details/fwd.ipp  \
   %reldir%/details/xallocator.ipp  \
+  %reldir%/details/xstring.ipp  \
   %reldir%/details/variant.ipp  \
   %reldir%/details/unique_handle.ipp  \
   %reldir%/details/cow_string.ipp  \
@@ -23,6 +24,7 @@ nobase_include_HEADERS +=  \
   %reldir%/fwd.hpp  \
   %reldir%/throw.hpp  \
   %reldir%/xallocator.hpp  \
+  %reldir%/xstring.hpp  \
   %reldir%/xhashtable.hpp  \
   %reldir%/variant.hpp  \
   %reldir%/fill_iterator.hpp  \
