@@ -13,16 +13,25 @@ test_xstring()
     constexpr charT meowTTThello[] = { 'm','e','o','w','T','T','T','h','e','l','l','o',0 };
 
     static_assert(xstrlen(hello + 5) == 0);
+    ASTERIA_TEST_CHECK(xstrlen((volatile const charT*) hello + 5) == 0);
     static_assert(xstrlen(hello) == 5);
+    ASTERIA_TEST_CHECK(xstrlen((volatile const charT*) hello) == 5);
 
     static_assert(xstrchr(hello, 'l') == hello + 2);
+    ASTERIA_TEST_CHECK(xstrchr((volatile const charT*) hello, 'l') == hello + 2);
     static_assert(xstrchr(hello, 0) == hello + 5);
+    ASTERIA_TEST_CHECK(xstrchr((volatile const charT*) hello, 0) == hello + 5);
     static_assert(xstrchr(hello, 'a') == nullptr);
+    ASTERIA_TEST_CHECK(xstrchr((volatile const charT*) hello, 'a') == nullptr);
 
     static_assert(xmemchr(hello, 'l', 2) == nullptr);
+    ASTERIA_TEST_CHECK(xmemchr((volatile const charT*) hello, 'l', 2) == nullptr);
     static_assert(xmemchr(hello, 'l', 5) == hello + 2);
+    ASTERIA_TEST_CHECK(xmemchr((volatile const charT*) hello, 'l', 5) == hello + 2);
     static_assert(xmemchr(hello, 0, 5) == nullptr);
+    ASTERIA_TEST_CHECK(xmemchr((volatile const charT*) hello, 0, 5) == nullptr);
     static_assert(xmemchr(hello, 'a', 5) == nullptr);
+    ASTERIA_TEST_CHECK(xmemchr((volatile const charT*) hello, 'a', 5) == nullptr);
 
     charT temp[100] = { };
     charT* pos = temp;
