@@ -14,14 +14,14 @@ constexpr
 size_t
 xstrlen(charT* str) noexcept
   {
-    size_t off = 0;
+    size_t ki = 0;
     for(;;)
-      if(!ROCKET_CONSTANT_P(str[off]))
+      if(!ROCKET_CONSTANT_P(str[ki]))
         return details_xstring::xstrlen_nonconstexpr(str);
-      else if(str[off] == charT())
-        return off;
+      else if(str[ki] == charT())
+        return ki;
       else
-        off++;
+        ki ++;
   }
 
 template<typename charT>
@@ -29,31 +29,33 @@ constexpr
 charT*
 xstrchr(charT* str, typename identity<charT>::type target) noexcept
   {
-    size_t off = 0;
+    size_t ki = 0;
     for(;;)
-      if(!ROCKET_CONSTANT_P(str[off]) || !ROCKET_CONSTANT_P(target))
+      if(!ROCKET_CONSTANT_P(str[ki]) || !ROCKET_CONSTANT_P(target))
         return details_xstring::xstrchr_nonconstexpr(str, target);
-      else if(str[off] == target)
-        return str + off;
-      else if(str[off] == charT())
+      else if(str[ki] == target)
+        return str + ki;
+      else if(str[ki] == charT())
         return nullptr;
       else
-        off++;
+        ki ++;
   }
 
 template<typename charT>
 constexpr
 charT*
-xstrrpcpy(charT*& out, const typename identity<charT>::type* str) noexcept
+xmemchr(charT* str, typename identity<charT>::type target, size_t len) noexcept
   {
-    size_t off = 0;
+    size_t ki = 0;
     for(;;)
-      if(!ROCKET_CONSTANT_P(str[off]))
-        return details_xstring::xstrrpcpy_nonconstexpr(out, str);
-      else if(str[off] == charT())
-        return &(*out = charT());
+      if(ki >= len)
+        return nullptr;
+      else if(!ROCKET_CONSTANT_P(str[ki]) || !ROCKET_CONSTANT_P(target) || !ROCKET_CONSTANT_P(len))
+        return details_xstring::xmemchr_nonconstexpr(str, target, len);
+      else if(str[ki] == target)
+        return str + ki;
       else
-        *(out++) = str[off++];
+        ki ++;
   }
 
 template<typename charT>
@@ -62,63 +64,16 @@ int
 xstrcmp(const charT* lhs, const charT* rhs) noexcept
   {
     using cmp_type = typename details_xstring::xcmp_type<charT>::type;
-    size_t off = 0;
+    size_t ki = 0;
     for(;;)
-      if(!ROCKET_CONSTANT_P(lhs[off]) || !ROCKET_CONSTANT_P(rhs[off]))
+      if(!ROCKET_CONSTANT_P(lhs[ki]) || !ROCKET_CONSTANT_P(rhs[ki]))
         return details_xstring::xstrcmp_nonconstexpr(lhs, rhs);
-      else if(lhs[off] != rhs[off])
-        return ((cmp_type) lhs[off] < (cmp_type) rhs[off]) ? -1 : 1;
-      else if(lhs[off] == charT())
+      else if(lhs[ki] != rhs[ki])
+        return ((cmp_type) lhs[ki] < (cmp_type) rhs[ki]) ? -1 : 1;
+      else if(lhs[ki] == charT())
         return 0;
       else
-        off++;
-  }
-
-template<typename charT>
-constexpr
-charT*
-xmemchr(charT* str, typename identity<charT>::type target, size_t len) noexcept
-  {
-    size_t off = 0;
-    for(;;)
-      if(off >= len)
-        return nullptr;
-      else if(!ROCKET_CONSTANT_P(str[off]) || !ROCKET_CONSTANT_P(target) || !ROCKET_CONSTANT_P(len))
-        return details_xstring::xmemchr_nonconstexpr(str, target, len);
-      else if(str[off] == target)
-        return str + off;
-      else
-        off++;
-  }
-
-template<typename charT>
-constexpr
-charT*
-xmemrpset(charT*& out, typename identity<charT>::type elem, size_t len) noexcept
-  {
-    size_t off = 0;
-    for(;;)
-      if(off >= len)
-        return out;
-      else if(!ROCKET_CONSTANT_P(elem) || !ROCKET_CONSTANT_P(len))
-        return details_xstring::xmemrpset_nonconstexpr(out, elem, len);
-      else
-        *(out++) = (off++, elem);
-  }
-
-template<typename charT>
-constexpr
-charT*
-xmemrpcpy(charT*& out, const typename identity<charT>::type* str, size_t len) noexcept
-  {
-    size_t off = 0;
-    for(;;)
-      if(off >= len)
-        return out;
-      else if(!ROCKET_CONSTANT_P(str[off]) || !ROCKET_CONSTANT_P(len))
-        return details_xstring::xmemrpcpy_nonconstexpr(out, str, len);
-      else
-        *(out++) = str[off++];
+        ki ++;
   }
 
 template<typename charT>
@@ -127,16 +82,85 @@ int
 xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
     using cmp_type = typename details_xstring::xcmp_type<charT>::type;
-    size_t off = 0;
+    size_t ki = 0;
     for(;;)
-      if(off >= len)
+      if(ki >= len)
         return 0;
-      else if(!ROCKET_CONSTANT_P(lhs[off]) || !ROCKET_CONSTANT_P(rhs[off]) || !ROCKET_CONSTANT_P(len))
+      else if(!ROCKET_CONSTANT_P(lhs[ki]) || !ROCKET_CONSTANT_P(rhs[ki]) || !ROCKET_CONSTANT_P(len))
         return details_xstring::xmemcmp_nonconstexpr(lhs, rhs, len);
-      else if(lhs[off] != rhs[off])
-        return ((cmp_type) lhs[off] < (cmp_type) rhs[off]) ? -1 : 1;
+      else if(lhs[ki] != rhs[ki])
+        return ((cmp_type) lhs[ki] < (cmp_type) rhs[ki]) ? -1 : 1;
       else
-        off++;
+        ki ++;
+  }
+
+template<typename charT>
+constexpr
+charT*
+xmempset(charT* out, typename identity<charT>::type elem, size_t len) noexcept
+  {
+    size_t ki = 0;
+    for(;;)
+      if(ki >= len)
+        return out + ki;
+      else if(!ROCKET_CONSTANT_P(elem) || !ROCKET_CONSTANT_P(len))
+        return details_xstring::xmempset_nonconstexpr(out, elem, len);
+      else
+        out[ki] = elem, ki ++;
+  }
+
+template<typename charT>
+constexpr
+charT*
+xmemrpset(charT*& out, typename identity<charT>::type elem, size_t len) noexcept
+  {
+    return out = noadl::xmempset(out, elem, len);
+  }
+
+template<typename charT>
+constexpr
+charT*
+xstrpcpy(charT* out, const typename identity<charT>::type* str) noexcept
+  {
+    size_t ki = 0;
+    for(;;)
+      if(!ROCKET_CONSTANT_P(str[ki]))
+        return details_xstring::xstrpcpy_nonconstexpr(out, str);
+      else if((out[ki] = str[ki]) == charT())
+        return out + ki;
+      else
+        ki ++;
+  }
+
+template<typename charT>
+constexpr
+charT*
+xstrrpcpy(charT*& out, const typename identity<charT>::type* str) noexcept
+  {
+    return out = noadl::xstrpcpy(out, str);
+  }
+
+template<typename charT>
+constexpr
+charT*
+xmempcpy(charT* out, const typename identity<charT>::type* str, size_t len) noexcept
+  {
+    size_t ki = 0;
+    for(;;)
+      if(ki >= len)
+        return out + ki;
+      else if(!ROCKET_CONSTANT_P(str[ki]) || !ROCKET_CONSTANT_P(len))
+        return details_xstring::xmempcpy_nonconstexpr(out, str, len);
+      else
+        out[ki] = str[ki], ki ++;
+  }
+
+template<typename charT>
+constexpr
+charT*
+xmemrpcpy(charT*& out, const typename identity<charT>::type* str, size_t len) noexcept
+  {
+    return out = noadl::xmempcpy(out, str, len);
   }
 
 }  // namespace rocket
