@@ -6,13 +6,12 @@
 #endif
 namespace details_linear_buffer {
 
-template<typename allocT, typename traitsT>
+template<typename allocT>
 class basic_storage
   : private allocator_wrapper_base_for<allocT>::type
   {
   public:
     using allocator_type  = allocT;
-    using traits_type     = traitsT;
     using value_type      = typename allocator_type::value_type;
     using size_type       = typename allocator_traits<allocator_type>::size_type;
 
@@ -81,7 +80,7 @@ class basic_storage
         if(ROCKET_EXPECT(nadd <= this->m_cap - nused)) {
           // If the buffer is large enough for the combined data, shift the string to
           // the beginning to make some room after its the end.
-          traits_type::move(pbuf, pbuf + goff, nused);
+          ::memmove(pbuf, pbuf + goff, nused * sizeof(value_type));
         }
         else {
           // If the buffer is not large enough, allocate a new one.
@@ -96,16 +95,16 @@ class basic_storage
           auto ptr_new = allocator_traits<allocator_type>::allocate(*this, cap_new);
           auto pbuf_new = noadl::unfancy(ptr_new);
 #ifdef ROCKET_DEBUG
-          traits_type::assign(pbuf_new, cap_new, value_type(0xA5A5A5A5));
+          ::memset(pbuf_new, 0xA5, cap_new * sizeof(value_type));
 #endif
 
           // Copy the old string into the new buffer and deallocate the old one.
           if(ROCKET_UNEXPECT(nused)) {
-            traits_type::copy(pbuf_new, pbuf + goff, nused);
+            ::memcpy(pbuf_new, pbuf + goff, nused * sizeof(value_type));
           }
           if(ROCKET_UNEXPECT(pbuf)) {
 #ifdef ROCKET_DEBUG
-            traits_type::assign(pbuf, this->m_cap, value_type(0xE9E9E9E9));
+            ::memset(pbuf, 0xE9, this->m_cap * sizeof(value_type));
 #endif
             allocator_traits<allocator_type>::deallocate(*this, this->m_ptr, this->m_cap);
           }

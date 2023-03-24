@@ -6,16 +6,16 @@
 
 #include "fwd.hpp"
 #include "assert.hpp"
-#include "char_traits.hpp"
+#include "xstring.hpp"
 #include "xallocator.hpp"
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
+template<typename charT, typename allocT = allocator<charT>>
 class basic_linear_buffer;
 
 #include "details/linear_buffer.ipp"
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename allocT>
 class basic_linear_buffer
   {
     static_assert(!is_array<charT>::value, "invalid character type");
@@ -23,16 +23,13 @@ class basic_linear_buffer
     static_assert(is_same<typename allocT::value_type, charT>::value, "inappropriate allocator type");
 
   public:
-    using value_type      = charT;
-    using traits_type     = traitsT;
-    using allocator_type  = allocT;
-
-    using int_type         = typename traits_type::int_type;
+    using value_type       = charT;
+    using allocator_type   = allocT;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
   private:
-    details_linear_buffer::basic_storage<allocator_type, traits_type> m_stor;
+    details_linear_buffer::basic_storage<allocator_type> m_stor;
     size_type m_goff = 0;  // offset of the beginning
     size_type m_eoff = 0;  // offset of the end
 
@@ -211,7 +208,7 @@ class basic_linear_buffer
       {
         ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
 #ifdef ROCKET_DEBUG
-        traits_type::assign(this->mut_begin(), nbump, value_type(0xC7C7C7C7));
+        ::memset(this->mut_data(), 0xC7, nbump * sizeof(value_type));
 #endif
         this->m_goff += nbump;
         return *this;
@@ -224,7 +221,7 @@ class basic_linear_buffer
         if(nread <= 0)
           return 0;
 
-        traits_type::copy(s, this->begin(), nread);
+        noadl::xmempcpy(s, this->data(), nread);
         return nread;
       }
 
@@ -235,31 +232,33 @@ class basic_linear_buffer
         if(nread <= 0)
           return 0;
 
-        traits_type::copy(s, this->begin(), nread);
+        noadl::xmempcpy(s, this->data(), nread);
         this->discard(nread);
         return nread;
       }
 
-    int_type
+    int
     peekc() const noexcept
       {
-        value_type s[1];
-        if(this->peekn(s, 1) == 0)
-          return traits_type::eof();
+        value_type c;
+        if(this->peekn(&c, 1) == 0)
+          return -1;
 
-        int_type ch = traits_type::to_int_type(s[0]);
-        return ch;
+        return static_cast<int>(static_cast<typename conditional<
+                       is_same<volatile value_type, volatile char>::value,
+                       unsigned char, value_type>::type>(c));
       }
 
-    int_type
+    int
     getc() noexcept
       {
-        value_type s[1];
-        if(this->getn(s, 1) == 0)
-          return traits_type::eof();
+        value_type c;
+        if(this->getn(&c, 1) == 0)
+          return -1;
 
-        int_type ch = traits_type::to_int_type(s[0]);
-        return ch;
+        return static_cast<int>(static_cast<typename conditional<
+                       is_same<volatile value_type, volatile char>::value,
+                       unsigned char, value_type>::type>(c));
       }
 
     // write functions
@@ -289,7 +288,7 @@ class basic_linear_buffer
           this->m_eoff = nused;
         }
 #ifdef ROCKET_DEBUG
-        traits_type::assign(this->mut_end(), nbump, value_type(0xD3D3D3D3));
+        ::memset(this->mut_end(), 0xD3, nbump * sizeof(value_type));
 #endif
         return this->capacity_after_end();
       }
@@ -308,10 +307,10 @@ class basic_linear_buffer
     unaccept(size_type nbump) noexcept
       {
         ROCKET_ASSERT(nbump <= this->m_eoff - this->m_goff);
-#ifdef ROCKET_DEBUG
-        traits_type::assign(this->mut_end() - nbump, nbump, value_type(0xD9D9D9D9));
-#endif
         this->m_eoff -= nbump;
+#ifdef ROCKET_DEBUG
+        ::memset(this->mut_end(), 0xB6, nbump * sizeof(value_type));
+#endif
         return *this;
       }
 
@@ -319,7 +318,7 @@ class basic_linear_buffer
     putc(value_type c)
       {
         this->reserve_after_end(1);
-        traits_type::assign(this->mut_end()[0], c);
+        this->mut_end()[0] = c;
         this->accept(1);
         return *this;
       }
@@ -328,7 +327,7 @@ class basic_linear_buffer
     putn(size_type n, value_type c)
       {
         this->reserve_after_end(n);
-        traits_type::assign(this->mut_end(), n, c);
+        noadl::xmempset(this->mut_end(), c, n);
         this->accept(n);
         return *this;
       }
@@ -337,7 +336,7 @@ class basic_linear_buffer
     putn(const value_type* s, size_type n)
       {
         this->reserve_after_end(n);
-        traits_type::copy(this->mut_end(), s, n);
+        noadl::xmempcpy(this->mut_end(), s, n);
         this->accept(n);
         return *this;
       }
@@ -345,26 +344,28 @@ class basic_linear_buffer
     basic_linear_buffer&
     puts(const value_type* s)
       {
-        return this->putn(s, traits_type::length(s));
+        return this->putn(s, noadl::xstrlen(s));
       }
   };
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename allocT>
 inline
 void
-swap(basic_linear_buffer<charT, traitsT, allocT>& lhs, basic_linear_buffer<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_linear_buffer<charT, allocT>& lhs, basic_linear_buffer<charT, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }
 
-extern template
-class basic_linear_buffer<char>;
+extern template class basic_linear_buffer<char>;
+extern template class basic_linear_buffer<wchar_t>;
+extern template class basic_linear_buffer<char16_t>;
+extern template class basic_linear_buffer<char32_t>;
 
-extern template
-class basic_linear_buffer<wchar_t>;
-
-using linear_buffer   = basic_linear_buffer<char>;
-using linear_wbuffer  = basic_linear_buffer<wchar_t>;
+using linear_buffer      = basic_linear_buffer<char>;
+using linear_wbuffer     = basic_linear_buffer<wchar_t>;
+using linear_u16buffer   = basic_linear_buffer<char16_t>;
+using linear_u32wbuffer  = basic_linear_buffer<char32_t>;
 
 }  // namespace rocket
 #endif
