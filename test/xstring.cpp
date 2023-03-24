@@ -9,7 +9,7 @@ template<typename charT>
 void
 test_xstring()
   {
-    constexpr charT hello[] = { 'h','e','l','l','o',0 };
+    constexpr charT hello[] = { 'h','e','l','l','o',0,'a',0 };
     constexpr charT meowTTThello[] = { 'm','e','o','w','T','T','T','h','e','l','l','o',0 };
 
     static_assert(xstrlen(hello + 5) == 0);
