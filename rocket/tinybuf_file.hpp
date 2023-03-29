@@ -231,8 +231,12 @@ class basic_tinybuf_file
           mstr[0] = 'a';  // might be "w" or "r+"
         }
 
-        if(mode & tinybuf_base::open_binary)
+        if(mode & tinybuf_base::open_binary) {
+#ifdef _O_BINARY
+          flags |= _O_BINARY;
+#endif
           mstr[mlen++] = 'b';
+        }
 
         if(mode & tinybuf_base::open_create)
           flags |= O_CREAT;
