@@ -46,7 +46,7 @@ xstrchr_nonconstexpr(charT* str,  typename identity<charT>::type target) noexcep
     size_t ki = 0;
     for(;;)
       if(str[ki] == target)
-        return str + ki;
+        return &(str[ki]);
       else if(str[ki] == charT())
         return nullptr;
       else
@@ -83,7 +83,7 @@ xmemchr_nonconstexpr(charT* str, typename identity<charT>::type target, size_t l
       if(ki >= len)
         return nullptr;
       else if(str[ki] == target)
-        return str + ki;
+        return &(str[ki]);
       else
         ki++;
   }
@@ -205,7 +205,7 @@ xmempset_nonconstexpr(charT* out, typename identity<charT>::type elem, size_t le
     size_t ki = 0;
     for(;;)
       if(ki >= len)
-        return out + ki;
+        return &(out[ki]);
       else
         out[ki] = elem, ki ++;
   }
@@ -237,10 +237,10 @@ xstrpcpy_nonconstexpr(charT* out, const typename identity<charT>::type* str) noe
   {
     size_t ki = 0;
     for(;;)
-      if((out[ki] = str[ki]) == charT())
-        return out + ki;
+      if(str[ki] == charT())
+        return &(out[ki] = charT());
       else
-        ki ++;
+        out[ki] = str[ki], ki ++;
   }
 
 inline
@@ -271,7 +271,7 @@ xmempcpy_nonconstexpr(charT* out, const typename identity<charT>::type* str, siz
     size_t ki = 0;
     for(;;)
       if(ki >= len)
-        return out + ki;
+        return &(out[ki]);
       else
         out[ki] = str[ki], ki ++;
   }
