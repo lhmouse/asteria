@@ -33,6 +33,7 @@ AS_VAR_SET([abi_minor], [0])
 AS_VAR_SET([abi_suffix], [beta.0])
 
 ## Check for required libraries
+AC_CHECK_HEADERS([uchar.h])
 AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_WARN(librt not found; proceeding without it)])
 AC_CHECK_LIB([z], [crc32], [], [AC_MSG_ERROR(zlib not found)])
 AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR(PCRE2 not found)])

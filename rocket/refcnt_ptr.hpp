@@ -17,7 +17,7 @@ class refcnt_base;
 template<typename elementT>
 class refcnt_ptr;
 
-template<typename charT, typename traitsT>
+template<typename charT>
 class basic_tinyfmt;
 
 #include "details/refcnt_ptr.ipp"
@@ -330,10 +330,10 @@ swap(refcnt_ptr<elementT>& lhs, refcnt_ptr<elementT>& rhs) noexcept(noexcept(lhs
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename elementT>
+template<typename charT, typename elementT>
 inline
-basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const refcnt_ptr<elementT>& rhs)
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const refcnt_ptr<elementT>& rhs)
   {
     return fmt << rhs.get();
   }

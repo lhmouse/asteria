@@ -1,4 +1,4 @@
-// This file is part of Asteria.
+// This str is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_TINYFMT_STR_
@@ -8,62 +8,62 @@
 #include "tinybuf_str.hpp"
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocT = allocator<charT>>
-class basic_tinyfmt_str;
-
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename allocT = allocator<charT>>
 class basic_tinyfmt_str
-  : public basic_tinyfmt<charT, traitsT>
+  : public basic_tinyfmt<charT>
   {
   public:
-    using char_type       = charT;
-    using traits_type     = traitsT;
-    using allocator_type  = allocT;
+    using char_type     = charT;
+    using seek_dir      = tinybuf_base::seek_dir;
+    using open_mode     = tinybuf_base::open_mode;
+    using tinyfmt_type  = basic_tinyfmt<charT>;
+    using tinybuf_type  = basic_tinybuf_str<charT>;
 
-    using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
-    using tinybuf_type  = basic_tinybuf_str<charT, traitsT>;
-    using string_type   = typename tinybuf_type::string_type;
-
-    using seek_dir   = typename tinybuf_type::seek_dir;
-    using open_mode  = typename tinybuf_type::open_mode;
-    using int_type   = typename tinybuf_type::int_type;
-    using off_type   = typename tinybuf_type::off_type;
-    using size_type  = typename tinybuf_type::size_type;
+    using string_type     = typename tinybuf_type::string_type;
+    using allocator_type  = typename tinybuf_type::allocator_type;
 
   private:
-    mutable tinybuf_type m_buf;
+    tinybuf_type m_buf;
 
   public:
-    basic_tinyfmt_str() noexcept
-      : m_buf(tinybuf_base::open_write)
-      { }
+    // Constructs the buffer object. The fmt part is stateless and is always
+    // default-constructed.
+    basic_tinyfmt_str()
+      noexcept(is_nothrow_default_constructible<tinybuf_type>::value)
+      {
+      }
 
+    template<typename... paramsT,
+    ROCKET_ENABLE_IF(is_constructible<tinybuf_type, paramsT&&...>::value)>
     explicit
-    basic_tinyfmt_str(open_mode mode) noexcept
-      : m_buf(mode)
-      { }
-
-    template<typename xstrT,
-    ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&>::value)>
-    explicit
-    basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
-      : m_buf(::std::forward<xstrT>(xstr), mode)
-      { }
+    basic_tinyfmt_str(paramsT&&... params)
+      noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
+      : m_buf(::std::forward<paramsT>(params)...)
+      {
+      }
 
     basic_tinyfmt_str&
-    swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
+    swap(basic_tinyfmt_str& other)
+      noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
-        noadl::xswap(this->m_buf, other.m_buf);
+        this->m_buf.swap(other.m_buf);
         return *this;
       }
 
+  protected:
+    // Gets the associated buffer.
+    ROCKET_PURE virtual
+    tinybuf_type&
+    do_get_tinybuf_nonconst() const override
+      {
+        return const_cast<tinybuf_type&>(this->m_buf);
+      }
+
   public:
+    virtual
     ~basic_tinyfmt_str() override;
 
-    tinybuf_type&
-    get_tinybuf() const override
-      { return this->m_buf;  }
-
+    // Gets the internal string.
     const string_type&
     get_string() const noexcept
       { return this->m_buf.get_string();  }
@@ -72,42 +72,52 @@ class basic_tinyfmt_str
     c_str() const noexcept
       { return this->m_buf.c_str();  }
 
-    size_type
+    size_t
     length() const noexcept
       { return this->m_buf.length();  }
 
-    basic_tinyfmt_str&
-    clear_string(open_mode mode = tinybuf_base::open_write)
-      {
-        this->m_buf.clear_string(mode);
-        return *this;
-      }
-
+    // Replaces the internal string.
     template<typename xstrT>
     basic_tinyfmt_str&
-    set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
+    set_string(xstrT&& xstr, open_mode mode)
       {
         this->m_buf.set_string(::std::forward<xstrT>(xstr), mode);
         return *this;
       }
 
-    string_type
-    extract_string(open_mode mode = tinybuf_base::open_write)
+    template<typename xstrT>
+    basic_tinyfmt_str&
+    set_string(xstrT&& xstr)
       {
-        return this->m_buf.extract_string(mode);
+        this->m_buf.set_string(::std::forward<xstrT>(xstr));
+        return *this;
+      }
+
+    basic_tinyfmt_str&
+    clear_string()
+      {
+        this->m_buf.clear_string();
+        return *this;
+      }
+
+    string_type
+    extract_string()
+      {
+        return this->m_buf.extract_string();
       }
   };
 
-template<typename charT, typename traitsT, typename allocT>
-basic_tinyfmt_str<charT, traitsT, allocT>::
+template<typename charT, typename allocT>
+basic_tinyfmt_str<charT, allocT>::
 ~basic_tinyfmt_str()
   {
   }
 
-template<typename charT, typename traitsT, typename allocT>
+template<typename charT, typename allocT>
 inline
 void
-swap(basic_tinyfmt_str<charT, traitsT, allocT>& lhs, basic_tinyfmt_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinyfmt_str<charT, allocT>& lhs, basic_tinyfmt_str<charT, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }
@@ -118,6 +128,9 @@ using u16tinyfmt_str  = basic_tinyfmt_str<char16_t>;
 using u32tinyfmt_str  = basic_tinyfmt_str<char32_t>;
 
 extern template class basic_tinyfmt_str<char>;
+extern template class basic_tinyfmt_str<wchar_t>;
+extern template class basic_tinyfmt_str<char16_t>;
+extern template class basic_tinyfmt_str<char32_t>;
 
 }  // namespace rocket
 #endif

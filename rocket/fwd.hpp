@@ -4,9 +4,7 @@
 #ifndef ROCKET_FWD_
 #define ROCKET_FWD_
 
-// This must be the first header as it defines some macros that interact with the standard library.
 #include "compiler.h"
-
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()

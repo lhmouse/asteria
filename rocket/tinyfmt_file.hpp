@@ -8,67 +8,68 @@
 #include "tinybuf_file.hpp"
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>>
-class basic_tinyfmt_file;
-
-template<typename charT, typename traitsT>
+template<typename charT>
 class basic_tinyfmt_file
-  : public basic_tinyfmt<charT, traitsT>
+  : public basic_tinyfmt<charT>
   {
   public:
-    using char_type       = charT;
-    using traits_type     = traitsT;
+    using char_type     = charT;
+    using seek_dir      = tinybuf_base::seek_dir;
+    using open_mode     = tinybuf_base::open_mode;
+    using tinyfmt_type  = basic_tinyfmt<charT>;
+    using tinybuf_type  = basic_tinybuf_file<charT>;
 
-    using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
-    using tinybuf_type  = basic_tinybuf_file<charT, traitsT>;
+    using file_type     = typename tinybuf_type::file_type;
     using handle_type   = typename tinybuf_type::handle_type;
     using closer_type   = typename tinybuf_type::closer_type;
 
-    using seek_dir   = typename tinybuf_type::seek_dir;
-    using open_mode  = typename tinybuf_type::open_mode;
-    using int_type   = typename tinybuf_type::int_type;
-    using off_type   = typename tinybuf_type::off_type;
-    using size_type  = typename tinybuf_type::size_type;
-
   private:
-    mutable tinybuf_type m_buf;
+    tinybuf_type m_buf;
 
   public:
-    basic_tinyfmt_file() noexcept
-      : m_buf()
-      { }
+    // Constructs the buffer object. The fmt part is stateless and is always
+    // default-constructed.
+    basic_tinyfmt_file()
+      noexcept(is_nothrow_default_constructible<tinybuf_type>::value)
+      {
+      }
 
-    basic_tinyfmt_file(unique_posix_file&& file) noexcept
-      : m_buf(::std::move(file))
-      { }
-
-    basic_tinyfmt_file(handle_type fp, closer_type cl) noexcept
-      : m_buf(fp, cl)
-      { }
-
+    template<typename... paramsT,
+    ROCKET_ENABLE_IF(is_constructible<tinybuf_type, paramsT&&...>::value)>
     explicit
-    basic_tinyfmt_file(const char* path, open_mode mode = tinybuf_base::open_write) noexcept
-      : m_buf(path, mode)
-      { }
+    basic_tinyfmt_file(paramsT&&... params)
+      noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
+      : m_buf(::std::forward<paramsT>(params)...)
+      {
+      }
 
     basic_tinyfmt_file&
-    swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
+    swap(basic_tinyfmt_file& other)
+      noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
-        noadl::xswap(this->m_buf, other.m_buf);
+        this->m_buf.swap(other.m_buf);
         return *this;
       }
 
+  protected:
+    // Gets the associated buffer.
+    ROCKET_PURE virtual
+    tinybuf_type&
+    do_get_tinybuf_nonconst() const override
+      {
+        return const_cast<tinybuf_type&>(this->m_buf);
+      }
+
   public:
+    virtual
     ~basic_tinyfmt_file() override;
 
-    tinybuf_type&
-    get_tinybuf() const override
-      { return this->m_buf;  }
-
+    // Gets the file pointer.
     handle_type
     get_handle() const noexcept
       { return this->m_buf.get_handle();  }
 
+    // Gets the file closer function.
     const closer_type&
     get_closer() const noexcept
       { return this->m_buf.get_closer();  }
@@ -77,8 +78,9 @@ class basic_tinyfmt_file
     get_closer() noexcept
       { return this->m_buf.get_closer();  }
 
+    // Takes ownership of an existent file.
     basic_tinyfmt_file&
-    reset(unique_posix_file&& file) noexcept
+    reset(file_type&& file) noexcept
       {
         this->m_buf.reset(::std::move(file));
         return *this;
@@ -91,13 +93,15 @@ class basic_tinyfmt_file
         return *this;
       }
 
+    // Opens a new file.
     basic_tinyfmt_file&
-    open(const char* path, open_mode mode = tinybuf_base::open_write)
+    open(const char* path, open_mode mode)
       {
         this->m_buf.open(path, mode);
         return *this;
       }
 
+    // Closes the current file, if any.
     basic_tinyfmt_file&
     close() noexcept
       {
@@ -106,16 +110,17 @@ class basic_tinyfmt_file
       }
   };
 
-template<typename charT, typename traitsT>
-basic_tinyfmt_file<charT, traitsT>::
+template<typename charT>
+basic_tinyfmt_file<charT>::
 ~basic_tinyfmt_file()
   {
   }
 
-template<typename charT, typename traitsT>
+template<typename charT>
 inline
 void
-swap(basic_tinyfmt_file<charT, traitsT>& lhs, basic_tinyfmt_file<charT, traitsT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(basic_tinyfmt_file<charT>& lhs, basic_tinyfmt_file<charT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }
@@ -126,6 +131,9 @@ using u16tinyfmt_file  = basic_tinyfmt_file<char16_t>;
 using u32tinyfmt_file  = basic_tinyfmt_file<char32_t>;
 
 extern template class basic_tinyfmt_file<char>;
+extern template class basic_tinyfmt_file<wchar_t>;
+extern template class basic_tinyfmt_file<char16_t>;
+extern template class basic_tinyfmt_file<char32_t>;
 
 }  // namespace rocket
 #endif

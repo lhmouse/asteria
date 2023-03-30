@@ -10,7 +10,7 @@ namespace rocket {
 template<typename valueT>
 class optional;
 
-template<typename charT, typename traitsT>
+template<typename charT>
 class basic_tinyfmt;
 
 enum class nullopt_t : uintptr_t { };
@@ -393,10 +393,10 @@ operator!=(const valueT& lhs, const optional<valueT>& rhs)
     return !rhs || (lhs != *rhs);
   }
 
-template<typename charT, typename traitsT, typename valueT>
+template<typename charT, typename valueT>
 inline
-basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const optional<valueT>& rhs)
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const optional<valueT>& rhs)
   {
     return rhs ? (fmt << *rhs) : (fmt << "(no value)");
   }

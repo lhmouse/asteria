@@ -13,7 +13,7 @@ namespace rocket {
 template<typename elementT, typename deleterT = default_delete<const elementT>>
 class unique_ptr;
 
-template<typename charT, typename traitsT>
+template<typename charT>
 class basic_tinyfmt;
 
 #include "details/unique_ptr.ipp"
@@ -246,10 +246,10 @@ swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) n
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename elementT, typename deleterT>
+template<typename charT, typename elementT, typename deleterT>
 inline
-basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
   {
     return fmt << rhs.get();
   }

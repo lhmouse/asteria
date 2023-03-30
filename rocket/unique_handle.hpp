@@ -25,7 +25,7 @@ namespace rocket {
 template<typename handleT, typename closerT>
 class unique_handle;
 
-template<typename charT, typename traitsT>
+template<typename charT>
 class basic_tinyfmt;
 
 #include "details/unique_handle.ipp"
@@ -205,10 +205,10 @@ swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs)
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename handleT, typename closerT>
+template<typename charT, typename handleT, typename closerT>
 inline
-basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const unique_handle<handleT, closerT>& rhs)
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const unique_handle<handleT, closerT>& rhs)
   {
     return fmt << rhs.get();
   }
