@@ -686,7 +686,7 @@ class basic_cow_string
     basic_cow_string&
     push_back(value_type c)
       {
-        this->append(1U, c);
+        this->append(size_type(1), c);
         return *this;
       }
 
@@ -2623,7 +2623,7 @@ basic_cow_string<charT, allocT>
 operator+(charT lhs, const basic_cow_string<charT, allocT>& rhs)
   {
     auto str = rhs;
-    str.insert(str.begin(), 1U, lhs);
+    str.insert(str.begin(), typename allocator_traits<allocT>::size_type(1), lhs);
     return str;
   }
 
@@ -2668,7 +2668,7 @@ inline
 basic_cow_string<charT, allocT>
 operator+(charT lhs, basic_cow_string<charT, allocT>&& rhs)
   {
-    rhs.insert(rhs.begin(), 1U, lhs);
+    rhs.insert(rhs.begin(), typename allocator_traits<allocT>::size_type(1), lhs);
     return rhs;
   }
 
