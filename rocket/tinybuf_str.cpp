@@ -5,5 +5,8 @@
 namespace rocket {
 
 template class basic_tinybuf_str<char>;
+template class basic_tinybuf_str<wchar_t>;
+template class basic_tinybuf_str<char16_t>;
+template class basic_tinybuf_str<char32_t>;
 
 }  // namespace rocket

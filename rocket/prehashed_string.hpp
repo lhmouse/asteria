@@ -27,7 +27,6 @@ class basic_prehashed_string
     using key_equal    = eqT;
 
     using value_type      = typename string_type::value_type;
-    using traits_type     = typename string_type::traits_type;
     using allocator_type  = typename string_type::allocator_type;
 
     using size_type        = typename string_type::size_type;
@@ -363,10 +362,10 @@ swap(basic_prehashed_string<stringT, hashT, eqT>& lhs, basic_prehashed_string<st
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename stringT, typename hashT, typename eqT>
+template<typename charT, typename stringT, typename hashT, typename eqT>
 inline
-basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt, const basic_prehashed_string<stringT, hashT, eqT>& str)
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const basic_prehashed_string<stringT, hashT, eqT>& str)
   {
     return fmt << str.rdstr();
   }

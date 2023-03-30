@@ -89,14 +89,20 @@ class basic_storage
         }
         else {
           // If the buffer is not large enough, allocate a new one.
-          auto nmax = this->max_size();
-          if(nmax - nused < nadd)
-            noadl::sprintf_and_throw<length_error>(
-                  "linear_buffer: max size exceeded (`%lld` + `%lld` > `%lld`)",
-                  static_cast<long long>(nused), static_cast<long long>(nadd),
-                  static_cast<long long>(nmax));
+          size_type cap_new;
 
-          size_type cap_new = (nused + nadd) | 0x1000;
+          if(ROCKET_ADD_OVERFLOW(nused, nadd, &cap_new))
+            noadl::sprintf_and_throw<length_error>(
+                "linear_buffer: arithmetic overflow (`%lld` + `%lld`)",
+                static_cast<long long>(nused), static_cast<long long>(nadd));
+
+          if(cap_new > this->max_size())
+            noadl::sprintf_and_throw<length_error>(
+                "linear_buffer: max size exceeded (`%lld` + `%lld` > `%lld`)",
+                static_cast<long long>(nused), static_cast<long long>(nadd),
+                static_cast<long long>(this->max_size()));
+
+          cap_new |= 0x1000;
           auto ptr_new = allocator_traits<allocator_type>::allocate(*this, cap_new);
           auto pbuf_new = noadl::unfancy(ptr_new);
 #ifdef ROCKET_DEBUG
@@ -104,15 +110,8 @@ class basic_storage
 #endif
 
           // Copy the old string into the new buffer and deallocate the old one.
-          if(ROCKET_UNEXPECT(nused)) {
-            ::memcpy(pbuf_new, pbuf + goff, nused * sizeof(value_type));
-          }
-          if(ROCKET_UNEXPECT(pbuf)) {
-#ifdef ROCKET_DEBUG
-            ::memset(pbuf, 0xE9, this->m_cap * sizeof(value_type));
-#endif
-            allocator_traits<allocator_type>::deallocate(*this, this->m_ptr, this->m_cap);
-          }
+          ::memcpy(pbuf_new, pbuf + goff, nused * sizeof(value_type));
+          allocator_traits<allocator_type>::deallocate(*this, this->m_ptr, this->m_cap);
           pbuf = pbuf_new;
 
           // Set up the new buffer.

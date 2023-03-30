@@ -4,6 +4,11 @@
 #include "cow_string.hpp"
 namespace rocket {
 
+template class basic_shallow_string<char>;
+template class basic_shallow_string<wchar_t>;
+template class basic_shallow_string<char16_t>;
+template class basic_shallow_string<char32_t>;
+
 template class basic_cow_string<char>;
 template class basic_cow_string<wchar_t>;
 template class basic_cow_string<char16_t>;

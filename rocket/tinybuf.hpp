@@ -7,211 +7,140 @@
 #include "fwd.hpp"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "char_traits.hpp"
+#include "xstring.hpp"
+#include "tinybuf_base.hpp"
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>>
-class basic_tinybuf;
-
-/* Differences from `std::basic_streambuf`:
- * 1. Locales are not supported.
- * 2. Putting back is not supported.
- * 3. The design has been simplified.
- * 4. `off_type` is always `int64_t` regardless of the traits in effect.
-**/
-
-struct tinybuf_base
-  {
-    enum seek_dir : uint8_t
-      {
-        seek_set  = SEEK_SET,
-        seek_cur  = SEEK_CUR,
-        seek_end  = SEEK_END,
-      };
-
-    enum open_mode : uint16_t
-      {
-        open_read        = 0b000000000001,  // O_RDONLY
-        open_write       = 0b000000000010,  // O_WRONLY
-        open_read_write  = 0b000000000011,  // O_RDWR
-        open_append      = 0b000000000110,  // O_APPEND
-        open_binary      = 0b000000001000,  // _O_BINARY (Windows only)
-        open_create      = 0b000000010010,  // O_CREAT
-        open_truncate    = 0b000000100010,  // O_TRUNC
-        open_exclusive   = 0b000001000010,  // O_EXCL
-      };
-  };
-
-constexpr
-tinybuf_base::open_mode
-operator~(tinybuf_base::open_mode rhs) noexcept
-  {
-    return (tinybuf_base::open_mode)~(uint32_t)rhs;
-  }
-
-constexpr
-tinybuf_base::open_mode
-operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return (tinybuf_base::open_mode)((uint32_t)lhs & (uint32_t)rhs);
-  }
-
-constexpr
-tinybuf_base::open_mode
-operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return (tinybuf_base::open_mode)((uint32_t)lhs | (uint32_t)rhs);
-  }
-
-constexpr
-tinybuf_base::open_mode
-operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return (tinybuf_base::open_mode)((uint32_t)lhs ^ (uint32_t)rhs);
-  }
-
-template<typename charT, typename traitsT>
+template<typename charT>
 class basic_tinybuf
   : public tinybuf_base
   {
   public:
-    using char_type       = charT;
-    using traits_type     = traitsT;
-
-    using int_type   = typename traits_type::int_type;
-    using off_type   = int64_t;
-    using size_type  = size_t;
+    using char_type  = charT;
+    using seek_dir   = tinybuf_base::seek_dir;
+    using open_mode  = tinybuf_base::open_mode;
 
   protected:
     basic_tinybuf() noexcept = default;
 
-    basic_tinybuf(const basic_tinybuf&) noexcept = default;
-
-    basic_tinybuf&
-    operator=(const basic_tinybuf&) & noexcept = default;
-
-  protected:
-    // These can be overridden by derived buffer classes.
-    virtual
-    void
-    do_flush()
-      { }
-
-    virtual
-    off_type
-    do_tell() const
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
-      }
-
-    virtual
-    void
-    do_seek(off_type /*off*/, seek_dir /*dir*/)
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
-      }
-
-    virtual
-    size_type
-    do_getn(char_type* /*s*/, size_type /*n*/)
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");
-      }
-
-    virtual
-    int_type
-    do_getc()
-      {
-        char_type c;
-        if(this->do_getn(::std::addressof(c), 1) == 0)
-          return traits_type::eof();
-        return traits_type::to_int_type(c);
-      }
-
-    virtual
-    void
-    do_putn(const char_type* /*s*/, size_type /*n*/)
-      {
-        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
-      }
-
-    virtual
-    void
-    do_putc(char_type c)
-      {
-        this->do_putn(::std::addressof(c), 1);
-      }
+    basic_tinybuf(const basic_tinybuf&) noexcept = delete;
+    basic_tinybuf& operator=(const basic_tinybuf&) & noexcept = delete;
 
   public:
     virtual
     ~basic_tinybuf();
 
+    // Flushes a stream, like `fflush()`.
+    // The default implementation does nothing.
+    virtual
     basic_tinybuf&
     flush()
       {
-        this->do_flush();
         return *this;
       }
 
-    off_type
+    // Gets the current stream pointer.
+    // If the stream is non-seekable, `-1` shall be returned.
+    virtual
+    int64_t
     tell() const
       {
-        return this->do_tell();
+        return -1;
       }
 
+    // Adjusts the current stream pointer.
+    // If an exception is thrown, the stream is left in an unspecified state.
+    // The default implementation fails and throws an exception.
+    virtual
     basic_tinybuf&
-    seek(off_type off, seek_dir dir = seek_set)
+    seek(int64_t off, seek_dir dir)
       {
-        this->do_seek(off, dir);
-        return *this;
+        (void) off;
+        (void) dir;
+        noadl::sprintf_and_throw<invalid_argument>(
+                 "tinybuf: stream not seekable");
       }
 
-    size_type
-    getn(char_type* s, size_type n)
+    // Reads some characters from the stream.
+    // Upon success, the number of characters that have been read successfully
+    // shall be returned. If the end of stream has been reached, zero shall be
+    // returned. If an exception is thrown, the stream is left in an unspecified
+    // state.
+    // The default implementation fails and throws an exception.
+    virtual
+    size_t
+    getn(char_type* s, size_t n)
       {
-        return this->do_getn(s, n);
+        (void) s;
+        (void) n;
+        noadl::sprintf_and_throw<invalid_argument>(
+                 "tinybuf: stream not readable");
       }
 
-    int_type
+    // Reads a single character from the stream.
+    // Upon success, the character that has been read shall be zero-extended to
+    // an integer and returned. If the end of stream has been reached, `-1` shall
+    // be returned. If an exception is thrown, the stream is left in an unspecified
+    // state.
+    // The default implementation delegates to `getn()`.
+    virtual
+    int
     getc()
       {
-        return this->do_getc();
+        char_type s[1];
+        size_t n = this->getn(s, 1);
+        return (n == 0) ? -1 : noadl::xchrtoint(s[0]);
       }
 
+    // Puts some characters into the stream.
+    // This function shall return only after all characters have been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    // The default implementation fails and throws an exception.
+    virtual
     basic_tinybuf&
-    putn(const char_type* s, size_type n)
+    putn(const char_type* s, size_t n)
       {
-        this->do_putn(s, n);
-        return *this;
+        (void) s;
+        (void) n;
+        noadl::sprintf_and_throw<invalid_argument>(
+                 "tinybuf: stream not writable");
       }
 
+    // Puts a single character into the stream.
+    // This function shall return only after the character has been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    // The default implementation delegates to `putn()`.
+    virtual
     basic_tinybuf&
     putc(char_type c)
       {
-        this->do_putc(c);
+        this->putn(::std::addressof(c), 1);
         return *this;
       }
 
+    // Puts a null-terminated string into the stream.
+    // This function shall return only after all characters have been written
+    // successfully. If an exception is thrown, the stream is left in an
+    // unspecified state.
+    // The default implementation delegates to `putn()`.
+    virtual
     basic_tinybuf&
     puts(const char_type* s)
       {
-        static constexpr char_type xnull[] = { '(','n','u','l','l',')',0 };
-        const char_type* p = s ? s : xnull;
-        this->do_putn(p, traits_type::length(p));
+        static constexpr char_type null_str[] = { '(','n','u','l','l',')' };
+        const char_type* ps = s ? s : null_str;
+        size_t ns = s ? noadl::xstrlen(s) : noadl::size(null_str);
+        this->putn(ps, ns);
         return *this;
       }
   };
 
-template<typename charT, typename traitsT>
-basic_tinybuf<charT, traitsT>::
-~basic_tinybuf()  { }
-
-template<typename charT, typename traitsT>
-inline
-void
-swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename charT>
+basic_tinybuf<charT>::
+~basic_tinybuf()
   {
-    lhs.swap(rhs);
   }
 
 using tinybuf     = basic_tinybuf<char>;
@@ -220,6 +149,9 @@ using u16tinybuf  = basic_tinybuf<char16_t>;
 using u32tinybuf  = basic_tinybuf<char32_t>;
 
 extern template class basic_tinybuf<char>;
+extern template class basic_tinybuf<wchar_t>;
+extern template class basic_tinybuf<uint16_t>;
+extern template class basic_tinybuf<uint32_t>;
 
 }  // namespace rocket
 #endif

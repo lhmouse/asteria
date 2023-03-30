@@ -747,7 +747,7 @@ std_string_compare(V_string text1, V_string text2, optV_integer length)
       return 0;
 
     // Compare two substrings.
-    return text1.compare(0, static_cast<size_t>(*length), text2, 0, static_cast<size_t>(*length));
+    return text1.substr_compare(0, static_cast<size_t>(*length), text2, 0, static_cast<size_t>(*length));
   }
 
 V_boolean

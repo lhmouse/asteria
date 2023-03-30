@@ -33,7 +33,6 @@ nobase_include_HEADERS +=  \
   %reldir%/unique_posix_dir.hpp  \
   %reldir%/unique_posix_fd.hpp  \
   %reldir%/reference_counter.hpp  \
-  %reldir%/char_traits.hpp  \
   %reldir%/cow_string.hpp  \
   %reldir%/cow_vector.hpp  \
   %reldir%/cow_hashmap.hpp  \
@@ -45,6 +44,7 @@ nobase_include_HEADERS +=  \
   %reldir%/array.hpp  \
   %reldir%/reference_wrapper.hpp  \
   %reldir%/linear_buffer.hpp  \
+  %reldir%/tinybuf_base.hpp  \
   %reldir%/tinybuf.hpp  \
   %reldir%/tinybuf_str.hpp  \
   %reldir%/tinybuf_file.hpp  \

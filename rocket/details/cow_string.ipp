@@ -6,29 +6,9 @@
 #endif
 namespace details_cow_string {
 
-template<typename traitsT>
-constexpr ROCKET_ALWAYS_INLINE
-typename traitsT::size_type
-do_strlen_maybe_constexpr(const typename traitsT::char_type* ptr) noexcept
-  {
-    constexpr auto nul = (typename traitsT::char_type) 0;
-    auto k = (typename traitsT::size_type) -1;
-
-    while(ROCKET_CONSTANT_P(ptr[++k]))
-      if(((ptr[k]) == nul) || traitsT::eq(ptr[k], nul))
-        return k;
-
-    return traitsT::length(ptr);
-  }
-
 struct storage_header
   {
-    mutable reference_counter<long> nref;
-
-    explicit
-    storage_header() noexcept
-      : nref()
-      { }
+    mutable reference_counter<long> nref = { };
   };
 
 template<typename allocT>
@@ -81,17 +61,14 @@ struct basic_storage
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
   };
 
-template<typename allocT, typename traitsT>
+template<typename allocT>
 class storage_handle
   : private allocator_wrapper_base_for<allocT>::type
   {
   public:
     using allocator_type   = allocT;
-    using traits_type      = traitsT;
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
-
-    static constexpr value_type null_char[1] = { };
 
   private:
     using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
@@ -103,6 +80,11 @@ class storage_handle
     storage_pointer m_qstor = nullptr;
 
   public:
+    constexpr
+    storage_handle() noexcept
+      : allocator_base()
+      { }
+
     explicit constexpr
     storage_handle(const allocator_type& alloc) noexcept
       : allocator_base(alloc)
@@ -199,15 +181,20 @@ class storage_handle
     size_type
     check_size_add(size_type base, size_type add) const
       {
-        auto nmax = this->max_size();
-        ROCKET_ASSERT(base <= nmax);
-        if(nmax - base < add) {
+        size_type res;
+
+        if(ROCKET_ADD_OVERFLOW(base, add, &res))
           noadl::sprintf_and_throw<length_error>(
-                "cow_string: max size exceeded (`%lld` + `%lld` > `%lld`)",
-                static_cast<long long>(base), static_cast<long long>(add),
-                static_cast<long long>(nmax));
-        }
-        return base + add;
+              "basic_cow_string: arithmetic overflow (`%lld` + `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add));
+
+        if(res > this->max_size())
+          noadl::sprintf_and_throw<length_error>(
+              "basic_cow_string: max size exceeded (`%lld` + `%lld` > `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add),
+              static_cast<long long>(this->max_size()));
+
+        return res;
       }
 
     size_type
@@ -220,11 +207,11 @@ class storage_handle
 
     ROCKET_PURE
     const value_type*
-    data() const noexcept
+    data_opt() const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
-          return null_char;
+          return nullptr;
         return qstor->data;
       }
 
@@ -241,26 +228,24 @@ class storage_handle
     value_type*
     reallocate_more(const value_type* src, size_type len, size_type add)
       {
-        // Calculate the combined length of string (len + add).
-        // The first part is copied from `src`. The second part is left uninitialized.
+        // Calculate the combined length of string (len + add). The first part
+        // is copied from `src`. The second part is left uninitialized.
         size_type cap = this->check_size_add(len, add);
 
-        // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
+        // Allocate an array of `storage` large enough for a header + `cap`
+        // instances of `value_type`.
         auto nblk = storage::min_nblk_for_nchar(cap);
         storage_allocator st_alloc(this->as_allocator());
         auto qstor = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
         noadl::construct(noadl::unfancy(qstor), this->as_allocator(), nblk);
 
-        // Add a null character anyway.
-        // The user still has to keep track of it if the storage is not fully utilized.
-        traits_type::assign(qstor->data[cap], value_type());
+        // Add a null character anyway. The user still has to keep track of it
+        // if the storage is not fully utilized.
+        qstor->data[cap] = value_type();
 
-        // Copy characters into the new block if any.
-        // This shall not throw exceptions.
-        if(len)
-          traits_type::copy(qstor->data, src, len);
-
-        traits_type::assign(qstor->data[len], value_type());
+        // Copy characters into the new block. This shall not throw exceptions.
+        auto end = noadl::xmempcpy(qstor->data, src, len);
+        *end = value_type();
 
         // Set up the new storage.
         this->do_reset(qstor);
@@ -283,86 +268,6 @@ class storage_handle
     void
     exchange_with(storage_handle& other) noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }
-  };
-
-template<typename allocT, typename traitsT>
-constexpr typename allocT::value_type storage_handle<allocT, traitsT>::null_char[1];
-
-// Implement relational operators.
-template<typename charT, typename traitsT>
-struct comparator
-  {
-    using char_type    = charT;
-    using traits_type  = traitsT;
-    using size_type    = size_t;
-
-    static constexpr
-    int
-    inequality(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
-      {
-        return (n1 != n2) ? 2  // length not equal
-             : (s1 == s2) ? 0  // reflexive
-                          : traits_type::compare(s1, s2, n1);
-      }
-
-    static constexpr
-    int
-    relation(const char_type* s1, size_type n1, const char_type* s2, size_type n2) noexcept
-      {
-        return (n1 == n2) ?      traits_type::compare(s1, s2, n1)
-             : (n1 >= n2) ? 1 |  traits_type::compare(s1, s2, n2)
-                          : 1 | ~traits_type::compare(s2, s1, n1);
-      }
-  };
-
-// Implement the FNV-1a hash algorithm.
-template<typename charT, typename traitsT>
-class basic_hasher
-  {
-  private:
-    static constexpr char32_t xoffset = 0x811C9DC5;
-    static constexpr char32_t xprime = 0x1000193;
-    char32_t m_reg = xoffset;
-
-  public:
-    constexpr
-    basic_hasher&
-    append(charT c) noexcept
-      {
-        char32_t word = static_cast<char32_t>(c);
-        for(unsigned k = 0;  k < sizeof(charT);  ++k)
-          this->m_reg = (this->m_reg ^ ((word >> k * 8) & 0xFF)) * xprime;
-        return *this;
-      }
-
-    constexpr
-    basic_hasher&
-    append(const charT* s, size_t n)
-      {
-        const charT* sp = s;
-        while(sp != s + n)
-          this->append(*(sp++));
-        return *this;
-      }
-
-    constexpr
-    basic_hasher&
-    append(const charT* s)
-      {
-        const charT* sp = s;
-        while(!traitsT::eq(*sp, charT()))
-          this->append(*(sp++));
-        return *this;
-      }
-
-    constexpr
-    size_t
-    finish() noexcept
-      {
-        char32_t reg = this->m_reg;
-        this->m_reg = xoffset;
-        return reg;
-      }
   };
 
 template<typename stringT, typename charT>
@@ -440,14 +345,14 @@ class string_iterator
       { return ::std::addressof(**this);  }
 
     string_iterator&
-    operator+=(difference_type off) noexcept
+    operator+=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
       }
 
     string_iterator&
-    operator-=(difference_type off) noexcept
+    operator-=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
