@@ -124,7 +124,7 @@ lib_libasteria_la_SOURCES =  \
 
 lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
 lib_libasteria_la_LIBADD = lib/librocket.la ${LTLIBICONV}
-lib_libasteria_la_LDFLAGS = -no-undefined -version-info @abi_major@:@abi_minor@
+lib_libasteria_la_LDFLAGS = -no-undefined -version-number @abi_major@:@abi_minor@
 
 if enable_pch
 lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
