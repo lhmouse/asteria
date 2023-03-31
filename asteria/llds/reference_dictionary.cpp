@@ -100,7 +100,7 @@ do_rehash_more()
 
     // Move buckets into the new table.
     // Warning: no exception shall be thrown from the code below.
-    auto sbkt = ::std::exchange(this->m_head, nullptr);
+    auto sbkt = ::rocket::exchange(this->m_head);
     while(ROCKET_EXPECT(sbkt)) {
       ROCKET_ASSERT(*sbkt);
 

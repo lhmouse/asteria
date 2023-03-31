@@ -214,6 +214,16 @@ ssize(const elementT (&)[countT]) noexcept
     return static_cast<ptrdiff_t>(countT);
   }
 
+template<typename valueT, typename... withT>
+constexpr
+valueT
+exchange(valueT& ref, withT&&... with)
+  {
+    valueT old = ::std::move(ref);
+    ref = { ::std::forward<withT>(with)... };
+    return old;
+  }
+
 template<typename... typesT>
 struct conjunction
   : true_type

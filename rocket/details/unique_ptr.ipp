@@ -84,7 +84,7 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
 
     pointer
     release() noexcept
-      { return ::std::exchange(this->m_ptr, nullptr);  }
+      { return noadl::exchange(this->m_ptr);  }
 
     void
     reset(pointer ptr_new) noexcept
@@ -147,7 +147,7 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
 
     pointer
     release() noexcept
-      { return ::std::exchange(this->m_ptr, nullptr);  }
+      { return noadl::exchange(this->m_ptr);  }
 
     void
     reset(pointer ptr_new) noexcept
@@ -204,7 +204,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
 
     pointer
     release() noexcept
-      { return ::std::exchange(this->m_ptr, nullptr);  }
+      { return noadl::exchange(this->m_ptr);  }
 
     void
     reset(pointer ptr_new) noexcept

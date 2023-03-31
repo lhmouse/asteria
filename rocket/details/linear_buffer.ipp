@@ -124,7 +124,7 @@ class basic_storage
     deallocate() noexcept
       {
         // If the pointer is null we assume the capacity is zero.
-        auto ptr = ::std::exchange(this->m_ptr, nullptr);
+        auto ptr = noadl::exchange(this->m_ptr);
         if(!ptr)
           return;
 

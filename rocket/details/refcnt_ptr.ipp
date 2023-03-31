@@ -90,7 +90,7 @@ class stored_pointer
 
     pointer
     release() noexcept
-      { return ::std::exchange(this->m_ptr, nullptr);  }
+      { return noadl::exchange(this->m_ptr);  }
 
     pointer
     fork() const noexcept
