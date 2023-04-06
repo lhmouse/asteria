@@ -155,8 +155,8 @@ class cow_vector
             static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
       }
 
-    // This function works the same way as `substr()`.
-    // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
+    // This function works the same way as `substr()`. It ensures `tpos` is
+    // within range and returns the number of elements that start there.
     size_type
     do_clamp_subvec(size_type tpos, size_type tn) const
       {
@@ -166,14 +166,14 @@ class cow_vector
         return noadl::min(tn, len - tpos);
       }
 
-    // This function is used to implement `insert()` after new elements has been appended.
-    // `tpos` is the position to insert. `kpos` is the old length prior to `append()`.
+    // This function is used to implement `insert()` after new elements has
+    // been appended. `tpos` is the position to insert. `old_size` is the old
+    // size before `append()`.
     value_type*
-    do_swizzle_unchecked(size_type tpos, size_type kpos)
+    do_swizzle_unchecked(size_type tpos, size_type old_size)
       {
-        // Swap the intervals [`tpos+tlen`,`kpos`) and [`kpos`,`size`).
         auto ptr = this->mut_data();
-        noadl::rotate(ptr, tpos, kpos, this->size());
+        noadl::rotate(ptr, tpos, old_size, this->size());
         return ptr + tpos;
       }
 
@@ -181,7 +181,6 @@ class cow_vector
     value_type*
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        // Swap the intervals [`tpos`,`tpos+tlen`) and [`tpos+tlen`,`size`).
         auto ptr = this->mut_data();
         noadl::rotate(ptr, tpos, tpos + tlen, this->size());
         this->m_sth.pop_back_unchecked(tlen);

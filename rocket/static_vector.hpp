@@ -151,8 +151,8 @@ class static_vector
             static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
       }
 
-    // This function works the same way as `substr()`.
-    // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
+    // This function works the same way as `substr()`. It ensures `tpos` is
+    // within range and returns the number of elements that start there.
     size_type
     do_clamp_subvec(size_type tpos, size_type tn) const
       {
@@ -162,8 +162,9 @@ class static_vector
         return noadl::min(tn, len - tpos);
       }
 
-    // This function is used to implement `insert()` after new elements has been appended.
-    // `tpos` is the position to insert. `kpos` is the old length prior to `append()`.
+    // This function is used to implement `insert()` after new elements has
+    // been appended. `tpos` is the position to insert. `kpos` is the old
+    // length prior to `append()`.
     value_type*
     do_swizzle_unchecked(size_type tpos, size_type kpos)
       {
