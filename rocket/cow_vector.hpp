@@ -362,11 +362,29 @@ class cow_vector
         return this->data()[pos];
       }
 
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    at(subscriptT pos) const
+      {
+        return this->at(static_cast<size_type>(pos));
+      }
+
     const_reference
     operator[](size_type pos) const noexcept
       {
         ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
+      }
+
+    // N.B. This is a non-standard extension.
+    template<typename subscriptT,
+    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
+    const_reference
+    operator[](subscriptT pos) const noexcept
+      {
+        return this->operator[](static_cast<size_type>(pos));
       }
 
     const_reference
