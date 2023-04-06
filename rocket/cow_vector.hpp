@@ -183,7 +183,7 @@ class cow_vector
       {
         auto ptr = this->mut_data();
         noadl::rotate(ptr, tpos, tpos + tlen, this->size());
-        this->m_sth.pop_back_unchecked(tlen);
+        this->m_sth.pop_n_unchecked(tlen);
         return ptr + tpos;
       }
 
@@ -339,7 +339,7 @@ class cow_vector
         if(!this->m_sth.unique())
           return this->do_deallocate();
 
-        this->m_sth.pop_back_unchecked(this->size());
+        this->m_sth.pop_n_unchecked(this->size());
         return *this;
       }
 
@@ -428,7 +428,9 @@ class cow_vector
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     reference
     mut(subscriptT pos)
-      { return this->mut(static_cast<size_type>(pos));  }
+      {
+        return this->mut(static_cast<size_type>(pos));
+      }
 
     // N.B. This is a non-standard extension.
     // N.B. This function may throw `std::bad_alloc`.
@@ -471,19 +473,16 @@ class cow_vector
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
         size_type len = this->size();
+
         if(ROCKET_EXPECT(ptr && (n <= cap - len))) {
-          for(size_type k = 0;  k < n;  ++k)
-            this->m_sth.emplace_back_unchecked(params...);
+          this->m_sth.append_n_unchecked(n, params...);
           return *this;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
         ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
-
-        // Append elements to the new storage.
-        for(size_type k = 0;  k < n;  ++k)
-          sth.emplace_back_unchecked(params...);
+        sth.append_n_unchecked(n, params...);
         sth.reallocate_finish(this->m_sth);
 
         // Set the new storage up.
@@ -494,7 +493,9 @@ class cow_vector
     // N.B. This is a non-standard extension.
     cow_vector&
     append(initializer_list<value_type> init)
-      { return this->append(init.begin(), init.end());  }
+      {
+        return this->append(init.begin(), init.end());
+      }
 
     // N.B. This is a non-standard extension.
     template<typename inputT,
@@ -512,9 +513,9 @@ class cow_vector
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
         size_type len = this->size();
+
         if(ROCKET_EXPECT(dist && (dist == n) && ptr && (n <= cap - len))) {
-          for(auto it = ::std::move(first);  it != last;  ++it)
-            this->m_sth.emplace_back_unchecked(*it);
+          this->m_sth.append_range_unchecked(::std::move(first), ::std::move(last));
           return *this;
         }
 
@@ -523,10 +524,7 @@ class cow_vector
         if(ROCKET_EXPECT(dist && (dist == n))) {
           // The length is known.
           ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
-
-          // Append elements to the new storage.
-          for(auto it = ::std::move(first);  it != last;  ++it)
-            sth.emplace_back_unchecked(*it);
+          sth.append_range_unchecked(::std::move(first), ::std::move(last));
         }
         else {
           // The length is not known.
@@ -558,8 +556,8 @@ class cow_vector
         auto ptr = this->m_sth.mut_data_opt();
         size_type cap = this->capacity();
         size_type len = this->size();
+
         if(ROCKET_EXPECT(ptr && (len < cap))) {
-          // Append an element in place.
           auto& ref = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
           return ref;
         }
@@ -567,8 +565,6 @@ class cow_vector
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
         ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
-
-        // Append an element to the new storage.
         auto& ref = sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         sth.reallocate_finish(this->m_sth);
 
@@ -762,7 +758,7 @@ class cow_vector
     pop_back(size_type n = 1)
       {
         this->mut_data();
-        this->m_sth.pop_back_unchecked(n);
+        this->m_sth.pop_n_unchecked(n);
         return *this;
       }
 

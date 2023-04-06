@@ -179,7 +179,7 @@ class static_vector
       {
         auto ptr = this->mut_data();
         noadl::rotate(ptr, tpos, tpos + tlen, this->size());
-        this->m_sth.pop_back_unchecked(tlen);
+        this->m_sth.pop_n_unchecked(tlen);
         return ptr + tpos;
       }
 
@@ -295,7 +295,7 @@ class static_vector
     static_vector&
     clear() noexcept
       {
-        this->m_sth.pop_back_unchecked(this->size());
+        this->m_sth.pop_n_unchecked(this->size());
         return *this;
       }
 
@@ -372,7 +372,9 @@ class static_vector
     ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
     reference
     mut(subscriptT pos)
-      { return this->mut(static_cast<size_type>(pos));  }
+      {
+        return this->mut(static_cast<size_type>(pos));
+      }
 
     // N.B. This is a non-standard extension.
     reference
@@ -407,21 +409,18 @@ class static_vector
         if(n == 0)
           return *this;
 
-        // Check whether there is room for new elements.
-        this->m_sth.check_size_add(this->size(), n);
-
         // The storage can't be reallocated, so we may append all elements in place.
-        for(size_type k = 0;  k < n;  ++k)
-          this->m_sth.emplace_back_unchecked(params...);
-
-        // The return type aligns with `std::string::append()`.
+        this->m_sth.check_size_add(this->size(), n);
+        this->m_sth.append_n_unchecked(n, params...);
         return *this;
       }
 
     // N.B. This is a non-standard extension.
     static_vector&
     append(initializer_list<value_type> init)
-      { return this->append(init.begin(), init.end());  }
+      {
+        return this->append(init.begin(), init.end());
+      }
 
     // N.B. This is a non-standard extension.
     template<typename inputT,
@@ -432,16 +431,10 @@ class static_vector
         if(first == last)
           return *this;
 
-        size_type n = noadl::estimate_distance(first, last);
-
-        // Check whether there is room for new elements if `inputT` is a forward iterator type.
-        this->m_sth.check_size_add(this->size(), n);
-
         // The storage can't be reallocated, so we may append all elements in place.
-        for(auto it = ::std::move(first);  it != last;  ++it)
-          this->m_sth.emplace_back_unchecked(*it);
-
-        // The return type aligns with `std::string::append()`.
+        size_type n = noadl::estimate_distance(first, last);
+        this->m_sth.check_size_add(this->size(), n);
+        this->m_sth.append_unchecked(::std::move(first), ::std::move(last));
         return *this;
       }
 
@@ -450,10 +443,8 @@ class static_vector
     reference
     emplace_back(paramsT&&... params)
       {
-        // Check whether there is room for new elements.
-        this->m_sth.check_size_add(this->size(), 1);
-
         // The storage can't be reallocated, so we may append the element in place.
+        this->m_sth.check_size_add(this->size(), 1);
         return this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
       }
 
@@ -639,7 +630,7 @@ class static_vector
     static_vector&
     pop_back(size_type n = 1)
       {
-        this->m_sth.pop_back_unchecked(n);
+        this->m_sth.pop_n_unchecked(n);
         return *this;
       }
 

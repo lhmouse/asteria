@@ -90,7 +90,7 @@ struct basic_storage
 
         size_t off = this->nelem;
         allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
-        this->nelem = static_cast<size_type>(off + 1);
+        this->nelem = static_cast<size_type>(off + 1U);
         return this->data[off];
       }
 
@@ -100,7 +100,7 @@ struct basic_storage
         ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
         ROCKET_ASSERT_MSG(this->nelem > 0, "no element to pop");
 
-        size_t off = this->nelem - 1;
+        size_t off = this->nelem - 1U;
         this->nelem = static_cast<size_type>(off);
         allocator_traits<allocator_type>::destroy(*this, this->data + off);
       }
@@ -367,11 +367,27 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "no storage allocated");
-        return qstor->pop_back_unchecked();
+        qstor->pop_back_unchecked();
+      }
+
+    template<typename... paramsT>
+    void
+    append_n_unchecked(size_t total, const paramsT&... params)
+      {
+        for(size_t k = 0;  k != total;  ++k)
+          this->emplace_back_unchecked(params...);
+      }
+
+    template<typename inputT>
+    void
+    append_range_unchecked(inputT first, inputT last)
+      {
+        for(auto it = ::std::move(first);  it != last;  ++it)
+          this->emplace_back_unchecked(*it);
       }
 
     void
-    pop_back_unchecked(size_t total) noexcept
+    pop_n_unchecked(size_t total) noexcept
       {
         for(size_t k = 0;  k != total;  ++k)
           this->pop_back_unchecked();

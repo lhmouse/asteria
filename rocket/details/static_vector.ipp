@@ -139,7 +139,7 @@ class storage_handle
 
         size_t off = this->m_nelem;
         allocator_traits<allocator_type>::construct(*this, this->m_data + off, ::std::forward<paramsT>(params)...);
-        this->m_nelem = static_cast<nelem_type>(off + 1);
+        this->m_nelem = static_cast<nelem_type>(off + 1U);
         return this->m_data[off];
       }
 
@@ -148,13 +148,29 @@ class storage_handle
       {
         ROCKET_ASSERT_MSG(this->m_nelem > 0, "no element to pop");
 
-        size_t off = this->m_nelem - size_t(1);
+        size_t off = this->m_nelem - 1U;
         this->m_nelem = static_cast<nelem_type>(off);
         allocator_traits<allocator_type>::destroy(*this, this->m_data + off);
       }
 
+    template<typename... paramsT>
     void
-    pop_back_unchecked(size_t total) noexcept
+    append_n_unchecked(size_t total, const paramsT&... params)
+      {
+        for(size_t k = 0;  k != total;  ++k)
+          this->emplace_back_unchecked(params...);
+      }
+
+    template<typename inputT>
+    void
+    append_range_unchecked(inputT first, inputT last)
+      {
+        for(auto it = ::std::move(first);  it != last;  ++it)
+          this->emplace_back_unchecked(*it);
+      }
+
+    void
+    pop_n_unchecked(size_t total) noexcept
       {
         for(size_t k = 0;  k != total;  ++k)
           this->pop_back_unchecked();
