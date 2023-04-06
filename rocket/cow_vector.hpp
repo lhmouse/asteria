@@ -276,10 +276,9 @@ class cow_vector
     cow_vector&
     resize(size_type n, const paramsT&... params)
       {
-        if(this->size() < n)
-          return this->append(n - this->size(), params...);
-        else
-          return this->pop_back(this->size() - n);
+        return (this->size() < n)
+                 ? this->append(n - this->size(), params...)
+                 : this->pop_back(this->size() - n);
       }
 
     size_type
