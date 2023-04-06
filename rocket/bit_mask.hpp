@@ -12,7 +12,7 @@ template<typename valueT>
 class bit_mask
   {
     static_assert(is_unsigned<valueT>::value && !is_same<valueT, bool>::value,
-        "`value_type` must be an unsigned integral type other than `bool`");
+                  "`value_type` must be an unsigned integral type other than `bool`");
 
   public:
     using value_type = valueT;

@@ -485,10 +485,10 @@ class variant
       }
   };
 
-#if __cpp_inline_variables + 0 < 201606  // < c++17
+#ifndef __cpp_inline_variables
 template<typename... altsT>
 const size_t variant<altsT...>::alternative_size;
-#endif
+#endif  // __cpp_inline_variables
 
 template<typename... altsT>
 inline

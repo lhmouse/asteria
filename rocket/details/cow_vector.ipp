@@ -10,7 +10,7 @@ using unknown_function  = void (...);
 
 struct storage_header
   {
-    mutable reference_counter<long> nref;
+    mutable reference_counter<long> nref = { };
 
     unknown_function* dtor;
     size_t nelem;
@@ -19,10 +19,6 @@ struct storage_header
     // This field is paramount for exception safety.
     // It shall be zero for a fully initialized block.
     size_t nskip;
-
-    explicit
-    storage_header() noexcept
-      : nref()  { }
   };
 
 template<typename allocT>
@@ -76,8 +72,7 @@ struct basic_storage
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->data), '~',
-                 sizeof(value_type) + (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->data), '~', sizeof(value_type) + (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -91,14 +86,11 @@ struct basic_storage
     emplace_back_unchecked(paramsT&&... params)
       {
         ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
-        ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk),
-                          "no space for new elements");
+        ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk), "no space for new elements");
 
         size_t off = this->nelem;
-        allocator_traits<allocator_type>::construct(*this, this->data + off,
-                                                    ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
         this->nelem = static_cast<size_type>(off + 1);
-
         return this->data[off];
       }
 
@@ -140,8 +132,7 @@ struct storage_traits
                 bool,         // 3. copyable?
                 storage_type& st_new, storage_type& st_old, size_t nskip)
       {
-        ::std::memcpy(st_new.data + nskip, st_old.data + nskip,
-                                           sizeof(value_type) * (st_old.nelem - nskip));
+        ::std::memcpy(st_new.data + nskip, st_old.data + nskip, sizeof(value_type) * (st_old.nelem - nskip));
         st_new.nskip = st_old.nskip;
       }
 
@@ -154,13 +145,11 @@ struct storage_traits
       {
         if(st_old.nref.unique())
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new,
-                                     st_new.data + k, ::std::move(st_old.data[k])),
+            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, ::std::move(st_old.data[k])),
             st_new.nskip = k;
         else
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new,
-                                     st_new.data + k, st_old.data[k]),
+            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, st_old.data[k]),
             st_new.nskip = k;
       }
 
@@ -173,8 +162,7 @@ struct storage_traits
       {
         if(st_old.nref.unique())
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new,
-                                     st_new.data + k, ::std::move(st_old.data[k])),
+            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, ::std::move(st_old.data[k])),
             st_new.nskip = k;
         else
           noadl::sprintf_and_throw<domain_error>(
@@ -192,10 +180,9 @@ struct storage_traits
         ROCKET_ASSERT(st_old.nskip <= nskip);
 
         return do_transfer(
-            is_move_constructible<value_type>(),              // 1. movable
-            conjunction<is_trivially_copyable<value_type>,
-                        is_std_allocator<allocator_type>>(),  // 2. trivial
-            is_copy_constructible<value_type>(),              // 3. copyable
+            is_move_constructible<value_type>(),  // 1. movable
+            conjunction<is_trivially_copyable<value_type>, is_std_allocator<allocator_type>>(),  // 2. trivial
+            is_copy_constructible<value_type>(),  // 3. copyable
             st_new, st_old, nskip);
       }
   };
@@ -313,15 +300,20 @@ class storage_handle
     size_type
     check_size_add(size_type base, size_type add) const
       {
-        auto nmax = this->max_size();
-        ROCKET_ASSERT(base <= nmax);
-        if(nmax - base < add) {
+        size_type res;
+
+        if(ROCKET_ADD_OVERFLOW(base, add, &res))
           noadl::sprintf_and_throw<length_error>(
-                "cow_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
-                static_cast<long long>(base), static_cast<long long>(add),
-                static_cast<long long>(nmax));
-        }
-        return base + add;
+              "cow_vector: arithmetic overflow (`%lld` + `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add));
+
+        if(res > this->max_size())
+          noadl::sprintf_and_throw<length_error>(
+              "cow_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add),
+              static_cast<long long>(this->max_size()));
+
+        return res;
       }
 
     size_type

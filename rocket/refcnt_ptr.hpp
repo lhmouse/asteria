@@ -11,8 +11,7 @@
 #include "xallocator.hpp"
 namespace rocket {
 
-template<typename elementT,
-         typename deleterT = default_delete<const elementT>>
+template<typename elementT, typename deleterT = default_delete<const elementT>>
 class refcnt_base;
 
 template<typename elementT>

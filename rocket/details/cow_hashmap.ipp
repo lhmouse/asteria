@@ -10,14 +10,10 @@ using unknown_function  = void (...);
 
 struct storage_header
   {
-    mutable reference_counter<long> nref;
+    mutable reference_counter<long> nref = { };
 
     unknown_function* dtor;
     size_t nelem;
-
-    explicit
-    storage_header() noexcept
-      : nref()  { }
   };
 
 // This struct is used as placeholders for EBO'd bases that would otherwise
@@ -166,8 +162,7 @@ struct basic_storage
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->bkts), '~',
-                 sizeof(bucket_type) + (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->bkts), '~', sizeof(bucket_type) + (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
@@ -191,8 +186,7 @@ struct basic_storage
       {
         auto qval = allocator_traits<allocator_type>::allocate(*this, size_type(1));
         try {
-          allocator_traits<allocator_type>::construct(
-                *this, noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
+          allocator_traits<allocator_type>::construct(*this, noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
         }
         catch(...) {
           allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
@@ -205,7 +199,6 @@ struct basic_storage
     free_value(pointer qval) noexcept
       {
         ROCKET_ASSERT(qval);
-
         allocator_traits<allocator_type>::destroy(*this, noadl::unfancy(qval)),
         allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
       }
@@ -492,15 +485,20 @@ class storage_handle
     size_type
     check_size_add(size_type base, size_type add) const
       {
-        auto nmax = this->max_size();
-        ROCKET_ASSERT(base <= nmax);
-        if(nmax - base < add) {
+        size_type res;
+
+        if(ROCKET_ADD_OVERFLOW(base, add, &res))
+          noadl::sprintf_and_throw<length_error>(
+              "cow_hashmap: arithmetic overflow (`%lld` + `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add));
+
+        if(res > this->max_size())
           noadl::sprintf_and_throw<length_error>(
               "cow_hashmap: max size exceeded (`%lld` + `%lld` > `%lld`)",
               static_cast<long long>(base), static_cast<long long>(add),
-              static_cast<long long>(nmax));
-        }
-        return base + add;
+              static_cast<long long>(this->max_size()));
+
+        return res;
       }
 
     size_type

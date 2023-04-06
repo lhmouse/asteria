@@ -175,8 +175,6 @@ class basic_cow_string
 
   private:
     using storage_handle = details_cow_string::storage_handle<allocator_type, traits_type>;
-
-  private:
     storage_handle m_sth;
     const value_type* m_ptr;
     size_type m_len;

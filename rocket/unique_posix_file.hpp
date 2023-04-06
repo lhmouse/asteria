@@ -51,12 +51,7 @@ class posix_file_closer
 
     int
     close(handle_type fp) const noexcept
-      {
-        if(!this->m_cl)
-          return 0;  // no close
-        else
-          return this->m_cl(fp);
-      }
+      { return !this->m_cl ? 0 : this->m_cl(fp);  }
   };
 
 using unique_posix_file  = unique_handle<::FILE*, posix_file_closer>;

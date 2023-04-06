@@ -32,9 +32,7 @@ class ascii_numget
     ascii_numget() noexcept = default;
 
     ascii_numget(const ascii_numget&) = delete;
-
-    ascii_numget&
-    operator=(const ascii_numget&) = delete;
+    ascii_numget& operator=(const ascii_numget&) = delete;
 
   public:
     // accessors

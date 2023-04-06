@@ -10,22 +10,19 @@
 #include "xallocator.hpp"
 namespace rocket {
 
-template<typename valueT, size_t capacityT,
-         typename allocT = allocator<valueT>>
+// Differences from `std::vector`:
+// 1. The storage of elements are allocated inside the vector object, which
+//    does not require dynamic allocation.
+// 2. An additional capacity template parameter is required.
+// 3. The specialization for `bool` is not provided.
+// 4. `emplace()` is not provided.
+// 5. `capacity()` is a `static constexpr` member function.
+// 6. Comparison operators are not provided.
+// 7. Incomplete element types are not supported.
+template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
 class static_vector;
 
 #include "details/static_vector.ipp"
-
-/* Differences from `std::vector`:
- * 1. The storage of elements are allocated inside the vector object, which eliminates dynamic
- *    allocation.
- * 2. An additional capacity template parameter is required.
- * 3. The specialization for `bool` is not provided.
- * 4. `emplace()` is not provided.
- * 5. `capacity()` is a `static constexpr` member function.
- * 6. Comparison operators are not provided.
- * 7. Incomplete element types are not supported.
-**/
 
 template<typename valueT, size_t capacityT, typename allocT>
 class static_vector
@@ -43,15 +40,13 @@ class static_vector
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator      = details_static_vector::vector_iterator<static_vector, const value_type>;
-    using iterator            = details_static_vector::vector_iterator<static_vector, value_type>;
+    using const_iterator          = details_static_vector::vector_iterator<static_vector, const value_type>;
+    using iterator                = details_static_vector::vector_iterator<static_vector, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
   private:
     using storage_handle = details_static_vector::storage_handle<allocator_type, capacityT>;
-
-  private:
     storage_handle m_sth;
 
   public:
@@ -71,7 +66,8 @@ class static_vector
       : m_sth(alloc)
       { this->m_sth.copy_from(other.m_sth);  }
 
-    static_vector(static_vector&& other) noexcept(is_nothrow_move_constructible<value_type>::value)
+    static_vector(static_vector&& other)
+      noexcept(is_nothrow_move_constructible<value_type>::value)
       : m_sth(::std::move(other.m_sth.as_allocator()))
       { this->m_sth.move_from(::std::move(other.m_sth));  }
 
@@ -151,9 +147,8 @@ class static_vector
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
-              "static_vector: subscript out of range (`%llu` %s `%llu`)",
-              static_cast<unsigned long long>(pos), rel,
-              static_cast<unsigned long long>(this->size()));
+              "static_vector: subscript out of range (`%lld` %s `%lld`)",
+              static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
       }
 
     // This function works the same way as `substr()`.
@@ -708,10 +703,11 @@ class static_vector
       { return this->m_sth.as_allocator();  }
   };
 
-template<typename valueT, size_t capacityT, typename allocT>
+template<typename valueT, size_t N, typename allocT>
 inline
 void
-swap(static_vector<valueT, capacityT, allocT>& lhs, static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(static_vector<valueT, N, allocT>& lhs, static_vector<valueT, N, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

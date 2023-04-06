@@ -11,24 +11,22 @@
 #include "xallocator.hpp"
 namespace rocket {
 
-template<typename valueT,
-         typename allocT = allocator<valueT>>
+// Differences from `std::vector`:
+// 1. All functions guarantee only basic exception safety rather than strong
+//    exception safety, hence are more efficient.
+// 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()`
+//    and `back()` always return `const_reference`s.
+// 3. The copy constructor and copy assignment operator will not throw
+//    exceptions.
+// 4. The specialization for `bool` is not provided.
+// 5. `emplace()` is not provided.
+// 6. Comparison operators are not provided.
+// 7. The value type may be incomplete. It need be neither copy-assignable nor
+//    move-assignable, but must be swappable.
+template<typename valueT, typename allocT = allocator<valueT>>
 class cow_vector;
 
 #include "details/cow_vector.ipp"
-
-/* Differences from `std::vector`:
- * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence
- *    are more efficient.
- * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
- *    return `const_reference`s.
- * 3. The copy constructor and copy assignment operator will not throw exceptions.
- * 4. The specialization for `bool` is not provided.
- * 5. `emplace()` is not provided.
- * 6. Comparison operators are not provided.
- * 7. The value type may be incomplete. It need be neither copy-assignable nor move-assignable, but
- *    must be swappable.
-**/
 
 template<typename valueT, typename allocT>
 class cow_vector
@@ -53,8 +51,6 @@ class cow_vector
 
   private:
     using storage_handle = details_cow_vector::storage_handle<allocator_type>;
-
-  private:
     storage_handle m_sth;
 
   public:
@@ -155,9 +151,8 @@ class cow_vector
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
-            "cow_vector: subscript out of range (`%llu` %s `%llu`)",
-            static_cast<unsigned long long>(pos), rel,
-            static_cast<unsigned long long>(this->size()));
+            "cow_vector: subscript out of range (`%lld` %s `%lld`)",
+            static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
       }
 
     // This function works the same way as `substr()`.
@@ -825,7 +820,8 @@ class cow_vector
 template<typename valueT, typename allocT>
 inline
 void
-swap(cow_vector<valueT, allocT>& lhs, cow_vector<valueT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(cow_vector<valueT, allocT>& lhs, cow_vector<valueT, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

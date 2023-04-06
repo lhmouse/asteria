@@ -14,28 +14,24 @@
 #include <cstdio>  // std::sprintf()
 namespace rocket {
 
-template<typename keyT, typename mappedT,
-         typename hashT = hash<keyT>,
-         typename eqT = equal_to<void>,
-         typename allocT = allocator<pair<const keyT, mappedT>>>
+// Differences from `std::unordered_map`:
+// 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
+//    return `const_reference`s.
+// 2. Iterators are bidirectional iterators, not just forward iterators.
+// 3. The copy constructor and copy assignment operator will not throw exceptions.
+// 4. Comparison operators are not provided.
+// 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
+//    as an alternative.
+// 6. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
+//    be implemented.
+// 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
+//    nor move-assignable.
+// 8. `erase()` may move elements around and invalidate iterators.
+template<typename keyT, typename mappedT, typename hashT = hash<keyT>,
+         typename eqT = equal_to<void>, typename allocT = allocator<pair<const keyT, mappedT>>>
 class cow_hashmap;
 
 #include "details/cow_hashmap.ipp"
-
-/* Differences from `std::unordered_map`:
- * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
- *    return `const_reference`s.
- * 2. Iterators are bidirectional iterators, not just forward iterators.
- * 3. The copy constructor and copy assignment operator will not throw exceptions.
- * 4. Comparison operators are not provided.
- * 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
- *    as an alternative.
- * 6. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
- *    be implemented.
- * 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
- *    nor move-assignable.
- * 8. `erase()` may move elements around and invalidate iterators.
-**/
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
 class cow_hashmap
@@ -65,16 +61,14 @@ class cow_hashmap
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator     = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
-    using iterator           = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
+    using const_iterator          = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
+    using iterator                = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
   private:
     using storage_handle = details_cow_hashmap::storage_handle<allocator_type, hasher, key_equal>;
-    using bucket_type    = typename storage_handle::bucket_type;
-
-  private:
+    using bucket_type = typename storage_handle::bucket_type;
     storage_handle m_sth;
 
   public:
@@ -788,11 +782,11 @@ class cow_hashmap
       { return this->m_sth.as_key_equal();  }
   };
 
-template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
+template<typename K, typename V, typename H, typename E, typename allocT>
 inline
 void
-swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
-     cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(cow_hashmap<K, V, H, E, allocT>& lhs, cow_hashmap<K, V, H, E, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

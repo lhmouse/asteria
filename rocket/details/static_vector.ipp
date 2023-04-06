@@ -101,15 +101,20 @@ class storage_handle
     size_type
     check_size_add(size_type base, size_type add) const
       {
-        auto nmax = this->max_size();
-        ROCKET_ASSERT(base <= nmax);
-        if(nmax - base < add) {
+        size_type res;
+
+        if(ROCKET_ADD_OVERFLOW(base, add, &res))
           noadl::sprintf_and_throw<length_error>(
-                "static_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
-                static_cast<long long>(base), static_cast<long long>(add),
-                static_cast<long long>(nmax));
-        }
-        return base + add;
+              "static_vector: arithmetic overflow (`%lld` + `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add));
+
+        if(res > this->max_size())
+          noadl::sprintf_and_throw<length_error>(
+              "static_vector: max size exceeded (`%lld` + `%lld` > `%lld`)",
+              static_cast<long long>(base), static_cast<long long>(add),
+              static_cast<long long>(this->max_size()));
+
+        return res;
       }
 
     ROCKET_PURE constexpr
@@ -133,10 +138,8 @@ class storage_handle
         ROCKET_ASSERT_MSG(this->m_nelem < this->capacity(), "no space for new elements");
 
         size_t off = this->m_nelem;
-        allocator_traits<allocator_type>::construct(*this, this->m_data + off,
-                                                    ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(*this, this->m_data + off, ::std::forward<paramsT>(params)...);
         this->m_nelem = static_cast<nelem_type>(off + 1);
-
         return this->m_data[off];
       }
 

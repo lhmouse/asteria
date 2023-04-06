@@ -243,8 +243,7 @@ swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) n
 template<typename charT, typename traitsT, typename elementT, typename deleterT>
 inline
 basic_tinyfmt<charT, traitsT>&
-operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-           const unique_ptr<elementT, deleterT>& rhs)
+operator<<(basic_tinyfmt<charT, traitsT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
   {
     return fmt << rhs.get();
   }

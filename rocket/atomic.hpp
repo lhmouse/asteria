@@ -8,15 +8,10 @@
 #include <atomic>  // std::atomic<>
 namespace rocket {
 
+// Differences from `std::atomic`:
+// 1. The default constructor value-initializes the object.
+// 2. Memory order is a template argument and cannot be specified elsewhere.
 template<typename valueT, memory_order memorderT = memory_order_acq_rel>
-class atomic;
-
-/* Differences from `std::atomic`:
- * 1. The default constructor value-initializes the object.
- * 2. Memory order is a template argument and cannot be specified elsewhere.
-**/
-
-template<typename valueT, memory_order memorderT>
 class atomic
   {
   public:

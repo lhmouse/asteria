@@ -9,16 +9,14 @@
 #include "throw.hpp"
 namespace rocket {
 
+// Differences from `std::array`:
+// 1. Multi-dimensional arrays are supported natively.
+// 2. `fill()` takes different parameters.
+// 3. Comparison operators are not provided.
 template<typename valueT, size_t capacityT, size_t... nestedT>
 class array;
 
 #include "details/array.ipp"
-
-/* Differences from `std::array`:
- * 1. Multi-dimensional arrays are supported natively.
- * 2. `fill()` takes different parameters.
- * 3. Comparison operators are not provided.
-**/
 
 template<typename valueT, size_t capacityT, size_t... nestedT>
 class array
@@ -58,9 +56,8 @@ class array
     do_throw_subscript_out_of_range(size_type pos, const char* rel) const
       {
         noadl::sprintf_and_throw<out_of_range>(
-              "array: subscript out of range (`%llu` %s `%llu`)",
-              static_cast<unsigned long long>(pos), rel,
-              static_cast<unsigned long long>(this->size()));
+              "array: subscript out of range (`%lld` %s `%lld`)",
+              static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
       }
 
   public:

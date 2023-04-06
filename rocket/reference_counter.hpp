@@ -11,9 +11,6 @@
 namespace rocket {
 
 template<typename valueT = long>
-class reference_counter;
-
-template<typename valueT>
 class reference_counter
   {
     static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,

@@ -27,9 +27,7 @@ class ascii_numput
     ascii_numput() noexcept = default;
 
     ascii_numput(const ascii_numput&) = delete;
-
-    ascii_numput&
-    operator=(const ascii_numput&) = delete;
+    ascii_numput& operator=(const ascii_numput&) = delete;
 
   public:
     // accessors
