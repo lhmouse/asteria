@@ -5,21 +5,22 @@
 #define ROCKET_ASSERT_
 namespace rocket {
 
-// `report_assertion_failure()` is always provided even when assertions are disabled.
-[[noreturn]] void
-report_assertion_failure(const char* expr, const char* file, long line, const char* msg) noexcept;
+// This is always declared even when assertions are disabled.
+[[noreturn]]
+void
+assert_fail(const char* expr, const char* file, long line, const char* msg) noexcept;
 
 #ifdef ROCKET_DEBUG
-#  define ROCKET_XASSERT_FAIL_(...)     ::rocket::report_assertion_failure(__VA_ARGS__)
+#  define ROCKET_ASSERT_FAIL(...)    ::rocket::assert_fail(__VA_ARGS__)
 #else
-#  define ROCKET_XASSERT_FAIL_(...)     ROCKET_UNREACHABLE()
+#  define ROCKET_ASSERT_FAIL(...)    ROCKET_UNREACHABLE()
 #endif
 
-#define ROCKET_XASSERT_(cond, str, mt)  \
-    ((cond) ? void(0) : ROCKET_XASSERT_FAIL_(str, __FILE__, __LINE__, mt))
+#define ROCKET_ASSERT_MSG(expr, msg)  \
+          ((expr) ? (void) 0 : ROCKET_ASSERT_FAIL(#expr, __FILE__, __LINE__, (msg)))
 
-#define ROCKET_ASSERT(expr)             ROCKET_XASSERT_(expr, #expr, "")
-#define ROCKET_ASSERT_MSG(expr, mt)     ROCKET_XASSERT_(expr, #expr, mt)
+#define ROCKET_ASSERT(expr)  \
+          ((expr) ? (void) 0 : ROCKET_ASSERT_FAIL(#expr, __FILE__, __LINE__, ""))
 
 }  // namespace rocket
 #endif

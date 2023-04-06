@@ -367,10 +367,8 @@ class basic_hasher
 template<typename stringT, typename charT>
 class string_iterator
   {
-    template<typename, typename>
-    friend class string_iterator;
-
     friend stringT;
+    template<typename, typename> friend class string_iterator;
 
   public:
     using iterator_category  = ::std::random_access_iterator_tag;

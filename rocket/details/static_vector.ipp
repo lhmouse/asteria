@@ -245,10 +245,8 @@ class storage_handle
 template<typename vectorT, typename valueT>
 class vector_iterator
   {
-    template<typename, typename>
-    friend class vector_iterator;
-
     friend vectorT;
+    template<typename, typename> friend class vector_iterator;
 
   public:
     using iterator_category  = ::std::random_access_iterator_tag;
