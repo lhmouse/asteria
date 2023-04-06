@@ -166,7 +166,7 @@ class cow_vector
         return noadl::min(tn, len - tpos);
       }
 
-    // This function is used to implement `insert()` after new elements has
+    // This function is used to implement `insert()` after new elements have
     // been appended. `tpos` is the position to insert. `old_size` is the old
     // size before `append()`.
     value_type*

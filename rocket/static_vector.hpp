@@ -162,36 +162,25 @@ class static_vector
         return noadl::min(tn, len - tpos);
       }
 
-    // This function is used to implement `insert()` after new elements has
-    // been appended. `tpos` is the position to insert. `kpos` is the old
-    // length prior to `append()`.
+    // This function is used to implement `insert()` after new elements have
+    // been appended. `tpos` is the position to insert. `old_size` is the old
+    // size before `append()`.
     value_type*
-    do_swizzle_unchecked(size_type tpos, size_type kpos)
+    do_swizzle_unchecked(size_type tpos, size_type old_size)
       {
-        // Get a pointer to mutable storage.
-        auto ptr = this->mut_data() + tpos;
-        size_type klen = kpos - tpos;
-        size_type slen = this->size() - tpos;
-
-        // Swap the intervals [`tpos`,`kpos`) and [`kpos`,`size`).
-        noadl::rotate(ptr, 0, klen, slen);
-        return ptr;
+        auto ptr = this->mut_data();
+        noadl::rotate(ptr, tpos, old_size, this->size());
+        return ptr + tpos;
       }
 
     // This function is used to implement `erase()`.
     value_type*
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        // Get a pointer to mutable storage.
-        auto ptr = this->mut_data() + tpos;
-        size_type slen = this->size() - tpos;
-
-        // Swap the intervals [`tpos`,`tpos+tlen`) and [`tpos+tlen`,`size`).
-        noadl::rotate(ptr, 0, tlen, slen);
-
-        // Purge unwanted elements.
+        auto ptr = this->mut_data();
+        noadl::rotate(ptr, tpos, tpos + tlen, this->size());
         this->m_sth.pop_back_unchecked(tlen);
-        return ptr;
+        return ptr + tpos;
       }
 
   public:
