@@ -116,21 +116,6 @@ struct basic_storage
     using pointer          = typename allocator_traits<allocator_type>::pointer;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-    static constexpr
-    size_type
-    min_nblk_for_nbkt(size_t nbkt) noexcept
-      {
-        // Note this is correct even when `nbkt` is zero, as long as
-        // `basic_storage` is larger than `bucket_type`.
-        return ((nbkt - 1) * sizeof(bucket_type) + sizeof(basic_storage) - 1)
-                / sizeof(basic_storage) + 1;
-      }
-
-    static constexpr
-    size_t
-    max_nbkt_for_nblk(size_type nblk) noexcept
-      { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type) + 1;  }
-
     size_type nblk;
     union { bucket_type bkts[1];  };
 
@@ -167,9 +152,22 @@ struct basic_storage
       }
 
     basic_storage(const basic_storage&) = delete;
+    basic_storage& operator=(const basic_storage&) = delete;
 
-    basic_storage&
-    operator=(const basic_storage&) = delete;
+    static constexpr
+    size_type
+    min_nblk_for_nbkt(size_t nbkt) noexcept
+      {
+        // Note this is correct even when `nbkt` is zero, as long as
+        // `basic_storage` is larger than `bucket_type`.
+        return ((nbkt - 1) * sizeof(bucket_type) + sizeof(basic_storage) - 1)
+                / sizeof(basic_storage) + 1;
+      }
+
+    static constexpr
+    size_t
+    max_nbkt_for_nblk(size_type nblk) noexcept
+      { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type) + 1;  }
 
     constexpr
     bool

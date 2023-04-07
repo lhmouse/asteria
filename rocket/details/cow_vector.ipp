@@ -30,21 +30,6 @@ struct basic_storage
     using value_type       = typename allocator_type::value_type;
     using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-    static constexpr
-    size_type
-    min_nblk_for_nelem(size_t nelem) noexcept
-      {
-        // Note this is correct even when `nelem` is zero, as long as
-        // `basic_storage` is larger than `value_type`.
-        return ((nelem - 1) * sizeof(value_type) + sizeof(basic_storage) - 1)
-                / sizeof(basic_storage) + 1;
-      }
-
-    static constexpr
-    size_t
-    max_nelem_for_nblk(size_type nblk) noexcept
-      { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) + 1;  }
-
     size_type nblk;
     union { value_type data[1];  };
 
@@ -77,9 +62,22 @@ struct basic_storage
       }
 
     basic_storage(const basic_storage&) = delete;
+    basic_storage& operator=(const basic_storage&) = delete;
 
-    basic_storage&
-    operator=(const basic_storage&) = delete;
+    static constexpr
+    size_type
+    min_nblk_for_nelem(size_t nelem) noexcept
+      {
+        // Note this is correct even when `nelem` is zero, as long as
+        // `basic_storage` is larger than `value_type`.
+        return ((nelem - 1) * sizeof(value_type) + sizeof(basic_storage) - 1)
+                / sizeof(basic_storage) + 1;
+      }
+
+    static constexpr
+    size_t
+    max_nelem_for_nblk(size_type nblk) noexcept
+      { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) + 1;  }
 
     template<typename... paramsT>
     value_type&
