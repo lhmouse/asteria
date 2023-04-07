@@ -256,7 +256,7 @@ template<typename charT>
 charT*
 xmempcpy_nonconstexpr(charT* out, const typename identity<charT>::type* str, size_t len) noexcept
   {
-    return (char*) ::memcpy(out, str, len * sizeof(charT)) + len;
+    return (charT*) ::memcpy(out, str, len * sizeof(charT)) + len;
   }
 
 }  // namespace details_xstring
