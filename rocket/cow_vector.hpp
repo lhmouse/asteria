@@ -654,8 +654,8 @@ class cow_vector
         // Note `value` may reference an element in `*this`.
         size_type kpos = this->size();
         this->push_back(value);
-        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_swizzle_unchecked(tpos, kpos);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     iterator
@@ -666,8 +666,8 @@ class cow_vector
         // Note `value` may reference an element in `*this`.
         size_type kpos = this->size();
         this->push_back(::std::move(value));
-        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_swizzle_unchecked(tpos, kpos);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     // N.B. The parameter pack is a non-standard extension.
@@ -681,8 +681,8 @@ class cow_vector
         // Note `params...` may reference an element in `*this`.
         size_type kpos = this->size();
         this->append(n, params...);
-        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_swizzle_unchecked(tpos, kpos);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     iterator
@@ -693,8 +693,8 @@ class cow_vector
         // XXX: This can be optimized *a lot*.
         size_type kpos = this->size();
         this->append(init);
-        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_swizzle_unchecked(tpos, kpos);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     template<typename inputT,
@@ -707,8 +707,8 @@ class cow_vector
         // Note `first` may overlap with `this->begin()`.
         size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
-        auto ptr = this->do_swizzle_unchecked(tpos, kpos);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_swizzle_unchecked(tpos, kpos);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     // N.B. This is a non-standard extension.
@@ -728,22 +728,23 @@ class cow_vector
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
 
-        auto ptr = this->do_erase_unchecked(tpos, tlen);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_erase_unchecked(tpos, tlen);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     iterator
     erase(const_iterator pos)
       {
+        ROCKET_ASSERT_MSG(pos < this->end(), "invalid position");
         size_type tpos = static_cast<size_type>(pos - this->begin());
 
-        auto ptr = this->do_erase_unchecked(tpos, 1);
-        return iterator(ptr - tpos, tpos, this->size());
+        auto tptr = this->do_erase_unchecked(tpos, 1U);
+        return iterator(tptr - tpos, tpos, this->size());
       }
 
     // N.B. The return type and parameter are non-standard extensions.
     cow_vector&
-    pop_back(size_type n = 1)
+    pop_back(size_type n = 1U)
       {
         this->mut_data();
         this->m_sth.pop_n_unchecked(n);
@@ -754,9 +755,9 @@ class cow_vector
     cow_vector
     subvec(size_type tpos, size_type tn = size_type(-1)) const
       {
-        return cow_vector(this->data() + tpos,
-                          this->data() + tpos + this->do_clamp_subvec(tpos, tn),
-                          this->m_sth.as_allocator());
+        size_type tlen = this->do_clamp_subvec(tpos, tn);
+        auto tptr = this->data() + tpos;
+        return cow_vector(tptr, tptr + tlen, this->m_sth._allocator());
       }
 
     // N.B. The parameter pack is a non-standard extension.

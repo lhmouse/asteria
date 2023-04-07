@@ -595,11 +595,10 @@ class cow_hashmap
     erase(const ykeyT& ykey)
       {
         size_type tpos;
-        if(!this->m_sth.find(tpos, ykey))
-          return false;
-
-        this->do_erase_unchecked(tpos, 1);
-        return true;
+        bool found = this->m_sth.find(tpos, ykey);
+        if(found)
+          this->do_erase_unchecked(tpos, 1U);
+        return found;
       }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -618,9 +617,10 @@ class cow_hashmap
     iterator
     erase(const_iterator pos)
       {
+        ROCKET_ASSERT_MSG(pos.m_cur < this->do_buckets() + this->bucket_count(), "invalid position");
         size_type tpos = static_cast<size_type>(pos.do_this_pos(this->do_buckets()));
 
-        auto bkt = this->do_erase_unchecked(tpos, 1);
+        auto bkt = this->do_erase_unchecked(tpos, 1U);
         return iterator(bkt - tpos, tpos, this->bucket_count());
       }
 
