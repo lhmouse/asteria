@@ -469,8 +469,6 @@ class static_vector
     insert(size_type tpos, const value_type& value)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-
-        // Note `value` may reference an element in `*this`.
         size_type kpos = this->size();
         this->push_back(value);
         this->do_swizzle_unchecked(tpos, kpos);
@@ -482,8 +480,6 @@ class static_vector
     insert(size_type tpos, value_type&& value)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-
-        // Note `value` may reference an element in `*this`.
         size_type kpos = this->size();
         this->push_back(::std::move(value));
         this->do_swizzle_unchecked(tpos, kpos);
@@ -496,8 +492,6 @@ class static_vector
     insert(size_type tpos, size_type n, const paramsT&... params)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-
-        // Note `params...` may reference an element in `*this`.
         size_type kpos = this->size();
         this->append(n, params...);
         this->do_swizzle_unchecked(tpos, kpos);
@@ -509,8 +503,6 @@ class static_vector
     insert(size_type tpos, initializer_list<value_type> init)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-
-        // XXX: This can be optimized *a lot*.
         size_type kpos = this->size();
         this->append(init);
         this->do_swizzle_unchecked(tpos, kpos);
@@ -524,8 +516,6 @@ class static_vector
     insert(size_type tpos, inputT first, inputT last)
       {
         this->do_clamp_subvec(tpos, 0);  // just check
-
-        // Note `first` may overlap with `this->begin()`.
         size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
         this->do_swizzle_unchecked(tpos, kpos);
@@ -536,8 +526,6 @@ class static_vector
     insert(const_iterator tins, const value_type& value)
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
-
-        // Note `value` may reference an element in `*this`.
         size_type kpos = this->size();
         this->push_back(value);
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
@@ -548,8 +536,6 @@ class static_vector
     insert(const_iterator tins, value_type&& value)
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
-
-        // Note `value` may reference an element in `*this`.
         size_type kpos = this->size();
         this->push_back(::std::move(value));
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
@@ -562,8 +548,6 @@ class static_vector
     insert(const_iterator tins, size_type n, const paramsT&... params)
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
-
-        // Note `params...` may reference an element in `*this`.
         size_type kpos = this->size();
         this->append(n, params...);
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
@@ -574,8 +558,6 @@ class static_vector
     insert(const_iterator tins, initializer_list<value_type> init)
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
-
-        // XXX: This can be optimized *a lot*.
         size_type kpos = this->size();
         this->append(init);
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
@@ -588,8 +570,6 @@ class static_vector
     insert(const_iterator tins, inputT first, inputT last)
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
-
-        // Note `first` may overlap with `this->begin()`.
         size_type kpos = this->size();
         this->append(::std::move(first), ::std::move(last));
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
@@ -601,7 +581,6 @@ class static_vector
     erase(size_type tpos, size_type tn = size_type(-1))
       {
         size_type tlen = this->do_clamp_subvec(tpos, tn);
-
         this->do_erase_unchecked(tpos, tlen);
         return *this;
       }
@@ -612,7 +591,6 @@ class static_vector
         ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
-
         auto tptr = this->do_erase_unchecked(tpos, tlen);
         return iterator(tptr - tpos, tpos, this->size());
       }
@@ -622,7 +600,6 @@ class static_vector
       {
         ROCKET_ASSERT_MSG(pos < this->end(), "invalid position");
         size_type tpos = static_cast<size_type>(pos - this->begin());
-
         auto tptr = this->do_erase_unchecked(tpos, 1U);
         return iterator(tptr - tpos, tpos, this->size());
       }

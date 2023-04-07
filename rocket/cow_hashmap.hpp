@@ -235,13 +235,8 @@ class cow_hashmap
     bucket_type*
     do_erase_unchecked(size_type tpos, size_type tlen)
       {
-        // Get a pointer to mutable storage.
         auto bkts = this->do_mut_buckets();
-
-        // Purge unwanted elements.
         this->m_sth.erase_range_unchecked(tpos, tlen);
-
-        // Return a pointer next to erased elements.
         return bkts + tpos;
       }
 
@@ -595,10 +590,10 @@ class cow_hashmap
     erase(const ykeyT& ykey)
       {
         size_type tpos;
-        bool found = this->m_sth.find(tpos, ykey);
-        if(found)
-          this->do_erase_unchecked(tpos, 1U);
-        return found;
+        if(!this->m_sth.find(tpos, ykey))
+          return false;
+        this->do_erase_unchecked(tpos, 1U);
+        return true;
       }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -608,7 +603,6 @@ class cow_hashmap
         ROCKET_ASSERT_MSG(first.m_cur <= last.m_cur, "invalid range");
         size_type tpos = static_cast<size_type>(first.do_this_pos(this->do_buckets()));
         size_type tlen = static_cast<size_type>(last.do_this_len(first));
-
         auto bkt = this->do_erase_unchecked(tpos, tlen);
         return iterator(bkt - tpos, tpos, this->bucket_count());
       }
@@ -619,7 +613,6 @@ class cow_hashmap
       {
         ROCKET_ASSERT_MSG(pos.m_cur < this->do_buckets() + this->bucket_count(), "invalid position");
         size_type tpos = static_cast<size_type>(pos.do_this_pos(this->do_buckets()));
-
         auto bkt = this->do_erase_unchecked(tpos, 1U);
         return iterator(bkt - tpos, tpos, this->bucket_count());
       }
