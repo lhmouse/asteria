@@ -701,21 +701,18 @@ class cow_vector
       }
 
     iterator
+    erase(const_iterator pos)
+      {
+        return this->erase(pos, pos + 1);
+      }
+
+    iterator
     erase(const_iterator first, const_iterator last)
       {
         ROCKET_ASSERT_MSG(first <= last, "invalid range");
         size_type tpos = static_cast<size_type>(first - this->begin());
         size_type tlen = static_cast<size_type>(last - first);
         auto tptr = this->do_erase_unchecked(tpos, tlen);
-        return iterator(tptr - tpos, tpos, this->size());
-      }
-
-    iterator
-    erase(const_iterator pos)
-      {
-        ROCKET_ASSERT_MSG(pos < this->end(), "invalid position");
-        size_type tpos = static_cast<size_type>(pos - this->begin());
-        auto tptr = this->do_erase_unchecked(tpos, 1U);
         return iterator(tptr - tpos, tpos, this->size());
       }
 

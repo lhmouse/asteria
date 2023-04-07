@@ -596,7 +596,14 @@ class cow_hashmap
         return true;
       }
 
-    // N.B. This function may throw `std::bad_alloc`.
+    iterator
+    erase(const_iterator pos)
+      {
+        const_iterator next = pos;
+        next.m_cur ++;
+        return this->erase(pos, next);
+      }
+
     iterator
     erase(const_iterator first, const_iterator last)
       {
@@ -604,16 +611,6 @@ class cow_hashmap
         size_type tpos = static_cast<size_type>(first.do_this_pos(this->do_buckets()));
         size_type tlen = static_cast<size_type>(last.do_this_len(first));
         auto bkt = this->do_erase_unchecked(tpos, tlen);
-        return iterator(bkt - tpos, tpos, this->bucket_count());
-      }
-
-    // N.B. This function may throw `std::bad_alloc`.
-    iterator
-    erase(const_iterator pos)
-      {
-        ROCKET_ASSERT_MSG(pos.m_cur < this->do_buckets() + this->bucket_count(), "invalid position");
-        size_type tpos = static_cast<size_type>(pos.do_this_pos(this->do_buckets()));
-        auto bkt = this->do_erase_unchecked(tpos, 1U);
         return iterator(bkt - tpos, tpos, this->bucket_count());
       }
 
