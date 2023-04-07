@@ -302,8 +302,6 @@ class cow_vector
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
         sth.reallocate_prepare(this->m_sth, 0, rcap - this->size());
-
-        // Set the new storage up. The length is left intact.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -325,8 +323,6 @@ class cow_vector
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
         sth.reallocate_prepare(this->m_sth, 0, 0);
-
-        // Set the new storage up. The length is left intact.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -484,8 +480,6 @@ class cow_vector
         ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
         sth.append_n_unchecked(n, params...);
         sth.reallocate_finish(this->m_sth);
-
-        // Set the new storage up.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -530,8 +524,6 @@ class cow_vector
           // The length is not known.
           ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
           cap = sth.capacity();
-
-          // Reallocate the storage if necessary.
           for(auto it = ::std::move(first);  it != last;  ++it) {
             if(ROCKET_UNEXPECT(sth.size() >= cap)) {
               ptr = sth.reallocate_prepare(sth, len, cap / 2);
@@ -541,8 +533,6 @@ class cow_vector
           }
         }
         sth.reallocate_finish(this->m_sth);
-
-        // Set the new storage up.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -567,8 +557,6 @@ class cow_vector
         ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
         auto& ref = sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         sth.reallocate_finish(this->m_sth);
-
-        // Set the new storage up.
         this->m_sth.exchange_with(sth);
         return ref;
       }

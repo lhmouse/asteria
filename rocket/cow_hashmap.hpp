@@ -348,11 +348,8 @@ class cow_hashmap
           return *this;
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
-                           this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
         sth.reallocate_reserve(this->m_sth, true, rcap - this->size());
-
-        // Set the new storage up. The size is left intact.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -372,11 +369,8 @@ class cow_hashmap
           return *this;
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
-                           this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
         sth.reallocate_reserve(this->m_sth, true, 0);
-
-        // Set the new storage up. The size is left intact.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -430,11 +424,8 @@ class cow_hashmap
           return *this;
 
         // Allocate new storage.
-        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(),
-                           this->m_sth.as_key_equal());
+        storage_handle sth(this->m_sth.as_allocator(), this->m_sth.as_hasher(), this->m_sth.as_key_equal());
         sth.reallocate_reserve(this->m_sth, true, rcap - this->size());
-
-        // Set the new storage up. The size is left intact.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -488,8 +479,6 @@ class cow_hashmap
         if(ROCKET_EXPECT(n && (n == dist))) {
           // The length is known.
           bkts = sth.reallocate_reserve(this->m_sth, false, n | cap / 2);
-
-          // Insert new elements into the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it)
             if(!this->m_sth.find(tpos, it->first))
               sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
@@ -498,10 +487,7 @@ class cow_hashmap
           // The length is not known.
           bkts = sth.reallocate_reserve(this->m_sth, false, 17 | cap / 2);
           cap = sth.capacity();
-
-          // Insert new elements into the new storage.
           for(auto it = ::std::move(first);  it != last;  ++it) {
-            // Reallocate the storage if necessary.
             if(ROCKET_UNEXPECT(sth.size() >= cap)) {
               bkts = sth.reallocate_reserve(sth, this->size(), cap / 2);
               cap = sth.capacity();
@@ -511,8 +497,6 @@ class cow_hashmap
           }
         }
         sth.reallocate_finish(this->m_sth);
-
-        // Set the new storage up.
         this->m_sth.exchange_with(sth);
         return *this;
       }
@@ -560,14 +544,12 @@ class cow_hashmap
                            this->m_sth.as_key_equal());
         bkts = sth.reallocate_reserve(this->m_sth, false, 17 | cap / 2);
 
-        // Insert the new element into the new storage.
         sth.keyed_try_emplace(tpos, ykey,
-                    ::std::piecewise_construct,
-                    ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
-                    ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
-        sth.reallocate_finish(this->m_sth);
+                 ::std::piecewise_construct,
+                 ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
+                 ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
 
-        // Set the new storage up.
+        sth.reallocate_finish(this->m_sth);
         this->m_sth.exchange_with(sth);
         return { iterator(bkts, tpos, this->bucket_count()), true };
       }
