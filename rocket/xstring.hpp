@@ -7,6 +7,21 @@
 #include "fwd.hpp"
 namespace rocket {
 
+template<typename charT>
+constexpr
+int
+xchrtoint(charT c) noexcept
+  {
+    return static_cast<int>(c);
+  }
+
+constexpr
+int
+xchrtoint(char c) noexcept
+  {
+    return static_cast<unsigned char>(c);
+  }
+
 #include "details/xstring.ipp"
 
 template<typename charT>
@@ -73,13 +88,12 @@ constexpr
 int
 xstrcmp(const charT* lhs, const charT* rhs) noexcept
   {
-    using cmp_type = typename details_xstring::xcmp_type<charT>::type;
     size_t ki = 0;
     for(;;)
       if(!ROCKET_CONSTANT_P(lhs[ki] != rhs[ki]))
         break;
       else if(lhs[ki] != rhs[ki])
-        return ((cmp_type) lhs[ki] < (cmp_type) rhs[ki]) ? -1 : 1;
+        return (noadl::xchrtoint(lhs[ki]) < noadl::xchrtoint(rhs[ki])) ? -1 : 1;
       else if(!ROCKET_CONSTANT_P(lhs[ki] == charT()))
         break;
       else if(lhs[ki] == charT())
@@ -92,10 +106,30 @@ xstrcmp(const charT* lhs, const charT* rhs) noexcept
 
 template<typename charT>
 constexpr
+bool
+xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
+  {
+    size_t ki = 0;
+    for(;;)
+      if(!ROCKET_CONSTANT_P(ki >= len))
+        break;
+      else if(ki >= len)
+        return true;
+      else if(!ROCKET_CONSTANT_P(lhs[ki] != rhs[ki]))
+        break;
+      else if(lhs[ki] != rhs[ki])
+        return false;
+      else
+        ki ++;
+
+    return details_xstring::xmemeq_nonconstexpr(lhs, rhs, len);
+  }
+
+template<typename charT>
+constexpr
 int
 xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
-    using cmp_type = typename details_xstring::xcmp_type<charT>::type;
     size_t ki = 0;
     for(;;)
       if(!ROCKET_CONSTANT_P(ki >= len))
@@ -105,7 +139,7 @@ xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
       else if(!ROCKET_CONSTANT_P(lhs[ki] != rhs[ki]))
         break;
       else if(lhs[ki] != rhs[ki])
-        return ((cmp_type) lhs[ki] < (cmp_type) rhs[ki]) ? -1 : 1;
+        return (noadl::xchrtoint(lhs[ki]) < noadl::xchrtoint(rhs[ki])) ? -1 : 1;
       else
         ki ++;
 

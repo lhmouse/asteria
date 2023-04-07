@@ -110,31 +110,13 @@ xmemchr_nonconstexpr(const wchar_t* str, wchar_t target, size_t len) noexcept
   }
 
 template<typename charT>
-struct xcmp_type
-  : identity<charT>
-  { };
-
-template<>
-struct xcmp_type<char>
-  : identity<unsigned char>
-  { };
-
-#if __cpp_lib_byte + 0 >= 201603
-template<>
-struct xcmp_type<::std::byte>
-  : identity<unsigned char>
-  { };
-#endif  // __cpp_lib_byte
-
-template<typename charT>
 int
 xstrcmp_nonconstexpr(const charT* lhs, const charT* rhs) noexcept
   {
-    using cmp_type = typename xcmp_type<charT>::type;
     size_t ki = 0;
     for(;;)
       if(lhs[ki] != rhs[ki])
-        return ((cmp_type) lhs[ki] < (cmp_type) rhs[ki]) ? -1 : 1;
+        return (noadl::xchrtoint(lhs[ki]) < noadl::xchrtoint(rhs[ki])) ? -1 : 1;
       else if(lhs[ki] == charT())
         return 0;
       else
@@ -166,13 +148,12 @@ template<typename charT>
 int
 xmemcmp_nonconstexpr(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
-    using cmp_type = typename details_xstring::xcmp_type<charT>::type;
     size_t ki = 0;
     for(;;)
       if(ki >= len)
         return 0;
       else if(lhs[ki] != rhs[ki])
-        return ((cmp_type) lhs[ki] < (cmp_type) rhs[ki]) ? -1 : 1;
+        return (noadl::xchrtoint(lhs[ki]) < noadl::xchrtoint(rhs[ki])) ? -1 : 1;
       else
         ki++;
   }
@@ -196,6 +177,13 @@ int
 xmemcmp_nonconstexpr(const wchar_t* lhs, const wchar_t* rhs, size_t len) noexcept
   {
     return ::wmemcmp(lhs, rhs, len);
+  }
+
+template<typename charT>
+bool
+xmemeq_nonconstexpr(const charT* lhs, const charT* rhs, size_t len) noexcept
+  {
+    return ::memcmp(lhs, rhs, len * sizeof(charT)) == 0;
   }
 
 template<typename charT>
@@ -268,33 +256,7 @@ template<typename charT>
 charT*
 xmempcpy_nonconstexpr(charT* out, const typename identity<charT>::type* str, size_t len) noexcept
   {
-    size_t ki = 0;
-    for(;;)
-      if(ki >= len)
-        return &(out[ki]);
-      else
-        out[ki] = str[ki], ki ++;
-  }
-
-inline
-char*
-xmempcpy_nonconstexpr(char* out, const char* str, size_t len) noexcept
-  {
-    return (char*) ::memcpy(out, str, len) + len;
-  }
-
-inline
-unsigned char*
-xmempcpy_nonconstexpr(unsigned char* out, const unsigned char* str, size_t len) noexcept
-  {
-    return (unsigned char*) ::memcpy(out, str, len) + len;
-  }
-
-inline
-wchar_t*
-xmempcpy_nonconstexpr(wchar_t* out, const wchar_t* str, size_t len) noexcept
-  {
-    return ::wmemcpy(out, str, len) + len;
+    return (char*) ::memcpy(out, str, len * sizeof(charT)) + len;
   }
 
 }  // namespace details_xstring
