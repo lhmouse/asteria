@@ -157,6 +157,7 @@ class cow_vector
 
     // This function works the same way as `substr()`. It ensures `tpos` is
     // within range and returns the number of elements that start there.
+    constexpr
     size_type
     do_clamp_subvec(size_type tpos, size_type tn) const
       {
