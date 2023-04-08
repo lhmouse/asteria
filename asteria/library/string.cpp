@@ -1050,7 +1050,7 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
       while((segments.size() + 1 < rlimit) && (tcur != text.end())) {
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
-        segments.emplace_back(V_string(sref(s_char_table[uint8_t(*tcur)], 1)));
+        segments.emplace_back(sref(s_char_table[uint8_t(*tcur)]));
         tcur += 1;
       }
       if(tcur != text.end())
@@ -1094,9 +1094,11 @@ std_string_implode(V_array segments, optV_string delim)
 V_string
 std_string_hex_encode(V_string data, optV_string delim)
   {
+    const char* pdelim = delim ? delim->data() : "";
+    size_t ndelim = delim ? delim->size() : 0;
+
     V_string text;
-    auto rdelim = delim ? sref(*delim) : sref("");
-    text.reserve(data.size() * (2 + rdelim.length()));
+    text.reserve(data.size() * (2 + ndelim));
 
     // These shall be operated in big-endian order.
     uint32_t reg = 0;
@@ -1106,7 +1108,7 @@ std_string_hex_encode(V_string data, optV_string delim)
     while(nread != data.size()) {
       // Insert a delimiter before every byte other than the first one.
       if(!text.empty())
-        text += rdelim;
+        text.append(pdelim, ndelim);
 
       // Read a byte.
       reg = data[nread++] & 0xFF;
@@ -1654,7 +1656,7 @@ std_string_format(V_string templ, cow_vector<Value> values)
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
-    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
+    vformat(fmt, templ.safe_c_str(), insts.data(), insts.size());
     return fmt.extract_string();
   }
 

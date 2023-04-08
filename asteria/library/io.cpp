@@ -120,7 +120,7 @@ do_format_write_utf8_common(::FILE* fp, const V_string& templ,
 
     // Compose the string into a stream and write it.
     ::rocket::tinyfmt_str fmt;
-    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
+    vformat(fmt, templ.safe_c_str(), insts.data(), insts.size());
     return do_write_utf8_common(fp, fmt.get_string());
   }
 

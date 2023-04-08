@@ -186,7 +186,7 @@ do_quote_string(tinyfmt& fmt, stringR str)
             nump.put_XU(*p, 4);
             char seq[8] = { "\\u" };
             ::std::memcpy(seq + 2, nump.data() + 2, 4);
-            fmt << sref(seq, 6);
+            fmt.putn(seq, 6);
           }
           break;
         }
