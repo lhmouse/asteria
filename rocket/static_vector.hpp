@@ -606,7 +606,7 @@ class static_vector
 
     // N.B. The return type and parameter are non-standard extensions.
     static_vector&
-    pop_back(size_type n = 1U)
+    pop_back(size_type n = 1)
       {
         this->m_sth.pop_n_unchecked(n);
         return *this;

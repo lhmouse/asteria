@@ -598,7 +598,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
           return false;
-        this->do_erase_unchecked(tpos, 1U);
+        this->do_erase_unchecked(tpos, 1);
         return true;
       }
 

@@ -721,7 +721,7 @@ class cow_vector
 
     // N.B. The return type and parameter are non-standard extensions.
     cow_vector&
-    pop_back(size_type n = 1U)
+    pop_back(size_type n = 1)
       {
         this->mut_data();
         this->m_sth.pop_n_unchecked(n);
