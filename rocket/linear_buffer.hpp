@@ -34,6 +34,11 @@ class basic_linear_buffer
     size_type m_eoff = 0;  // offset of the end
 
   public:
+    constexpr
+    basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
+      : m_stor()
+      { }
+
     explicit constexpr
     basic_linear_buffer(const allocator_type& alloc) noexcept
       : m_stor(alloc)
@@ -63,11 +68,6 @@ class basic_linear_buffer
           // Otherwise, we have to copy its contents instead.
           this->putn(other.data(), other.size());
       }
-
-    constexpr
-    basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : basic_linear_buffer(allocator_type())
-      { }
 
     basic_linear_buffer&
     operator=(const basic_linear_buffer& other) &

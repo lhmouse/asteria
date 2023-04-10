@@ -55,6 +55,11 @@ class cow_vector
 
   public:
     // 26.3.11.2, construct/copy/destroy
+    constexpr
+    cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
+      : m_sth()
+      { }
+
     explicit constexpr
     cow_vector(const allocator_type& alloc) noexcept
       : m_sth(alloc)
@@ -76,11 +81,6 @@ class cow_vector
     cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
       : m_sth(alloc)
       { this->m_sth.exchange_with(other.m_sth);  }
-
-    constexpr
-    cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : cow_vector(allocator_type())
-      { }
 
     explicit
     cow_vector(size_type n, const allocator_type& alloc = allocator_type())

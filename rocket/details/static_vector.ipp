@@ -40,10 +40,16 @@ class storage_handle
     };
 
   public:
+    constexpr
+    storage_handle() noexcept(is_nothrow_constructible<allocator_type>::value)
+      : allocator_base(),
+        m_init_nelem(0)
+      { }
+
     explicit
     storage_handle(const allocator_type& alloc) noexcept
       : allocator_base(alloc),
-        m_init_nelem()
+        m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
@@ -53,7 +59,7 @@ class storage_handle
     explicit
     storage_handle(allocator_type&& alloc) noexcept
       : allocator_base(::std::move(alloc)),
-        m_init_nelem()
+        m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));

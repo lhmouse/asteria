@@ -363,16 +363,28 @@ class storage_handle
 
   public:
     constexpr
+    storage_handle()
+      noexcept(conjunction<is_nothrow_constructible<allocator_type>,
+                           is_nothrow_constructible<hasher>,
+                           is_nothrow_constructible<key_equal>>::value)
+      : allocator_base(),
+        ebo_select<hashT, allocT>(),
+        ebo_select<eqT, allocT, hashT>()
+      { }
+
+    constexpr
     storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
       : allocator_base(alloc),
         ebo_select<hashT, allocT>(hf),
-        ebo_select<eqT, allocT, hashT>(eq)  { }
+        ebo_select<eqT, allocT, hashT>(eq)
+      { }
 
     constexpr
     storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
       : allocator_base(::std::move(alloc)),
         ebo_select<hashT, allocT>(hf),
-        ebo_select<eqT, allocT, hashT>(eq)  { }
+        ebo_select<eqT, allocT, hashT>(eq)
+      { }
 
     ~storage_handle()
       { this->deallocate();  }

@@ -73,6 +73,14 @@ class cow_hashmap
 
   public:
     // 26.5.4.2, construct/copy/destroy
+    constexpr
+    cow_hashmap()
+      noexcept(conjunction<is_nothrow_constructible<allocator_type>,
+                           is_nothrow_constructible<hasher>,
+                           is_nothrow_constructible<key_equal>>::value)
+      : m_sth()
+      { }
+
     explicit constexpr
     cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(),
                 const key_equal& eq = key_equal())
@@ -109,16 +117,6 @@ class cow_hashmap
                            is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.exchange_with(other.m_sth);  }
-
-    constexpr
-    cow_hashmap()
-      noexcept(conjunction<is_nothrow_constructible<allocator_type>,
-                           is_nothrow_constructible<hasher>,
-                           is_nothrow_copy_constructible<hasher>,
-                           is_nothrow_constructible<key_equal>,
-                           is_nothrow_copy_constructible<key_equal>>::value)
-      : cow_hashmap(allocator_type())
-      { }
 
     explicit
     cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),

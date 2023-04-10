@@ -204,6 +204,11 @@ class storage_handle
     storage_pointer m_qstor = nullptr;
 
   public:
+    constexpr
+    storage_handle() noexcept(is_nothrow_constructible<allocator_type>::value)
+      : allocator_base()
+      { }
+
     explicit constexpr
     storage_handle(const allocator_type& alloc) noexcept
       : allocator_base(alloc)

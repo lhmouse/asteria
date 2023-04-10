@@ -21,8 +21,8 @@ void
 Runtime_Error::
 do_backtrace(Backtrace_Frame&& new_frm)
   {
-    // Unpack nested exceptions, if any.
     try {
+      // Unpack nested exceptions, if any.
       auto eptr = ::std::current_exception();
       if(eptr)
         ::std::rethrow_exception(eptr);
@@ -30,7 +30,9 @@ do_backtrace(Backtrace_Frame&& new_frm)
     catch(Runtime_Error& nested) {
       this->m_frames.append(nested.m_frames.move_begin(), nested.m_frames.move_end());
     }
-    catch(...) { }
+    catch(...) {
+      ::fprintf(stderr, "WARNING: An unknown exception has been ignored.\n");
+    }
 
     // Push a new frame.
     this->do_insert_frame(::std::move(new_frm));
