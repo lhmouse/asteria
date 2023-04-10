@@ -51,12 +51,20 @@ class array
   private:
     [[noreturn]] ROCKET_NEVER_INLINE
     void
-    do_throw_subscript_out_of_range(size_type pos, const char* rel) const
+    do_throw_subscript_out_of_range(size_type pos, unsigned char rel) const
       {
+        static constexpr char opstr[6][3] = { "==", "<", "<=", ">", ">=", "!=" };
+        unsigned int inv = 5U - rel;
+
         noadl::sprintf_and_throw<out_of_range>(
-              "array: subscript out of range (`%lld` %s `%lld`)",
-              static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
+            "array: subscript out of range (`%lld` %s `%lld`)",
+            static_cast<long long>(pos), opstr[inv], static_cast<long long>(this->size()));
       }
+
+#define ROCKET_ARRAY_VALIDATE_SUBSCRIPT_(pos, op)  \
+        if(!(pos op this->size()))  \
+          this->do_throw_subscript_out_of_range((pos),  \
+                     ((2 op 1) * 4 + (1 op 2) * 2 + (1 op 1) - 1));
 
   public:
     // iterators
@@ -165,32 +173,22 @@ class array
     const_reference
     at(size_type pos) const
       {
-        if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos, ">=");
+        ROCKET_ARRAY_VALIDATE_SUBSCRIPT_(pos, <);
         return this->data()[pos];
       }
 
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    const_reference
-    at(subscriptT pos) const
-      { return this->at(static_cast<size_type>(pos));  }
+    // N.B. This is a non-standard extension.
+    const value_type*
+    ptr(size_type pos) const noexcept
+      {
+        return (pos < this->size())
+                 ? (this->data() + pos) : nullptr;
+      }
 
     const_reference
     operator[](size_type pos) const noexcept
       {
         ROCKET_ASSERT(pos < this->size());
-        return this->data()[pos];
-      }
-
-    // N.B. This is a non-standard extension.
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    const_reference
-    operator[](subscriptT pos) const noexcept
-      {
-        ROCKET_ASSERT(pos >= 0);
-        ROCKET_ASSERT(static_cast<size_type>(pos) < this->size());
         return this->data()[pos];
       }
 
@@ -208,32 +206,23 @@ class array
         return this->data()[this->size() - 1];
       }
 
-    // N.B. This is a non-standard extension.
-    const value_type*
-    ptr(size_type pos) const noexcept
-      {
-        if(pos >= this->size())
-          return nullptr;
-        return this->data() + pos;
-      }
-
     // There is no `at()` overload that returns a non-const reference.
     // This is the consequent overload which does that.
     // N.B. This is a non-standard extension.
     reference
     mut(size_type pos)
       {
-        if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos, ">=");
+        ROCKET_ARRAY_VALIDATE_SUBSCRIPT_(pos, <);
         return this->mut_data()[pos];
       }
 
     // N.B. This is a non-standard extension.
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    reference
-    mut(subscriptT pos)
-      { return this->mut(static_cast<size_type>(pos));  }
+    value_type*
+    mut_ptr(size_type pos)
+      {
+        return (pos < this->size())
+                 ? (this->mut_data() + pos) : nullptr;
+      }
 
     // N.B. This is a non-standard extension.
     reference
@@ -249,15 +238,6 @@ class array
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[this->size() - 1];
-      }
-
-    // N.B. This is a non-standard extension.
-    value_type*
-    mut_ptr(size_type pos)
-      {
-        if(pos >= this->size())
-          return nullptr;
-        return this->mut_data() + pos;
       }
 
     // element access

@@ -150,12 +150,20 @@ class cow_vector
 
     [[noreturn]] ROCKET_NEVER_INLINE
     void
-    do_throw_subscript_out_of_range(size_type pos, const char* rel) const
+    do_throw_subscript_out_of_range(size_type pos, unsigned char rel) const
       {
+        static constexpr char opstr[6][3] = { "==", "<", "<=", ">", ">=", "!=" };
+        unsigned int inv = 5U - rel;
+
         noadl::sprintf_and_throw<out_of_range>(
             "cow_vector: subscript out of range (`%lld` %s `%lld`)",
-            static_cast<long long>(pos), rel, static_cast<long long>(this->size()));
+            static_cast<long long>(pos), opstr[inv], static_cast<long long>(this->size()));
       }
+
+#define ROCKET_COW_VECTOR_VALIDATE_SUBSCRIPT_(pos, op)  \
+        if(!(pos op this->size()))  \
+          this->do_throw_subscript_out_of_range((pos),  \
+                     ((2 op 1) * 4 + (1 op 2) * 2 + (1 op 1) - 1));
 
     // This function works the same way as `substr()`. It ensures `tpos` is
     // within range and returns the number of elements that start there.
@@ -163,10 +171,8 @@ class cow_vector
     size_type
     do_clamp_subvec(size_type tpos, size_type tn) const
       {
-        size_type len = this->size();
-        if(tpos > len)
-          this->do_throw_subscript_out_of_range(tpos, ">");
-        return noadl::min(tn, len - tpos);
+        ROCKET_COW_VECTOR_VALIDATE_SUBSCRIPT_(tpos, <=);
+        return noadl::min(this->size() - tpos, tn);
       }
 
     // This function is used to implement `insert()` after new elements have
@@ -356,18 +362,16 @@ class cow_vector
     const_reference
     at(size_type pos) const
       {
-        if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos, ">=");
+        ROCKET_COW_VECTOR_VALIDATE_SUBSCRIPT_(pos, <);
         return this->data()[pos];
       }
 
     // N.B. This is a non-standard extension.
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    const_reference
-    at(subscriptT pos) const
+    const value_type*
+    ptr(size_type pos) const noexcept
       {
-        return this->at(static_cast<size_type>(pos));
+        return (pos < this->size())
+                 ? (this->data() + pos) : nullptr;
       }
 
     const_reference
@@ -375,15 +379,6 @@ class cow_vector
       {
         ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
-      }
-
-    // N.B. This is a non-standard extension.
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    const_reference
-    operator[](subscriptT pos) const noexcept
-      {
-        return this->operator[](static_cast<size_type>(pos));
       }
 
     const_reference
@@ -400,15 +395,6 @@ class cow_vector
         return this->data()[this->size() - 1];
       }
 
-    // N.B. This is a non-standard extension.
-    const value_type*
-    ptr(size_type pos) const noexcept
-      {
-        if(pos >= this->size())
-          return nullptr;
-        return this->data() + pos;
-      }
-
     // There is no `at()` overload that returns a non-const reference.
     // This is the consequent overload which does that.
     // N.B. This is a non-standard extension.
@@ -416,19 +402,17 @@ class cow_vector
     reference
     mut(size_type pos)
       {
-        if(pos >= this->size())
-          this->do_throw_subscript_out_of_range(pos, ">=");
+        ROCKET_COW_VECTOR_VALIDATE_SUBSCRIPT_(pos, <);
         return this->mut_data()[pos];
       }
 
     // N.B. This is a non-standard extension.
     // N.B. This function may throw `std::bad_alloc`.
-    template<typename subscriptT,
-    ROCKET_ENABLE_IF(is_integral<subscriptT>::value && (sizeof(subscriptT) <= sizeof(size_type)))>
-    reference
-    mut(subscriptT pos)
+    value_type*
+    mut_ptr(size_type pos)
       {
-        return this->mut(static_cast<size_type>(pos));
+        return (pos < this->size())
+                 ? (this->mut_data() + pos) : nullptr;
       }
 
     // N.B. This is a non-standard extension.
@@ -447,16 +431,6 @@ class cow_vector
       {
         ROCKET_ASSERT(!this->empty());
         return this->mut_data()[this->size() - 1];
-      }
-
-    // N.B. This is a non-standard extension.
-    // N.B. This function may throw `std::bad_alloc`.
-    value_type*
-    mut_ptr(size_type pos)
-      {
-        if(pos >= this->size())
-          return nullptr;
-        return this->mut_data() + pos;
       }
 
     // N.B. This is a non-standard extension.
