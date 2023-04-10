@@ -40,15 +40,18 @@ class basic_tinybuf_file
   public:
     basic_tinybuf_file()
       noexcept(is_nothrow_constructible<unique_posix_file, nullptr_t, nullptr_t>::value)
-      : m_file(nullptr, nullptr)  { }
+      : m_file(nullptr, nullptr)
+      { }
 
     explicit
     basic_tinybuf_file(unique_posix_file&& file) noexcept
-      : m_file(::std::move(file))  { }
+      : m_file(::std::move(file))
+      { }
 
     explicit
     basic_tinybuf_file(handle_type fp, closer_type cl) noexcept
-      : m_file(fp, cl)  { }
+      : m_file(fp, cl)
+      { }
 
     explicit
     basic_tinybuf_file(const char* path, open_mode mode)

@@ -819,7 +819,8 @@ class hashmap_iterator
   public:
     constexpr
     hashmap_iterator() noexcept
-      : m_begin(), m_cur(), m_end()  { }
+      : m_begin(), m_cur(), m_end()
+      { }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
@@ -827,7 +828,8 @@ class hashmap_iterator
     hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
       : m_begin(other.m_begin),
         m_cur(other.m_cur),
-        m_end(other.m_end)  { }
+        m_end(other.m_end)
+      { }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>

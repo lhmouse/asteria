@@ -35,17 +35,20 @@ class basic_tinyfmt_str
 
   public:
     basic_tinyfmt_str() noexcept
-      : m_buf(tinybuf_base::open_write)  { }
+      : m_buf(tinybuf_base::open_write)
+      { }
 
     explicit
     basic_tinyfmt_str(open_mode mode) noexcept
-      : m_buf(mode)  { }
+      : m_buf(mode)
+      { }
 
     template<typename xstrT,
     ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&>::value)>
     explicit
     basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
-      : m_buf(::std::forward<xstrT>(xstr), mode)  { }
+      : m_buf(::std::forward<xstrT>(xstr), mode)
+      { }
 
     basic_tinyfmt_str&
     swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)

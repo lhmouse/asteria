@@ -71,7 +71,8 @@ class Token
     constexpr
     Token(const Source_Location& xsloc, size_t xlen, XTokT&& xtok)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XTokT&&>::value)
-      : m_sloc(xsloc), m_length(xlen), m_stor(::std::forward<XTokT>(xtok))  { }
+      : m_sloc(xsloc), m_length(xlen), m_stor(::std::forward<XTokT>(xtok))
+      { }
 
     Token&
     swap(Token& other) noexcept

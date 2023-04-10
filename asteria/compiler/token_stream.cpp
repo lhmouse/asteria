@@ -27,7 +27,8 @@ class Text_Reader
   public:
     explicit
     Text_Reader(tinybuf& xcbuf, stringR xfile, int xline)
-      : m_cbuf(xcbuf), m_file(xfile), m_line(xline)  { }
+      : m_cbuf(xcbuf), m_file(xfile), m_line(xline)
+      { }
 
   public:
     const cow_string&

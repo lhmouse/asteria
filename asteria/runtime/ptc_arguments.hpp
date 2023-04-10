@@ -30,7 +30,8 @@ class PTC_Arguments final
     PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
                   const cow_function& target, Reference_Stack&& stack)
       : m_sloc(sloc), m_ptc(ptc),
-        m_target(target), m_stack(::std::move(stack))  { }
+        m_target(target), m_stack(::std::move(stack))
+      { }
 
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(PTC_Arguments);

@@ -53,7 +53,8 @@ class static_vector
     // 26.3.11.2, construct/copy/destroy
     explicit
     static_vector(const allocator_type& alloc) noexcept
-      : m_sth(alloc)  { }
+      : m_sth(alloc)
+      { }
 
     static_vector(const static_vector& other)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
@@ -77,7 +78,8 @@ class static_vector
       { this->m_sth.move_from(::std::move(other.m_sth));  }
 
     static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : static_vector(allocator_type())  { }
+      : static_vector(allocator_type())
+      { }
 
     explicit
     static_vector(size_type n, const allocator_type& alloc = allocator_type())

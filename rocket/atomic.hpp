@@ -25,7 +25,8 @@ class atomic
 
     explicit
     atomic(value_type val) noexcept
-      : m_val(val)  { }
+      : m_val(val)
+      { }
 
     atomic(const atomic&) = delete;
     atomic& operator=(const atomic&) = delete;
