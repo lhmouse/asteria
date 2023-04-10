@@ -114,8 +114,5 @@ class reference_counter
       { return this->decrement() + 1;  }
   };
 
-template
-class reference_counter<long>;
-
 }  // namespace rocket
 #endif
