@@ -162,8 +162,8 @@ class cow_vector
 
 #define ROCKET_COW_VECTOR_VALIDATE_SUBSCRIPT_(pos, op)  \
         if(!(pos op this->size()))  \
-          this->do_throw_subscript_out_of_range((pos),  \
-                     ((2 op 1) * 4 + (1 op 2) * 2 + (1 op 1) - 1));
+          this->do_throw_subscript_out_of_range(pos,  \
+                  ((2 op 1) * 4 + (1 op 2) * 2 + (1 op 1) - 1))
 
     // This function works the same way as `substr()`. It ensures `tpos` is
     // within range and returns the number of elements that start there.
