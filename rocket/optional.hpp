@@ -20,6 +20,7 @@ template<typename valueT>
 class optional
   {
     static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(!is_reference<valueT>::value, "invalid element type");
     static_assert(!is_same<valueT, nullopt_t>::value, "invalid element type");
     template<typename> friend class optional;
 

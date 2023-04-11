@@ -22,6 +22,7 @@ template<typename elementT, typename deleterT>
 class unique_ptr
   {
     static_assert(!is_array<elementT>::value, "invalid element type");
+    static_assert(!is_reference<elementT>::value, "invalid element type");
     template<typename, typename> friend class unique_ptr;
 
   public:

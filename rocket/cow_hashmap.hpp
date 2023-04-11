@@ -37,14 +37,15 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 class cow_hashmap
   {
     static_assert(!is_array<keyT>::value, "invalid key type");
+    static_assert(!is_reference<keyT>::value, "invalid key type");
     static_assert(!is_array<mappedT>::value, "invalid mapped value type");
-    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
-                  "inappropriate allocator type");
+    static_assert(!is_reference<mappedT>::value, "invalid mapped value type");
 
 #ifndef ROCKET_NO_STRICT_HASH_NOEXCEPT
-    // Note if a hash function throws an exception, the behavior is undefined.
-    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
-                  "hash operations must not throw exceptions");
+    // If an exception is thrown during rehashing, the behavior is undefined.
+    static_assert(
+        noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
+        "hash operations must not throw exceptions");
 #endif  // ROCKET_NO_STRICT_HASH_NOEXCEPT
 
   public:

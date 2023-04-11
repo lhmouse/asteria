@@ -32,7 +32,7 @@ template<typename valueT, typename allocT>
 class cow_vector
   {
     static_assert(!is_array<valueT>::value, "invalid element type");
-    static_assert(is_same<typename allocT::value_type, valueT>::value, "inappropriate allocator type");
+    static_assert(!is_reference<valueT>::value, "invalid element type");
 
   public:
     // types

@@ -22,6 +22,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT>
 class array
   {
     static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(!is_reference<valueT>::value, "invalid element type");
 
   public:
     // types
