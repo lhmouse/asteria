@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "assert.hpp"
+#include "throw.hpp"
 #include "xstring.hpp"
 #include "xallocator.hpp"
 namespace rocket {

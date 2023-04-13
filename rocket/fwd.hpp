@@ -10,14 +10,14 @@
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()
-#include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
+#include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>, std::unqiue_ptr, std::shared_ptr
 #include <new>  // placement new
+#include <atomic>  // std::atomic<>
 #include <initializer_list>  // std::initializer_list<>
 #include <limits>  // std::numeric_limits<>
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
-#include <memory>  // std::unqiue_ptr, std::shared_ptr
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 namespace rocket {

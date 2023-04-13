@@ -4,8 +4,8 @@
 #ifndef ROCKET_ATOMIC_
 #define ROCKET_ATOMIC_
 
+#include "fwd.hpp"
 #include "assert.hpp"
-#include <atomic>  // std::atomic<>
 namespace rocket {
 
 // Differences from `std::atomic`:
