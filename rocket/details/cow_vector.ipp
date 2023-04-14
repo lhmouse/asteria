@@ -569,14 +569,14 @@ class vector_iterator
       { return ::std::addressof(**this);  }
 
     vector_iterator&
-    operator+=(difference_type off) noexcept
+    operator+=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
       }
 
     vector_iterator&
-    operator-=(difference_type off) noexcept
+    operator-=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
