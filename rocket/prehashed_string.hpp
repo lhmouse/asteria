@@ -15,8 +15,10 @@ class basic_prehashed_string;
 template<typename stringT, typename hashT, typename eqT>
 class basic_prehashed_string
   {
+#ifndef ROCKET_NO_STRICT_HASH_NOEXCEPT
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const stringT&>())),
                   "hash operations must not throw exceptions");
+#endif  // ROCKET_NO_STRICT_HASH_NOEXCEPT
 
   public:
     // types
