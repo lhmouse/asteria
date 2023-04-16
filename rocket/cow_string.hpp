@@ -1480,30 +1480,19 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = from;  k < this->size();  ++k) {
-          ROCKET_ASSERT(k != npos);
-
-          // A null character is not part of the target string.
-          if(this->data()[k] == 0)
-            continue;
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            continue;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            return k;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xstrchr(s, this->data()[k]) != nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`. The null
+          // terminator is not part of the target string.
+          ROCKET_ASSERT(k != npos);
+          if(bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               && (this->data()[k] != 0)
+               && /* in bitmap && */ (!overflow || noadl::xstrchr(s, this->data()[k])))
             return k;
         }
 
@@ -1531,26 +1520,17 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = from;  k < this->size();  ++k) {
-          ROCKET_ASSERT(k != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            continue;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            return k;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xmemchr(s, this->data()[k], n))
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
+          if(bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[k], n)))
             return k;
         }
 
@@ -1572,10 +1552,9 @@ return npos;
           return npos;
 
         for(size_type k = from;  k < this->size();  ++k) {
-          ROCKET_ASSERT(k != npos);
-
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
           if(this->data()[k] == c)
             return k;
         }
@@ -1660,30 +1639,19 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = noadl::min(to, this->size() - 1);  k != size_type(-1);  --k) {
-          ROCKET_ASSERT(k != npos);
-
-          // A null character is not part of the target string.
-          if(this->data()[k] == 0)
-            continue;
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            continue;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            return k;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xstrchr(s, this->data()[k]) != nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`. The null
+          // terminator is not part of the target string.
+          ROCKET_ASSERT(k != npos);
+          if(bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               && (this->data()[k] != 0)
+               && /* in bitmap && */ (!overflow || noadl::xstrchr(s, this->data()[k])))
             return k;
         }
 
@@ -1711,26 +1679,17 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = noadl::min(to, this->size() - 1);  k != size_type(-1);  --k) {
-          ROCKET_ASSERT(k != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            continue;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            return k;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xmemchr(s, this->data()[k], n) != nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
+          if(bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[k], n)))
             return k;
         }
 
@@ -1752,10 +1711,9 @@ return npos;
           return npos;
 
         for(size_type k = noadl::min(to, this->size() - 1);  k != size_type(-1);  --k) {
-          ROCKET_ASSERT(k != npos);
-
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
           if(this->data()[k] == c)
             return k;
         }
@@ -1840,30 +1798,19 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = from;  k < this->size();  ++k) {
-          ROCKET_ASSERT(k != npos);
-
-          // A null character is not part of the target string.
-          if(this->data()[k] == 0)
-            return k;
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            return k;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            continue;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xstrchr(s, this->data()[k]) == nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`. The null
+          // terminator is not part of the target string.
+          ROCKET_ASSERT(k != npos);
+          if(!bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               || (this->data()[k] == 0)
+               || (/* in bitmap && */ overflow && !noadl::xstrchr(s, this->data()[k])))
             return k;
         }
 
@@ -1891,26 +1838,17 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = from;  k < this->size();  ++k) {
-          ROCKET_ASSERT(k != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            return k;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            continue;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xmemchr(s, this->data()[k], n) == nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
+          if(!bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[k], n)))
             return k;
         }
 
@@ -1932,10 +1870,9 @@ return npos;
           return npos;
 
         for(size_type k = from;  k < this->size();  ++k) {
-          ROCKET_ASSERT(k != npos);
-
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
           if(this->data()[k] != c)
             return k;
         }
@@ -2020,30 +1957,19 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = noadl::min(to, this->size() - 1);  k != size_type(-1);  --k) {
-          ROCKET_ASSERT(k != npos);
-
-          // A null character is not part of the target string.
-          if(this->data()[k] == 0)
-            return k;
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            return k;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            continue;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xstrchr(s, this->data()[k]) == nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`. The null
+          // terminator is not part of the target string.
+          ROCKET_ASSERT(k != npos);
+          if(!bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               || (this->data()[k] == 0)
+               || (/* in bitmap && */ overflow && !noadl::xstrchr(s, this->data()[k])))
             return k;
         }
 
@@ -2071,26 +1997,17 @@ return npos;
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           int ch = noadl::xchrtoint(*sptr);
-          bitmap[uint8_t(ch)] = true;
+          bitmap[ch & 0xFF] = true;
           overflow |= ch >> 8;
         }
 
         for(size_type k = noadl::min(to, this->size() - 1);  k != size_type(-1);  --k) {
-          ROCKET_ASSERT(k != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
-          int ch = noadl::xchrtoint(this->data()[k]);
-          if(bitmap[uint8_t(ch)] == false)
-            return k;
-
-          // If `bitmap` has not been overflowed, then it is not necessary to look
-          // for it in the target string.
-          if(overflow == 0)
-            continue;
-
-          // Check whether this is really a match using plain comparison, unlike
-          // `std::basic_string` which uses `std::char_traits`.
-          if(noadl::xmemchr(s, this->data()[k], n) == nullptr)
+          // Otherwise, check whether this is really a match using plain comparison,
+          // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
+          if(!bitmap[noadl::xchrtoint(this->data()[k]) & 0xFF]
+               || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[k], n)))
             return k;
         }
 
@@ -2112,10 +2029,9 @@ return npos;
           return npos;
 
         for(size_type k = noadl::min(to, this->size() - 1);  k != size_type(-1);  --k) {
-          ROCKET_ASSERT(k != npos);
-
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
+          ROCKET_ASSERT(k != npos);
           if(this->data()[k] != c)
             return k;
         }
