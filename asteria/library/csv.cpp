@@ -152,7 +152,7 @@ std_csv_format(V_array value)
         if(cellp->is_string()) {
           // Check whether we need to escape special characters.
           const auto& str = cellp->as_string();
-          if(str.find_first_of(sref(",\n\"")) != cow_string::npos) {
+          if(str.find_of(sref(",\n\"")) != cow_string::npos) {
             fmt << "\"";
 
             for(char c : str)

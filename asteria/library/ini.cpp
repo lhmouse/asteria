@@ -18,13 +18,13 @@ do_format_key(tinyfmt& fmt, stringR key)
     if(key.empty())
       ASTERIA_THROW_RUNTIME_ERROR(("Empty key is not allowed"));
 
-    if(key.find_first_of(s_reject) != cow_string::npos)
+    if(key.find_of(s_reject) != cow_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR(("Key contains invalid characters: $1"), key);
 
-    if(key.find_first_of(s_space) == 0)
+    if(key.find_of(s_space) == 0)
       ASTERIA_THROW_RUNTIME_ERROR(("Key shall not begin with a space: $1"), key);
 
-    if(key.find_last_of(s_space) == key.size() - 1)
+    if(key.rfind_of(s_space) == key.size() - 1)
       ASTERIA_THROW_RUNTIME_ERROR(("Key shall not end with a space: $1"), key);
 
     return fmt << key;
@@ -47,13 +47,13 @@ do_format_check_scalar(const Value& value)
         if(str.empty())
           return true;
 
-        if(str.find_first_of(s_reject) != cow_string::npos)
+        if(str.find_of(s_reject) != cow_string::npos)
           ASTERIA_THROW_RUNTIME_ERROR(("Value contains invalid characters: $1"), str);
 
-        if(str.find_first_of(s_space) == 0)
+        if(str.find_of(s_space) == 0)
           ASTERIA_THROW_RUNTIME_ERROR(("Value shall not begin with a space: $1"), str);
 
-        if(str.find_last_of(s_space) == str.size() - 1)
+        if(str.rfind_of(s_space) == str.size() - 1)
           ASTERIA_THROW_RUNTIME_ERROR(("Value shall not end with a space: $1"), str);
 
         return true;
@@ -94,7 +94,7 @@ do_ini_parse(tinybuf& buf)
         line.pop_back();
 
       // Remove comments.
-      size_t pos = line.find_first_of(s_comment);
+      size_t pos = line.find_of(s_comment);
       if(pos != cow_string::npos)
         line.erase(pos);
 
