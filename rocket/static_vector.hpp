@@ -592,8 +592,9 @@ class static_vector
     subvec(size_type tpos, size_type tn = size_type(-1)) const
       {
         size_type tlen = this->do_clamp_subvec(tpos, tn);
-        auto tptr = this->data() + tpos;
-        return static_vector(tptr, tptr + tlen, this->m_sth._allocator());
+        static_vector res(this->m_sth.as_allocator());
+        res.append(this->data() + tpos, this->data() + tpos + tlen);
+        return res;
       }
 
     // N.B. The parameter pack is a non-standard extension.
