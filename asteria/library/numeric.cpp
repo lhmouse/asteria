@@ -703,13 +703,13 @@ Value
 std_numeric_parse(V_string text)
   {
     static constexpr char s_spaces[] = " \f\n\r\t\v";
-    size_t tpos = text.find_first_not_of(s_spaces);
+    size_t tpos = text.find_not_of(s_spaces);
     if(tpos == V_string::npos)
       ASTERIA_THROW_RUNTIME_ERROR(("Blank string"));
 
     // Try parsing the string as a real number first.
     ::rocket::ascii_numget numg;
-    size_t tlen = text.find_last_not_of(s_spaces) + 1 - tpos;
+    size_t tlen = text.rfind_not_of(s_spaces) + 1 - tpos;
     if(numg.parse_D(text.data() + tpos, tlen) != tlen)
       ASTERIA_THROW_RUNTIME_ERROR((
           "String not convertible to a number (text `$1`)"), text);

@@ -80,10 +80,10 @@ read_execute_print_single()
       exit_printf(exit_system_error, "! could not read standard input: %m");
 
     // Remove leading and trailing blank lines.
-    pos = repl_source.find_first_not_of('\n');
+    pos = repl_source.find_not_of('\n');
     repl_source.erase(0, pos);
 
-    pos = repl_source.find_last_not_of('\n');
+    pos = repl_source.rfind_not_of('\n');
     repl_source.erase(pos + 1);
 
     // Exit if the end of user input has been reached.
@@ -93,7 +93,7 @@ read_execute_print_single()
     if(iscmd) {
       // Skip space characters after the command initiator.
       // If user input was empty, don't do anything.
-      pos = repl_source.find_first_not_of(1, " \f\n\r\t\v");
+      pos = repl_source.find_not_of(1, " \f\n\r\t\v");
       if(pos == cow_string::npos)
         return;
 
@@ -110,7 +110,7 @@ read_execute_print_single()
     }
 
     // Skip space characters. If the source string becomes empty, do nothing.
-    pos = repl_source.find_first_not_of(" \f\n\r\t\v");
+    pos = repl_source.find_not_of(" \f\n\r\t\v");
     if(pos == cow_string::npos)
       return;
 

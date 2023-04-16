@@ -100,12 +100,12 @@ do_ini_parse(tinybuf& buf)
 
       // Remove leading and trailing spaces.
       // Empty lines are ignored.
-      pos = line.find_first_not_of(s_space);
+      pos = line.find_not_of(s_space);
       if(pos == cow_string::npos)
         continue;
 
       line.erase(0, pos);
-      pos = line.find_last_not_of(s_space);
+      pos = line.rfind_not_of(s_space);
       line.erase(pos + 1);
 
       cow_string key = line;
@@ -117,7 +117,7 @@ do_ini_parse(tinybuf& buf)
           ASTERIA_THROW_RUNTIME_ERROR(("Invalid section name on line $1"), nlines);
 
         // Trim the section name.
-        pos = line.find_first_not_of(1, s_space);
+        pos = line.find_not_of(1, s_space);
         if(pos == line.size() - 1)
           ASTERIA_THROW_RUNTIME_ERROR(("Empty section name on line $1"), nlines);
 
@@ -134,7 +134,7 @@ do_ini_parse(tinybuf& buf)
       // Otherwise, it shall be a property.
       size_t eqpos = line.find('=');
       if(eqpos != cow_string::npos) {
-        pos = line.find_last_not_of(eqpos - 1, s_space);
+        pos = line.rfind_not_of(eqpos - 1, s_space);
         if(pos == cow_string::npos)
           ASTERIA_THROW_RUNTIME_ERROR(("Empty property name on line $1"), nlines);
 
@@ -142,7 +142,7 @@ do_ini_parse(tinybuf& buf)
         key.assign(line, 0, pos + 1);
 
         // Get the value without leading spaces.
-        pos = line.find_first_not_of(eqpos + 1, s_space);
+        pos = line.find_not_of(eqpos + 1, s_space);
         if(pos != cow_string::npos)
           value.assign(line, pos, line.size());
       }

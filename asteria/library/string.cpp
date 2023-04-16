@@ -864,13 +864,13 @@ std_string_trim(V_string text, optV_string reject)
       return text;
 
     // Get the index of the first byte to keep.
-    size_t bpos = text.find_first_not_of(rchars);
+    size_t bpos = text.find_not_of(rchars);
     if(bpos == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return { };
 
     // Get the index of the last byte to keep.
-    size_t epos = text.find_last_not_of(rchars) + 1;
+    size_t epos = text.rfind_not_of(rchars) + 1;
     if((bpos == 0) && (epos == text.size()))
       // There is no byte to strip. Make use of reference counting.
       return text;
@@ -888,7 +888,7 @@ std_string_triml(V_string text, optV_string reject)
       return text;
 
     // Get the index of the first byte to keep.
-    size_t bpos = text.find_first_not_of(rchars);
+    size_t bpos = text.find_not_of(rchars);
     if(bpos == V_string::npos)
       // There is no byte to keep. Return an empty string.
       return { };
@@ -910,7 +910,7 @@ std_string_trimr(V_string text, optV_string reject)
       return text;
 
     // Get the index of the last byte to keep.
-    size_t epos = text.find_last_not_of(rchars) + 1;
+    size_t epos = text.rfind_not_of(rchars) + 1;
     if(epos == 0)
       // There is no byte to keep. Return an empty string.
       return { };

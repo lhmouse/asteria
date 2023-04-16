@@ -73,7 +73,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     }
 
     // Remove trailing space characters.
-    size_t pos = data.find_last_not_of(" \f\n\r\t\v");
+    size_t pos = data.rfind_not_of(" \f\n\r\t\v");
     data.erase(pos + 1);
     data += "\n\n";
 
@@ -96,7 +96,7 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
     data.append(msg.begin(), msg.end());
 
     // Remove trailing space characters.
-    size_t pos = data.find_last_not_of(" \f\n\r\t\v");
+    size_t pos = data.rfind_not_of(" \f\n\r\t\v");
     data.erase(pos + 1);
     data += "\n";
 
