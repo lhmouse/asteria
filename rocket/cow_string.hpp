@@ -1262,7 +1262,6 @@ class basic_cow_string
     size_type
     find(size_type from, const value_type* s) const noexcept
       {
-// TODO
         return this->find(from, s, noadl::xstrlen(s));
       }
 
@@ -1277,11 +1276,33 @@ class basic_cow_string
     size_type
     find(size_type from, const value_type* s, size_type n) const noexcept
       {
-// TODO
-for(size_type k = from;  (k <= this->size()) && (this->size() - k >= n);  ++k)
-  if(noadl::xmemeq(this->data() + k, s, n))
-    return k;
-return npos;
+        if(from > this->size())
+          return npos;
+
+        if(n == 0)
+          return from;
+
+        if(this->size() - from < n)
+          return npos;
+
+        size_type cur = from;
+        size_type offsets[256] = { };
+
+        for(auto sptr = s;  sptr != s + n - 1;  ++sptr)
+          offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(sptr - s + 1);
+
+        for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
+          // Check this substring. If it is not a match, propose a shift count
+          // according to the rightmost character.
+          if(noadl::xmemeq(this->data() + cur, s, n))
+            return cur;
+
+          cur += n - offsets[noadl::xchrtoint(this->data()[cur + n - 1]) & 0xFF];
+          if(cur > this->size() - n)
+            return npos;
+        }
       }
 
     constexpr
@@ -1365,7 +1386,6 @@ return npos;
     size_type
     rfind(size_type to, const value_type* s) const noexcept
       {
-// TODO
         return this->rfind(to, s, noadl::xstrlen(s));
       }
 
@@ -1380,13 +1400,30 @@ return npos;
     size_type
     rfind(size_type to, const value_type* s, size_type n) const noexcept
       {
-// TODO
-if(this->size() < n)
-  return npos;
-for(size_type k = noadl::min(to, this->size() - n);  k != npos;  --k)
-  if(noadl::xmemeq(this->data() + k, s, n))
-    return k;
-return npos;
+        if(this->size() < n)
+          return npos;
+
+        if(n == 0)
+          return noadl::min(to, this->size() - n);
+
+        size_type cur = noadl::min(to, this->size() - n);
+        size_type offsets[256] = { };
+
+        for(auto sptr = s + n - 1;  sptr != s;  --sptr)
+          offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(s + n - sptr);
+
+        for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
+          // Check this substring. If it is not a match, propose a shift count
+          // according to the leftmost character.
+          if(noadl::xmemeq(this->data() + cur, s, n))
+            return cur;
+
+          cur -= n - offsets[noadl::xchrtoint(this->data()[cur]) & 0xFF];
+          if(cur > -n)
+            return npos;
+        }
       }
 
     constexpr
