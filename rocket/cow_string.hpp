@@ -1262,7 +1262,40 @@ class basic_cow_string
     size_type
     find(size_type from, const value_type* s) const noexcept
       {
-        return this->find(from, s, noadl::xstrlen(s));
+        if(from > this->size())
+          return npos;
+
+        if(*s == 0)
+          return from;
+
+        size_type cur = from;
+        size_type n = 1;
+        size_type offsets[256] = { };
+
+        for(auto sptr = s;  sptr[1] != 0;  ++sptr) {
+          // Calculate the length of the pattern string, as well as the offset
+          // from each character to the end. The offset table will be used to
+          // propose a shift count when a mismatch is detected, according to
+          // the Bad Character Rule.
+          n ++;
+          offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(sptr - s + 1);
+        }
+
+        if(this->size() - from < n)
+          return npos;
+
+        for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
+          // Check this substring. If it is not a match, propose a shift count
+          // according to the rightmost character.
+          if(noadl::xmemeq(this->data() + cur, s, n))
+            return cur;
+
+          cur += n - offsets[noadl::xchrtoint(this->data()[cur + n - 1]) & 0xFF];
+          if(cur > this->size() - n)
+            return npos;
+        }
       }
 
     constexpr
@@ -1288,8 +1321,12 @@ class basic_cow_string
         size_type cur = from;
         size_type offsets[256] = { };
 
-        for(auto sptr = s;  sptr != s + n - 1;  ++sptr)
+        for(auto sptr = s;  sptr != s + n - 1;  ++sptr) {
+          // Calculate the offset from each character to the end. The offset
+          // table will be used to propose a shift count when a mismatch is
+          // detected, according to the Bad Character Rule.
           offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(sptr - s + 1);
+        }
 
         for(;;) {
           ROCKET_ASSERT(cur != npos);
@@ -1409,8 +1446,12 @@ class basic_cow_string
         size_type cur = noadl::min(to, this->size() - n);
         size_type offsets[256] = { };
 
-        for(auto sptr = s + n - 1;  sptr != s;  --sptr)
+        for(auto sptr = s + n - 1;  sptr != s;  --sptr) {
+          // Calculate the offset from each character to the beginning. The
+          // offset table will be used to propose a shift count when a mismatch
+          // is detected, according to the Bad Character Rule.
           offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(s + n - sptr);
+        }
 
         for(;;) {
           ROCKET_ASSERT(cur != npos);
