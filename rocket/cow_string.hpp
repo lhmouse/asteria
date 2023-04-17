@@ -1480,9 +1480,8 @@ return npos;
         for(auto sptr = s;  *sptr != 0;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1522,9 +1521,8 @@ return npos;
         for(auto sptr = s;  sptr != s + n;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1646,9 +1644,8 @@ return npos;
         for(auto sptr = s;  *sptr != 0;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1688,9 +1685,8 @@ return npos;
         for(auto sptr = s;  sptr != s + n;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1812,9 +1808,8 @@ return npos;
         for(auto sptr = s;  *sptr != 0;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1854,9 +1849,8 @@ return npos;
         for(auto sptr = s;  sptr != s + n;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1978,9 +1972,8 @@ return npos;
         for(auto sptr = s;  *sptr != 0;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
@@ -2020,9 +2013,8 @@ return npos;
         for(auto sptr = s;  sptr != s + n;  ++sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          int ch = noadl::xchrtoint(*sptr);
-          bitmap[ch & 0xFF] = true;
-          overflow |= ch >> 8;
+          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
+          overflow |= noadl::xchrtoint(*sptr) >> 8;
         }
 
         for(;;) {
