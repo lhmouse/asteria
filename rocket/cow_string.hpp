@@ -1441,7 +1441,7 @@ class basic_cow_string
           return npos;
 
         if(n == 0)
-          return noadl::min(to, this->size() - n);
+          return noadl::min(to, this->size());
 
         size_type cur = noadl::min(to, this->size() - n);
         size_type offsets[256] = { };
