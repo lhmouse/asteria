@@ -412,7 +412,7 @@ class static_vector
         // The storage can't be reallocated, so we may append all elements in place.
         size_type n = noadl::estimate_distance(first, last);
         this->m_sth.check_size_add(this->size(), n);
-        this->m_sth.append_unchecked(::std::move(first), ::std::move(last));
+        this->m_sth.append_n_unchecked(::std::move(first), ::std::move(last));
         return *this;
       }
 
