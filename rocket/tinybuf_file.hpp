@@ -106,8 +106,8 @@ class basic_tinybuf_file
     reset(file_type&& file) noexcept
       {
         this->m_file = ::std::move(file);
-        this->m_mbst_g = ::mbstate_t();
-        this->m_mbst_p = ::mbstate_t();
+        this->m_mbst_g = { };
+        this->m_mbst_p = { };
         return *this;
       }
 
@@ -115,8 +115,8 @@ class basic_tinybuf_file
     reset(handle_type fp, closer_type cl) noexcept
       {
         this->m_file.reset(fp, cl);
-        this->m_mbst_g = ::mbstate_t();
-        this->m_mbst_p = ::mbstate_t();
+        this->m_mbst_g = { };
+        this->m_mbst_p = { };
         return *this;
       }
 
@@ -129,8 +129,8 @@ class basic_tinybuf_file
     close() noexcept
       {
         this->m_file.reset();
-        this->m_mbst_g = ::mbstate_t();
-        this->m_mbst_p = ::mbstate_t();
+        this->m_mbst_g = { };
+        this->m_mbst_p = { };
         return *this;
       }
 
@@ -178,8 +178,8 @@ class basic_tinybuf_file
               ::fileno(this->m_file), errno);
 
         // FIXME: We need to report errors about corrupted shift states.
-        this->m_mbst_g = ::mbstate_t();
-        this->m_mbst_p = ::mbstate_t();
+        this->m_mbst_g = { };
+        this->m_mbst_p = { };
         return *this;
       }
 
@@ -298,8 +298,8 @@ open(const char* path, open_mode mode)
 
     // Set the file now.
     this->m_file = ::std::move(file);
-    this->m_mbst_g = ::mbstate_t();
-    this->m_mbst_p = ::mbstate_t();
+    this->m_mbst_g = { };
+    this->m_mbst_p = { };
     return *this;
   }
 

@@ -31,17 +31,23 @@ class locked_FILE
     locked_FILE(const locked_FILE&) = delete;
     locked_FILE& operator=(const locked_FILE&) = delete;
 
+  private:
+    void
+    do_throw_exception_if_io_error() const
+      {
+        if(::ferror_unlocked(this->m_file))
+          noadl::sprintf_and_throw<runtime_error>(
+              "basic_tinybuf_file: I/O error (fileno `%d`, errno `%d`)",
+              ::fileno_unlocked(this->m_file), errno);
+      }
+
   public:
     int
     getc()
       {
         int r = ::fgetc_unlocked(this->m_file);
-        if((r == EOF) && ::ferror_unlocked(this->m_file))
-          noadl::sprintf_and_throw<runtime_error>(
-              "basic_tinybuf_file: `fgetc_unlocked()` failed (fileno `%d`, errno `%d`)",
-              ::fileno_unlocked(this->m_file), errno);
-
-        // Normalize the result.
+        if(r == EOF)
+          this->do_throw_exception_if_io_error();
         return (r == EOF) ? -1 : r;
       }
 
@@ -50,9 +56,23 @@ class locked_FILE
       {
         int r = ::fputc_unlocked((unsigned char) c, this->m_file);
         if(r == EOF)
-          noadl::sprintf_and_throw<runtime_error>(
-              "basic_tinybuf_file: `fputc_unlocked()` failed (fileno `%d`, errno `%d`)",
-              ::fileno_unlocked(this->m_file), errno);
+          this->do_throw_exception_if_io_error();
+      }
+
+    void
+    putn(const char* s, size_t n)
+      {
+        size_t r = ::fwrite_unlocked(s, 1, n, this->m_file);
+        if(r != n)
+          this->do_throw_exception_if_io_error();
+      }
+
+    void
+    puts(const char* s)
+      {
+        int r = ::fputs_unlocked(s, this->m_file);
+        if(r == EOF)
+          this->do_throw_exception_if_io_error();
       }
   };
 
@@ -92,6 +112,12 @@ do_getn_common(xwcharT* ws, size_t n, locked_FILE& file, xmbrtowcT&& xmbrtowc, :
           wptr ++;
           break;
 
+        case 0:
+          // null character written; input byte consumed
+          more_input = 1;
+          wptr ++;
+          break;
+
         default:
           // multi-byte character written; input byte consumed
           more_input = 1;
@@ -122,10 +148,15 @@ do_putn_common(locked_FILE& file, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const
           wptr ++;
           break;
 
+        case 0:
+          // no character written; input incomplete but consumed
+          wptr ++;
+          break;
+
         default:
           // `mblen` bytes written; input consumed
-          noadl::for_range(mbcs, mbcs + (unsigned) mblen, [&](char* q) { file.putc(*q);  });
-          ntotal += (unsigned int) mblen;
+          file.putn(mbcs, (unsigned) mblen);
+          ntotal += (unsigned) mblen;
           wptr ++;
           break;
       }
@@ -182,12 +213,7 @@ tinybuf_file::
 putn(const char* s, size_t n)
   {
     locked_FILE file(this->m_file);
-    const char* sptr = s;
-    while(sptr != s + n) {
-      // Write bytes one by one. No conversion is performed.
-      file.putc(*sptr);
-      sptr ++;
-    }
+    file.putn(s, n);
     return *this;
   }
 
@@ -207,12 +233,7 @@ tinybuf_file::
 puts(const char* s)
   {
     locked_FILE file(this->m_file);
-    const char* sptr = s;
-    while(*sptr != 0) {
-      // Write bytes one by one. No conversion is performed.
-      file.putc(*sptr);
-      sptr ++;
-    }
+    file.puts(s);
     return *this;
   }
 
