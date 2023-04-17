@@ -1635,20 +1635,13 @@ class basic_cow_string
         if(from >= this->size())
           return npos;
 
-        size_type cur = from;
+        const value_type* ptr = noadl::xmemchr(this->data() + from, c, this->size() - from);
+        if(!ptr)
+          return npos;
 
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // Perform plain comparison, unlike `std::basic_string` which uses
-          // `std::char_traits`.
-          if(this->data()[cur] == c)
-            return cur;
-
-          cur ++;
-          if(cur == this->size())
-            return npos;
-        }
+        size_type cur = static_cast<size_type>(ptr - this->data());
+        ROCKET_ASSERT(cur != npos);
+        return cur;
       }
 
     constexpr
