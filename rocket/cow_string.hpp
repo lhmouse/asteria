@@ -1485,17 +1485,19 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`. The null
           // terminator is not part of the target string.
-          ROCKET_ASSERT(cur != npos);
           if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                && (this->data()[cur] != 0)
                && /* in bitmap && */ (!overflow || noadl::xstrchr(s, this->data()[cur])))
             return cur;
 
-          if(++cur == this->size())
+          cur ++;
+          if(cur == this->size())
             return npos;
         }
       }
@@ -1526,15 +1528,17 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
-          if(++cur == this->size())
+          cur ++;
+          if(cur == this->size())
             return npos;
         }
       }
@@ -1556,13 +1560,15 @@ return npos;
         size_type cur = from;
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(this->data()[cur] == c)
             return cur;
 
-          if(++cur == this->size())
+          cur ++;
+          if(cur == this->size())
             return npos;
         }
       }
@@ -1649,17 +1655,19 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`. The null
           // terminator is not part of the target string.
-          ROCKET_ASSERT(cur != npos);
           if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                && (this->data()[cur] != 0)
                && /* in bitmap && */ (!overflow || noadl::xstrchr(s, this->data()[cur])))
             return cur;
 
-          if(--cur == size_type(-1))
+          cur --;
+          if(cur == size_type(-1))
             return npos;
         }
       }
@@ -1690,15 +1698,17 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
-          if(--cur == size_type(-1))
+          cur --;
+          if(cur == size_type(-1))
             return npos;
         }
       }
@@ -1720,13 +1730,15 @@ return npos;
         size_type cur = noadl::min(to, this->size() - 1);
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(this->data()[cur] == c)
             return cur;
 
-          if(--cur == size_type(-1))
+          cur --;
+          if(cur == size_type(-1))
             return npos;
         }
       }
@@ -1813,17 +1825,19 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`. The null
           // terminator is not part of the target string.
-          ROCKET_ASSERT(cur != npos);
           if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                || (this->data()[cur] == 0)
                || (/* in bitmap && */ overflow && !noadl::xstrchr(s, this->data()[cur])))
             return cur;
 
-          if(++cur == this->size())
+          cur ++;
+          if(cur == this->size())
             return npos;
         }
       }
@@ -1854,15 +1868,17 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
-          if(++cur == this->size())
+          cur ++;
+          if(cur == this->size())
             return npos;
         }
       }
@@ -1884,13 +1900,15 @@ return npos;
         size_type cur = from;
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(this->data()[cur] != c)
             return cur;
 
-          if(++cur == this->size())
+          cur ++;
+          if(cur == this->size())
             return npos;
         }
       }
@@ -1977,17 +1995,19 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`. The null
           // terminator is not part of the target string.
-          ROCKET_ASSERT(cur != npos);
           if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                || (this->data()[cur] == 0)
                || (/* in bitmap && */ overflow && !noadl::xstrchr(s, this->data()[cur])))
             return cur;
 
-          if(--cur == size_type(-1))
+          cur --;
+          if(cur == size_type(-1))
             return npos;
         }
       }
@@ -2018,15 +2038,17 @@ return npos;
         }
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
-          if(--cur == size_type(-1))
+          cur --;
+          if(cur == size_type(-1))
             return npos;
         }
       }
@@ -2048,13 +2070,15 @@ return npos;
         size_type cur = noadl::min(to, this->size() - 1);
 
         for(;;) {
+          ROCKET_ASSERT(cur != npos);
+
           // Perform plain comparison, unlike `std::basic_string` which uses
           // `std::char_traits`.
-          ROCKET_ASSERT(cur != npos);
           if(this->data()[cur] != c)
             return cur;
 
-          if(--cur == size_type(-1))
+          cur --;
+          if(cur == size_type(-1))
             return npos;
         }
       }
