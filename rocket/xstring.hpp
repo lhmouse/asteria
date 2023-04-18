@@ -8,14 +8,14 @@
 namespace rocket {
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 int
 xchrtoint(charT c) noexcept
   {
     return static_cast<int>(c);
   }
 
-constexpr
+ROCKET_PURE constexpr
 int
 xchrtoint(char c) noexcept
   {
@@ -25,7 +25,7 @@ xchrtoint(char c) noexcept
 #include "details/xstring.ipp"
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 size_t
 xstrlen(charT* str) noexcept
   {
@@ -42,7 +42,7 @@ xstrlen(charT* str) noexcept
   }
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 charT*
 xstrchr(charT* str, typename identity<charT>::type target) noexcept
   {
@@ -63,7 +63,7 @@ xstrchr(charT* str, typename identity<charT>::type target) noexcept
   }
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 charT*
 xmemchr(charT* str, typename identity<charT>::type target, size_t len) noexcept
   {
@@ -84,7 +84,7 @@ xmemchr(charT* str, typename identity<charT>::type target, size_t len) noexcept
   }
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 int
 xstrcmp(const charT* lhs, const charT* rhs) noexcept
   {
@@ -105,7 +105,7 @@ xstrcmp(const charT* lhs, const charT* rhs) noexcept
   }
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 bool
 xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
@@ -126,7 +126,7 @@ xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
   }
 
 template<typename charT>
-constexpr
+ROCKET_PURE constexpr
 int
 xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
@@ -168,7 +168,8 @@ constexpr
 charT*
 xmemrpset(charT*& out, typename identity<charT>::type elem, size_t len) noexcept
   {
-    return out = noadl::xmempset(out, elem, len);
+    out = noadl::xmempset(out, elem, len);
+    return out;
   }
 
 template<typename charT>
@@ -193,7 +194,8 @@ constexpr
 charT*
 xstrrpcpy(charT*& out, const typename identity<charT>::type* str) noexcept
   {
-    return out = noadl::xstrpcpy(out, str);
+    out = noadl::xstrpcpy(out, str);
+    return out;
   }
 
 template<typename charT>
@@ -218,7 +220,8 @@ constexpr
 charT*
 xmemrpcpy(charT*& out, const typename identity<charT>::type* str, size_t len) noexcept
   {
-    return out = noadl::xmempcpy(out, str, len);
+    out = noadl::xmempcpy(out, str, len);
+    return out;
   }
 
 }  // namespace rocket

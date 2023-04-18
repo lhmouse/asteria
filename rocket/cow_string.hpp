@@ -1262,40 +1262,7 @@ class basic_cow_string
     size_type
     find(size_type from, const value_type* s) const noexcept
       {
-        if(from > this->size())
-          return npos;
-
-        if(*s == 0)
-          return from;
-
-        size_type cur = from;
-        size_type n = 1;
-        size_type offsets[256] = { };
-
-        for(auto sptr = s;  sptr[1] != 0;  ++sptr) {
-          // Calculate the length of the pattern string, as well as the offset
-          // from each character to the end. The offset table will be used to
-          // propose a shift count when a mismatch is detected, according to
-          // the Bad Character Rule.
-          n ++;
-          offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(sptr - s + 1);
-        }
-
-        if(this->size() - from < n)
-          return npos;
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // Check this substring. If it is not a match, propose a shift count
-          // according to the rightmost character.
-          if(noadl::xmemeq(this->data() + cur, s, n))
-            return cur;
-
-          cur += n - offsets[noadl::xchrtoint(this->data()[cur + n - 1]) & 0xFF];
-          if(cur > this->size() - n)
-            return npos;
-        }
+        return this->find(from, s, noadl::xstrlen(s));
       }
 
     constexpr
@@ -1321,7 +1288,7 @@ class basic_cow_string
         size_type cur = from;
         size_type offsets[256] = { };
 
-        for(auto sptr = s;  sptr != s + n - 1;  ++sptr) {
+        for(auto sptr = s;  sptr != s + n - 1;  ++ sptr) {
           // Calculate the offset from each character to the end. The offset
           // table will be used to propose a shift count when a mismatch is
           // detected, according to the Bad Character Rule.
@@ -1329,14 +1296,14 @@ class basic_cow_string
         }
 
         for(;;) {
+          // Compare this substring. If it is not a match, propose a shift count
+          // according to its rightmost character.
           ROCKET_ASSERT(cur != npos);
-
-          // Check this substring. If it is not a match, propose a shift count
-          // according to the rightmost character.
           if(noadl::xmemeq(this->data() + cur, s, n))
             return cur;
 
-          cur += n - offsets[noadl::xchrtoint(this->data()[cur + n - 1]) & 0xFF];
+          size_type off = offsets[noadl::xchrtoint(this->data()[cur + n - 1]) & 0xFF];
+          cur += n - off;
           if(cur > this->size() - n)
             return npos;
         }
@@ -1446,7 +1413,7 @@ class basic_cow_string
         size_type cur = noadl::min(to, this->size() - n);
         size_type offsets[256] = { };
 
-        for(auto sptr = s + n - 1;  sptr != s;  --sptr) {
+        for(auto sptr = s + n - 1;  sptr != s;  -- sptr) {
           // Calculate the offset from each character to the beginning. The
           // offset table will be used to propose a shift count when a mismatch
           // is detected, according to the Bad Character Rule.
@@ -1454,15 +1421,15 @@ class basic_cow_string
         }
 
         for(;;) {
+          // Compare this substring. If it is not a match, propose a shift count
+          // according to its leftmost character.
           ROCKET_ASSERT(cur != npos);
-
-          // Check this substring. If it is not a match, propose a shift count
-          // according to the leftmost character.
           if(noadl::xmemeq(this->data() + cur, s, n))
             return cur;
 
-          cur -= n - offsets[noadl::xchrtoint(this->data()[cur]) & 0xFF];
-          if(cur > -n)
+          size_type off = offsets[noadl::xchrtoint(this->data()[cur]) & 0xFF];
+          cur -= n - off;
+          if(cur > size_type(-1) - n)
             return npos;
         }
       }
@@ -1548,36 +1515,7 @@ class basic_cow_string
     size_type
     find_of(size_type from, const value_type* s) const noexcept
       {
-        if(from >= this->size())
-          return npos;
-
-        size_type cur = from;
-        bool bitmap[256] = { };
-        int overflow = 0;
-
-        for(auto sptr = s;  *sptr != 0;  ++sptr) {
-          // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
-          // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
-        }
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // If `bitmap` doesn't contain this character, then it cannot be a match.
-          // Otherwise, check whether this is really a match using plain comparison,
-          // unlike `std::basic_string` which uses `std::char_traits`. The null
-          // terminator is not part of the target string.
-          if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
-               && (this->data()[cur] != 0)
-               && /* in bitmap && */ (!overflow || noadl::xstrchr(s, this->data()[cur])))
-            return cur;
-
-          cur ++;
-          if(cur == this->size())
-            return npos;
-        }
+        return this->find_of(from, s, noadl::xstrlen(s));
       }
 
     constexpr
@@ -1598,7 +1536,7 @@ class basic_cow_string
         bool bitmap[256] = { };
         int overflow = 0;
 
-        for(auto sptr = s;  sptr != s + n;  ++sptr) {
+        for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
@@ -1606,17 +1544,16 @@ class basic_cow_string
         }
 
         for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(cur != npos);
           if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
           cur ++;
-          if(cur == this->size())
+          if(cur >= this->size())
             return npos;
         }
       }
@@ -1711,36 +1648,7 @@ class basic_cow_string
     size_type
     rfind_of(size_type to, const value_type* s) const noexcept
       {
-        if(this->empty())
-          return npos;
-
-        size_type cur = noadl::min(to, this->size() - 1);
-        bool bitmap[256] = { };
-        int overflow = 0;
-
-        for(auto sptr = s;  *sptr != 0;  ++sptr) {
-          // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
-          // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
-        }
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // If `bitmap` doesn't contain this character, then it cannot be a match.
-          // Otherwise, check whether this is really a match using plain comparison,
-          // unlike `std::basic_string` which uses `std::char_traits`. The null
-          // terminator is not part of the target string.
-          if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
-               && (this->data()[cur] != 0)
-               && /* in bitmap && */ (!overflow || noadl::xstrchr(s, this->data()[cur])))
-            return cur;
-
-          cur --;
-          if(cur == size_type(-1))
-            return npos;
-        }
+        return this->rfind_of(to, s, noadl::xstrlen(s));
       }
 
     constexpr
@@ -1761,7 +1669,7 @@ class basic_cow_string
         bool bitmap[256] = { };
         int overflow = 0;
 
-        for(auto sptr = s;  sptr != s + n;  ++sptr) {
+        for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
@@ -1769,17 +1677,16 @@ class basic_cow_string
         }
 
         for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(cur != npos);
           if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
           cur --;
-          if(cur == size_type(-1))
+          if(cur >= size_type(-1))
             return npos;
         }
       }
@@ -1798,20 +1705,11 @@ class basic_cow_string
         if(this->empty())
           return npos;
 
-        size_type cur = noadl::min(to, this->size() - 1);
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // Perform plain comparison, unlike `std::basic_string` which uses
-          // `std::char_traits`.
+        for(size_type cur = noadl::min(to, this->size() - 1);  cur != size_type(-1);  -- cur)
           if(this->data()[cur] == c)
             return cur;
 
-          cur --;
-          if(cur == size_type(-1))
-            return npos;
-        }
+        return npos;
       }
 
     constexpr
@@ -1881,36 +1779,7 @@ class basic_cow_string
     size_type
     find_not_of(size_type from, const value_type* s) const noexcept
       {
-        if(from >= this->size())
-          return npos;
-
-        size_type cur = from;
-        bool bitmap[256] = { };
-        int overflow = 0;
-
-        for(auto sptr = s;  *sptr != 0;  ++sptr) {
-          // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
-          // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
-        }
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // If `bitmap` doesn't contain this character, then it cannot be a match.
-          // Otherwise, check whether this is really a match using plain comparison,
-          // unlike `std::basic_string` which uses `std::char_traits`. The null
-          // terminator is not part of the target string.
-          if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
-               || (this->data()[cur] == 0)
-               || (/* in bitmap && */ overflow && !noadl::xstrchr(s, this->data()[cur])))
-            return cur;
-
-          cur ++;
-          if(cur == this->size())
-            return npos;
-        }
+        return this->find_not_of(from, s, noadl::xstrlen(s));
       }
 
     constexpr
@@ -1931,7 +1800,7 @@ class basic_cow_string
         bool bitmap[256] = { };
         int overflow = 0;
 
-        for(auto sptr = s;  sptr != s + n;  ++sptr) {
+        for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
@@ -1939,17 +1808,16 @@ class basic_cow_string
         }
 
         for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(cur != npos);
           if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
           cur ++;
-          if(cur == this->size())
+          if(cur >= this->size())
             return npos;
         }
       }
@@ -1965,23 +1833,14 @@ class basic_cow_string
     size_type
     find_not_of(size_type from, value_type c) const noexcept
       {
-        if(from >= this->size())
+        if(this->empty())
           return npos;
 
-        size_type cur = from;
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // Perform plain comparison, unlike `std::basic_string` which uses
-          // `std::char_traits`.
-          if(this->data()[cur] != c)
+        for(size_type cur = from;  cur < this->size();  ++ cur)
+          if(this->data()[cur] == c)
             return cur;
 
-          cur ++;
-          if(cur == this->size())
-            return npos;
-        }
+        return npos;
       }
 
     constexpr
@@ -2051,36 +1910,7 @@ class basic_cow_string
     size_type
     rfind_not_of(size_type to, const value_type* s) const noexcept
       {
-        if(this->empty())
-          return npos;
-
-        size_type cur = noadl::min(to, this->size() - 1);
-        bool bitmap[256] = { };
-        int overflow = 0;
-
-        for(auto sptr = s;  *sptr != 0;  ++sptr) {
-          // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
-          // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
-        }
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // If `bitmap` doesn't contain this character, then it cannot be a match.
-          // Otherwise, check whether this is really a match using plain comparison,
-          // unlike `std::basic_string` which uses `std::char_traits`. The null
-          // terminator is not part of the target string.
-          if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
-               || (this->data()[cur] == 0)
-               || (/* in bitmap && */ overflow && !noadl::xstrchr(s, this->data()[cur])))
-            return cur;
-
-          cur --;
-          if(cur == size_type(-1))
-            return npos;
-        }
+        return this->rfind_not_of(to, s, noadl::xstrlen(s));
       }
 
     constexpr
@@ -2101,7 +1931,7 @@ class basic_cow_string
         bool bitmap[256] = { };
         int overflow = 0;
 
-        for(auto sptr = s;  sptr != s + n;  ++sptr) {
+        for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
           bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
@@ -2109,17 +1939,16 @@ class basic_cow_string
         }
 
         for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
           // If `bitmap` doesn't contain this character, then it cannot be a match.
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
+          ROCKET_ASSERT(cur != npos);
           if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
                || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
           cur --;
-          if(cur == size_type(-1))
+          if(cur >= size_type(-1))
             return npos;
         }
       }
@@ -2138,20 +1967,11 @@ class basic_cow_string
         if(this->empty())
           return npos;
 
-        size_type cur = noadl::min(to, this->size() - 1);
-
-        for(;;) {
-          ROCKET_ASSERT(cur != npos);
-
-          // Perform plain comparison, unlike `std::basic_string` which uses
-          // `std::char_traits`.
+        for(size_type cur = noadl::min(to, this->size() - 1);  cur != size_type(-1);  -- cur)
           if(this->data()[cur] != c)
             return cur;
 
-          cur --;
-          if(cur == size_type(-1))
-            return npos;
-        }
+        return npos;
       }
 
     constexpr
