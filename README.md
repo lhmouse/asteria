@@ -8,11 +8,10 @@
 |[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |Standard I/O not in **UTF-32**.  |
 |[**LGTM**](https://lgtm.com/projects/g/lhmouse/asteria) | | |[![Alerts](https://img.shields.io/lgtm/alerts/github/lhmouse/asteria.svg)](https://lgtm.com/projects/g/lhmouse/asteria/alerts/)  | |
 
-|Compiler    |Category                   |Remarks          |
-|:-----------|:--------------------------|:----------------|
-|**GCC 6+**  |:1st_place_medal:Primary   |10.3 has an internal compiler error about `constexpr`.  |
-|**Clang 7+** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
-|**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.   |
+|Compiler     |Category                   |Remarks          |
+|:------------|:--------------------------|:----------------|
+|**GCC 9**    |:1st_place_medal:Primary   |                 |
+|**Clang 11** |:2nd_place_medal:Secondary |A number of meaningless warnings.  |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/asteria/master/GNU-nano-FTW.png)
 
