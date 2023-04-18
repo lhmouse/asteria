@@ -383,7 +383,7 @@ class storage_handle
         ebo_select<eqT, allocT, hashT>(eq)
       { }
 
-#if __cpp_constexpr >= 202207
+#ifdef __cpp_constexpr_dynamic_alloc
     constexpr
 #endif
     ~storage_handle()
@@ -393,7 +393,7 @@ class storage_handle
     storage_handle& operator=(const storage_handle&) = delete;
 
   private:
-#if __cpp_constexpr >= 202207
+#ifdef __cpp_constexpr_dynamic_alloc
     constexpr
 #endif
     void

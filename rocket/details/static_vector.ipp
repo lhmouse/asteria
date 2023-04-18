@@ -66,7 +66,7 @@ class storage_handle
 #endif
       }
 
-#if __cpp_constexpr >= 202207
+#ifdef __cpp_constexpr_dynamic_alloc
     constexpr
 #endif
     ~storage_handle()
