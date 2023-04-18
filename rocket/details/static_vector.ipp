@@ -80,9 +80,7 @@ class storage_handle
       }
 
     storage_handle(const storage_handle&) = delete;
-
-    storage_handle&
-    operator=(const storage_handle&) = delete;
+    storage_handle& operator=(const storage_handle&) = delete;
 
   public:
     constexpr

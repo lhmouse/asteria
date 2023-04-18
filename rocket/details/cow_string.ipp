@@ -99,11 +99,10 @@ class storage_handle
       { this->deallocate();  }
 
     storage_handle(const storage_handle&) = delete;
-
-    storage_handle&
-    operator=(const storage_handle&) = delete;
+    storage_handle& operator=(const storage_handle&) = delete;
 
   private:
+    constexpr
     void
     do_reset(storage_pointer qstor_new) noexcept
       {
@@ -252,10 +251,12 @@ class storage_handle
         return qstor->data;
       }
 
+    constexpr
     void
     deallocate() noexcept
       { this->do_reset(nullptr);  }
 
+    constexpr
     void
     share_with(const storage_handle& other) noexcept
       {
@@ -265,6 +266,7 @@ class storage_handle
         this->do_reset(qstor);
       }
 
+    constexpr
     void
     exchange_with(storage_handle& other) noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }
