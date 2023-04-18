@@ -59,13 +59,10 @@ class basic_bucket
     pointer m_qval = nullptr;
 
   public:
-    constexpr
-    basic_bucket() noexcept = default;
+    constexpr basic_bucket() noexcept = default;
 
     basic_bucket(const basic_bucket&) = delete;
-
-    basic_bucket&
-    operator=(const basic_bucket&) = delete;
+    basic_bucket& operator=(const basic_bucket&) = delete;
 
   public:
     constexpr

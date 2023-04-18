@@ -35,9 +35,7 @@ class string_storage
       { }
 
     string_storage(const string_storage&) = delete;
-
-    string_storage&
-    operator=(const string_storage&) = delete;
+    string_storage& operator=(const string_storage&) = delete;
 
   public:
     constexpr
