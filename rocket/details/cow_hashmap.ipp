@@ -383,14 +383,19 @@ class storage_handle
         ebo_select<eqT, allocT, hashT>(eq)
       { }
 
+#if __cpp_constexpr >= 202207
+    constexpr
+#endif
     ~storage_handle()
-      { this->deallocate();  }
+      { this->do_reset(nullptr);  }
 
     storage_handle(const storage_handle&) = delete;
     storage_handle& operator=(const storage_handle&) = delete;
 
   private:
+#if __cpp_constexpr >= 202207
     constexpr
+#endif
     void
     do_reset(storage_pointer qstor_new) noexcept
       {
@@ -711,12 +716,10 @@ class storage_handle
           storage_traits<allocator_type, storage>::dispatch_transfer(*qstor, *(sth.m_qstor));
       }
 
-    constexpr
     void
     deallocate() noexcept
       { this->do_reset(nullptr);  }
 
-    constexpr
     void
     share_with(const storage_handle& other) noexcept
       {
@@ -726,7 +729,6 @@ class storage_handle
         this->do_reset(qstor);
       }
 
-    constexpr
     void
     exchange_with(storage_handle& other) noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }

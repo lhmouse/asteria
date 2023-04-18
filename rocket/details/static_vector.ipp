@@ -66,6 +66,9 @@ class storage_handle
 #endif
       }
 
+#if __cpp_constexpr >= 202207
+    constexpr
+#endif
     ~storage_handle()
       {
         // Destroy all elements backwards.
