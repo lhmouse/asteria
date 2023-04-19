@@ -2893,6 +2893,7 @@ using cow_u16string  = basic_cow_string<char16_t>;
 using cow_u32string  = basic_cow_string<char32_t>;
 
 #ifndef ROCKET_COW_STRING_NO_EXTERN_TEMPLATE_
+
 extern template class basic_shallow_string<char>;
 extern template class basic_shallow_string<wchar_t>;
 extern template class basic_shallow_string<char16_t>;
@@ -2902,6 +2903,7 @@ extern template class basic_cow_string<char>;
 extern template class basic_cow_string<wchar_t>;
 extern template class basic_cow_string<char16_t>;
 extern template class basic_cow_string<char32_t>;
+
 #endif  // ROCKET_COW_STRING_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket

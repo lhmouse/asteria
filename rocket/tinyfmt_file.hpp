@@ -131,10 +131,12 @@ using u16tinyfmt_file  = basic_tinyfmt_file<char16_t>;
 using u32tinyfmt_file  = basic_tinyfmt_file<char32_t>;
 
 #ifndef ROCKET_TINYFMT_FILE_NO_EXTERN_TEMPLATE_
+
 extern template class basic_tinyfmt_file<char>;
 extern template class basic_tinyfmt_file<wchar_t>;
 extern template class basic_tinyfmt_file<char16_t>;
 extern template class basic_tinyfmt_file<char32_t>;
+
 #endif  // ROCKET_TINYFMT_FILE_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket

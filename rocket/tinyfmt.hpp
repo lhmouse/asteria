@@ -334,6 +334,7 @@ using u16tinyfmt  = basic_tinyfmt<char16_t>;
 using u32tinyfmt  = basic_tinyfmt<char32_t>;
 
 #ifndef ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_
+
 extern template class basic_tinyfmt<char>;
 extern template class basic_tinyfmt<wchar_t>;
 extern template class basic_tinyfmt<char16_t>;
@@ -515,6 +516,7 @@ extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<doub
 extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
+
 #endif  // ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket

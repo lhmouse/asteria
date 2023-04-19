@@ -156,10 +156,12 @@ using u16formatter  = basic_formatter<char16_t>;
 using u32formatter  = basic_formatter<char32_t>;
 
 #ifndef ROCKET_FORMAT_NO_EXTERN_TEMPLATE_
+
 extern template tinyfmt& vformat(tinyfmt&, const char*, const formatter*, size_t);
 extern template wtinyfmt& vformat(wtinyfmt&, const wchar_t*, const wformatter*, size_t);
 extern template u16tinyfmt& vformat(u16tinyfmt&, const char16_t*, const u16formatter*, size_t);
 extern template u32tinyfmt& vformat(u32tinyfmt&, const char32_t*, const u32formatter*, size_t);
+
 #endif  // ROCKET_FORMAT_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
