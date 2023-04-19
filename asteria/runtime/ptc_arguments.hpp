@@ -34,7 +34,7 @@ class PTC_Arguments final
       { }
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(PTC_Arguments);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(PTC_Arguments);
 
     const Source_Location&
     sloc() const noexcept

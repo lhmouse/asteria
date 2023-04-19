@@ -84,7 +84,7 @@ struct Handler_exit final
 
     [[noreturn]]
     void
-    handle(cow_vector<cow_string>&& args)
+    handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
           exit_printf(exit_success, "* have a nice day :)");

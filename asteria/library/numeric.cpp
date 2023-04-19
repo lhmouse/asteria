@@ -73,16 +73,9 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
 
 inline
 void
-bswap_be(int8_t& value) noexcept
+bswap_nop(int8_t& value) noexcept
   {
-    (void)value;
-  }
-
-inline
-void
-bswap_le(int8_t& value) noexcept
-  {
-    (void)value;
+    (void) value;
   }
 
 inline
@@ -731,19 +724,19 @@ std_numeric_parse(V_string text)
 V_string
 std_numeric_pack_i8(V_integer value)
   {
-    return do_pack<int8_t, V_integer>(bswap_be, value);
+    return do_pack<int8_t, V_integer>(bswap_nop, value);
   }
 
 V_string
 std_numeric_pack_i8(V_array values)
   {
-    return do_pack<int8_t, V_integer>(bswap_be, &Value::as_integer, values);
+    return do_pack<int8_t, V_integer>(bswap_nop, &Value::as_integer, values);
   }
 
 V_array
 std_numeric_unpack_i8(V_string text)
   {
-    return do_unpack<int8_t, V_integer>(bswap_be, text);
+    return do_unpack<int8_t, V_integer>(bswap_nop, text);
   }
 
 V_string
