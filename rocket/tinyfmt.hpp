@@ -127,16 +127,6 @@ basic_tinyfmt<charT>::
   {
   }
 
-using tinyfmt     = basic_tinyfmt<char>;
-using wtinyfmt    = basic_tinyfmt<wchar_t>;
-using u16tinyfmt  = basic_tinyfmt<char16_t>;
-using u32tinyfmt  = basic_tinyfmt<char32_t>;
-
-extern template class basic_tinyfmt<char>;
-extern template class basic_tinyfmt<wchar_t>;
-extern template class basic_tinyfmt<char16_t>;
-extern template class basic_tinyfmt<char32_t>;
-
 // specialized stream inserters
 template<typename charT>
 inline
@@ -338,6 +328,17 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " week");
   }
 
+using tinyfmt     = basic_tinyfmt<char>;
+using wtinyfmt    = basic_tinyfmt<wchar_t>;
+using u16tinyfmt  = basic_tinyfmt<char16_t>;
+using u32tinyfmt  = basic_tinyfmt<char32_t>;
+
+#ifndef ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_
+extern template class basic_tinyfmt<char>;
+extern template class basic_tinyfmt<wchar_t>;
+extern template class basic_tinyfmt<char16_t>;
+extern template class basic_tinyfmt<char32_t>;
+
 extern template tinyfmt& operator<<(tinyfmt&, char);
 extern template wtinyfmt& operator<<(wtinyfmt&, wchar_t);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, char16_t);
@@ -514,6 +515,7 @@ extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<doub
 extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
+#endif  // ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

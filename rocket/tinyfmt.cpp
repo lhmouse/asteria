@@ -1,10 +1,14 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
+#define ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_ 1
 #include "tinyfmt.hpp"
 #include "static_vector.hpp"
 #include <limits.h>  // MB_LEN_MAX
 #include <wchar.h>
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 #ifdef HAVE_UCHAR_H
 #  include <uchar.h>
 #endif
@@ -63,11 +67,6 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
   }
 
 }  // namespace
-
-template class basic_tinyfmt<char>;
-template class basic_tinyfmt<wchar_t>;
-template class basic_tinyfmt<char16_t>;
-template class basic_tinyfmt<char32_t>;
 
 template<>
 tinyfmt&
@@ -156,6 +155,11 @@ putmbs(const char* s)
     noadl::sprintf_and_throw<domain_error>("u32tinyfmt: UTF-32 functions not available");
 #endif
   }
+
+template class basic_tinyfmt<char>;
+template class basic_tinyfmt<wchar_t>;
+template class basic_tinyfmt<char16_t>;
+template class basic_tinyfmt<char32_t>;
 
 template tinyfmt& operator<<(tinyfmt&, char);
 template wtinyfmt& operator<<(wtinyfmt&, wchar_t);

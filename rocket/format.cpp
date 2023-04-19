@@ -1,6 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
+#define ROCKET_FORMAT_NO_EXTERN_TEMPLATE_  1
 #include "format.hpp"
 namespace rocket {
 

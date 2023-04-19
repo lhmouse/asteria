@@ -1,9 +1,13 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
+#define ROCKET_TINYBUF_FILE_NO_EXTERN_TEMPLATE_ 1
 #include "tinybuf_file.hpp"
 #include <limits.h>  // MB_LEN_MAX
 #include <wchar.h>
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 #ifdef HAVE_UCHAR_H
 #  include <uchar.h>
 #endif
@@ -165,11 +169,6 @@ do_putn_common(locked_FILE& file, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const
   }
 
 }  // namespace
-
-template class basic_tinybuf_file<char>;
-template class basic_tinybuf_file<wchar_t>;
-template class basic_tinybuf_file<char16_t>;
-template class basic_tinybuf_file<char32_t>;
 
 template<>
 size_t
@@ -429,5 +428,10 @@ puts(const char32_t* s)
     noadl::sprintf_and_throw<domain_error>("u32tinybuf_file: UTF-32 functions not available");
 #endif
   }
+
+template class basic_tinybuf_file<char>;
+template class basic_tinybuf_file<wchar_t>;
+template class basic_tinybuf_file<char16_t>;
+template class basic_tinybuf_file<char32_t>;
 
 }  // namespace rocket

@@ -82,7 +82,3 @@ lib_librocket_la_SOURCES =  \
 
 lib_librocket_la_CXXFLAGS = ${AM_CXXFLAGS}
 lib_librocket_la_LDFLAGS =
-
-if enable_pch
-lib_librocket_la_CXXFLAGS += -include %reldir%/../asteria/precompiled.xipp
-endif

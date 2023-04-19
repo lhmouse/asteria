@@ -99,16 +99,6 @@ sref(const charT* ptr) noexcept
     return basic_shallow_string<charT>(ptr);
   }
 
-extern template class basic_shallow_string<char>;
-extern template class basic_shallow_string<wchar_t>;
-extern template class basic_shallow_string<char16_t>;
-extern template class basic_shallow_string<char32_t>;
-
-using shallow_string     = basic_shallow_string<char>;
-using shallow_wstring    = basic_shallow_string<wchar_t>;
-using shallow_u16string  = basic_shallow_string<char16_t>;
-using shallow_u32string  = basic_shallow_string<char32_t>;
-
 template<typename charT, typename allocT>
 class basic_cow_string
   {
@@ -2892,15 +2882,27 @@ getline(basic_cow_string<charT, allocT>& str, basic_tinybuf<charT>& buf)
         str.push_back(static_cast<charT>(ch));
   }
 
-extern template class basic_cow_string<char>;
-extern template class basic_cow_string<wchar_t>;
-extern template class basic_cow_string<char16_t>;
-extern template class basic_cow_string<char32_t>;
+using shallow_string     = basic_shallow_string<char>;
+using shallow_wstring    = basic_shallow_string<wchar_t>;
+using shallow_u16string  = basic_shallow_string<char16_t>;
+using shallow_u32string  = basic_shallow_string<char32_t>;
 
 using cow_string     = basic_cow_string<char>;
 using cow_wstring    = basic_cow_string<wchar_t>;
 using cow_u16string  = basic_cow_string<char16_t>;
 using cow_u32string  = basic_cow_string<char32_t>;
+
+#ifndef ROCKET_COW_STRING_NO_EXTERN_TEMPLATE_
+extern template class basic_shallow_string<char>;
+extern template class basic_shallow_string<wchar_t>;
+extern template class basic_shallow_string<char16_t>;
+extern template class basic_shallow_string<char32_t>;
+
+extern template class basic_cow_string<char>;
+extern template class basic_cow_string<wchar_t>;
+extern template class basic_cow_string<char16_t>;
+extern template class basic_cow_string<char32_t>;
+#endif  // ROCKET_COW_STRING_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

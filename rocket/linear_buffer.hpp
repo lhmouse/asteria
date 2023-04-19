@@ -360,15 +360,17 @@ swap(basic_linear_buffer<charT, allocT>& lhs, basic_linear_buffer<charT, allocT>
     lhs.swap(rhs);
   }
 
-extern template class basic_linear_buffer<char>;
-extern template class basic_linear_buffer<wchar_t>;
-extern template class basic_linear_buffer<char16_t>;
-extern template class basic_linear_buffer<char32_t>;
-
 using linear_buffer      = basic_linear_buffer<char>;
 using linear_wbuffer     = basic_linear_buffer<wchar_t>;
 using linear_u16buffer   = basic_linear_buffer<char16_t>;
 using linear_u32wbuffer  = basic_linear_buffer<char32_t>;
+
+#ifndef ROCKET_LINEAR_BUFFER_NO_EXTERN_TEMPLATE_
+extern template class basic_linear_buffer<char>;
+extern template class basic_linear_buffer<wchar_t>;
+extern template class basic_linear_buffer<char16_t>;
+extern template class basic_linear_buffer<char32_t>;
+#endif  // ROCKET_LINEAR_BUFFER_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif
