@@ -1827,7 +1827,7 @@ class basic_cow_string
           return npos;
 
         for(size_type cur = from;  cur < this->size();  ++ cur)
-          if(this->data()[cur] == c)
+          if(this->data()[cur] != c)
             return cur;
 
         return npos;
