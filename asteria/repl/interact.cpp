@@ -33,7 +33,7 @@ read_execute_print_single()
 
     while(!!(linebuf = editline_gets(&linelen))) {
       // Append this line.
-      repl_source.append(linebuf, (unsigned)linelen);
+      repl_source.append(linebuf, (size_t)(unsigned) linelen);
 
       // `linebuf` has a trailing line feed if it is not the last line.
       // Remove it for simplicity.
