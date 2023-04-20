@@ -240,14 +240,12 @@ std_filesystem_get_properties(V_string path)
 
     stat.try_emplace(sref("time_accessed"),
       V_integer(
-        int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000
-                                      // timestamp of creation
+        int64_t(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000 // timestamp of creation
       ));
 
     stat.try_emplace(sref("time_modified"),
       V_integer(
-        int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000
-                                      // timestamp of last modification
+        int64_t(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
       ));
 
     return stat;
