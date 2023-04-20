@@ -2325,6 +2325,15 @@ struct basic_cow_string<charT, allocT>::hash
 
 template<typename charT, typename allocT>
 inline
+void
+swap(basic_cow_string<charT, allocT>& lhs, basic_cow_string<charT, allocT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
+  {
+    lhs.swap(rhs);
+  }
+
+template<typename charT, typename allocT>
+inline
 basic_cow_string<charT, allocT>
 operator+(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs)
   {
@@ -2847,15 +2856,6 @@ bool
 operator>=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   {
     return rhs.compare(lhs) <= 0;
-  }
-
-template<typename charT, typename allocT>
-inline
-void
-swap(basic_cow_string<charT, allocT>& lhs, basic_cow_string<charT, allocT>& rhs)
-  noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
   }
 
 template<typename charT, typename allocT>
