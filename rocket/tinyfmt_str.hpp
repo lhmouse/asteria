@@ -127,14 +127,10 @@ using wtinyfmt_str    = basic_tinyfmt_str<wchar_t>;
 using u16tinyfmt_str  = basic_tinyfmt_str<char16_t>;
 using u32tinyfmt_str  = basic_tinyfmt_str<char32_t>;
 
-#ifndef ROCKET_TINYFMT_STR_NO_EXTERN_TEMPLATE_
-
 extern template class basic_tinyfmt_str<char>;
 extern template class basic_tinyfmt_str<wchar_t>;
 extern template class basic_tinyfmt_str<char16_t>;
 extern template class basic_tinyfmt_str<char32_t>;
-
-#endif  // ROCKET_TINYFMT_STR_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

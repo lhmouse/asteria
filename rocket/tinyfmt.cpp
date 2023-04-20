@@ -1,7 +1,6 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#define ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_ 1
 #include "tinyfmt.hpp"
 #include "static_vector.hpp"
 #include <limits.h>  // MB_LEN_MAX
@@ -17,15 +16,15 @@ namespace {
 
 template<typename xwcharT, typename xmbrtowcT>
 void
-do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* s, size_t n)
+do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* s)
   {
     ::mbstate_t mbst = { };
     static_vector<xwcharT, 128> wtemp;
     const char* sptr = s;
-    while(sptr != s + n) {
+    while(*sptr != 0) {
       // Decode one multi-byte character.
       xwcharT wc;
-      int mblen = (int) xmbrtowc(&wc, sptr, (size_t) (s + n - sptr), &mbst);
+      int mblen = (int) xmbrtowc(&wc, sptr, MB_LEN_MAX, &mbst);
 
       switch(mblen) {
         case -3:
@@ -68,89 +67,30 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
 
 }  // namespace
 
-template<>
-tinyfmt&
-tinyfmt::
-putmbn(const char* s, size_t n)
+basic_tinyfmt<wchar_t>&
+operator<<(basic_tinyfmt<wchar_t>& fmt, const char* s)
   {
-    this->do_get_tinybuf_nonconst().putn(s, n);
-    return *this;
+    do_putmbn_common(fmt.mut_buf(), ::mbrtowc, s);
+    return fmt;
   }
 
-template<>
-tinyfmt&
-tinyfmt::
-putmbs(const char* s)
-  {
-    this->do_get_tinybuf_nonconst().puts(s);
-    return *this;
-  }
-
-template<>
-wtinyfmt&
-wtinyfmt::
-putmbn(const char* s, size_t n)
-  {
-    do_putmbn_common(this->do_get_tinybuf_nonconst(), ::mbrtowc, s, n);
-    return *this;
-  }
-
-template<>
-wtinyfmt&
-wtinyfmt::
-putmbs(const char* s)
-  {
-    do_putmbn_common(this->do_get_tinybuf_nonconst(), ::mbrtowc, s, ::strlen(s));
-    return *this;
-  }
-
-template<>
-u16tinyfmt&
-u16tinyfmt::
-putmbn(const char* s, size_t n)
+basic_tinyfmt<char16_t>&
+operator<<(basic_tinyfmt<char16_t>& fmt, const char* s)
   {
 #ifdef HAVE_UCHAR_H
-    do_putmbn_common(this->do_get_tinybuf_nonconst(), ::mbrtoc16, s, n);
-    return *this;
+    do_putmbn_common(fmt.mut_buf(), ::mbrtoc16, s);
+    return fmt;
 #else
     noadl::sprintf_and_throw<domain_error>("u16tinyfmt: UTF-16 functions not available");
 #endif
   }
 
-template<>
-u16tinyfmt&
-u16tinyfmt::
-putmbs(const char* s)
+basic_tinyfmt<char32_t>&
+operator<<(basic_tinyfmt<char32_t>& fmt, const char* s)
   {
 #ifdef HAVE_UCHAR_H
-    do_putmbn_common(this->do_get_tinybuf_nonconst(), ::mbrtoc16, s, ::strlen(s));
-    return *this;
-#else
-    noadl::sprintf_and_throw<domain_error>("u16tinyfmt: UTF-16 functions not available");
-#endif
-  }
-
-template<>
-u32tinyfmt&
-u32tinyfmt::
-putmbn(const char* s, size_t n)
-  {
-#ifdef HAVE_UCHAR_H
-    do_putmbn_common(this->do_get_tinybuf_nonconst(), ::mbrtoc32, s, n);
-    return *this;
-#else
-    noadl::sprintf_and_throw<domain_error>("u32tinyfmt: UTF-32 functions not available");
-#endif
-  }
-
-template<>
-u32tinyfmt&
-u32tinyfmt::
-putmbs(const char* s)
-  {
-#ifdef HAVE_UCHAR_H
-    do_putmbn_common(this->do_get_tinybuf_nonconst(), ::mbrtoc32, s, ::strlen(s));
-    return *this;
+    do_putmbn_common(fmt.mut_buf(), ::mbrtoc32, s);
+    return fmt;
 #else
     noadl::sprintf_and_throw<domain_error>("u32tinyfmt: UTF-32 functions not available");
 #endif
@@ -166,12 +106,10 @@ template wtinyfmt& operator<<(wtinyfmt&, wchar_t);
 template u16tinyfmt& operator<<(u16tinyfmt&, char16_t);
 template u32tinyfmt& operator<<(u32tinyfmt&, char32_t);
 
+template tinyfmt& operator<<(tinyfmt&, const char*);
 template wtinyfmt& operator<<(wtinyfmt&, const wchar_t*);
-template wtinyfmt& operator<<(wtinyfmt&, const char*);
 template u16tinyfmt& operator<<(u16tinyfmt&, const char16_t*);
-template u16tinyfmt& operator<<(u16tinyfmt&, const char*);
 template u32tinyfmt& operator<<(u32tinyfmt&, const char32_t*);
-template u32tinyfmt& operator<<(u32tinyfmt&, const char*);
 
 template tinyfmt& operator<<(tinyfmt&, const ascii_numput&);
 template wtinyfmt& operator<<(wtinyfmt&, const ascii_numput&);

@@ -148,14 +148,10 @@ using wtinybuf    = basic_tinybuf<wchar_t>;
 using u16tinybuf  = basic_tinybuf<char16_t>;
 using u32tinybuf  = basic_tinybuf<char32_t>;
 
-#ifndef ROCKET_TINYBUF_NO_EXTERN_TEMPLATE_
-
 extern template class basic_tinybuf<char>;
 extern template class basic_tinybuf<wchar_t>;
 extern template class basic_tinybuf<uint16_t>;
 extern template class basic_tinybuf<uint32_t>;
-
-#endif  // ROCKET_TINYBUF_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

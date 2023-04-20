@@ -43,13 +43,22 @@ class ascii_numput
     empty() const noexcept
       { return this->m_size == 0;  }
 
+    const char*
+    data() const noexcept
+      { return this->m_data;  }
+
+
+    const char*
+    c_str() const noexcept
+      { return this->m_data;  }
+
     size_t
     size() const noexcept
       { return this->m_size;  }
 
-    const char*
-    data() const noexcept
-      { return this->m_data;  }
+    size_t
+    length() const noexcept
+      { return this->m_size;  }
 
     void
     clear() noexcept

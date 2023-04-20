@@ -1,7 +1,6 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
-#define ROCKET_TINYFMT_STR_NO_EXTERN_TEMPLATE_ 1
 #include "tinyfmt_str.hpp"
 namespace rocket {
 

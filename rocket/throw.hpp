@@ -12,8 +12,6 @@ template<typename exceptT>
 void
 sprintf_and_throw(const char* fmt, ...);
 
-#ifndef ROCKET_THROW_NO_EXTERN_TEMPLATE_
-
 extern template void sprintf_and_throw<logic_error>(const char*, ...);
 extern template void sprintf_and_throw<domain_error>(const char*, ...);
 extern template void sprintf_and_throw<invalid_argument>(const char*, ...);
@@ -23,8 +21,6 @@ extern template void sprintf_and_throw<runtime_error>(const char*, ...);
 extern template void sprintf_and_throw<range_error>(const char*, ...);
 extern template void sprintf_and_throw<overflow_error>(const char*, ...);
 extern template void sprintf_and_throw<underflow_error>(const char*, ...);
-
-#endif  // ROCKET_THROW_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

@@ -112,13 +112,6 @@ class basic_tinyfmt
         this->mut_buf().puts(s);
         return *this;
       }
-
-    // Puts a multi-bytes string.
-    basic_tinyfmt&
-    putmbn(const char* s, size_t n);
-
-    basic_tinyfmt&
-    putmbs(const char* s);
   };
 
 template<typename charT>
@@ -126,6 +119,17 @@ basic_tinyfmt<charT>::
 ~basic_tinyfmt()
   {
   }
+
+// Inserts a null-terminated multi-byte string. The string shall begin and
+// end in the initial shift state, otherwise the result is unspecified.
+basic_tinyfmt<wchar_t>&
+operator<<(basic_tinyfmt<wchar_t>& fmt, const char* s);
+
+basic_tinyfmt<char16_t>&
+operator<<(basic_tinyfmt<char16_t>& fmt, const char* s);
+
+basic_tinyfmt<char32_t>&
+operator<<(basic_tinyfmt<char32_t>& fmt, const char* s);
 
 // specialized stream inserters
 template<typename charT>
@@ -136,8 +140,7 @@ operator<<(basic_tinyfmt<charT>& fmt, charT c)
     return fmt.putc(c);
   }
 
-template<typename charT,
-ROCKET_DISABLE_IF(is_same<charT, char>::value)>
+template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
@@ -145,27 +148,28 @@ operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
     return fmt.puts(s);
   }
 
-template<typename charT>
-inline
+template<typename charT, typename allocT>
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const char* s)
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string<charT, allocT>& str)
   {
-    return fmt.putmbs(s);
+    return fmt.putn(str.data(), str.size());
   }
+
+#ifdef __cpp_lib_string_view
+template<typename charT>
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string_view<charT>& str)
+  {
+    return fmt.putn(str.data(), str.size());
+  }
+#endif  // __cpp_lib_string_view
 
 template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ascii_numput& nump)
   {
-    return fmt.putmbn(nump.data(), nump.size());
-  }
-
-inline
-basic_tinyfmt<char>&
-operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
-  {
-    return fmt.putn(nump.data(), nump.size());
+    return fmt << nump.c_str();
   }
 
 template<typename charT, typename valueT>
@@ -221,36 +225,6 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
   {
     return fmt << ptr.get();
   }
-
-template<typename charT, typename allocT>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string<charT, allocT>& str)
-  {
-    return fmt.putn(str.data(), str.size());
-  }
-
-template<typename charT, typename allocT>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string<char, allocT>& str)
-  {
-    return fmt.putmbn(str.data(), str.size());
-  }
-
-#ifdef __cpp_lib_string_view
-template<typename charT>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string_view<charT>& str)
-  {
-    return fmt.putn(str.data(), str.size());
-  }
-
-template<typename charT>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string_view<char>& str)
-  {
-    return fmt.putmbn(str.data(), str.size());
-  }
-#endif  // __cpp_lib_string_view
 
 template<typename charT>
 basic_tinyfmt<charT>&
@@ -333,8 +307,6 @@ using wtinyfmt    = basic_tinyfmt<wchar_t>;
 using u16tinyfmt  = basic_tinyfmt<char16_t>;
 using u32tinyfmt  = basic_tinyfmt<char32_t>;
 
-#ifndef ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_
-
 extern template class basic_tinyfmt<char>;
 extern template class basic_tinyfmt<wchar_t>;
 extern template class basic_tinyfmt<char16_t>;
@@ -345,12 +317,10 @@ extern template wtinyfmt& operator<<(wtinyfmt&, wchar_t);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, char16_t);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, char32_t);
 
+extern template tinyfmt& operator<<(tinyfmt&, const char*);
 extern template wtinyfmt& operator<<(wtinyfmt&, const wchar_t*);
-extern template wtinyfmt& operator<<(wtinyfmt&, const char*);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, const char16_t*);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const char*);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, const char32_t*);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const char*);
 
 extern template tinyfmt& operator<<(tinyfmt&, const ascii_numput&);
 extern template wtinyfmt& operator<<(wtinyfmt&, const ascii_numput&);
@@ -516,8 +486,6 @@ extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<doub
 extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
-
-#endif  // ROCKET_TINYFMT_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

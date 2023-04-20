@@ -370,14 +370,10 @@ using prehashed_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::
 using prehashed_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hash>;
 using prehashed_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
-#ifndef ROCKET_PREHASHED_STRING_NO_EXTERN_TEMPLATE_
-
 extern template class basic_prehashed_string<cow_string, cow_string::hash>;
 extern template class basic_prehashed_string<cow_wstring, cow_wstring::hash>;
 extern template class basic_prehashed_string<cow_u16string, cow_u16string::hash>;
 extern template class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
-
-#endif  // ROCKET_PREHASHED_STRING_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif
