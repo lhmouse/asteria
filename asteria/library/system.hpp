@@ -31,6 +31,10 @@ std_system_env_get_variable(V_string name);
 V_object
 std_system_env_get_variables();
 
+// `std.system.get_properties`
+V_object
+std_system_get_properties();
+
 // `std.system.uuid`
 V_string
 std_system_uuid(Global_Context& global);

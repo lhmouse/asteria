@@ -73,6 +73,17 @@
 	* Returns an object of strings which consists of copies of all
 	  environment variables.
 
+`std.system.get_properties()`
+
+	* Retrieves properties about the current system.
+
+	* Returns an object consisting of the following members:
+
+	  * `os`       string: name of the operating system
+	  * `kernel`   string: name and release of the kernel
+	  * `arch`     string: name of the CPU architecture
+	  * `nprocs`   integer: number of active CPU cores
+
 `std.system.uuid()`
 
 	* Generates a UUID according to the following specification:

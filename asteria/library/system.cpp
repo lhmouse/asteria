@@ -14,6 +14,8 @@
 #include "../utils.hpp"
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
+#include <sys/utsname.h>  // ::uname()
+#include <sys/sysinfo.h>  // ::get_nprocs()
 #include <unistd.h>  // ::daemon()
 #include <time.h>  // ::clock_gettime()
 namespace asteria {
@@ -346,6 +348,39 @@ std_system_env_get_variables()
     return vars;
   }
 
+V_object
+std_system_get_properties()
+  {
+    struct ::utsname uts;
+    if(::uname(&uts) != 0)
+      return { };
+
+    // Convert the result to an `object`.
+    V_object names;
+
+    names.try_emplace(sref("os"),
+      V_string(
+        uts.sysname  // name of the operating system
+      ));
+
+    names.try_emplace(sref("kernel"),
+      V_string(
+        cow_string(uts.release) + ' ' + uts.version  // name and release of the kernel
+      ));
+
+    names.try_emplace(sref("arch"),
+      V_string(
+        uts.machine  // name of the CPU architecture
+      ));
+
+    names.try_emplace(sref("nprocs"),
+      V_integer(
+        (unsigned) ::get_nprocs()  // number of active CPU cores
+      ));
+
+    return names;
+  }
+
 V_string
 std_system_uuid(Global_Context& global)
   {
@@ -592,6 +627,18 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         if(reader.end_overload())
           return (Value) std_system_env_get_variables();
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("get_properties"),
+      ASTERIA_BINDING(
+        "std.system.get_properties", "",
+        Argument_Reader&& reader)
+      {
+        reader.start_overload();
+        if(reader.end_overload())
+          return (Value) std_system_get_properties();
 
         reader.throw_no_matching_function_call();
       });
