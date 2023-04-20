@@ -72,11 +72,16 @@ AM_COND_IF([enable_thread_sanitizer], [
   AS_VAR_APPEND([sanitizer_flags], [" -fsanitize=thread"])
 ])
 
+# Set host-specific options
+AC_CHECK_DECL([__i386__], AS_VAR_SET([host_asm_opt], [-masm=intel -msse2 -mfpmath=sse]))
+AC_CHECK_DECL([__amd64__], AS_VAR_SET([host_asm_opt], [-masm=intel]))
+
 ## Finish
 AC_SUBST([abi_major])
 AC_SUBST([abi_minor])
 AC_SUBST([abi_suffix])
 AC_SUBST([sanitizer_flags])
+AC_SUBST([host_asm_opt])
 
 AC_CONFIG_FILES([Makefile asteria/version.h])
 AC_OUTPUT
