@@ -89,7 +89,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
         // Zero denotes the format string and non-zero denotes an argument.
         // No padding or alignment is added for this specifier.
         if(ai == 0)
-          fmt.puts(stempl);
+          fmt.putn(stempl, noadl::xstrlen(stempl));
         else
           (pinsts + ai - 1)->do_format_output(fmt);
       }
@@ -120,7 +120,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
         // Zero denotes the format string and non-zero denotes an argument.
         // TODO: Support more comprehensive placeholders.
         if(ai == 0)
-          fmt.puts(stempl);
+          fmt.putn(stempl, noadl::xstrlen(stempl));
         else
           (pinsts + ai - 1)->do_format_output(fmt);
       }

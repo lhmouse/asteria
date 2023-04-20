@@ -105,13 +105,6 @@ class basic_tinyfmt
         this->mut_buf().putc(c);
         return *this;
       }
-
-    basic_tinyfmt&
-    puts(const char_type* s)
-      {
-        this->mut_buf().puts(s);
-        return *this;
-      }
   };
 
 template<typename charT>
@@ -145,7 +138,7 @@ inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
   {
-    return fmt.puts(s);
+    return fmt.putn(s, noadl::xstrlen(s));
   }
 
 template<typename charT, typename allocT>

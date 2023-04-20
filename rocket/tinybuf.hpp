@@ -119,22 +119,6 @@ class basic_tinybuf
         this->putn(::std::addressof(c), 1);
         return *this;
       }
-
-    // Puts a null-terminated string into the stream.
-    // This function shall return only after all characters have been written
-    // successfully. If an exception is thrown, the stream is left in an
-    // unspecified state.
-    // The default implementation delegates to `putn()`.
-    virtual
-    basic_tinybuf&
-    puts(const char_type* s)
-      {
-        static constexpr char_type null_str[] = { '(','n','u','l','l',')' };
-        const char_type* ps = s ? s : null_str;
-        size_t ns = s ? noadl::xstrlen(s) : noadl::size(null_str);
-        this->putn(ps, ns);
-        return *this;
-      }
   };
 
 template<typename charT>

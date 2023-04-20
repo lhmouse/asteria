@@ -7,9 +7,9 @@
 #include "tinybuf.hpp"
 #include "unique_posix_file.hpp"
 #include "unique_posix_fd.hpp"
+#include "uchar_io.hpp"
 #include <fcntl.h>  // ::open()
-#include <unistd.h>  // ::close()
-#include <stdio.h>  // ::fdopen(), ::fclose(), ::fgetc(), ::fputc()
+#include <stdio.h>  // ::fdopen(), ::fclose()
 #include <errno.h>  // errno
 namespace rocket {
 
@@ -122,7 +122,84 @@ class basic_tinybuf_file
 
     // Opens a new file.
     basic_tinybuf_file&
-    open(const char* path, open_mode mode);
+    open(const char* path, open_mode mode)
+      {
+        int flags = 0;
+        char mstr[8] = "";
+        size_t ml = 0;
+
+        switch(static_cast<uint32_t>(mode & tinybuf_base::open_read_write)) {
+          case tinybuf_base::open_read:
+            flags = O_RDONLY;
+            mstr[ml++] = 'r';
+            break;
+
+          case tinybuf_base::open_write:
+            flags = O_WRONLY;
+            mstr[ml++] = 'w';
+            break;
+
+          case tinybuf_base::open_read_write:
+            flags = O_RDWR;
+            mstr[ml++] = 'r';
+            mstr[ml++] = '+';
+            break;
+
+          default:
+            noadl::sprintf_and_throw<invalid_argument>(
+                "basic_tinybuf_file: no access specified (path `%s`, mode `%u`)",
+                path, mode);
+        }
+
+        if(mode & tinybuf_base::open_binary) {
+#ifdef _O_BINARY
+          flags |= _O_BINARY;
+#endif
+          mstr[ml++] = 'b';
+        }
+
+        if(mode & tinybuf_base::open_exclusive)
+          flags |= O_EXCL;
+
+        if(mode & tinybuf_base::open_write) {
+          // These flags make sense only when writing to a file. Should
+          // we throw exceptions if they are specified qith read-only
+          // access? Maybe.
+          if(mode & tinybuf_base::open_append) {
+            flags |= O_APPEND;
+            mstr[0] = 'a';  // might be "w" or "r+"
+          }
+
+          if(mode & tinybuf_base::open_create)
+            flags |= O_CREAT;
+
+          if(mode & tinybuf_base::open_truncate)
+            flags |= O_TRUNC;
+        }
+
+        // Open the file.
+        unique_posix_fd fd(::open(path, flags, 0666), ::close);
+        if(!fd)
+          noadl::sprintf_and_throw<runtime_error>(
+              "basic_tinybuf_file: `open()` failed (path `%s`, flags `%u`, errno `%d`)",
+              path, mode, errno);
+
+        file_type file(::fdopen(fd, mstr), ::fclose);
+        if(!file)
+          noadl::sprintf_and_throw<runtime_error>(
+              "basic_tinybuf_file: `open()` failed (path `%s`, modes `%s`, errno `%d`)",
+              path, mstr, errno);
+
+        // If and only if `fdopen()` succeeds, will it take the ownership
+        // of the file descriptor.
+        fd.release();
+
+        // Set the file now.
+        this->m_file = ::std::move(file);
+        this->m_mbst_g = { };
+        this->m_mbst_p = { };
+        return *this;
+      }
 
     // Closes the current file, if any.
     basic_tinybuf_file&
@@ -169,12 +246,12 @@ class basic_tinybuf_file
       {
         if(!this->m_file)
           noadl::sprintf_and_throw<invalid_argument>(
-              "tinybuf_file: no file opened");
+              "basic_tinybuf_file: no file opened");
 
         ::off_t cur = ::fseeko(this->m_file, off, (int) dir);
         if(cur == -1)
           noadl::sprintf_and_throw<runtime_error>(
-              "tinybuf_file: `fseeko()` failed (fileno `%d`, errno `%d`)",
+              "basic_tinybuf_file: `fseeko()` failed (fileno `%d`, errno `%d`)",
               ::fileno(this->m_file), errno);
 
         // FIXME: We need to report errors about corrupted shift states.
@@ -189,7 +266,15 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     size_t
-    getn(char_type* s, size_t n) override;
+    getn(char_type* s, size_t n) override
+      {
+        if(!this->m_file)
+          noadl::sprintf_and_throw<invalid_argument>(
+              "basic_tinybuf_file: no file opened");
+
+        size_t r = noadl::xfgetn(s, n, this->m_file, this->m_mbst_g);
+        return r;
+      }
 
     // Reads a single character from the stream. If the end of stream has been
     // reached, `-1` is returned.
@@ -197,110 +282,52 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     int
-    getc() override;
+    getc() override
+      {
+        if(!this->m_file)
+          noadl::sprintf_and_throw<invalid_argument>(
+              "basic_tinybuf_file: no file opened");
+
+        char_type c;
+        int ch = noadl::xfgetc(c, this->m_file, this->m_mbst_g);
+        return ch;
+      }
 
     // Puts some characters into the stream.
     // In case of an error, an exception is thrown, and the stream is left in an
     // unspecified state.
     virtual
     basic_tinybuf_file&
-    putn(const char_type* s, size_t n) override;
+    putn(const char_type* s, size_t n) override
+      {
+        if(!this->m_file)
+          noadl::sprintf_and_throw<invalid_argument>(
+              "basic_tinybuf_file: no file opened");
+
+        noadl::xfputn(this->m_file, this->m_mbst_p, s, n);
+        return *this;
+      }
 
     // Puts a single character into the stream.
     // In case of an error, an exception is thrown, and the stream is left in an
     // unspecified state.
     virtual
     basic_tinybuf_file&
-    putc(char_type c) override;
+    putc(char_type c) override
+      {
+        if(!this->m_file)
+          noadl::sprintf_and_throw<invalid_argument>(
+              "basic_tinybuf_file: no file opened");
 
-    // Puts a null-terminated string into the stream.
-    // In case of an error, an exception is thrown, and the stream is left in an
-    // unspecified state.
-    virtual
-    basic_tinybuf_file&
-    puts(const char_type* s) override;
+        noadl::xfputc(this->m_file, this->m_mbst_p, c);
+        return *this;
+      }
   };
 
 template<typename charT>
 basic_tinybuf_file<charT>::
 ~basic_tinybuf_file()
   {
-  }
-
-template<typename charT>
-basic_tinybuf_file<charT>&
-basic_tinybuf_file<charT>::
-open(const char* path, open_mode mode)
-  {
-    int flags = 0;
-    char mstr[8] = "";
-    size_t ml = 0;
-
-    switch(static_cast<uint32_t>(mode & tinybuf_base::open_read_write)) {
-      case tinybuf_base::open_read:
-        flags = O_RDONLY;
-        mstr[ml++] = 'r';
-        break;
-
-      case tinybuf_base::open_write:
-        flags = O_WRONLY;
-        mstr[ml++] = 'w';
-        break;
-
-      case tinybuf_base::open_read_write:
-        flags = O_RDWR;
-        mstr[ml++] = 'r';
-        mstr[ml++] = '+';
-        break;
-
-      default:
-        noadl::sprintf_and_throw<invalid_argument>(
-            "tinybuf_file: no access specified (path `%s`, mode `%u`)",
-            path, mode);
-    }
-
-    if(mode & tinybuf_base::open_append) {
-      flags |= O_APPEND;
-      mstr[0] = 'a';  // might be "w" or "r+"
-    }
-
-    if(mode & tinybuf_base::open_binary) {
-#ifdef _O_BINARY
-      flags |= _O_BINARY;
-#endif
-      mstr[ml++] = 'b';
-    }
-
-    if(mode & tinybuf_base::open_create)
-      flags |= O_CREAT;
-
-    if(mode & tinybuf_base::open_truncate)
-      flags |= O_TRUNC;
-
-    if(mode & tinybuf_base::open_exclusive)
-      flags |= O_EXCL;
-
-    // Open the file.
-    unique_posix_fd fd(::open(path, flags, 0666), ::close);
-    if(!fd)
-      noadl::sprintf_and_throw<runtime_error>(
-          "tinybuf_file: `open()` failed (path = `%s`, flags = `%u`, errno = `%d`)",
-          path, mode, errno);
-
-    file_type file(::fdopen(fd, mstr), ::fclose);
-    if(!file)
-      noadl::sprintf_and_throw<runtime_error>(
-          "tinybuf_file: `open()` failed (path = `%s`, modes = `%s`, errno = `%d`)",
-          path, mstr, errno);
-
-    // If `fdopen()` succeeds it will have taken the ownership of `fd`.
-    fd.release();
-
-    // Set the file now.
-    this->m_file = ::std::move(file);
-    this->m_mbst_g = { };
-    this->m_mbst_p = { };
-    return *this;
   }
 
 template<typename charT>
@@ -317,14 +344,10 @@ using wtinybuf_file    = basic_tinybuf_file<wchar_t>;
 using u16tinybuf_file  = basic_tinybuf_file<char16_t>;
 using u32tinybuf_file  = basic_tinybuf_file<char32_t>;
 
-#ifndef ROCKET_TINYBUF_FILE_NO_EXTERN_TEMPLATE_
-
 extern template class basic_tinybuf_file<char>;
 extern template class basic_tinybuf_file<wchar_t>;
 extern template class basic_tinybuf_file<char16_t>;
 extern template class basic_tinybuf_file<char32_t>;
-
-#endif  // ROCKET_TINYBUF_FILE_NO_EXTERN_TEMPLATE_
 
 }  // namespace rocket
 #endif

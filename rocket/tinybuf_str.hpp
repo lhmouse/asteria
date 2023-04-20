@@ -179,7 +179,44 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     basic_tinybuf_str&
-    seek(int64_t off, seek_dir dir) override;
+    seek(int64_t off, seek_dir dir) override
+      {
+        int64_t orig, targ;
+
+        // Get the origin offset.
+        switch(dir) {
+          case tinybuf_base::seek_set:
+            orig = 0;
+            break;
+
+          case tinybuf_base::seek_cur:
+            orig = this->m_off;
+            break;
+
+          case tinybuf_base::seek_end:
+            orig = static_cast<int64_t>(this->m_str.size());
+            break;
+
+          default:
+            noadl::sprintf_and_throw<invalid_argument>(
+                "tinybuf_str: seek direction `%d` not valid",
+                static_cast<int>(dir));
+        }
+
+        // Calculate the target offset.
+        if(ROCKET_ADD_OVERFLOW(orig, off, ::std::addressof(targ)))
+          noadl::sprintf_and_throw<out_of_range>(
+              "tinybuf_str: stream offset overflow (operands were `%lld` and `%lld`)",
+              static_cast<long long>(orig), static_cast<long long>(off));
+
+        if(targ < 0)
+          noadl::sprintf_and_throw<out_of_range>(
+              "tinybuf_str: seeking to negative offsets not allowed");
+
+        // Set the new stream offset. It is valid to write past the end.
+        this->m_off = targ;
+        return *this;
+      }
 
     // Reads some characters from the stream. If the end of stream has been
     // reached, zero is returned.
@@ -187,7 +224,22 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     size_t
-    getn(char_type* s, size_t n) override;
+    getn(char_type* s, size_t n) override
+      {
+        if(!(this->m_mode & tinybuf_base::open_read))
+          noadl::sprintf_and_throw<invalid_argument>(
+                   "tinybuf_str: stream not readable");
+
+        // If the stream offset is beyond the end, report end of stream.
+        if(this->m_off >= static_cast<int64_t>(this->m_str.size()))
+          return 0;
+
+        const char_type* bptr = this->m_str.data() + static_cast<size_t>(this->m_off);
+        size_t r = noadl::min(n, this->m_str.size() - static_cast<size_t>(this->m_off));
+        this->m_off += static_cast<int64_t>(r);
+        noadl::xmempcpy(s, bptr, r);
+        return r;
+      }
 
     // Reads a single character from the stream. If the end of stream has been
     // reached, `-1` is returned.
@@ -195,211 +247,93 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     int
-    getc() override;
+    getc() override
+      {
+        if(!(this->m_mode & tinybuf_base::open_read))
+          noadl::sprintf_and_throw<invalid_argument>(
+                   "tinybuf_str: stream not readable");
+
+        // If the stream offset is beyond the end, report end of stream.
+        if(this->m_off >= static_cast<int64_t>(this->m_str.size()))
+          return -1;
+
+        const char_type* bptr = this->m_str.data() + static_cast<size_t>(this->m_off);
+        this->m_off ++;
+        return noadl::xchrtoint(*bptr);
+      }
 
     // Puts some characters into the stream.
     // In case of an error, an exception is thrown, and the stream is left in an
     // unspecified state.
     virtual
     basic_tinybuf_str&
-    putn(const char_type* s, size_t n) override;
+    putn(const char_type* s, size_t n) override
+      {
+        if(!(this->m_mode & tinybuf_base::open_write))
+          noadl::sprintf_and_throw<invalid_argument>(
+                   "tinybuf_str: stream not writable");
+
+        if((this->m_mode & tinybuf_base::open_append)
+             || (this->m_off == static_cast<int64_t>(this->m_str.size()))) {
+          // This can be optimized a little.
+          this->m_str.append(s, n);
+          this->m_off = static_cast<int64_t>(this->m_str.size());
+          return *this;
+        }
+
+        // Resize the string as necessary.
+        if((this->m_off > static_cast<int64_t>(this->m_str.max_size()))
+             || (n > this->m_str.max_size() - static_cast<size_t>(this->m_off)))
+          noadl::sprintf_and_throw<overflow_error>(
+                   "tinybuf_str: string too long (offset `%lld` + `%lld` > `%lld`)",
+                   static_cast<long long>(this->m_off), static_cast<long long>(n),
+                   static_cast<long long>(this->m_str.max_size()));
+
+        this->m_str.resize(static_cast<size_t>(this->m_off) + n);
+        char_type* bptr = this->m_str.mut_data() + static_cast<size_t>(this->m_off);
+        this->m_off += static_cast<int64_t>(n);
+        noadl::xmempcpy(bptr, s, n);
+        return *this;
+      }
 
     // Puts a single character into the stream.
     // In case of an error, an exception is thrown, and the stream is left in an
     // unspecified state.
     virtual
     basic_tinybuf_str&
-    putc(char_type c) override;
+    putc(char_type c) override
+      {
+        if(!(this->m_mode & tinybuf_base::open_write))
+          noadl::sprintf_and_throw<invalid_argument>(
+                   "tinybuf_str: stream not writable");
 
-    // Puts a null-terminated string into the stream.
-    // In case of an error, an exception is thrown, and the stream is left in an
-    // unspecified state.
-    virtual
-    basic_tinybuf_str&
-    puts(const char_type* s) override;
+        if((this->m_mode & tinybuf_base::open_append)
+             || (this->m_off == static_cast<int64_t>(this->m_str.size()))) {
+          // This can be optimized a little.
+          this->m_str.push_back(c);
+          this->m_off = static_cast<int64_t>(this->m_str.size());
+          return *this;
+        }
+
+        // Resize the string as necessary.
+        if(this->m_off >= static_cast<int64_t>(this->m_str.max_size()))
+          noadl::sprintf_and_throw<overflow_error>(
+                   "tinybuf_str: string too long (offset `%lld` > `%lld`)",
+                   static_cast<long long>(this->m_off),
+                   static_cast<long long>(this->m_str.max_size()));
+
+        this->m_str.resize(static_cast<size_t>(this->m_off) + 1);
+        char_type* bptr = this->m_str.mut_data() + static_cast<size_t>(this->m_off);
+        this->m_off ++;
+        *bptr = c;
+        return *this;
+      }
   };
 
 template<typename charT, typename allocT>
 basic_tinybuf_str<charT, allocT>::
 ~basic_tinybuf_str()
   {
-  }
-
-template<typename charT, typename allocT>
-basic_tinybuf_str<charT, allocT>&
-basic_tinybuf_str<charT, allocT>::
-seek(int64_t off, seek_dir dir)
-  {
-    int64_t orig, targ;
-
-    // Get the origin offset.
-    switch(dir) {
-      case tinybuf_base::seek_set:
-        orig = 0;
-        break;
-
-      case tinybuf_base::seek_cur:
-        orig = this->m_off;
-        break;
-
-      case tinybuf_base::seek_end:
-        orig = static_cast<int64_t>(this->m_str.size());
-        break;
-
-      default:
-        noadl::sprintf_and_throw<invalid_argument>(
-            "tinybuf_str: seek direction `%d` not valid",
-            static_cast<int>(dir));
-    }
-
-    // Calculate the target offset.
-    if(ROCKET_ADD_OVERFLOW(orig, off, ::std::addressof(targ)))
-      noadl::sprintf_and_throw<out_of_range>(
-          "tinybuf_str: stream offset overflow (operands were `%lld` and `%lld`)",
-          static_cast<long long>(orig), static_cast<long long>(off));
-
-    if(targ < 0)
-      noadl::sprintf_and_throw<out_of_range>(
-          "tinybuf_str: seeking to negative offsets not allowed");
-
-    // Set the new stream offset. It is valid to write past the end.
-    this->m_off = targ;
-    return *this;
-  }
-
-template<typename charT, typename allocT>
-size_t
-basic_tinybuf_str<charT, allocT>::
-getn(char_type* s, size_t n)
-  {
-    if(!(this->m_mode & tinybuf_base::open_read))
-      noadl::sprintf_and_throw<invalid_argument>(
-               "tinybuf_str: stream not readable");
-
-    // If the stream offset is beyond the end, report end of stream.
-    if(this->m_off >= static_cast<int64_t>(this->m_str.size()))
-      return 0;
-
-    const char_type* bptr = this->m_str.data() + static_cast<size_t>(this->m_off);
-    size_t r = noadl::min(n, this->m_str.size() - static_cast<size_t>(this->m_off));
-    this->m_off += static_cast<int64_t>(r);
-    noadl::xmempcpy(s, bptr, r);
-    return r;
-  }
-
-template<typename charT, typename allocT>
-int
-basic_tinybuf_str<charT, allocT>::
-getc()
-  {
-    if(!(this->m_mode & tinybuf_base::open_read))
-      noadl::sprintf_and_throw<invalid_argument>(
-               "tinybuf_str: stream not readable");
-
-    // If the stream offset is beyond the end, report end of stream.
-    if(this->m_off >= static_cast<int64_t>(this->m_str.size()))
-      return -1;
-
-    const char_type* bptr = this->m_str.data() + static_cast<size_t>(this->m_off);
-    this->m_off ++;
-    return noadl::xchrtoint(*bptr);
-  }
-
-template<typename charT, typename allocT>
-basic_tinybuf_str<charT, allocT>&
-basic_tinybuf_str<charT, allocT>::
-putn(const char_type* s, size_t n)
-  {
-    if(!(this->m_mode & tinybuf_base::open_write))
-      noadl::sprintf_and_throw<invalid_argument>(
-               "tinybuf_str: stream not writable");
-
-    if((this->m_mode & tinybuf_base::open_append)
-         || (this->m_off == static_cast<int64_t>(this->m_str.size()))) {
-      // This can be optimized a little.
-      this->m_str.append(s, n);
-      this->m_off = static_cast<int64_t>(this->m_str.size());
-      return *this;
-    }
-
-    // Resize the string as necessary.
-    if((this->m_off > static_cast<int64_t>(this->m_str.max_size()))
-         || (n > this->m_str.max_size() - static_cast<size_t>(this->m_off)))
-      noadl::sprintf_and_throw<overflow_error>(
-               "tinybuf_str: string too long (offset `%lld` + `%lld` > `%lld`)",
-               static_cast<long long>(this->m_off), static_cast<long long>(n),
-               static_cast<long long>(this->m_str.max_size()));
-
-    this->m_str.resize(static_cast<size_t>(this->m_off) + n);
-    char_type* bptr = this->m_str.mut_data() + static_cast<size_t>(this->m_off);
-    this->m_off += static_cast<int64_t>(n);
-    noadl::xmempcpy(bptr, s, n);
-    return *this;
-  }
-
-template<typename charT, typename allocT>
-basic_tinybuf_str<charT, allocT>&
-basic_tinybuf_str<charT, allocT>::
-putc(char_type c)
-  {
-    if(!(this->m_mode & tinybuf_base::open_write))
-      noadl::sprintf_and_throw<invalid_argument>(
-               "tinybuf_str: stream not writable");
-
-    if((this->m_mode & tinybuf_base::open_append)
-         || (this->m_off == static_cast<int64_t>(this->m_str.size()))) {
-      // This can be optimized a little.
-      this->m_str.push_back(c);
-      this->m_off = static_cast<int64_t>(this->m_str.size());
-      return *this;
-    }
-
-    // Resize the string as necessary.
-    if(this->m_off >= static_cast<int64_t>(this->m_str.max_size()))
-      noadl::sprintf_and_throw<overflow_error>(
-               "tinybuf_str: string too long (offset `%lld` > `%lld`)",
-               static_cast<long long>(this->m_off),
-               static_cast<long long>(this->m_str.max_size()));
-
-    this->m_str.resize(static_cast<size_t>(this->m_off) + 1);
-    char_type* bptr = this->m_str.mut_data() + static_cast<size_t>(this->m_off);
-    this->m_off ++;
-    *bptr = c;
-    return *this;
-  }
-
-template<typename charT, typename allocT>
-basic_tinybuf_str<charT, allocT>&
-basic_tinybuf_str<charT, allocT>::
-puts(const char_type* s)
-  {
-    if(!(this->m_mode & tinybuf_base::open_write))
-      noadl::sprintf_and_throw<invalid_argument>(
-               "tinybuf_str: stream not writable");
-
-    if((this->m_mode & tinybuf_base::open_append)
-         || (this->m_off == static_cast<int64_t>(this->m_str.size()))) {
-      // This can be optimized a little.
-      this->m_str.append(s);
-      this->m_off = static_cast<int64_t>(this->m_str.size());
-      return *this;
-    }
-
-    // Resize the string as necessary.
-    size_t n = noadl::xstrlen(s);
-
-    if((this->m_off > static_cast<int64_t>(this->m_str.max_size()))
-         || (n > this->m_str.max_size() - static_cast<size_t>(this->m_off)))
-      noadl::sprintf_and_throw<overflow_error>(
-               "tinybuf_str: string too long (offset `%lld` + `%lld` > `%lld`)",
-               static_cast<long long>(this->m_off), static_cast<long long>(n),
-               static_cast<long long>(this->m_str.max_size()));
-
-    this->m_str.resize(static_cast<size_t>(this->m_off) + n);
-    char_type* bptr = this->m_str.mut_data() + static_cast<size_t>(this->m_off);
-    this->m_off += static_cast<int64_t>(n);
-    noadl::xmempcpy(bptr, s, n);
-    return *this;
   }
 
 template<typename charT, typename allocT>

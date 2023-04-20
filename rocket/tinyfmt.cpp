@@ -24,7 +24,7 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
     while(*sptr != 0) {
       // Decode one multi-byte character.
       xwcharT wc;
-      int mblen = (int) xmbrtowc(&wc, sptr, MB_LEN_MAX, &mbst);
+      int mblen = static_cast<int>(xmbrtowc(&wc, sptr, MB_LEN_MAX, &mbst));
 
       switch(mblen) {
         case -3:
@@ -36,7 +36,7 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
         case -1:
           // input invalid
           mbst = { };
-          wtemp.push_back((unsigned char) *sptr);
+          wtemp.push_back(static_cast<unsigned char>(*sptr));
           sptr ++;
           break;
 
@@ -49,7 +49,7 @@ do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* 
         default:
           // multi-byte character written; `mblen` bytes consumed
           wtemp.push_back(wc);
-          sptr += (unsigned int) mblen;
+          sptr += static_cast<unsigned>(mblen);
           break;
       }
 

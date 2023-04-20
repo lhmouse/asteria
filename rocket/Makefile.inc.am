@@ -26,6 +26,7 @@ nobase_include_HEADERS +=  \
   %reldir%/xallocator.hpp  \
   %reldir%/xstring.hpp  \
   %reldir%/xhashtable.hpp  \
+  %reldir%/uchar_io.hpp  \
   %reldir%/variant.hpp  \
   %reldir%/fill_iterator.hpp  \
   %reldir%/unique_handle.hpp  \
@@ -66,6 +67,7 @@ nobase_include_HEADERS +=  \
 lib_librocket_la_SOURCES =  \
   %reldir%/assert.cpp  \
   %reldir%/throw.cpp  \
+  %reldir%/uchar_io.cpp  \
   %reldir%/cow_string.cpp  \
   %reldir%/linear_buffer.cpp  \
   %reldir%/tinybuf.cpp  \
