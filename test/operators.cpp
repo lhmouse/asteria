@@ -405,7 +405,7 @@ int main()
         if(std.string.compare(os_str, "cygwin", 6) == 0) {
           std.debug.logf("cygwin fma is broken");
         }
-        else if(std.string.compare(os_str, "mingw", 5) == 0) {
+        else if(std.string.compare(os_str, "msys", 4) == 0) {
           std.debug.logf("msys2 fma is broken");
         }
         else {
