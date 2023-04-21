@@ -15,32 +15,32 @@ namespace rocket {
 // the operation fails, an exception is thrown, and `fp` and `mbst` are
 // left in unspecified states.
 size_t
-xfgetn(char* s, size_t n, ::FILE* fp, ::mbstate_t& mbst);
+xfgetn(::FILE* fp, ::mbstate_t& mbst, char* s, size_t n);
 
 size_t
-xfgetn(wchar_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst);
+xfgetn(::FILE* fp, ::mbstate_t& mbst, wchar_t* s, size_t n);
 
 size_t
-xfgetn(char16_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst);
+xfgetn(::FILE* fp, ::mbstate_t& mbst, char16_t* s, size_t n);
 
 size_t
-xfgetn(char32_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst);
+xfgetn(::FILE* fp, ::mbstate_t& mbst, char32_t* s, size_t n);
 
 // Gets a single character from `fp`. If the end of file has been reached,
 // `-1` is returned. Upon success, the character is stored into `c`. If
 // the operation fails, an exception is thrown, and `fp` and `mbst` are
 // left in unspecified states.
 int
-xfgetc(char& c, ::FILE* fp, ::mbstate_t& mbst);
+xfgetc(::FILE* fp, ::mbstate_t& mbst, char& c);
 
 int
-xfgetc(wchar_t& c, ::FILE* fp, ::mbstate_t& mbst);
+xfgetc(::FILE* fp, ::mbstate_t& mbst, wchar_t& c);
 
 int
-xfgetc(char16_t& c, ::FILE* fp, ::mbstate_t& mbst);
+xfgetc(::FILE* fp, ::mbstate_t& mbst, char16_t& c);
 
 int
-xfgetc(char32_t& c, ::FILE* fp, ::mbstate_t& mbst);
+xfgetc(::FILE* fp, ::mbstate_t& mbst, char32_t& c);
 
 // Puts a sequence of characters into `fp`. Upon success, the number of
 // bytes that have been transferred is returned. If the operation fails, an

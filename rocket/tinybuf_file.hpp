@@ -272,7 +272,7 @@ class basic_tinybuf_file
           noadl::sprintf_and_throw<invalid_argument>(
               "basic_tinybuf_file: no file opened");
 
-        size_t r = noadl::xfgetn(s, n, this->m_file, this->m_mbst_g);
+        size_t r = noadl::xfgetn(this->m_file, this->m_mbst_g, s, n);
         return r;
       }
 
@@ -289,7 +289,7 @@ class basic_tinybuf_file
               "basic_tinybuf_file: no file opened");
 
         char_type c;
-        int ch = noadl::xfgetc(c, this->m_file, this->m_mbst_g);
+        int ch = noadl::xfgetc(this->m_file, this->m_mbst_g, c);
         return ch;
       }
 

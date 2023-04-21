@@ -27,7 +27,7 @@ do_throw_if_error_unlocked(::FILE* fp)
 
 template<typename xwcharT, typename xmbrtowcT>
 size_t
-do_xfgetn_common(xwcharT* ws, size_t n, ::FILE* fp, xmbrtowcT&& xmbrtowc, ::mbstate_t& mbst)
+do_xfgetn_common(::FILE* fp, xmbrtowcT&& xmbrtowc, ::mbstate_t& mbst, xwcharT* ws, size_t n)
   {
     ::flockfile(fp);
     const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
@@ -132,7 +132,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
 }  // namespace
 
 size_t
-xfgetn(char* s, size_t n, ::FILE* fp, ::mbstate_t& /*mbst*/)
+xfgetn(::FILE* fp, ::mbstate_t& /*mbst*/, char* s, size_t n)
   {
     ::flockfile(fp);
     const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
@@ -160,17 +160,17 @@ xfgetn(char* s, size_t n, ::FILE* fp, ::mbstate_t& /*mbst*/)
   }
 
 size_t
-xfgetn(wchar_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst)
+xfgetn(::FILE* fp, ::mbstate_t& mbst, wchar_t* s, size_t n)
   {
-    size_t r = do_xfgetn_common(s, n, fp, ::mbrtowc, mbst);
+    size_t r = do_xfgetn_common(fp, ::mbrtowc, mbst, s, n);
     return r;
   }
 
 size_t
-xfgetn(char16_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst)
+xfgetn(::FILE* fp, ::mbstate_t& mbst, char16_t* s, size_t n)
   {
 #ifdef HAVE_UCHAR_H
-    size_t r = do_xfgetn_common(s, n, fp, ::mbrtoc16, mbst);
+    size_t r = do_xfgetn_common(fp, ::mbrtoc16, mbst, s, n);
     return r;
 #else
     noadl::sprintf_and_throw<domain_error>(
@@ -179,10 +179,10 @@ xfgetn(char16_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst)
   }
 
 size_t
-xfgetn(char32_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst)
+xfgetn(::FILE* fp, ::mbstate_t& mbst, char32_t* s, size_t n)
   {
 #ifdef HAVE_UCHAR_H
-    size_t r = do_xfgetn_common(s, n, fp, ::mbrtoc32, mbst);
+    size_t r = do_xfgetn_common(fp, ::mbrtoc32, mbst, s, n);
     return r;
 #else
     noadl::sprintf_and_throw<domain_error>(
@@ -191,30 +191,30 @@ xfgetn(char32_t* s, size_t n, ::FILE* fp, ::mbstate_t& mbst)
   }
 
 int
-xfgetc(char& c, ::FILE* fp, ::mbstate_t& /*mbst*/)
+xfgetc(::FILE* fp, ::mbstate_t& /*mbst*/, char& c)
   {
     ::flockfile(fp);
     const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
 
     int ch = ::fgetc_unlocked(fp);
-    c = static_cast<char>(ch);
     if(ch == EOF)
       do_throw_if_error_unlocked(fp);
+    c = static_cast<char>(ch);
     return (ch == EOF) ? -1 : ch;
   }
 
 int
-xfgetc(wchar_t& c, ::FILE* fp, ::mbstate_t& mbst)
+xfgetc(::FILE* fp, ::mbstate_t& mbst, wchar_t& c)
   {
-    size_t r = do_xfgetn_common(&c, 1, fp, ::mbrtowc, mbst);
+    size_t r = do_xfgetn_common(fp, ::mbrtowc, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
   }
 
 int
-xfgetc(char16_t& c, ::FILE* fp, ::mbstate_t& mbst)
+xfgetc(::FILE* fp, ::mbstate_t& mbst, char16_t& c)
   {
 #ifdef HAVE_UCHAR_H
-    size_t r = do_xfgetn_common(&c, 1, fp, ::mbrtoc16, mbst);
+    size_t r = do_xfgetn_common(fp, ::mbrtoc16, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
     noadl::sprintf_and_throw<domain_error>(
@@ -223,10 +223,10 @@ xfgetc(char16_t& c, ::FILE* fp, ::mbstate_t& mbst)
   }
 
 int
-xfgetc(char32_t& c, ::FILE* fp, ::mbstate_t& mbst)
+xfgetc(::FILE* fp, ::mbstate_t& mbst, char32_t& c)
   {
 #ifdef HAVE_UCHAR_H
-    size_t r = do_xfgetn_common(&c, 1, fp, ::mbrtoc32, mbst);
+    size_t r = do_xfgetn_common(fp, ::mbrtoc32, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
     noadl::sprintf_and_throw<domain_error>(
