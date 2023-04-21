@@ -11,26 +11,28 @@ bool
 do_subseq(const char*& rptr, const char* eptr, const char* cstr)
   {
     size_t n = ::strlen(cstr);
-    if(((size_t) (eptr - rptr) >= n) && (::memcmp(rptr, cstr, n) == 0)) {
-      // `n` should always be a constant but can this be enhanced?
-      rptr += (ptrdiff_t) n;
-      return true;
-    }
-    return false;
+    if((size_t) (eptr - rptr) < n)
+      return false;
+
+    if(::memcmp(rptr, cstr, n) != 0)
+      return false;
+
+    // `n` should always be a constant but can this be enhanced?
+    rptr += (ptrdiff_t) n;
+    return true;
   }
 
 inline
 bool
 do_get_sign(const char*& rptr, const char* eptr)
   {
-    if(do_subseq(rptr, eptr, "+")) {
-      return 0;
-    }
-    else if(do_subseq(rptr, eptr, "-")) {
-      return 1;
-    }
-    else
-      return 0;  // default; implicitly positive
+    if(do_subseq(rptr, eptr, "+"))
+      return false;
+
+    if(do_subseq(rptr, eptr, "-"))
+      return true;
+
+    return false;  // default; implicitly positive
   }
 
 enum value_class : uint8_t
@@ -39,24 +41,23 @@ enum value_class : uint8_t
     value_class_infinitesimal  = 1,
     value_class_infinity       = 2,
     value_class_nan            = 3,
-    value_class_finite         = 4,
+    value_class_normal         = 4,
   };
 
 inline
 value_class
 do_get_special_value(const char*& rptr, const char* eptr)
   {
-    if(do_subseq(rptr, eptr, "nan") || do_subseq(rptr, eptr, "NaN")) {
+    if(do_subseq(rptr, eptr, "nan") || do_subseq(rptr, eptr, "NaN"))
       return value_class_nan;
-    }
-    else if(do_subseq(rptr, eptr, "infinity") || do_subseq(rptr, eptr, "Infinity")) {
+
+    if(do_subseq(rptr, eptr, "infinity") || do_subseq(rptr, eptr, "Infinity"))
       return value_class_infinity;
-    }
-    else if(do_subseq(rptr, eptr, "inf") || do_subseq(rptr, eptr, "Inf")) {
+
+    if(do_subseq(rptr, eptr, "inf") || do_subseq(rptr, eptr, "Inf"))
       return value_class_infinity;
-    }
-    else
-      return value_class_finite;
+
+    return value_class_normal;
   }
 
 inline
@@ -939,7 +940,7 @@ parse_TB(const char* str, size_t len) noexcept
     const char* const eptr = str + len;
     const char* rptr = str;
 
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
     this->m_base = 2;
     this->m_exp = 0;
     this->m_more = false;
@@ -968,7 +969,7 @@ parse_BU(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = 0;
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
 
     do_skip_base_prefix(rptr, eptr, 'b');
 
@@ -995,7 +996,7 @@ parse_XU(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = 0;
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
 
     do_skip_base_prefix(rptr, eptr, 'x');
 
@@ -1022,7 +1023,7 @@ parse_DU(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = 0;
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
@@ -1047,7 +1048,7 @@ parse_BI(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = do_get_sign(rptr, eptr);
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
 
     do_skip_base_prefix(rptr, eptr, 'b');
 
@@ -1074,7 +1075,7 @@ parse_XI(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = do_get_sign(rptr, eptr);
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
 
     do_skip_base_prefix(rptr, eptr, 'x');
 
@@ -1101,7 +1102,7 @@ parse_DI(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = do_get_sign(rptr, eptr);
-    this->m_cls = value_class_finite;
+    this->m_cls = value_class_normal;
 
     // Get at least one significant digit. The entire string will not
     // be otherwise accepted.
@@ -1128,7 +1129,7 @@ parse_BD(const char* str, size_t len) noexcept
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = do_get_special_value(rptr, eptr);
 
-    if(this->m_cls != value_class_finite)
+    if(this->m_cls != value_class_normal)
       return (size_t) (rptr - str);
 
     do_skip_base_prefix(rptr, eptr, 'b');
@@ -1158,7 +1159,7 @@ parse_XD(const char* str, size_t len) noexcept
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = do_get_special_value(rptr, eptr);
 
-    if(this->m_cls != value_class_finite)
+    if(this->m_cls != value_class_normal)
       return (size_t) (rptr - str);
 
     do_skip_base_prefix(rptr, eptr, 'x');
@@ -1188,7 +1189,7 @@ parse_DD(const char* str, size_t len) noexcept
     this->m_sign = do_get_sign(rptr, eptr);
     this->m_cls = do_get_special_value(rptr, eptr);
 
-    if(this->m_cls != value_class_finite)
+    if(this->m_cls != value_class_normal)
       return (size_t) (rptr - str);
 
     // Get at least one significant digit. The entire string will not

@@ -1022,18 +1022,18 @@ constexpr s_decimal_multipliers[] =
 // `exp10 = ROUND((exp2 - 57) * LOG2)` where `LOG2 = 0.30103`
 constexpr int s_decimal_exp_min = ((s_decimal_multipliers[0].exp2 - 57) * 30103LL + 50000LL) / 100000LL;
 
-enum fpclass : uint8_t
+enum floating_point_class : uint8_t
   {
-    fpclass_norm  = 0,
-    fpclass_inf   = 1,
-    fpclass_nan   = 2,
-    fpclass_zero  = 3,
-    fpclass_sub   = 4,
+    floating_point_class_zero       = 0,
+    floating_point_class_subnormal  = 1,
+    floating_point_class_infinity   = 2,
+    floating_point_class_nan        = 3,
+    floating_point_class_normal     = 4,
   };
 
 struct frexp
   {
-    fpclass cls;
+    floating_point_class cls;
     bool sign;
     int exp;
     uint64_t mant;
@@ -1049,21 +1049,21 @@ do_frexp2_23(float value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = fpclass_norm;
+    frx.cls = floating_point_class_normal;
     frx.sign = (int32_t) bits < 0;
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
     if(frx.exp == 0xFF) {
       // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
       return frx;
     }
 
     if(frx.exp == 0) {
       // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
-      if(frx.cls == fpclass_zero)
+      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
+      if(frx.mant == 0)
         return frx;
 
       // Normalize the subnormal value.
@@ -1090,21 +1090,21 @@ do_frexp2_52(double value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = fpclass_norm;
+    frx.cls = floating_point_class_normal;
     frx.sign = (int64_t) bits < 0;
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
     if(frx.exp == 0x7FF) {
       // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
       return frx;
     }
 
     if(frx.exp == 0) {
       // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
-      if(frx.cls == fpclass_zero)
+      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
+      if(frx.mant == 0)
         return frx;
 
       // Normalize the subnormal value.
@@ -1131,21 +1131,21 @@ do_frexp10_8(float value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = fpclass_norm;
+    frx.cls = floating_point_class_normal;
     frx.sign = (int32_t) bits < 0;
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
     if(frx.exp == 0xFF) {
       // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
       return frx;
     }
 
     if(frx.exp == 0) {
       // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
-      if(frx.cls == fpclass_zero)
+      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
+      if(frx.mant == 0)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
@@ -1219,21 +1219,21 @@ do_frexp10_17(double value)
     ::memcpy(&bits, &value, sizeof(bits));
 
     frexp frx;
-    frx.cls = fpclass_norm;
+    frx.cls = floating_point_class_normal;
     frx.sign = (int64_t) bits < 0;
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
     if(frx.exp == 0x7FF) {
       // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? fpclass_inf : fpclass_nan;
+      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
       return frx;
     }
 
     if(frx.exp == 0) {
       // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? fpclass_zero : fpclass_sub;
-      if(frx.cls == fpclass_zero)
+      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
+      if(frx.mant == 0)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
@@ -1300,17 +1300,17 @@ bool
 do_is_special_class(const char*& str_out, uint32_t& len_out, const frexp& frx)
   {
     switch((uint32_t) frx.cls) {
-      case fpclass_inf:
+      case floating_point_class_infinity:
         str_out = "-infinity" + (1U - frx.sign);
         len_out = 8U + frx.sign;
         return true;
 
-      case fpclass_nan:
+      case floating_point_class_nan:
         str_out = "-nan" + (1U - frx.sign);
         len_out = 3U + frx.sign;
         return true;
 
-      case fpclass_zero:
+      case floating_point_class_zero:
         str_out = s_small_decimals[0] + (1U - frx.sign);
         len_out = 1U + frx.sign;
         return true;
