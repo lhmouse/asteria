@@ -146,7 +146,7 @@ do_collect_digits(const char*& rptr, const char* eptr, uint32_t base, int rdxp)
     // two. For binary and decimal numbers, they are the same as their
     // significant figures.
     if(base == 16)
-      xu.exp <<= 2;
+      xu.exp *= 4;
 
     // Look for the exponent. If no exponent exists, finish.
     if((eptr - rptr >= 2) && ((rptr[0] | 0x20) == ((base == 10) ? 'e' : 'p'))
@@ -1573,6 +1573,7 @@ cast_F(float& value, float min, float max) noexcept
           exp = mult.exp2;
           uint64_t ceiled_mult_mant = (mult.mant + UINT32_MAX) >> 32;
           bits = (uint32_t) (bits * ceiled_mult_mant >> 32);
+          ROCKET_ASSERT(bits != 0);
 
           // Re-align the mantissa, so its MSB is non-zero.
           int rsh = ROCKET_LZCNT32(bits);
@@ -1751,6 +1752,7 @@ cast_D(double& value, double min, double max) noexcept
           const auto& mult = s_decimal_multipliers[(uint32_t) (exp - s_decimal_exp_min)];
           exp = mult.exp2;
           bits = mulh128(bits, mult.mant);
+          ROCKET_ASSERT(bits != 0);
 
           // Re-align the mantissa, so its MSB is non-zero.
           int rsh = ROCKET_LZCNT64(bits);
