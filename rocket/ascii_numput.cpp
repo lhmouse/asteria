@@ -1054,16 +1054,10 @@ do_frexp2_23(float value)
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
-    if(frx.exp == 0xFF) {
-      // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
-      return frx;
-    }
-
-    if(frx.exp == 0) {
-      // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
-      if(frx.mant == 0)
+    if(((frx.exp + 1) & 0xFF) <= 1) {
+      // The biased exponent is 00 or FF, so this value is not normal.
+      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != floating_point_class_subnormal)
         return frx;
 
       // Normalize the subnormal value.
@@ -1095,16 +1089,10 @@ do_frexp2_52(double value)
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
-    if(frx.exp == 0x7FF) {
-      // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
-      return frx;
-    }
-
-    if(frx.exp == 0) {
-      // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
-      if(frx.mant == 0)
+    if(((frx.exp + 1) & 0x7FF) <= 1) {
+      // The biased exponent is 000 or 7FF, so this value is not normal.
+      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != floating_point_class_subnormal)
         return frx;
 
       // Normalize the subnormal value.
@@ -1136,16 +1124,10 @@ do_frexp10_8(float value)
     frx.exp = (int) (bits >> 23) & 0xFF;
     frx.mant = bits & 0x7FFFFFULL;
 
-    if(frx.exp == 0xFF) {
-      // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
-      return frx;
-    }
-
-    if(frx.exp == 0) {
-      // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
-      if(frx.mant == 0)
+    if(((frx.exp + 1) & 0xFF) <= 1) {
+      // The biased exponent is 00 or FF, so this value is not normal.
+      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != floating_point_class_subnormal)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
@@ -1224,16 +1206,10 @@ do_frexp10_17(double value)
     frx.exp = (int) (bits >> 52) & 0x7FF;
     frx.mant = bits & 0xFFFFFFFFFFFFFULL;
 
-    if(frx.exp == 0x7FF) {
-      // This may be an infinity or a NaN.
-      frx.cls = (frx.mant == 0) ? floating_point_class_infinity : floating_point_class_nan;
-      return frx;
-    }
-
-    if(frx.exp == 0) {
-      // This may be a subnormal value or zero.
-      frx.cls = (frx.mant == 0) ? floating_point_class_zero : floating_point_class_subnormal;
-      if(frx.mant == 0)
+    if(((frx.exp + 1) & 0x7FF) <= 1) {
+      // The biased exponent is 000 or 7FF, so this value is not normal.
+      frx.cls = (floating_point_class) ((frx.exp & 2) | (int) ((frx.mant + INT64_MAX) >> 63));
+      if(frx.cls != floating_point_class_subnormal)
         return frx;
 
       // Normalize the subnormal value and remove the hidden bit.
