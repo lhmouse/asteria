@@ -104,8 +104,7 @@ do_init_once()
     if(!home)
       return;
 
-    cow_string path = sref("/.editrc");
-    path.insert(0, home);
+    auto path = cow_string(home) + "/.editrc";
     repl_printf("* loading settings from `%s`...", path.c_str());
 
     ::rocket::unique_ptr<char, void (void*)> abspath(::free);
@@ -114,7 +113,7 @@ do_init_once()
       return repl_printf("* ... ignored: %m");
 
     ::el_source(s_editor, nullptr);
-    repl_printf("* ... done");
+    repl_printf("* ... done.");
   }
 
 }  // namespace
