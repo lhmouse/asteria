@@ -29,20 +29,19 @@ Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
   -v      enable verbose mode
 
 Source code is read from standard input if no FILE is specified or `-` is
-given as FILE, and from FILE otherwise. ARGUMENTS following FILE are passed
+given as FILE, and otherwise from FILE. ARGUMENTS following FILE are passed
 to the script as strings verbatim, which can be retrieved via `__varg`.
 
 If neither `-I` or `-i` is set, interactive mode is enabled when no FILE is
-specified and standard input is connected to a terminal, and is disabled
-otherwise. Be advised that specifying `-` explicitly disables interactive
-mode.
+specified and standard input is connected to a terminal; otherwise it is
+disabled. Be advised, specifying `-` explicitly disables interactive mode.
 
 When running in non-interactive mode, characters are read from FILE, then
 compiled and executed. If the script returns an integer, it is truncated to
 an 8-bit unsigned integer and then used as the exit status. If the script
-returns no value, the exit status is zero. If the script returns a value
-that is neither an integer nor void, or throws an exception, the status is
-non-zero.
+returns nothing, the exit status is zero. If the script returns a value that
+is not an integer, or throws an exception, the exit status is an unspecified
+non-zero value.
 
 In verbose mode, execution details are printed to standard error. It also
 prevents quick termination, which enables some tools such as valgrind to
