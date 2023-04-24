@@ -15,17 +15,18 @@
 namespace rocket {
 
 // Differences from `std::unordered_map`:
-// 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always
-//    return `const_reference`s.
+// 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()`
+//    and `back()` always return `const_reference`s.
 // 2. Iterators are bidirectional iterators, not just forward iterators.
-// 3. The copy constructor and copy assignment operator will not throw exceptions.
+// 3. The copy constructor and copy assignment operator will not throw
+//    exceptions.
 // 4. Comparison operators are not provided.
-// 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended
-//    as an alternative.
-// 6. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot
-//    be implemented.
-// 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable
-//    nor move-assignable.
+// 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()`
+//    is recommended as an alternative.
+// 6. There are no buckets. Bucket lookups and local iterators are not provided.
+//    Multimap cannot be implemented.
+// 7. The key and mapped types may be incomplete. The mapped type need be neither
+//    copy-assignable nor move-assignable.
 // 8. `erase()` may move elements around and invalidate iterators.
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>,
          typename eqT = equal_to<void>, typename allocT = allocator<pair<const keyT, mappedT>>>
