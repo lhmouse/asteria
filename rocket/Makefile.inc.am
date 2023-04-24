@@ -28,7 +28,6 @@ nobase_include_HEADERS +=  \
   %reldir%/xhashtable.hpp  \
   %reldir%/uchar_io.hpp  \
   %reldir%/variant.hpp  \
-  %reldir%/fill_iterator.hpp  \
   %reldir%/unique_handle.hpp  \
   %reldir%/unique_posix_file.hpp  \
   %reldir%/unique_posix_dir.hpp  \
