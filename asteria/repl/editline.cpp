@@ -3,12 +3,14 @@
 
 #include "../precompiled.ipp"
 #include "fwd.hpp"
+#include "rocket/once_flag.hpp"
 #include <stdarg.h>
 #include <signal.h>
 #include <histedit.h>
 namespace asteria {
 namespace {
 
+::rocket::once_flag s_once;
 ::History* s_history;
 ::EditLine* s_editor;
 char s_prompt[64];
@@ -63,6 +65,8 @@ do_getcfn(::EditLine* el, wchar_t* out)
 void
 do_init_once()
   {
+    repl_printf("* initializing editline...");
+
     ROCKET_ASSERT(!s_history);
     s_history = ::history_init();
     if(!s_history)
@@ -101,19 +105,21 @@ do_init_once()
 
     // Load `~/.editrc`. Errors are ignored.
     const char* home = ::secure_getenv("HOME");
-    if(!home)
-      return;
+    if(home) {
+      auto path = cow_string(home) + "/.editrc";
+      repl_printf("* loading settings from `%s`...", path.c_str());
 
-    auto path = cow_string(home) + "/.editrc";
-    repl_printf("* loading settings from `%s`...", path.c_str());
+      ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+      if(abspath.reset(::realpath(path.c_str(), nullptr))) {
+        ::el_source(s_editor, nullptr);
+        repl_printf("* ... done.");
+      }
+      else
+        repl_printf("* ... ignored: %m");
+    }
 
-    ::rocket::unique_ptr<char, void (void*)> abspath(::free);
-    abspath.reset(::realpath(path.c_str(), nullptr));
-    if(!abspath)
-      return repl_printf("* ... ignored: %m");
-
-    ::el_source(s_editor, nullptr);
-    repl_printf("* ... done.");
+    // Done.
+    repl_printf("");
   }
 
 }  // namespace
@@ -130,31 +136,21 @@ editline_set_prompt(const char* fmt, ...)
 const char*
 editline_gets(int* nchars)
   {
-    if(!s_editor) {
-      // Does this have to be thread-safe?
-      repl_printf("* initializing editline...");
-      do_init_once();
-      repl_printf("");
-    }
-
+    s_once.call(do_init_once);
     return ::el_gets(s_editor, nchars);
   }
 
 void
 editline_reset()
   {
-    if(!s_editor)
-      return;
-
+    s_once.call(do_init_once);
     ::el_reset(s_editor);
   }
 
 void
 editline_add_history(stringR text)
   {
-    if(!s_history)
-      return;
-
+    s_once.call(do_init_once);
     ::HistEvent event;
     ::history(s_history, &event, H_ENTER, text.c_str());
   }
