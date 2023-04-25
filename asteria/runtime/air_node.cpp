@@ -1516,12 +1516,13 @@ struct Traits_apply_xop_inc_post
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
 
-            V_integer old = val;
-            if(ROCKET_ADD_OVERFLOW(old, V_integer(1), &val))
+            V_integer result;
+            if(ROCKET_ADD_OVERFLOW(val, V_integer(1), &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer increment overflow"));
 
-            ctx.stack().mut_top().set_temporary(old);
+            val = result;
+            ctx.stack().mut_top().set_temporary(result - 1);
             return air_status_next;
           }
 
@@ -1566,12 +1567,13 @@ struct Traits_apply_xop_dec_post
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
 
-            V_integer old = val;
-            if(ROCKET_SUB_OVERFLOW(old, V_integer(1), &val))
+            V_integer result = val;
+            if(ROCKET_SUB_OVERFLOW(val, V_integer(1), &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer decrement overflow"));
 
-            ctx.stack().mut_top().set_temporary(old);
+            val = result;
+            ctx.stack().mut_top().set_temporary(result + 1);
             return air_status_next;
           }
 
@@ -1844,17 +1846,18 @@ struct Traits_apply_xop_inc_pre
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
 
-            if(ROCKET_ADD_OVERFLOW(val, V_integer(1), &val))
+            V_integer result;
+            if(ROCKET_ADD_OVERFLOW(val, V_integer(1), &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer increment overflow"));
 
+            val = result;
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.mut_real();
-            ++val;
+            rhs.mut_real() ++;
             return air_status_next;
           }
 
@@ -1891,17 +1894,18 @@ struct Traits_apply_xop_dec_pre
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
 
-            if(ROCKET_SUB_OVERFLOW(val, V_integer(1), &val))
+            V_integer result;
+            if(ROCKET_SUB_OVERFLOW(val, V_integer(1), &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer decrement overflow"));
 
+            val = result;
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.mut_real();
-            --val;
+            rhs.mut_real() --;
             return air_status_next;
           }
 
@@ -3069,12 +3073,13 @@ struct Traits_apply_xop_add
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            V_integer oldx = x;
-            if(ROCKET_ADD_OVERFLOW(oldx, y, &x))
+            V_integer result;
+            if(ROCKET_ADD_OVERFLOW(x, y, &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer addition overflow (operands were `$1` and `$2`)"),
-                  oldx, y);
+                  x, y);
 
+            x = result;
             return air_status_next;
           }
 
@@ -3147,12 +3152,13 @@ struct Traits_apply_xop_sub
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            V_integer oldx = x;
-            if(ROCKET_SUB_OVERFLOW(oldx, y, &x))
+            V_integer result;
+            if(ROCKET_SUB_OVERFLOW(x, y, &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer subtraction overflow (operands were `$1` and `$2`)"),
-                  oldx, y);
+                  x, y);
 
+            x = result;
             return air_status_next;
           }
 
@@ -3219,12 +3225,13 @@ struct Traits_apply_xop_mul
             ROCKET_ASSERT(rhs.is_integer());
             auto y = rhs.as_integer();
 
-            V_integer oldx = x;
-            if(ROCKET_MUL_OVERFLOW(oldx, y, &x))
+            V_integer result;
+            if(ROCKET_MUL_OVERFLOW(x, y, &result))
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Integer multiplication overflow (operands were `$1` and `$2`)"),
-                  oldx, y);
+                  x, y);
 
+            x = result;
             return air_status_next;
           }
 
