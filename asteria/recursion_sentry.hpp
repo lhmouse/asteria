@@ -10,9 +10,10 @@ namespace asteria {
 class Recursion_Sentry
   {
   public:
-    enum : size_t {
-      stack_mask_bits = 19,  // 512KiB
-    };
+    enum : size_t
+      {
+        stack_mask_bits = 19,  // 512KiB
+      };
 
   private:
     const void* m_base;
