@@ -1067,7 +1067,19 @@ class basic_cow_string
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
         basic_cow_string res(this->m_sth.as_allocator());
-        res.append(this->data() + tpos, tlen);
+
+        if(tpos + tlen == this->m_ref.m_len) {
+          // Reuse the last part of existing dynamic storage.
+          res.m_sth.share_with(this->m_sth);
+          res.m_ref.m_ptr = this->m_ref.m_ptr + tpos;
+          res.m_ref.m_len = tlen;
+          return res;
+        }
+
+        // Duplicate the subrange.
+        auto ptr = res.m_sth.reallocate_more(this->m_ref.m_ptr, 0, tlen);
+        ::memcpy(ptr, this->data() + tpos, tlen * sizeof(value_type));
+        res.do_set_data_and_size(ptr, tlen);
         return res;
       }
 

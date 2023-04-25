@@ -708,7 +708,10 @@ class cow_vector
       {
         size_type tlen = this->do_clamp_subvec(tpos, tn);
         cow_vector res(this->m_sth.as_allocator());
-        res.append(this->data() + tpos, this->data() + tpos + tlen);
+
+        // Duplicate the subrange.
+        res.m_sth.reallocate_prepare(res.m_sth, 0, tlen);
+        res.m_sth.append_range_unchecked(this->data() + tpos, this->data() + tpos + tlen);
         return res;
       }
 

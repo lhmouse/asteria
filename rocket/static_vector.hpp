@@ -593,7 +593,9 @@ class static_vector
       {
         size_type tlen = this->do_clamp_subvec(tpos, tn);
         static_vector res(this->m_sth.as_allocator());
-        res.append(this->data() + tpos, this->data() + tpos + tlen);
+
+        // Duplicate the subrange.
+        res.m_sth.append_range_unchecked(this->data() + tpos, this->data() + tpos + tlen);
         return res;
       }
 
