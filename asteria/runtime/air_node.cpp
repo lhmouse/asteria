@@ -957,7 +957,7 @@ struct Traits_check_argument
       {
         // Ensure the argument is dereferenceable.
         auto& top = ctx.stack().mut_top();
-        (void)(up.u8v[0] ? top.dereference_readonly() : top.mut_temporary());
+        (void) (up.u8v[0] ? top.dereference_readonly() : top.mut_temporary());
         return air_status_next;
       }
   };
@@ -1256,6 +1256,42 @@ do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, 
     return alt_stack;
   }
 
+inline
+V_integer
+do_integer_check_add(V_integer x, V_integer y)
+  {
+    V_integer result;
+    if(ROCKET_ADD_OVERFLOW(x, y, &result))
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Integer addition overflow (operands were `$1` and `$2`)"),
+          x, y);
+    return result;
+  }
+
+inline
+V_integer
+do_integer_check_sub(V_integer x, V_integer y)
+  {
+    V_integer result;
+    if(ROCKET_SUB_OVERFLOW(x, y, &result))
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Integer subtraction overflow (operands were `$1` and `$2`)"),
+          x, y);
+    return result;
+  }
+
+inline
+V_integer
+do_integer_check_mul(V_integer x, V_integer y)
+  {
+    V_integer result;
+    if(ROCKET_MUL_OVERFLOW(x, y, &result))
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Integer multiplication overflow (operands were `$1` and `$2`)"),
+          x, y);
+    return result;
+  }
+
 struct Traits_function_call
   {
     // `up` is `nargs` and `ptc`.
@@ -1464,7 +1500,7 @@ struct Traits_return_value
           return air_status_return_void;
 
         // Ensure the argument is dereferenceable.
-        (void)top.mut_temporary();
+        (void) top.mut_temporary();
         return air_status_return_ref;
       }
   };
@@ -1515,21 +1551,18 @@ struct Traits_apply_xop_inc_post
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
-
-            V_integer result;
-            if(ROCKET_ADD_OVERFLOW(val, V_integer(1), &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer increment overflow"));
-
-            val = result;
-            ctx.stack().mut_top().set_temporary(result - 1);
+            auto oldval = val;
+            val = do_integer_check_add(val, 1);
+            ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             auto& val = lhs.mut_real();
-            ctx.stack().mut_top().set_temporary(val++);
+            auto oldval = val;
+            val ++;
+            ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
@@ -1566,21 +1599,18 @@ struct Traits_apply_xop_dec_post
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
-
-            V_integer result = val;
-            if(ROCKET_SUB_OVERFLOW(val, V_integer(1), &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer decrement overflow"));
-
-            val = result;
-            ctx.stack().mut_top().set_temporary(result + 1);
+            auto oldval = val;
+            val = do_integer_check_sub(val, 1);
+            ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(lhs.is_real());
             auto& val = lhs.mut_real();
-            ctx.stack().mut_top().set_temporary(val--);
+            auto oldval = val;
+            val --;
+            ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
@@ -1703,11 +1733,7 @@ struct Traits_apply_xop_neg
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
-
-            if(ROCKET_SUB_OVERFLOW(V_integer(0), val, &val))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer negation overflow"));
-
+            val = do_integer_check_sub(0, val);
             return air_status_next;
           }
 
@@ -1845,19 +1871,14 @@ struct Traits_apply_xop_inc_pre
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
-
-            V_integer result;
-            if(ROCKET_ADD_OVERFLOW(val, V_integer(1), &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer increment overflow"));
-
-            val = result;
+            val = do_integer_check_add(val, 1);
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            rhs.mut_real() ++;
+            auto& val = rhs.mut_real();
+            val ++;
             return air_status_next;
           }
 
@@ -1893,19 +1914,14 @@ struct Traits_apply_xop_dec_pre
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
-
-            V_integer result;
-            if(ROCKET_SUB_OVERFLOW(val, V_integer(1), &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer decrement overflow"));
-
-            val = result;
+            val = do_integer_check_sub(val, 1);
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
-            rhs.mut_real() --;
+            auto& val = rhs.mut_real();
+            val --;
             return air_status_next;
           }
 
@@ -2223,23 +2239,15 @@ struct Traits_apply_xop_abs
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
             auto& val = rhs.mut_integer();
-
-            V_integer mask;
-            if(ROCKET_SUB_OVERFLOW(V_integer(0), val, &mask))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer absolute value overflow"));
-
-            mask = val >> 63;
-            val ^= mask;
-            val -= mask;
-
+            auto mask = do_integer_check_sub(val, 1) >> 63;
+            val = (val ^ mask) - mask;
             return air_status_next;
           }
 
           case M_real: {
             ROCKET_ASSERT(rhs.is_real());
             auto& val = rhs.mut_real();
-            val = ::std::fabs(val);
+            val = ::fabs(val);
             return air_status_next;
           }
 
@@ -3069,17 +3077,9 @@ struct Traits_apply_xop_add
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            V_integer result;
-            if(ROCKET_ADD_OVERFLOW(x, y, &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer addition overflow (operands were `$1` and `$2`)"),
-                  x, y);
-
-            x = result;
+            auto& val = lhs.mut_integer();
+            val = do_integer_check_add(val, rhs.as_integer());
             return air_status_next;
           }
 
@@ -3148,17 +3148,9 @@ struct Traits_apply_xop_sub
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            V_integer result;
-            if(ROCKET_SUB_OVERFLOW(x, y, &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer subtraction overflow (operands were `$1` and `$2`)"),
-                  x, y);
-
-            x = result;
+            auto& val = lhs.mut_integer();
+            val = do_integer_check_sub(val, rhs.as_integer());
             return air_status_next;
           }
 
@@ -3221,17 +3213,9 @@ struct Traits_apply_xop_mul
 
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            V_integer result;
-            if(ROCKET_MUL_OVERFLOW(x, y, &result))
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Integer multiplication overflow (operands were `$1` and `$2`)"),
-                  x, y);
-
-            x = result;
+            auto& val = lhs.mut_integer();
+            val = do_integer_check_mul(val, rhs.as_integer());
             return air_status_next;
           }
 
@@ -4864,11 +4848,9 @@ struct Traits_apply_xop_addm
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            ROCKET_ADD_OVERFLOW(x, y, &x);
+            auto& val = lhs.mut_integer();
+            ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &val);
             return air_status_next;
           }
 
@@ -4914,11 +4896,9 @@ struct Traits_apply_xop_subm
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            ROCKET_SUB_OVERFLOW(x, y, &x);
+            auto& val = lhs.mut_integer();
+            ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &val);
             return air_status_next;
           }
 
@@ -4964,11 +4944,9 @@ struct Traits_apply_xop_mulm
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            ROCKET_MUL_OVERFLOW(x, y, &x);
+            auto& val = lhs.mut_integer();
+            ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &val);
             return air_status_next;
           }
 
@@ -5014,14 +4992,11 @@ struct Traits_apply_xop_adds
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            V_integer t = x;
-            if(ROCKET_ADD_OVERFLOW(t, y, &x))
-              x = (t >> 63) ^ INT64_MAX;
-
+            auto& val = lhs.mut_integer();
+            auto limit = (val >> 63) ^ INT64_MAX;
+            auto mask = ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &val) - 1LL;
+            val = ((val ^ limit) & mask) ^ limit;
             return air_status_next;
           }
 
@@ -5075,14 +5050,11 @@ struct Traits_apply_xop_subs
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            V_integer t = x;
-            if(ROCKET_SUB_OVERFLOW(t, y, &x))
-              x = (t >> 63) ^ INT64_MAX;
-
+            auto& val = lhs.mut_integer();
+            auto limit = (val >> 63) ^ INT64_MAX;
+            auto mask = ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &val) - 1LL;
+            val = ((val ^ limit) & mask) ^ limit;
             return air_status_next;
           }
 
@@ -5136,14 +5108,11 @@ struct Traits_apply_xop_muls
         switch(lhs.type_mask() | rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
-            auto& x = lhs.mut_integer();
             ROCKET_ASSERT(rhs.is_integer());
-            auto y = rhs.as_integer();
-
-            V_integer t = x;
-            if(ROCKET_MUL_OVERFLOW(t, y, &x))
-              x = ((t ^ y) >> 63) ^ INT64_MAX;
-
+            auto& val = lhs.mut_integer();
+            auto limit = (val >> 63) ^ (rhs.as_integer() >> 63) ^ INT64_MAX;
+            auto mask = ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &val) - 1LL;
+            val = ((val ^ limit) & mask) ^ limit;
             return air_status_next;
           }
 
