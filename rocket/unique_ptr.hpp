@@ -152,96 +152,91 @@ class unique_ptr
       }
   };
 
-template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator==(const unique_ptr<xelementT, xdeleterT>& lhs,
-           const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
+operator==(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
 
-template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator!=(const unique_ptr<xelementT, xdeleterT>& lhs,
-           const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
+operator!=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
 
-template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator<(const unique_ptr<xelementT, xdeleterT>& lhs,
-           const unique_ptr<yelementT, ydeleterT>& rhs)
+operator<(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
 
-template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator>(const unique_ptr<xelementT, xdeleterT>& lhs,
-           const unique_ptr<yelementT, ydeleterT>& rhs)
+operator>(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
 
-template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator<=(const unique_ptr<xelementT, xdeleterT>& lhs,
-           const unique_ptr<yelementT, ydeleterT>& rhs)
+operator<=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
 
-template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator>=(const unique_ptr<xelementT, xdeleterT>& lhs,
-           const unique_ptr<yelementT, ydeleterT>& rhs)
+operator>=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename elementT, typename deleterT>
+template<typename elemT, typename delT>
 constexpr
 bool
-operator==(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
+operator==(const unique_ptr<elemT, delT>& lhs, nullptr_t) noexcept
   {
     return !lhs;
   }
 
-template<typename elementT, typename deleterT>
+template<typename elemT, typename delT>
 constexpr
 bool
-operator!=(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
+operator!=(const unique_ptr<elemT, delT>& lhs, nullptr_t) noexcept
   {
     return !!lhs;
   }
 
-template<typename elementT, typename deleterT>
+template<typename elemT, typename delT>
 constexpr
 bool
-operator==(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
+operator==(nullptr_t, const unique_ptr<elemT, delT>& rhs) noexcept
   {
     return !rhs;
   }
 
-template<typename elementT, typename deleterT>
+template<typename elemT, typename delT>
 constexpr
 bool
-operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
+operator!=(nullptr_t, const unique_ptr<elemT, delT>& rhs) noexcept
   {
     return !!rhs;
   }
 
-template<typename elementT, typename deleterT>
+template<typename elemT, typename delT>
 inline
 void
-swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(unique_ptr<elemT, delT>& lhs, unique_ptr<elemT, delT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

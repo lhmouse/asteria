@@ -143,64 +143,59 @@ class unique_handle
       }
   };
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 constexpr
 bool
-operator==(const unique_handle<handleT, closerT>& lhs,
-           const unique_handle<handleT, closerT>& rhs)
+operator==(const unique_handle<handT, closT>& lhs, const unique_handle<handT, closT>& rhs)
   {
     return lhs.get() == rhs.get();
   }
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 constexpr
 bool
-operator!=(const unique_handle<handleT, closerT>& lhs,
-           const unique_handle<handleT, closerT>& rhs)
+operator!=(const unique_handle<handT, closT>& lhs, const unique_handle<handT, closT>& rhs)
   {
     return lhs.get() != rhs.get();
   }
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 constexpr
 bool
-operator<(const unique_handle<handleT, closerT>& lhs,
-           const unique_handle<handleT, closerT>& rhs)
+operator<(const unique_handle<handT, closT>& lhs, const unique_handle<handT, closT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 constexpr
 bool
-operator>(const unique_handle<handleT, closerT>& lhs,
-           const unique_handle<handleT, closerT>& rhs)
+operator>(const unique_handle<handT, closT>& lhs, const unique_handle<handT, closT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 constexpr
 bool
-operator<=(const unique_handle<handleT, closerT>& lhs,
-           const unique_handle<handleT, closerT>& rhs)
+operator<=(const unique_handle<handT, closT>& lhs, const unique_handle<handT, closT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 constexpr
 bool
-operator>=(const unique_handle<handleT, closerT>& lhs,
-           const unique_handle<handleT, closerT>& rhs)
+operator>=(const unique_handle<handT, closT>& lhs, const unique_handle<handT, closT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename handleT, typename closerT>
+template<typename handT, typename closT>
 inline
 void
-swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+swap(unique_handle<handT, closT>& lhs, unique_handle<handT, closT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }

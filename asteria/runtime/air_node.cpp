@@ -4544,7 +4544,7 @@ struct Traits_import_call
         if((path[0] != '/') && (src_path[0] == '/'))
           path.insert(0, src_path, 0, src_path.rfind('/') + 1);
 
-        ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+        unique_ptr<char, void (void*)> abspath(::free);
         abspath.reset(::realpath(path.safe_c_str(), nullptr));
         if(!abspath)
           ASTERIA_THROW_RUNTIME_ERROR((

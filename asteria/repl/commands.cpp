@@ -254,7 +254,7 @@ struct Handler_source final
             args.mut(0).replace(0, 1, home);
         }
 
-        ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+        unique_ptr<char, void (void*)> abspath(::free);
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
         if(!abspath)
           ASTERIA_THROW((

@@ -82,7 +82,7 @@ void
 Simple_Script::
 reload_file(const char* path)
   {
-    ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+    unique_ptr<char, void (void*)> abspath(::free);
     abspath.reset(::realpath(path, nullptr));
     if(!abspath)
       ASTERIA_THROW((

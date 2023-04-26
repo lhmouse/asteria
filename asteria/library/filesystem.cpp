@@ -165,7 +165,7 @@ std_filesystem_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
-    ::rocket::unique_ptr<char, void (void*)> cwd(::free);
+    unique_ptr<char, void (void*)> cwd(::free);
     cwd.reset(::getcwd(nullptr, 0));
     if(!cwd)
       ASTERIA_THROW_RUNTIME_ERROR((
@@ -181,7 +181,7 @@ V_string
 std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
-    ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+    unique_ptr<char, void (void*)> abspath(::free);
     abspath.reset(::realpath(path.safe_c_str(), nullptr));
     if(!abspath)
       ASTERIA_THROW_RUNTIME_ERROR((
@@ -638,7 +638,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
           format_errno(), path_old);
 
     // Allocate the I/O buffer.
-    ::rocket::unique_ptr<char, void (void*)> pbuf(::operator delete);
+    unique_ptr<char, void (void*)> pbuf(::operator delete);
     size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x1000);
     pbuf.reset(static_cast<char*>(::operator new(nbuf)));
 

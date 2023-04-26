@@ -24,7 +24,7 @@ do_getcfn(::EditLine* el, wchar_t* out)
       return 0;
 
     ::flockfile(fp);
-    const ::rocket::unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
+    const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
 
   r:
     repl_signal.store(0);
@@ -108,7 +108,7 @@ do_init_once()
       auto path = cow_string(home) + "/.editrc";
       repl_printf("* loading settings from `%s`...", path.c_str());
 
-      ::rocket::unique_ptr<char, void (void*)> abspath(::free);
+      unique_ptr<char, void (void*)> abspath(::free);
       if(abspath.reset(::realpath(path.c_str(), nullptr))) {
         ::el_source(s_editor, nullptr);
         repl_printf("* ... done.");
