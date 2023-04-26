@@ -23,15 +23,14 @@ do_getcfn(::EditLine* el, wchar_t* out)
     if(::el_get(el, EL_GETFP, 0, &fp) != 0)
       return 0;
 
-    ::rocket::unique_ptr<::FILE, void (::FILE*)> locked_fp(::funlockfile);
     ::flockfile(fp);
-    locked_fp.reset(fp);
+    const ::rocket::unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
 
   r:
     repl_signal.store(0);
     ::clearerr_unlocked(fp);
     ::wint_t wch = ::fgetwc_unlocked(fp);
-    *out = (wchar_t)wch;
+    *out = (wchar_t) wch;
 
     if(wch != WEOF)
       return 1;  // success
