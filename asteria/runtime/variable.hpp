@@ -14,7 +14,7 @@ class Variable final
   public:
     enum State : uint8_t
       {
-        state_invalid     = 0,
+        state_invalid    = 0,
         state_immutable  = 1,
         state_mutable    = 2,
       };

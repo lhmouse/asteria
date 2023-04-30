@@ -95,7 +95,6 @@ Global_Context(API_Version version)
         auto r = ostd.try_emplace(sref(mod.name));
         if(r.second)
           r.first->second = V_object();
-
         mod.init(r.first->second.mut_object(), eptr[-1].version);
       });
 
