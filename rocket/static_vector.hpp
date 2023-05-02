@@ -92,7 +92,8 @@ class static_vector
 
     // N.B. This is a non-standard extension.
     template<typename firstT, typename... restT,
-    ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
+    ROCKET_ENABLE_IF(is_constructible<value_type, const firstT&, const restT&...>::value),
+    ROCKET_DISABLE_IF(is_same<const firstT&, const allocator_type&>::value)>
     static_vector(size_type n, const firstT& first, const restT&... rest)
       : static_vector()
       { this->append(n, first, rest...);  }
