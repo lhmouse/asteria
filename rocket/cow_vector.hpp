@@ -94,7 +94,7 @@ class cow_vector
     // N.B. This is a non-standard extension.
     template<typename firstT, typename... restT,
     ROCKET_ENABLE_IF(is_constructible<value_type, const firstT&, const restT&...>::value),
-    ROCKET_DISABLE_IF(is_same<const firstT&, const allocator_type&>::value)>
+    ROCKET_DISABLE_IF(is_convertible<const firstT&, allocator_type>::value)>
     cow_vector(size_type n, const firstT& first, const restT&... rest)
       : cow_vector()
       { this->assign(n, first, rest...);  }
