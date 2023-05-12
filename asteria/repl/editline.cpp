@@ -132,11 +132,38 @@ editline_set_prompt(const char* fmt, ...)
     va_end(ap);
   }
 
-const char*
-editline_gets(int* nchars)
+bool
+editline_gets(bool& eof, cow_string& line)
+  {
+    eof = true;
+    line.clear();
+
+    s_once.call(do_init_once);
+    int len = 0;
+    const char* str = ::el_gets(s_editor, &len);
+
+    // Check for errors.
+    if((len == -1) && (errno == EINTR))
+      return false;
+
+    if(len == -1)
+      exit_printf(exit_system_error, "! could not read standard input: %m");
+
+    if(!str)
+      return false;
+
+    // If the string ends with a new line character, then it is removed.
+    eof = false;
+    line.append(str, (unsigned) len);
+    line.pop_back(line.ends_with("\n"));
+    return true;
+  }
+
+void
+editline_puts(stringR text)
   {
     s_once.call(do_init_once);
-    return ::el_gets(s_editor, nchars);
+    ::el_push(s_editor, text.c_str());
   }
 
 void

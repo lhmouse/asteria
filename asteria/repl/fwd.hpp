@@ -76,8 +76,11 @@ read_execute_print_single();
 void
 editline_set_prompt(const char* fmt, ...);
 
-const char*
-editline_gets(int* nchars);
+bool
+editline_gets(bool& eof, cow_string& line);
+
+void
+editline_puts(stringR text);
 
 void
 editline_reset();

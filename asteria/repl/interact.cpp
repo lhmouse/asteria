@@ -21,29 +21,24 @@ read_execute_print_single()
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
 
-    const char* linebuf;
-    int linelen;
+    bool iscmd = false;
+    bool eof;
+    cow_string linestr;
     size_t pos;
 
     // Prompt for the first line.
-    bool iscmd = false;
     long linenum = 0;
     int indent;
     editline_set_prompt("#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
 
-    while(!!(linebuf = editline_gets(&linelen))) {
-      // Append this line.
-      repl_source.append(linebuf, (size_t)(unsigned) linelen);
-
-      // `linebuf` has a trailing line feed if it is not the last line.
-      // Remove it for simplicity.
-      if(repl_source.ends_with("\n"))
-        repl_source.pop_back();
+    while(editline_gets(eof, linestr)) {
+      // collect this line.
+      repl_source.append(linestr);
 
       // In heredoc mode, a line matching the user-defined terminator ends
       // the current snippet, which is not part of the snippet.
       if(!heredoc.empty() && repl_source.ends_with(heredoc)) {
-        repl_source.erase(repl_source.size() - heredoc.size());
+        repl_source.pop_back(heredoc.size());
         break;
       }
 
@@ -63,18 +58,21 @@ read_execute_print_single()
       // Prompt for the next line.
       repl_source.push_back('\n');
       editline_set_prompt("%*lu> ", indent, ++linenum);
+
+      // Auto-indent it.
+      pos = linestr.find_not_of(" \t");
+      linestr.erase(::std::min(pos, linestr.size()));
+
+      if(!linestr.empty())
+        editline_puts(linestr);
     }
 
     // Discard this snippet if Ctrl-C was received.
     if(repl_signal.xchg(0) != 0) {
       editline_reset();
-      repl_printf("! interrupted (type `:exit` to quit)");
+      repl_printf("\n! interrupted (type `:exit` to quit)");
       return;
     }
-
-    // Exit if an error occurred while reading user input.
-    if(linelen == -1)
-      exit_printf(exit_system_error, "! could not read standard input: %m");
 
     // Remove leading and trailing blank lines.
     pos = repl_source.find_not_of('\n');
@@ -84,7 +82,7 @@ read_execute_print_single()
     repl_source.erase(pos + 1);
 
     // Exit if the end of user input has been reached.
-    if(!linebuf && repl_source.empty())
+    if(repl_source.empty() && eof)
       exit_printf(exit_success, "\n* have a nice day :)");
 
     if(iscmd) {
