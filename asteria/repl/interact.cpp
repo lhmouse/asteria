@@ -65,9 +65,6 @@ read_execute_print_single()
       editline_set_prompt("%*lu> ", indent, ++linenum);
     }
 
-    if(!linebuf)
-      repl_printf("");
-
     // Discard this snippet if Ctrl-C was received.
     if(repl_signal.xchg(0) != 0) {
       editline_reset();
@@ -88,7 +85,7 @@ read_execute_print_single()
 
     // Exit if the end of user input has been reached.
     if(!linebuf && repl_source.empty())
-      exit_printf(exit_success, "* have a nice day :)");
+      exit_printf(exit_success, "\n* have a nice day :)");
 
     if(iscmd) {
       // Skip space characters after the command initiator.
