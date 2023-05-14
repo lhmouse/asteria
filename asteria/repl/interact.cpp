@@ -21,7 +21,7 @@ read_execute_print_single()
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
 
-    bool iscmd = false, iseof = true;
+    bool iscmd = false, more = true;
     cow_string linestr;
     size_t pos;
 
@@ -32,8 +32,8 @@ read_execute_print_single()
 
     while(editline_gets(linestr)) {
       // Remove trailing new line characters, if any.
-      iseof = !linestr.ends_with("\n");
-      linestr.pop_back(iseof);
+      more = linestr.ends_with("\n");
+      linestr.pop_back(more);
       repl_source.append(linestr);
 
       // In heredoc mode, a line matching the user-defined terminator ends
@@ -88,7 +88,7 @@ read_execute_print_single()
     repl_source.erase(pos + 1);
 
     // Exit if the end of user input has been reached.
-    if(repl_source.empty() && iseof)
+    if(repl_source.empty() && !more)
       exit_printf(exit_success, "\n* have a nice day :)");
 
     if(iscmd) {
