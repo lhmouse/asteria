@@ -21,7 +21,7 @@ read_execute_print_single()
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
 
-    bool iscmd = false, more = true;
+    bool iscmd = false, more = false;
     cow_string linestr;
     size_t pos;
 
