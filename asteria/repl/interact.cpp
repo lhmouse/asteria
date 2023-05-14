@@ -21,8 +21,7 @@ read_execute_print_single()
     cow_string heredoc;
     heredoc.swap(repl_heredoc);
 
-    bool iscmd = false;
-    bool eof;
+    bool iscmd = false, iseof = true;
     cow_string linestr;
     size_t pos;
 
@@ -31,8 +30,10 @@ read_execute_print_single()
     int indent;
     editline_set_prompt("#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
 
-    while(editline_gets(eof, linestr)) {
-      // collect this line.
+    while(editline_gets(linestr)) {
+      // Remove trailing new line characters, if any.
+      iseof = !linestr.ends_with("\n");
+      linestr.pop_back(iseof);
       repl_source.append(linestr);
 
       // In heredoc mode, a line matching the user-defined terminator ends
@@ -43,15 +44,20 @@ read_execute_print_single()
       }
 
       if(heredoc.empty()) {
-        iscmd = repl_source[0] == repl_cmd_char;
-        if(!repl_source.ends_with("\\"))  // note `repl_source` may be empty
+        // Check for commands. A command is not allowed to straddle multiple
+        // lines.
+        if(repl_source.empty())
           break;
 
-        // A command is not allowed to straddle multiple lines.
-        if(iscmd)
+        iscmd = repl_source.front() == repl_cmd_char;
+        if(iscmd && (repl_source.back() == '\\'))
           return repl_printf("! dangling \\ at end of command");
 
-        // Backslashes that join lines are removed, unlike in heredoc mode.
+        // Check for multi-line inputs. Backslashes that join lines are
+        // removed, unlike in heredoc mode.
+        if(repl_source.back() != '\\')
+          break;
+
         repl_source.pop_back();
       }
 
@@ -82,7 +88,7 @@ read_execute_print_single()
     repl_source.erase(pos + 1);
 
     // Exit if the end of user input has been reached.
-    if(repl_source.empty() && eof)
+    if(repl_source.empty() && iseof)
       exit_printf(exit_success, "\n* have a nice day :)");
 
     if(iscmd) {

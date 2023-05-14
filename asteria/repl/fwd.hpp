@@ -77,7 +77,7 @@ void
 editline_set_prompt(const char* fmt, ...);
 
 bool
-editline_gets(bool& eof, cow_string& line);
+editline_gets(cow_string& line);
 
 void
 editline_puts(stringR text);

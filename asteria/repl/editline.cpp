@@ -133,9 +133,8 @@ editline_set_prompt(const char* fmt, ...)
   }
 
 bool
-editline_gets(bool& eof, cow_string& line)
+editline_gets(cow_string& line)
   {
-    eof = true;
     line.clear();
 
     s_once.call(do_init_once);
@@ -152,10 +151,8 @@ editline_gets(bool& eof, cow_string& line)
     if(!str)
       return false;
 
-    // If the string ends with a new line character, then it is removed.
-    eof = false;
+    // Accept trailing new line characters, if any.
     line.append(str, (unsigned) len);
-    line.pop_back(line.ends_with("\n"));
     return true;
   }
 
