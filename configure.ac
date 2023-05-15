@@ -34,11 +34,11 @@ AS_VAR_SET([abi_suffix], [beta.0])
 
 ## Check for required libraries
 AC_CHECK_HEADERS([uchar.h])
-AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_WARN(librt not found; proceeding without it)])
-AC_CHECK_LIB([z], [crc32_z], [], [AC_MSG_ERROR(zlib >= 1.2.9 required])
-AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR(PCRE2 not found)])
-AC_CHECK_LIB([crypto], [MD5_Init], [], [AC_MSG_ERROR(OpenSSL not found)])
-AC_CHECK_LIB([edit], [el_init], [], [AC_MSG_ERROR(Editline library not found)])
+AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_WARN([librt not found; proceeding without it])])
+AC_CHECK_LIB([z], [crc32_z], [], [AC_MSG_ERROR([zlib >= 1.2.9 required])])
+AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR([PCRE2 not found])])
+AC_CHECK_LIB([crypto], [MD5_Init], [], [AC_MSG_ERROR([OpenSSL not found])])
+AC_CHECK_LIB([edit], [el_init], [], [AC_MSG_ERROR([Editline library not found])])
 AM_ICONV_LINK()
 
 ## Check for assertions
