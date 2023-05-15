@@ -54,16 +54,7 @@ class CRC32_Hasher final
     void
     update(const void* data, size_t size) noexcept
       {
-        auto bptr = static_cast<const ::Byte*>(data);
-#if ZLIB_VERNUM < 0x1290
-        // XXX: Why do we have to maintain this stupid piece of code for compatibility?
-        const auto eptr = bptr + size;
-        while(ptrdiff_t n = ::rocket::min(eptr - bptr, INT_MAX))
-          this->m_reg = ::crc32(this->m_reg, (bptr += n) - n, static_cast<::uInt>(n));
-#else
-        // zlib >= 1.2.9
-        this->m_reg = ::crc32_z(this->m_reg, bptr, size);
-#endif
+        this->m_reg = ::crc32_z(this->m_reg, static_cast<const ::Byte*>(data), size);
       }
 
     V_integer
