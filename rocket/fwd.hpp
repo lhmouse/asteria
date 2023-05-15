@@ -18,6 +18,7 @@
 #include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
+#include <cstdint>  // std::u?int(8|16|32|64|ptr)_t
 namespace rocket {
 namespace noadl = rocket;
 
