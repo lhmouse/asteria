@@ -1295,7 +1295,7 @@ class basic_cow_string
         iterator_type pattern_begin(s);
         iterator_type pattern_end(s + n);
 
-        return ROCKET_EXPECT(n <= 0xFF)
+        return ROCKET_EXPECT(n <= 0x100)
             ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
                         text_begin, text_end, pattern_begin, pattern_end, npos)
             : details_cow_string::do_boyer_moore_horspool_search<size_type>(
@@ -1412,7 +1412,7 @@ class basic_cow_string
         iterator_type pattern_rbegin(s + n);
         iterator_type pattern_rend(s);
 
-        return d - (ROCKET_EXPECT(n <= 0xFF)
+        return d - (ROCKET_EXPECT(n <= 0x100)
             ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
                    text_rbegin, text_rend, pattern_rbegin, pattern_rend, d - npos)
             : details_cow_string::do_boyer_moore_horspool_search<size_type>(
