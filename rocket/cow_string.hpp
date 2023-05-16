@@ -1287,28 +1287,19 @@ class basic_cow_string
         if(this->size() - from < n)
           return npos;
 
-        size_type cur = from;
-        size_type offsets[256] = { };
+        // Use normal iterators.
+        using iterator_type = const value_type*;
 
-        for(auto sptr = s;  sptr != s + n - 1;  ++ sptr) {
-          // Calculate the offset from each character to the end. The offset
-          // table will be used to propose a shift count when a mismatch is
-          // detected, according to the Bad Character Rule.
-          offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(sptr - s + 1);
-        }
+        iterator_type text_begin(this->data() + from);
+        iterator_type text_end(this->data() + this->size());
+        iterator_type pattern_begin(s);
+        iterator_type pattern_end(s + n);
 
-        for(;;) {
-          // Compare this substring. If it is not a match, propose a shift count
-          // according to its rightmost character.
-          ROCKET_ASSERT(cur != npos);
-          if(noadl::xmemeq(this->data() + cur, s, n))
-            return cur;
-
-          size_type off = offsets[noadl::xchrtoint(this->data()[cur + n - 1]) & 0xFF];
-          cur += n - off;
-          if(cur > this->size() - n)
-            return npos;
-        }
+        return ROCKET_EXPECT(n <= 0xFF)
+            ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
+                        text_begin, text_end, pattern_begin, pattern_end, npos)
+            : details_cow_string::do_boyer_moore_horspool_search<size_type>(
+                        text_begin, text_end, pattern_begin, pattern_end, npos);
       }
 
     constexpr
@@ -1412,28 +1403,20 @@ class basic_cow_string
         if(n == 0)
           return noadl::min(to, this->size());
 
-        size_type cur = noadl::min(to, this->size() - n);
-        size_type offsets[256] = { };
+        // Use reverse iterators.
+        using iterator_type = ::std::reverse_iterator<const value_type*>;
+        size_type d = noadl::min(to, this->size() - n);
 
-        for(auto sptr = s + n - 1;  sptr != s;  -- sptr) {
-          // Calculate the offset from each character to the beginning. The
-          // offset table will be used to propose a shift count when a mismatch
-          // is detected, according to the Bad Character Rule.
-          offsets[noadl::xchrtoint(*sptr) & 0xFF] = static_cast<size_type>(s + n - sptr);
-        }
+        iterator_type text_rbegin(this->data() + d + n);
+        iterator_type text_rend(this->data());
+        iterator_type pattern_rbegin(s + n);
+        iterator_type pattern_rend(s);
 
-        for(;;) {
-          // Compare this substring. If it is not a match, propose a shift count
-          // according to its leftmost character.
-          ROCKET_ASSERT(cur != npos);
-          if(noadl::xmemeq(this->data() + cur, s, n))
-            return cur;
-
-          size_type off = offsets[noadl::xchrtoint(this->data()[cur]) & 0xFF];
-          cur -= n - off;
-          if(cur > size_type(-1) - n)
-            return npos;
-        }
+        return d - (ROCKET_EXPECT(n <= 0xFF)
+            ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
+                   text_rbegin, text_rend, pattern_rbegin, pattern_rend, d - npos)
+            : details_cow_string::do_boyer_moore_horspool_search<size_type>(
+                   text_rbegin, text_rend, pattern_rbegin, pattern_rend, d - npos));
       }
 
     constexpr

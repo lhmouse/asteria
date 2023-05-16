@@ -442,4 +442,50 @@ class string_iterator
       { return *this - other >= 0;  }
   };
 
+template<typename offsetT, typename sizeT, typename textT, typename pattT>
+constexpr
+sizeT
+do_boyer_moore_horspool_search(textT tbegin, textT tend, pattT pbegin, pattT pend, sizeT npos)
+  {
+    // Require random-access iterators and non-empty ranges.
+    ROCKET_ASSERT(tend - tbegin >= pend - pbegin);
+    ROCKET_ASSERT(pend - pbegin >= 1);
+
+    auto tcur = tbegin;
+    auto pcur = pbegin;
+
+    // Initialize the offset table. Input characters are hashed into the table
+    // basing on their lowest 8 bits. Each offset denotes a pattern character
+    // from the beginning of the pattern string, which will be used to propose
+    // a shift when a mismatch is encountered, as per the Bad Character Rule.
+    constexpr uint32_t NT = 64;
+    offsetT offsets[NT] = { };
+
+    while(++ pcur != pend) {
+      uint32_t hash = static_cast<uint32_t>(noadl::xchrtoint(pcur[-1])) % NT;
+      offsets[hash] = static_cast<offsetT>(pcur - pbegin);
+    }
+
+    do {
+      // Compare this text substring with the pattern string. If it is not a
+      // match, propose a shift according to its rightmost character.
+      auto tcomp = tcur;
+      pcur = pbegin;
+
+      while(*tcomp == *pcur) {
+        ++ tcomp;
+        if(++ pcur == pend)
+          return static_cast<sizeT>(tcur - tbegin);
+      }
+
+      tcur += pend - pbegin;
+      uint32_t hash = static_cast<uint32_t>(noadl::xchrtoint(tcur[-1])) % NT;
+      tcur -= static_cast<ptrdiff_t>(offsets[hash]);
+    }
+    while(tend - tcur >= pend - pbegin);
+
+    // If there is no match, return a custom not-a-position.
+    return npos;
+  }
+
 }  // namespace details_cow_string
