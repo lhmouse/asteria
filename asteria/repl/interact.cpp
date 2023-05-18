@@ -107,7 +107,8 @@ read_execute_print_single()
         handle_repl_command(::std::move(cmdline));
       }
       catch(exception& stdex) {
-        return repl_printf("! error: %s", stdex.what());  }
+        return repl_printf("! error: %s", stdex.what());
+      }
     }
 
     // Skip space characters. If the source string becomes empty, do nothing.
@@ -165,7 +166,13 @@ read_execute_print_single()
         repl_file = ::std::move(real_name);
       }
       catch(Compiler_Error& again) {
-        return repl_printf("! error: %s", again.what());  }
+        // If the snippet doesn't look like an expression, report the
+        // previous error.
+        if((again.line() == 1) && (again.column() == 1) && (again.status() == compiler_status_expression_expected))
+          return repl_printf("! error: %s", except.what());
+
+        return repl_printf("! error: %s", again.what());
+      }
     }
 
     // Save the accepted snippet.
@@ -178,7 +185,8 @@ read_execute_print_single()
       ref = repl_script.execute(::std::move(repl_args));
     }
     catch(exception& stdex) {
-      return repl_printf("! error: %s", stdex.what());  }
+      return repl_printf("! error: %s", stdex.what());
+    }
 
     // Stringify the result.
     if(ref.is_void())
