@@ -138,6 +138,10 @@ inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
   {
+    if(!s) {
+      static constexpr charT null[] = { '(','n','u','l','l',')' };
+      return fmt.putn(null, 6);
+    }
     return fmt.putn(s, noadl::xstrlen(s));
   }
 

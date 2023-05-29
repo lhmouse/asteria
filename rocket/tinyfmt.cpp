@@ -18,6 +18,12 @@ template<typename xwcharT, typename xmbrtowcT>
 void
 do_putmbn_common(basic_tinybuf<xwcharT>& buf, xmbrtowcT&& xmbrtowc, const char* s)
   {
+    if(!s) {
+      static constexpr xwcharT null[] = { '(','n','u','l','l',')' };
+      buf.putn(null, 6);
+      return;
+    }
+
     ::mbstate_t mbst = { };
     static_vector<xwcharT, 128> wtemp;
     const char* sptr = s;
