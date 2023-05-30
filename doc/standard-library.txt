@@ -1840,6 +1840,16 @@
 	* Throws an exception if the file or directory at `path` cannot
 	  be removed.
 
+`std.filesystem.glob(pattern)`
+
+	* Finds all paths that match `pattern`.
+
+	* Returns an array of strings. If a string ends with '/', it
+	  designates a direcory; otherwise, it designates a file. If no
+	  such path exists, an empty array is returned.
+
+	* Throws an exception in case of a system error.
+
 `std.filesystem.dir_list(path)`
 
 	* Lists the contents of the directory at `path`.

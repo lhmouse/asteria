@@ -9,10 +9,10 @@
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
 #include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
-#include <dirent.h>  // ::opendir()
+#include <dirent.h>  // ::opendir(), ::closedir()
 #include <fcntl.h>  // ::open()
 #include <stdio.h>  // ::rename()
-#include <errno.h>  // errno
+#include <glob.h>  // ::glob(), ::globfree();
 namespace asteria {
 namespace {
 
@@ -302,10 +302,33 @@ std_filesystem_remove_recursive(V_string path)
         format_errno(), path);
   }
 
+V_array
+std_filesystem_glob(V_string pattern)
+  {
+    // Get all paths into an array.
+    V_array paths;
+    ::glob_t gl = { };
+    int gr = ::glob(pattern.safe_c_str(), GLOB_MARK | GLOB_NOSORT, nullptr, &gl);
+    if(gr == GLOB_NOMATCH)
+      return paths;
+    else if(gr != 0)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not find paths according to '$2'",
+          "[`glob()` failed: $1]"),
+          format_errno(), pattern);
+
+    // Convert them to strings.
+    ::rocket::unique_ptr<::glob_t, void (::glob_t*)> gp(&gl, ::globfree);
+    paths.reserve(gl.gl_pathc);
+    for(size_t k = 0;  k != gl.gl_pathc;  ++k)
+      paths.emplace_back(V_string(gl.gl_pathv[k]));
+    return paths;
+  }
+
 V_object
 std_filesystem_dir_list(V_string path)
   {
-    // Try opening t he directory.
+    // Try opening the directory.
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()));
     if(!dp)
       ASTERIA_THROW_RUNTIME_ERROR((
@@ -756,6 +779,21 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(path);
         if(reader.end_overload())
           return (Value) std_filesystem_remove_recursive(path);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("glob"),
+      ASTERIA_BINDING(
+        "std.filesystem.glob", "pattern",
+        Argument_Reader&& reader)
+      {
+        V_string pattern;
+
+        reader.start_overload();
+        reader.required(pattern);
+        if(reader.end_overload())
+          return (Value) std_filesystem_glob(pattern);
 
         reader.throw_no_matching_function_call();
       });

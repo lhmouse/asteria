@@ -27,6 +27,10 @@ std_filesystem_move_from(V_string path_new, V_string path_old);
 V_integer
 std_filesystem_remove_recursive(V_string path);
 
+// `std.filesystem.glob`
+V_array
+std_filesystem_glob(V_string pattern);
+
 // `std.filesystem.directory_list`
 V_object
 std_filesystem_dir_list(V_string path);
