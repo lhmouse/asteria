@@ -399,52 +399,46 @@ std_filesystem_dir_list(V_string path)
 V_integer
 std_filesystem_dir_create(V_string path)
   {
-    // Try creating an empty directory.
     if(::mkdir(path.safe_c_str(), 0777) == 0)
       return 1;
 
-    // If the path references a directory or a symlink to a directory, don't fail.
-    if(errno == EEXIST) {
-      struct ::stat stb;
-      if(::stat(path.c_str(), &stb) != 0)
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Could not get information about '$2'",
-            "[`stat()` failed: $1]"),
-            format_errno(), path);
+    if(errno != EEXIST)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not create directory '$2'",
+          "[`mkdir()` failed: $1]"),
+          format_errno(), path);
 
-      if(S_ISDIR(stb.st_mode))
-        return 0;
+    struct ::stat stb;
+    if(::stat(path.c_str(), &stb) != 0)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not get information about '$2'",
+          "[`stat()` failed: $1]"),
+          format_errno(), path);
 
-      // Throw an exception about the previous error.
+    if(!S_ISDIR(stb.st_mode))
       ASTERIA_THROW_RUNTIME_ERROR((
           "Could not create directory '$2'",
           "[`mkdir()` failed: $1]"),
           format_errno(EEXIST), path);
-    }
 
-    // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR((
-        "Could not create directory '$2'",
-        "[`mkdir()` failed: $1]"),
-        format_errno(), path);
+    // The directory already exists.
+    return 0;
   }
 
 V_integer
 std_filesystem_dir_remove(V_string path)
   {
-    // Try removing an empty directory.
     if(::rmdir(path.safe_c_str()) == 0)
       return 1;
 
-    // If the path does not exist, don't fail.
-    if(errno == ENOENT)
-      return 0;
+    if(errno != ENOENT)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could remove directory '$2'",
+          "[`rmdir()` failed: $1]"),
+          format_errno(), path);
 
-    // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR((
-        "Could remove directory '$2'",
-        "[`rmdir()` failed: $1]"),
-        format_errno(), path);
+    // The directory does not exist.
+    return 0;
   }
 
 V_string
@@ -692,19 +686,17 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
 V_integer
 std_filesystem_file_remove(V_string path)
   {
-    // Try removing a non-directory.
     if(::unlink(path.safe_c_str()) == 0)
       return 1;
 
-    // If the path does not exist, don't fail.
-    if(errno == ENOENT)
-      return 0;
+    if(errno != ENOENT)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not remove file '$2'",
+          "[`unlink()` failed: $1]"),
+          format_errno(), path);
 
-    // Throw an exception for general failures.
-    ASTERIA_THROW_RUNTIME_ERROR((
-        "Could not remove file '$2'",
-        "[`unlink()` failed: $1]"),
-        format_errno(), path);
+    // The file does not exist.
+    return 0;
   }
 
 void
