@@ -166,6 +166,11 @@ using ::std::memory_order_seq_cst;
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)    ROCKET_VOID_T(__VA_ARGS__)* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)   ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
 
+#define ROCKET_DISABLE_SELF(x,...)  \
+    ROCKET_DISABLE_IF(::std::is_same<x,  \
+        typename ::std::remove_cv<typename ::std::remove_reference<__VA_ARGS__>::type>::type  \
+          >::value)
+
 template<typename typeT>
 struct remove_cvref
   : remove_cv<typename remove_reference<typeT>::type>
