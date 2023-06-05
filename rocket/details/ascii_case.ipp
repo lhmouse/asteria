@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_ASCII_CASE_
 #  error Please include <rocket/ascii_case.hpp> instead.
