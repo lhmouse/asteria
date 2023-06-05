@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2022, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_XSTRING_
-#  error Please include <rocket/ystring.hpp> instead.
+#  error Please include <rocket/xstring.hpp> instead.
 #endif
 namespace details_xstring {
 
