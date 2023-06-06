@@ -46,64 +46,69 @@ do_destroy_variant_slow() noexcept
 
     // Expand arrays and objects by hand.
     // This blows the entire C++ object model up. Don't play with this at home!
-    ::rocket::linear_buffer bytes;
+    ::rocket::linear_buffer byte_stack;
 
-    do {
-      switch(this->type()) {
-        case type_null:
-        case type_boolean:
-        case type_integer:
-        case type_real:
-          break;
+  r:
+    switch(this->type()) {
+      case type_null:
+      case type_boolean:
+      case type_integer:
+      case type_real:
+        break;
 
-        case type_string:
-          this->m_stor.mut<type_string>().~V_string();
-          break;
+      case type_string:
+        this->m_stor.mut<type_string>().~V_string();
+        break;
 
-        case type_opaque:
-          this->m_stor.mut<type_opaque>().~V_opaque();
-          break;
+      case type_opaque:
+        this->m_stor.mut<type_opaque>().~V_opaque();
+        break;
 
-        case type_function:
-          this->m_stor.mut<type_function>().~V_function();
-          break;
+      case type_function:
+        this->m_stor.mut<type_function>().~V_function();
+        break;
 
-        case type_array: {
-          auto& altr = this->m_stor.mut<type_array>();
-          if(altr.unique() && !altr.empty()) {
-            // Move raw bytes into `bytes`.
-            for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
-              bytes.putn(it->m_bytes, sizeof(storage));
-              ::std::memset(it->m_bytes, 0, sizeof(storage));
-            }
-          }
-          altr.~V_array();
-          break;
+      case type_array: {
+        auto& altr = this->m_stor.mut<type_array>();
+        if(!altr.empty() && altr.unique()) {
+          // Move raw bytes into `byte_stack`.
+          byte_stack.putn((const char*) altr.data(), altr.size() * sizeof(storage));
+          ::memset((char*) altr.mut_data(), 0, altr.size() * sizeof(storage));
         }
-
-        case type_object: {
-          auto& altr = this->m_stor.mut<type_object>();
-          if(altr.unique() && !altr.empty()) {
-            // Move raw bytes into `bytes`.
-            for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
-              bytes.putn(it->second.m_bytes, sizeof(storage));
-              ::std::memset(it->second.m_bytes, 0, sizeof(storage));
-            }
-          }
-          altr.~V_object();
-          break;
-        }
-
-        default:
-          ASTERIA_TERMINATE((
-              "Invalid value type (type `$1`)"),
-              this->type());
+        altr.~V_array();
+        break;
       }
-    }
-    while(bytes.getn(this->m_bytes, sizeof(storage)) != 0);
 
-    ROCKET_ASSERT(bytes.empty());
+      case type_object: {
+        auto& altr = this->m_stor.mut<type_object>();
+        if(!altr.empty() && altr.unique()) {
+          // Move raw bytes into `byte_stack`.
+          for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
+            byte_stack.putn((const char*) &(it->second), sizeof(storage));
+            ::memset((char*) &(it->second), 0, sizeof(storage));
+          }
+        }
+        altr.~V_object();
+        break;
+      }
+
+      default:
+        ASTERIA_TERMINATE((
+            "Invalid value type (type `$1`)"),
+            this->type());
+    }
+
+    if(!byte_stack.empty()) {
+      // Pop an element.
+      ROCKET_ASSERT(byte_stack.size() >= sizeof(storage));
+      ::memcpy(this->m_bytes, byte_stack.end() - sizeof(storage), sizeof(storage));
+      byte_stack.unaccept(sizeof(storage));
+      goto r;
+    }
+
+#ifdef ROCKET_DEBUG
     ::std::memset(this->m_bytes, 0xEB, sizeof(storage));
+#endif
   }
   catch(exception& stdex) {
     ::fprintf(stderr,
