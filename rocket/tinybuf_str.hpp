@@ -53,7 +53,7 @@ class basic_tinybuf_str
     // is not move-constructible.
     basic_tinybuf_str(const basic_tinybuf_str& other)
       noexcept(is_nothrow_copy_constructible<string_type>::value)
-      : m_str(other.m_str), m_off(other.m_off),  m_mode(other.m_mode)
+      : tinybuf_type(), m_str(other.m_str), m_off(other.m_off),  m_mode(other.m_mode)
       { }
 
     basic_tinybuf_str(const basic_tinybuf_str& other, const allocator_type& alloc) noexcept
@@ -72,7 +72,7 @@ class basic_tinybuf_str
 
     basic_tinybuf_str(basic_tinybuf_str&& other)
       noexcept(is_nothrow_move_constructible<string_type>::value)
-      : m_str(::std::move(other.m_str)), m_off(noadl::exchange(other.m_off)),
+      : tinybuf_type(), m_str(::std::move(other.m_str)), m_off(noadl::exchange(other.m_off)),
         m_mode(noadl::exchange(other.m_mode))
       { }
 
