@@ -379,11 +379,10 @@ class variant
     const typename alternative_at<indexT>::type&
     as() const
       {
-        auto ptr = this->ptr<indexT>();
-        if(!ptr)
+        if(this->m_index != indexT)
           this->do_throw_index_mismatch(indexT,
                        typeid(typename alternative_at<indexT>::type));
-        return *ptr;
+        return *(this->do_cast_storage<indexT>());
       }
 
     template<typename targetT,
@@ -398,11 +397,10 @@ class variant
     typename alternative_at<indexT>::type&
     mut()
       {
-        auto ptr = this->mut_ptr<indexT>();
-        if(!ptr)
+        if(this->m_index != indexT)
           this->do_throw_index_mismatch(indexT,
                        typeid(typename alternative_at<indexT>::type));
-        return *ptr;
+        return *(this->do_cast_storage<indexT>());
       }
 
     template<typename targetT,
