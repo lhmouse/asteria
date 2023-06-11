@@ -25,12 +25,11 @@ class Reference
     Value m_value;
     rcfwd_ptr<Variable> m_var;
     rcfwd_ptr<PTC_Arguments> m_ptca;
-    cow_vector<Reference_Modifier> m_mods;
-
     union {
       Index m_index;
       void* m_init_index;  // force initialization of padding bits
     };
+    cow_vector<Reference_Modifier> m_mods;
 
   public:
     // Constructors and assignment operators
@@ -40,73 +39,62 @@ class Reference
       { }
 
     Reference(const Reference& other) noexcept
-      : m_mods(other.m_mods),
-        m_index(other.m_index)
+      : m_init_index(other.m_init_index),
+        m_mods(other.m_mods)
       {
-        this->do_copy_partial(other);
-      }
-
-    Reference(Reference&& other) noexcept
-      : m_mods(::std::move(other.m_mods)),
-        m_index(other.m_index)
-      {
-        this->do_swap_partial(other);
+        if(other.m_index == index_temporary)
+          this->m_value = other.m_value;
+        else if(other.m_index == index_variable)
+          this->m_var = other.m_var;
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca = other.m_ptca;
       }
 
     Reference&
     operator=(const Reference& other) & noexcept
       {
-        this->do_copy_partial(other);
+        if(other.m_index == index_temporary)
+          this->m_value = other.m_value;
+        else if(other.m_index == index_variable)
+          this->m_var = other.m_var;
+        else if(other.m_index == index_ptc_args)
+          this->m_ptca = other.m_ptca;
+
+        this->m_init_index = other.m_init_index;
         this->m_mods = other.m_mods;
-        this->m_index = other.m_index;
         return *this;
+      }
+
+    Reference(Reference&& other) noexcept
+      {
+        // Don't play with this at home!
+        char* tbytes = (char*) this;
+        char* obytes = (char*) &other;
+        ::memcpy(tbytes, obytes, sizeof(*this));
+        ::memset(obytes, 0, sizeof(*this));
       }
 
     Reference&
     operator=(Reference&& other) & noexcept
       {
-        this->do_swap_partial(other);
-        this->m_mods = ::std::move(other.m_mods);
-        this->m_index = other.m_index;
+        this->swap(other);
         return *this;
       }
 
     Reference&
     swap(Reference& other) noexcept
       {
-        this->do_swap_partial(other);
-        this->m_mods.swap(other.m_mods);
-        ::std::swap(this->m_index, other.m_index);
+        // Don't play with this at home!
+        char ebytes[sizeof(*this)];
+        char* tbytes = (char*) this;
+        char* obytes = (char*) &other;
+        ::memcpy(ebytes, tbytes, sizeof(*this));
+        ::memcpy(tbytes, obytes, sizeof(*this));
+        ::memcpy(obytes, ebytes, sizeof(*this));
         return *this;
       }
 
   private:
-    ROCKET_ALWAYS_INLINE
-    void
-    do_copy_partial(const Reference& other)
-      {
-        const uint32_t index = other.m_index;
-        if(index == index_temporary)
-          this->m_value = other.m_value;
-        if(index == index_variable)
-          this->m_var = other.m_var;
-        if(index == index_ptc_args)
-          this->m_ptca = other.m_ptca;
-      }
-
-    ROCKET_ALWAYS_INLINE
-    void
-    do_swap_partial(Reference& other)
-      {
-        const bmask32 mask = { this->m_index, other.m_index };
-        if(mask.test(index_temporary))
-          this->m_value.swap(other.m_value);
-        if(mask.test(index_variable))
-          this->m_var.swap(other.m_var);
-        if(mask.test(index_ptc_args))
-          this->m_ptca.swap(other.m_ptca);
-      }
-
     const Value&
     do_dereference_readonly_slow() const;
 
