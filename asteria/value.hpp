@@ -78,9 +78,9 @@ class Value
     Value(Value&& other) noexcept
       {
         // Don't play with this at home!
-        char* mbytes = (char*) this;
+        char* tbytes = (char*) this;
         char* obytes = (char*) &other;
-        ::memcpy(mbytes, obytes, sizeof(*this));
+        ::memcpy(tbytes, obytes, sizeof(*this));
         ::memset(obytes, 0, sizeof(*this));
       }
 
@@ -95,12 +95,12 @@ class Value
     swap(Value& other) noexcept
       {
         // Don't play with this at home!
-        char tbytes[sizeof(*this)];
-        char* mbytes = (char*) this;
+        char ebytes[sizeof(*this)];
+        char* tbytes = (char*) this;
         char* obytes = (char*) &other;
-        ::memcpy(tbytes, mbytes, sizeof(*this));
-        ::memcpy(mbytes, obytes, sizeof(*this));
-        ::memcpy(obytes, tbytes, sizeof(*this));
+        ::memcpy(ebytes, tbytes, sizeof(*this));
+        ::memcpy(tbytes, obytes, sizeof(*this));
+        ::memcpy(obytes, ebytes, sizeof(*this));
         return *this;
       }
 
