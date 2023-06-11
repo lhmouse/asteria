@@ -78,8 +78,10 @@ class Value
     Value(Value&& other) noexcept
       {
         // Don't play with this at home!
-        ::std::memcpy(this->m_bytes, other.m_bytes, sizeof(storage));
-        ::std::memset(other.m_bytes, 0, sizeof(storage));
+        char* mbytes = (char*) this;
+        char* obytes = (char*) &other;
+        ::memcpy(mbytes, obytes, sizeof(*this));
+        ::memset(obytes, 0, sizeof(*this));
       }
 
     Value&
@@ -93,10 +95,12 @@ class Value
     swap(Value& other) noexcept
       {
         // Don't play with this at home!
-        char temp[sizeof(storage)];
-        ::std::memcpy(temp, this->m_bytes, sizeof(storage));
-        ::std::memcpy(this->m_bytes, other.m_bytes, sizeof(storage));
-        ::std::memcpy(other.m_bytes, temp, sizeof(storage));
+        char tbytes[sizeof(*this)];
+        char* mbytes = (char*) this;
+        char* obytes = (char*) &other;
+        ::memcpy(tbytes, mbytes, sizeof(*this));
+        ::memcpy(mbytes, obytes, sizeof(*this));
+        ::memcpy(obytes, tbytes, sizeof(*this));
         return *this;
       }
 

@@ -72,8 +72,9 @@ do_destroy_variant_slow() noexcept
         auto& altr = this->m_stor.mut<type_array>();
         if(!altr.empty() && altr.unique()) {
           // Move raw bytes into `byte_stack`.
-          byte_stack.putn((const char*) altr.data(), altr.size() * sizeof(storage));
-          ::memset((char*) altr.mut_data(), 0, altr.size() * sizeof(storage));
+          char* adata = (char*) altr.mut_data();
+          byte_stack.putn(adata, altr.size() * sizeof(*this));
+          ::memset(adata, 0, altr.size() * sizeof(*this));
         }
         altr.~V_array();
         break;
@@ -84,8 +85,9 @@ do_destroy_variant_slow() noexcept
         if(!altr.empty() && altr.unique()) {
           // Move raw bytes into `byte_stack`.
           for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
-            byte_stack.putn((const char*) &(it->second), sizeof(storage));
-            ::memset((char*) &(it->second), 0, sizeof(storage));
+            char* adata = (char*) &(it->second);
+            byte_stack.putn(adata, sizeof(*this));
+            ::memset(adata, 0, sizeof(*this));
           }
         }
         altr.~V_object();
@@ -100,14 +102,14 @@ do_destroy_variant_slow() noexcept
 
     if(!byte_stack.empty()) {
       // Pop an element.
-      ROCKET_ASSERT(byte_stack.size() >= sizeof(storage));
-      ::memcpy(this->m_bytes, byte_stack.end() - sizeof(storage), sizeof(storage));
-      byte_stack.unaccept(sizeof(storage));
+      ROCKET_ASSERT(byte_stack.size() >= sizeof(*this));
+      ::memcpy(this->m_bytes, byte_stack.end() - sizeof(*this), sizeof(*this));
+      byte_stack.unaccept(sizeof(*this));
       goto r;
     }
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_bytes, 0xEB, sizeof(storage));
+    ::std::memset(this->m_bytes, 0xEB, sizeof(*this));
 #endif
   }
   catch(exception& stdex) {
