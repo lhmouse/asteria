@@ -8,7 +8,6 @@
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/format.hpp"
 #include "details/utils.ipp"
-#include <cmath>
 namespace asteria {
 
 // Formatting
@@ -157,14 +156,34 @@ enum : uint8_t
     cmask_cntrl   = 0x40,  // [[:cntrl:]]
   };
 
-ROCKET_CONST inline
+constexpr uint8_t cmask_table[128] =
+  {
+    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
+    0x40, 0x21, 0x61, 0x41, 0x41, 0x41, 0x40, 0x40,
+    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
+    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
+    0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C,
+    0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x10,
+    0x00, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x1A, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+    0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x40,
+  };
+
+constexpr
 uint8_t
 get_cmask(char ch) noexcept
   {
-    return ((ch & 0x7F) == ch) ? details_utils::cmask_table[(uint8_t)ch] : 0;
+    return ((ch & 0x7F) == ch) ? cmask_table[(uint8_t) ch] : 0;
   }
 
-ROCKET_CONST inline
+constexpr
 bool
 is_cmask(char ch, uint8_t mask) noexcept
   {
@@ -172,36 +191,36 @@ is_cmask(char ch, uint8_t mask) noexcept
   }
 
 // Numeric conversion
-ROCKET_CONST inline
+constexpr
 bool
 is_convertible_to_int64(double val) noexcept
   {
     return (-0x1p63 <= val) && (val < 0x1p63);
   }
 
-ROCKET_CONST inline
+constexpr
 bool
 is_exact_int64(double val) noexcept
   {
-    return noadl::is_convertible_to_int64(val) && (::std::trunc(val) == val);
+    return noadl::is_convertible_to_int64(val) && ((double)(int64_t) val == val);
   }
 
 inline
 int64_t
 safe_double_to_int64(double val)
   {
-    double fval = ::std::trunc(val);
-    if(fval != val)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_double_to_int64: value `%.17g` is not an exact integer",
-            val);
-
     if(!noadl::is_convertible_to_int64(val))
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
             "safe_double_to_int64: value `%.17g` is out of range for an `int64`",
             val);
 
-    return static_cast<int64_t>(val);
+    int64_t ival = (int64_t) val;
+    if((double) ival != val)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "safe_double_to_int64: value `%.17g` is not an exact integer",
+            val);
+
+    return ival;
   }
 
 // C-style quoting
