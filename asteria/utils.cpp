@@ -326,10 +326,10 @@ wrap_index(int64_t index, size_t size) noexcept
 
     // The range of valid indices is (~size, size).
     Wrapped_Index w;
-    auto ssize = (int64_t) size;
+    int64_t ssize = (int64_t) size;
     if(index >= 0) {
       // Append elements as needed.
-      auto nappend = ::rocket::max(index, ssize - 1) - (ssize - 1);
+      int64_t nappend = ::rocket::max(index, ssize - 1) - (ssize - 1);
       w.nprepend = 0;
       w.nappend = (uint64_t) nappend;
 
@@ -339,7 +339,7 @@ wrap_index(int64_t index, size_t size) noexcept
     }
     else {
       // Prepend elements as needed.
-      auto nprepend = ::rocket::max(index - 1, ~ssize) - (index - 1);
+      int64_t nprepend = ::rocket::max(index - 1, -1 - ssize) - (index - 1);
       w.nprepend = (uint64_t) nprepend;
       w.nappend = 0;
 
