@@ -45,17 +45,17 @@ class Text_Reader
 
     Source_Location
     tell() const noexcept
-      { return { this->file(), this->line(), this->column() };  }
+      {
+        return { this->file(), this->line(), this->column() };
+      }
 
     bool
     advance()
       {
         this->m_off = 0;
-        if(!getline(this->m_str, this->m_cbuf))
-          return false;
-
-        this->m_line += 1;
-        return true;
+        bool succ = getline(this->m_str, this->m_cbuf);
+        this->m_line += succ;
+        return succ;
       }
 
     size_t
