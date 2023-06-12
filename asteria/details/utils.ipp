@@ -7,17 +7,6 @@
 namespace asteria {
 namespace details_utils {
 
-extern const char ctrl_char_names[][8];
-extern const char char_escapes[][8];
-
-struct Quote_Wrapper
-  {
-    const char* str;
-    size_t len;
-  };
-
-tinyfmt&
-operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
 
 struct Paragraph_Wrapper
   {

@@ -265,12 +265,12 @@ do_compare_slow(const Value& other) const noexcept
 
         case type_boolean:
           comp = details_value::do_3way_compare<int>(
-                           qlhs->as_boolean(), qrhs->as_boolean());
+                    qlhs->as_boolean(), qrhs->as_boolean());
           break;
 
         case type_integer:
           comp = details_value::do_3way_compare<V_integer>(
-                           qlhs->as_integer(), qrhs->as_integer());
+                    qlhs->as_integer(), qrhs->as_integer());
           break;
 
         case type_real:
@@ -278,7 +278,7 @@ do_compare_slow(const Value& other) const noexcept
 
         case type_string:
           comp = details_value::do_3way_compare<int>(
-                        qlhs->as_string().compare(qrhs->as_string()), 0);
+                    qlhs->as_string().compare(qrhs->as_string()), 0);
           break;
 
         case type_opaque:
@@ -291,7 +291,7 @@ do_compare_slow(const Value& other) const noexcept
 
           if(altr1.empty() != altr2.empty())
             return details_value::do_3way_compare<size_t>(
-                                       altr1.size(), altr2.size());
+                      altr1.size(), altr2.size());
 
           if(!altr1.empty()) {
             // Open a pair of arrays.
@@ -327,7 +327,7 @@ do_compare_slow(const Value& other) const noexcept
 
       if(cont1 != cont2)
         return details_value::do_3way_compare<size_t>(
-                     elem.first.refa->size(), elem.second.refa->size());
+                  elem.first.refa->size(), elem.second.refa->size());
 
       if(cont1) {
         qlhs = &*(elem.first.curp);
@@ -378,7 +378,9 @@ print(tinyfmt& fmt) const
         break;
 
       case type_string:
-        fmt << quote(qval->as_string());
+        fmt << '\"';
+        c_quote(fmt, qval->as_string().data(), qval->as_string().size());
+        fmt << '\"';
         break;
 
       case type_opaque:
@@ -411,7 +413,9 @@ print(tinyfmt& fmt) const
         Rbr_object elemo = { &altr, altr.begin() };
         if(elemo.curp != altr.end()) {
           // Open an object.
-          fmt << "{ " << quote(elemo.curp->first) << ": ";
+          fmt << "{ \"";
+          c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+          fmt << "\": ";
           qval = &(elemo.curp->second);
           stack.emplace_back(::std::move(elemo));
           goto r;
@@ -447,7 +451,9 @@ print(tinyfmt& fmt) const
         case 1: {
           auto& elemo = elem.mut<1>();
           if(++(elemo.curp) != elemo.refo->end()) {
-            fmt << ", " << quote(elemo.curp->first) << ": ";
+            fmt << ", \"";
+            c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+            fmt << "\": ";
             qval = &(elemo.curp->second);
             goto r;
           }
@@ -504,7 +510,9 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
       case type_string: {
         const auto& altr = qval->as_string();
-        fmt << "string(" << altr.size() << ") " << quote(altr) << ';';
+        fmt << "string(" << altr.size() << ") \"";
+        c_quote(fmt, altr.data(), altr.size());
+        fmt << "\";";
         break;
       }
 
@@ -528,7 +536,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         if(elema.curp != altr.end()) {
           // Open an array.
           fmt << '[';
-          fmt << pwrap(indent, hanging + indent * (stack.size() + 1));
+          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
           fmt << (elema.curp - altr.begin()) << " = ";
           qval = &*(elema.curp);
           stack.emplace_back(::std::move(elema));
@@ -547,8 +555,10 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         if(elemo.curp != altr.end()) {
           // Open an object.
           fmt << '{';
-          fmt << pwrap(indent, hanging + indent * (stack.size() + 1));
-          fmt << quote(elemo.curp->first) << " = ";
+          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
+          fmt << '\"';
+          c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+          fmt << "\" = ";
           qval = &(elemo.curp->second);
           stack.emplace_back(::std::move(elemo));
           goto r;
@@ -571,14 +581,14 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         case 0: {
           auto& elema = elem.mut<0>();
           if(++(elema.curp) != elema.refa->end()) {
-            fmt << pwrap(indent, hanging + indent * stack.size());
+            details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
             fmt << (elema.curp - elema.refa->begin()) << " = ";
             qval = &*(elema.curp);
             goto r;
           }
 
           // Close this array.
-          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
+          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
           fmt << "];";
           break;
         }
@@ -586,14 +596,16 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         case 1: {
           auto& elemo = elem.mut<1>();
           if(++(elemo.curp) != elemo.refo->end()) {
-            fmt << pwrap(indent, hanging + indent * stack.size());
-            fmt << quote(elemo.curp->first) << " = ";
+            details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
+            fmt << '\"';
+            c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+            fmt << "\" = ";
             qval = &(elemo.curp->second);
             goto r;
           }
 
           // Close this object.
-          fmt << pwrap(indent, hanging + indent * (stack.size() - 1));
+          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
           fmt << "};";
           break;
         }

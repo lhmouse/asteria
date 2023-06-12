@@ -26,7 +26,7 @@ apply_read_opt(const Value& parent) const
               describe_type(parent.type()), altr.index);
 
         const auto& arr = parent.as_array();
-        auto w = wrap_index(altr.index, arr.size());
+        auto w = wrap_array_index(arr.ssize(), altr.index);
         if(w.nprepend | w.nappend)
           return nullptr;
 
@@ -132,7 +132,7 @@ apply_write_opt(Value& parent) const
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
-        auto w = wrap_index(altr.index, arr.size());
+        auto w = wrap_array_index(arr.ssize(), altr.index);
         if(w.nprepend | w.nappend)
           return nullptr;
 
@@ -238,7 +238,7 @@ apply_open(Value& parent) const
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
-        auto w = wrap_index(altr.index, arr.size());
+        auto w = wrap_array_index(arr.ssize(), altr.index);
         if(w.nprepend)
           arr.insert(arr.begin(), w.nprepend);
         else if(w.nappend)
@@ -351,7 +351,7 @@ apply_unset(Value& parent) const
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
-        auto w = wrap_index(altr.index, arr.size());
+        auto w = wrap_array_index(arr.ssize(), altr.index);
         if(w.nprepend | w.nappend)
           return nullopt;
 

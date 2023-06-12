@@ -19,7 +19,7 @@ struct Indenter
     ~Indenter();
 
     virtual
-    tinyfmt&
+    void
     break_line(tinyfmt& fmt) const = 0;
 
     virtual
@@ -48,9 +48,9 @@ class Indenter_none final
     Indenter_none() = default;
 
   public:
-    tinyfmt&
-    break_line(tinyfmt& fmt) const override
-      { return fmt;  }
+    void
+    break_line(tinyfmt& /*fmt*/) const override
+      { }
 
     void
     increment_level() override
@@ -79,21 +79,29 @@ class Indenter_string final
       { }
 
   public:
-    tinyfmt&
+    void
     break_line(tinyfmt& fmt) const override
-      { return fmt << this->m_cur;  }
+      {
+        fmt << this->m_cur;
+      }
 
     void
     increment_level() override
-      { this->m_cur.append(this->m_add);  }
+      {
+        this->m_cur.append(this->m_add);
+      }
 
     void
     decrement_level() override
-      { this->m_cur.pop_back(this->m_add.size());  }
+      {
+        this->m_cur.pop_back(this->m_add.size());
+      }
 
     bool
     has_indention() const noexcept override
-      { return this->m_add.size();  }
+      {
+        return this->m_add.size() != 0;
+      }
   };
 
 class Indenter_spaces final
@@ -110,27 +118,52 @@ class Indenter_spaces final
       { }
 
   public:
-    tinyfmt&
+    void
     break_line(tinyfmt& fmt) const override
-      { return fmt << pwrap(this->m_add, this->m_cur);  }
+      {
+        static constexpr char spaces[] = "                       ";
+        static constexpr size_t nspaces = ::rocket::xstrlen(spaces);
+
+        // When `step` is zero, separate fields with a single space.
+        if(ROCKET_EXPECT(this->m_add == 0)) {
+          fmt << spaces[0];
+          return;
+        }
+
+        // Otherwise, terminate the current line, and indent the next.
+        size_t nrem = this->m_cur;
+        fmt << '\n';
+        while(ROCKET_UNEXPECT(nrem > nspaces)) {
+          nrem -= nspaces;
+          fmt.putn(spaces, nspaces);
+        }
+        fmt.putn(spaces, nrem);
+      }
 
     void
     increment_level() override
-      { this->m_cur += this->m_add;  }
+      {
+        this->m_cur += this->m_add;
+      }
 
     void
     decrement_level() override
-      { this->m_cur -= this->m_add;  }
+      {
+        this->m_cur -= this->m_add;
+      }
 
     bool
     has_indention() const noexcept override
-      { return this->m_add;  }
+      {
+        return this->m_add != 0;
+      }
   };
 
-tinyfmt&
+void
 do_quote_string(tinyfmt& fmt, stringR str)
   {
-    // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
+    // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification
+    // adopts UTF-16.
     fmt << '\"';
     size_t offset = 0;
     while(offset < str.size()) {
@@ -195,16 +228,15 @@ do_quote_string(tinyfmt& fmt, stringR str)
       }
     }
     fmt << '\"';
-    return fmt;
   }
 
-tinyfmt&
+void
 do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, stringR name)
   {
     // Write the key.
     if(json5 && name.size() && is_cmask(name[0], cmask_namei) &&
-                ::std::all_of(name.begin() + 1, name.end(),
-                              [](char c) { return is_cmask(c, cmask_namei | cmask_digit);  }))
+           ::std::all_of(name.begin() + 1, name.end(),
+                      [](char c) { return is_cmask(c, cmask_namei | cmask_digit);  }))
       fmt << name;
     else
       do_quote_string(fmt, name);
@@ -214,8 +246,6 @@ do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, stringR n
       fmt << ": ";
     else
       fmt << ':';
-
-    return fmt;
   }
 
 bool
@@ -225,8 +255,8 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
       if(curp == object.end())
         return false;
       else if(::rocket::is_none_of(curp->second.type(),
-                     { type_null, type_boolean, type_integer, type_real, type_string,
-                       type_array, type_object }))
+                 { type_null, type_boolean, type_integer, type_real, type_string,
+                   type_array, type_object }))
         ++curp;
       else
         return true;

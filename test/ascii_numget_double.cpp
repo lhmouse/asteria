@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "../rocket/ascii_numget.hpp"
 #include <float.h>
+#include <math.h>
 using namespace ::rocket;
 
 struct

@@ -302,5 +302,26 @@ do_3way_compare(const XValT& lhs, const XValT& rhs) noexcept
       return compare_equal;
   }
 
+inline
+tinyfmt&
+do_break_line(tinyfmt& fmt, size_t step, size_t next)
+  {
+    static constexpr char spaces[] = "                       ";
+    static constexpr size_t nspaces = ::rocket::xstrlen(spaces);
+
+    // When `step` is zero, separate fields with a single space.
+    if(step == 0)
+      return fmt << spaces[0];
+
+    // Otherwise, terminate the current line, and indent the next.
+    size_t nrem = next;
+    fmt << '\n';
+    while(ROCKET_UNEXPECT(nrem > nspaces)) {
+      nrem -= nspaces;
+      fmt.putn(spaces, nspaces);
+    }
+    return fmt.putn(spaces, nrem);
+  }
+
 }  // namespace details_value
 }  // namespace asteria

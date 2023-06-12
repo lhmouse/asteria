@@ -62,5 +62,6 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <immintrin.h>
 
 #endif

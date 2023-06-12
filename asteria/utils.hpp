@@ -99,32 +99,6 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
        ),  \
      ROCKET_UNREACHABLE())
 
-// UTF-8 conversion functions
-bool
-utf8_encode(char*& pos, char32_t cp) noexcept;
-
-bool
-utf8_encode(cow_string& text, char32_t cp);
-
-bool
-utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
-
-bool
-utf8_decode(char32_t& cp, stringR text, size_t& offset);
-
-// UTF-16 conversion functions
-bool
-utf16_encode(char16_t*& pos, char32_t cp) noexcept;
-
-bool
-utf16_encode(cow_u16string& text, char32_t cp);
-
-bool
-utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept;
-
-bool
-utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
-
 // Type conversion
 template<typename enumT>
 ROCKET_CONST constexpr
@@ -223,35 +197,97 @@ safe_double_to_int64(double val)
     return ival;
   }
 
+// Gets a random number from hardware.
+inline
+uint64_t
+generate_random_seed() noexcept
+  {
+    int hw_ok = 0;
+    uint64_t val = 0;
+#ifdef __RDSEED__
+    hw_ok = ::_rdseed64_step(&val);
+#endif
+    return ROCKET_EXPECT(hw_ok) ? val : ::__rdtsc();
+  }
+
+// Negative array index wrapper
+struct Wrapped_Index
+  {
+    uint64_t nappend;   // number of elements to append
+    uint64_t nprepend;  // number of elements to prepend
+
+    size_t rindex;  // wrapped index, within range if and only if
+                    // both `nappend` and `nprepend` are zeroes
+
+    constexpr
+    Wrapped_Index(ptrdiff_t ssize, int64_t sindex) noexcept
+      : nappend(0), nprepend(0),
+        rindex(0)
+      {
+        ROCKET_ASSERT(ssize >= 0);
+
+        if(sindex >= 0) {
+          ptrdiff_t last_sindex = ssize - 1;
+          this->nappend = (uint64_t) (::std::max(last_sindex, sindex) - last_sindex);
+          this->rindex = (size_t) sindex;
+        }
+        else {
+          ptrdiff_t first_sindex = 0 - ssize;
+          this->nprepend = (uint64_t) (first_sindex - ::std::min(sindex, first_sindex));
+          this->rindex = (size_t) (sindex + ssize) + (size_t) this->nprepend;
+        }
+      }
+  };
+
+constexpr
+Wrapped_Index
+wrap_array_index(ptrdiff_t ssize, int64_t sindex) noexcept
+  {
+    return Wrapped_Index(ssize, sindex);
+  }
+
+// UTF-8 conversion functions
+bool
+utf8_encode(char*& pos, char32_t cp) noexcept;
+
+bool
+utf8_encode(cow_string& text, char32_t cp);
+
+bool
+utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
+
+bool
+utf8_decode(char32_t& cp, stringR text, size_t& offset);
+
+// UTF-16 conversion functions
+bool
+utf16_encode(char16_t*& pos, char32_t cp) noexcept;
+
+bool
+utf16_encode(cow_u16string& text, char32_t cp);
+
+bool
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept;
+
+bool
+utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
+
 // C-style quoting
-constexpr
-details_utils::Quote_Wrapper
-quote(const char* str, size_t len) noexcept
-  {
-    return { str, len };
-  }
+tinyfmt&
+c_quote(tinyfmt& fmt, const char* data, size_t size);
 
-inline
-details_utils::Quote_Wrapper
-quote(const char* str) noexcept
-  {
-    return noadl::quote(str, ::std::strlen(str));
-  }
+cow_string&
+c_quote(cow_string& str, const char* data, size_t size);
 
-inline
-details_utils::Quote_Wrapper
-quote(stringR str) noexcept
-  {
-    return noadl::quote(str.data(), str.size());
-  }
 
-// Justifying
-constexpr
-details_utils::Paragraph_Wrapper
-pwrap(size_t indent, size_t hanging) noexcept
-  {
-    return { indent, hanging };
-  }
+
+
+
+
+
+
+
+
 
 // Error numbers
 constexpr
@@ -260,22 +296,6 @@ format_errno(int err = errno) noexcept
   {
     return { err };
   }
-
-// Negative array index wrapper
-struct Wrapped_Index
-  {
-    uint64_t nprepend;  // number of elements to prepend
-    uint64_t nappend;   // number of elements to append
-    size_t rindex;      // the wrapped index (valid if both `nprepend` and `nappend` are 0s)
-  };
-
-ROCKET_CONST
-Wrapped_Index
-wrap_index(int64_t index, size_t size) noexcept;
-
-// Note that all bits in the result are filled.
-uint64_t
-generate_random_seed() noexcept;
 
 }  // namespace asteria
 #endif

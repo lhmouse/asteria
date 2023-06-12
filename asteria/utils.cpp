@@ -6,6 +6,45 @@
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <unistd.h>  // ::write
 namespace asteria {
+namespace {
+
+const char s_char_escapes[][5] =
+  {
+    "\\0",   "\\x01", "\\x02", "\\x03", "\\x04", "\\x05", "\\x06", "\\a",
+    "\\b",   "\\t",   "\\n",   "\\v",   "\\f",   "\\r",   "\\x0E", "\\x0F",
+    "\\x10", "\\x11", "\\x12", "\\x13", "\\x14", "\\x15", "\\x16", "\\x17",
+    "\\x18", "\\x19", "\\Z",   "\\e",   "\\x1C", "\\x1D", "\\x1E", "\\x1F",
+    " ",     "!",     "\\\"",  "#",     "$",     "%",     "&",     "\\'",
+    "(",     ")",     "*",     "+",     ",",     "-",     ".",     "/",
+    "0",     "1",     "2",     "3",     "4",     "5",     "6",     "7",
+    "8",     "9",     ":",     ";",     "<",     "=",     ">",     "?",
+    "@",     "A",     "B",     "C",     "D",     "E",     "F",     "G",
+    "H",     "I",     "J",     "K",     "L",     "M",     "N",     "O",
+    "P",     "Q",     "R",     "S",     "T",     "U",     "V",     "W",
+    "X",     "Y",     "Z",     "[",     "\\\\",  "]",     "^",     "_",
+    "`",     "a",     "b",     "c",     "d",     "e",     "f",     "g",
+    "h",     "i",     "j",     "k",     "l",     "m",     "n",     "o",
+    "p",     "q",     "r",     "s",     "t",     "u",     "v",     "w",
+    "x",     "y",     "z",     "{",     "|",     "}",     "~",     "\\x7F",
+    "\\x80", "\\x81", "\\x82", "\\x83", "\\x84", "\\x85", "\\x86", "\\x87",
+    "\\x88", "\\x89", "\\x8A", "\\x8B", "\\x8C", "\\x8D", "\\x8E", "\\x8F",
+    "\\x90", "\\x91", "\\x92", "\\x93", "\\x94", "\\x95", "\\x96", "\\x97",
+    "\\x98", "\\x99", "\\x9A", "\\x9B", "\\x9C", "\\x9D", "\\x9E", "\\x9F",
+    "\\xA0", "\\xA1", "\\xA2", "\\xA3", "\\xA4", "\\xA5", "\\xA6", "\\xA7",
+    "\\xA8", "\\xA9", "\\xAA", "\\xAB", "\\xAC", "\\xAD", "\\xAE", "\\xAF",
+    "\\xB0", "\\xB1", "\\xB2", "\\xB3", "\\xB4", "\\xB5", "\\xB6", "\\xB7",
+    "\\xB8", "\\xB9", "\\xBA", "\\xBB", "\\xBC", "\\xBD", "\\xBE", "\\xBF",
+    "\\xC0", "\\xC1", "\\xC2", "\\xC3", "\\xC4", "\\xC5", "\\xC6", "\\xC7",
+    "\\xC8", "\\xC9", "\\xCA", "\\xCB", "\\xCC", "\\xCD", "\\xCE", "\\xCF",
+    "\\xD0", "\\xD1", "\\xD2", "\\xD3", "\\xD4", "\\xD5", "\\xD6", "\\xD7",
+    "\\xD8", "\\xD9", "\\xDA", "\\xDB", "\\xDC", "\\xDD", "\\xDE", "\\xDF",
+    "\\xE0", "\\xE1", "\\xE2", "\\xE3", "\\xE4", "\\xE5", "\\xE6", "\\xE7",
+    "\\xE8", "\\xE9", "\\xEA", "\\xEB", "\\xEC", "\\xED", "\\xEE", "\\xEF",
+    "\\xF0", "\\xF1", "\\xF2", "\\xF3", "\\xF4", "\\xF5", "\\xF6", "\\xF7",
+    "\\xF8", "\\xF9", "\\xFA", "\\xFB", "\\xFC", "\\xFD", "\\xFE", "\\xFF",
+  };
+
+}  // namespace
 
 ptrdiff_t
 write_log_to_stderr(const char* file, long line, const char* func, cow_string&& msg)
@@ -63,13 +102,42 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
 
     // Neutralize control characters: ['\x00','\x1F'] and '\x7F'.
     for(char c : msg) {
-      uint32_t ch = (unsigned char) c;
-      if(ch <= 0x1F)
-        data += details_utils::ctrl_char_names[ch];
-      else if(ch == 0x7F)
-        data += "[DEL]";
-      else
-        data += (char) ch;
+      switch(c) {
+        break; case 0x00:  data += "[NUL]";
+        break; case 0x01:  data += "[SOH]";
+        break; case 0x02:  data += "[STX]";
+        break; case 0x03:  data += "[ETX]";
+        break; case 0x04:  data += "[EOT]";
+        break; case 0x05:  data += "[ENQ]";
+        break; case 0x06:  data += "[ACK]";
+        break; case 0x07:  data += "[BEL]";
+        break; case 0x08:  data += "[BS]";
+        break; case 0x09:  data += "\t";    // HT
+        break; case 0x0A:  data += "\n\t";  // LF
+        break; case 0x0B:  data += "[VT]";
+        break; case 0x0C:  data += "[FF]";
+        break; case 0x0D:                   // CR
+        break; case 0x0E:  data += "[SO]";
+        break; case 0x0F:  data += "[SI]";
+        break; case 0x10:  data += "[DLE]";
+        break; case 0x11:  data += "[DC1]";
+        break; case 0x12:  data += "[DC2]";
+        break; case 0x13:  data += "[DC3]";
+        break; case 0x14:  data += "[DC4]";
+        break; case 0x15:  data += "[NAK]";
+        break; case 0x16:  data += "[SYN]";
+        break; case 0x17:  data += "[ETB]";
+        break; case 0x18:  data += "[CAN]";
+        break; case 0x19:  data += "[EM]";
+        break; case 0x1A:  data += "[SUB]";
+        break; case 0x1B:  data += "[ESC]";
+        break; case 0x1C:  data += "[FS]";
+        break; case 0x1D:  data += "[GS]";
+        break; case 0x1E:  data += "[RS]";
+        break; case 0x1F:  data += "[US]";
+        break;   default:  data += c;       // verbatim
+        break; case 0x7F:  data += "[DEL]";
+      }
     }
 
     // Remove trailing space characters.
@@ -319,55 +387,36 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
     return true;
   }
 
-Wrapped_Index
-wrap_index(int64_t index, size_t size) noexcept
+tinyfmt&
+c_quote(tinyfmt& fmt, const char* data, size_t size)
   {
-    ROCKET_ASSERT(size <= PTRDIFF_MAX);
+    for(size_t k = 0;  k != size;  ++k) {
+      uint32_t ch = (uint8_t) data[k];
+      const char* seq = s_char_escapes[ch];
 
-    // The range of valid indices is (~size, size).
-    Wrapped_Index w;
-    int64_t ssize = (int64_t) size;
-    if(index >= 0) {
-      // Append elements as needed.
-      int64_t nappend = ::rocket::max(index, ssize - 1) - (ssize - 1);
-      w.nprepend = 0;
-      w.nappend = (uint64_t) nappend;
-
-      // `index` is truncated if it does not fit in `size_t`, but in this case it
-      // shouldn't be used.
-      w.rindex = (size_t) index;
+      // Optimize the operation if it comprises only one character.
+      if(ROCKET_EXPECT(seq[1] == 0))
+        fmt << seq[0];
+      else
+        fmt << seq;
     }
-    else {
-      // Prepend elements as needed.
-      int64_t nprepend = ::rocket::max(index - 1, -1 - ssize) - (index - 1);
-      w.nprepend = (uint64_t) nprepend;
-      w.nappend = 0;
-
-      // `index + ssize` cannot overflow when `index` is negative and `ssize` is not.
-      w.rindex = (size_t) (index + ssize) + (size_t) nprepend;
-    }
-    return w;
+    return fmt;
   }
 
-uint64_t
-generate_random_seed() noexcept
+cow_string&
+c_quote(cow_string& str, const char* data, size_t size)
   {
-    // Get the system time of very high resolution.
-    ::timespec ts;
-    ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t ireg = (uint64_t) ts.tv_sec;
-    ireg <<= 30;
-    ireg |= (uint32_t) ts.tv_nsec;
+    for(size_t k = 0;  k != size;  ++k) {
+      uint32_t ch = (uint8_t) data[k];
+      const char* seq = s_char_escapes[ch];
 
-    // Hash it using FNV-1a to erase sensitive information.
-    //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
-    // The source value is read in little-endian byte order.
-    uint64_t seed = 0xCBF29CE484222325U;
-    for(size_t i = 0;  i < 8;  ++i) {
-      seed = (seed ^ (ireg & 0xFF)) * 0x100000001B3U;
-      ireg >>= 8;
+      // Optimize the operation if it comprises only one character.
+      if(ROCKET_EXPECT(seq[1] == 0))
+        str += seq[0];
+      else
+        str += seq;
     }
-    return seed;
+    return str;
   }
 
 }  // namespace asteria

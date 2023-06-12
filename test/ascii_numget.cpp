@@ -3,6 +3,8 @@
 
 #include "utils.hpp"
 #include "../rocket/ascii_numget.hpp"
+#include <float.h>
+#include <math.h>
 using namespace ::rocket;
 
 // Test cases of known-bad strtod conversions that motivated the use of dmg_fp.
