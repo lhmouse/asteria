@@ -19,19 +19,19 @@ std_io_getln();
 optV_integer
 std_io_putc(V_integer value);
 
-optV_integer
+V_integer
 std_io_putc(V_string value);
 
 // `std.io.putln`
-optV_integer
+V_integer
 std_io_putln(V_string value);
 
 // `std.io.putf`
-optV_integer
+V_integer
 std_io_putf(V_string templ, cow_vector<Value> values);
 
 // `std.io.putfln`
-optV_integer
+V_integer
 std_io_putfln(V_string templ, cow_vector<Value> values);
 
 // `std.io.read`
@@ -39,7 +39,7 @@ optV_string
 std_io_read(optV_integer limit);
 
 // `std.io.write`
-optV_integer
+V_integer
 std_io_write(V_string data);
 
 // `std.io.flush`

@@ -9,6 +9,14 @@
 namespace asteria {
 namespace {
 
+enum IOF_Mode : uint8_t
+  {
+    iof_mode_input_narrow    = 0b00,
+    iof_mode_input_wide      = 0b01,
+    iof_mode_output_narrow   = 0b10,
+    iof_mode_output_wide     = 0b11,
+  };
+
 class IOF_Sentry
   {
   private:
@@ -16,69 +24,54 @@ class IOF_Sentry
 
   public:
     explicit
-    IOF_Sentry(::FILE* fp) noexcept
+    IOF_Sentry(::FILE* fp, IOF_Mode mode)
       : m_fp(fp)
-      { ::flockfile(this->m_fp);  }
+      {
+        int orient_req = (mode & 0b01) ? +1 : -1;
+        char mode_req[4] = "?b";
+        mode_req[0] = (mode & 0b10) ? 'w' : 'r';
+
+        ::flockfile(this->m_fp);
+
+        if((::fwide(this->m_fp, orient_req) ^ orient_req) < 0) {
+          // Clear the current orientation.
+          // XXX: Is it safe to do so when the file has been locked?
+          if(::freopen(nullptr, mode_req, this->m_fp) == nullptr)
+            ASTERIA_THROW((
+                "Could not reopen standard stream (mode `$2`)",
+                "[`freopen` failed: $1]"),
+                format_errno(), mode_req);
+
+          // Retry now. This really should not fail.
+          if((::fwide(this->m_fp, orient_req) ^ orient_req) < 0)
+            ASTERIA_THROW((
+                "Could not set standard stream orientation (mode `$2`)"),
+                mode_req);
+        }
+
+        // Check for earlier errors.
+        if(::ferror_unlocked(fp))
+          ASTERIA_THROW_RUNTIME_ERROR((
+              "Standard stream error (mode `$2`, error bit set)"),
+              mode_req);
+      }
 
     ASTERIA_NONCOPYABLE_DESTRUCTOR(IOF_Sentry)
-      { ::funlockfile(this->m_fp);  }
+      {
+        ::funlockfile(this->m_fp);
+      }
 
-  public:
     operator
     ::FILE*() const noexcept
       { return this->m_fp;  }
   };
-
-int
-do_recover_unlocked(::FILE* fp)
-  {
-    // Note `errno` is meaningful only when an error has occurred.
-    // EOF is not an error.
-    int err = 0;
-    if(ROCKET_UNEXPECT(::ferror_unlocked(fp))) {
-      err = errno;
-
-      // If the preceding operation failed for these non-fatal errors,
-      // clear the error bit. This makes such operations retryable.
-      if(::rocket::is_any_of(err, { EINTR, EAGAIN, EWOULDBLOCK }))
-        ::clearerr_unlocked(fp);
-    }
-
-    // Return the error code as is.
-    // Note that we will always throw an exception in case of errors,
-    // even when it is not fatal.
-    return err;
-  }
-
-constexpr
-int
-do_normalize_fwide(int wide) noexcept
-  {
-    return (wide == 0) ? 0 : ((wide >> (WORD_BIT - 1)) | 1);
-  }
-
-bool
-do_set_wide(::FILE* fp, const char* mode, int wide)
-  {
-    // Get the current orientation.
-    int wcomp = do_normalize_fwide(wide);
-    if(do_normalize_fwide(::fwide(fp, wide)) != wcomp) {
-      // Clear the current orientation and try resetting it.
-      // XXX: Is it safe to do so when the file has been locked?
-      if(!::freopen(nullptr, mode, fp))
-        ::abort();
-
-      if(do_normalize_fwide(::fwide(fp, wide)) != wcomp)
-        return false;
-    }
-    return true;
-  }
 
 size_t
 do_write_utf8_common(::FILE* fp, stringR text)
   {
     size_t ncps = 0;
     size_t off = 0;
+
     while(off < text.size()) {
       // Decode a code point from `text`.
       char32_t cp;
@@ -101,20 +94,20 @@ do_write_utf8_common(::FILE* fp, stringR text)
   }
 
 size_t
-do_format_write_utf8_common(::FILE* fp, const V_string& templ,
-                            const cow_vector<Value>& values)
+do_format_write_utf8_common(::FILE* fp, const V_string& templ, const cow_vector<Value>& values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
+
     for(const auto& val : values)
       insts.push_back({
         [](tinyfmt& fmt, const void* ptr) {
-          const auto& r = *(const Value*) ptr;
-          if(r.is_string())
-            fmt << r.as_string();
+          const Value& arg = *(const Value*) ptr;
+          if(arg.is_string())
+            fmt << arg.as_string();
           else
-            r.print(fmt);
+            arg.print(fmt);
         },
         &val });
 
@@ -129,311 +122,185 @@ do_format_write_utf8_common(::FILE* fp, const V_string& templ,
 optV_integer
 std_io_getc()
   {
-    const IOF_Sentry fp(stdin);
+    wint_t wch;
+    const IOF_Sentry fp(stdin, iof_mode_input_wide);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
+    wch = ::fgetwc_unlocked(fp);
+    if((wch == WEOF) && ::ferror_unlocked(fp))
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard input failure (error bit set)"));
+          "Error reading standard input",
+          "[`fgetwc_unlocked()` failed: $1]"),
+          format_errno());
 
-    if(!do_set_wide(fp, "r", +1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text read from binary-oriented input"));
-
-    // Read a UTF code point.
-    wint_t wch = ::fgetwc_unlocked(fp);
-    if(wch == WEOF) {
-      // Throw an exception on error.
-      int err = do_recover_unlocked(fp);
-      if(err != 0)
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Error reading standard input",
-            "[`fgetwc_unlocked()` failed: $1]"),
-            format_errno(err));
-
-      // Return `null` on EOF.
+    if(wch == WEOF)
       return nullopt;
-    }
 
-    // Zero-extend the code point to an integer.
-    return (char32_t)wch;
+    return (int64_t)(uint32_t) wch;
   }
 
 optV_string
 std_io_getln()
   {
-    const IOF_Sentry fp(stdin);
-
-    // Check stream status.
-    if(::ferror_unlocked(fp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard input failure (error bit set)"));
-
-    if(!do_set_wide(fp, "r", +1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text read from binary-oriented input"));
-
-    // Read a UTF-8 string.
     cow_string u8str;
-    ::wint_t wch;
-    while((wch = ::fgetwc_unlocked(fp)) != L'\n') {
-      // Check for errors.
-      if(wch == WEOF) {
-        // If at least a character has been read, don't fail.
-        if(!u8str.empty())
-          break;
+    wint_t wch;
+    const IOF_Sentry fp(stdin, iof_mode_input_wide);
 
-        // Throw an exception on error.
-        int err = do_recover_unlocked(fp);
-        if(err != 0)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Error reading standard input",
-              "[`fgetwc_unlocked()` failed: $1]"),
-              format_errno(err));
+    for(;;) {
+      wch = ::fgetwc_unlocked(fp);
+      if((wch == WEOF) && ::ferror_unlocked(fp))
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Error reading standard input",
+            "[`fgetwc_unlocked()` failed: $1]"),
+            format_errno());
 
-        // Return `null` on EOF.
-        return nullopt;
-      }
+      if((wch == L'\n') || (wch == WEOF))
+        break;
 
-      // Append the non-LF character to the result string.
-      char32_t cp = (char32_t)wch;
-      if(!utf8_encode(u8str, cp))
+      if(!utf8_encode(u8str, (char32_t) wch))
         ASTERIA_THROW_RUNTIME_ERROR((
             "Invalid UTF code point from standard input (value `$1`)"),
             wch);
     }
-    return u8str;
+
+    if((wch == WEOF) && u8str.empty())
+      return nullopt;
+
+    return ::std::move(u8str);
   }
 
 optV_integer
 std_io_putc(V_integer value)
   {
-    const IOF_Sentry fp(stdout);
+    char u8discard[4];
+    char* u8ptr = u8discard;
+    const IOF_Sentry fp(stdout, iof_mode_output_wide);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
+    if((value < 0) || (value > 0x10FFFF))
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard output failure (error bit set)"));
+          "Invalid UTF code point (value `$1`)"),
+          value);
 
-    if(!do_set_wide(fp, "w", +1))
+    if(!utf8_encode(u8ptr, (char32_t) value))
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text write to binary-oriented output"));
+          "Invalid UTF code point (value `$1`)"),
+          value);
 
-    // Validate the code point.
-    char32_t cp = (char32_t)value;
-    if(cp != value)
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid UTF code point (value `$1`)"), value);
-
-    // Check whether it is valid by try encoding it.
-    // The result is discarded.
-    char16_t sbuf[2];
-    char16_t* sp = sbuf;
-    if(!utf16_encode(sp, cp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid UTF code point (value `$1`)"), value);
-
-    // Write a UTF code point.
-    if(::fputwc_unlocked((wchar_t)cp, fp) == WEOF)
+    if(::fputwc_unlocked((wchar_t) value, fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
           format_errno());
 
-    // Return the number of code points that have been written.
-    // This is always 1 for this function.
     return 1;
   }
 
-optV_integer
+V_integer
 std_io_putc(V_string value)
   {
-    const IOF_Sentry fp(stdout);
+    size_t ncps;
+    const IOF_Sentry fp(stdout, iof_mode_output_wide);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard output failure (error bit set)"));
-
-    if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text write to binary-oriented output"));
-
-    // Write only the string.
-    size_t ncps = do_write_utf8_common(fp, value);
-
-    // Return the number of code points that have been written.
-    return (int64_t)ncps;
+    ncps = do_write_utf8_common(fp, value);
+    return (int64_t) ncps;
   }
 
-optV_integer
+V_integer
 std_io_putln(V_string value)
   {
-    const IOF_Sentry fp(stdout);
+    size_t ncps;
+    const IOF_Sentry fp(stdout, iof_mode_output_wide);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard output failure (error bit set)"));
+    ncps = do_write_utf8_common(fp, value);
 
-    if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text write to binary-oriented output"));
-
-    // Write the string itself.
-    size_t ncps = do_write_utf8_common(fp, value);
-
-    // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
           format_errno());
 
-    // Return the number of code points that have been written.
-    // The implicit LF also counts.
-    return (int64_t)ncps + 1;
+    return (int64_t) ncps + 1;
   }
 
-optV_integer
+V_integer
 std_io_putf(V_string templ, cow_vector<Value> values)
   {
-    const IOF_Sentry fp(stdout);
+    size_t ncps;
+    const IOF_Sentry fp(stdout, iof_mode_output_wide);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard output failure (error bit set)"));
-
-    if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text write to binary-oriented output"));
-
-    // Write the string itself.
-    size_t ncps = do_format_write_utf8_common(fp, templ, values);
-
-    // Return the number of code points that have been written.
-    return (int64_t)ncps;
+    ncps = do_format_write_utf8_common(fp, templ, values);
+    return (int64_t) ncps;
   }
 
-optV_integer
+V_integer
 std_io_putfln(V_string templ, cow_vector<Value> values)
   {
-    const IOF_Sentry fp(stdout);
+    size_t ncps;
+    const IOF_Sentry fp(stdout, iof_mode_output_wide);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard output failure (error bit set)"));
+    ncps = do_format_write_utf8_common(fp, templ, values);
 
-    if(!do_set_wide(fp, "w", +1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid text write to binary-oriented output"));
-
-    // Write the string itself.
-    size_t ncps = do_format_write_utf8_common(fp, templ, values);
-
-    // Append a line feed and flush.
     if(::fputwc_unlocked(L'\n', fp) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
           format_errno());
 
-    // Return the number of code points that have been written.
-    // The implicit LF also counts.
-    return (int64_t)ncps + 1;
+    return (int64_t) ncps;
   }
 
 optV_string
 std_io_read(optV_integer limit)
   {
-    const IOF_Sentry fp(stdin);
-
-    // Check stream status.
-    if(::ferror_unlocked(fp))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard input failure (error bit set)"));
-
-    if(!do_set_wide(fp, "r", -1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid binary read from text-oriented input"));
-
+    const size_t ntotal = ::rocket::clamp_cast<size_t>(limit.value_or(INT_MAX), 0, INT_MAX);
+    size_t nbatch, nread;
     V_string data;
-    int64_t rlimit = limit.value_or(INT64_MAX);
-    while(rlimit > 0) {
-      // Try reading some bytes.
-      size_t nbatch = ::rocket::clamp_cast<size_t>(rlimit, 0, 0x100000);
-      auto insert_pos = data.insert(data.end(), nbatch, '/');
-      size_t nread = ::fread_unlocked(&*insert_pos, 1, nbatch, fp);
-      data.erase(insert_pos + (ptrdiff_t)nread, data.end());
+    const IOF_Sentry fp(stdin, iof_mode_input_narrow);
 
-      // Check for errors.
-      if(nread == 0) {
-        // If at least a byte has been read, don't fail.
-        if(!data.empty())
-          break;
+    for(;;) {
+      ROCKET_ASSERT(data.size() <= ntotal);
+      nbatch = ntotal - data.size();
+      if(nbatch == 0)
+        break;
 
-        // Throw an exception on error.
-        int err = do_recover_unlocked(fp);
-        if(err != 0)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Error reading standard input",
-              "[`fgetwc_unlocked()` failed: $1]"),
-              format_errno(err));
+      data.append(nbatch, '*');
+      nread = ::fread_unlocked(data.mut_data() + data.size() - nbatch, 1, nbatch, fp);
+      data.pop_back(nbatch - nread);
+      if((nread != nbatch) && ::ferror_unlocked(fp))
+        ASTERIA_THROW_RUNTIME_ERROR((
+            "Error reading standard input",
+            "[`fgetwc_unlocked()` failed: $1]"),
+            format_errno());
 
-        // Return `null` on EOF.
-        return nullopt;
-      }
-
-      rlimit -= (int64_t)nread;
+      if(nread != nbatch)
+        break;
     }
+
+    if(((nbatch != 0) || ::feof_unlocked(fp)) && data.empty())
+      return nullopt;
+
     return ::std::move(data);
   }
 
-optV_integer
+V_integer
 std_io_write(V_string data)
   {
-    const IOF_Sentry fp(stdout);
+    const IOF_Sentry fp(stdout, iof_mode_output_narrow);
 
-    // Check stream status.
-    if(::ferror_unlocked(fp))
+    if(::fwrite_unlocked(data.data(), 1, data.size(), fp) != data.size())
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Standard output failure (error bit set)"));
+          "Error writing standard output",
+          "[`fwrite_unlocked()` failed: $1]"),
+          format_errno());
 
-    if(!do_set_wide(fp, "w", -1))
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Invalid binary write to text-oriented output"));
-
-    size_t off = 0;
-    while(off < data.size()) {
-      // Try writing some bytes.
-      size_t nwrtn = ::fwrite_unlocked(data.data() + off, 1, data.size() - off, fp);
-      if(nwrtn == 0) {
-        // Throw an exception on error.
-        int err = do_recover_unlocked(fp);
-        if(err != 0)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Error writing standard output",
-              "[`fwrite_unlocked()` failed: $1]"),
-              format_errno(err));
-
-        // If nothing has been written, fail.
-        return nullopt;
-      }
-
-      off += nwrtn;
-    }
-    return (int64_t)off;
+    return (int64_t) data.size();
   }
 
 void
 std_io_flush()
   {
-    // Flush standard output only.
-    if(::fflush(stdout) == EOF)
+    if(::fflush(nullptr) == EOF)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Error flushing standard output",
+          "Error flushing standard streams",
           "[`fflush()` failed: $1]"),
           format_errno());
   }
