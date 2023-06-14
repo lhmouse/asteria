@@ -62,6 +62,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <x86intrin.h>
 #include <immintrin.h>
 
 #endif

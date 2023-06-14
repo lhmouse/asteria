@@ -29,6 +29,7 @@
 #include <limits.h>
 #include <wchar.h>
 #include <endian.h>
+#include <x86intrin.h>
 #include <immintrin.h>
 
 #define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
