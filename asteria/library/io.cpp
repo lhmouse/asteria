@@ -24,8 +24,8 @@ class IOF_Sentry
 
   public:
     explicit
-    IOF_Sentry(::FILE* fp, IOF_Mode mode)
-      : m_fp(fp)
+    IOF_Sentry(::FILE* sentry, IOF_Mode mode)
+      : m_fp(sentry)
       {
         int orient_req = (mode & 0b01) ? +1 : -1;
         char mode_req[4] = "?b";
@@ -50,7 +50,7 @@ class IOF_Sentry
         }
 
         // Check for earlier errors.
-        if(::ferror_unlocked(fp))
+        if(::ferror_unlocked(sentry))
           ASTERIA_THROW_RUNTIME_ERROR((
               "Standard stream error (mode `$2`, error bit set)"),
               mode_req);
@@ -67,7 +67,7 @@ class IOF_Sentry
   };
 
 size_t
-do_write_utf8_common(::FILE* fp, stringR text)
+do_write_utf8_common(const IOF_Sentry& sentry, stringR text)
   {
     size_t ncps = 0;
     size_t off = 0;
@@ -81,7 +81,7 @@ do_write_utf8_common(::FILE* fp, stringR text)
             text, off);
 
       // Insert it into the output stream.
-      if(::fputwc_unlocked((wchar_t)cp, fp) == WEOF)
+      if(::fputwc_unlocked((wchar_t)cp, sentry) == WEOF)
         ASTERIA_THROW_RUNTIME_ERROR((
             "Error writing standard output",
             "[`fputwc_unlocked()` failed: $1]"),
@@ -94,7 +94,7 @@ do_write_utf8_common(::FILE* fp, stringR text)
   }
 
 size_t
-do_format_write_utf8_common(::FILE* fp, const V_string& templ, const cow_vector<Value>& values)
+do_format_write_utf8_common(const IOF_Sentry& sentry, const V_string& templ, const cow_vector<Value>& values)
   {
     // Prepare inserters.
     cow_vector<::rocket::formatter> insts;
@@ -114,7 +114,7 @@ do_format_write_utf8_common(::FILE* fp, const V_string& templ, const cow_vector<
     // Compose the string into a stream and write it.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.safe_c_str(), insts.data(), insts.size());
-    return do_write_utf8_common(fp, fmt.get_string());
+    return do_write_utf8_common(sentry, fmt.get_string());
   }
 
 }  // namespace
@@ -123,10 +123,10 @@ optV_integer
 std_io_getc()
   {
     wint_t wch;
-    const IOF_Sentry fp(stdin, iof_mode_input_wide);
+    const IOF_Sentry sentry(stdin, iof_mode_input_wide);
 
-    wch = ::fgetwc_unlocked(fp);
-    if((wch == WEOF) && ::ferror_unlocked(fp))
+    wch = ::fgetwc_unlocked(sentry);
+    if((wch == WEOF) && ::ferror_unlocked(sentry))
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error reading standard input",
           "[`fgetwc_unlocked()` failed: $1]"),
@@ -143,11 +143,11 @@ std_io_getln()
   {
     cow_string u8str;
     wint_t wch;
-    const IOF_Sentry fp(stdin, iof_mode_input_wide);
+    const IOF_Sentry sentry(stdin, iof_mode_input_wide);
 
     for(;;) {
-      wch = ::fgetwc_unlocked(fp);
-      if((wch == WEOF) && ::ferror_unlocked(fp))
+      wch = ::fgetwc_unlocked(sentry);
+      if((wch == WEOF) && ::ferror_unlocked(sentry))
         ASTERIA_THROW_RUNTIME_ERROR((
             "Error reading standard input",
             "[`fgetwc_unlocked()` failed: $1]"),
@@ -173,7 +173,7 @@ std_io_putc(V_integer value)
   {
     char u8discard[4];
     char* u8ptr = u8discard;
-    const IOF_Sentry fp(stdout, iof_mode_output_wide);
+    const IOF_Sentry sentry(stdout, iof_mode_output_wide);
 
     if((value < 0) || (value > 0x10FFFF))
       ASTERIA_THROW_RUNTIME_ERROR((
@@ -185,7 +185,7 @@ std_io_putc(V_integer value)
           "Invalid UTF code point (value `$1`)"),
           value);
 
-    if(::fputwc_unlocked((wchar_t) value, fp) == WEOF)
+    if(::fputwc_unlocked((wchar_t) value, sentry) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
@@ -198,9 +198,9 @@ V_integer
 std_io_putc(V_string value)
   {
     size_t ncps;
-    const IOF_Sentry fp(stdout, iof_mode_output_wide);
+    const IOF_Sentry sentry(stdout, iof_mode_output_wide);
 
-    ncps = do_write_utf8_common(fp, value);
+    ncps = do_write_utf8_common(sentry, value);
     return (int64_t) ncps;
   }
 
@@ -208,11 +208,11 @@ V_integer
 std_io_putln(V_string value)
   {
     size_t ncps;
-    const IOF_Sentry fp(stdout, iof_mode_output_wide);
+    const IOF_Sentry sentry(stdout, iof_mode_output_wide);
 
-    ncps = do_write_utf8_common(fp, value);
+    ncps = do_write_utf8_common(sentry, value);
 
-    if(::fputwc_unlocked(L'\n', fp) == WEOF)
+    if(::fputwc_unlocked(L'\n', sentry) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
@@ -225,9 +225,9 @@ V_integer
 std_io_putf(V_string templ, cow_vector<Value> values)
   {
     size_t ncps;
-    const IOF_Sentry fp(stdout, iof_mode_output_wide);
+    const IOF_Sentry sentry(stdout, iof_mode_output_wide);
 
-    ncps = do_format_write_utf8_common(fp, templ, values);
+    ncps = do_format_write_utf8_common(sentry, templ, values);
     return (int64_t) ncps;
   }
 
@@ -235,11 +235,11 @@ V_integer
 std_io_putfln(V_string templ, cow_vector<Value> values)
   {
     size_t ncps;
-    const IOF_Sentry fp(stdout, iof_mode_output_wide);
+    const IOF_Sentry sentry(stdout, iof_mode_output_wide);
 
-    ncps = do_format_write_utf8_common(fp, templ, values);
+    ncps = do_format_write_utf8_common(sentry, templ, values);
 
-    if(::fputwc_unlocked(L'\n', fp) == WEOF)
+    if(::fputwc_unlocked(L'\n', sentry) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: $1]"),
@@ -254,28 +254,29 @@ std_io_read(optV_integer limit)
     const size_t ntotal = ::rocket::clamp_cast<size_t>(limit.value_or(INT_MAX), 0, INT_MAX);
     size_t nbatch, nread;
     V_string data;
-    const IOF_Sentry fp(stdin, iof_mode_input_narrow);
+    const IOF_Sentry sentry(stdin, iof_mode_input_narrow);
 
     for(;;) {
       ROCKET_ASSERT(data.size() <= ntotal);
-      nbatch = ntotal - data.size();
+      nbatch = ::std::min(ntotal - data.size(), data.size() / 2 + 127);
       if(nbatch == 0)
         break;
 
-      data.append(nbatch, '*');
-      nread = ::fread_unlocked(data.mut_data() + data.size() - nbatch, 1, nbatch, fp);
-      data.pop_back(nbatch - nread);
-      if((nread != nbatch) && ::ferror_unlocked(fp))
+      auto batch_pos = data.insert(data.end(), nbatch, '*');
+      nread = ::fread_unlocked(&*batch_pos, 1, nbatch, sentry);
+      if((nread != nbatch) && ::ferror_unlocked(sentry))
         ASTERIA_THROW_RUNTIME_ERROR((
             "Error reading standard input",
             "[`fgetwc_unlocked()` failed: $1]"),
             format_errno());
 
-      if(nread != nbatch)
+      if(nread != nbatch) {
+        data.erase(batch_pos + (ptrdiff_t) nread, data.end());
         break;
+      }
     }
 
-    if(((nbatch != 0) || ::feof_unlocked(fp)) && data.empty())
+    if(((nbatch != 0) || ::feof_unlocked(sentry)) && data.empty())
       return nullopt;
 
     return ::std::move(data);
@@ -284,9 +285,9 @@ std_io_read(optV_integer limit)
 V_integer
 std_io_write(V_string data)
   {
-    const IOF_Sentry fp(stdout, iof_mode_output_narrow);
+    const IOF_Sentry sentry(stdout, iof_mode_output_narrow);
 
-    if(::fwrite_unlocked(data.data(), 1, data.size(), fp) != data.size())
+    if(::fwrite_unlocked(data.data(), 1, data.size(), sentry) != data.size())
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
           "[`fwrite_unlocked()` failed: $1]"),
