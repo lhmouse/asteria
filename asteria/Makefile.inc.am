@@ -2,7 +2,6 @@ lib_LTLIBRARIES += lib/libasteria.la
 bin_PROGRAMS += bin/asteria
 
 nobase_include_HEADERS +=  \
-  %reldir%/details/utils.ipp  \
   %reldir%/details/value.ipp  \
   %reldir%/details/variable_hashmap.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
@@ -67,7 +66,6 @@ nobase_include_HEADERS +=  \
 lib_libasteria_la_SOURCES =  \
   %reldir%/version.h.in  \
   %reldir%/precompiled.ipp  \
-  %reldir%/details/utils.cpp  \
   %reldir%/fwd.cpp  \
   %reldir%/utils.cpp  \
   %reldir%/recursion_sentry.cpp  \

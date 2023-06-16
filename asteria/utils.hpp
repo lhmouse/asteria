@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/format.hpp"
-#include "details/utils.ipp"
 namespace asteria {
 
 // Formatting
@@ -278,24 +277,6 @@ c_quote(tinyfmt& fmt, const char* data, size_t size);
 
 cow_string&
 c_quote(cow_string& str, const char* data, size_t size);
-
-
-
-
-
-
-
-
-
-
-
-// Error numbers
-constexpr
-details_utils::Formatted_errno
-format_errno(int err = errno) noexcept
-  {
-    return { err };
-  }
 
 }  // namespace asteria
 #endif

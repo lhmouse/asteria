@@ -58,8 +58,8 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
 
     while(*next != charT()) {
       // Look for the next placeholder.
-      // XXX: For multi-byte strings this is faulty, as a non-leading byte
-      //      may coincidentally match the dollar sign.
+      // XXX: For non-UTF multi-byte strings this is faulty, as trailing bytes
+      //      may match the dollar sign coincidentally.
       if(*next != charT('$')) {
         next ++;
         continue;
@@ -68,6 +68,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
       if(next != base)
         fmt.putn(base, static_cast<size_t>(next - base));
 
+      // Get the immediate specifier following this dollar sign.
       next ++;
       if(*next == charT()) {
         // end of string
@@ -80,14 +81,13 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
       }
       else if((*next >= charT('0')) && (*next <= charT('9'))) {
         // simple specifier
-        unsigned ai = static_cast<unsigned>(*next - charT('0'));
+        unsigned int ai = static_cast<unsigned int>(*next - charT('0'));
         if(ai > ninsts)
           noadl::sprintf_and_throw<out_of_range>(
               "vformat: no enough arguments (`%lld > `%lld)",
               static_cast<long long>(ai), static_cast<long long>(ninsts));
 
         // Zero denotes the format string and non-zero denotes an argument.
-        // No padding or alignment is added for this specifier.
         if(ai == 0)
           fmt.putn(stempl, noadl::xstrlen(stempl));
         else
@@ -100,6 +100,39 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
         if(!next)
           noadl::sprintf_and_throw<invalid_argument>(
               "vformat: unmatched `${` in template string");
+
+        // Define built-in specifiers.
+        static constexpr charT sp_errno_str[] = { 'e','r','r','n','o','/','s','t','r' };
+        static constexpr charT sp_errno_full[] = { 'e','r','r','n','o','/','f','u','l','l' };
+        static constexpr charT sp_time_utc[] = { 't','i','m','e','/','u','t','c' };
+        static constexpr charT sp_time_ns_utc[] = { 't','i','m','e','/','n','s','/','u','t','c' };
+/*
+        if((next - base ==  5) && noadl::xmemeq(base, sp_errno_str, 5)) {
+          // 'errno': the value of `errno` in numeral form
+          ascii_numput nump;
+          nump.put_DI(errno);
+          fmt << nump.c_str();
+        }
+        else if(next - base == 9) && noadl::xmemeq(base, sp_errno_str, 5)) {
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // At this moment, only the index of an argument is accepted.
         // TODO: Support more comprehensive placeholders.

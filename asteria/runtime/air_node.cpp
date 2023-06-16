@@ -4548,9 +4548,9 @@ struct Traits_import_call
         abspath.reset(::realpath(path.safe_c_str(), nullptr));
         if(!abspath)
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Could not open module file '$2'",
-              "[`realpath()` failed: $1]"),
-              format_errno(), path);
+              "Could not open module file '$1'",
+              "[`realpath()` failed: ${errno:full}]"),
+              path);
 
         // Compile the script file into a function object.
         Module_Loader::Unique_Stream utext;

@@ -38,9 +38,9 @@ class IOF_Sentry
           // XXX: Is it safe to do so when the file has been locked?
           if(::freopen(nullptr, mode_req, this->m_fp) == nullptr)
             ASTERIA_THROW((
-                "Could not reopen standard stream (mode `$2`)",
-                "[`freopen` failed: $1]"),
-                format_errno(), mode_req);
+                "Could not reopen standard stream (mode `$1`)",
+                "[`freopen` failed: ${errno:full}]"),
+                mode_req);
 
           // Retry now. This really should not fail.
           if((::fwide(this->m_fp, orient_req) ^ orient_req) < 0)
@@ -84,8 +84,7 @@ do_write_utf8_common(const IOF_Sentry& sentry, stringR text)
       if(::fputwc_unlocked((wchar_t)cp, sentry) == WEOF)
         ASTERIA_THROW_RUNTIME_ERROR((
             "Error writing standard output",
-            "[`fputwc_unlocked()` failed: $1]"),
-            format_errno());
+            "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
       // The return value is the number of code points rather than bytes.
       ncps += 1;
@@ -129,8 +128,7 @@ std_io_getc()
     if((wch == WEOF) && ::ferror_unlocked(sentry))
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error reading standard input",
-          "[`fgetwc_unlocked()` failed: $1]"),
-          format_errno());
+          "[`fgetwc_unlocked()` failed: ${errno:full}]"));
 
     if(wch == WEOF)
       return nullopt;
@@ -150,8 +148,7 @@ std_io_getln()
       if((wch == WEOF) && ::ferror_unlocked(sentry))
         ASTERIA_THROW_RUNTIME_ERROR((
             "Error reading standard input",
-            "[`fgetwc_unlocked()` failed: $1]"),
-            format_errno());
+            "[`fgetwc_unlocked()` failed: ${errno:full}]"));
 
       if((wch == L'\n') || (wch == WEOF))
         break;
@@ -188,8 +185,7 @@ std_io_putc(V_integer value)
     if(::fputwc_unlocked((wchar_t) value, sentry) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
-          "[`fputwc_unlocked()` failed: $1]"),
-          format_errno());
+          "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
     return 1;
   }
@@ -215,8 +211,7 @@ std_io_putln(V_string value)
     if(::fputwc_unlocked(L'\n', sentry) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
-          "[`fputwc_unlocked()` failed: $1]"),
-          format_errno());
+          "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
     return (int64_t) ncps + 1;
   }
@@ -242,8 +237,7 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
     if(::fputwc_unlocked(L'\n', sentry) == WEOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
-          "[`fputwc_unlocked()` failed: $1]"),
-          format_errno());
+          "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
     return (int64_t) ncps;
   }
@@ -267,8 +261,7 @@ std_io_read(optV_integer limit)
       if((nread != nbatch) && ::ferror_unlocked(sentry))
         ASTERIA_THROW_RUNTIME_ERROR((
             "Error reading standard input",
-            "[`fgetwc_unlocked()` failed: $1]"),
-            format_errno());
+            "[`fgetwc_unlocked()` failed: ${errno:full}]"));
 
       if(nread != nbatch) {
         data.erase(batch_pos + (ptrdiff_t) nread, data.end());
@@ -290,8 +283,7 @@ std_io_write(V_string data)
     if(::fwrite_unlocked(data.data(), 1, data.size(), sentry) != data.size())
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error writing standard output",
-          "[`fwrite_unlocked()` failed: $1]"),
-          format_errno());
+          "[`fwrite_unlocked()` failed: ${errno:full}]"));
 
     return (int64_t) data.size();
   }
@@ -302,8 +294,7 @@ std_io_flush()
     if(::fflush(nullptr) == EOF)
       ASTERIA_THROW_RUNTIME_ERROR((
           "Error flushing standard streams",
-          "[`fflush()` failed: $1]"),
-          format_errno());
+          "[`fflush()` failed: ${errno:full}]"));
   }
 
 void

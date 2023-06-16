@@ -286,17 +286,19 @@ do_streq_ci(const V_string& str, V_string::shallow_type cmp) noexcept
 class PCRE2_Error
   {
   private:
-    uint8_t m_buf[480];
+    char m_buf[480];
 
   public:
     explicit
     PCRE2_Error(int err) noexcept
-      { ::pcre2_get_error_message(err, this->m_buf, sizeof(m_buf));  }
+      {
+        ::pcre2_get_error_message(err, (uint8_t*) this->m_buf, sizeof(m_buf));
+      }
 
   public:
     const char*
     c_str() const noexcept
-      { return reinterpret_cast<const char*>(this->m_buf);  }
+      { return this->m_buf;  }
   };
 
 inline
@@ -1738,10 +1740,9 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
     ::rocket::unique_handle<::iconv_t, iconv_closer> qcd;
     if(!qcd.reset(::iconv_open(to_enc, from_enc)))
       ASTERIA_THROW_RUNTIME_ERROR((
-             "Could not create iconv context",
-             "[`iconv_open()` failed: $1]",
-             "[converting to encoding `$2` from `$3`]"),
-             format_errno(), to_enc, from_enc);
+             "Could not create iconv context to encoding `$1` from `$2`"),
+             "[`iconv_open()` failed: ${errno:full}]",
+             to_enc, from_enc);
 
     // Perform bytewise conversion.
     V_string output;
@@ -1757,11 +1758,9 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
       output.append(temp, outp);
       if((r == (size_t)-1) && (errno != E2BIG))
         ASTERIA_THROW_RUNTIME_ERROR((
-               "Invalid input byte at offset `$4`",
-               "[`iconv()` failed: $1]",
-               "[converting to encoding `$2` from `$3`]"),
-               format_errno(), to_enc, from_enc,
-               inp - text.c_str());
+               "Invalid input byte to encoding `$1` from `$2` at offset `$3`",
+               "[`iconv()` failed: ${errno:full}]"),
+               to_enc, from_enc, inp - text.c_str());
     }
     return output;
   }

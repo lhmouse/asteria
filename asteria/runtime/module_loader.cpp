@@ -23,18 +23,18 @@ do_lock_stream(const char* path)
     ::rocket::unique_posix_file file(::fopen(path, "rb"));
     if(!file)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not open script file '$2'",
-          "[`fopen()` failed: $1]"),
-          format_errno(), path);
+          "Could not open script file '$1'",
+          "[`fopen()` failed: ${errno:full}]"),
+          path);
 
     // Make the unique identifier of this file from its device ID and inode number.
     int fd = ::fileno(file);
     struct ::stat info;
     if(::fstat(fd, &info))
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not get properties of script file '$2'",
-          "[`fstat()` failed: $1]"),
-          format_errno(), path);
+          "Could not get properties of script file '$1'",
+          "[`fstat()` failed: ${errno:full}]"),
+          path);
 
     // Mark the stream locked.
     auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
@@ -49,9 +49,9 @@ do_lock_stream(const char* path)
     // Keep in mind that `file` is now null.
     if(::flock(fd, LOCK_EX) != 0)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not lock script file '$2'",
-          "[`fcntl()` failed: $1]"),
-          format_errno(), path);
+          "Could not lock script file '$1'",
+          "[`fcntl()` failed: ${errno:full}]"),
+          path);
 
     return &*(result.first);
   }

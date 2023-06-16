@@ -16,7 +16,7 @@
 #include <sys/wait.h>  // ::waitpid()
 #include <sys/utsname.h>  // ::uname()
 #include <sys/sysinfo.h>  // ::get_nprocs()
-#include <unistd.h>  // ::daemon()
+#include <sys/socket.h>  // ::socket()
 #include <time.h>  // ::clock_gettime()
 namespace asteria {
 namespace {
@@ -482,9 +482,9 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not spawn process '$2'",
-          "[`posix_spawnp()` failed: $1]"),
-          format_errno(), cmd);
+          "Could not spawn process '$1'",
+          "[`posix_spawnp()` failed: ${errno:full}]"),
+          cmd);
 
     for(;;) {
       // Await its termination.
@@ -492,9 +492,9 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
         ASTERIA_THROW_RUNTIME_ERROR((
-            "Error awaiting child process '$2'",
-            "[`waitpid()` failed: $1]"),
-            format_errno(), pid);
+            "Error awaiting child process '$1'",
+            "[`waitpid()` failed: ${errno:full}]"),
+            pid);
 
       if(WIFEXITED(wstat))
         return WEXITSTATUS(wstat);  // exited
@@ -507,18 +507,64 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
 void
 std_system_proc_daemonize()
   {
-    if(::daemon(1, 0) != 0)
+    // Create a socket for overwriting standard streams in child
+    // processes later.
+    ::rocket::unique_posix_fd tfd(::socket(AF_UNIX, SOCK_STREAM, 0));
+    if(tfd == -1)
       ASTERIA_THROW_RUNTIME_ERROR((
-          "Could not daemonize process",
-          "[`daemon()` failed: $1]"),
-          format_errno());
+          "Could not create blackhole stream",
+          "[`socket()` failed: ${errno:full}]"));
+
+    // Create the CHILD process and wait.
+    ::pid_t cpid = ::fork();
+    if(cpid == -1)
+      ASTERIA_THROW_RUNTIME_ERROR((
+          "Could not create child process",
+          "[`fork()` failed: ${errno:full}]"));
+
+    if(cpid != 0) {
+      // Wait for the CHILD process and forward its exit code.
+      int wstatus;
+      for(;;)
+        if(::waitpid(cpid, &wstatus, 0) != cpid)
+          continue;
+        else if(WIFEXITED(wstatus))
+          ::_Exit(WEXITSTATUS(wstatus));
+        else if(WIFSIGNALED(wstatus))
+          ::_Exit(128 + WTERMSIG(wstatus));
+    }
+
+    // The CHILD shall create a new session and become its leader. This
+    // ensures that a later GRANDCHILD will not be a session leader and
+    // will not unintentially gain a controlling terminal.
+    ::setsid();
+
+    // Create the GRANDCHILD process.
+    cpid = ::fork();
+    if(cpid == -1)
+      ASTERIA_TERMINATE((
+          "Could not create grandchild process",
+          "[`fork()` failed: ${errno:full}]"));
+
+    if(cpid != 0) {
+      // Exit so the PARENT process will continue.
+      ::_Exit(0);
+    }
+
+    // Close standard streams in the GRANDCHILD. Errors are ignored.
+    // The GRANDCHILD shall continue execution.
+    ::shutdown(tfd, SHUT_RDWR);
+    (void)! ::dup2(tfd, STDIN_FILENO);
+    (void)! ::dup2(tfd, STDOUT_FILENO);
+    (void)! ::dup2(tfd, STDERR_FILENO);
   }
 
 V_object
 std_system_conf_load_file(V_string path)
   {
     // Initialize tokenizer options.
-    // Unlike JSON5, we support _real_ integers and single-quote string literals.
+    // Unlike JSON5, we support _real_ integers and single-quote string
+    // literals.
     Compiler_Options opts;
     opts.keywords_as_identifiers = true;
 

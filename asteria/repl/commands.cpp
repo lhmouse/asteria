@@ -258,9 +258,9 @@ struct Handler_source final
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
         if(!abspath)
           ASTERIA_THROW((
-              "Could not open script file '$2'",
-              "[`realpath()` failed: $1]"),
-              format_errno(), args[0]);
+              "Could not open script file '$1'",
+              "[`realpath()` failed: ${errno:full}]"),
+              args[0]);
 
         repl_printf("* loading file '%s'...", abspath.get());
         ::rocket::tinybuf_file file;
