@@ -105,6 +105,28 @@ class basic_tinyfmt
         this->mut_buf().putc(c);
         return *this;
       }
+
+    basic_tinyfmt&
+    putn_latin1(const char* s, size_t n)
+      {
+        constexpr size_t M = 32;
+        char_type x[M];
+        size_t ns = 0, nx = 0;
+
+        while(ns != n) {
+          // Zero-extend one character to `char_type`.
+          ROCKET_ASSERT(nx != M);
+          x[nx++] = static_cast<char_type>(s[ns++] & 0xFF);
+
+          if(ROCKET_EXPECT(ns != n) && ROCKET_EXPECT(nx != M))
+            continue;
+
+          // Flush all pending characters.
+          this->mut_buf().putn(x, nx);
+          nx = 0;
+        }
+        return *this;
+      }
   };
 
 template<typename charT>
