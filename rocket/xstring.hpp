@@ -85,6 +85,14 @@ xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
   }
 
 template<typename charT>
+ROCKET_PURE constexpr
+bool
+xmemeq(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
+  {
+    return (llen == rlen) && noadl::xmemeq(lhs, rhs, llen);
+  }
+
+template<typename charT>
 constexpr
 charT*
 xmempset(charT* out, typename identity<charT>::type elem, size_t len) noexcept
@@ -99,8 +107,7 @@ inline
 charT*
 xmemrpset(charT*& out, typename identity<charT>::type elem, size_t len) noexcept
   {
-    out = details_xstring::ymempset(out, elem, len);
-    return out;
+    return out = noadl::xmempset(out, elem, len);
   }
 
 template<typename charT>
@@ -118,8 +125,7 @@ inline
 charT*
 xstrrpcpy(charT*& out, const typename identity<charT>::type* str) noexcept
   {
-    out = details_xstring::ystrpcpy(out, str);
-    return out;
+    return out = noadl::xstrpcpy(out, str);
   }
 
 template<typename charT>
@@ -137,8 +143,7 @@ inline
 charT*
 xmemrpcpy(charT*& out, const typename identity<charT>::type* str, size_t len) noexcept
   {
-    out = details_xstring::ymempcpy(out, str, len);
-    return out;
+    return out = noadl::xmempcpy(out, str, len);
   }
 
 }  // namespace rocket
