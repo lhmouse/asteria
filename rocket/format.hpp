@@ -27,10 +27,6 @@ struct basic_formatter
       : ifunc(xifunc), param(xparam)
       { }
 
-    void
-    do_format_output(tinyfmt_type& fmt) const
-      { this->ifunc(fmt, this->param);  }
-
     // Format the given value with `operator<<` via argument-dependent lookup.
     template<typename valueT>
     static
@@ -42,12 +38,14 @@ struct basic_formatter
 template<typename charT, typename valueT>
 constexpr
 basic_formatter<charT>
-make_default_formatter(basic_tinyfmt<charT>& /*fmt*/, const valueT& value) noexcept
+make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value) noexcept
   {
     using formatter = basic_formatter<charT>;
     constexpr auto callback = formatter::template default_callback<valueT>;
     return formatter(callback, ::std::addressof(value));
   }
+
+#include "details/format.ipp"
 
 template<typename charT>
 basic_tinyfmt<charT>&
@@ -56,120 +54,168 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
     const charT* base = stempl;
     const charT* next = stempl;
 
-    while(*next != charT()) {
+    for(;;) {
       // Look for the next placeholder.
-      // XXX: For non-UTF multi-byte strings this is faulty, as trailing bytes
-      //      may match the dollar sign coincidentally.
-      if(*next != charT('$')) {
+      // XXX: For non-UTF multi-byte strings this is faulty, as trailing
+      //      bytes may match the dollar sign coincidentally.
+      while((*next != charT()) && (*next != charT('$')))
         next ++;
-        continue;
-      }
 
-      if(next != base)
+      if(base != next) {
         fmt.putn(base, static_cast<size_t>(next - base));
-
-      // Get the immediate specifier following this dollar sign.
-      next ++;
-      if(*next == charT()) {
-        // end of string
-        noadl::sprintf_and_throw<invalid_argument>(
-            "vformat: dangling `$` in template string");
-      }
-      else if(*next == charT('$')) {
-        // literal `$`
-        fmt.putc(charT('$'));
-      }
-      else if((*next >= charT('0')) && (*next <= charT('9'))) {
-        // simple specifier
-        unsigned int ai = static_cast<unsigned int>(*next - charT('0'));
-        if(ai > ninsts)
-          noadl::sprintf_and_throw<out_of_range>(
-              "vformat: no enough arguments (`%lld > `%lld)",
-              static_cast<long long>(ai), static_cast<long long>(ninsts));
-
-        // Zero denotes the format string and non-zero denotes an argument.
-        if(ai == 0)
-          fmt.putn(stempl, noadl::xstrlen(stempl));
-        else
-          (pinsts + ai - 1)->do_format_output(fmt);
-      }
-      else if(*next == charT('{')) {
-        // This is the long, generic form, such as `${42}`.
         base = next;
-        next = noadl::xstrchr(base + 1, charT('}'));
-        if(!next)
-          noadl::sprintf_and_throw<invalid_argument>(
-              "vformat: unmatched `${` in template string");
-
-        // Define built-in specifiers.
-        static constexpr charT sp_errno_str[] = { 'e','r','r','n','o','/','s','t','r' };
-        static constexpr charT sp_errno_full[] = { 'e','r','r','n','o','/','f','u','l','l' };
-        static constexpr charT sp_time_utc[] = { 't','i','m','e','/','u','t','c' };
-        static constexpr charT sp_time_ns_utc[] = { 't','i','m','e','/','n','s','/','u','t','c' };
-/*
-        if((next - base ==  5) && noadl::xmemeq(base, sp_errno_str, 5)) {
-          // 'errno': the value of `errno` in numeral form
-          ascii_numput nump;
-          nump.put_DI(errno);
-          fmt << nump.c_str();
-        }
-        else if(next - base == 9) && noadl::xmemeq(base, sp_errno_str, 5)) {
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // At this moment, only the index of an argument is accepted.
-        // TODO: Support more comprehensive placeholders.
-        unsigned ai = 0;
-
-        while(++ base != next) {
-          // XXX: this is sloppy and needs polishing.
-          // XXX: I'm too lazy to check for overflows.
-          if((*base >= charT('0')) && (*base <= charT('9')))
-            ai = ai * 10 + static_cast<unsigned>(*base - charT('0'));
-        }
-
-        if(ai > ninsts)
-          noadl::sprintf_and_throw<out_of_range>(
-              "vformat: no enough arguments (`%lld > `%lld)",
-              static_cast<long long>(ai), static_cast<long long>(ninsts));
-
-        // Zero denotes the format string and non-zero denotes an argument.
-        // TODO: Support more comprehensive placeholders.
-        if(ai == 0)
-          fmt.putn(stempl, noadl::xstrlen(stempl));
-        else
-          (pinsts + ai - 1)->do_format_output(fmt);
       }
-      else
-        noadl::sprintf_and_throw<invalid_argument>(
-            "vformat: invalid placeholder `$%c` in template string",
-            static_cast<int>(*next));
 
-      // Move past this placeholder.
+      // If the end of the template string has been reached, stop.
+      if(*next == charT())
+        break;
+
+      // Parse this plafceholder.
+      ROCKET_ASSERT(*next == charT('$'));
+      next ++;
+      switch(*next) {
+        case charT('$'): {
+          // literal `$`
+          fmt.putc(charT('$'));
+          break;
+        }
+
+        case charT('0'):
+        case charT('1'):
+        case charT('2'):
+        case charT('3'):
+        case charT('4'):
+        case charT('5'):
+        case charT('6'):
+        case charT('7'):
+        case charT('8'):
+        case charT('9'): {
+          // simple placeholder
+          uint32_t iarg = static_cast<unsigned char>(*next - charT('0'));
+          if(iarg == 0) {
+            // `0` denotes the template string.
+            fmt.putn(stempl, noadl::xstrlen(stempl));
+          }
+          else if(iarg <= ninsts) {
+            // `1`...`ninsts` denote ordinal arguments.
+            const basic_formatter<charT>* inst = pinsts + iarg - 1;
+            inst->ifunc(fmt, inst->param);
+          }
+          else {
+            static constexpr charT bad_index[] = { '(','b','a','d','-','i','n','d','e','x',')' };
+            fmt.putn(bad_index, 11);
+          }
+          break;
+        }
+        case charT('{'): {
+          // composite placeholder
+          next ++;
+          base = next;
+
+          while((*next != charT()) && (*next != charT('}')))
+            next ++;
+
+          if(*next == charT())
+            noadl::sprintf_and_throw<invalid_argument>(
+                "vformat: no matching `}` in template string");
+
+          // Check for built-in placeholders.
+          static constexpr charT errno_str[] = { 'e','r','r','n','o',':','s','t','r' };
+          static constexpr charT errno_full[] = { 'e','r','r','n','o',':','f','u','l','l' };
+          static constexpr charT time_utc[] = { 't','i','m','e',':','u','t','c' };
+
+          if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 5)) {
+            // `errno`: value of `errno`
+            details_format::do_format_errno(fmt);
+            break;
+          }
+
+          if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 9)) {
+            // `errno:str`: description of `errno`
+            details_format::do_format_strerror_errno(fmt);
+            break;
+          }
+
+          if(noadl::xmemeq(base, (size_t) (next - base), errno_full, 10)) {
+            // `errno:full`: value of `errno` followed by its description
+            details_format::do_format_strerror_errno(fmt);
+            fmt.putn_latin1(" (errno ", 8);
+            details_format::do_format_errno(fmt);
+            fmt.putn_latin1(")", 1);
+            break;
+          }
+
+          if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 4)) {
+            // `time`: current date and time in local time zone
+            ::timespec tv;
+            ::clock_gettime(CLOCK_REALTIME, &tv);
+            ::tm tm;
+            ::localtime_r(&(tv.tv_sec), &tm);
+            details_format::do_format_time_iso(fmt, tm, tv.tv_nsec);
+            break;
+          }
+
+          if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 8)) {
+            // `time:utc`: current date and time in UTC
+            ::timespec tv;
+            ::clock_gettime(CLOCK_REALTIME, &tv);
+            ::tm tm;
+            ::gmtime_r(&(tv.tv_sec), &tm);
+            details_format::do_format_time_iso(fmt, tm, tv.tv_nsec);
+            break;
+          }
+
+          if(next == base) {
+            // ``: valid but no output
+            break;
+          }
+
+          // The placeholder shall be a non-negative integer.
+          uint32_t iarg = 0;
+
+          while(base != next) {
+            if((*base < charT('0')) || (*base > charT('9'))) {
+              iarg = UINT32_MAX;
+              break;
+            }
+            else if(iarg >= 0xFFFFU) {
+              iarg = UINT32_MAX;
+              break;
+            }
+            iarg *= 10U;
+            iarg += static_cast<unsigned char>(*base - charT('0'));
+            base ++;
+          }
+
+          if(iarg == 0) {
+            // `0` denotes the template string.
+            fmt.putn(stempl, noadl::xstrlen(stempl));
+          }
+          else if(iarg <= ninsts) {
+            // `1`...`ninsts` denote ordinal arguments.
+            const basic_formatter<charT>* inst = pinsts + iarg - 1;
+            inst->ifunc(fmt, inst->param);
+          }
+          else {
+            static constexpr charT bad_index[] = { '(','b','a','d','-','i','n','d','e','x',')' };
+            fmt.putn(bad_index, 11);
+          }
+          break;
+        }
+
+        case charT():
+          noadl::sprintf_and_throw<invalid_argument>(
+              "vformat: dangling `$` at end of template string");
+
+        default:
+          noadl::sprintf_and_throw<invalid_argument>(
+              "vformat: unknown placeholder `$%c` in template string",
+              static_cast<int>(*next));
+      }
+
       next ++;
       base = next;
     }
-
-    if(next != base)
-      fmt.putn(base, static_cast<size_t>(next - base));
-
     return fmt;
   }
 
