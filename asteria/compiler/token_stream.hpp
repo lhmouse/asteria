@@ -22,6 +22,13 @@ class Token_Stream
       : m_opts(opts)
       { }
 
+    Token_Stream&
+    swap(Token_Stream& other) noexcept
+      {
+        this->m_stmts.swap(other.m_stmts);
+        return *this;
+      }
+
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Token_Stream);
 
@@ -86,6 +93,13 @@ class Token_Stream
     void
     reload(stringR file, int start_line, tinybuf&& cbuf);
   };
+
+inline
+void
+swap(Token_Stream& lhs, Token_Stream& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace asteria
 #endif
