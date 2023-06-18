@@ -21,7 +21,7 @@ class Statement_Sequence
       { }
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(Statement_Sequence);
+    ASTERIA_NONCOPYABLE_DESTRUCTOR(Statement_Sequence);
 
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
