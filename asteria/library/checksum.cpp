@@ -24,7 +24,9 @@ class CRC32_Hasher final
   public:
     explicit
     CRC32_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -129,7 +131,9 @@ class FNV1a32_Hasher final
   public:
     explicit
     FNV1a32_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -253,7 +257,9 @@ class MD5_Hasher final
   public:
     explicit
     MD5_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -359,7 +365,9 @@ class SHA1_Hasher final
   public:
     explicit
     SHA1_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -465,7 +473,9 @@ class SHA224_Hasher final
   public:
     explicit
     SHA224_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -571,7 +581,9 @@ class SHA256_Hasher final
   public:
     explicit
     SHA256_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -677,7 +689,9 @@ class SHA384_Hasher final
   public:
     explicit
     SHA384_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
@@ -783,7 +797,9 @@ class SHA512_Hasher final
   public:
     explicit
     SHA512_Hasher() noexcept
-      { this->clear();  }
+      {
+        this->clear();
+      }
 
   public:
     tinyfmt&
