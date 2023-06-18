@@ -20,13 +20,6 @@ class Statement_Sequence
       : m_opts(opts)
       { }
 
-    Statement_Sequence&
-    swap(Statement_Sequence& other) noexcept
-      {
-        this->m_stmts.swap(other.m_stmts);
-        return *this;
-      }
-
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(Statement_Sequence);
 
@@ -78,13 +71,6 @@ class Statement_Sequence
     void
     reload_oneline(Token_Stream&& tstrm);
   };
-
-inline
-void
-swap(Statement_Sequence& lhs, Statement_Sequence& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 }  // namespace asteria
 #endif
