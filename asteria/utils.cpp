@@ -98,7 +98,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     data += ':';
     nump.put_DU((unsigned long) line);
     data.append(nump.data(), nump.size());
-    data += "\n\t";
+    data += "\x1B\x45\t";
 
     // Neutralize control characters: ['\x00','\x1F'] and '\x7F'.
     for(char c : msg) {
@@ -113,7 +113,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
         break; case 0x07:  data += "[BEL]";
         break; case 0x08:  data += "[BS]";
         break; case 0x09:  data += "\t";    // HT
-        break; case 0x0A:  data += "\n\t";  // LF
+        break; case 0x0A:  data += "\x1B\x45\t";  // LF
         break; case 0x0B:  data += "[VT]";
         break; case 0x0C:  data += "[FF]";
         break; case 0x0D:                   // CR
@@ -143,7 +143,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     // Remove trailing space characters.
     size_t pos = data.rfind_not_of(" \f\n\r\t\v");
     data.erase(pos + 1);
-    data += "\n\n";
+    data += "\x1B\x45\n";
 
     // Write the string now. Errors are ignored.
     return ::write(STDERR_FILENO, data.data(), data.size());
