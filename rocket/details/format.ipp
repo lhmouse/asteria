@@ -34,40 +34,35 @@ template<typename charT>
 void
 do_format_time_iso(basic_tinyfmt<charT>& fmt, const ::tm& tm, long nsec)
   {
+    char stemp[] = "2014-09-26 00:58:26.123456789";
+    uint64_t date;
     ascii_numput nump;
-    nump.put_DU(uint32_t(tm.tm_year) + 1900U, 4);
-    fmt.putn_latin1(nump.data(), 4);
 
-    fmt.putc(charT('-'));
-    nump.put_DU(uint32_t(tm.tm_mon) + 1U, 2);
-    fmt.putn_latin1(nump.data(), 2);
+    date = (uint32_t) tm.tm_year + 1900;
+    date *= 1000;
+    date += (uint32_t) tm.tm_mon + 1;
+    date *= 1000;
+    date += (uint32_t) tm.tm_mday;
+    date *= 1000;
+    date += (uint32_t) tm.tm_hour;
+    date *= 1000;
+    date += (uint32_t) tm.tm_min;
+    date *= 1000;
+    date += (uint32_t) tm.tm_sec;
 
-    fmt.putc(charT('-'));
-    nump.put_DU(uint32_t(tm.tm_mday), 2);
-    fmt.putn_latin1(nump.data(), 2);
+    nump.put_DU(date, 19);
+    ::memcpy(stemp, nump.data(), 19);
 
-    fmt.putc(charT(' '));
-    nump.put_DU(uint32_t(tm.tm_hour), 2);
-    fmt.putn_latin1(nump.data(), 2);
+    stemp[4] = '-';
+    stemp[7] = '-';
+    stemp[10] = ' ';
+    stemp[13] = ':';
+    stemp[16] = ':';
 
-    fmt.putc(charT(':'));
-    nump.put_DU(uint32_t(tm.tm_min), 2);
-    fmt.putn_latin1(nump.data(), 2);
+    nump.put_DU((uint32_t) nsec, 9);
+    ::memcpy(stemp + 20, nump.data(), 9);
 
-    fmt.putc(charT(':'));
-    nump.put_DU(uint32_t(tm.tm_sec), 2);
-    fmt.putn_latin1(nump.data(), 2);
-
-    fmt.putc(charT('.'));
-    nump.put_DU(uint64_t(nsec), 9);
-    fmt.putn_latin1(nump.data(), 9);
-
-    fmt.putc(charT(' '));
-    fmt.putc((tm.tm_gmtoff >= 0) ? charT('+') : charT('-'));
-    nump.put_DU(uint32_t(::std::abs(tm.tm_gmtoff)) / 3600U, 2);
-    fmt.putn_latin1(nump.data(), 2);
-    nump.put_DU(uint32_t(::std::abs(tm.tm_gmtoff)) % 3600U / 60U, 2);
-    fmt.putn_latin1(nump.data(), 2);
+    fmt.putn_latin1(stemp, 29);
   }
 
 }  // namespace details_format
