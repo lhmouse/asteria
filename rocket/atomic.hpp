@@ -18,10 +18,12 @@ class atomic
     using value_type  = valueT;
 
   private:
-    ::std::atomic<value_type> m_val = { value_type() };
+    ::std::atomic<value_type> m_val;
 
   public:
-    atomic() noexcept = default;
+    atomic() noexcept
+      : m_val(value_type())
+      { }
 
     explicit
     atomic(value_type val) noexcept
