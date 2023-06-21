@@ -203,8 +203,12 @@ generate_random_seed() noexcept
   {
     int hw_ok = 0;
     uint64_t val = 0;
-#ifdef __RDSEED__
-    hw_ok = ::_rdseed64_step(&val);
+#if defined(__RDSEED__)
+#  ifdef __x86_64__
+    hw_ok = ::_rdseed64_step((unsigned long long*) &val);
+#  else
+    hw_ok = ::_rdseed32_step((unsigned int*) &val);
+#  endif
 #endif
     return ROCKET_EXPECT(hw_ok) ? val : ::__rdtsc();
   }
