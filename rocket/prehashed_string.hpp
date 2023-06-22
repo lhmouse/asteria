@@ -330,7 +330,7 @@ constexpr
 bool
 operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.equals(rhs)))
   {
-    return !lhs.equals(rhs);
+    return not lhs.equals(rhs);
   }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
@@ -338,7 +338,7 @@ constexpr
 bool
 operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs) noexcept(noexcept(lhs.equals(rhs)))
   {
-    return !lhs.equals(rhs);
+    return not lhs.equals(rhs);
   }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
@@ -346,7 +346,7 @@ constexpr
 bool
 operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(rhs.equals(lhs)))
   {
-    return !rhs.equals(lhs);
+    return not rhs.equals(lhs);
   }
 
 template<typename stringT, typename hashT, typename eqT>

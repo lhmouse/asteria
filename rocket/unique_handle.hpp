@@ -108,7 +108,7 @@ class unique_handle
 
     explicit constexpr operator
     bool() const noexcept
-      { return !(this->m_sth.as_closer().is_null(this->m_sth.get()));  }
+      { return not this->m_sth.as_closer().is_null(this->m_sth.get());  }
 
     constexpr operator
     const handle_type&() const noexcept

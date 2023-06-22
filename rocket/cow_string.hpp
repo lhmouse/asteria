@@ -2578,7 +2578,7 @@ constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   {
-    return ! lhs.equals(rhs);
+    return not lhs.equals(rhs);
   }
 
 template<typename charT, typename allocT>
@@ -2586,7 +2586,7 @@ constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
   {
-    return ! lhs.equals(rhs);
+    return not lhs.equals(rhs);
   }
 
 template<typename charT, typename allocT>
@@ -2594,7 +2594,7 @@ constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
   {
-    return ! lhs.equals(rhs);
+    return not lhs.equals(rhs);
   }
 
 template<typename charT, typename allocT>
@@ -2602,7 +2602,7 @@ constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   {
-    return ! lhs.equals(rhs);
+    return not lhs.equals(rhs);
   }
 
 template<typename charT, typename allocT>
@@ -2610,7 +2610,7 @@ constexpr
 bool
 operator!=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   {
-    return ! rhs.equals(lhs);
+    return not rhs.equals(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2618,7 +2618,7 @@ constexpr
 bool
 operator!=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   {
-    return ! rhs.equals(lhs);
+    return not rhs.equals(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2626,7 +2626,7 @@ constexpr
 bool
 operator!=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   {
-    return ! rhs.equals(lhs);
+    return not rhs.equals(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2870,7 +2870,7 @@ getline(basic_cow_string<charT, allocT>& str, basic_tinybuf<charT>& buf)
     str.clear();
     for(;;)
       if((ch = buf.getc()) < 0)
-        return !str.empty();  // end of stream
+        return not str.empty();  // end of stream
       else if(ch == '\n')
         return true;  // new line
       else

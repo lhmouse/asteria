@@ -49,7 +49,7 @@ class posix_fd_closer
 
     int
     close(handle_type fd) const noexcept
-      { return !this->m_cl ? 0 : this->m_cl(fd);  }
+      { return this->m_cl ? this->m_cl(fd) : 0;  }
   };
 
 using unique_posix_fd  = unique_handle<int, posix_fd_closer>;

@@ -49,7 +49,7 @@ class posix_dir_closer
 
     int
     close(handle_type dp) const noexcept
-      { return !this->m_cl ? 0 : this->m_cl(dp);  }
+      { return this->m_cl ? this->m_cl(dp) : 0;  }
   };
 
 using unique_posix_dir  = unique_handle<::DIR*, posix_dir_closer>;
