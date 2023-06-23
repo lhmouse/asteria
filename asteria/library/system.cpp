@@ -385,17 +385,18 @@ V_string
 std_system_uuid(Global_Context& global)
   {
     // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
-    //  * x: number of 1/10,000 seconds since UNIX Epoch
+    //  * x: number of 1/30518 seconds since UNIX Epoch
     //  * M: always `4` (UUID version)
     //  * y: process ID
     //  * N: any of `0`-`7` (UUID variant)
     //  * z: context ID
     //  * w: random bytes
+    static atomic<uint64_t> m_serial;
     const auto prng = global.random_engine();
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
 
-    uint64_t x = (uint64_t) ts.tv_sec * 30518 + (uint32_t) ts.tv_nsec / 32768;
+    uint64_t x = (uint64_t) ts.tv_sec * 30518U + (uint32_t) ts.tv_nsec / 32768U + m_serial.xadd(1U);
     uint64_t y = (uint32_t) ::getpid();
     uint64_t z = (uint64_t)(void*) &global >> 12;
     uint64_t w = (uint64_t) prng->bump() << 32 | prng->bump();
