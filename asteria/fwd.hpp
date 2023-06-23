@@ -31,6 +31,8 @@
 #include <endian.h>
 #include <x86intrin.h>
 #include <immintrin.h>
+namespace asteria {
+namespace noadl = asteria;
 
 #define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
     C(const C&) = default;  \
@@ -62,8 +64,6 @@
 
 #define ASTERIA_INCOMPLET(T)  \
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
-namespace asteria {
-namespace noadl = asteria;
 
 // `using`-directives
 using ::std::initializer_list;
