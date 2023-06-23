@@ -40,10 +40,10 @@
 #  define ROCKET_DEBUG                      1
 #endif
 
-#if __GNUC__ < 11
-#  define _mm_storeu_si32(ptr, val)   _mm_store_ss((float*) (ptr), _mm_castsi128_ps(val))
+#if (__GNUC__ < 11) && defined(__SSE2__)
+#  define _mm_storeu_si32(ptr, val)         _mm_store_ss((float*) (ptr), _mm_castsi128_ps(val))
 #endif
 
-#if __GNUC__ < 10
-#  define _mm_storeu_si64(ptr, val)   _mm_store_sd((double*) (ptr), _mm_castsi128_pd(val))
+#if (__GNUC__ < 10) && defined(__SSE2__)
+#  define _mm_storeu_si64(ptr, val)         _mm_store_sd((double*) (ptr), _mm_castsi128_pd(val))
 #endif
