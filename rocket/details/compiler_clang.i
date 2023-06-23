@@ -39,3 +39,8 @@
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
 #  define ROCKET_DEBUG                      1
 #endif
+
+#if __clang_major__ < 8
+#  define _mm_storeu_si32(ptr, val)   _mm_store_ss((float*) (ptr), _mm_castsi128_ps(val))
+#  define _mm_storeu_si64(ptr, val)   _mm_store_sd((double*) (ptr), _mm_castsi128_pd(val))
+#endif
