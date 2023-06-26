@@ -14,6 +14,9 @@ namespace rocket {
 template<typename charT, typename allocT = allocator<charT>>
 class basic_linear_buffer;
 
+template<typename charT>
+class basic_tinyfmt;
+
 #include "details/linear_buffer.ipp"
 
 template<typename charT, typename allocT>
@@ -358,6 +361,14 @@ swap(basic_linear_buffer<charT, allocT>& lhs, basic_linear_buffer<charT, allocT>
   noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
+  }
+
+template<typename charT, typename allocT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const basic_linear_buffer<charT, allocT>& buf)
+  {
+    return fmt.putn(buf.data(), buf.size());
   }
 
 using linear_buffer      = basic_linear_buffer<char>;
