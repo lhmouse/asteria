@@ -118,6 +118,14 @@ class basic_tinybuf_str
     length() const noexcept
       { return this->m_str.length();  }
 
+    const char_type*
+    data() const noexcept
+      { return this->m_str.data();  }
+
+    size_t
+    size() const noexcept
+      { return this->m_str.size();  }
+
     // Replaces the internal string.
     template<typename xstrT>
     basic_tinybuf_str&
