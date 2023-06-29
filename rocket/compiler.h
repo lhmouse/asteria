@@ -48,4 +48,9 @@
 #  error Some macros are missing.
 #endif
 
+// Disable standard C assertions by default.
+#if !defined(NDEBUG) && !defined(ROCKET_DEBUG)
+#  define NDEBUG  1
 #endif
+
+#endif  // ROCKET_COMPILER_
