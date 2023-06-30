@@ -336,8 +336,8 @@ class variant
     const type_info&
     type() const noexcept
       {
-        static const type_info* const table[] = { &(typeid(altsT))... };
-        return *(table[this->m_index]);
+        static const type_info* const ti_table[] = { &(typeid(altsT))... };
+        return *(ti_table[this->m_index]);
       }
 
     // accessors
@@ -419,7 +419,7 @@ class variant
              details_variant::const_func_table<void (const void*, visitorT&&),
                          details_variant::wrapped_visit<const altsT>...>();
 
-        table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
+        nt_funcs(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     template<typename visitorT>
@@ -430,7 +430,7 @@ class variant
              details_variant::const_func_table<void (void*, visitorT&&),
                          details_variant::wrapped_visit<altsT>...>();
 
-        table(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
+        nt_funcs(this->m_index, this->m_stor, ::std::forward<visitorT>(visitor));
       }
 
     // 23.7.3.4, modifiers
