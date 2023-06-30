@@ -113,8 +113,8 @@ class const_func_table
     typename ::std::result_of<targetT* (argsT&&...)>::type
 #endif
     operator()(size_t k, argsT&&... args) const
-      noexcept(noexcept(::std::declval<targetT*>()(args...)))
-      { return this->m_ptrs[k](::std::forward<argsT>(args)...);  }
+      noexcept(noexcept(::std::declval<targetT*>() (::std::declval<argsT>()...)))
+      { return this->m_ptrs[k] (::std::forward<argsT>(args)...);  }
   };
 
 // In a `catch` block that is conditionally unreachable, direct use
@@ -196,7 +196,11 @@ void
 wrapped_visit(xvoidT* sptr, visitorT&& visitor)
   {
     auto sp = static_cast<xaltT*>(sptr);
-    ::std::forward<visitorT>(visitor)(*sp);
+#ifdef __cpp_lib_invoke
+    ::std::invoke(::std::forward<visitorT>(visitor), *sp);
+#else
+    ::std::forward<visitorT>(visitor) (*sp);
+#endif
   }
 
 constexpr size_t nbytes_eager_copy = 8 * sizeof(void*);
