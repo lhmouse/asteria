@@ -126,6 +126,17 @@ class basic_tinybuf_str
     size() const noexcept
       { return this->m_str.size();  }
 
+    size_t
+    capacity() const noexcept
+      { return this->m_str.capacity();  }
+
+    basic_tinybuf_str&
+    reserve(size_t res_arg)
+      {
+        this->m_str.reserve(res_arg);
+        return *this;
+      }
+
     // Replaces the internal string.
     template<typename xstrT>
     basic_tinybuf_str&
