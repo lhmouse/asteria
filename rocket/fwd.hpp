@@ -442,6 +442,21 @@ destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
 #endif
   }
 
+template<typename elementT, typename... paramsT>
+ROCKET_ALWAYS_INLINE
+elementT*
+reconstruct(elementT* ptr, paramsT&&... params) noexcept
+  {
+    // This has to be noexcept, as there is no way to recover the destroyed
+    // object if a new one can't be constructed.
+    static_assert(is_nothrow_constructible<elementT, paramsT&&...>::value);
+    ptr->~elementT();
+#ifdef ROCKET_DEBUG
+    ::std::memset((void*)ptr, 0xAA, sizeof(elementT));
+#endif
+    return ::new((void*)ptr) elementT(::std::forward<paramsT>(params)...);
+  }
+
 template<typename elementT>
 inline
 void
