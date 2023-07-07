@@ -84,6 +84,10 @@ class basic_tinyfmt_str
     size() const noexcept
       { return this->m_buf.size();  }
 
+    ptrdiff_t
+    ssize() const noexcept
+      { return this->m_buf.ssize();  }
+
     size_t
     capacity() const noexcept
       { return this->m_buf.capacity();  }
