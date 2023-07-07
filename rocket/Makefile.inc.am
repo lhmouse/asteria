@@ -49,12 +49,14 @@ nobase_include_HEADERS +=  \
   %reldir%/tinybuf.hpp  \
   %reldir%/tinybuf_str.hpp  \
   %reldir%/tinybuf_file.hpp  \
+  %reldir%/tinybuf_ln.hpp  \
   %reldir%/ascii_numput.hpp  \
   %reldir%/ascii_numget.hpp  \
   %reldir%/ascii_case.hpp  \
   %reldir%/tinyfmt.hpp  \
   %reldir%/tinyfmt_str.hpp  \
   %reldir%/tinyfmt_file.hpp  \
+  %reldir%/tinyfmt_ln.hpp  \
   %reldir%/format.hpp  \
   %reldir%/atomic.hpp  \
   %reldir%/mutex.hpp  \
@@ -73,11 +75,13 @@ lib_librocket_la_SOURCES =  \
   %reldir%/tinybuf.cpp  \
   %reldir%/tinybuf_str.cpp  \
   %reldir%/tinybuf_file.cpp  \
+  %reldir%/tinybuf_ln.cpp  \
   %reldir%/ascii_numput.cpp  \
   %reldir%/ascii_numget.cpp  \
   %reldir%/tinyfmt.cpp  \
   %reldir%/tinyfmt_str.cpp  \
   %reldir%/tinyfmt_file.cpp  \
+  %reldir%/tinyfmt_ln.cpp  \
   %reldir%/format.cpp  \
   %reldir%/prehashed_string.cpp  \
   ${END}
