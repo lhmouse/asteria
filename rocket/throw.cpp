@@ -2,34 +2,29 @@
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
 #include "throw.hpp"
-#include "unique_ptr.hpp"
-#include <stdlib.h>  // ::free()
 #include <stdarg.h>  // ::va_list
-#include <stdio.h>  // ::vasprintf()
+#include <stdio.h>  // ::vsnprintf()
 namespace rocket {
 
 template<typename exceptT>
 void
 sprintf_and_throw(const char* fmt, ...)
   {
-    // Compose the error message in allocated storage.
+    // Compose the error message in temporary storage.
     ::va_list ap;
     va_start(ap, fmt);
-    char* str;
-    int ret = ::vasprintf(&str, fmt, ap);
+    char strbuf[4096];
+    char* eptr = strbuf + (uint32_t) max(0, ::vsnprintf(strbuf, sizeof(strbuf), fmt, ap));
     va_end(ap);
 
-    if(ret < 0)
-      throw ::std::bad_alloc();
+    // Remove trailing line breaks.
+    while((eptr != strbuf) && (eptr[-1] == '\n'))
+      *--eptr = 0;
 
-    // Remove trailing new line characters.
-    size_t ep = (uint32_t) ret;
-    while((ep != 0) && (str[--ep] == '\n'))
-      str[ep] = 0;
-
-    // Construct the exception object and throw it.
-    unique_ptr<char, void (void*)> uptr(str, ::free);
-    throw exceptT(str);
+    // Throw an exception with a copy of the formatted message...
+    // Can we make use of the reference-counting string in standard exceptions
+    // directly?
+    throw exceptT(strbuf);
   }
 
 template void sprintf_and_throw<logic_error>(const char*, ...);
