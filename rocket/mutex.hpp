@@ -14,7 +14,7 @@ class mutex
     friend class condition_variable;
 
   private:
-    ::std::mutex m_mtx;
+    ::std::mutex m_std_mtx;
 
   public:
     mutex() = default;
@@ -30,7 +30,7 @@ class mutex
         friend class condition_variable;
 
       private:
-        ::std::mutex* m_mtx = nullptr;
+        ::pthread_mutex_t* m_mtx = nullptr;
 
       public:
         constexpr
@@ -38,8 +38,8 @@ class mutex
 
         unique_lock(mutex& m) noexcept
           {
-            m.m_mtx.lock();
-            this->m_mtx = &(m.m_mtx);
+            ::pthread_mutex_lock(m.m_std_mtx.native_handle());
+            this->m_mtx = m.m_std_mtx.native_handle();
           }
 
         unique_lock(unique_lock&& other) noexcept
@@ -80,12 +80,12 @@ class mutex
         void
         lock(mutex& m) noexcept
           {
-            if(this->m_mtx == &(m.m_mtx))
+            if(this->m_mtx == m.m_std_mtx.native_handle())
               return;
 
-            m.m_mtx.lock();  // note lock first
+            ::pthread_mutex_lock(m.m_std_mtx.native_handle());  // note lock first
             this->unlock();
-            this->m_mtx = &(m.m_mtx);
+            this->m_mtx = m.m_std_mtx.native_handle();
           }
 
         void
@@ -94,7 +94,7 @@ class mutex
             if(this->m_mtx == nullptr)
               return;
 
-            this->m_mtx->unlock();
+            ::pthread_mutex_unlock(this->m_mtx);
             this->m_mtx = nullptr;
           }
       };

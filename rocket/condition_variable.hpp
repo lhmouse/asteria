@@ -8,12 +8,13 @@
 #include "mutex.hpp"
 #include "assert.hpp"
 #include <condition_variable>
+#include <time.h>
 namespace rocket {
 
 class condition_variable
   {
   private:
-    ::std::condition_variable m_cond;
+    ::std::condition_variable m_std_cond;
 
   public:
     condition_variable() = default;
@@ -26,40 +27,64 @@ class condition_variable
     void
     wait(mutex::unique_lock& lock)
       {
-        ROCKET_ASSERT(lock.m_mtx != nullptr);
-        ::std::unique_lock<::std::mutex> sl(*(lock.m_mtx), ::std::adopt_lock);
+        ROCKET_ASSERT(lock.m_mtx);
+
+        // Release `lock.m_mtx` before the wait operation, as it might get
+        // modified by other threads.
+        ::pthread_mutex_t* saved_mtx = lock.m_mtx;
         lock.m_mtx = nullptr;
-
-        this->m_cond.wait(sl);
-
+        ::pthread_cond_wait(this->m_std_cond.native_handle(), saved_mtx);
         lock.unlock();
-        lock.m_mtx = sl.release();
+        lock.m_mtx = saved_mtx;
       }
 
     template<typename durationT>
     void
     wait_for(mutex::unique_lock& lock, const durationT& timeout)
       {
-        ROCKET_ASSERT(lock.m_mtx != nullptr);
-        ::std::unique_lock<::std::mutex> sl(*(lock.m_mtx), ::std::adopt_lock);
+        ROCKET_ASSERT(lock.m_mtx);
+
+        // Convert the duration to a time point.
+        ::timespec ts;
+        ::clock_gettime(CLOCK_REALTIME, &ts);
+        double secs = (double) ts.tv_sec + (double) ts.tv_nsec * 0.000000001;
+
+        using hires_secs = ::std::chrono::duration<double>;
+        secs += ::std::chrono::duration_cast<hires_secs>(timeout).count();
+
+        if(secs > 0x7FFFFFFFFFFFFC00) {
+          ts.tv_sec = 0x7FFFFFFFFFFFFC00;
+          ts.tv_nsec = 0;
+        }
+        else if(secs > 0) {
+          secs += 0.000000000999;
+          ts.tv_sec = (::time_t) secs;
+          ts.tv_nsec = (long) ((secs - (double) ts.tv_sec) * 1000000000);
+        }
+        else {
+          ts.tv_sec = 0;
+          ts.tv_nsec = 0;
+        }
+
+        // Release `lock.m_mtx` before the wait operation, as it might get
+        // modified by other threads.
+        ::pthread_mutex_t* saved_mtx = lock.m_mtx;
         lock.m_mtx = nullptr;
-
-        this->m_cond.wait_for(sl, timeout);
-
+        ::pthread_cond_timedwait(this->m_std_cond.native_handle(), saved_mtx, &ts);
         lock.unlock();
-        lock.m_mtx = sl.release();
+        lock.m_mtx = saved_mtx;
       }
 
     void
     notify_one() noexcept
       {
-        this->m_cond.notify_one();
+        ::pthread_cond_signal(this->m_std_cond.native_handle());
       }
 
     void
     notify_all() noexcept
       {
-        this->m_cond.notify_all();
+        ::pthread_cond_broadcast(this->m_std_cond.native_handle());
       }
   };
 
