@@ -6,6 +6,7 @@
 #include "../utils.hpp"
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::read()
+#include <openssl/rand.h>
 namespace asteria {
 
 Random_Engine::
@@ -63,12 +64,7 @@ init() noexcept
     this->m_randa = 0;
     this->m_randb = 0;
     this->m_randc = 0;
-    ::std::memset(this->m_randrsl, 0, sizeof(m_randrsl));
-
-    // Read some random bytes. Errors are ignored.
-    ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY));
-    if(fd)
-      (void) !::read(fd, this->m_randrsl, sizeof(m_randrsl));
+    ::RAND_priv_bytes((uint8_t*) this->m_randrsl, sizeof(m_randrsl));
 
     ///////////////////////////////////////////////////////////////////////////
     // Below is a direct copy with a few fixups.
