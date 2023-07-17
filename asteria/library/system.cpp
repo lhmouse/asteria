@@ -170,7 +170,6 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
         tstrm.shift();
         break;
 
-
       case Token::index_real_literal:
         // Accept a real number.
         value = qtok->as_real_literal();
