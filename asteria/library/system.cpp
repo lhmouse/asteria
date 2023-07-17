@@ -39,34 +39,27 @@ do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accep
     return punct;
   }
 
-struct S_xparse_array
+struct Xparse_array
   {
     V_array arr;
   };
 
-struct S_xparse_object
+struct Xparse_object
   {
     V_object obj;
     phsh_string key;
     Source_Location key_sloc;
   };
 
-using Xparse = ::rocket::variant<S_xparse_array, S_xparse_object>;
-
-enum Scope_type
-  {
-    scope_root = 0,
-    scope_node = 1,
-  };
+using Xparse = ::rocket::variant<Xparse_array, Xparse_object>;
 
 void
-do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm, Scope_type scope)
+do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       throw Compiler_Error(Compiler_Error::M_status(),
-                (scope == scope_root) ? compiler_status_identifier_expected
-                    : compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
+                compiler_status_identifier_expected, tstrm.next_sloc());
 
     switch(weaken_enum(qtok->index())) {
       case Token::index_identifier:
@@ -79,16 +72,14 @@ do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm, Scope_type scop
 
       default:
         throw Compiler_Error(Compiler_Error::M_status(),
-                  (scope == scope_root) ? compiler_status_identifier_expected
-                      : compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
+                  compiler_status_identifier_expected, tstrm.next_sloc());
     }
+
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();
 
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon, punctuator_assign });
-    if(!kpunct)
-      throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_colon_expected, tstrm.next_sloc());
+    // A colon or equals sign may follow, but it has no meaning whatsoever.
+    do_accept_punctuator_opt(tstrm, { punctuator_colon, punctuator_assign });
   }
 
 Value
@@ -98,161 +89,157 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
     Value value;
     cow_vector<Xparse> stack;
 
-    for(;;) {
-      // Accept a value. No other things such as closed brackets are allowed.
-      auto qtok = tstrm.peek_opt();
-      if(!qtok)
-        throw Compiler_Error(Compiler_Error::M_format(),
-                  compiler_status_expression_expected, tstrm.next_sloc(),
-                  "Value expected");
+    // Accept a value. No other things such as closed brackets are allowed.
+  parse_next:
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      throw Compiler_Error(Compiler_Error::M_format(),
+                compiler_status_expression_expected, tstrm.next_sloc(),
+                "Value expected");
 
-      switch(weaken_enum(qtok->index())) {
-        case Token::index_punctuator: {
-          // Accept an `[` or `{`.
-          auto punct = qtok->as_punctuator();
-          switch(weaken_enum(punct)) {
-            case punctuator_bracket_op: {
-              tstrm.shift();
+    switch(weaken_enum(qtok->index())) {
+      case Token::index_punctuator:
+        // Accept an `[` or `{`.
+        if(qtok->as_punctuator() == punctuator_bracket_op) {
+          tstrm.shift();
 
-              // Open an array.
-              auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-              if(!kpunct) {
-                // Descend into the new array.
-                stack.emplace_back(S_xparse_array());
-                continue;
-              }
-
-              // Accept an empty array.
-              value = V_array();
-              break;
-            }
-
-            case punctuator_brace_op: {
-              tstrm.shift();
-
-              // Open an object.
-              auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-              if(!kpunct) {
-                // Descend into the new object.
-                stack.emplace_back(S_xparse_object());
-                do_accept_object_key(stack.mut_back().mut<1>(), tstrm, scope_node);
-                continue;
-              }
-
-              // Accept an empty object.
-              value = V_object();
-              break;
-            }
-
-            default:
-              throw Compiler_Error(Compiler_Error::M_format(),
-                        compiler_status_expression_expected, tstrm.next_sloc(),
-                        "Value expected");
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+          if(!kpunct) {
+            stack.emplace_back(Xparse_array());
+            goto parse_next;
           }
+
+          // Accept an empty array.
+          value = V_array();
           break;
         }
-
-        case Token::index_identifier: {
-          // Accept a literal.
-          const auto& name = qtok->as_identifier();
-          if(::rocket::is_none_of(name, { "null", "true", "false", "infinity", "nan" }))
-            throw Compiler_Error(Compiler_Error::M_format(),
-                      compiler_status_expression_expected, tstrm.next_sloc(),
-                      "Value expected");
-
-          switch(name[3]) {
-            case 'l':
-              value = nullopt;
-              break;
-
-            case 'e':
-              value = true;
-              break;
-
-            case 's':
-              value = false;
-              break;
-
-            case 'i':
-              value = ::std::numeric_limits<double>::infinity();
-              break;
-
-            case '\0':
-              value = ::std::numeric_limits<double>::quiet_NaN();
-              break;
-
-            default:
-              ROCKET_ASSERT(false);
-          }
+        else if(qtok->as_punctuator() == punctuator_brace_op) {
           tstrm.shift();
+
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+          if(!kpunct) {
+            stack.emplace_back(Xparse_object());
+            do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+            goto parse_next;
+          }
+
+          // Accept an empty object.
+          value = V_object();
           break;
         }
-
-        case Token::index_integer_literal:
-          // Accept an integer.
-          value = qtok->as_integer_literal();
-          tstrm.shift();
-          break;
-
-        case Token::index_real_literal:
-          // Accept a real number.
-          value = qtok->as_real_literal();
-          tstrm.shift();
-          break;
-
-        case Token::index_string_literal:
-          // Accept a UTF-8 string.
-          value = qtok->as_string_literal();
-          tstrm.shift();
-          break;
-
-        default:
+        else
           throw Compiler_Error(Compiler_Error::M_format(),
                     compiler_status_expression_expected, tstrm.next_sloc(),
                     "Value expected");
-      }
 
-      // A complete value has been accepted. Insert it into its parent array or object.
-      for(;;) {
-        if(stack.empty())
-          return value;
+      case Token::index_identifier:
+        // Accept a literal.
+        if(qtok->as_identifier() == "null") {
+          tstrm.shift();
+          value = nullopt;
+          break;
+        }
+        else if(qtok->as_identifier() == "true") {
+          tstrm.shift();
+          value = true;
+          break;
+        }
+        else if(qtok->as_identifier() == "false") {
+          tstrm.shift();
+          value = false;
+          break;
+        }
+        else if((qtok->as_identifier() == "Infinity") || (qtok->as_identifier() == "infinity")) {
+          tstrm.shift();
+          value = ::std::numeric_limits<double>::infinity();
+          break;
+        }
+        else if((qtok->as_identifier() == "NaN") || (qtok->as_identifier() == "nan")) {
+          tstrm.shift();
+          value = ::std::numeric_limits<double>::quiet_NaN();
+          break;
+        }
+        else
+          throw Compiler_Error(Compiler_Error::M_format(),
+                    compiler_status_expression_expected, tstrm.next_sloc(),
+                    "Value expected");
 
-        if(stack.back().index() == 0) {
-          auto& ctxa = stack.mut_back().mut<0>();
+      case Token::index_integer_literal:
+        // Accept an integer.
+        value = qtok->as_integer_literal();
+        tstrm.shift();
+        break;
+
+
+      case Token::index_real_literal:
+        // Accept a real number.
+        value = qtok->as_real_literal();
+        tstrm.shift();
+        break;
+
+      case Token::index_string_literal:
+        // Accept a UTF-8 string.
+        value = qtok->as_string_literal();
+        tstrm.shift();
+        break;
+
+      default:
+        throw Compiler_Error(Compiler_Error::M_format(),
+                  compiler_status_expression_expected, tstrm.next_sloc(),
+                  "Value expected");
+    }
+
+    while(stack.size()) {
+      // Advance to the next element.
+      auto& ctx = stack.mut_back();
+      switch(ctx.index()) {
+        case 0: {
+          auto& ctxa = ctx.mut<Xparse_array>();
           ctxa.arr.emplace_back(::std::move(value));
 
-          // Check for termination of this array.
+          // A comma or semicolon may follow, but it has no meaning whatsoever.
+          do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+
+          // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-          if(!kpunct) {
-            // Look for the next element.
-            break;
-          }
+          if(!kpunct)
+            goto parse_next;
 
           // Close this array.
           value = ::std::move(ctxa.arr);
+          break;
         }
-        else {
-          auto& ctxo = stack.mut_back().mut<1>();
+
+        case 1: {
+          auto& ctxo = ctx.mut<Xparse_object>();
           auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
           if(!pair.second)
             throw Compiler_Error(Compiler_Error::M_status(),
                       compiler_status_duplicate_key_in_object, ctxo.key_sloc);
 
-          // Check for termination of this array.
+          // A comma or semicolon may follow, but it has no meaning whatsoever.
+          do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+
+          // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
           if(!kpunct) {
-            // Look for the next element.
-            do_accept_object_key(ctxo, tstrm, scope_node);
-            break;
+            do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+            goto parse_next;
           }
 
           // Close this object.
           value = ::std::move(ctxo.obj);
+          break;
         }
 
-        stack.pop_back();
+        default:
+          ROCKET_ASSERT(false);
       }
+
+      stack.pop_back();
     }
+
+    return value;
   }
 
 }  // namespace
@@ -563,9 +550,8 @@ std_system_proc_daemonize()
 V_object
 std_system_conf_load_file(V_string path)
   {
-    // Initialize tokenizer options.
-    // Unlike JSON5, we support _real_ integers and single-quote string
-    // literals.
+    // Initialize tokenizer options. Unlike JSON5, we support genuine integers
+    // and single-quoted string literals.
     Compiler_Options opts;
     opts.keywords_as_identifiers = true;
 
@@ -573,17 +559,22 @@ std_system_conf_load_file(V_string path)
     ::rocket::tinybuf_file cbuf(path.safe_c_str(), tinybuf::open_read);
     tstrm.reload(path, 1, ::std::move(cbuf));
 
-    // Parse a sequence of key-value pairs.
-    S_xparse_object ctxo = { };
+    Xparse_object ctxo;
     while(!tstrm.empty()) {
-      do_accept_object_key(ctxo, tstrm, scope_root);
+      // Parse the stream for a key-value pair.
+      do_accept_object_key(ctxo, tstrm);
       auto value = do_conf_parse_value_nonrecursive(tstrm);
 
       auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
       if(!pair.second)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_duplicate_key_in_object, ctxo.key_sloc);
+
+      // A comma or semicolon may follow, but it has no meaning whatsoever.
+      do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
     }
+
+    // Extract the value.
     return ::std::move(ctxo.obj);
   }
 
