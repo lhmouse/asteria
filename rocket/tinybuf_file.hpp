@@ -39,13 +39,11 @@ class basic_tinybuf_file
 
     explicit
     basic_tinybuf_file(file_type&& file) noexcept
-      : m_file(::std::move(file))
-      { }
+      : m_file(::std::move(file))  { }
 
     explicit
     basic_tinybuf_file(handle_type fp, closer_type cl) noexcept
-      : m_file(fp, cl)
-      { }
+      : m_file(fp, cl)  { }
 
     explicit
     basic_tinybuf_file(const char* path, open_mode mode)

@@ -102,13 +102,11 @@ struct binder_eq
 
     constexpr
     binder_eq(const valueT& xval) noexcept(is_nothrow_copy_constructible<valueT>::value)
-      : m_val(xval)
-      { }
+      : m_val(xval)  { }
 
     constexpr
     binder_eq(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
-      : m_val(::std::move(xval))
-      { }
+      : m_val(::std::move(xval))  { }
 
     template<typename xvalueT>
     constexpr
@@ -124,13 +122,11 @@ struct binder_ne
 
     constexpr
     binder_ne(const valueT& xval) noexcept(is_nothrow_copy_constructible<valueT>::value)
-      : m_val(xval)
-      { }
+      : m_val(xval)  { }
 
     constexpr
     binder_ne(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
-      : m_val(::std::move(xval))
-      { }
+      : m_val(::std::move(xval))  { }
 
     template<typename xvalueT>
     constexpr

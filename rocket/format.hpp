@@ -19,13 +19,11 @@ struct basic_formatter
 
     constexpr
     basic_formatter() noexcept
-      : ifunc(nullptr), param(nullptr)
-      { }
+      : ifunc(nullptr), param(nullptr)  { }
 
     constexpr
     basic_formatter(callback_type* xifunc, const void* xparam) noexcept
-      : ifunc(xifunc), param(xparam)
-      { }
+      : ifunc(xifunc), param(xparam)  { }
 
     // Format the given value with `operator<<` via argument-dependent lookup.
     template<typename valueT>

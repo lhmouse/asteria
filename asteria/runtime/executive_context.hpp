@@ -45,8 +45,7 @@ class Executive_Context
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
       : m_parent_opt(),
         m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
-        m_defer(::std::move(defer))
-      { }
+        m_defer(::std::move(defer))  { }
 
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which

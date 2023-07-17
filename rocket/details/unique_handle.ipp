@@ -32,8 +32,7 @@ class stored_handle
     stored_handle(handle_type hv, clparamsT&&... clparams)
       noexcept(is_nothrow_constructible<closer_type, clparamsT&&...>::value)
       : closer_base(::std::forward<clparamsT>(clparams)...),
-        m_hv(::std::move(hv))
-      { }
+        m_hv(::std::move(hv))  { }
 
     ~stored_handle()
       { this->reset(this->as_closer().null());  }
@@ -85,8 +84,7 @@ class default_closer_wrapper
   public:
     constexpr  // non-explicit
     default_closer_wrapper(closerT&& xcl)
-      : m_cl(::std::forward<closerT>(xcl))
-      { }
+      : m_cl(::std::forward<closerT>(xcl))  { }
 
   public:
     constexpr
