@@ -620,7 +620,6 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
     return fmt;
   }
 
-
 bool
 Value::
 dump_to_stderr(size_t indent, size_t hanging) const

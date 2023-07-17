@@ -47,7 +47,6 @@ class ascii_numput
     data() const noexcept
       { return this->m_data;  }
 
-
     const char*
     c_str() const noexcept
       { return this->m_data;  }

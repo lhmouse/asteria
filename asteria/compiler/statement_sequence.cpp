@@ -2582,7 +2582,6 @@ reload_oneline(Token_Stream&& tstrm)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_invalid_expression, tstrm.next_sloc());
 
-
     // Build a return-statement that forwards the result by reference.
     xexpr.sloc = sloc;
     Statement::S_return xstmt = { ::std::move(sloc), true, ::std::move(xexpr) };

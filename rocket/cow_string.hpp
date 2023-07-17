@@ -2422,7 +2422,6 @@ operator+(basic_cow_string<charT, allocT>&& lhs, const charT* rhs)
     return lhs;
   }
 
-
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>

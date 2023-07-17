@@ -55,7 +55,6 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
 void
 std_filesystem_file_write(V_string path, optV_integer offset, V_string data);
 
-
 // `std.filesystem.file_append`
 void
 std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive);
