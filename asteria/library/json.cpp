@@ -50,19 +50,24 @@ class Indenter_none final
   public:
     void
     break_line(tinyfmt& /*fmt*/) const override
-      { }
+      {
+      }
 
     void
     increment_level() override
-      { }
+      {
+      }
 
     void
     decrement_level() override
-      { }
+      {
+      }
 
     bool
     has_indention() const noexcept override
-      { return false;  }
+      {
+        return false;
+      }
   };
 
 class Indenter_string final
@@ -206,7 +211,7 @@ do_quote_string(tinyfmt& fmt, stringR str)
         default: {
           if((0x20 <= cp) && (cp <= 0x7E)) {
             // Write printable characters as is.
-            fmt << static_cast<char>(cp);
+            fmt << (char) cp;
             break;
           }
 
@@ -234,9 +239,9 @@ void
 do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, stringR name)
   {
     // Write the key.
-    if(json5 && name.size() && is_cmask(name[0], cmask_namei) &&
-           ::std::all_of(name.begin() + 1, name.end(),
-                      [](char c) { return is_cmask(c, cmask_namei | cmask_digit);  }))
+    if(json5 && name.size() && is_cmask(name[0], cmask_namei)
+         && ::std::all_of(name.begin() + 1, name.end(),
+               [](char c) { return is_cmask(c, cmask_namei | cmask_digit);  }))
       fmt << name;
     else
       do_quote_string(fmt, name);
@@ -262,19 +267,19 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
         return true;
   }
 
-struct S_xformat_array
+struct Xformat_array
   {
     const V_array* refa;
     V_array::const_iterator curp;
   };
 
-struct S_xformat_object
+struct Xformat_object
   {
     const V_object* refo;
     V_object::const_iterator curp;
   };
 
-using Xformat = ::rocket::variant<S_xformat_array, S_xformat_object>;
+using Xformat = ::rocket::variant<Xformat_array, Xformat_object>;
 
 V_string
 do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
@@ -284,8 +289,8 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     auto qval = &value;
     cow_vector<Xformat> stack;
 
-  r:
     // Format a value. `qval` must always point to a valid value here.
+  format_next:
     switch(weaken_enum(qval->type())) {
       case type_boolean:
         // Write `true` or `false`.
@@ -294,7 +299,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
       case type_integer:
         // Write the integer in decimal.
-        fmt << static_cast<double>(qval->as_integer());
+        fmt << (double) qval->as_integer();
         break;
 
       case type_real: {
@@ -327,7 +332,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         const auto& array = qval->as_array();
         fmt << '[';
 
-        S_xformat_array ctxa = { &array, array.begin() };
+        Xformat_array ctxa = { &array, array.begin() };
         if(ctxa.curp != array.end()) {
           // Open an array.
           indent.increment_level();
@@ -335,7 +340,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
           qval = &*(ctxa.curp);
           stack.emplace_back(::std::move(ctxa));
-          goto r;
+          goto format_next;
         }
 
         fmt << ']';
@@ -346,7 +351,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         const auto& object = qval->as_object();
         fmt << '{';
 
-        S_xformat_object ctxo = { &object, object.begin() };
+        Xformat_object ctxo = { &object, object.begin() };
         if(do_find_uncensored(ctxo.curp, object)) {
           // Open an object.
           indent.increment_level();
@@ -355,7 +360,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
           qval = &(ctxo.curp->second);
           stack.emplace_back(::std::move(ctxo));
-          goto r;
+          goto format_next;
         }
 
         fmt << '}';
@@ -380,7 +385,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
             // Format the next element.
             qval = &*(ctxa.curp);
-            goto r;
+            goto format_next;
           }
 
           // Close this array.
@@ -402,7 +407,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
             // Format the next value.
             qval = &(ctxo.curp->second);
-            goto r;
+            goto format_next;
           }
 
           // Close this object.
@@ -449,22 +454,22 @@ do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accep
     return punct;
   }
 
-struct S_xparse_array
+struct Xparse_array
   {
     V_array arr;
   };
 
-struct S_xparse_object
+struct Xparse_object
   {
     V_object obj;
     phsh_string key;
     Source_Location key_sloc;
   };
 
-using Xparse = ::rocket::variant<S_xparse_array, S_xparse_object>;
+using Xparse = ::rocket::variant<Xparse_array, Xparse_object>;
 
 void
-do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm)
+do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
@@ -484,6 +489,7 @@ do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
     }
+
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();
 
@@ -500,121 +506,105 @@ do_parse_nonrecursive(Token_Stream& tstrm)
     Value value;
     cow_vector<Xparse> stack;
 
-    for(;;) {
-      // Accept a value. No other things such as closed brackets are allowed.
-      auto qtok = tstrm.peek_opt();
-      if(!qtok)
-        throw Compiler_Error(Compiler_Error::M_format(),
-                  compiler_status_expression_expected, tstrm.next_sloc(),
-                  "Value expected");
+    // Accept a value. No other things such as closed brackets are allowed.
+  parse_next:
+    auto qtok = tstrm.peek_opt();
+    if(!qtok)
+      throw Compiler_Error(Compiler_Error::M_format(),
+                compiler_status_expression_expected, tstrm.next_sloc(),
+                "Value expected");
 
-      switch(weaken_enum(qtok->index())) {
-        case Token::index_punctuator: {
-          // Accept an `[` or `{`.
-          auto punct = qtok->as_punctuator();
-          switch(weaken_enum(punct)) {
-            case punctuator_bracket_op: {
-              tstrm.shift();
+    switch(weaken_enum(qtok->index())) {
+      case Token::index_punctuator:
+        // Accept an `[` or `{`.
+        if(qtok->as_punctuator() == punctuator_bracket_op) {
+          tstrm.shift();
 
-              // Open an array.
-              auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-              if(!kpunct) {
-                // Descend into the new array.
-                stack.emplace_back(S_xparse_array());
-                continue;
-              }
-
-              // Accept an empty array.
-              value = V_array();
-              break;
-            }
-
-            case punctuator_brace_op: {
-              tstrm.shift();
-
-              // Open an object.
-              auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-              if(!kpunct) {
-                // Descend into the new object.
-                stack.emplace_back(S_xparse_object());
-                do_accept_object_key(stack.mut_back().mut<1>(), tstrm);
-                continue;
-              }
-
-              // Accept an empty object.
-              value = V_object();
-              break;
-            }
-
-            default:
-              throw Compiler_Error(Compiler_Error::M_format(),
-                        compiler_status_expression_expected, tstrm.next_sloc(),
-                        "Value expected");
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+          if(!kpunct) {
+            stack.emplace_back(Xparse_array());
+            goto parse_next;
           }
+
+          // Accept an empty array.
+          value = V_array();
           break;
         }
-
-        case Token::index_identifier: {
-          // Accept a literal.
-          const auto& name = qtok->as_identifier();
-          if(::rocket::is_none_of(name, { "null", "true", "false", "Infinity", "NaN" }))
-            throw Compiler_Error(Compiler_Error::M_format(),
-                      compiler_status_expression_expected, tstrm.next_sloc(),
-                      "Value expected");
-
-          switch(name[0]) {
-            case 'n':
-              value = nullopt;
-              break;
-
-            case 't':
-              value = true;
-              break;
-
-            case 'f':
-              value = false;
-              break;
-
-            case 'I':
-              value = ::std::numeric_limits<double>::infinity();
-              break;
-
-            case 'N':
-              value = ::std::numeric_limits<double>::quiet_NaN();
-              break;
-
-            default:
-              ROCKET_ASSERT(false);
-          }
+        else if(qtok->as_punctuator() == punctuator_brace_op) {
           tstrm.shift();
+
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+          if(!kpunct) {
+            stack.emplace_back(Xparse_object());
+            do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+            goto parse_next;
+          }
+
+          // Accept an empty object.
+          value = V_object();
           break;
         }
-
-        case Token::index_real_literal:
-          // Accept a number.
-          value = qtok->as_real_literal();
-          tstrm.shift();
-          break;
-
-        case Token::index_string_literal:
-          // Accept a UTF-8 string.
-          value = qtok->as_string_literal();
-          tstrm.shift();
-          break;
-
-        default:
+        else
           throw Compiler_Error(Compiler_Error::M_format(),
                     compiler_status_expression_expected, tstrm.next_sloc(),
                     "Value expected");
-      }
 
-      // A complete value has been accepted. Insert it into its parent array or object.
-      for(;;) {
-        if(stack.empty())
-          return value;
+      case Token::index_identifier:
+        // Accept a literal.
+        if(qtok->as_identifier() == "null") {
+          tstrm.shift();
+          value = nullopt;
+          break;
+        }
+        else if(qtok->as_identifier() == "true") {
+          tstrm.shift();
+          value = true;
+          break;
+        }
+        else if(qtok->as_identifier() == "false") {
+          tstrm.shift();
+          value = false;
+          break;
+        }
+        else if(qtok->as_identifier() == "Infinity") {
+          tstrm.shift();
+          value = ::std::numeric_limits<double>::infinity();
+          break;
+        }
+        else if(qtok->as_identifier() == "NaN") {
+          tstrm.shift();
+          value = ::std::numeric_limits<double>::quiet_NaN();
+          break;
+        }
+        else
+          throw Compiler_Error(Compiler_Error::M_format(),
+                    compiler_status_expression_expected, tstrm.next_sloc(),
+                    "Value expected");
 
-        if(stack.back().index() == 0) {
-          auto& ctxa = stack.mut_back().mut<0>();
+      case Token::index_real_literal:
+        // Accept a number.
+        value = qtok->as_real_literal();
+        tstrm.shift();
+        break;
+
+      case Token::index_string_literal:
+        // Accept a UTF-8 string.
+        value = qtok->as_string_literal();
+        tstrm.shift();
+        break;
+
+      default:
+        throw Compiler_Error(Compiler_Error::M_format(),
+                  compiler_status_expression_expected, tstrm.next_sloc(),
+                  "Value expected");
+    }
+
+    while(stack.size()) {
+      // Advance to the next element.
+      auto& ctx = stack.mut_back();
+      switch(ctx.index()) {
+        case 0: {
+          auto& ctxa = ctx.mut<Xparse_array>();
           ctxa.arr.emplace_back(::std::move(value));
 
           // Look for the next element.
@@ -623,20 +613,20 @@ do_parse_nonrecursive(Token_Stream& tstrm)
             throw Compiler_Error(Compiler_Error::M_status(),
                       compiler_status_closed_bracket_or_comma_expected, tstrm.next_sloc());
 
-          // Check for termination of this array.
           if(*kpunct == punctuator_comma) {
+            // A closing bracket may still follow.
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-            if(!kpunct) {
-              // Look for the next element.
-              break;
-            }
+            if(!kpunct)
+              goto parse_next;
           }
 
           // Close this array.
           value = ::std::move(ctxa.arr);
+          break;
         }
-        else {
-          auto& ctxo = stack.mut_back().mut<1>();
+
+        case 1: {
+          auto& ctxo = ctx.mut<Xparse_object>();
           auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
           if(!pair.second)
             throw Compiler_Error(Compiler_Error::M_status(),
@@ -648,23 +638,28 @@ do_parse_nonrecursive(Token_Stream& tstrm)
             throw Compiler_Error(Compiler_Error::M_status(),
                       compiler_status_closed_brace_or_comma_expected, tstrm.next_sloc());
 
-          // Check for termination of this array.
           if(*kpunct == punctuator_comma) {
+            // A closing brace may still follow.
             kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
             if(!kpunct) {
-              // Look for the next element.
-              do_accept_object_key(ctxo, tstrm);
-              break;
+              do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+              goto parse_next;
             }
           }
 
           // Close this object.
           value = ::std::move(ctxo.obj);
+          break;
         }
 
-        stack.pop_back();
+        default:
+          ROCKET_ASSERT(false);
       }
+
+      stack.pop_back();
     }
+
+    return value;
   }
 
 Value
