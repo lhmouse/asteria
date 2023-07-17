@@ -265,8 +265,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
       if(!kpunct)
         throw Compiler_Error(Compiler_Error::M_add_format(),
-                  comma_allowed ? compiler_status_closed_bracket_or_comma_expected
-                      : compiler_status_closed_bracket_or_identifier_expected, tstrm.next_sloc(),
+                  comma_allowed ? compiler_status_closing_bracket_or_comma_expected
+                      : compiler_status_closing_bracket_or_identifier_expected, tstrm.next_sloc(),
                   "[unmatched `[` at '$1']", op_sloc);
 
       // Make the list different from a plain, sole one.
@@ -300,8 +300,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
       if(!kpunct)
         throw Compiler_Error(Compiler_Error::M_add_format(),
-                  comma_allowed ? compiler_status_closed_brace_or_comma_expected
-                      : compiler_status_closed_brace_or_identifier_expected, tstrm.next_sloc(),
+                  comma_allowed ? compiler_status_closing_brace_or_comma_expected
+                      : compiler_status_closing_brace_or_identifier_expected, tstrm.next_sloc(),
                   "[unmatched `{` at '$1']", op_sloc);
 
       // Make the list different from a plain, sole one.
@@ -408,7 +408,7 @@ do_accept_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_brace_or_statement_expected, tstrm.next_sloc(),
+                compiler_status_closing_brace_or_statement_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", op_sloc);
 
     Statement::S_block xstmt = {  ::std::move(body) };
@@ -661,7 +661,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qbody = do_accept_block_opt(tstrm, scope_plain);
@@ -719,7 +719,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qbtrue = do_accept_statement_as_block_opt(tstrm, scfl);
@@ -771,7 +771,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     // Parse the block by hand.
@@ -818,7 +818,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_brace_or_switch_clause_expected, tstrm.next_sloc(),
+                compiler_status_closing_brace_or_switch_clause_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", op_sloc);
 
     Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
@@ -862,7 +862,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
@@ -901,7 +901,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_while);
@@ -951,7 +951,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
@@ -1033,7 +1033,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_for);
@@ -1308,7 +1308,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qbcatch = do_accept_statement_as_block_opt(tstrm, scfl);
@@ -1636,7 +1636,7 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     op_sloc = tstrm.next_sloc();
@@ -1721,8 +1721,8 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                comma_allowed ? compiler_status_closed_bracket_or_comma_expected
-                    : compiler_status_closed_bracket_or_expression_expected, tstrm.next_sloc(),
+                comma_allowed ? compiler_status_closing_bracket_or_comma_expected
+                    : compiler_status_closing_bracket_or_expression_expected, tstrm.next_sloc(),
                 "[unmatched `[` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
@@ -1777,8 +1777,8 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                comma_allowed ? compiler_status_closed_brace_or_comma_expected
-                    : compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc(),
+                comma_allowed ? compiler_status_closing_brace_or_comma_expected
+                    : compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
@@ -1803,7 +1803,7 @@ do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& ts
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", sloc);
 
     return true;
@@ -1850,7 +1850,7 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_fma, false };
@@ -1922,7 +1922,7 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     units.emplace_back(::std::move(*qxunit));
@@ -1952,7 +1952,7 @@ do_accept_catch_expression(cow_vector<Expression_Unit>& units, Token_Stream& tst
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     units.emplace_back(::std::move(xunit));
@@ -1991,7 +1991,7 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_parenthesis_expected, tstrm.next_sloc(),
+                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
@@ -2050,8 +2050,8 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                comma_allowed ? compiler_status_closed_parenthesis_or_comma_expected
-                    : compiler_status_closed_parenthesis_or_argument_expected, tstrm.next_sloc(),
+                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
+                    : compiler_status_closing_parenthesis_or_argument_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
@@ -2197,8 +2197,8 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                comma_allowed ? compiler_status_closed_parenthesis_or_comma_expected
-                    : compiler_status_closed_parenthesis_or_argument_expected, tstrm.next_sloc(),
+                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
+                    : compiler_status_closing_parenthesis_or_argument_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", sloc);
 
     Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
@@ -2223,7 +2223,7 @@ do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& ts
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closed_bracket_expected, tstrm.next_sloc(),
+                compiler_status_closing_bracket_expected, tstrm.next_sloc(),
                 "[unmatched `[` at '$1']", sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };

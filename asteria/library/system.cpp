@@ -66,7 +66,7 @@ do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm, Scope_type scop
     if(!qtok)
       throw Compiler_Error(Compiler_Error::M_status(),
                 (scope == scope_root) ? compiler_status_identifier_expected
-                    : compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
+                    : compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
 
     switch(weaken_enum(qtok->index())) {
       case Token::index_identifier:
@@ -80,7 +80,7 @@ do_accept_object_key(S_xparse_object& ctxo, Token_Stream& tstrm, Scope_type scop
       default:
         throw Compiler_Error(Compiler_Error::M_status(),
                   (scope == scope_root) ? compiler_status_identifier_expected
-                      : compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
+                      : compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
     }
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();

@@ -474,7 +474,7 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
+                compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
 
     switch(weaken_enum(qtok->index())) {
       case Token::index_identifier:
@@ -487,7 +487,7 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
 
       default:
         throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_closed_brace_or_json5_key_expected, tstrm.next_sloc());
+                  compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
     }
 
     ctxo.key_sloc = qtok->sloc();
@@ -611,7 +611,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
           if(!kpunct)
             throw Compiler_Error(Compiler_Error::M_status(),
-                      compiler_status_closed_bracket_or_comma_expected, tstrm.next_sloc());
+                      compiler_status_closing_bracket_or_comma_expected, tstrm.next_sloc());
 
           if(*kpunct == punctuator_comma) {
             // A closing bracket may still follow.
@@ -636,7 +636,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
           if(!kpunct)
             throw Compiler_Error(Compiler_Error::M_status(),
-                      compiler_status_closed_brace_or_comma_expected, tstrm.next_sloc());
+                      compiler_status_closing_brace_or_comma_expected, tstrm.next_sloc());
 
           if(*kpunct == punctuator_comma) {
             // A closing brace may still follow.

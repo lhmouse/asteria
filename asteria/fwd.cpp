@@ -225,22 +225,22 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_open_brace_expected:
         return "`{` expected";
 
-      case compiler_status_closed_brace_or_statement_expected:
+      case compiler_status_closing_brace_or_statement_expected:
         return "`}` or statement expected";
 
       case compiler_status_open_parenthesis_expected:
         return "`(` expected";
 
-      case compiler_status_closed_parenthesis_or_comma_expected:
+      case compiler_status_closing_parenthesis_or_comma_expected:
         return "`)` or `,` expected";
 
-      case compiler_status_closed_parenthesis_expected:
+      case compiler_status_closing_parenthesis_expected:
         return "`)` expected";
 
       case compiler_status_colon_expected:
         return "`:` expected";
 
-      case compiler_status_closed_brace_or_switch_clause_expected:
+      case compiler_status_closing_brace_or_switch_clause_expected:
         return "`}`, `case` or `default` expected";
 
       case compiler_status_keyword_while_expected:
@@ -258,13 +258,13 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_semicolon_or_expression_expected:
         return "`;` or expression expected";
 
-      case compiler_status_closed_brace_expected:
+      case compiler_status_closing_brace_expected:
         return "`}` expected";
 
       case compiler_status_too_many_elements:
         return "max number of elements exceeded";
 
-      case compiler_status_closed_bracket_expected:
+      case compiler_status_closing_bracket_expected:
         return "`]` expected";
 
       case compiler_status_open_brace_or_equal_initializer_expected:
@@ -273,22 +273,22 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_equals_sign_or_colon_expected:
         return "`=` or `:` expected";
 
-      case compiler_status_closed_bracket_or_comma_expected:
+      case compiler_status_closing_bracket_or_comma_expected:
         return "`]` or `,` expected";
 
-      case compiler_status_closed_brace_or_comma_expected:
+      case compiler_status_closing_brace_or_comma_expected:
         return "`}` or `,` expected";
 
-      case compiler_status_closed_bracket_or_expression_expected:
+      case compiler_status_closing_bracket_or_expression_expected:
         return "`]` or expression expected";
 
-      case compiler_status_closed_brace_or_json5_key_expected:
+      case compiler_status_closing_brace_or_json5_key_expected:
         return "`}`, identifier or string literal expected";
 
       case compiler_status_argument_expected:
         return "argument expected";
 
-      case compiler_status_closed_parenthesis_or_argument_expected:
+      case compiler_status_closing_parenthesis_or_argument_expected:
         return "`)` or argument expected";
 
       case compiler_status_arrow_expected:
@@ -303,10 +303,10 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_continue_no_matching_scope:
         return "no matching scope found for `continue`";
 
-      case compiler_status_closed_bracket_or_identifier_expected:
+      case compiler_status_closing_bracket_or_identifier_expected:
         return "`]` or identifier expected";
 
-      case compiler_status_closed_brace_or_identifier_expected:
+      case compiler_status_closing_brace_or_identifier_expected:
         return "`}` or identifier expected";
 
       case compiler_status_invalid_expression:
