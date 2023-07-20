@@ -82,8 +82,7 @@ void
 Simple_Script::
 reload_file(const char* path)
   {
-    unique_ptr<char, void (void*)> abspath(::free);
-    abspath.reset(::realpath(path, nullptr));
+    unique_ptr<char, void (void*)> abspath(::realpath(path, nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW((
           "Could not open script file '$1'",
@@ -108,7 +107,8 @@ execute(Reference_Stack&& stack)
   {
     Reference self;
     self.set_temporary(nullopt);
-    this->m_func.invoke(self, this->m_global, ::std::move(stack));
+    auto func = this->m_func;
+    func.invoke(self, this->m_global, ::std::move(stack));
     ::fflush(nullptr);
     return self;
   }
