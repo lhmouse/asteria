@@ -66,6 +66,16 @@ xstrcmp(const charT* lhs, const charT* rhs) noexcept
 
 template<typename charT>
 ROCKET_PURE constexpr
+bool
+xstreq(const charT* lhs, const charT* rhs) noexcept
+  {
+    return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrcmp(lhs, rhs))
+                          ? (details_xstring::maybe_constexpr::ystrcmp(lhs, rhs) == 0)
+                          : (details_xstring::ystrcmp(lhs, rhs) == 0);
+  }
+
+template<typename charT>
+ROCKET_PURE constexpr
 int
 xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
