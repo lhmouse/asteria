@@ -92,6 +92,14 @@ class basic_shallow_string
   };
 
 template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const basic_shallow_string<charT>& sh)
+  {
+    return fmt.putn(sh.data(), sh.size());
+  }
+
+template<typename charT>
 constexpr
 basic_shallow_string<charT>
 sref(const charT* ptr) noexcept
