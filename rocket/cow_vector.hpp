@@ -57,11 +57,13 @@ class cow_vector
     // 26.3.11.2, construct/copy/destroy
     constexpr
     cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : m_sth()  { }
+      : m_sth()
+      { }
 
     explicit constexpr
     cow_vector(const allocator_type& alloc) noexcept
-      : m_sth(alloc)  { }
+      : m_sth(alloc)
+      { }
 
     cow_vector(const cow_vector& other) noexcept
       : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(

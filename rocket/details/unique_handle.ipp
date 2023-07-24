@@ -84,7 +84,8 @@ class default_closer_wrapper
   public:
     constexpr  // non-explicit
     default_closer_wrapper(closerT&& xcl)
-      : m_cl(::std::forward<closerT>(xcl))  { }
+      : m_cl(::std::forward<closerT>(xcl))
+      { }
 
   public:
     constexpr

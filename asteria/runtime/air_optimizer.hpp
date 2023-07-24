@@ -18,7 +18,8 @@ class AIR_Optimizer
   public:
     explicit constexpr
     AIR_Optimizer(const Compiler_Options& opts) noexcept
-      : m_opts(opts)  { }
+      : m_opts(opts)
+      { }
 
   public:
     ASTERIA_COPYABLE_DESTRUCTOR(AIR_Optimizer);

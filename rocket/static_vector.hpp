@@ -52,11 +52,13 @@ class static_vector
   public:
     // 26.3.11.2, construct/copy/destroy
     static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : m_sth()  { }
+      : m_sth()
+      { }
 
     explicit
     static_vector(const allocator_type& alloc) noexcept
-      : m_sth(alloc)  { }
+      : m_sth(alloc)
+      { }
 
     static_vector(const static_vector& other)
       noexcept(is_nothrow_copy_constructible<value_type>::value)

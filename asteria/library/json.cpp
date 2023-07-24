@@ -80,7 +80,8 @@ class Indenter_string final
   public:
     explicit
     Indenter_string(stringR add)
-      : m_add(add), m_cur(sref("\n"))  { }
+      : m_add(add), m_cur(sref("\n"))
+      { }
 
   public:
     void
@@ -118,7 +119,8 @@ class Indenter_spaces final
   public:
     explicit
     Indenter_spaces(int64_t add)
-      : m_add(::rocket::clamp_cast<size_t>(add, 0, 10)), m_cur(0)  { }
+      : m_add(::rocket::clamp_cast<size_t>(add, 0, 10)), m_cur(0)
+      { }
 
   public:
     void

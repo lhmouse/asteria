@@ -40,11 +40,13 @@ class basic_linear_buffer
   public:
     constexpr
     basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : m_stor()  { }
+      : m_stor()
+      { }
 
     explicit constexpr
     basic_linear_buffer(const allocator_type& alloc) noexcept
-      : m_stor(alloc)  { }
+      : m_stor(alloc)
+      { }
 
     basic_linear_buffer(const basic_linear_buffer& other)
       : m_stor(allocator_traits<allocator_type>::select_on_container_copy_construction(

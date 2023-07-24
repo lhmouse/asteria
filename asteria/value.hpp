@@ -34,14 +34,16 @@ class Value
     // Constructors and assignment operators
     constexpr
     Value(nullopt_t = nullopt) noexcept
-      : m_bytes()  { }
+      : m_bytes()
+      { }
 
     template<typename XValT,
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                         typename details_value::Valuable<XValT>::via_type&&>::value)
-      : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))  { }
+      : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
+      { }
 
     template<typename XValT,
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
@@ -63,7 +65,8 @@ class Value
       }
 
     Value(const Value& other) noexcept
-      : m_stor(other.m_stor)  { }
+      : m_stor(other.m_stor)
+      { }
 
     Value&
     operator=(const Value& other) & noexcept

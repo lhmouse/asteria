@@ -37,7 +37,8 @@ class Thunk_Base
   public:
     explicit
     Thunk_Base(const Factory& fact, FunctionT func)
-      : m_name(fact.name), m_desc(fact.desc), m_func(func)  { }
+      : m_name(fact.name), m_desc(fact.desc), m_func(func)
+      { }
 
   public:
     tinyfmt&

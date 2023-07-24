@@ -73,7 +73,8 @@ class variant
     // 23.7.3.1, constructors
     constexpr
     variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
-      : m_init_stor(), m_init_index()  { }
+      : m_init_stor(), m_init_index()
+      { }
 
     template<typename paramT,
     ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>

@@ -35,7 +35,8 @@ class Reference
     // Constructors and assignment operators
     constexpr
     Reference() noexcept
-      : m_init_index()  { }
+      : m_init_index()
+      { }
 
     Reference(const Reference& other) noexcept
       : m_init_index(other.m_init_index),

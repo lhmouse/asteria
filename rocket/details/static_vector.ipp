@@ -287,12 +287,14 @@ class vector_iterator
     // This constructor is called by the container.
     constexpr
     vector_iterator(valueT* begin, size_t ncur, size_t nend) noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)  { }
+      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
+      { }
 
   public:
     constexpr
     vector_iterator() noexcept
-      : m_begin(), m_cur(), m_end()  { }
+      : m_begin(), m_cur(), m_end()
+      { }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
