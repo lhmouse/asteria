@@ -28,8 +28,8 @@ struct Verbose_Hooks final
 
         // Compose the string to write.
         this->m_fmt.clear_string();
-        this->m_fmt << "REPL running at '" << sloc << "':\n";
-        format(this->m_fmt, templ, params...);  // ADL intended
+        format(this->m_fmt, "REPL running at '$1':\n", sloc);  // ADL intended
+        format(this->m_fmt, templ, params...);
 
         // Extract the string and write it to standard error.
         // Errors are ignored.
