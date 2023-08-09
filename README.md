@@ -1,6 +1,6 @@
 # The Asteria Programming Language
 
-![README](https://raw.githubusercontent.com/lhmouse/asteria/master/README.png)
+![asteria](https://raw.githubusercontent.com/lhmouse/asteria/master/asteria.png)
 
 |CI            |Category                   |Host OS         |Build Status     |Remarks          |
 |:-------------|:--------------------------|:---------------|:----------------|:----------------|
