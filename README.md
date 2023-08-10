@@ -1,6 +1,7 @@
 # The Asteria Programming Language
 
-![asteria](https://raw.githubusercontent.com/lhmouse/asteria/master/asteria.png)
+![asteria](asteria.png)
+![README](README.png)
 
 |CI            |Category                   |Host OS         |Build Status     |Remarks          |
 |:-------------|:--------------------------|:---------------|:----------------|:----------------|
@@ -11,8 +12,6 @@
 |:------------|:--------------------------|:----------------|
 |**GCC 9**    |:1st_place_medal:Primary   |                 |
 |**Clang 11** |:2nd_place_medal:Secondary |A number of meaningless warnings.  |
-
-![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/asteria/master/GNU-nano-FTW.png)
 
 # Concepts
 
