@@ -1183,6 +1183,12 @@ do_frexp10_8(float value)
       mant_next = next_digits * next_mult;
     }
 
+    if(bits >= 1000000000U) {
+      // Rounding has effected a carry, so revert it.
+      bits /= 10U;
+      bpos ++;
+    }
+
     // Convert the exponent and mantissa back. The number will be
     // interpreted as `sign mant E exp` in scientific floating-point
     // notation.
@@ -1261,6 +1267,12 @@ do_frexp10_17(double value)
       next_digits += carry;
       next_mult *= 10U;
       mant_next = next_digits * next_mult;
+    }
+
+    if(bits >= 1000000000000000000ULL) {
+      // Rounding has effected a carry, so revert it.
+      bits /= 10U;
+      bpos ++;
     }
 
     // Convert the exponent and mantissa back. The number will be
