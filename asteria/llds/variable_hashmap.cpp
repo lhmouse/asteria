@@ -24,14 +24,14 @@ do_destroy_buckets(bool xfree) noexcept
       qbkt->prev = nullptr;
     }
 
-    this->m_head = (Bucket*)0xDEADBEEF;
-    if(!xfree)
-      return;
+    if(xfree) {
+      // Deallocate the table. This is called by the destructor.
+      ::free(this->m_bptr);
+      this->m_bptr = (Bucket*)(intptr_t) 0xDEADBEEF;
+      this->m_eptr = (Bucket*)(intptr_t) 0xDEADBEEF;
+    }
 
-    // Deallocate the old table.
-    auto bold = ::std::exchange(this->m_bptr, (Bucket*)0xDEADBEEF);
-    auto eold = ::std::exchange(this->m_eptr, (Bucket*)0xBEEFDEAD);
-    ::rocket::freeN<Bucket>(bold, (size_t)(eold - bold));
+    this->m_head = (Bucket*)(intptr_t) 0xDEADBEEF;
   }
 
 void
@@ -88,18 +88,17 @@ do_rehash_more(size_t nadd)
           "Variable_HashMap: rehash size not valid (`%zd` + `%zd`)",
           this->m_size, nadd);
 
-    auto bptr = ::rocket::allocN<Bucket>(nbkt);
-    auto eptr = bptr + nbkt;
+    auto bptr = (Bucket*) ::calloc(nbkt, sizeof(Bucket));
+    if(!bptr)
+      throw ::std::bad_alloc();
 
-    // Initialize an empty table.
-    ::std::for_each(bptr, eptr, [&](Bucket& r) { r.prev = nullptr;  });
     auto bold = ::std::exchange(this->m_bptr, bptr);
-    auto eold = ::std::exchange(this->m_eptr, eptr);
+    this->m_eptr = bptr + nbkt;
+
     if(ROCKET_EXPECT(!bold))
       return;
 
-    // Move buckets into the new table.
-    // Warning: no exception shall be thrown from the code below.
+    // Move buckets into the new table. No exception shall be thrown.
     auto sbkt = ::rocket::exchange(this->m_head);
     while(ROCKET_EXPECT(sbkt)) {
       ROCKET_ASSERT(*sbkt);
@@ -107,9 +106,9 @@ do_rehash_more(size_t nadd)
       // Find a new bucket for the name using linear probing.
       // Uniqueness has already been implied for all elements, so there is
       // no need to check for collisions.
-      auto mptr = ::rocket::get_probing_origin(bptr, eptr,
+      auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
                       reinterpret_cast<uintptr_t>(sbkt->key_p));
-      auto qbkt = ::rocket::linear_probe(bptr, mptr, mptr, eptr,
+      auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
                       [&](const Bucket&) { return false;  });
 
       // Mark the new bucket non-empty.
@@ -127,7 +126,7 @@ do_rehash_more(size_t nadd)
     }
 
     // Deallocate the old table.
-    ::rocket::freeN<Bucket>(bold, (size_t)(eold - bold));
+      ::free(bold);
   }
 
 size_t
