@@ -11,7 +11,8 @@ autoreconf -ifv
 
 cd $(mktemp -d)
 trap 'rm -rf ~+ || true' EXIT
-~-/configure --disable-silent-rules --enable-debug-checks --{build,host}=${CONFIGURE_HOST} ${CONFIGURE_OPTS}
+~-/configure --{build,host}=${CONFIGURE_HOST} ${CONFIGURE_OPTS}  \
+  --disable-dependency-tracking --disable-silent-rules --enable-debug-checks
 
 # test
 if ! make -j$(nproc) distcheck DISTCHECK_CONFIGURE_FLAGS=${CONFIGURE_OPTS}
