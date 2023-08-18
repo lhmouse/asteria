@@ -53,8 +53,7 @@ class Variable_HashMap
     do_xprobe(const void* key_p) const noexcept
       {
         // Find a bucket using linear probing.
-        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
-                          reinterpret_cast<uintptr_t>(key_p));
+        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr, (uintptr_t) key_p);
         auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
                           [&](const Bucket& r) { return r.key_p == key_p;  });
 
