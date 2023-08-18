@@ -53,10 +53,8 @@ do_xrelocate_but(Bucket* qxcld) noexcept
         // Find a new bucket for the name using linear probing.
         // Uniqueness has already been implied for all elements, so there is
         // no need to check for collisions.
-        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
-                        reinterpret_cast<uintptr_t>(sbkt->key_p));
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
-                        [&](const Bucket&) { return false;  });
+        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr, (uintptr_t) sbkt->key_p);
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr, [&](const Bucket&) { return false;  });
 
         // Mark the new bucket non-empty.
         ROCKET_ASSERT(qbkt);
@@ -106,10 +104,8 @@ do_rehash_more(size_t nadd)
       // Find a new bucket for the name using linear probing.
       // Uniqueness has already been implied for all elements, so there is
       // no need to check for collisions.
-      auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr,
-                      reinterpret_cast<uintptr_t>(sbkt->key_p));
-      auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
-                      [&](const Bucket&) { return false;  });
+      auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr, (uintptr_t) sbkt->key_p);
+      auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr, [&](const Bucket&) { return false;  });
 
       // Mark the new bucket non-empty.
       ROCKET_ASSERT(qbkt);
@@ -126,7 +122,7 @@ do_rehash_more(size_t nadd)
     }
 
     // Deallocate the old table.
-      ::free(bold);
+    ::free(bold);
   }
 
 size_t
