@@ -43,17 +43,17 @@ class Reference_Stack
       }
 
   private:
+    // This is the only memory management function. `estor` shall specify the
+    // new number of references to reserve. If `estor` is zero, any dynamic
+    // storage will be deallocated.
     void
-    do_deallocate() noexcept;
-
-    void
-    do_reserve_more();
+    do_reallocate(uint32_t estor);
 
   public:
     ~Reference_Stack()
       {
         if(this->m_bptr)
-          this->do_deallocate();
+          this->do_reallocate(0);
       }
 
     bool
@@ -73,8 +73,8 @@ class Reference_Stack
     void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        for(uint32_t ki = 0;  ki != this->m_einit;  ++ki)
-          this->m_bptr[ki].get_variables(staged, temp);
+        for(uint32_t refi = 0;  refi != this->m_einit;  ++ refi)
+          this->m_bptr[refi].get_variables(staged, temp);
       }
 
     void
@@ -87,41 +87,38 @@ class Reference_Stack
     const Reference&
     top(size_t index = 0) const noexcept
       {
-        size_t ki = this->m_etop + ~index;
-        ROCKET_ASSERT(ki < this->m_etop);
-        return this->m_bptr[ki];
+        ROCKET_ASSERT(index < this->m_etop);
+        return *(this->m_bptr + this->m_etop + ~ index);
       }
 
     Reference&
     mut_top(size_t index = 0)
       {
-        size_t ki = this->m_etop + ~index;
-        ROCKET_ASSERT(ki < this->m_etop);
-        return this->m_bptr[ki];
+        ROCKET_ASSERT(index < this->m_etop);
+        return *(this->m_bptr + this->m_etop + ~ index);
       }
 
     Reference&
     push()
       {
-        size_t ki = this->m_etop;
-        if(ROCKET_UNEXPECT(ki >= this->m_einit)) {
-          // Construct one more reference.
-          if(ROCKET_UNEXPECT(ki >= this->m_estor))
-            this->do_reserve_more();
-
-          ROCKET_ASSERT(ki < this->m_estor);
-          ::rocket::construct(this->m_bptr + ki);
-          this->m_einit += 1;
+        if(ROCKET_EXPECT(this->m_etop < this->m_einit)) {
+          this->m_etop ++;
+          return *(this->m_bptr + this->m_etop - 1);
         }
-        this->m_etop += 1;
-        return this->m_bptr[ki];
+
+        if(this->m_einit >= this->m_estor)
+          this->do_reallocate(this->m_estor / 2 * 3 | 17);
+
+        ::rocket::construct(this->m_bptr + this->m_einit);
+        this->m_etop = ++ this->m_einit;
+        return *(this->m_bptr + this->m_etop - 1);
       }
 
     void
     pop(size_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->m_etop);
-        this->m_etop -= (uint32_t)count;
+        this->m_etop -= (uint32_t) count;
       }
   };
 
