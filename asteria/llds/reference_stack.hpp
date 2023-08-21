@@ -22,11 +22,15 @@ class Reference_Stack
       { }
 
     Reference_Stack(Reference_Stack&& other) noexcept
-      { this->swap(other);  }
+      {
+        this->swap(other);
+      }
 
     Reference_Stack&
     operator=(Reference_Stack&& other) & noexcept
-      { return this->swap(other);  }
+      {
+        return this->swap(other);
+      }
 
     Reference_Stack&
     swap(Reference_Stack& other) noexcept
@@ -40,16 +44,16 @@ class Reference_Stack
 
   private:
     void
-    do_destroy_elements(bool xfree) noexcept;
+    do_deallocate() noexcept;
 
     void
-    do_reserve_more(uint32_t nadd);
+    do_reserve_more();
 
   public:
     ~Reference_Stack()
       {
         if(this->m_bptr)
-          this->do_destroy_elements(true);
+          this->do_deallocate();
       }
 
     bool
@@ -69,23 +73,15 @@ class Reference_Stack
     void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        auto bptr = this->m_bptr;
-        auto eptr = this->m_bptr + this->m_einit;
-
-        while(eptr != bptr)
-          (--eptr)->get_variables(staged, temp);
+        for(uint32_t ki = 0;  ki != this->m_einit;  ++ki)
+          this->m_bptr[ki].get_variables(staged, temp);
       }
 
     void
     clear_cache() noexcept
       {
-        auto tptr = this->m_bptr + this->m_etop;
-        auto eptr = this->m_bptr + this->m_einit;
-
-        while(eptr != tptr)
-          ::rocket::destroy(--eptr);
-
-        this->m_einit = this->m_etop;
+        while(this->m_etop != this->m_einit)
+          ::rocket::destroy(this->m_bptr + -- this->m_einit);
       }
 
     const Reference&
@@ -111,7 +107,7 @@ class Reference_Stack
         if(ROCKET_UNEXPECT(ki >= this->m_einit)) {
           // Construct one more reference.
           if(ROCKET_UNEXPECT(ki >= this->m_estor))
-            this->do_reserve_more(7);
+            this->do_reserve_more();
 
           ROCKET_ASSERT(ki < this->m_estor);
           ::rocket::construct(this->m_bptr + ki);
