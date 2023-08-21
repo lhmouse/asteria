@@ -21,6 +21,10 @@ do_reallocate(uint32_t estor)
       if(!bptr)
         throw ::std::bad_alloc();
 
+#ifdef ROCKET_DEBUG
+      ::memset((void*) (bptr + this->m_einit), 0xC3, (estor - this->m_einit) * sizeof(Reference));
+#endif
+
       this->m_bptr = bptr;
       this->m_estor = estor;
     }
@@ -29,7 +33,12 @@ do_reallocate(uint32_t estor)
       while(this->m_einit != 0)
         ::rocket::destroy(this->m_bptr + -- this->m_einit);
 
+#ifdef ROCKET_DEBUG
+      ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
+#endif
+
       ::free(this->m_bptr);
+
       this->m_bptr = nullptr;
       this->m_estor = 0;
     }
