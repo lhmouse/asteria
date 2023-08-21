@@ -91,9 +91,6 @@ do_collect_generation(size_t gen)
     // Mark all variables that have been collected so far.
     this->m_temp_1.merge(tracked);
 
-    if(next_opt)
-      next_opt->reserve_more(this->m_temp_1.size());
-
     while(do_pop_variable(var, this->m_temp_1)) {
       // Each variable whose `gc_ref` counter equals its reference count is
       // marked as possibly unreachable. Note `var` here owns a reference
@@ -121,12 +118,19 @@ do_collect_generation(size_t gen)
         if(!tracked.erase(var.get()))
           continue;
 
-        // Transfer this variable to the next generation.
-        // Note that storage has been reserved so this shall not cause
-        // exceptions.
-        ROCKET_ASSERT(next_opt->size() < next_opt->capacity());
-        next_opt->insert(var.get(), var);
-        *count_opt += 1;
+        try {
+          // Transfer this variable to the next generation.
+          *count_opt += 1;
+          next_opt->insert(var.get(), var);
+        }
+        catch(exception& stdex) {
+          ::fprintf(stderr,
+              "WARNING: An exception has been caught and ignored.\n"
+              "\n"
+              "  exception class: %s\n"
+              "  what(): %s\n",
+              typeid(stdex).name(), stdex.what());
+        }
       }
     }
 
