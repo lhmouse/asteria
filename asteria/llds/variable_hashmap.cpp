@@ -45,13 +45,7 @@ do_rehash(uint32_t nbkt)
     }
     else {
       // Free the storage.
-      if(this->m_size != 0)
-        for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-          if(this->m_bptr[t]) {
-            this->m_size --;
-            this->m_bptr[t].key_opt = nullptr;
-            ::rocket::destroy(this->m_bptr[t].vstor);
-          }
+      this->clear();
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_variable_hashmap::Bucket));
