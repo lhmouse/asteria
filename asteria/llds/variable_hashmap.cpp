@@ -54,7 +54,6 @@ do_rehash(uint32_t nbkt)
 
       this->m_bptr = nullptr;
       this->m_nbkt = 0;
-      ROCKET_ASSERT(this->m_size == 0);
     }
   }
 
