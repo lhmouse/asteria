@@ -36,7 +36,6 @@ do_reallocate(uint32_t estor)
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
 #endif
-
       ::free(this->m_bptr);
 
       this->m_bptr = nullptr;

@@ -18,26 +18,26 @@ do_rehash(uint32_t nbkt)
       if(!bptr)
         throw ::std::bad_alloc();
 
-      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-        if(this->m_bptr[t]) {
-          // Look for a new bucket for this element. Uniqueness is implied.
-          auto qrel = ::rocket::get_probing_origin(
-              bptr, bptr + nbkt, (uintptr_t) this->m_bptr[t].key_opt);
+      if(this->m_size != 0)
+        for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+          if(this->m_bptr[t]) {
+            // Look for a new bucket for this element. Uniqueness is implied.
+            auto qrel = ::rocket::get_probing_origin(
+                bptr, bptr + nbkt, (uintptr_t) this->m_bptr[t].key_opt);
 
-          qrel = ::rocket::linear_probe(
-              bptr, qrel, qrel, bptr + nbkt,
-              [&](const details_variable_hashmap::Bucket&) { return false;  });
+            qrel = ::rocket::linear_probe(
+                bptr, qrel, qrel, bptr + nbkt,
+                [&](const details_variable_hashmap::Bucket&) { return false;  });
 
-          // Relocate the value into the new bucket.
-          qrel->key_opt = this->m_bptr[t].key_opt;
-          ::rocket::construct(qrel->vstor, ::std::move(this->m_bptr[t].vstor[0]));
-          ::rocket::destroy(this->m_bptr[t].vstor);
-        }
+            // Relocate the value into the new bucket.
+            qrel->key_opt = this->m_bptr[t].key_opt;
+            ::rocket::construct(qrel->vstor, ::std::move(this->m_bptr[t].vstor[0]));
+            ::rocket::destroy(this->m_bptr[t].vstor);
+          }
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_variable_hashmap::Bucket));
 #endif
-
       ::free(this->m_bptr);
 
       this->m_bptr = bptr;
@@ -45,17 +45,17 @@ do_rehash(uint32_t nbkt)
     }
     else {
       // Free the storage.
-      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-        if(this->m_bptr[t]) {
-          this->m_size --;
-          this->m_bptr[t].key_opt = nullptr;
-          ::rocket::destroy(this->m_bptr[t].vstor);
-        }
+      if(this->m_size != 0)
+        for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+          if(this->m_bptr[t]) {
+            this->m_size --;
+            this->m_bptr[t].key_opt = nullptr;
+            ::rocket::destroy(this->m_bptr[t].vstor);
+          }
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_variable_hashmap::Bucket));
 #endif
-
       ::free(this->m_bptr);
 
       this->m_bptr = nullptr;
@@ -68,12 +68,13 @@ void
 Variable_HashMap::
 clear() noexcept
   {
-    for(auto qbkt = this->m_bptr;  qbkt != this->m_bptr + this->m_nbkt;  ++ qbkt)
-      if(*qbkt) {
-        this->m_size --;
-        qbkt->key_opt = nullptr;
-        ::rocket::destroy(qbkt->vstor);
-      }
+    if(this->m_size != 0)
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          this->m_size --;
+          this->m_bptr[t].key_opt = nullptr;
+          ::rocket::destroy(this->m_bptr[t].vstor);
+        }
 
     ROCKET_ASSERT(this->m_size == 0);
   }
@@ -170,9 +171,13 @@ void
 Variable_HashMap::
 merge(const Variable_HashMap& other)
   {
-    for(uint32_t t = 0;  t != other.m_nbkt;  ++t)
-      if(other.m_bptr[t])
-        this->insert(other.m_bptr[t].key_opt, other.m_bptr[t].vstor[0]);
+    if(this == &other)
+      return;
+
+    if(other.m_size != 0)
+      for(uint32_t t = 0;  t != other.m_nbkt;  ++t)
+        if(other.m_bptr[t])
+          this->insert(other.m_bptr[t].key_opt, other.m_bptr[t].vstor[0]);
   }
 
 refcnt_ptr<Variable>
