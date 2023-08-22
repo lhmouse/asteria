@@ -964,7 +964,7 @@ struct Traits_check_argument
 
 struct Traits_push_global_reference
   {
-    // `up` is the hint.
+    // `up` is unused.
     // `sp` is the source location and name;
 
     static
@@ -972,15 +972,6 @@ struct Traits_push_global_reference
     get_symbols(const AIR_Node::S_push_global_reference& altr)
       {
         return altr.sloc;
-      }
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_global_reference& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.u16 = static_cast<uint16_t>(altr.hint);
-        return up;
       }
 
     static
@@ -992,11 +983,10 @@ struct Traits_push_global_reference
 
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, phsh_stringR name)
+    execute(Executive_Context& ctx, phsh_stringR name)
       {
         // Look for the name in the global context.
-        size_t hint = up.u16;
-        auto qref = ctx.global().get_named_reference_with_hint_opt(hint, name);
+        auto qref = ctx.global().get_named_reference_opt(name);
         if(!qref)
           ASTERIA_THROW_RUNTIME_ERROR((
               "Unresolvable global identifier `$1`"),
@@ -1009,7 +999,7 @@ struct Traits_push_global_reference
 
 struct Traits_push_local_reference
   {
-    // `up` is the depth and hint.
+    // `up` is the depth.
     // `sp` is the source location and name;
 
     static
@@ -1025,7 +1015,6 @@ struct Traits_push_local_reference
       {
         AVMC_Queue::Uparam up;
         up.u32 = altr.depth;
-        up.u16 = static_cast<uint16_t>(altr.hint);
         return up;
       }
 
@@ -1046,8 +1035,7 @@ struct Traits_push_local_reference
           qctx = qctx->get_parent_opt();
 
         // Look for the name in the context.
-        size_t hint = up.u16;
-        auto qref = qctx->get_named_reference_with_hint_opt(hint, name);
+        auto qref = qctx->get_named_reference_opt(name);
         if(!qref)
           ASTERIA_THROW_RUNTIME_ERROR((
               "Undeclared identifier `$1`"),

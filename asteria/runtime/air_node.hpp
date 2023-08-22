@@ -112,7 +112,6 @@ class AIR_Node
     struct S_push_global_reference
       {
         Source_Location sloc;
-        size_t hint;
         phsh_string name;
       };
 
@@ -120,7 +119,6 @@ class AIR_Node
       {
         Source_Location sloc;
         uint32_t depth;
-        size_t hint;
         phsh_string name;
       };
 

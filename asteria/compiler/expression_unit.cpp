@@ -60,12 +60,11 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         for(;;) {
           // Look for the name in the current context.
-          size_t hint = SIZE_MAX;
-          qref = qctx->get_named_reference_with_hint_opt(hint, altr.name);
+          qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
             // A reference declared later has been found.
             // Record the context depth for later lookups.
-            AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, hint, altr.name };
+            AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
           }
@@ -75,17 +74,16 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           if(!qctx) {
             // No name has been found so far.
             // Assume that the name will be found in the global context.
-            hint = SIZE_MAX;
             if(!opts.implicit_global_names) {
               // If implicit global names are not allowed, it must be resolved now.
-              qref = global.get_named_reference_with_hint_opt(hint, altr.name);
+              qref = global.get_named_reference_opt(altr.name);
               if(!qref)
                 throw Compiler_Error(Compiler_Error::M_format(),
                           compiler_status_undeclared_identifier, altr.sloc,
                           "Undeclared identifier `$1`", altr.name);
             }
 
-            AIR_Node::S_push_global_reference xnode = { altr.sloc, hint, altr.name };
+            AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
             code.emplace_back(::std::move(xnode));
             return code;
           }
@@ -193,7 +191,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<index_global_reference>();
 
         // This name is always looked up in the global context.
-        AIR_Node::S_push_global_reference xnode = { altr.sloc, UINT16_MAX, altr.name };
+        AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
         code.emplace_back(::std::move(xnode));
         return code;
       }
