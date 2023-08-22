@@ -79,26 +79,15 @@ do_collect_generation(uint32_t gen)
 
       var->get_value().get_variables(this->m_staged, this->m_temp_2);
 
-      if(!next_opt)
-        continue;
-
-      // Foreign variables must not be transferred.
-      if(!tracked.erase(var.get()))
-        continue;
-
-      try {
-        // Transfer this variable to the next generation.
-        *count_opt += 1;
-        next_opt->insert(var.get(), var);
-      }
-      catch(exception& stdex) {
-        ::fprintf(stderr,
-            "WARNING: An exception has been caught and ignored.\n"
-            "\n"
-            "  exception class: %s\n"
-            "  what(): %s\n",
-            typeid(stdex).name(), stdex.what());
-      }
+      if(next_opt && tracked.erase(var.get()))
+        try {
+          // Move the variable to the next generation.
+          next_opt->insert(var.get(), var);
+          *count_opt += 1;
+        }
+        catch(exception& /*stdex*/) {
+          tracked.insert(var.get(), var);
+        }
     }
 
     this->m_temp_2.clear();
@@ -109,13 +98,14 @@ do_collect_generation(uint32_t gen)
       if(!tracked.erase(var.get()))
         continue;
 
-      // Cache the variable for later use.
-      // If an exception is thrown during uninitialization, the variable
-      // shall be collected immediately.
+      ROCKET_ASSERT(var->get_gc_ref() != 0);
+      nvars += 1;
+
       try {
-        ROCKET_ASSERT(var->get_gc_ref() != 0);
+        // Cache the variable for later use.
+        // If an exception is thrown during uninitialization, the variable
+        // shall be collected immediately.
         var->uninitialize();
-        nvars += 1;
         this->m_pool.insert(var.get(), var);
       }
       catch(exception& stdex) {
