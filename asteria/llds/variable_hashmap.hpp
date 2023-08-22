@@ -74,12 +74,9 @@ class Variable_HashMap
           return nullptr;
 
         // Find a bucket using linear probing.
-        auto qbkt = ::rocket::get_probing_origin(
-            this->m_bptr, this->m_bptr + this->m_nbkt, (uintptr_t) key);
-
-        qbkt = ::rocket::linear_probe(
-            this->m_bptr, qbkt, qbkt, this->m_bptr + this->m_nbkt,
-            [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
+        size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
+              [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
 
         // The load factor is kept <= 0.5 so a bucket is always returned. If
         // probing has stopped on an empty bucket, then there is no match.

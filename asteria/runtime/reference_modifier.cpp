@@ -98,13 +98,11 @@ apply_read_opt(const Value& parent) const
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
-        auto bptr = arr.data();
-        auto eptr = bptr + arr.size();
-        if(bptr == eptr)
+        if(arr.empty())
           return nullptr;
 
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
-        return mptr;
+        size_t r = ::rocket::probe_origin(arr.size(), altr.seed);
+        return arr.data() + r;
       }
 
       default:
@@ -204,13 +202,11 @@ apply_write_opt(Value& parent) const
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
-        auto bptr = arr.mut_data();
-        auto eptr = bptr + arr.size();
-        if(bptr == eptr)
+        if(arr.empty())
           return nullptr;
 
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
-        return mptr;
+        size_t r = ::rocket::probe_origin(arr.size(), altr.seed);
+        return arr.mut_data() + r;
       }
 
       default:
@@ -316,14 +312,12 @@ apply_open(Value& parent) const
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
-        auto bptr = arr.mut_data();
-        auto eptr = bptr + arr.size();
-        if(bptr == eptr)
+        if(arr.empty())
           ASTERIA_THROW_RUNTIME_ERROR((
               "Cannot write to random element of an empty array"));
 
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
-        return *mptr;
+        size_t r = ::rocket::probe_origin(arr.size(), altr.seed);
+        return arr.mut(r);
       }
 
       default:
@@ -435,14 +429,12 @@ apply_unset(Value& parent) const
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
-        auto bptr = arr.mut_data();
-        auto eptr = bptr + arr.size();
-        if(bptr == eptr)
+        if(arr.empty())
           return nullopt;
 
-        auto mptr = ::rocket::get_probing_origin(bptr, eptr, altr.seed);
-        auto val = ::std::move(*mptr);
-        arr.erase(static_cast<size_t>(mptr - bptr), 1);
+        size_t r = ::rocket::probe_origin(arr.size(), altr.seed);
+        auto val = ::std::move(arr.mut(r));
+        arr.erase(r, 1);
         return val;
       }
 

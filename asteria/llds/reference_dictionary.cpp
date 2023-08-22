@@ -41,9 +41,9 @@ do_xrelocate_but(Bucket* qxcld) noexcept
   {
     ::rocket::linear_probe(
       this->m_bptr,
-      qxcld,
-      qxcld + 1,
-      this->m_eptr,
+      (size_t) (qxcld  - this->m_bptr),
+      (size_t) (qxcld + 1 - this->m_bptr),
+      (size_t) (this->m_eptr - this->m_bptr),
       [&](Bucket& rb) {
         auto sbkt = &rb;
 
@@ -54,8 +54,9 @@ do_xrelocate_but(Bucket* qxcld) noexcept
         // Find a new bucket for the name using linear probing.
         // Uniqueness has already been implied for all elements, so there is
         // no need to check for collisions.
-        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr, sbkt->kstor[0].rdhash());
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr, [&](const Bucket&) { return false;  });
+        size_t orig = ::rocket::probe_origin( (size_t) (this->m_eptr - this->m_bptr), sbkt->kstor[0].rdhash());
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, (size_t) (this->m_eptr - this->m_bptr),
+         [&](const Bucket&) { return false;  });
 
         // Mark the new bucket non-empty.
         ROCKET_ASSERT(qbkt);
@@ -104,8 +105,9 @@ do_rehash_more()
       // Find a new bucket for the name using linear probing.
       // Uniqueness has already been implied for all elements, so there is
       // no need to check for collisions.
-      auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr, sbkt->kstor[0].rdhash());
-      auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr, [&](const Bucket&) { return false;  });
+        size_t orig = ::rocket::probe_origin( (size_t) (this->m_eptr - this->m_bptr), sbkt->kstor[0].rdhash());
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, (size_t) (this->m_eptr - this->m_bptr),
+         [&](const Bucket&) { return false;  });
 
       // Mark the new bucket non-empty.
       ROCKET_ASSERT(qbkt);

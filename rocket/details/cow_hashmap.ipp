@@ -211,18 +211,14 @@ struct basic_storage
         ROCKET_ASSERT(qval);
         ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
 
-        // Get table bounds.
-        auto bptr = this->bkts;
-        auto eptr = this->bkts + this->bucket_count();
+        // Find a spare bucket.
+        size_t orig = noadl::probe_origin(this->bucket_count(), this->hash(qval->first));
+        auto qbkt = noadl::linear_probe(this->bkts, orig, orig, this->bucket_count(),
+              [&](const bucket_type&) { return false;  });
 
-        // Find an empty bucket for the new element.
-        auto orig = noadl::get_probing_origin(bptr, eptr, this->hash(qval->first));
-        auto qbkt = noadl::linear_probe(bptr, orig, orig, eptr,
-                                        [&](const bucket_type&) { return false;  });
+        // Insert it into the spare bucket.
         ROCKET_ASSERT(qbkt);
-
-        // Insert it into the new bucket.
-        return this->adopt_value_unchecked(static_cast<size_t>(qbkt - bptr), qval);
+        return this->adopt_value_unchecked(static_cast<size_type>(qbkt - this->bkts), qval);
       }
 
     // This function does not check for duplicate keys.
@@ -553,30 +549,25 @@ class storage_handle
     const bucket_type*
     find(size_type& tpos, const ykeyT& ykey) const noexcept
       {
-        // Get table bounds.
         auto qstor = this->m_qstor;
         if(!qstor)
           return nullptr;
 
-        auto bptr = qstor->bkts;
-        auto eptr = qstor->bkts + qstor->bucket_count();
-
         // Find an equivalent key using linear probing.
         // The load factor is kept below 0.5 so there is always at least one bucket available.
-        auto orig = noadl::get_probing_origin(bptr, eptr, qstor->hash(ykey));
-        auto qbkt = noadl::linear_probe(bptr, orig, orig, eptr,
-                        [&](const bucket_type& r) { return this->as_key_equal()(r->first, ykey);  });
+        size_t orig = noadl::probe_origin(qstor->bucket_count(), qstor->hash(ykey));
+        auto qbkt = noadl::linear_probe(qstor->bkts, orig, orig, qstor->bucket_count(),
+              [&](const bucket_type& r) { return this->as_key_equal()(r->first, ykey);  });
 
         static_assert(max_load_factor_reciprocal > 1);
         ROCKET_ASSERT(qbkt);
-        tpos = static_cast<size_type>(qbkt - bptr);
+        tpos = static_cast<size_type>(qbkt - qstor->bkts);
 
         // If probing stopped due to an empty bucket, there is no equivalent key.
         if(!*qbkt)
           return nullptr;
 
-        // Report that an element has been found.
-        // The bucket index is returned via `tpos`.
+        // Report that an element has been found. The bucket index is returned via `tpos`.
         return qbkt;
       }
 
@@ -616,10 +607,7 @@ class storage_handle
 
         // Relocate elements that are not placed in their immediate locations.
         noadl::linear_probe(
-          qstor->bkts,
-          qstor->bkts + tpos,
-          qstor->bkts + tpos + tlen,
-          qstor->bkts + qstor->bucket_count(),
+          qstor->bkts, tpos, tpos + tlen, qstor->bucket_count(),
           [&](bucket_type& r) {
             // Clear this bucket temporarily.
             auto qval = r.exchange(nullptr);

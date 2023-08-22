@@ -22,12 +22,9 @@ do_rehash(uint32_t nbkt)
         for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
           if(this->m_bptr[t]) {
             // Look for a new bucket for this element. Uniqueness is implied.
-            auto qrel = ::rocket::get_probing_origin(
-                bptr, bptr + nbkt, (uintptr_t) this->m_bptr[t].key_opt);
-
-            qrel = ::rocket::linear_probe(
-                bptr, qrel, qrel, bptr + nbkt,
-                [&](const details_variable_hashmap::Bucket&) { return false;  });
+            size_t orel = ::rocket::probe_origin(nbkt, (uintptr_t) this->m_bptr[t].key_opt);
+            auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
+                  [&](const details_variable_hashmap::Bucket&) { return false;  });
 
             // Relocate the value into the new bucket.
             qrel->key_opt = this->m_bptr[t].key_opt;
@@ -85,12 +82,9 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
       this->do_rehash(this->m_size * 3 | 57);
 
     // Find a bucket using linear probing.
-    auto qbkt = ::rocket::get_probing_origin(
-        this->m_bptr, this->m_bptr + this->m_nbkt, (uintptr_t) key);
-
-    qbkt = ::rocket::linear_probe(
-        this->m_bptr, qbkt, qbkt, this->m_bptr + this->m_nbkt,
-        [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
+    size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
+    auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
+          [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
 
     if(*qbkt)
       return false;
@@ -110,12 +104,9 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
       return false;
 
     // Find a bucket using linear probing.
-    auto qbkt = ::rocket::get_probing_origin(
-        this->m_bptr, this->m_bptr + this->m_nbkt, (uintptr_t) key);
-
-    qbkt = ::rocket::linear_probe(
-        this->m_bptr, qbkt, qbkt, this->m_bptr + this->m_nbkt,
-        [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
+    size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
+    auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
+          [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
 
     if(!*qbkt)
       return false;
@@ -130,30 +121,27 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
 
     // Relocate elements that are not placed in their immediate locations.
     ::rocket::linear_probe(
-      this->m_bptr, qbkt, qbkt + 1, this->m_bptr + this->m_nbkt,
-      [&](details_variable_hashmap::Bucket& t) {
+      this->m_bptr,
+      (size_t) (qbkt - this->m_bptr),
+      (size_t) (qbkt - this->m_bptr) + 1,
+      this->m_nbkt,
+      [&](details_variable_hashmap::Bucket& r) {
         // Clear this bucket temporarily.
-        const void* saved_key = t.key_opt;
-        ROCKET_ASSERT(t.key_opt);
-        t.key_opt = nullptr;
+        ROCKET_ASSERT(r.key_opt);
+        const void* saved_key = r.key_opt;
+        r.key_opt = nullptr;
 
         // Look for a new bucket for this element. Uniqueness is implied.
-        auto qrel = ::rocket::get_probing_origin(
-            this->m_bptr, this->m_bptr + this->m_nbkt, (uintptr_t) saved_key);
+        size_t orel = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) saved_key);
+        auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
+              [&](const details_variable_hashmap::Bucket&) { return false;  });
 
-        qrel = ::rocket::linear_probe(
-            this->m_bptr, qrel, qrel, this->m_bptr + this->m_nbkt,
-            [&](const details_variable_hashmap::Bucket&) { return false;  });
-
-        if(qrel != &t) {
+        qrel->key_opt = saved_key;
+        if(qrel != &r) {
           // Relocate the value into the new bucket.
-          qrel->key_opt = saved_key;
-          ::rocket::construct(qrel->vstor, ::std::move(t.vstor[0]));
-          ::rocket::destroy(t.vstor);
+          ::rocket::construct(qrel->vstor, ::std::move(r.vstor[0]));
+          ::rocket::destroy(r.vstor);
         }
-        else
-          t.key_opt = saved_key;
-
         return false;
       });
 

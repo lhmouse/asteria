@@ -52,12 +52,12 @@ class Reference_Dictionary
     Bucket*
     do_xprobe(phsh_stringR name) const noexcept
       {
-        // Find a bucket using linear probing.
-        auto mptr = ::rocket::get_probing_origin(this->m_bptr, this->m_eptr, name.rdhash());
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, mptr, mptr, this->m_eptr,
+        // Find a bucket using linear probing. The load factor is kept <= 0.5
+        // so there must always be a bucket available.
+        size_t orig = ::rocket::probe_origin( (size_t) (this->m_eptr - this->m_bptr), name.rdhash());
+        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, (size_t) (this->m_eptr - this->m_bptr),
                [&](const Bucket& r) { return details_reference_dictionary::do_compare_eq(r.kstor[0], name);  });
 
-        // The load factor is kept <= 0.5 so there must always be a bucket available.
         ROCKET_ASSERT(qbkt);
         return qbkt;
       }

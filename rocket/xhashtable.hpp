@@ -8,44 +8,30 @@
 #include "assert.hpp"
 namespace rocket {
 
-template<typename bucketT>
-bucketT*
-get_probing_origin(bucketT* begin, bucketT* end, size_t hval) noexcept
+constexpr
+size_t
+probe_origin(size_t size, size_t hval) noexcept
   {
-    ROCKET_ASSERT(begin < end);
-
-    // Make a fixed-point value in the interval [0,1).
-    uint64_t dist = (uint32_t) (hval * 0x9E3779B9U);
-
-    // Multiply it by the number of buckets.
-    dist *= (size_t) ((char*) end - (char*) begin);
-    dist >>= 32;
-    dist /= sizeof(*begin);
-
-    // Return a pointer to the origin.
-    return begin + (ptrdiff_t) dist;
+    // Make a fixed-point value in the interval [0,1), and then multiply
+    // `size` by it to get an index in the middle.
+    return (size_t) ((hval * 0x9E3779B9U & 0xFFFFFFFFULL) * size >> 32);
   }
 
-template<typename bucketT, typename predT>
+template<typename bucketT, typename predictorT>
+constexpr
 bucketT*
-linear_probe(bucketT* begin, bucketT* to, bucketT* from, bucketT* end, predT&& pred)
+linear_probe(bucketT* data, size_t to, size_t from, size_t size, predictorT&& pred)
   {
-    ROCKET_ASSERT(begin <= to);
-    ROCKET_ASSERT(to <= from);
-    ROCKET_ASSERT(from <= end);
-    ROCKET_ASSERT(begin < end);
+    // Probe from `from` to `size`, then from `0` to `to`. Probing shall
+    // stop if an empty bucket or a match is found.
+    for(size_t k = from;  k != size;  ++k)
+      if(!(bool) data[k] || (bool) pred(data[k]))
+        return data + k;
 
-    // Phase 1: Probe from `from` to `end`.
-    for(auto bkt = from;  bkt != end;  ++bkt)
-      if(!*bkt || (bool) pred(*bkt))
-        return bkt;
+    for(size_t k = 0;  k != to;  ++k)
+      if(!(bool) data[k] || (bool) pred(data[k]))
+        return data + k;
 
-    // Phase 2: Probe from `begin` to `to`.
-    for(auto bkt = begin;  bkt != to;  ++bkt)
-      if(!*bkt || (bool) pred(*bkt))
-        return bkt;
-
-    // The table is full and no desired bucket has been found so far.
     return nullptr;
   }
 
