@@ -2303,7 +2303,7 @@ const basic_shallow_string<charT> basic_cow_string<charT, allocT>::s_zstr;
 template<typename charT, typename allocT>
 struct basic_cow_string<charT, allocT>::hash
   {
-    using result_type    = size_t;
+    using result_type    = uint32_t;
     using argument_type  = basic_cow_string;
 
     constexpr
@@ -2316,7 +2316,7 @@ struct basic_cow_string<charT, allocT>::hash
           int ch = noadl::xchrtoint(c);
 
           // Accumulate bytes in little-endian byte order.
-          for(size_t k = 0;  k != sizeof(c);  ++k) {
+          for(uint32_t k = 0;  k != sizeof(c);  ++k) {
             reg ^= static_cast<uint8_t>(ch);
             reg *= 16777619U;
             ch >>= 8;
