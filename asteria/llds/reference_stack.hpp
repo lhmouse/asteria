@@ -71,18 +71,7 @@ class Reference_Stack
       }
 
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
-      {
-        for(uint32_t refi = 0;  refi != this->m_einit;  ++ refi)
-          this->m_bptr[refi].get_variables(staged, temp);
-      }
-
-    void
-    clear_cache() noexcept
-      {
-        while(this->m_etop != this->m_einit)
-          ::rocket::destroy(this->m_bptr + -- this->m_einit);
-      }
+    clear_cache() noexcept;
 
     const Reference&
     top(size_t index = 0) const noexcept
@@ -120,6 +109,9 @@ class Reference_Stack
         ROCKET_ASSERT(count <= this->m_etop);
         this->m_etop -= (uint32_t) count;
       }
+
+    void
+    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
 inline

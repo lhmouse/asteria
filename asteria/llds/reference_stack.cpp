@@ -30,8 +30,8 @@ do_reallocate(uint32_t estor)
     }
     else {
       // Free the storage.
-      while(this->m_einit != 0)
-        ::rocket::destroy(this->m_bptr + -- this->m_einit);
+      this->clear();
+      this->clear_cache();
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
@@ -41,6 +41,22 @@ do_reallocate(uint32_t estor)
       this->m_bptr = nullptr;
       this->m_estor = 0;
     }
+  }
+
+void
+Reference_Stack::
+clear_cache() noexcept
+  {
+    while(this->m_etop != this->m_einit)
+      ::rocket::destroy(this->m_bptr + -- this->m_einit);
+  }
+
+void
+Reference_Stack::
+get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+  {
+    for(uint32_t refi = 0;  refi != this->m_einit;  ++ refi)
+      this->m_bptr[refi].get_variables(staged, temp);
   }
 
 }  // namespace asteria
