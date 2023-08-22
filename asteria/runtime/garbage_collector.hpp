@@ -12,10 +12,10 @@ class Garbage_Collector final
   : public rcfwd<Garbage_Collector>
   {
   private:
-    long m_recur = 0;
+    int m_recur = 0;
     Variable_HashMap m_pool;  // key is a pointer to the `Variable` itself
 
-    static constexpr size_t gMax = gc_generation_oldest;
+    static constexpr uint32_t gMax = gc_generation_oldest;
     ::std::array<size_t, gMax+1> m_counts = { };
     ::std::array<size_t, gMax+1> m_thres = { 10, 70, 500 };
     ::std::array<Variable_HashMap, gMax+1> m_tracked;
@@ -33,7 +33,7 @@ class Garbage_Collector final
   private:
     inline
     size_t
-    do_collect_generation(size_t gen);
+    do_collect_generation(uint32_t gen);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Garbage_Collector);

@@ -6,40 +6,6 @@
 #include "variable.hpp"
 #include "../utils.hpp"
 namespace asteria {
-namespace {
-
-class Sentry
-  {
-  private:
-    long* m_ptr;
-    long m_old;
-
-  public:
-    explicit
-    Sentry(long& ref) noexcept
-      : m_ptr(&ref), m_old(ref)
-      { ++*(this->m_ptr);  }
-
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Sentry)
-      { --*(this->m_ptr);  }
-
-  public:
-    explicit operator
-    bool() const noexcept
-      { return this->m_old == 0;  }
-  };
-
-bool
-do_pop_variable(refcnt_ptr<Variable>& var, Variable_HashMap& map)
-  {
-    for(;;)
-      if(!map.erase_random(nullptr, &var))
-        return false;
-      else if(var)
-        return true;
-  }
-
-}  // namespace
 
 Garbage_Collector::
 ~Garbage_Collector()
@@ -48,16 +14,18 @@ Garbage_Collector::
 
 size_t
 Garbage_Collector::
-do_collect_generation(size_t gen)
+do_collect_generation(uint32_t gen)
   {
     // Ignore recursive requests.
-    const Sentry sentry(this->m_recur);
-    if(!sentry)
+    if(this->m_recur > 0)
       return 0;
 
-    size_t nvars = 0;
-    refcnt_ptr<Variable> var;
+    this->m_recur ++;
+    const ::rocket::unique_ptr<int, void (int*)> rguard(&(this->m_recur), *[](int* ptr) { -- *ptr;  });
 
+    // This algorithm is described at
+    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
+    size_t nvars = 0;
     auto& tracked = this->m_tracked.at(gMax - gen);
     const auto next_opt = (gen >= gMax) ? nullptr : &(this->m_tracked.at(gMax - gen - 1));
     const auto count_opt = (gen >= gMax) ? nullptr : &(this->m_counts.at(gMax - gen - 1));
@@ -67,11 +35,9 @@ do_collect_generation(size_t gen)
     this->m_temp_2.clear();
     this->m_unreach.clear();
 
-    // This algorithm is described at
-    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     this->m_temp_1.merge(tracked);
 
-    while(do_pop_variable(var, this->m_temp_1)) {
+    while(auto var = this->m_temp_1.extract_variable_opt()) {
       // Each variable that is encountered here shall have a direct reference
       // from either `tracked` or `m_staged`, so its `gc_ref` counter is
       // initialized to one.
@@ -80,7 +46,9 @@ do_collect_generation(size_t gen)
       var->get_value().get_variables(this->m_staged, this->m_temp_1);
     }
 
-    while(do_pop_variable(var, this->m_staged)) {
+    this->m_temp_1.clear();
+
+    while(auto var = this->m_staged.extract_variable_opt()) {
       // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
       // counter shall be incremented.
       var->set_gc_ref(var->get_gc_ref() + 1);
@@ -88,54 +56,55 @@ do_collect_generation(size_t gen)
       this->m_temp_1.insert(var.get(), var);
     }
 
-    // Mark all variables that have been collected so far.
+    this->m_staged.clear();
     this->m_temp_1.merge(tracked);
 
-    while(do_pop_variable(var, this->m_temp_1)) {
+    while(auto var = this->m_temp_1.extract_variable_opt()) {
       // Each variable whose `gc_ref` counter equals its reference count is
       // marked as possibly unreachable. Note `var` here owns a reference
       // which must be excluded.
-      if(ROCKET_EXPECT(var->get_gc_ref() == var->use_count() - 1)) {
+      if(var->get_gc_ref() == var->use_count() - 1)
         this->m_unreach.insert(var.get(), var);
+      else
+        this->m_temp_2.insert(var.get(), var);
+    }
+
+    this->m_temp_1.clear();
+
+    while(auto var = this->m_temp_2.extract_variable_opt()) {
+      // Mark this indirectly reachable variable, too.
+      var->set_gc_ref(0);
+      this->m_temp_1.erase(var.get());
+      this->m_unreach.erase(var.get());
+
+      var->get_value().get_variables(this->m_staged, this->m_temp_2);
+
+      if(!next_opt)
         continue;
+
+      // Foreign variables must not be transferred.
+      if(!tracked.erase(var.get()))
+        continue;
+
+      try {
+        // Transfer this variable to the next generation.
+        *count_opt += 1;
+        next_opt->insert(var.get(), var);
       }
-
-      // This variable is reachable.
-      this->m_temp_2.insert(var.get(), var);
-
-      while(do_pop_variable(var, this->m_temp_2)) {
-        // Mark this indirectly reachable variable, too.
-        var->set_gc_ref(0);
-        this->m_temp_1.erase(var.get());
-        this->m_unreach.erase(var.get());
-
-        var->get_value().get_variables(this->m_staged, this->m_temp_2);
-
-        if(!next_opt)
-          continue;
-
-        // Foreign variables must not be transferred.
-        if(!tracked.erase(var.get()))
-          continue;
-
-        try {
-          // Transfer this variable to the next generation.
-          *count_opt += 1;
-          next_opt->insert(var.get(), var);
-        }
-        catch(exception& stdex) {
-          ::fprintf(stderr,
-              "WARNING: An exception has been caught and ignored.\n"
-              "\n"
-              "  exception class: %s\n"
-              "  what(): %s\n",
-              typeid(stdex).name(), stdex.what());
-        }
+      catch(exception& stdex) {
+        ::fprintf(stderr,
+            "WARNING: An exception has been caught and ignored.\n"
+            "\n"
+            "  exception class: %s\n"
+            "  what(): %s\n",
+            typeid(stdex).name(), stdex.what());
       }
     }
 
+    this->m_temp_2.clear();
+
     // Collect all variables from `m_unreach`.
-    while(do_pop_variable(var, this->m_unreach)) {
+    while(auto var = this->m_unreach.extract_variable_opt()) {
       // Foreign variables must not be collected.
       if(!tracked.erase(var.get()))
         continue;
@@ -161,9 +130,6 @@ do_collect_generation(size_t gen)
       }
     }
 
-    this->m_staged.clear();
-    this->m_temp_1.clear();
-    this->m_temp_2.clear();
     this->m_unreach.clear();
 
     // Reset the GC counter to zero only if the operation completes
@@ -179,14 +145,12 @@ Garbage_Collector::
 create_variable(GC_Generation gen_hint)
   {
     // Perform automatic garbage collection.
-    for(size_t gen = 0;  gen <= gMax;  ++gen)
+    for(uint32_t gen = 0;  gen <= gMax;  ++gen)
       if(this->m_counts[gMax-gen] >= this->m_thres[gMax-gen])
         this->do_collect_generation(gen);
 
     // Get a cached variable.
-    // If the pool has been exhausted, allocate a new one.
-    refcnt_ptr<Variable> var;
-    this->m_pool.erase_random(nullptr, &var);
+    auto var = this->m_pool.extract_variable_opt();
     if(!var)
       var = ::rocket::make_refcnt<Variable>();
 
@@ -203,7 +167,7 @@ collect_variables(GC_Generation gen_limit)
   {
     // Collect all variables up to generation `gen_limit`.
     size_t nvars = 0;
-    for(size_t gen = 0;  (gen <= gMax) && (gen <= gen_limit);  ++gen)
+    for(uint32_t gen = 0;  (gen <= gMax) && (gen <= gen_limit);  ++gen)
       nvars += this->do_collect_generation(gen);
 
     // Clear cached variables.
@@ -217,27 +181,23 @@ Garbage_Collector::
 finalize() noexcept
   {
     // Ensure no garbage collection is in progress.
-    const Sentry sentry(this->m_recur);
-    if(!sentry)
+    if(this->m_recur > 0)
       ASTERIA_TERMINATE(("Garbage collector not finalizable while in use"));
 
     size_t nvars = 0;
-    refcnt_ptr<Variable> var;
-
     this->m_staged.clear();
     this->m_temp_1.clear();
     this->m_temp_2.clear();
     this->m_unreach.clear();
 
+    for(size_t gen = 0;  gen <= gMax;  ++gen)
+      nvars += this->m_tracked.at(gMax-gen).size();
+
     // Wipe out all tracked variables. Indirect ones may be foreign so they
     // must not be wiped.
-    for(size_t gen = 0;  gen <= gMax;  ++gen) {
-      auto& tracked = this->m_tracked.at(gMax-gen);
-      nvars += tracked.size();
-
-      while(tracked.erase_random(nullptr, &var))
+    for(size_t gen = 0;  gen <= gMax;  ++gen)
+      while(auto var = this->m_tracked.at(gMax-gen).extract_variable_opt())
         var->uninitialize();
-    }
 
     // Clear cached variables.
     nvars += this->m_pool.size();
