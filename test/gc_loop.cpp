@@ -43,11 +43,7 @@ int main()
       Simple_Script code;
       code.reload_string(
         sref(__FILE__), __LINE__, sref(""
-#ifdef __OPTIMIZE__
-        "const nloop = 1000000;"
-#else
         "const nloop = 10000;"
-#endif
         R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
