@@ -8,124 +8,154 @@ namespace asteria {
 
 void
 Reference_Dictionary::
-do_destroy_buckets(bool xfree) noexcept
+do_rehash(uint32_t nbkt)
   {
-    auto next = this->m_head;
-    while(ROCKET_EXPECT(next)) {
-      auto qbkt = next;
-      next = qbkt->next;
+    if(nbkt != 0) {
+      // Extend the storage.
+      ROCKET_ASSERT(nbkt >= this->m_size * 2);
 
-      // Destroy this bucket.
-      ROCKET_ASSERT(*qbkt);
-      ::rocket::destroy(qbkt->kstor);
-      ::rocket::destroy(qbkt->vstor);
+      auto bptr = (details_reference_dictionary::Bucket*) ::calloc(nbkt, sizeof(details_reference_dictionary::Bucket));
+      if(!bptr)
+        throw ::std::bad_alloc();
+
+      if(this->m_size != 0)
+        for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+          if(this->m_bptr[t]) {
+            // Look for a new bucket for this element. Uniqueness is implied.
+            size_t orel = ::rocket::probe_origin(nbkt, this->m_bptr[t].khash);
+            auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
+                  [&](const details_reference_dictionary::Bucket&) { return false;  });
+
+            // Relocate the value into the new bucket.
+            qrel->flags = this->m_bptr[t].flags;
+            qrel->khash = this->m_bptr[t].khash;
+            ::rocket::construct(qrel->kstor, ::std::move(this->m_bptr[t].kstor[0]));
+            ::rocket::destroy(this->m_bptr[t].kstor);
+            ::rocket::construct(qrel->vstor, ::std::move(this->m_bptr[t].vstor[0]));
+            ::rocket::destroy(this->m_bptr[t].vstor);
+          }
+
 #ifdef ROCKET_DEBUG
-      ::std::memset((void*)qbkt, 0xD2, sizeof(*qbkt));
+      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_reference_dictionary::Bucket));
 #endif
-      qbkt->prev = nullptr;
-    }
-
-    if(xfree) {
-      // Deallocate the table. This is called by the destructor.
       ::free(this->m_bptr);
-      this->m_bptr = (Bucket*)(intptr_t) 0xDEADBEEF;
-      this->m_eptr = (Bucket*)(intptr_t) 0xDEADBEEF;
-    }
 
-    this->m_head = (Bucket*)(intptr_t) 0xDEADBEEF;
+      this->m_bptr = bptr;
+      this->m_nbkt = nbkt;
+    }
+    else {
+      // Free the storage.
+      this->clear();
+
+#ifdef ROCKET_DEBUG
+      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_reference_dictionary::Bucket));
+#endif
+      ::free(this->m_bptr);
+
+      this->m_bptr = nullptr;
+      this->m_nbkt = 0;
+    }
   }
 
 void
 Reference_Dictionary::
-do_xrelocate_but(Bucket* qxcld) noexcept
+clear() noexcept
   {
+    if(this->m_size != 0)
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          this->m_size --;
+          this->m_bptr[t].flags = 0;
+          ::rocket::destroy(this->m_bptr[t].kstor);
+          ::rocket::destroy(this->m_bptr[t].vstor);
+        }
+
+    ROCKET_ASSERT(this->m_size == 0);
+  }
+
+pair<Reference*, bool>
+Reference_Dictionary::
+insert(phsh_stringR key)
+  {
+    if(key.empty())
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          "Reference_Dictionary: empty key not valid");
+
+    // Reserve storage for the new element. The load factor is always <= 0.5.
+    if(this->m_size >= this->m_nbkt / 2)
+      this->do_rehash(this->m_size * 3 | 19);
+
+    // Find a bucket using linear probing.
+    size_t orig = ::rocket::probe_origin(this->m_nbkt, (uint32_t) key.rdhash());
+    auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
+          [&](const details_reference_dictionary::Bucket& r) { return r.key_equals(key);  });
+
+    if(*qbkt)
+      return { qbkt->vstor, false };
+
+    // Construct a new element.
+    qbkt->flags = 1;
+    qbkt->khash = (uint32_t) key.rdhash();
+    ::rocket::construct(qbkt->kstor, key);
+    ::rocket::construct(qbkt->vstor);
+    this->m_size ++;
+    return { qbkt->vstor, true };
+  }
+
+bool
+Reference_Dictionary::
+erase(phsh_stringR key, Reference* refp_opt) noexcept
+  {
+    if(this->m_size == 0)
+      return false;
+
+    // Find a bucket using linear probing.
+    size_t orig = ::rocket::probe_origin(this->m_nbkt, (uint32_t) key.rdhash());
+    auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
+          [&](const details_reference_dictionary::Bucket& r) { return r.key_equals(key);  });
+
+    if(*qbkt)
+      return false;
+
+    // Destroy the bucket.
+    if(refp_opt)
+      *refp_opt = ::std::move(qbkt->vstor[0]);
+
+    this->m_size --;
+    qbkt->flags = 0;
+    ::rocket::destroy(qbkt->kstor);
+    ::rocket::destroy(qbkt->vstor);
+
+    // Relocate elements that are not placed in their immediate locations.
     ::rocket::linear_probe(
       this->m_bptr,
-      (size_t) (qxcld  - this->m_bptr),
-      (size_t) (qxcld + 1 - this->m_bptr),
-      (size_t) (this->m_eptr - this->m_bptr),
-      [&](Bucket& rb) {
-        auto sbkt = &rb;
+      (size_t) (qbkt - this->m_bptr),
+      (size_t) (qbkt - this->m_bptr) + 1,
+      this->m_nbkt,
+      [&](details_reference_dictionary::Bucket& r) {
+        // Clear this bucket temporarily.
+        ROCKET_ASSERT(r.flags != 0);
+        uint32_t saved_flags = r.flags;
+        r.flags = 0;
 
-        // Mark this bucket empty, without destroying its contents.
-        ROCKET_ASSERT(*sbkt);
-        this->do_list_detach(sbkt);
+        // Look for a new bucket for this element. Uniqueness is implied.
+        size_t orel = ::rocket::probe_origin(this->m_nbkt, r.khash);
+        auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
+              [&](const details_reference_dictionary::Bucket&) { return false;  });
 
-        // Find a new bucket for the name using linear probing.
-        // Uniqueness has already been implied for all elements, so there is
-        // no need to check for collisions.
-        size_t orig = ::rocket::probe_origin( (size_t) (this->m_eptr - this->m_bptr), sbkt->kstor[0].rdhash());
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, (size_t) (this->m_eptr - this->m_bptr),
-         [&](const Bucket&) { return false;  });
-
-        // Mark the new bucket non-empty.
-        ROCKET_ASSERT(qbkt);
-        ROCKET_ASSERT(!*qbkt);
-        this->do_list_attach(qbkt);
-
-        // If the two pointers reference the same one, no relocation is needed.
-        if(ROCKET_EXPECT(qbkt == sbkt))
-          return false;
-
-        // Relocate the bucket.
-        ::rocket::construct(qbkt->kstor, ::std::move(sbkt->kstor[0]));
-        ::rocket::destroy(sbkt->kstor);
-        ::rocket::construct(qbkt->vstor, ::std::move(sbkt->vstor[0]));
-        ::rocket::destroy(sbkt->vstor);
-
-        // Keep probing until an empty bucket is found.
+        qrel->flags = saved_flags;
+        if(qrel != &r) {
+          // Relocate the key and value into the new bucket.
+          qrel->khash = r.khash;
+          ::rocket::construct(qrel->kstor, ::std::move(r.kstor[0]));
+          ::rocket::destroy(r.kstor);
+          ::rocket::construct(qrel->vstor, ::std::move(r.vstor[0]));
+          ::rocket::destroy(r.vstor);
+        }
         return false;
       });
-  }
 
-void
-Reference_Dictionary::
-do_rehash_more()
-  {
-    // Allocate a new table.
-    size_t nbkt = (this->m_size * 3 + 2) | 17;
-    if(nbkt / 2 <= this->m_size)
-      throw ::std::bad_alloc();
-
-    auto bptr = (Bucket*) ::calloc(nbkt, sizeof(Bucket));
-    if(!bptr)
-      throw ::std::bad_alloc();
-
-    auto bold = ::std::exchange(this->m_bptr, bptr);
-    this->m_eptr = bptr + nbkt;
-
-    if(ROCKET_EXPECT(!bold))
-      return;
-
-    // Move buckets into the new table. No exception shall be thrown.
-    auto sbkt = ::rocket::exchange(this->m_head);
-    while(ROCKET_EXPECT(sbkt)) {
-      ROCKET_ASSERT(*sbkt);
-
-      // Find a new bucket for the name using linear probing.
-      // Uniqueness has already been implied for all elements, so there is
-      // no need to check for collisions.
-        size_t orig = ::rocket::probe_origin( (size_t) (this->m_eptr - this->m_bptr), sbkt->kstor[0].rdhash());
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, (size_t) (this->m_eptr - this->m_bptr),
-         [&](const Bucket&) { return false;  });
-
-      // Mark the new bucket non-empty.
-      ROCKET_ASSERT(qbkt);
-      ROCKET_ASSERT(!*qbkt);
-      this->do_list_attach(qbkt);
-
-      // Relocate the bucket.
-      ::rocket::construct(qbkt->kstor, ::std::move(sbkt->kstor[0]));
-      ::rocket::destroy(sbkt->kstor);
-      ::rocket::construct(qbkt->vstor, ::std::move(sbkt->vstor[0]));
-      ::rocket::destroy(sbkt->vstor);
-
-      // Process the next bucket.
-      sbkt = sbkt->next;
-    }
-
-    // Deallocate the old table.
-    ::free(bold);
+    return true;
   }
 
 }  // namespace asteria

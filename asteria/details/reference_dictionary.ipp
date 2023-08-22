@@ -9,15 +9,10 @@ namespace details_reference_dictionary {
 
 struct Bucket
   {
-    Bucket* next;  // the next bucket in the [non-circular] list;
-                   // used for iteration
-    Bucket* prev;  // the previous bucket in the [circular] list;
-                   // used to mark whether this bucket is empty or not
-
-    uintptr_t padding[2];
-
-    union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
-    union { Reference vstor[1];  };  // initialized iff `prev` is non-null
+    uint32_t flags;
+    uint32_t khash;
+    union { cow_string kstor[1];  };
+    union { Reference vstor[1];  };
 
     Bucket() noexcept { }
     ~Bucket() noexcept { }
@@ -26,19 +21,17 @@ struct Bucket
 
     explicit operator
     bool() const noexcept
-      { return this->prev != nullptr;  }
-  };
+      { return this->flags != 0;  }
 
-inline
-bool
-do_compare_eq(phsh_stringR lhs, phsh_stringR rhs) noexcept
-  {
-    // Generally, we expect the strings to compare equal.
-    return ROCKET_EXPECT((((uintptr_t) lhs.c_str() ^ (uintptr_t) rhs.c_str())
-                          | (lhs.size() ^ rhs.size())) == 0)
-           || ((lhs.size() == rhs.size())
-               && (::std::memcmp(lhs.c_str(), rhs.c_str(), lhs.size()) == 0));
-  }
+    bool
+    key_equals(phsh_stringR ykey) const noexcept
+      {
+        return ROCKET_EXPECT((this->khash == (uint32_t) ykey.rdhash())
+                &&  (this->kstor[0].size() == ykey.size())
+                && ((this->kstor[0].data() == ykey.data())
+                    || ::rocket::xmemeq(this->kstor[0].data(), ykey.data(), ykey.size())));
+      }
+  };
 
 }  // namespace details_reference_dictionary
 }  // namespace asteria

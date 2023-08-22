@@ -104,9 +104,9 @@ class Abstract_Context
       }
 
     bool
-    erase_named_reference(phsh_stringR name) noexcept
+    erase_named_reference(phsh_stringR name, Reference* refp_opt = nullptr) noexcept
       {
-        return this->m_named_refs.erase(name);
+        return this->m_named_refs.erase(name, refp_opt);
       }
   };
 
