@@ -332,7 +332,7 @@ struct Traits_declare_variable
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
         const auto var = gcoll->create_variable();
-        ctx.mut_named_reference(sp.name).set_variable(var);
+        ctx.insert_named_reference(sp.name).set_variable(var);
         if(qhooks)
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
@@ -482,7 +482,7 @@ struct Traits_switch_statement
 
           // Inject all bypassed variables into the scope.
           for(const auto& name : sp.names_added[bp])
-            ctx_body.mut_named_reference(name).set_invalid();
+            ctx_body.insert_named_reference(name).set_invalid();
 
           try {
             do {
@@ -637,10 +637,10 @@ struct Traits_for_each_statement
 
         // Allocate an uninitialized variable for the key.
         const auto vkey = gcoll->create_variable();
-        ctx_for.mut_named_reference(sp.name_key).set_variable(vkey);
+        ctx_for.insert_named_reference(sp.name_key).set_variable(vkey);
 
         // Create the mapped reference.
-        auto& mapped = ctx_for.mut_named_reference(sp.name_mapped);
+        auto& mapped = ctx_for.insert_named_reference(sp.name_mapped);
 
         // Evaluate the range initializer and set the range up, which isn't going to
         // change for all loops.
@@ -816,7 +816,7 @@ struct Traits_try_statement
 
         try {
           // Set the exception reference.
-          ctx_catch.mut_named_reference(sp.name_except)
+          ctx_catch.insert_named_reference(sp.name_except)
               .set_temporary(except.value());
 
           // Set backtrace frames.
@@ -835,7 +835,7 @@ struct Traits_try_statement
             // Append this frame.
             backtrace.emplace_back(::std::move(r));
           }
-          ctx_catch.mut_named_reference(sref("__backtrace"))
+          ctx_catch.insert_named_reference(sref("__backtrace"))
               .set_temporary(::std::move(backtrace));
 
           // Execute the `catch` clause.
@@ -4249,7 +4249,7 @@ struct Traits_define_null_variable
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
         const auto var = gcoll->create_variable();
-        ctx.mut_named_reference(sp.name).set_variable(var);
+        ctx.insert_named_reference(sp.name).set_variable(var);
         if(qhooks)
           qhooks->on_variable_declare(sp.sloc, sp.name);
 
@@ -4590,7 +4590,7 @@ struct Traits_declare_reference
     AIR_Status
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
-        ctx.mut_named_reference(sp.name).set_invalid();
+        ctx.insert_named_reference(sp.name).set_invalid();
         return air_status_next;
       }
   };
@@ -4621,7 +4621,7 @@ struct Traits_initialize_reference
     execute(Executive_Context& ctx, const Sparam_name& sp)
       {
         // Pop a reference from the stack. Ensure it is dereferenceable.
-        ctx.mut_named_reference(sp.name) = ::std::move(ctx.stack().mut_top());
+        ctx.insert_named_reference(sp.name) = ::std::move(ctx.stack().mut_top());
         ctx.stack().pop();
         return air_status_next;
       }

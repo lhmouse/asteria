@@ -44,7 +44,7 @@ int main()
     foreign->initialize(42);
     {
       Simple_Script code;
-      code.global().mut_named_reference(sref("foreign_variable")).set_variable(foreign);
+      code.global().insert_named_reference(sref("foreign_variable")).set_variable(foreign);
 
       code.reload_string(
         sref(__FILE__), __LINE__, sref(R"__(

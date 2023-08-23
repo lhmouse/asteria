@@ -103,7 +103,7 @@ Global_Context(API_Version version)
     ROCKET_ASSERT(gcoll);
     auto vstd = gcoll->create_variable(gc_generation_oldest);
     vstd->initialize(::std::move(ostd), Variable::state_immutable);
-    this->do_open_named_reference(nullptr, sref("std")).set_variable(vstd);
+    this->do_mut_named_reference(nullptr, sref("std")).set_variable(vstd);
     this->m_vstd = ::std::move(vstd);
   }
 
@@ -113,6 +113,7 @@ Global_Context::
     // Perform the final garbage collection. Note if there are still cyclic
     // references afterwards, they are left uncollected!
     this->do_clear_named_references();
+
     const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     gcoll->finalize();

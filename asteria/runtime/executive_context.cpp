@@ -29,14 +29,14 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       // this overhead.
       const auto& val = self.dereference_readonly();
       if(!val.is_null())
-        this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
+        this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else if(self.is_variable()) {
       // If the self reference points to a variable, copy it because it is
       // always an lvalue.
       auto var = self.get_variable_opt();
       ROCKET_ASSERT(var);
-      this->do_open_named_reference(nullptr, sref("__this")) = ::std::move(self);
+      this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else
       ASTERIA_THROW_RUNTIME_ERROR((
@@ -62,9 +62,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       // Try popping an argument from `stack` and assign it to this parameter.
       // If no more arguments follow, declare a constant `null`.
       if(nargs != 0)
-        this->do_open_named_reference(nullptr, name) = ::std::move(stack.mut_top(--nargs));
+        this->do_mut_named_reference(nullptr, name) = ::std::move(stack.mut_top(--nargs));
       else
-        this->do_open_named_reference(nullptr, name).set_temporary(nullopt);
+        this->do_mut_named_reference(nullptr, name).set_temporary(nullopt);
     }
 
     // All arguments must have been consumed.
@@ -87,7 +87,7 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     // N.B. If you have ever changed these, remember to update
     // 'analytic_context.cpp' as well.
     if(name == sref("__func")) {
-      auto& ref = this->do_open_named_reference(hint_opt, name);
+      auto& ref = this->do_mut_named_reference(hint_opt, name);
 
       // Note: This can only happen inside a function context.
       ref.set_temporary(this->m_zvarg->func());
@@ -95,7 +95,7 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     }
 
     if(name == sref("__this")) {
-      auto& ref = this->do_open_named_reference(hint_opt, name);
+      auto& ref = this->do_mut_named_reference(hint_opt, name);
 
       // Note: This can only happen inside a function context and the `this`
       // argument is null.
@@ -104,7 +104,7 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     }
 
     if(name == sref("__varg")) {
-      auto& ref = this->do_open_named_reference(hint_opt, name);
+      auto& ref = this->do_mut_named_reference(hint_opt, name);
 
       // Use the zero-ary argument getter if there is variadic argument.
       // Create a new one otherwise.

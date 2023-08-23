@@ -104,8 +104,8 @@ class Reference_Dictionary
         return qbkt->vstor;
       }
 
-    pair<Reference*, bool>
-    insert(phsh_stringR key);
+    Reference&
+    insert(phsh_stringR key, bool* newly = nullptr);
 
     bool
     erase(phsh_stringR key, Reference* refp_opt = nullptr) noexcept;

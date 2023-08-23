@@ -67,7 +67,7 @@ do_accept_identifier_opt(Token_Stream& tstrm, bool user_decl)
       return nullopt;
 
     auto name = qtok->as_identifier();
-    if(user_decl && name.starts_with("__"))
+    if(user_decl && (name[0] == '_') && (name[1] == '_'))
       throw Compiler_Error(Compiler_Error::M_format(),
                 compiler_status_reserved_identifier_not_declarable, qtok->sloc(),
                 "Identifier `$1` not user-declarable", name);

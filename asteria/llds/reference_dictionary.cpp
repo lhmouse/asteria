@@ -68,9 +68,9 @@ clear() noexcept
     ROCKET_ASSERT(this->m_size == 0);
   }
 
-pair<Reference*, bool>
+Reference&
 Reference_Dictionary::
-insert(phsh_stringR key)
+insert(phsh_stringR key, bool* newly)
   {
     if(key.empty())
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
@@ -85,8 +85,11 @@ insert(phsh_stringR key)
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
           [&](const details_reference_dictionary::Bucket& r) { return r.key_equals(key);  });
 
+    if(newly)
+      *newly = !*qbkt;
+
     if(*qbkt)
-      return { qbkt->vstor, false };
+      return qbkt->vstor[0];
 
     // Construct a new element.
     qbkt->flags = 1;
@@ -94,7 +97,7 @@ insert(phsh_stringR key)
     ::rocket::construct(qbkt->kstor, key);
     ::rocket::construct(qbkt->vstor);
     this->m_size ++;
-    return { qbkt->vstor, true };
+    return qbkt->vstor[0];
   }
 
 bool
