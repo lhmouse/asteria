@@ -27,12 +27,7 @@ do_rehash(uint32_t nbkt)
                   [&](const details_reference_dictionary::Bucket&) { return false;  });
 
             // Relocate the value into the new bucket.
-            qrel->flags = this->m_bptr[t].flags;
-            qrel->khash = this->m_bptr[t].khash;
-            ::rocket::construct(qrel->kstor, ::std::move(this->m_bptr[t].kstor[0]));
-            ::rocket::destroy(this->m_bptr[t].kstor);
-            ::rocket::construct(qrel->vstor, ::std::move(this->m_bptr[t].vstor[0]));
-            ::rocket::destroy(this->m_bptr[t].vstor);
+            ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(details_reference_dictionary::Bucket));
           }
 
 #ifdef ROCKET_DEBUG

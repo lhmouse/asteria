@@ -27,9 +27,7 @@ do_rehash(uint32_t nbkt)
                   [&](const details_variable_hashmap::Bucket&) { return false;  });
 
             // Relocate the value into the new bucket.
-            qrel->key_opt = this->m_bptr[t].key_opt;
-            ::rocket::construct(qrel->vstor, ::std::move(this->m_bptr[t].vstor[0]));
-            ::rocket::destroy(this->m_bptr[t].vstor);
+            ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(details_variable_hashmap::Bucket));
           }
 
 #ifdef ROCKET_DEBUG
