@@ -10,17 +10,24 @@ void
 Variable_HashMap::
 do_rehash(uint32_t nbkt)
   {
+    details_variable_hashmap::Bucket* bptr = nullptr;
+
     if(nbkt != 0) {
       // Extend the storage.
       ROCKET_ASSERT(nbkt >= this->m_size * 2);
 
-      auto bptr = (details_variable_hashmap::Bucket*) ::calloc(nbkt, sizeof(details_variable_hashmap::Bucket));
-      if(!bptr)
+      if(nbkt >= 0x7FFF000U / sizeof(details_variable_hashmap::Bucket))
         throw ::std::bad_alloc();
 
-      if(this->m_size != 0)
-        for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-          if(this->m_bptr[t]) {
+      bptr = (details_variable_hashmap::Bucket*) ::calloc(nbkt, sizeof(details_variable_hashmap::Bucket));
+      if(!bptr)
+        throw ::std::bad_alloc();
+    }
+
+    if(this->m_size != 0)
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          if(bptr) {
             // Look for a new bucket for this element. Uniqueness is implied.
             size_t orel = ::rocket::probe_origin(nbkt, (uintptr_t) this->m_bptr[t].key_opt);
             auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
@@ -29,27 +36,24 @@ do_rehash(uint32_t nbkt)
             // Relocate the value into the new bucket.
             ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(details_variable_hashmap::Bucket));
           }
+          else {
+            // Destroy this element.
+            this->m_size --;
+            this->m_bptr[t].key_opt = nullptr;
+            ::rocket::destroy(this->m_bptr[t].vstor);
+          }
+        }
 
+    if(this->m_bptr) {
+      // Free the old storage.
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_variable_hashmap::Bucket));
 #endif
       ::free(this->m_bptr);
-
-      this->m_bptr = bptr;
-      this->m_nbkt = nbkt;
     }
-    else {
-      // Free the storage.
-      this->clear();
 
-#ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_variable_hashmap::Bucket));
-#endif
-      ::free(this->m_bptr);
-
-      this->m_bptr = nullptr;
-      this->m_nbkt = 0;
-    }
+    this->m_bptr = bptr;
+    this->m_nbkt = nbkt;
   }
 
 void
