@@ -10,6 +10,8 @@ void
 Reference_Stack::
 do_reallocate(uint32_t estor)
   {
+    Reference* bptr = nullptr;
+
     if(estor != 0) {
       // Extend the storage.
       ROCKET_ASSERT(estor >= this->m_einit);
@@ -17,37 +19,36 @@ do_reallocate(uint32_t estor)
       if(estor >= 0x7FFF000U / sizeof(Reference))
         throw ::std::bad_alloc();
 
-      auto bptr = (Reference*) ::realloc((void*) this->m_bptr, estor * sizeof(Reference));
+      bptr = (Reference*) ::realloc((void*) this->m_bptr, estor * sizeof(Reference));
       if(!bptr)
         throw ::std::bad_alloc();
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) (bptr + this->m_einit), 0xC3, (estor - this->m_einit) * sizeof(Reference));
 #endif
-
-      this->m_bptr = bptr;
-      this->m_estor = estor;
     }
     else {
       // Free the storage.
-      this->clear();
-      this->clear_cache();
+      this->m_etop = 0;
+
+      while(this->m_einit != 0)
+        ::rocket::destroy(this->m_bptr + -- this->m_einit);
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
 #endif
       ::free(this->m_bptr);
-
-      this->m_bptr = nullptr;
-      this->m_estor = 0;
     }
+
+    this->m_bptr = bptr;
+    this->m_estor = estor;
   }
 
 void
 Reference_Stack::
 clear_cache() noexcept
   {
-    while(this->m_etop != this->m_einit)
+    while(this->m_einit != this->m_etop)
       ::rocket::destroy(this->m_bptr + -- this->m_einit);
   }
 

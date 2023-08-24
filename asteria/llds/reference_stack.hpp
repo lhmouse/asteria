@@ -77,14 +77,14 @@ class Reference_Stack
     top(size_t index = 0) const noexcept
       {
         ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop + ~ index);
+        return *(this->m_bptr + this->m_etop - 1 - index);
       }
 
     Reference&
     mut_top(size_t index = 0)
       {
         ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop + ~ index);
+        return *(this->m_bptr + this->m_etop - 1 - index);
       }
 
     Reference&
@@ -99,7 +99,8 @@ class Reference_Stack
           this->do_reallocate(this->m_estor / 2 * 3 | 17);
 
         ::rocket::construct(this->m_bptr + this->m_einit);
-        this->m_etop = ++ this->m_einit;
+        this->m_einit ++;
+        this->m_etop = this->m_einit;
         return *(this->m_bptr + this->m_etop - 1);
       }
 
