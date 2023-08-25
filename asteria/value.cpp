@@ -202,7 +202,8 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
       switch(elem.index()) {
         case 0: {
           auto& elema = elem.mut<0>();
-          if(++(elema.curp) != elema.refa->end()) {
+          ++ elema.curp;
+          if(elema.curp != elema.refa->end()) {
             qval = &*(elema.curp);
             goto r;
           }
@@ -213,7 +214,8 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
 
         case 1: {
           auto& elemo = elem.mut<1>();
-          if(++(elemo.curp) != elemo.refo->end()) {
+          ++ elemo.curp;
+          if(elemo.curp != elemo.refo->end()) {
             qval = &(elemo.curp->second);
             goto r;
           }
@@ -437,7 +439,8 @@ print(tinyfmt& fmt) const
       switch(elem.index()) {
         case 0: {
           auto& elema = elem.mut<0>();
-          if(++(elema.curp) != elema.refa->end()) {
+          ++ elema.curp;
+          if(elema.curp != elema.refa->end()) {
             fmt << ", ";
             qval = &*(elema.curp);
             goto r;
@@ -450,7 +453,8 @@ print(tinyfmt& fmt) const
 
         case 1: {
           auto& elemo = elem.mut<1>();
-          if(++(elemo.curp) != elemo.refo->end()) {
+          ++ elemo.curp;
+          if(elemo.curp != elemo.refo->end()) {
             fmt << ", \"";
             c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
             fmt << "\": ";
@@ -580,7 +584,8 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       switch(elem.index()) {
         case 0: {
           auto& elema = elem.mut<0>();
-          if(++(elema.curp) != elema.refa->end()) {
+          ++ elema.curp;
+          if(elema.curp != elema.refa->end()) {
             details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
             fmt << (elema.curp - elema.refa->begin()) << " = ";
             qval = &*(elema.curp);
@@ -595,7 +600,8 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
         case 1: {
           auto& elemo = elem.mut<1>();
-          if(++(elemo.curp) != elemo.refo->end()) {
+          ++ elemo.curp;
+          if(elemo.curp != elemo.refo->end()) {
             details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
             fmt << '\"';
             c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());

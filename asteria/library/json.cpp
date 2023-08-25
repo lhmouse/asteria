@@ -379,7 +379,8 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
       switch(ctx.index()) {
         case 0: {
           auto& ctxa = ctx.mut<0>();
-          if(++(ctxa.curp) != ctxa.refa->end()) {
+          ++ ctxa.curp;
+          if(ctxa.curp != ctxa.refa->end()) {
             fmt << ',';
             indent.break_line(fmt);
 
