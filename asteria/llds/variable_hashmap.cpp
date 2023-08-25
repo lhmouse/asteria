@@ -31,16 +31,18 @@ do_rehash(uint32_t nbkt)
             // Look for a new bucket for this element. Uniqueness is implied.
             size_t orel = ::rocket::probe_origin(nbkt, (uintptr_t) this->m_bptr[t].key_opt);
             auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
-                  [&](const details_variable_hashmap::Bucket&) { return false;  });
+                    [&](const details_variable_hashmap::Bucket&) { return false;  });
 
             // Relocate the value into the new bucket.
             ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(details_variable_hashmap::Bucket));
+            ::std::atomic_signal_fence(::std::memory_order_release);
+            this->m_bptr[t].key_opt = nullptr;
           }
           else {
             // Destroy this element.
-            this->m_size --;
-            this->m_bptr[t].key_opt = nullptr;
             ::rocket::destroy(this->m_bptr[t].vstor);
+            this->m_bptr[t].key_opt = nullptr;
+            this->m_size --;
           }
         }
 
@@ -63,9 +65,9 @@ clear() noexcept
     if(this->m_size != 0)
       for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
         if(this->m_bptr[t]) {
-          this->m_size --;
-          this->m_bptr[t].key_opt = nullptr;
           ::rocket::destroy(this->m_bptr[t].vstor);
+          this->m_bptr[t].key_opt = nullptr;
+          this->m_size --;
         }
 
     ROCKET_ASSERT(this->m_size == 0);
@@ -86,7 +88,7 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-          [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
+            [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
 
     if(*qbkt)
       return false;
@@ -136,14 +138,12 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
         // Look for a new bucket for this element. Uniqueness is implied.
         size_t orel = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) saved_key);
         auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
-              [&](const details_variable_hashmap::Bucket&) { return false;  });
+                [&](const details_variable_hashmap::Bucket&) { return false;  });
 
+        // Relocate the value into the new bucket.
+        ::memcpy((void*) qrel, (const void*) &r, sizeof(details_variable_hashmap::Bucket));
+        ::std::atomic_signal_fence(::std::memory_order_release);
         qrel->key_opt = saved_key;
-        if(qrel != &r) {
-          // Relocate the value into the new bucket.
-          ::rocket::construct(qrel->vstor, ::std::move(r.vstor[0]));
-          ::rocket::destroy(r.vstor);
-        }
         return false;
       });
 
