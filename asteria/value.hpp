@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "details/value.ipp"
-#include <cmath>
 namespace asteria {
 
 class Value
@@ -111,10 +110,6 @@ class Value
 
     void
     do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
-
-    ROCKET_COLD ROCKET_PURE
-    Compare
-    do_compare_slow(const Value& other) const noexcept;
 
     [[noreturn]]
     void
@@ -327,7 +322,9 @@ class Value
 
     bool
     is_scalar() const noexcept
-      { return this->type_mask() & (M_null | M_boolean | M_integer | M_real | M_string);  }
+      {
+        return this->type_mask() & (M_null | M_boolean | M_integer | M_real | M_string);
+      }
 
     // This is used by garbage collection.
     void
@@ -341,24 +338,24 @@ class Value
     bool
     test() const noexcept
       {
-        switch((uint32_t) this->type()) {
+        switch(this->m_stor.index()) {
           case type_null:
             return false;
 
           case type_boolean:
-            return this->as_boolean();
+            return this->m_stor.as<V_boolean>();
 
           case type_integer:
-            return this->as_integer() != 0;
+            return this->m_stor.as<V_integer>() != 0;
 
           case type_real:
-            return this->as_real() != 0;
+            return this->m_stor.as<V_real>() != 0;
 
           case type_string:
-            return this->as_string().size() != 0;
+            return this->m_stor.as<V_string>().size() != 0;
 
           case type_array:
-            return this->as_array().size() != 0;
+            return this->m_stor.as<V_array>().size() != 0;
 
           default:  // opaque, function, object
             return true;
@@ -367,49 +364,7 @@ class Value
 
     // This performs the builtin comparison with another value.
     Compare
-    compare(const Value& other) const noexcept
-      {
-        if(this->is_null() && other.is_null())
-          return compare_equal;
-
-        if(this->is_null() != other.is_null())
-          return compare_unordered;
-
-        if(this->is_real() && other.is_real()) {
-          // Convert integers to reals and compare them.
-          static_assert(compare_greater == 1);
-          static_assert(compare_less == 2);
-          static_assert(compare_equal == 3);
-
-          int comp = ::std::islessequal(this->as_real(), other.as_real());
-          comp <<= 1;
-          comp |= ::std::isgreaterequal(this->as_real(), other.as_real());
-          return static_cast<Compare>(comp);
-        }
-
-        // Non-arithmetic values of different types can't be compared.
-        if(this->type() != other.type())
-          return compare_unordered;
-
-        // Compare values of the same type.
-        if(this->type() == type_boolean)
-          return details_value::do_3way_compare<int>(
-                           this->as_boolean(), other.as_boolean());
-
-        if(this->type() == type_integer)
-          return details_value::do_3way_compare<V_integer>(
-                           this->as_integer(), other.as_integer());
-
-        if(this->type() == type_string)
-          return details_value::do_3way_compare<int>(
-                        this->as_string().compare(other.as_string()), 0);
-
-        if(this->type() == type_array)
-          return this->do_compare_slow(other);
-
-        // All the others are uncomparable.
-        return compare_unordered;
-      }
+    compare(const Value& other) const noexcept;
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&

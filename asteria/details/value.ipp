@@ -284,23 +284,7 @@ struct Valuable_impl<opt<XValT>, typename ::std::conditional<
   };
 
 template<typename XValT>
-using Valuable = Valuable_impl<
-           typename ::rocket::remove_cvref<XValT>::type, void>;
-
-// Comparison
-template<typename XValT,
-ROCKET_ENABLE_IF(::std::is_integral<XValT>::value)>
-constexpr
-Compare
-do_3way_compare(const XValT& lhs, const XValT& rhs) noexcept
-  {
-    if(lhs < rhs)
-      return compare_less;
-    else if(lhs > rhs)
-      return compare_greater;
-    else
-      return compare_equal;
-  }
+using Valuable = Valuable_impl<typename ::rocket::remove_cvref<XValT>::type, void>;
 
 inline
 tinyfmt&

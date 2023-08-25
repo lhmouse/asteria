@@ -145,7 +145,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           break;
 
         // Collect variables recursively.
-        qval->as_opaque().get_variables(staged, temp);
+        qval->m_stor.as<V_opaque>().get_variables(staged, temp);
         break;
 
       case type_function:
@@ -153,7 +153,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           break;
 
         // Collect variables recursively.
-        qval->as_function().get_variables(staged, temp);
+        qval->m_stor.as<V_function>().get_variables(staged, temp);
         break;
 
       case type_array: {
@@ -161,7 +161,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           break;
 
         // Push this element onto `stack`.
-        const auto& altr = qval->as_array();
+        const auto& altr = qval->m_stor.as<V_array>();
         Rbr_array elema = { &altr, altr.begin() };
         if(elema.curp != altr.end()) {
           // Open an array.
@@ -178,7 +178,7 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
           break;
 
         // Push this element onto `stack`.
-        const auto& altr = qval->as_object();
+        const auto& altr = qval->m_stor.as<V_object>();
         Rbr_object elemo = { &altr, altr.begin() };
         if(elemo.curp != altr.end()) {
           // Open an object.
@@ -232,118 +232,6 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
     }
   }
 
-Compare
-Value::
-do_compare_slow(const Value& other) const noexcept
-  {
-    // Expand recursion by hand with a stack.
-    static_assert(compare_greater == 1);
-    static_assert(compare_less == 2);
-    static_assert(compare_equal == 3);
-
-    auto qlhs = this;
-    auto qrhs = &other;
-    cow_bivector<Rbr_array, Rbr_array> stack;
-    Compare comp;
-
-  r:
-    if(qlhs->is_real() && qrhs->is_real()) {
-      // Convert integers to reals and compare them.
-      comp = static_cast<Compare>(
-               ::std::islessequal(qlhs->as_real(), qrhs->as_real()) * 2 +
-               ::std::isgreaterequal(qlhs->as_real(), qrhs->as_real()));
-    }
-    else {
-      // Non-arithmetic values of different types can't be compared.
-      if(qlhs->type() != qrhs->type())
-        return compare_unordered;
-
-      // Compare values of the same type.
-      comp = compare_equal;
-
-      switch(qlhs->type()) {
-        case type_null:
-          break;
-
-        case type_boolean:
-          comp = details_value::do_3way_compare<int>(
-                    qlhs->as_boolean(), qrhs->as_boolean());
-          break;
-
-        case type_integer:
-          comp = details_value::do_3way_compare<V_integer>(
-                    qlhs->as_integer(), qrhs->as_integer());
-          break;
-
-        case type_real:
-          ROCKET_ASSERT(false);
-
-        case type_string:
-          comp = details_value::do_3way_compare<int>(
-                    qlhs->as_string().compare(qrhs->as_string()), 0);
-          break;
-
-        case type_opaque:
-        case type_function:
-          return compare_unordered;
-
-        case type_array: {
-          const auto& altr1 = qlhs->as_array();
-          const auto& altr2 = qrhs->as_array();
-
-          if(altr1.empty() != altr2.empty())
-            return details_value::do_3way_compare<size_t>(
-                      altr1.size(), altr2.size());
-
-          if(!altr1.empty()) {
-            // Open a pair of arrays.
-            Rbr_array elem1 = { &altr1, altr1.begin() };
-            qlhs = &*(elem1.curp);
-            Rbr_array elem2 = { &altr2, altr2.begin() };
-            qrhs = &*(elem2.curp);
-            stack.emplace_back(::std::move(elem1), ::std::move(elem2));
-            goto r;
-          }
-
-          break;
-        }
-
-        case type_object:
-          return compare_unordered;
-
-        default:
-          ASTERIA_TERMINATE((
-              "Invalid value type (type `$1`)"),
-              qlhs->type());
-      }
-    }
-
-    if(comp != compare_equal)
-      return comp;
-
-    while(stack.size()) {
-      // Advance to the next element.
-      auto& elem = stack.mut_back();
-      bool cont1 = ++(elem.first.curp) != elem.first.refa->end();
-      bool cont2 = ++(elem.second.curp) != elem.second.refa->end();
-
-      if(cont1 != cont2)
-        return details_value::do_3way_compare<size_t>(
-                  elem.first.refa->size(), elem.second.refa->size());
-
-      if(cont1) {
-        qlhs = &*(elem.first.curp);
-        qrhs = &*(elem.second.curp);
-        goto r;
-      }
-
-      // Close these arrays.
-      stack.pop_back();
-    }
-
-    return compare_equal;
-  }
-
 void
 Value::
 do_throw_type_mismatch(const char* desc) const
@@ -351,6 +239,117 @@ do_throw_type_mismatch(const char* desc) const
     ::rocket::sprintf_and_throw<::std::invalid_argument>(
           "Value: type mismatch (expecting %s, but value had type `%s`)",
           desc, describe_type(this->type()));
+  }
+
+Compare
+Value::
+compare(const Value& other) const noexcept
+  {
+    // Expand recursion by hand with a stack.
+    auto qval = this;
+    auto qoth = &other;
+    cow_bivector<Rbr_array, Rbr_array> stack;
+
+#define do_compare_3way_(xx, yy)  \
+    if((xx) < (yy))  \
+      return compare_less;  \
+    else if((xx) > (yy))  \
+      return compare_greater;  \
+    else  \
+      ((void) 0)  // no semicolon
+
+  r:
+    switch(qval->type_mask() | qoth->type_mask()) {
+      case M_null:
+        break;
+
+      case M_boolean: {
+        ROCKET_ASSERT(qval->m_stor.index() == type_boolean);
+        ROCKET_ASSERT(qoth->m_stor.index() == type_boolean);
+        V_boolean lhs = qval->m_stor.as<V_boolean>();
+        V_boolean rhs = qoth->m_stor.as<V_boolean>();
+
+        do_compare_3way_(lhs, rhs);
+        break;
+      }
+
+      case M_integer: {
+        ROCKET_ASSERT(qval->m_stor.index() == type_integer);
+        ROCKET_ASSERT(qoth->m_stor.index() == type_integer);
+        V_integer lhs = qval->m_stor.as<V_integer>();
+        V_integer rhs = qoth->m_stor.as<V_integer>();
+
+        do_compare_3way_(lhs, rhs);
+        break;
+      }
+
+      case M_real | M_integer:
+      case M_real: {
+        ROCKET_ASSERT(qval->is_real());
+        ROCKET_ASSERT(qoth->is_real());
+        V_real lhs = qval->as_real();
+        V_real rhs = qoth->as_real();
+
+        if(::std::isunordered(lhs, rhs))
+          return compare_unordered;
+
+        do_compare_3way_(lhs, rhs);
+        break;
+      }
+
+      case M_string: {
+        ROCKET_ASSERT(qval->m_stor.index() == type_string);
+        ROCKET_ASSERT(qoth->m_stor.index() == type_string);
+        const V_string& lhs = qval->m_stor.as<V_string>();
+        const V_string& rhs = qoth->m_stor.as<V_string>();
+
+        int cmp = lhs.compare(rhs);
+        do_compare_3way_(cmp, 0);
+        break;
+      }
+
+      case M_array: {
+        ROCKET_ASSERT(qval->m_stor.index() == type_array);
+        ROCKET_ASSERT(qoth->m_stor.index() == type_array);
+        const V_array& lhs = qval->m_stor.as<V_array>();
+        const V_array& rhs = qoth->m_stor.as<V_array>();
+
+        if(!lhs.empty() && !rhs.empty()) {
+          // Open a pair of arrays.
+          Rbr_array lelem = { &lhs, lhs.begin() };
+          qval = &*(lelem.curp);
+          Rbr_array relem = { &rhs, rhs.begin() };
+          qoth = &*(relem.curp);
+          stack.emplace_back(::std::move(lelem), ::std::move(relem));
+          goto r;
+        }
+
+        do_compare_3way_(lhs.size(), rhs.size());
+        break;
+      }
+
+      default:
+        return compare_unordered;
+    }
+
+    while(stack.size()) {
+      // Advance to the next elements.
+      auto& r = stack.mut_back();
+      ++ r.first.curp;
+      ++ r.second.curp;
+      if((r.first.curp != r.first.refa->end()) && (r.second.curp != r.second.refa->end())) {
+        qval = &*(r.first.curp);
+        qoth = &*(r.second.curp);
+        goto r;
+      }
+
+      // Close these arrays.
+      do_compare_3way_(r.first.refa->size(), r.second.refa->size());
+
+      stack.pop_back();
+    }
+
+    return compare_equal;
   }
 
 tinyfmt&
@@ -368,33 +367,33 @@ print(tinyfmt& fmt) const
         break;
 
       case type_boolean:
-        fmt << qval->as_boolean();
+        fmt << qval->m_stor.as<V_boolean>();
         break;
 
       case type_integer:
-        fmt << qval->as_integer();
+        fmt << qval->m_stor.as<V_integer>();
         break;
 
       case type_real:
-        fmt << qval->as_real();
+        fmt << qval->m_stor.as<V_real>();
         break;
 
       case type_string:
         fmt << '\"';
-        c_quote(fmt, qval->as_string().data(), qval->as_string().size());
+        c_quote(fmt, qval->m_stor.as<V_string>().data(), qval->m_stor.as<V_string>().size());
         fmt << '\"';
         break;
 
       case type_opaque:
-        fmt << "(opaque) [[" << qval->as_opaque() << "]]";
+        fmt << "(opaque) [[" << qval->m_stor.as<V_opaque>() << "]]";
         break;
 
       case type_function:
-        fmt << "(function) [[" << qval->as_function() << "]]";
+        fmt << "(function) [[" << qval->m_stor.as<V_function>() << "]]";
         break;
 
       case type_array: {
-        const auto& altr = qval->as_array();
+        const auto& altr = qval->m_stor.as<V_array>();
 
         Rbr_array elema = { &altr, altr.begin() };
         if(elema.curp != altr.end()) {
@@ -410,7 +409,7 @@ print(tinyfmt& fmt) const
       }
 
       case type_object: {
-        const auto& altr = qval->as_object();
+        const auto& altr = qval->m_stor.as<V_object>();
 
         Rbr_object elemo = { &altr, altr.begin() };
         if(elemo.curp != altr.end()) {
@@ -501,19 +500,19 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         break;
 
       case type_boolean:
-        fmt << "boolean " << qval->as_boolean() << ';';
+        fmt << "boolean " << qval->m_stor.as<V_boolean>() << ';';
         break;
 
       case type_integer:
-        fmt << "integer " << qval->as_integer() << ';';
+        fmt << "integer " << qval->m_stor.as<V_integer>() << ';';
         break;
 
       case type_real:
-        fmt << "real " << qval->as_real() << ';';
+        fmt << "real " << qval->m_stor.as<V_real>() << ';';
         break;
 
       case type_string: {
-        const auto& altr = qval->as_string();
+        const auto& altr = qval->m_stor.as<V_string>();
         fmt << "string(" << altr.size() << ") \"";
         c_quote(fmt, altr.data(), altr.size());
         fmt << "\";";
@@ -521,19 +520,19 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       case type_opaque: {
-        const auto& altr = qval->as_opaque();
+        const auto& altr = qval->m_stor.as<V_opaque>();
         fmt << "opaque [[" << altr << "]];";
         break;
       }
 
       case type_function: {
-        const auto& altr = qval->as_function();
+        const auto& altr = qval->m_stor.as<V_function>();
         fmt << "function [[" << altr << "]];";
         break;
       }
 
       case type_array: {
-        const auto& altr = qval->as_array();
+        const auto& altr = qval->m_stor.as<V_array>();
         fmt << "array(" << altr.size() << ") ";
 
         Rbr_array elema = { &altr, altr.begin() };
@@ -552,7 +551,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       case type_object: {
-        const auto& altr = qval->as_object();
+        const auto& altr = qval->m_stor.as<V_object>();
         fmt << "object(" << altr.size() << ") ";
 
         Rbr_object elemo = { &altr, altr.begin() };
