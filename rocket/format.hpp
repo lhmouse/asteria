@@ -107,6 +107,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
           }
           break;
         }
+
         case charT('{'): {
           // composite placeholder
           next ++;
