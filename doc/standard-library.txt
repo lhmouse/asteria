@@ -647,7 +647,7 @@
 
 	  * `"caseless"`    Do caseless matching
 	  * `"dotall"`      `.` matches anything including new lines
-	  * `"extended"`    Ignore white space and `#` comments
+	  * `"extended"`    Ignore whitespace and `#` comments
 	  * `"multiline"`   `^` and `$` match newlines within data
 
 	* Returns a matcher as an object consisting of the following
