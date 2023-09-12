@@ -267,8 +267,8 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_closing_bracket_expected:
         return "`]` expected";
 
-      case compiler_status_open_brace_or_equal_initializer_expected:
-        return "`{` or `=` expected";
+      case compiler_status_open_brace_or_initializer_expected:
+        return "`{`, `=` or `->` expected";
 
       case compiler_status_equals_sign_or_colon_expected:
         return "`=` or `:` expected";

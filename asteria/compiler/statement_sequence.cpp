@@ -1661,7 +1661,7 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
     }
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_open_brace_or_equal_initializer_expected, tstrm.next_sloc());
+                compiler_status_open_brace_or_initializer_expected, tstrm.next_sloc());
 
     auto unique_name = format_string("__closure:$1:$2", sloc.line(), sloc.column());
 
