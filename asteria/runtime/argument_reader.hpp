@@ -148,7 +148,7 @@ class Argument_Reader
     ::asteria::details_argument_reader::Factory{  \
         ::rocket::sref("" name ""),  \
         ::rocket::sref("`" name "(" params ")` at '" ROCKET_SOURCE_LOCATION "'")  \
-      }%*[](__VA_ARGS__)
+      }->**[](__VA_ARGS__)
 
 }  // namespace asteria
 #endif

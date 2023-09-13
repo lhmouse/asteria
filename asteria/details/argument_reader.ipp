@@ -66,40 +66,40 @@ using F_void_self_reader         = void (Reference&&, Argument_Reader&&);
 using F_void_reader              = void (Argument_Reader&&);
 
 cow_function
-operator%(const Factory& fact, F_ref_global_self_reader func);
+operator->*(const Factory& fact, F_ref_global_self_reader func);
 
 cow_function
-operator%(const Factory& fact, F_ref_global_reader func);
+operator->*(const Factory& fact, F_ref_global_reader func);
 
 cow_function
-operator%(const Factory& fact, F_ref_self_reader func);
+operator->*(const Factory& fact, F_ref_self_reader func);
 
 cow_function
-operator%(const Factory& fact, F_ref_reader func);
+operator->*(const Factory& fact, F_ref_reader func);
 
 cow_function
-operator%(const Factory& fact, F_val_global_self_reader func);
+operator->*(const Factory& fact, F_val_global_self_reader func);
 
 cow_function
-operator%(const Factory& fact, F_val_global_reader func);
+operator->*(const Factory& fact, F_val_global_reader func);
 
 cow_function
-operator%(const Factory& fact, F_val_self_reader func);
+operator->*(const Factory& fact, F_val_self_reader func);
 
 cow_function
-operator%(const Factory& fact, F_val_reader func);
+operator->*(const Factory& fact, F_val_reader func);
 
 cow_function
-operator%(const Factory& fact, F_void_global_self_reader func);
+operator->*(const Factory& fact, F_void_global_self_reader func);
 
 cow_function
-operator%(const Factory& fact, F_void_global_reader func);
+operator->*(const Factory& fact, F_void_global_reader func);
 
 cow_function
-operator%(const Factory& fact, F_void_self_reader func);
+operator->*(const Factory& fact, F_void_self_reader func);
 
 cow_function
-operator%(const Factory& fact, F_void_reader func);
+operator->*(const Factory& fact, F_void_reader func);
 
 }  // namespace details_argument_reader
 }  // namespace asteria

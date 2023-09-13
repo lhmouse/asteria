@@ -565,7 +565,7 @@ throw_no_matching_function_call() const
 // Binding factory operators
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_ref_global_self_reader func)
+operator->*(const Factory& fact, F_ref_global_self_reader func)
   {
     struct Thunk : Thunk_Base<F_ref_global_self_reader>
       {
@@ -586,7 +586,7 @@ operator%(const Factory& fact, F_ref_global_self_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_ref_global_reader func)
+operator->*(const Factory& fact, F_ref_global_reader func)
   {
     struct Thunk : Thunk_Base<F_ref_global_reader>
       {
@@ -607,7 +607,7 @@ operator%(const Factory& fact, F_ref_global_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_ref_self_reader func)
+operator->*(const Factory& fact, F_ref_self_reader func)
   {
     struct Thunk : Thunk_Base<F_ref_self_reader>
       {
@@ -628,7 +628,7 @@ operator%(const Factory& fact, F_ref_self_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_ref_reader func)
+operator->*(const Factory& fact, F_ref_reader func)
   {
     struct Thunk : Thunk_Base<F_ref_reader>
       {
@@ -649,7 +649,7 @@ operator%(const Factory& fact, F_ref_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_val_global_self_reader func)
+operator->*(const Factory& fact, F_val_global_self_reader func)
   {
     struct Thunk : Thunk_Base<F_val_global_self_reader>
       {
@@ -670,7 +670,7 @@ operator%(const Factory& fact, F_val_global_self_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_val_global_reader func)
+operator->*(const Factory& fact, F_val_global_reader func)
   {
     struct Thunk : Thunk_Base<F_val_global_reader>
       {
@@ -691,7 +691,7 @@ operator%(const Factory& fact, F_val_global_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_val_self_reader func)
+operator->*(const Factory& fact, F_val_self_reader func)
   {
     struct Thunk : Thunk_Base<F_val_self_reader>
       {
@@ -712,7 +712,7 @@ operator%(const Factory& fact, F_val_self_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_val_reader func)
+operator->*(const Factory& fact, F_val_reader func)
   {
     struct Thunk : Thunk_Base<F_val_reader>
       {
@@ -733,7 +733,7 @@ operator%(const Factory& fact, F_val_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_void_global_self_reader func)
+operator->*(const Factory& fact, F_void_global_self_reader func)
   {
     struct Thunk : Thunk_Base<F_void_global_self_reader>
       {
@@ -754,7 +754,7 @@ operator%(const Factory& fact, F_void_global_self_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_void_global_reader func)
+operator->*(const Factory& fact, F_void_global_reader func)
   {
     struct Thunk : Thunk_Base<F_void_global_reader>
       {
@@ -775,7 +775,7 @@ operator%(const Factory& fact, F_void_global_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_void_self_reader func)
+operator->*(const Factory& fact, F_void_self_reader func)
   {
     struct Thunk : Thunk_Base<F_void_self_reader>
       {
@@ -796,7 +796,7 @@ operator%(const Factory& fact, F_void_self_reader func)
 
 cow_function
 details_argument_reader::
-operator%(const Factory& fact, F_void_reader func)
+operator->*(const Factory& fact, F_void_reader func)
   {
     struct Thunk : Thunk_Base<F_void_reader>
       {
