@@ -576,7 +576,7 @@
 	* Returns the encoded string. If `data` is empty, an empty
 	  string is returned.
 
-`std.string.url_decode_query(text)`
+`std.string.url_query_decode(text)`
 
 	* Decodes percent-encode sequences from `text` and converts them
 	  to bytes according to IETF RFC 3986. This function behaves like

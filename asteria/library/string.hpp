@@ -135,9 +135,9 @@ std_string_url_decode(V_string text);
 V_string
 std_string_url_query_encode(V_string data);
 
-// `std.string.url_decode_query`
+// `std.string.url_query_decode`
 V_string
-std_string_url_decode_query(V_string text);
+std_string_url_query_decode(V_string text);
 
 // `std.string.utf8_validate`
 V_boolean

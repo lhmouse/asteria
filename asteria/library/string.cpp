@@ -1515,7 +1515,7 @@ std_string_url_query_encode(V_string data)
   }
 
 V_string
-std_string_url_decode_query(V_string text)
+std_string_url_query_decode(V_string text)
   {
     // Only modify the string as needed, without causing copies on write.
     V_string data = text;
@@ -2434,9 +2434,9 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("url_decode_query"),
+    result.insert_or_assign(sref("url_query_decode"),
       ASTERIA_BINDING(
-        "std.string.url_decode_query", "text",
+        "std.string.url_query_decode", "text",
         Argument_Reader&& reader)
       {
         V_string text;
@@ -2444,7 +2444,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(text);
         if(reader.end_overload())
-          return (Value) std_string_url_decode_query(text);
+          return (Value) std_string_url_query_decode(text);
 
         reader.throw_no_matching_function_call();
       });
