@@ -113,12 +113,12 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
     auto epos = ::std::move(end);
 
     for(;;) {
-      auto dist = epos - bpos;
+      ptrdiff_t dist = epos - bpos;
       if(dist <= 0)
         return { ::std::move(bpos), false };
 
       // Compare `target` to the element in the middle.
-      auto mpos = bpos + dist / 2;
+      auto mpos = bpos + (dist >> 1);
       auto cmp = do_compare(global, stack, kcomp, target, *mpos);
       if(cmp == compare_unordered)
         ASTERIA_THROW_RUNTIME_ERROR((
