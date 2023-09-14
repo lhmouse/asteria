@@ -562,21 +562,38 @@ throw_no_matching_function_call() const
         this->m_name, arguments, overloads);
   }
 
-// Binding factory operators
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_ref_global_self_reader func)
+operator->*(const Factory& fact, F_ref_global_self_reader& func)
   {
-    struct Thunk : Thunk_Base<F_ref_global_self_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_ref_global_self_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_ref_global_self_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            self = this->m_func(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            self = this->func(global, ::std::move(self), ::std::move(reader));
             return self;
           }
       };
@@ -586,18 +603,36 @@ operator->*(const Factory& fact, F_ref_global_self_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_ref_global_reader func)
+operator->*(const Factory& fact, F_ref_global_reader& func)
   {
-    struct Thunk : Thunk_Base<F_ref_global_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_ref_global_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_ref_global_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            self = this->m_func(global, ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            self = this->func(global, ::std::move(reader));
             return self;
           }
       };
@@ -607,18 +642,36 @@ operator->*(const Factory& fact, F_ref_global_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_ref_self_reader func)
+operator->*(const Factory& fact, F_ref_self_reader& func)
   {
-    struct Thunk : Thunk_Base<F_ref_self_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_ref_self_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_ref_self_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            self = this->m_func(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            self = this->func(::std::move(self), ::std::move(reader));
             return self;
           }
       };
@@ -628,18 +681,36 @@ operator->*(const Factory& fact, F_ref_self_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_ref_reader func)
+operator->*(const Factory& fact, F_ref_reader& func)
   {
-    struct Thunk : Thunk_Base<F_ref_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_ref_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_ref_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            self = this->m_func(::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            self = this->func(::std::move(reader));
             return self;
           }
       };
@@ -649,18 +720,36 @@ operator->*(const Factory& fact, F_ref_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_val_global_self_reader func)
+operator->*(const Factory& fact, F_val_global_self_reader& func)
   {
-    struct Thunk : Thunk_Base<F_val_global_self_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_val_global_self_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_val_global_self_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            auto val = this->m_func(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            auto val = this->func(global, ::std::move(self), ::std::move(reader));
             return self.set_temporary(::std::move(val));
           }
       };
@@ -670,18 +759,36 @@ operator->*(const Factory& fact, F_val_global_self_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_val_global_reader func)
+operator->*(const Factory& fact, F_val_global_reader& func)
   {
-    struct Thunk : Thunk_Base<F_val_global_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_val_global_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_val_global_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            auto val = this->m_func(global, ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            auto val = this->func(global, ::std::move(reader));
             return self.set_temporary(::std::move(val));
           }
       };
@@ -691,18 +798,36 @@ operator->*(const Factory& fact, F_val_global_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_val_self_reader func)
+operator->*(const Factory& fact, F_val_self_reader& func)
   {
-    struct Thunk : Thunk_Base<F_val_self_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_val_self_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_val_self_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            auto val = this->m_func(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            auto val = this->func(::std::move(self), ::std::move(reader));
             return self.set_temporary(::std::move(val));
           }
       };
@@ -712,18 +837,36 @@ operator->*(const Factory& fact, F_val_self_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_val_reader func)
+operator->*(const Factory& fact, F_val_reader& func)
   {
-    struct Thunk : Thunk_Base<F_val_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_val_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_val_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            auto val = this->m_func(::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            auto val = this->func(::std::move(reader));
             return self.set_temporary(::std::move(val));
           }
       };
@@ -733,18 +876,36 @@ operator->*(const Factory& fact, F_val_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_void_global_self_reader func)
+operator->*(const Factory& fact, F_void_global_self_reader& func)
   {
-    struct Thunk : Thunk_Base<F_void_global_self_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_void_global_self_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_void_global_self_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            this->m_func(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            this->func(global, ::std::move(self), ::std::move(reader));
             return self.set_void();
           }
       };
@@ -754,18 +915,36 @@ operator->*(const Factory& fact, F_void_global_self_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_void_global_reader func)
+operator->*(const Factory& fact, F_void_global_reader& func)
   {
-    struct Thunk : Thunk_Base<F_void_global_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_void_global_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_void_global_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            this->m_func(global, ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            this->func(global, ::std::move(reader));
             return self.set_void();
           }
       };
@@ -775,18 +954,36 @@ operator->*(const Factory& fact, F_void_global_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_void_self_reader func)
+operator->*(const Factory& fact, F_void_self_reader& func)
   {
-    struct Thunk : Thunk_Base<F_void_self_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_void_self_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_void_self_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            this->m_func(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            this->func(::std::move(self), ::std::move(reader));
             return self.set_void();
           }
       };
@@ -796,18 +993,36 @@ operator->*(const Factory& fact, F_void_self_reader func)
 
 cow_function
 details_argument_reader::
-operator->*(const Factory& fact, F_void_reader func)
+operator->*(const Factory& fact, F_void_reader& func)
   {
-    struct Thunk : Thunk_Base<F_void_reader>
+    struct Thunk : Abstract_Function
       {
-        using Thunk_Base::Thunk_Base;
+        cow_string::shallow_type name;
+        cow_string::shallow_type desc;
+        F_void_reader* func;
+
+        explicit
+        Thunk(const Factory& xfact, F_void_reader& xfunc)
+          : name(xfact.name), desc(xfact.desc), func(xfunc)
+          {
+          }
+
+        tinyfmt&
+        describe(tinyfmt& fmt) const override
+          {
+            return fmt << this->desc;
+          }
+
+        void
+        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+          {
+          }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/,
-                         Reference_Stack&& args) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& args) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(args));
-            this->m_func(::std::move(reader));
+            Argument_Reader reader(this->name, ::std::move(args));
+            this->func(::std::move(reader));
             return self.set_void();
           }
       };
