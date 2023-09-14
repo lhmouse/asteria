@@ -91,7 +91,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     data.push_back(' ');
 
     // Append the function name and source location, followed by a line feed.
-    data += " (";
+    data += "(";
     data += func;
     data += ") @ ";
     data += file;
@@ -101,7 +101,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     data += "\x1B\x45\t";
 
     // Neutralize control characters: ['\x00','\x1F'] and '\x7F'.
-    for(char c : msg) {
+    for(char c : msg)
       switch(c) {
         break; case 0x00:  data += "[NUL]";
         break; case 0x01:  data += "[SOH]";
@@ -135,10 +135,9 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
         break; case 0x1D:  data += "[GS]";
         break; case 0x1E:  data += "[RS]";
         break; case 0x1F:  data += "[US]";
-        break;   default:  data += c;       // verbatim
+        break; default:    data += c;       // verbatim
         break; case 0x7F:  data += "[DEL]";
       }
-    }
 
     // Remove trailing space characters.
     size_t pos = data.rfind_not_of(" \f\n\r\t\v");
