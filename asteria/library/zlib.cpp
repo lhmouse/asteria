@@ -3,7 +3,8 @@
 
 #include "../precompiled.ipp"
 #include "zlib.hpp"
-#include "../runtime/argument_reader.hpp"
+#include "../argument_reader.hpp"
+#include "../binding_generator.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utils.hpp"

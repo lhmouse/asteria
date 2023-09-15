@@ -1,14 +1,13 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_ARGUMENT_READER_
-#define ASTERIA_RUNTIME_ARGUMENT_READER_
+#ifndef ASTERIA_ARGUMENT_READER_
+#define ASTERIA_ARGUMENT_READER_
 
-#include "../fwd.hpp"
-#include "reference.hpp"
-#include "runtime_error.hpp"
-#include "../llds/reference_stack.hpp"
-#include "../details/argument_reader.ipp"
+#include "fwd.hpp"
+#include "runtime/reference.hpp"
+#include "runtime/runtime_error.hpp"
+#include "llds/reference_stack.hpp"
 namespace asteria {
 
 class Argument_Reader
@@ -17,8 +16,16 @@ class Argument_Reader
     cow_string m_name;
     Reference_Stack m_stack;
 
-    details_argument_reader::State m_state;
-    cow_vector<details_argument_reader::State> m_saved_states;
+    struct State
+      {
+        cow_string params;
+        uint32_t nparams = 0;
+        bool ended = false;
+        bool matched = false;
+      };
+
+    State m_state;
+    cow_vector<State> m_saved_states;
     cow_string m_overloads;
 
   public:
@@ -142,13 +149,6 @@ class Argument_Reader
     void
     throw_no_matching_function_call() const;
   };
-
-// See '../library/string.cpp' for how to use this macro.
-#define ASTERIA_BINDING(name, params, ...)  \
-    ::asteria::details_argument_reader::Factory{  \
-        ::rocket::sref("" name ""),  \
-        ::rocket::sref("`" name "(" params ")` at '" ROCKET_SOURCE_LOCATION "'")  \
-      }->**[](__VA_ARGS__)
 
 }  // namespace asteria
 #endif

@@ -150,6 +150,8 @@ class Value;
 class Source_Location;
 class Recursion_Sentry;
 class Simple_Script;
+class Argument_Reader;
+class Binding_Generator;
 
 // Low-level data structures
 class Variable_HashMap;
@@ -159,7 +161,7 @@ class AVMC_Queue;
 
 // Runtime
 enum AIR_Status : uint8_t;
-enum PTC_Aware : int8_t;  // this is a bitmask!
+enum PTC_Aware : int8_t;  // This is a bitmask!
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
@@ -178,7 +180,6 @@ class Variadic_Arguer;
 class Instantiated_Function;
 class AIR_Node;
 class Backtrace_Frame;
-class Argument_Reader;
 
 // Compiler
 enum Punctuator : uint8_t;

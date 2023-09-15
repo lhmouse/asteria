@@ -6,7 +6,6 @@ nobase_include_HEADERS +=  \
   %reldir%/details/variable_hashmap.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
   %reldir%/details/avmc_queue.ipp  \
-  %reldir%/details/argument_reader.ipp  \
   %reldir%/version.h  \
   %reldir%/fwd.hpp  \
   %reldir%/utils.hpp  \
@@ -14,6 +13,8 @@ nobase_include_HEADERS +=  \
   %reldir%/value.hpp  \
   %reldir%/source_location.hpp  \
   %reldir%/simple_script.hpp  \
+  %reldir%/argument_reader.hpp  \
+  %reldir%/binding_generator.hpp  \
   %reldir%/llds/variable_hashmap.hpp  \
   %reldir%/llds/reference_dictionary.hpp  \
   %reldir%/llds/reference_stack.hpp  \
@@ -37,7 +38,6 @@ nobase_include_HEADERS +=  \
   %reldir%/runtime/instantiated_function.hpp  \
   %reldir%/runtime/air_node.hpp  \
   %reldir%/runtime/air_optimizer.hpp  \
-  %reldir%/runtime/argument_reader.hpp  \
   %reldir%/compiler/enums.hpp  \
   %reldir%/compiler/compiler_error.hpp  \
   %reldir%/compiler/token.hpp  \
@@ -72,6 +72,8 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/value.cpp  \
   %reldir%/source_location.cpp  \
   %reldir%/simple_script.cpp  \
+  %reldir%/argument_reader.cpp  \
+  %reldir%/binding_generator.cpp  \
   %reldir%/llds/variable_hashmap.cpp  \
   %reldir%/llds/reference_dictionary.cpp  \
   %reldir%/llds/reference_stack.cpp  \
@@ -94,7 +96,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/instantiated_function.cpp  \
   %reldir%/runtime/air_node.cpp  \
   %reldir%/runtime/air_optimizer.cpp  \
-  %reldir%/runtime/argument_reader.cpp  \
   %reldir%/compiler/enums.cpp  \
   %reldir%/compiler/compiler_error.cpp  \
   %reldir%/compiler/token.cpp  \
