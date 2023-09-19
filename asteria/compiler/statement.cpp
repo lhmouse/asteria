@@ -21,7 +21,7 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
       return;
 
     // Record this name.
-    if(names_opt && !::rocket::find(*names_opt, name))
+    if(names_opt && !find(*names_opt, name))
       names_opt->emplace_back(name);
 
     // Just ensure the name exists.

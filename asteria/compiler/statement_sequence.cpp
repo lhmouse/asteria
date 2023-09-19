@@ -1754,7 +1754,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       if(!qkey)
         break;
 
-      if(::rocket::find(keys, *qkey))
+      if(find(keys, *qkey))
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_duplicate_key_in_object, op_sloc);
 
