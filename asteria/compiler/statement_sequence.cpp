@@ -785,6 +785,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
                 compiler_status_open_brace_expected, tstrm.next_sloc());
 
     for(;;) {
+      auto label_sloc = tstrm.next_sloc();
       qkwrd = do_accept_keyword_opt(tstrm, { keyword_case, keyword_default });
       if(!qkwrd)
         break;
@@ -798,9 +799,15 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
 
         labels.emplace_back(::std::move(*qlabel));
       }
-      else
-        // The `default` label takes no argument.
+      else {
+        // The `default` label takes no argument. There shall be no more than
+        // one `default` label within each `switch` statement.
+        if(any_of(labels, [&](const auto& r) { return r.units.empty();  }))
+          throw Compiler_Error(Compiler_Error::M_status(),
+                    compiler_status_multiple_default, label_sloc);
+
         labels.emplace_back();
+      }
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
       if(!kpunct)

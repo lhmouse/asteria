@@ -290,10 +290,13 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         ROCKET_ASSERT(nclauses == altr.bodies.size());
 
         for(size_t i = 0;  i < nclauses;  ++i) {
-          // Generate code for the label.
+          // Generate code for `case` labels, or create empty code for the `default` label.
           // Note labels are not part of the body.
-          do_generate_expression(code_labels.emplace_back(), opts, global, ctx, ptc_aware_none,
-                                 altr.labels[i]);
+          if(altr.labels[i].units.empty())
+            code_labels.emplace_back();
+          else
+            do_generate_expression(code_labels.emplace_back(), opts, global, ctx, ptc_aware_none,
+                                   altr.labels[i]);
 
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.

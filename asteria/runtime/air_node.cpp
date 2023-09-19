@@ -459,10 +459,6 @@ struct Traits_switch_statement
           // This is a `default` clause if the condition is empty, and a `case` clause
           // otherwise.
           if(sp.queues_labels[i].empty()) {
-            if(bp != SIZE_MAX)
-              ASTERIA_THROW_RUNTIME_ERROR((
-                  "Multiple `default` clauses not allowed"));
-
             bp = i;
             continue;
           }

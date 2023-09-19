@@ -315,6 +315,9 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_undeclared_identifier:
         return "undeclared identifier";
 
+      case compiler_status_multiple_default:
+        return "multiple `default` clauses not allowed";
+
       default:
         return "[unknown compiler status]";
     }
