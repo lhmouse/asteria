@@ -364,7 +364,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped,
+        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, altr.sloc_init,
                                                  ::std::move(code_init), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;

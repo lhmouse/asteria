@@ -943,6 +943,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_arrow_expected, tstrm.next_sloc());
 
+    auto sloc_init = tstrm.next_sloc();
     auto qinit = do_accept_expression_opt(tstrm);
     if(!qinit)
       throw Compiler_Error(Compiler_Error::M_status(),
@@ -960,7 +961,8 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                 compiler_status_statement_expected, tstrm.next_sloc());
 
     Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qvname),
-                                    ::std::move(*qinit), ::std::move(*qblock) };
+                                    ::std::move(sloc_init), ::std::move(*qinit),
+                                    ::std::move(*qblock) };
     return ::std::move(xstmt);
   }
 

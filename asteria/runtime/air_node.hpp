@@ -66,6 +66,7 @@ class AIR_Node
       {
         phsh_string name_key;
         phsh_string name_mapped;
+        Source_Location sloc_init;
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
       };

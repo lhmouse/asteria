@@ -71,6 +71,7 @@ class Statement
       {
         phsh_string name_key;
         phsh_string name_mapped;
+        Source_Location sloc_init;
         S_expression init;
         S_block body;
       };

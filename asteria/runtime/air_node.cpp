@@ -206,6 +206,7 @@ struct Sparam_for_each
   {
     phsh_string name_key;
     phsh_string name_mapped;
+    Source_Location sloc_init;
     AVMC_Queue queue_init;
     AVMC_Queue queue_body;
 
@@ -619,6 +620,7 @@ struct Traits_for_each_statement
         Sparam_for_each sp;
         sp.name_key = altr.name_key;
         sp.name_mapped = altr.name_mapped;
+        sp.sloc_init = altr.sloc_init;
         do_solidify_nodes(sp.queue_init, altr.code_init);
         do_solidify_nodes(sp.queue_body, altr.code_body);
         return sp;
@@ -703,9 +705,11 @@ struct Traits_for_each_statement
           }
 
           default:
-            ASTERIA_THROW_RUNTIME_ERROR((
-                "Range value not iterable (range `$1`)"),
-                range);
+            ::rocket::tinyfmt_str fmt;
+            format(fmt, "Range value not iterable (range `$1`)", range);
+            Runtime_Error except(Runtime_Error::M_native(), fmt.extract_string());
+            except.push_frame_plain(sp.sloc_init, sref(""));
+            throw except;
         }
       }
   };
