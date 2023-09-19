@@ -8,9 +8,45 @@
 #include "compiler/statement.hpp"
 #include "compiler/expression_unit.hpp"
 #include "runtime/air_optimizer.hpp"
+#include "runtime/variable.hpp"
+#include "runtime/garbage_collector.hpp"
 #include "llds/reference_stack.hpp"
 #include "utils.hpp"
 namespace asteria {
+
+refcnt_ptr<Variable>
+Simple_Script::
+get_global_variable_opt(phsh_stringR name) const noexcept
+  {
+    auto gref = this->m_global.get_named_reference_opt(name);
+    if(!gref)
+      return nullptr;
+
+    // Errors are ignored.
+    return gref->get_variable_opt();
+  }
+
+refcnt_ptr<Variable>
+Simple_Script::
+open_global_variable(phsh_stringR name)
+  {
+    auto& ref = this->m_global.insert_named_reference(name);
+    auto var = ref.get_variable_opt();
+    if(var)
+      return var;
+
+    // Allocate a new variable and take it over.
+    var = this->m_global.garbage_collector()->create_variable();
+    ref.set_variable(var);
+    return var;
+  }
+
+bool
+Simple_Script::
+erase_global_variable(phsh_stringR name) noexcept
+  {
+    return this->m_global.erase_named_reference(name);
+  }
 
 void
 Simple_Script::

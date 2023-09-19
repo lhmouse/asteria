@@ -52,6 +52,16 @@ class Simple_Script
     reset() noexcept
       { this->m_func.reset();  }
 
+    // Manage global variables in the bundled context.
+    refcnt_ptr<Variable>
+    get_global_variable_opt(phsh_stringR name) const noexcept;
+
+    refcnt_ptr<Variable>
+    open_global_variable(phsh_stringR name);
+
+    bool
+    erase_global_variable(phsh_stringR name) noexcept;
+
     // Load something. Calling these functions directly is not recommended.
     void
     reload(stringR name, Statement_Sequence&& stmtq);

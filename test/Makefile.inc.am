@@ -52,6 +52,7 @@ check_PROGRAMS +=  \
   %reldir%/var_mod.test  \
   %reldir%/ini.test  \
   %reldir%/csv.test  \
+  %reldir%/binding_variable.test  \
   ${END}
 
 EXTRA_DIST +=  \
