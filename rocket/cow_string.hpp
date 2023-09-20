@@ -2391,7 +2391,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, basic_shallow_string<charT> rhs)
   {
     lhs.append(rhs);
-    return lhs;
+    return ::std::move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2400,7 +2400,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, initializer_list<charT> rhs)
   {
     lhs.append(rhs);
-    return lhs;
+    return ::std::move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2409,7 +2409,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, const basic_cow_string<charT, allocT>& rhs)
   {
     lhs.append(rhs);
-    return lhs;
+    return ::std::move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2418,7 +2418,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, basic_cow_string<charT, allocT>&& rhs)
   {
     lhs.append(rhs);
-    return lhs;
+    return ::std::move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2427,7 +2427,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, const charT* rhs)
   {
     lhs.append(rhs);
-    return lhs;
+    return ::std::move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2436,7 +2436,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, charT rhs)
   {
     lhs.push_back(rhs);
-    return lhs;
+    return ::std::move(lhs);
   }
 
 template<typename charT, typename allocT>
