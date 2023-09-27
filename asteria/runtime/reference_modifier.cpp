@@ -22,7 +22,7 @@ apply_read_opt(const Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
+              "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
         const auto& arr = parent.as_array();
@@ -42,7 +42,7 @@ apply_read_opt(const Value& parent) const
         }
         else if(!parent.is_object())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
+              "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
         const auto& obj = parent.as_object();
@@ -57,7 +57,7 @@ apply_read_opt(const Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Head operator not applicable (parent type was `$1`)"),
+              "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
@@ -75,7 +75,7 @@ apply_read_opt(const Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Tail operator not applicable (parent type was `$1`)"),
+              "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
@@ -94,7 +94,7 @@ apply_read_opt(const Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Random operator not applicable (parent type was `$1`)"),
+              "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         const auto& arr = parent.as_array();
@@ -126,7 +126,7 @@ apply_write_opt(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
+              "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
@@ -146,7 +146,7 @@ apply_write_opt(Value& parent) const
         }
         else if(!parent.is_object())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
+              "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
         auto& obj = parent.mut_object();
@@ -161,7 +161,7 @@ apply_write_opt(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Head operator not applicable (parent type was `$1`)"),
+              "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -179,7 +179,7 @@ apply_write_opt(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Tail operator not applicable (parent type was `$1`)"),
+              "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -198,7 +198,7 @@ apply_write_opt(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Random operator not applicable (parent type was `$1`)"),
+              "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -230,7 +230,7 @@ apply_open(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
+              "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
@@ -252,7 +252,7 @@ apply_open(Value& parent) const
         }
         else if(!parent.is_object())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
+              "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
         auto& obj = parent.mut_object();
@@ -267,7 +267,7 @@ apply_open(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Head operator not applicable (parent type was `$1`)"),
+              "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -287,7 +287,7 @@ apply_open(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Tail operator not applicable (parent type was `$1`)"),
+              "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -308,7 +308,7 @@ apply_open(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Random operator not applicable (parent type was `$1`)"),
+              "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -341,7 +341,7 @@ apply_unset(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Integer subscript not applicable (parent type was `$1`; index was `$2`)"),
+              "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
         auto& arr = parent.mut_array();
@@ -349,7 +349,7 @@ apply_unset(Value& parent) const
         if(w.nprepend | w.nappend)
           return nullopt;
 
-        auto val = arr[w.rindex];
+        auto val = arr.mut(w.rindex);
         arr.erase(w.rindex, 1);
         return val;
       }
@@ -363,15 +363,15 @@ apply_unset(Value& parent) const
         }
         else if(!parent.is_object())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "String subscript not applicable (parent type was `$1`; key was `$2`)"),
+              "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
         auto& obj = parent.mut_object();
-        auto it = obj.find(altr.key);
+        auto it = obj.mut_find(altr.key);
         if(it == obj.end())
           return nullopt;
 
-        auto val = it->second;
+        auto val = ::std::move(it->second);
         obj.erase(it);
         return val;
       }
@@ -384,7 +384,7 @@ apply_unset(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Head operator not applicable (parent type was `$1`)"),
+              "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -404,7 +404,7 @@ apply_unset(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Tail operator not applicable (parent type was `$1`)"),
+              "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
@@ -425,7 +425,7 @@ apply_unset(Value& parent) const
         }
         else if(!parent.is_array())
           ASTERIA_THROW_RUNTIME_ERROR((
-              "Random operator not applicable (parent type was `$1`)"),
+              "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
