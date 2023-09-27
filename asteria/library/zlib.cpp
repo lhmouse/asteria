@@ -148,8 +148,8 @@ class Deflator final
 void
 do_construct_Deflator(V_object& result, V_string format, optV_integer level)
   {
-    static constexpr auto s_uuid = sref("{2D32F5E5-DECB-4A8C-0612-290629069F9C}");
-    result.insert_or_assign(s_uuid, std_zlib_Deflator_private(format, level));
+    static constexpr auto s_private_uuid = sref("{2D32F5E5-DECB-4A8C-0612-290629069F9C}");
+    result.insert_or_assign(s_private_uuid, std_zlib_Deflator_private(format, level));
     result.insert_or_assign(sref("output"), V_string());
 
     result.insert_or_assign(sref("update"),
@@ -157,8 +157,9 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& output = self.dereference_mutable().mut_object().mut(sref("output")).mut_string();
-        auto& defl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
+        auto& output = self_obj.mut(sref("output")).mut_string();
         V_string data;
 
         reader.start_overload();
@@ -174,8 +175,9 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::flush", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& output = self.dereference_mutable().mut_object().mut(sref("output")).mut_string();
-        auto& defl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
+        auto& output = self_obj.mut(sref("output")).mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -189,8 +191,9 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& output = self.dereference_mutable().mut_object().mut(sref("output")).mut_string();
-        auto& defl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
+        auto& output = self_obj.mut(sref("output")).mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -203,7 +206,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
       ASTERIA_BINDING(
         "std.zlib.Deflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
-      {        auto& defl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+      {        auto& defl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -336,8 +339,8 @@ class Inflator final
 void
 do_construct_Inflator(V_object& result, V_string format)
   {
-    static constexpr auto s_uuid = sref("{2D372D3E-4E40-4D8B-0632-19C519C5682D}");
-    result.insert_or_assign(s_uuid, std_zlib_Inflator_private(format));
+    static constexpr auto s_private_uuid = sref("{2D372D3E-4E40-4D8B-0632-19C519C5682D}");
+    result.insert_or_assign(s_private_uuid, std_zlib_Inflator_private(format));
     result.insert_or_assign(sref("output"), V_string());
 
     result.insert_or_assign(sref("update"),
@@ -345,8 +348,9 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& output = self.dereference_mutable().mut_object().mut(sref("output")).mut_string();
-        auto& infl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
+        auto& output = self_obj.mut(sref("output")).mut_string();
         V_string data;
 
         reader.start_overload();
@@ -362,8 +366,9 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::flush", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& output = self.dereference_mutable().mut_object().mut(sref("output")).mut_string();
-        auto& infl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
+        auto& output = self_obj.mut(sref("output")).mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -377,8 +382,9 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& output = self.dereference_mutable().mut_object().mut(sref("output")).mut_string();
-        auto& infl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
+        auto& output = self_obj.mut(sref("output")).mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -391,7 +397,7 @@ do_construct_Inflator(V_object& result, V_string format)
       ASTERIA_BINDING(
         "std.zlib.Inflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
-      {        auto& infl = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+      {        auto& infl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())

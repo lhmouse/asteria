@@ -72,15 +72,16 @@ class CRC32_Hasher final
 void
 do_construct_CRC32(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
-    result.insert_or_assign(s_uuid, std_checksum_CRC32_private());
+    static constexpr auto s_private_uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
+    result.insert_or_assign(s_private_uuid, std_checksum_CRC32_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.CRC32::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -96,7 +97,8 @@ do_construct_CRC32(V_object& result)
         "std.checksum.CRC32::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -110,7 +112,8 @@ do_construct_CRC32(V_object& result)
         "std.checksum.CRC32::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -179,15 +182,16 @@ class FNV1a32_Hasher final
 void
 do_construct_FNV1a32(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
-    result.insert_or_assign(s_uuid, std_checksum_FNV1a32_private());
+    static constexpr auto s_private_uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
+    result.insert_or_assign(s_private_uuid, std_checksum_FNV1a32_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.FNV1a32::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -203,7 +207,8 @@ do_construct_FNV1a32(V_object& result)
         "std.checksum.FNV1a32::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -217,7 +222,8 @@ do_construct_FNV1a32(V_object& result)
         "std.checksum.FNV1a32::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -300,15 +306,16 @@ class MD5_Hasher final
 void
 do_construct_MD5(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
-    result.insert_or_assign(s_uuid, std_checksum_MD5_private());
+    static constexpr auto s_private_uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
+    result.insert_or_assign(s_private_uuid, std_checksum_MD5_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.MD5::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -324,7 +331,8 @@ do_construct_MD5(V_object& result)
         "std.checksum.MD5::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -338,7 +346,8 @@ do_construct_MD5(V_object& result)
         "std.checksum.MD5::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -405,15 +414,16 @@ class SHA1_Hasher final
 void
 do_construct_SHA1(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
-    result.insert_or_assign(s_uuid, std_checksum_SHA1_private());
+    static constexpr auto s_private_uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
+    result.insert_or_assign(s_private_uuid, std_checksum_SHA1_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.SHA1::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -429,7 +439,8 @@ do_construct_SHA1(V_object& result)
         "std.checksum.SHA1::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -443,7 +454,8 @@ do_construct_SHA1(V_object& result)
         "std.checksum.SHA1::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -510,15 +522,16 @@ class SHA224_Hasher final
 void
 do_construct_SHA224(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
-    result.insert_or_assign(s_uuid, std_checksum_SHA224_private());
+    static constexpr auto s_private_uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
+    result.insert_or_assign(s_private_uuid, std_checksum_SHA224_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.SHA224::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -534,7 +547,8 @@ do_construct_SHA224(V_object& result)
         "std.checksum.SHA224::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -548,7 +562,8 @@ do_construct_SHA224(V_object& result)
         "std.checksum.SHA224::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -615,15 +630,16 @@ class SHA256_Hasher final
 void
 do_construct_SHA256(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
-    result.insert_or_assign(s_uuid, std_checksum_SHA256_private());
+    static constexpr auto s_private_uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
+    result.insert_or_assign(s_private_uuid, std_checksum_SHA256_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.SHA256::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -639,7 +655,8 @@ do_construct_SHA256(V_object& result)
         "std.checksum.SHA256::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -653,7 +670,8 @@ do_construct_SHA256(V_object& result)
         "std.checksum.SHA256::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -720,15 +738,16 @@ class SHA384_Hasher final
 void
 do_construct_SHA384(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
-    result.insert_or_assign(s_uuid, std_checksum_SHA384_private());
+    static constexpr auto s_private_uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
+    result.insert_or_assign(s_private_uuid, std_checksum_SHA384_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.SHA384::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -744,7 +763,8 @@ do_construct_SHA384(V_object& result)
         "std.checksum.SHA384::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -758,7 +778,8 @@ do_construct_SHA384(V_object& result)
         "std.checksum.SHA384::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -825,15 +846,16 @@ class SHA512_Hasher final
 void
 do_construct_SHA512(V_object& result)
   {
-    static constexpr auto s_uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
-    result.insert_or_assign(s_uuid, std_checksum_SHA512_private());
+    static constexpr auto s_private_uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
+    result.insert_or_assign(s_private_uuid, std_checksum_SHA512_private());
 
     result.insert_or_assign(sref("update"),
       ASTERIA_BINDING(
         "std.checksum.SHA512::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
         V_string data;
 
         reader.start_overload();
@@ -849,7 +871,8 @@ do_construct_SHA512(V_object& result)
         "std.checksum.SHA512::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -863,7 +886,8 @@ do_construct_SHA512(V_object& result)
         "std.checksum.SHA512::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& hasher = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())

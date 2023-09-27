@@ -555,15 +555,16 @@ class PCRE2_Matcher final
 void
 do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
   {
-    static constexpr auto s_uuid = sref("{2D86F6E8-8927-4A26-062F-77EB77EB23E7}");
-    result.insert_or_assign(s_uuid, std_string_PCRE_private(pattern, options));
+    static constexpr auto s_private_uuid = sref("{2D86F6E8-8927-4A26-062F-77EB77EB23E7}");
+    result.insert_or_assign(s_private_uuid, std_string_PCRE_private(pattern, options));
 
     result.insert_or_assign(sref("find"),
       ASTERIA_BINDING(
         "std.string.PCRE::find", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& m = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();;
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text;
         V_integer from;
         optV_integer len;
@@ -594,7 +595,8 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::match", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& m = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();;
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text;
         V_integer from;
         optV_integer len;
@@ -625,7 +627,8 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::named_match", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& m = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();;
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text;
         V_integer from;
         optV_integer len;
@@ -656,7 +659,8 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::replace", "text, [from, [length]], replacement",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& m = self.dereference_mutable().mut_object().mut(s_uuid).mut_opaque();;
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text, rep;
         V_integer from;
         optV_integer len;
