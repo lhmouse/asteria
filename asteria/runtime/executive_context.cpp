@@ -22,7 +22,6 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
     m_zvarg(zvarg)
   {
-    // Set the `this` reference.
     if(self.is_temporary()) {
       // If the self reference is null, it is likely that `this` isn't ever
       // referenced in this function, so perform lazy initialization to avoid
@@ -34,8 +33,6 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     else if(self.is_variable()) {
       // If the self reference points to a variable, copy it because it is
       // always an lvalue.
-      auto var = self.get_variable_opt();
-      ROCKET_ASSERT(var);
       this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else
