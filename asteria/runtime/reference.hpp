@@ -140,7 +140,8 @@ class Reference
     is_temporary() const noexcept
       { return this->index() == index_temporary;  }
 
-    template<typename XValT>
+    template<typename XValT,
+    ROCKET_ENABLE_IF(::std::is_assignable<Value&, XValT&&>::value)>
     Reference&
     set_temporary(XValT&& xval) noexcept
       {
@@ -221,43 +222,12 @@ class Reference
         return *this;
       }
 
+    template<typename XModT,
+    ROCKET_ENABLE_IF(::std::is_constructible<Reference_Modifier, XModT&&>::value)>
     Reference&
-    push_modifier_array_index(int64_t index)
+    push_modifier(XModT&& xmod)
       {
-        Reference_Modifier::S_array_index xmod = { index };
-        this->m_mods.emplace_back(::std::move(xmod));
-        return *this;
-      }
-
-    Reference&
-    push_modifier_object_key(phsh_stringR key)
-      {
-        Reference_Modifier::S_object_key xmod = { key };
-        this->m_mods.emplace_back(::std::move(xmod));
-        return *this;
-      }
-
-    Reference&
-    push_modifier_array_head()
-      {
-        Reference_Modifier::S_array_head xmod = { };
-        this->m_mods.emplace_back(::std::move(xmod));
-        return *this;
-      }
-
-    Reference&
-    push_modifier_array_tail()
-      {
-        Reference_Modifier::S_array_tail xmod = { };
-        this->m_mods.emplace_back(::std::move(xmod));
-        return *this;
-      }
-
-    Reference&
-    push_modifier_array_random(uint32_t seed)
-      {
-        Reference_Modifier::S_array_random xmod = { seed };
-        this->m_mods.emplace_back(::std::move(xmod));
+        this->m_mods.emplace_back(::std::forward<XModT>(xmod));
         return *this;
       }
 

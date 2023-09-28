@@ -633,12 +633,10 @@ struct Traits_for_each_statement
         // references outlast every iteration.
         Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
 
-        // Allocate an uninitialized variable for the key.
-        const auto vkey = gcoll->create_variable();
-        ctx_for.insert_named_reference(sp.name_key).set_variable(vkey);
-
-        // Create the mapped reference.
+        // Create key and mapped references.
+        auto& key = ctx_for.insert_named_reference(sp.name_key);
         auto& mapped = ctx_for.insert_named_reference(sp.name_mapped);
+        refcnt_ptr<Variable> kvar;
 
         // Evaluate the range initializer and set the range up, which isn't going to
         // change for all loops.
@@ -655,9 +653,19 @@ struct Traits_for_each_statement
           case type_array: {
             const auto& arr = range.as_array();
             for(int64_t i = 0;  i < arr.ssize();  ++i) {
-              // Set the key which is the subscript of the mapped element in the array.
-              vkey->initialize(i, Variable::state_immutable);
-              mapped.push_modifier_array_index(i);
+              // Set the key variable which is the subscript of the mapped element
+              // in the array.
+              if(!kvar) {
+                kvar = gcoll->create_variable();
+                key.set_variable(kvar);
+              }
+              else
+                mapped.pop_modifier();
+
+              kvar->initialize(i, Variable::state_immutable);
+
+              Reference_Modifier::S_array_index xmod = { i };
+              mapped.push_modifier(::std::move(xmod));
               mapped.dereference_readonly();
 
               // Execute the loop body.
@@ -669,9 +677,6 @@ struct Traits_for_each_statement
               if(::rocket::is_none_of(status, { air_status_next,
                                  air_status_continue_unspec, air_status_continue_for }))
                 return status;
-
-              // Restore the mapped reference.
-              mapped.pop_modifier();
             }
             return air_status_next;
           }
@@ -679,9 +684,19 @@ struct Traits_for_each_statement
           case type_object: {
             const auto& obj = range.as_object();
             for(auto it = obj.begin();  it != obj.end();  ++it) {
-              // Set the key which is the key of this element in the object.
-              vkey->initialize(it->first.rdstr(), Variable::state_immutable);
-              mapped.push_modifier_object_key(it->first);
+              // Set the key variable which is the name of the mapped element in
+              // the object.
+              if(!kvar) {
+                kvar = gcoll->create_variable();
+                key.set_variable(kvar);
+              }
+              else
+                mapped.pop_modifier();
+
+              kvar->initialize(it->first.rdstr(), Variable::state_immutable);
+
+              Reference_Modifier::S_object_key xmod = { it->first };
+              mapped.push_modifier(::std::move(xmod));
               mapped.dereference_readonly();
 
               // Execute the loop body.
@@ -1372,9 +1387,9 @@ struct Traits_member_access
     AIR_Status
     execute(Executive_Context& ctx, phsh_stringR name)
       {
-        auto& ref = ctx.stack().mut_top();
-        ref.push_modifier_object_key(name);
-        ref.dereference_readonly();
+        Reference_Modifier::S_object_key xmod = { name };
+        ctx.stack().mut_top().push_modifier(::std::move(xmod));
+        ctx.stack().top().dereference_readonly();
         return air_status_next;
       }
   };
@@ -1634,17 +1649,17 @@ struct Traits_apply_xop_subscr
         switch(rhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(rhs.is_integer());
-            auto& ref = ctx.stack().mut_top();
-            ref.push_modifier_array_index(rhs.as_integer());
-            ref.dereference_readonly();
+            Reference_Modifier::S_array_index xmod = { rhs.as_integer() };
+            ctx.stack().mut_top().push_modifier(::std::move(xmod));
+            ctx.stack().top().dereference_readonly();
             return air_status_next;
           }
 
           case M_string: {
             ROCKET_ASSERT(rhs.is_string());
-            auto& ref = ctx.stack().mut_top();
-            ref.push_modifier_object_key(rhs.as_string());
-            ref.dereference_readonly();
+            Reference_Modifier::S_object_key xmod = { rhs.as_string() };
+            ctx.stack().mut_top().push_modifier(::std::move(xmod));
+            ctx.stack().top().dereference_readonly();
             return air_status_next;
           }
 
@@ -4052,10 +4067,9 @@ struct Traits_apply_xop_head
     AIR_Status
     execute(Executive_Context& ctx)
       {
-        // This operator is unary. `assign` is ignored.
-        auto& ref = ctx.stack().mut_top();
-        ref.push_modifier_array_head();
-        ref.dereference_readonly();
+        Reference_Modifier::S_array_head xmod = { };
+        ctx.stack().mut_top().push_modifier(::std::move(xmod));
+        ctx.stack().top().dereference_readonly();
         return air_status_next;
       }
   };
@@ -4076,10 +4090,9 @@ struct Traits_apply_xop_tail
     AIR_Status
     execute(Executive_Context& ctx)
       {
-        // This operator is unary. `assign` is ignored.
-        auto& ref = ctx.stack().mut_top();
-        ref.push_modifier_array_tail();
-        ref.dereference_readonly();
+        Reference_Modifier::S_array_tail xmod = { };
+        ctx.stack().mut_top().push_modifier(::std::move(xmod));
+        ctx.stack().top().dereference_readonly();
         return air_status_next;
       }
   };
@@ -5136,10 +5149,9 @@ struct Traits_apply_xop_random
     AIR_Status
     execute(Executive_Context& ctx)
       {
-        // This operator is unary. `assign` is ignored.
-        auto& ref = ctx.stack().mut_top();
-        ref.push_modifier_array_random(ctx.global().random_engine()->bump());
-        ref.dereference_readonly();
+        Reference_Modifier::S_array_random xmod = { ctx.global().random_engine()->bump() };
+        ctx.stack().mut_top().push_modifier(::std::move(xmod));
+        ctx.stack().top().dereference_readonly();
         return air_status_next;
       }
   };

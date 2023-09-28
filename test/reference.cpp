@@ -33,19 +33,19 @@ int main()
     auto var = ::rocket::make_refcnt<Variable>();
     var->initialize(V_null());
     ref.set_variable(var);
-    ref.push_modifier_array_index(-3);
+    ref.push_modifier(Reference_Modifier::S_array_index{ -3 });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_null());
     ref.dereference_mutable() = V_integer(36);
     ref.pop_modifier();
-    ref.push_modifier_array_index(0);
+    ref.push_modifier(Reference_Modifier::S_array_index{ 0 });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_integer());
     ASTERIA_TEST_CHECK(val.as_integer() == 36);
     ref.pop_modifier();
 
-    ref.push_modifier_array_index(2);
-    ref.push_modifier_object_key(sref("my_key"));
+    ref.push_modifier(Reference_Modifier::S_array_index{ 2 });
+    ref.push_modifier(Reference_Modifier::S_object_key{ sref("my_key") });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_null());
     ref.dereference_mutable() = V_real(10.5);
@@ -54,12 +54,12 @@ int main()
     ASTERIA_TEST_CHECK(val.as_real() == 10.5);
     ref.pop_modifier();
     ref.pop_modifier();
-    ref.push_modifier_array_index(-1);
-    ref.push_modifier_object_key(sref("my_key"));
+    ref.push_modifier(Reference_Modifier::S_array_index{ -1 });
+    ref.push_modifier(Reference_Modifier::S_object_key{ sref("my_key") });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_real());
     ASTERIA_TEST_CHECK(val.as_real() == 10.5);
-    ref.push_modifier_object_key(sref("invalid_access"));
+    ref.push_modifier(Reference_Modifier::S_object_key{ sref("invalid_access") });
     ASTERIA_TEST_CHECK_CATCH(val = ref.dereference_readonly());
     ref.pop_modifier();
 

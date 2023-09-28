@@ -63,7 +63,8 @@ class Variable final
       { return this->m_value;  }
 
     // Modifiers
-    template<typename XValT>
+    template<typename XValT,
+    ROCKET_ENABLE_IF(::std::is_assignable<Value&, XValT&&>::value)>
     void
     initialize(XValT&& xval, State xstat = state_mutable)
       {
