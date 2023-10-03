@@ -14,14 +14,14 @@ class Variable final
   public:
     enum State : uint8_t
       {
-        state_invalid    = 0,
-        state_immutable  = 1,
-        state_mutable    = 2,
+        state_uninitialized  = 0,
+        state_immutable      = 1,
+        state_mutable        = 2,
       };
 
   private:
-    State m_state = state_invalid;
     Value m_value;
+    State m_state = state_uninitialized;
     long m_gc_ref;  // uninitialized by default
 
   public:
@@ -48,7 +48,7 @@ class Variable final
 
     bool
     is_uninitialized() const noexcept
-      { return this->m_state == state_invalid;  }
+      { return this->m_state == state_uninitialized;  }
 
     bool
     is_mutable() const noexcept
@@ -66,17 +66,17 @@ class Variable final
     template<typename XValT,
     ROCKET_ENABLE_IF(::std::is_assignable<Value&, XValT&&>::value)>
     void
-    initialize(XValT&& xval, State xstat = state_mutable)
+    initialize(XValT&& xval, State xstate = state_mutable)
       {
         this->m_value = ::std::forward<XValT>(xval);
-        this->m_state = xstat;
+        this->m_state = xstate;
       }
 
     void
     uninitialize() noexcept
       {
-        this->m_value = ::rocket::sref("[[`dead value`]]");
-        this->m_state = state_invalid;
+        this->m_value = ::rocket::sref("[[`destroyed variable`]]");
+        this->m_state = state_uninitialized;
       }
   };
 
