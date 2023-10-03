@@ -118,10 +118,8 @@ class Value
   public:
     ~Value()
       {
-        if(this->type_mask() & (M_array | M_object))
+        if(ROCKET_UNEXPECT(this->type() >= type_string))
           this->do_destroy_variant_slow();
-        else
-          this->m_stor.~storage();
       }
 
     // Accessors
@@ -320,17 +318,11 @@ class Value
         this->do_throw_type_mismatch("`object`");
       }
 
-    bool
-    is_scalar() const noexcept
-      {
-        return this->type_mask() & (M_null | M_boolean | M_integer | M_real | M_string);
-      }
-
     // This is used by garbage collection.
     void
     get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        if(!this->is_scalar())
+        if(ROCKET_UNEXPECT(this->type() >= type_opaque))
           this->do_get_variables_slow(staged, temp);
       }
 
