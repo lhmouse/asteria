@@ -35,11 +35,6 @@ class bit_mask
 
   public:
     constexpr
-    value_type
-    value() const noexcept
-      { return this->m_value;  }
-
-    constexpr
     bool
     test(size_t b) const noexcept
       {
@@ -88,6 +83,11 @@ class bit_mask
         this->m_value |= other.m_value;
         return *this;
       }
+
+    constexpr
+    value_type
+    value() const noexcept
+      { return this->m_value;  }
 
     constexpr operator
     value_type() const noexcept
