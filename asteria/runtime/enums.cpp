@@ -9,182 +9,176 @@ const char*
 describe_xop(Xop xop) noexcept
   {
     switch(xop) {
-      case xop_inc_post:
-        return "postfix `++`";
+      case xop_inc:
+        return "++";
 
-      case xop_dec_post:
-        return "postfix `--`";
+      case xop_dec:
+        return "--";
 
       case xop_subscr:
-        return "postfix `[]`";
+        return "[]";
 
       case xop_pos:
-        return "prefix `+`";
+        return "+";
 
       case xop_neg:
-        return "prefix `-`";
+        return "-";
 
       case xop_notb:
-        return "prefix `~`";
+        return "~";
 
       case xop_notl:
-        return "prefix `!`";
-
-      case xop_inc_pre:
-        return "prefix `++`";
-
-      case xop_dec_pre:
-        return "prefix `--`";
+        return "!";
 
       case xop_unset:
-        return "prefix `unset`";
+        return "unset";
 
       case xop_countof:
-        return "prefix `countof`";
+        return "countof";
 
       case xop_typeof:
-        return "prefix `typeof`";
+        return "typeof";
 
       case xop_sqrt:
-        return "prefix `__sqrt`";
+        return "__sqrt";
 
       case xop_isnan:
-        return "prefix `__isnan`";
+        return "__isnan";
 
       case xop_isinf:
-        return "prefix `__isinf`";
+        return "__isinf";
 
       case xop_abs:
-        return "prefix `__abs`";
+        return "__abs";
 
       case xop_sign:
-        return "prefix `__sign`";
+        return "__sign";
 
       case xop_round:
-        return "prefix `__round`";
+        return "__round";
 
       case xop_floor:
-        return "prefix `__floor`";
+        return "__floor";
 
       case xop_ceil:
-        return "prefix `__ceil`";
+        return "__ceil";
 
       case xop_trunc:
-        return "prefix `__trunc`";
+        return "__trunc";
 
       case xop_iround:
-        return "prefix `__iround`";
+        return "__iround";
 
       case xop_ifloor:
-        return "prefix `__ifloor`";
+        return "__ifloor";
 
       case xop_iceil:
-        return "prefix `__iceil`";
+        return "__iceil";
 
       case xop_itrunc:
-        return "prefix `__itrunc`";
+        return "__itrunc";
 
       case xop_cmp_eq:
-        return "infix `==`";
+        return "==";
 
       case xop_cmp_ne:
-        return "infix `!=`";
+        return "!=";
 
       case xop_cmp_lt:
-        return "infix `<`";
+        return "<";
 
       case xop_cmp_gt:
-        return "infix `>`";
+        return ">";
 
       case xop_cmp_lte:
-        return "infix `<=`";
+        return "<=";
 
       case xop_cmp_gte:
-        return "infix `>=`";
+        return ">=";
 
       case xop_cmp_3way:
-        return "infix `<=>`";
+        return "<=>";
 
       case xop_add:
-        return "infix `+`";
+        return "+";
 
       case xop_sub:
-        return "infix `-`";
+        return "-";
 
       case xop_mul:
-        return "infix `*`";
+        return "*";
 
       case xop_div:
-        return "infix `/`";
+        return "/";
 
       case xop_mod:
-        return "infix `%`";
+        return "%";
 
       case xop_sll:
-        return "infix `<<<`";
+        return "<<<";
 
       case xop_srl:
-        return "infix `>>>`";
+        return ">>>";
 
       case xop_sla:
-        return "infix `<<`";
+        return "<<";
 
       case xop_sra:
-        return "infix `>>`";
+        return ">>";
 
       case xop_andb:
-        return "infix `&`";
+        return "&";
 
       case xop_orb:
-        return "infix `|`";
+        return "|";
 
       case xop_xorb:
-        return "infix `^`";
+        return "^";
 
       case xop_assign:
-        return "infix `=`";
+        return "=";
 
       case xop_fma:
-        return "prefix `__fma`";
+        return "__fma";
 
       case xop_head:
-        return "postfix `[^]`";
+        return "[^]";
 
       case xop_tail:
-        return "postfix `[$]`";
+        return "[$]";
 
       case xop_lzcnt:
-        return "prefix `__lzcnt`";
+        return "__lzcnt";
 
       case xop_tzcnt:
-        return "prefix `__tzcnt`";
+        return "__tzcnt";
 
       case xop_popcnt:
-        return "prefix `__popcnt`";
+        return "__popcnt";
 
       case xop_addm:
-        return "prefix `__addm`";
+        return "__addm";
 
       case xop_subm:
-        return "prefix `__subm`";
+        return "__subm";
 
       case xop_mulm:
-        return "prefix `__mulm`";
+        return "__mulm";
 
       case xop_adds:
-        return "prefix `__adds`";
+        return "__adds";
 
       case xop_subs:
-        return "prefix `__subs`";
+        return "__subs";
 
       case xop_muls:
-        return "prefix `__muls`";
+        return "__muls";
 
       case xop_random:
-        return "postfix `[?]`";
+        return "[?]";
 
       case xop_cmp_un:
-        return "infix `</>`";
+        return "</>";
 
       default:
         return "[unknown operator]";

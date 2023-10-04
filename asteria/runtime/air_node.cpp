@@ -1529,9 +1529,9 @@ struct Traits_push_temporary
       }
   };
 
-struct Traits_apply_xop_inc_post
+struct Traits_apply_xop_inc
   {
-    // `up` is unused.
+    // `up` is `assign`.
     // `sp` is unused.
 
     static
@@ -1541,22 +1541,32 @@ struct Traits_apply_xop_inc_post
         return altr.sloc;
       }
 
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        // This operator is unary. `assign` is ignored.
-        // First, get the old value.
+        // This operator is unary. `assign` is `true` for the postfix variant
+        // and `false` for the prefix variant.
         auto& lhs = ctx.stack().top().dereference_mutable();
 
-        // Increment the value and replace the top with the old one.
+        // Increment the value and replace the top.
         switch(lhs.type_mask()) {
           case M_integer: {
             ROCKET_ASSERT(lhs.is_integer());
             auto& val = lhs.mut_integer();
             auto oldval = val;
             val = do_integer_check_add(val, 1);
-            ctx.stack().mut_top().set_temporary(oldval);
+            if(up.u8v[0])  // postfix
+              ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
@@ -1565,7 +1575,8 @@ struct Traits_apply_xop_inc_post
             auto& val = lhs.mut_real();
             auto oldval = val;
             val ++;
-            ctx.stack().mut_top().set_temporary(oldval);
+            if(up.u8v[0])  // postfix
+              ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
@@ -1577,9 +1588,9 @@ struct Traits_apply_xop_inc_post
       }
   };
 
-struct Traits_apply_xop_dec_post
+struct Traits_apply_xop_dec
   {
-    // `up` is unused.
+    // `up` is `assign`.
     // `sp` is unused.
 
     static
@@ -1589,12 +1600,21 @@ struct Traits_apply_xop_dec_post
         return altr.sloc;
       }
 
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.assign;
+        return up;
+      }
+
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        // This operator is unary. `assign` is ignored.
-        // First, get the old value.
+        // This operator is unary. `assign` is `true` for the postfix variant
+        // and `false` for the prefix variant.
         auto& lhs = ctx.stack().top().dereference_mutable();
 
         // Decrement the value and replace the top with the old one.
@@ -1604,7 +1624,8 @@ struct Traits_apply_xop_dec_post
             auto& val = lhs.mut_integer();
             auto oldval = val;
             val = do_integer_check_sub(val, 1);
-            ctx.stack().mut_top().set_temporary(oldval);
+            if(up.u8v[0])  // postfix
+              ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
@@ -1613,7 +1634,8 @@ struct Traits_apply_xop_dec_post
             auto& val = lhs.mut_real();
             auto oldval = val;
             val --;
-            ctx.stack().mut_top().set_temporary(oldval);
+            if(up.u8v[0])  // postfix
+              ctx.stack().mut_top().set_temporary(oldval);
             return air_status_next;
           }
 
@@ -1847,92 +1869,6 @@ struct Traits_apply_xop_notl
         // N.B. This is one of the few operators that work on all types.
         rhs = !rhs.test();
         return air_status_next;
-      }
-  };
-
-struct Traits_apply_xop_inc_pre
-  {
-    // `up` is unused.
-    // `sp` is unused.
-
-    static
-    const Source_Location&
-    get_symbols(const AIR_Node::S_apply_operator& altr)
-      {
-        return altr.sloc;
-      }
-
-    ROCKET_FLATTEN static
-    AIR_Status
-    execute(Executive_Context& ctx)
-      {
-        // This operator is unary. `assign` is ignored.
-        auto& rhs = ctx.stack().top().dereference_mutable();
-
-        // Increment the value in place.
-        switch(rhs.type_mask()) {
-          case M_integer: {
-            ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.mut_integer();
-            val = do_integer_check_add(val, 1);
-            return air_status_next;
-          }
-
-          case M_real: {
-            ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.mut_real();
-            val ++;
-            return air_status_next;
-          }
-
-          default:
-            ASTERIA_THROW_RUNTIME_ERROR((
-                "Prefix increment not applicable (operand was `$1`)"),
-                rhs);
-        }
-      }
-  };
-
-struct Traits_apply_xop_dec_pre
-  {
-    // `up` is unused.
-    // `sp` is unused.
-
-    static
-    const Source_Location&
-    get_symbols(const AIR_Node::S_apply_operator& altr)
-      {
-        return altr.sloc;
-      }
-
-    ROCKET_FLATTEN static
-    AIR_Status
-    execute(Executive_Context& ctx)
-      {
-        // This operator is unary. `assign` is ignored.
-        auto& rhs = ctx.stack().top().dereference_mutable();
-
-        // Decrement the value in place.
-        switch(rhs.type_mask()) {
-          case M_integer: {
-            ROCKET_ASSERT(rhs.is_integer());
-            auto& val = rhs.mut_integer();
-            val = do_integer_check_sub(val, 1);
-            return air_status_next;
-          }
-
-          case M_real: {
-            ROCKET_ASSERT(rhs.is_real());
-            auto& val = rhs.mut_real();
-            val --;
-            return air_status_next;
-          }
-
-          default:
-            ASTERIA_THROW_RUNTIME_ERROR((
-                "Prefix decrement not applicable (operand was `$1`)"),
-                rhs);
-        }
       }
   };
 
@@ -5681,11 +5617,11 @@ solidify(AVMC_Queue& queue) const
       case index_apply_operator: {
         const auto& altr = this->m_stor.as<index_apply_operator>();
         switch(altr.xop) {
-          case xop_inc_post:
-            return do_solidify<Traits_apply_xop_inc_post>(queue, altr);
+          case xop_inc:
+            return do_solidify<Traits_apply_xop_inc>(queue, altr);
 
-          case xop_dec_post:
-            return do_solidify<Traits_apply_xop_dec_post>(queue, altr);
+          case xop_dec:
+            return do_solidify<Traits_apply_xop_dec>(queue, altr);
 
           case xop_subscr:
             return do_solidify<Traits_apply_xop_subscr>(queue, altr);
@@ -5701,12 +5637,6 @@ solidify(AVMC_Queue& queue) const
 
           case xop_notl:
             return do_solidify<Traits_apply_xop_notl>(queue, altr);
-
-          case xop_inc_pre:
-            return do_solidify<Traits_apply_xop_inc_pre>(queue, altr);
-
-          case xop_dec_pre:
-            return do_solidify<Traits_apply_xop_dec_pre>(queue, altr);
 
           case xop_unset:
             return do_solidify<Traits_apply_xop_unset>(queue, altr);

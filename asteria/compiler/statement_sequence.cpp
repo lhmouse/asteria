@@ -1462,26 +1462,26 @@ struct Prefix_Keyword_Xop
   }
 constexpr s_prefix_keyword_xop[] =
   {
-    { keyword_unset,     xop_unset    },
-    { keyword_countof,   xop_countof  },
-    { keyword_typeof,    xop_typeof   },
-    { keyword_not,       xop_notl     },
-    { keyword_abs,       xop_abs      },
-    { keyword_sign,      xop_sign     },
-    { keyword_sqrt,      xop_sqrt     },
-    { keyword_isnan,     xop_isnan    },
-    { keyword_isinf,     xop_isinf    },
-    { keyword_round,     xop_round    },
-    { keyword_floor,     xop_floor    },
-    { keyword_ceil,      xop_ceil     },
-    { keyword_trunc,     xop_trunc    },
-    { keyword_iround,    xop_iround   },
-    { keyword_ifloor,    xop_ifloor   },
-    { keyword_iceil,     xop_iceil    },
-    { keyword_itrunc,    xop_itrunc   },
-    { keyword_lzcnt,     xop_lzcnt    },
-    { keyword_tzcnt,     xop_tzcnt    },
-    { keyword_popcnt,    xop_popcnt   },
+    { keyword_unset,    xop_unset    },
+    { keyword_countof,  xop_countof  },
+    { keyword_typeof,   xop_typeof   },
+    { keyword_not,      xop_notl     },
+    { keyword_abs,      xop_abs      },
+    { keyword_sign,     xop_sign     },
+    { keyword_sqrt,     xop_sqrt     },
+    { keyword_isnan,    xop_isnan    },
+    { keyword_isinf,    xop_isinf    },
+    { keyword_round,    xop_round    },
+    { keyword_floor,    xop_floor    },
+    { keyword_ceil,     xop_ceil     },
+    { keyword_trunc,    xop_trunc    },
+    { keyword_iround,   xop_iround   },
+    { keyword_ifloor,   xop_ifloor   },
+    { keyword_iceil,    xop_iceil    },
+    { keyword_itrunc,   xop_itrunc   },
+    { keyword_lzcnt,    xop_lzcnt    },
+    { keyword_tzcnt,    xop_tzcnt    },
+    { keyword_popcnt,   xop_popcnt   },
   };
 
 constexpr
@@ -1498,12 +1498,12 @@ struct Prefix_Punctuator_Xop
   }
 constexpr s_prefix_punctuator_xop[] =
   {
-    { punctuator_add,   xop_pos      },
-    { punctuator_sub,   xop_neg      },
-    { punctuator_notb,  xop_notb     },
-    { punctuator_notl,  xop_notl     },
-    { punctuator_inc,   xop_inc_pre  },
-    { punctuator_dec,   xop_dec_pre  },
+    { punctuator_add,   xop_pos   },
+    { punctuator_sub,   xop_neg   },
+    { punctuator_notb,  xop_notb  },
+    { punctuator_notl,  xop_notl  },
+    { punctuator_inc,   xop_inc   },
+    { punctuator_dec,   xop_dec   },
   };
 
 constexpr
@@ -2124,11 +2124,11 @@ struct Postfix_Punctuator_Xop
   }
 constexpr s_postfix_punctuator_xop[] =
   {
-    { punctuator_inc,     xop_inc_post  },
-    { punctuator_dec,     xop_dec_post  },
-    { punctuator_head,    xop_head      },
-    { punctuator_tail,    xop_tail      },
-    { punctuator_random,  xop_random    },
+    { punctuator_inc,     xop_inc     },
+    { punctuator_dec,     xop_dec     },
+    { punctuator_head,    xop_head    },
+    { punctuator_tail,    xop_tail    },
+    { punctuator_random,  xop_random  },
   };
 
 constexpr
@@ -2156,7 +2156,7 @@ do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
       // Return the postfix operator and discard this token.
       tstrm.shift();
-      Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
+      Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, true };
       units.emplace_back(::std::move(xunit));
       return true;
     }
