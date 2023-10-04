@@ -104,7 +104,6 @@ class Value
       }
 
   private:
-    ROCKET_COLD
     void
     do_destroy_variant_slow() noexcept;
 
@@ -126,10 +125,6 @@ class Value
     Type
     type() const noexcept
       { return static_cast<Type>(this->m_stor.index());  }
-
-    bmask32
-    type_mask() const noexcept
-      { return { this->m_stor.index() };  }
 
     bool
     is_null() const noexcept
@@ -181,7 +176,7 @@ class Value
 
     bool
     is_real() const noexcept
-      { return this->type_mask() & (M_integer | M_real);  }
+      { return (this->type() >= type_integer) && (this->type() <= type_real);  }
 
     V_real
     as_real() const
@@ -203,7 +198,7 @@ class Value
 
         if(this->type() == type_integer)
           return this->m_stor.emplace<V_real>(
-                static_cast<V_real>(this->m_stor.mut<V_integer>()));
+                   static_cast<V_real>(this->m_stor.mut<V_integer>()));
 
         this->do_throw_type_mismatch("`integer` or `real`");
       }

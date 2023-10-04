@@ -110,10 +110,6 @@ class Reference
     index() const noexcept
       { return this->m_index;  }
 
-    bmask32
-    index_mask() const noexcept
-      { return { (size_t) this->m_index };  }
-
     bool
     is_invalid() const noexcept
       { return this->index() == index_invalid;  }
@@ -234,8 +230,7 @@ class Reference
     Reference&
     pop_modifier()
       {
-        constexpr bmask32 has_value = { index_temporary, index_variable };
-        if(!has_value.test(this->index()))
+        if((this->m_index != index_temporary) && (this->m_index != index_variable))
           return *this;
 
         if(this->m_mods.empty()) {

@@ -132,9 +132,6 @@ using ::rocket::atomic_seq_cst;
 using stringR = const cow_string&;
 using phsh_string = ::rocket::prehashed_string;
 using phsh_stringR = const phsh_string&;
-using bmask32 = ::rocket::bit_mask<uint32_t>;
-using bmask64 = ::rocket::bit_mask<uint64_t>;
-using bmword = ::rocket::bit_mask<uintptr_t>;
 
 template<typename T, typename U>
 using cow_bivector = cow_vector<pair<T, U>>;
@@ -685,16 +682,6 @@ enum Type : uint8_t
     type_array     = 7,
     type_object    = 8,
   };
-
-constexpr bmask32 M_null      = { type_null };
-constexpr bmask32 M_boolean   = { type_boolean };
-constexpr bmask32 M_integer   = { type_integer };
-constexpr bmask32 M_real      = { type_real };
-constexpr bmask32 M_string    = { type_string };
-constexpr bmask32 M_opaque    = { type_opaque };
-constexpr bmask32 M_function  = { type_function };
-constexpr bmask32 M_array     = { type_array };
-constexpr bmask32 M_object    = { type_object };
 
 ROCKET_CONST
 const char*
