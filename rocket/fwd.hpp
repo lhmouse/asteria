@@ -462,18 +462,18 @@ inline
 void
 rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
   {
-    auto bot = begin;
-    auto brk = seek;
-    auto stp = seek;
+    size_t bot = begin;
+    size_t brk = seek;
+    size_t stp = seek;
 
     //     bot     brk         end
     //   > 0 1 2 3 4 5 6 7 8 9 -
     //     ^- isl -^--- isr ---^
-    auto isl = brk - bot;
+    size_t isl = brk - bot;
     if(isl == 0)
       return;
 
-    auto isr = end - brk;
+    size_t isr = end - brk;
     if(isr == 0)
       return;
 
