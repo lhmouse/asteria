@@ -997,7 +997,7 @@ struct Traits_push_global_reference
               "Unresolvable global identifier `$1`"),
               name);
 
-        ctx.stack().push(*qref);
+        ctx.stack().push() = *qref;
         return air_status_next;
       }
   };
@@ -1052,7 +1052,7 @@ struct Traits_push_local_reference
               "Use of bypassed variable or reference `$1`"),
               name);
 
-        ctx.stack().push(*qref);
+        ctx.stack().push() = *qref;
         return air_status_next;
       }
   };
@@ -1073,7 +1073,7 @@ struct Traits_push_bound_reference
     AIR_Status
     execute(Executive_Context& ctx, const Reference& ref)
       {
-        ctx.stack().push(ref);
+        ctx.stack().push() = ref;
         return air_status_next;
       }
   };

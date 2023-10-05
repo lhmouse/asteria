@@ -106,27 +106,6 @@ class Reference_Stack
         return *(this->m_bptr + this->m_etop - 1);
       }
 
-    template<typename XRefT>
-    Reference&
-    push(XRefT&& xref)
-      {
-        if(ROCKET_UNEXPECT(this->m_etop >= this->m_einit)) {
-          // Construct a new reference.
-          if(this->m_einit >= this->m_estor)
-            this->do_reallocate(this->m_estor / 2 * 3 | 17);
-
-          ::rocket::construct(this->m_bptr + this->m_einit, ::std::forward<XRefT>(xref));
-          this->m_einit ++;
-          this->m_etop = this->m_einit;
-        }
-        else {
-          // Reuse a previous one.
-          *(this->m_bptr + this->m_etop) = ::std::forward<XRefT>(xref);
-          this->m_etop ++;
-        }
-        return *(this->m_bptr + this->m_etop - 1);
-      }
-
     void
     pop(size_t count = 1) noexcept
       {
