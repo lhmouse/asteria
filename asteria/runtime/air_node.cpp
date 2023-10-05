@@ -132,7 +132,6 @@ do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     // Execute the body on a new context.
     Executive_Context ctx_next(Executive_Context::M_plain(), ctx);
     AIR_Status status;
-
     try {
       status = queue.execute(ctx_next);
     }
@@ -342,15 +341,12 @@ struct Traits_declare_variable
     AIR_Status
     execute(Executive_Context& ctx, const Sparam_sloc_name& sp)
       {
-        const auto qhooks = ctx.global().get_hooks_opt();
-        const auto gcoll = ctx.global().garbage_collector();
-
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
+        const auto gcoll = ctx.global().garbage_collector();
         const auto var = gcoll->create_variable();
         ctx.insert_named_reference(sp.name).set_variable(var);
-        if(qhooks)
-          qhooks->on_variable_declare(sp.sloc, sp.name);
+        ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_variable_declare, sp.sloc, sp.name);
 
         // Push a copy of the reference onto the stack.
         ctx.stack().push().set_variable(var);
@@ -457,13 +453,13 @@ struct Traits_switch_statement
     execute(Executive_Context& ctx, const Sparam_switch& sp)
       {
         // Get the number of clauses.
-        auto nclauses = sp.queues_labels.size();
+        size_t nclauses = sp.queues_labels.size();
         ROCKET_ASSERT(nclauses == sp.queues_bodies.size());
         ROCKET_ASSERT(nclauses == sp.names_added.size());
 
         // Read the value of the condition and find the target clause for it.
         auto cond = ctx.stack().top().dereference_readonly();
-        size_t bp = SIZE_MAX;
+        size_t target_index = SIZE_MAX;
 
         // This is different from the `switch` statement in C, where `case` labels must
         // have constant operands.
@@ -471,7 +467,7 @@ struct Traits_switch_statement
           // This is a `default` clause if the condition is empty, and a `case` clause
           // otherwise.
           if(sp.queues_labels[i].empty()) {
-            bp = i;
+            target_index = i;
             continue;
           }
 
@@ -479,39 +475,39 @@ struct Traits_switch_statement
           auto status = sp.queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
           if(ctx.stack().top().dereference_readonly().compare(cond) == compare_equal) {
-            bp = i;
+            target_index = i;
             break;
           }
         }
 
+        if(target_index >= nclauses)
+          return air_status_next;
+
         // Skip this statement if no matching clause has been found.
-        if(bp != SIZE_MAX) {
-          Executive_Context ctx_body(Executive_Context::M_plain(), ctx);
-          AIR_Status status;
-
-          // Inject all bypassed variables into the scope.
-          for(const auto& name : sp.names_added[bp])
-            ctx_body.insert_named_reference(name).set_invalid();
-
-          try {
-            do {
-              // Execute the body.
-              status = sp.queues_bodies[bp].execute(ctx_body);
-              if(::rocket::is_any_of(status,
-                    { air_status_break_unspec, air_status_break_switch }))
+        Executive_Context ctx_body(Executive_Context::M_plain(), ctx);
+        AIR_Status status;
+        try {
+          for(size_t i = 0;  i < nclauses;  ++i)
+            if(i < target_index) {
+              // Inject bypassed variables into the scope.
+              for(const auto& name : sp.names_added[i])
+                ctx_body.insert_named_reference(name)
+                    .set_invalid();
+            }
+            else {
+              // Execute the body of this clause.
+              status = sp.queues_bodies[i].execute(ctx_body);
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
                 break;
-
-              if(status != air_status_next)
+              else if(status != air_status_next)
                 return status;
             }
-            while(++bp < nclauses);
-          }
-          catch(Runtime_Error& except) {
-            ctx_body.on_scope_exit(except);
-            throw;
-          }
-          ctx_body.on_scope_exit(status);
         }
+        catch(Runtime_Error& except) {
+          ctx_body.on_scope_exit(except);
+          throw;
+        }
+        ctx_body.on_scope_exit(status);
         return air_status_next;
       }
   };
@@ -548,12 +544,10 @@ struct Traits_do_while_statement
         for(;;) {
           // Execute the body.
           auto status = do_execute_block(sp.queues[0], ctx);
-          if(::rocket::is_any_of(status,
-                { air_status_break_unspec, air_status_break_while }))
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
             break;
-
-          if(::rocket::is_none_of(status, { air_status_next,
-                  air_status_continue_unspec, air_status_continue_while }))
+          else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
+                                                 air_status_continue_while }))
             return status;
 
           // Check the condition.
@@ -604,12 +598,10 @@ struct Traits_while_statement
 
           // Execute the body.
           status = do_execute_block(sp.queues[1], ctx);
-          if(::rocket::is_any_of(status,
-                { air_status_break_unspec, air_status_break_while }))
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
             break;
-
-          if(::rocket::is_none_of(status, { air_status_next,
-                  air_status_continue_unspec, air_status_continue_while }))
+          else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
+                                                 air_status_continue_while }))
             return status;
         }
         return air_status_next;
@@ -682,12 +674,10 @@ struct Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec,
-                                 air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                 break;
-
-              if(::rocket::is_none_of(status, { air_status_next,
-                                 air_status_continue_unspec, air_status_continue_for }))
+              else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
+                                                     air_status_continue_for }))
                 return status;
             }
             return air_status_next;
@@ -713,12 +703,10 @@ struct Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec,
-                                 air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                 break;
-
-              if(::rocket::is_none_of(status, { air_status_next,
-                                 air_status_continue_unspec, air_status_continue_for }))
+              else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
+                                                     air_status_continue_for }))
                 return status;
 
               // Restore the mapped reference.
@@ -779,12 +767,10 @@ struct Traits_for_statement
 
           // Execute the body.
           status = do_execute_block(sp.queues[3], ctx_for);
-          if(::rocket::is_any_of(status,
-                { air_status_break_unspec, air_status_break_for }))
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
             break;
-
-          if(::rocket::is_none_of(status, { air_status_next,
-                  air_status_continue_unspec, air_status_continue_for }))
+          else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
+                                                 air_status_continue_for }))
             return status;
 
           // Execute the increment.
@@ -840,7 +826,6 @@ struct Traits_try_statement
         // `::std::current_exception`.
         Executive_Context ctx_catch(Executive_Context::M_plain(), ctx);
         AIR_Status status;
-
         try {
           // Set the exception reference.
           ctx_catch.insert_named_reference(sp.name_except)
@@ -1221,24 +1206,15 @@ AIR_Status
 do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_function& target,
                   Global_Context& global, Reference_Stack&& stack)
   {
-    const auto qhooks = global.get_hooks_opt();
-
-    if(ROCKET_EXPECT(!qhooks)) {
-      // Perform a plain call if there is no hook.
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
+    try {
       target.invoke(self, global, ::std::move(stack));
     }
-    else {
-      // Note exceptions thrown here are not caught.
-      qhooks->on_function_call(sloc, target);
-      try {
-        target.invoke(self, global, ::std::move(stack));
-      }
-      catch(Runtime_Error& except) {
-        qhooks->on_function_except(sloc, target, except);
-        throw;
-      }
-      qhooks->on_function_return(sloc, target, self);
+    catch(Runtime_Error& except) {
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, sloc, target, except);
+      throw;
     }
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
     return air_status_next;
   }
 
@@ -1246,14 +1222,11 @@ AIR_Status
 do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function& target,
                PTC_Aware ptc, Reference_Stack&& stack)
   {
-    // Set packed arguments for this PTC, which will be unpacked outside.
+    // Set packed arguments for this PTC, and return `air_status_return_ref` to
+    // allow the result to be unpacked outside; otherwise a null reference is
+    // returned instead of this PTC wrapper, which can then never be unpacked.
     stack.push() = ::std::move(self);
-    self.set_ptc_args(::rocket::make_refcnt<PTC_Arguments>(
-              sloc, ptc, target, ::std::move(stack)));
-
-    // Force `air_status_return_ref` if control flow reaches the end of a function.
-    // Otherwise a null reference is returned instead of this PTC wrapper, which can
-    // then never be unpacked.
+    self.set_ptc_args(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack)));
     return air_status_return_ref;
   }
 
@@ -1342,11 +1315,7 @@ struct Traits_function_call
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
-        const auto qhooks = ctx.global().get_hooks_opt();
-
-        // Generate a single-step trap before unpacking arguments.
-        if(qhooks)
-          qhooks->on_single_step_trap(sloc);
+        ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
         // Pop arguments off the stack backwards.
         auto& alt_stack = ctx.alt_stack();
@@ -4204,15 +4173,12 @@ struct Traits_define_null_variable
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_sloc_name& sp)
       {
-        const auto qhooks = ctx.global().get_hooks_opt();
-        const auto gcoll = ctx.global().garbage_collector();
-
         // Allocate an uninitialized variable.
         // Inject the variable into the current context.
+        const auto gcoll = ctx.global().garbage_collector();
         const auto var = gcoll->create_variable();
         ctx.insert_named_reference(sp.name).set_variable(var);
-        if(qhooks)
-          qhooks->on_variable_declare(sp.sloc, sp.name);
+        ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_variable_declare, sp.sloc, sp.name);
 
         // Initialize the variable to `null`.
         const auto vstat = up.u8v[0] ? Variable::state_immutable : Variable::state_mutable;
@@ -4244,9 +4210,7 @@ struct Traits_single_step_trap
     AIR_Status
     execute(Executive_Context& ctx, const Source_Location& sloc)
       {
-        const auto qhooks = ctx.global().get_hooks_opt();
-        if(qhooks)
-          qhooks->on_single_step_trap(sloc);
+        ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
         return air_status_next;
       }
   };
@@ -4284,11 +4248,7 @@ struct Traits_variadic_call
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Source_Location& sloc)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
-        const auto qhooks = ctx.global().get_hooks_opt();
-
-        // Generate a single-step trap before the call.
-        if(qhooks)
-          qhooks->on_single_step_trap(sloc);
+        ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
         // Initialize arguments.
         auto& stack = ctx.stack();
@@ -4465,11 +4425,7 @@ struct Traits_import_call
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_import& sp)
       {
         const auto sentry = ctx.global().copy_recursion_sentry();
-        const auto qhooks = ctx.global().get_hooks_opt();
-
-        // Generate a single-step trap before the call.
-        if(qhooks)
-          qhooks->on_single_step_trap(sp.sloc);
+        ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sp.sloc);
 
         // Pop arguments off the stack backwards.
         auto& alt_stack = ctx.alt_stack();

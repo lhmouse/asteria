@@ -99,18 +99,12 @@ do_finish_call_slow(Global_Context& global)
         ptca.reset(static_cast<PTC_Arguments*>(this->m_ptca.release()));
         this->m_index = index_invalid;
 
-        // Generate a single-step trap before unpacking arguments.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_single_step_trap(ptca->sloc());
-
         // Get the `this` reference and all the other arguments.
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_single_step_trap, ptca->sloc());
         auto& stack = ptca->stack();
         *this = ::std::move(stack.mut_top());
         stack.pop();
-
-        // Call the hook function if any.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_call(ptca->sloc(), ptca->target());
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptca->sloc(), ptca->target());
 
         // Record this frame.
         frames.emplace_back(ptca);
@@ -126,15 +120,14 @@ do_finish_call_slow(Global_Context& global)
         ptca = ::std::move(frames.mut_back());
         frames.pop_back();
 
-        // Evaluate deferred expressions if any.
-        if(ptca->defer().size())
-          Executive_Context(Executive_Context::M_defer(), global, ptca->stack(),
-                            alt_stack, ::std::move(ptca->defer()))
-            .on_scope_exit(air_status_next);
+        if(ptca->defer().size()) {
+          // Create a dummy context for evaluation of deferred expressions.
+          Executive_Context fctx(Executive_Context::M_defer(), global, ptca->stack(),
+                                 alt_stack, ::std::move(ptca->defer()));
+          fctx.on_scope_exit(air_status_next);
+        }
 
-        // Call the hook function if any.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_return(ptca->sloc(), ptca->target(), *this);
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptca->sloc(), ptca->target(), *this);
       }
     }
     catch(Runtime_Error& except) {
@@ -144,25 +137,22 @@ do_finish_call_slow(Global_Context& global)
         ptca = ::std::move(frames.mut_back());
         frames.pop_back();
 
-        // Push the function call.
-        except.push_frame_plain(ptca->sloc(), sref("[proper tail call]"));
-
-        // Call the hook function if any.
-        if(auto qhooks = global.get_hooks_opt())
-          qhooks->on_function_except(ptca->sloc(), ptca->target(), except);
-
-        // Evaluate deferred expressions if any.
-        if(ptca->defer().size())
-          Executive_Context(Executive_Context::M_defer(), global, ptca->stack(),
-                            alt_stack, ::std::move(ptca->defer()))
-            .on_scope_exit(except);
-
-        // Push the caller.
         // Note that if we arrive here, there must have been an exception thrown when
         // unpacking the last frame (i.e. the last call did not return), so the last
         // frame does not have its enclosing function set.
+        except.push_frame_plain(ptca->sloc(), sref("[proper tail call]"));
+
         if(auto qcall = ptca->caller_opt())
           except.push_frame_func(qcall->sloc(), qcall->func());
+
+        if(ptca->defer().size()) {
+          // Create a dummy context for evaluation of deferred expressions.
+          Executive_Context fctx(Executive_Context::M_defer(), global, ptca->stack(),
+                                 alt_stack, ::std::move(ptca->defer()));
+          fctx.on_scope_exit(except);
+        }
+
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptca->sloc(), ptca->target(), except);
       }
       throw;
     }

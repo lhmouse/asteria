@@ -93,5 +93,12 @@ class Global_Context
     max_api_version() const noexcept;
   };
 
+#define ASTERIA_CALL_GLOBAL_HOOK(global, target, ...)  \
+    ([&] {  \
+       if(const auto ieh7eMah = (global).get_hooks_opt())  \
+         ieh7eMah->target(__VA_ARGS__);  \
+     }()  \
+    )  // nosemicolon
+
 }  // namespace asteria
 #endif

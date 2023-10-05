@@ -283,9 +283,6 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
-        cow_vector<phsh_string> names;
-
-        // Get the number of clauses.
         auto nclauses = altr.labels.size();
         ROCKET_ASSERT(nclauses == altr.bodies.size());
 
@@ -300,10 +297,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
-          do_generate_statement_list(code_bodies.emplace_back(), &names, global, ctx_body, opts,
-                                     ptc_aware_none, altr.bodies[i]);
-
-          names_added.emplace_back(names);
+          do_generate_statement_list(code_bodies.emplace_back(), &(names_added.emplace_back()),
+                                     global, ctx_body, opts, ptc_aware_none, altr.bodies[i]);
         }
 
         // Encode arguments.
