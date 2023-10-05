@@ -5398,11 +5398,11 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<index_push_local_reference>();
 
         // Get the context.
-        // Don't bind references in analytic contexts.
         Abstract_Context* qctx = &ctx;
         for(uint32_t k = 0;  k != altr.depth;  ++k)
           qctx = qctx->get_parent_opt();
 
+        // Don't bind placeholder references in analytic contexts.
         if(qctx->is_analytic())
           return nullopt;
 
