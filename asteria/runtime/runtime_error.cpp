@@ -21,18 +21,17 @@ void
 Runtime_Error::
 do_backtrace(Backtrace_Frame&& new_frm)
   {
-    try {
-      // Unpack nested exceptions, if any.
-      auto eptr = ::std::current_exception();
-      if(eptr)
+    // Unpack nested exceptions, if any.
+    if(auto eptr = ::std::current_exception())
+      try {
         ::std::rethrow_exception(eptr);
-    }
-    catch(Runtime_Error& nested) {
-      this->m_frames.append(nested.m_frames.move_begin(), nested.m_frames.move_end());
-    }
-    catch(...) {
-      ::fprintf(stderr, "WARNING: An unknown exception has been ignored.\n");
-    }
+      }
+      catch(Runtime_Error& nested) {
+        this->m_frames.append(nested.m_frames.move_begin(), nested.m_frames.move_end());
+      }
+      catch(...) {
+        ::fprintf(stderr, "WARNING: An unknown exception has been ignored.\n");
+      }
 
     // Push a new frame.
     this->do_insert_frame(::std::move(new_frm));
@@ -59,7 +58,6 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     // Get the width of the frame number colomn.
     ::rocket::ascii_numput nump;
     nump.put_DU(this->m_frames.size());
-
     static_vector<char, 24> sbuf(nump.size(), ' ');
     sbuf.emplace_back();
 
