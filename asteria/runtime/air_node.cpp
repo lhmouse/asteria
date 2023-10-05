@@ -143,13 +143,6 @@ do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     return status;
   }
 
-Reference&
-do_push_reference_common(Reference_Stack& stack, const Reference& ref)
-  {
-    // TODO: This is called heavily and requires some optimization.
-    return stack.push() = ref;
-  }
-
 // These are user-defined parameter types for AVMC nodes.
 // The `enumerate_variables()` callback is optional.
 
@@ -1004,7 +997,7 @@ struct Traits_push_global_reference
               "Unresolvable global identifier `$1`"),
               name);
 
-        do_push_reference_common(ctx.stack(), *qref);
+        ctx.stack().push() = *qref;
         return air_status_next;
       }
   };
@@ -1059,7 +1052,7 @@ struct Traits_push_local_reference
               "Use of bypassed variable or reference `$1`"),
               name);
 
-        do_push_reference_common(ctx.stack(), *qref);
+        ctx.stack().push() = *qref;
         return air_status_next;
       }
   };
@@ -1080,7 +1073,7 @@ struct Traits_push_bound_reference
     AIR_Status
     execute(Executive_Context& ctx, const Reference& ref)
       {
-        do_push_reference_common(ctx.stack(), ref);
+        ctx.stack().push() = ref;
         return air_status_next;
       }
   };
