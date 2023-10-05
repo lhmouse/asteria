@@ -141,6 +141,8 @@ do_on_scope_exit_slow(AIR_Status status)
         defer.swap(this->m_defer);
       else
         defer.append(this->m_defer.move_begin(), this->m_defer.move_end());
+
+      ROCKET_ASSERT(!self.is_invalid());
     }
     else {
       // Execute all deferred expressions backwards.
@@ -160,12 +162,10 @@ do_on_scope_exit_slow(AIR_Status status)
           throw;
         }
       }
+
       if(self.is_invalid())
         return status;
     }
-    ROCKET_ASSERT(!self.is_invalid());
-
-    // Restore the returned reference.
     this->m_stack->mut_top() = ::std::move(self);
     return status;
   }
