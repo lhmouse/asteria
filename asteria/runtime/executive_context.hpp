@@ -58,29 +58,23 @@ class Executive_Context
   private:
     bool
     do_is_analytic() const noexcept final
-      { return this->is_analytic();  }
+      { return false;  }
 
     Abstract_Context*
     do_get_parent_opt() const noexcept override
-      { return this->get_parent_opt();  }
+      { return this->m_parent_opt;  }
 
     Reference*
     do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
 
-    ROCKET_COLD
-    AIR_Status
+    void
     do_on_scope_exit_slow(AIR_Status status);
 
-    ROCKET_COLD
-    Runtime_Error&
+    void
     do_on_scope_exit_slow(Runtime_Error& except);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
-
-    bool
-    is_analytic() const noexcept
-      { return false;  }
 
     Executive_Context*
     get_parent_opt() const noexcept
@@ -106,20 +100,18 @@ class Executive_Context
     // These functions must be called before exiting a scope.
     // Note that these functions may throw arbitrary exceptions, which
     // is why RAII is inapplicable.
-    AIR_Status
+    void
     on_scope_exit(AIR_Status status)
       {
-        return ROCKET_UNEXPECT(this->m_defer.size())
-          ? this->do_on_scope_exit_slow(status)
-          : status;
+        if(ROCKET_UNEXPECT(this->m_defer.size()))
+          this->do_on_scope_exit_slow(status);
       }
 
-    Runtime_Error&
+    void
     on_scope_exit(Runtime_Error& except)
       {
-        return ROCKET_UNEXPECT(this->m_defer.size())
-          ? this->do_on_scope_exit_slow(except)
-          : except;
+        if(ROCKET_UNEXPECT(this->m_defer.size()))
+          this->do_on_scope_exit_slow(except);
       }
   };
 

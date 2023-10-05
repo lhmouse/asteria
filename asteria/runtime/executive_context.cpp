@@ -124,53 +124,49 @@ defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
     this->m_defer.emplace_back(sloc, ::std::move(queue));
   }
 
-AIR_Status
+void
 Executive_Context::
 do_on_scope_exit_slow(AIR_Status status)
   {
-    // Stash the returned reference, if any.
+    if(status == air_status_return_ref) {
+      // If a PTC wrapper was returned, append all deferred expressions to it.
+      // These callbacks will be unpacked later, so we just return.
+      auto ptca = this->m_stack->mut_top().get_ptc_args_opt();
+      if(ptca) {
+        ptca->defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
+        return;
+      }
+    }
+
+    // Stash the result reference.
     Reference self;
     if(status == air_status_return_ref)
       self = ::std::move(this->m_stack->mut_top());
 
-    if(auto ptca = self.get_ptc_args_opt()) {
-      // If a PTC wrapper was returned, prepend all deferred expressions
-      // to it. These callbacks will be unpacked later, so we just return.
-      auto& defer = ptca->defer();
-      if(defer.empty())
-        defer.swap(this->m_defer);
-      else
-        defer.append(this->m_defer.move_begin(), this->m_defer.move_end());
+    // Execute all deferred expressions backwards.
+    while(this->m_defer.size()) {
+      auto pair = ::std::move(this->m_defer.mut_back());
+      this->m_defer.pop_back();
 
-      ROCKET_ASSERT(!self.is_invalid());
-    }
-    else {
-      // Execute all deferred expressions backwards.
-      while(this->m_defer.size()) {
-        auto pair = ::std::move(this->m_defer.mut_back());
-        this->m_defer.pop_back();
-
-        // Execute it.
-        // If an exception is thrown, append a frame and rethrow it.
-        try {
-          auto status_def = pair.second.execute(*this);
-          ROCKET_ASSERT(status_def == air_status_next);
-        }
-        catch(Runtime_Error& except) {
-          except.push_frame_defer(pair.first);
-          this->on_scope_exit(except);
-          throw;
-        }
+      // Execute it.
+      // If an exception is thrown, append a frame and rethrow it.
+      try {
+        AIR_Status status_def = pair.second.execute(*this);
+        ROCKET_ASSERT(status_def == air_status_next);
       }
-
-      if(self.is_invalid())
-        return status;
+      catch(Runtime_Error& except) {
+        except.push_frame_defer(pair.first);
+        this->on_scope_exit(except);
+        throw;
+      }
     }
-    this->m_stack->mut_top() = ::std::move(self);
-    return status;
+
+    // Restore the result reference.
+    if(!self.is_invalid())
+      this->m_stack->mut_top() = ::std::move(self);
   }
 
-Runtime_Error&
+void
 Executive_Context::
 do_on_scope_exit_slow(Runtime_Error& except)
   {
@@ -182,7 +178,7 @@ do_on_scope_exit_slow(Runtime_Error& except)
       // Execute it.
       // If an exception is thrown, replace `except` with it.
       try {
-        auto status_def = pair.second.execute(*this);
+        AIR_Status status_def = pair.second.execute(*this);
         ROCKET_ASSERT(status_def == air_status_next);
       }
       catch(Runtime_Error& nested) {
@@ -190,7 +186,6 @@ do_on_scope_exit_slow(Runtime_Error& except)
         except.push_frame_defer(pair.first);
       }
     }
-    return except;
   }
 
 }  // namespace asteria

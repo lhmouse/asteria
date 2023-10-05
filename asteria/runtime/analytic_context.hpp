@@ -32,11 +32,11 @@ class Analytic_Context
   protected:
     bool
     do_is_analytic() const noexcept final
-      { return this->is_analytic();  }
+      { return true;  }
 
     Abstract_Context*
     do_get_parent_opt() const noexcept override
-      { return this->get_parent_opt();  }
+      { return this->m_parent_opt;  }
 
     Reference*
     do_create_lazy_reference_opt(Reference*, phsh_stringR) const override
@@ -44,10 +44,6 @@ class Analytic_Context
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
-
-    bool
-    is_analytic() const noexcept
-      { return true;  }
 
     Abstract_Context*
     get_parent_opt() const noexcept
