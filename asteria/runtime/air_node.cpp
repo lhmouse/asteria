@@ -430,12 +430,9 @@ struct Traits_if_statement
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        if(ctx.stack().top().dereference_readonly().test() != up.u8v[0])
-          // Execute the true branch and forward the status verbatim.
-          return do_execute_block(sp.queues[0], ctx);
-
-        // Execute the false branch and forward the status verbatim.
-        return do_execute_block(sp.queues[1], ctx);
+        return (ctx.stack().top().dereference_readonly().test() != up.u8v[0])
+                  ? do_execute_block(sp.queues[0], ctx)
+                  : do_execute_block(sp.queues[1], ctx);
       }
   };
 
