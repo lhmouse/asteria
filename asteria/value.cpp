@@ -550,3 +550,18 @@ dump_to_stderr(size_t indent, size_t hanging) const
   }
 
 }  // namespace asteria
+
+template class ::rocket::variant<::asteria::V_null, ::asteria::V_boolean,
+    ::asteria::V_integer, ::asteria::V_real, ::asteria::V_string, ::asteria::V_opaque,
+    ::asteria::V_function, ::asteria::V_array,  ::asteria::V_object>;
+template class ::rocket::cow_vector<::asteria::Value>;
+template class ::rocket::cow_hashmap<::rocket::prehashed_string,
+    ::asteria::Value, ::rocket::prehashed_string::hash>;
+template class ::rocket::optional<::asteria::V_boolean>;
+template class ::rocket::optional<::asteria::V_integer>;
+template class ::rocket::optional<::asteria::V_real>;
+template class ::rocket::optional<::asteria::V_string>;
+template class ::rocket::optional<::asteria::V_opaque>;
+template class ::rocket::optional<::asteria::V_function>;
+template class ::rocket::optional<::asteria::V_array>;
+template class ::rocket::optional<::asteria::V_object>;

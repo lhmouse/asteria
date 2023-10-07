@@ -382,4 +382,19 @@ operator<<(tinyfmt& fmt, const Value& value)
   }
 
 }  // namespace asteria
+
+extern template class ::rocket::variant<::asteria::V_null, ::asteria::V_boolean,
+    ::asteria::V_integer, ::asteria::V_real, ::asteria::V_string, ::asteria::V_opaque,
+    ::asteria::V_function, ::asteria::V_array,  ::asteria::V_object>;
+extern template class ::rocket::cow_vector<::asteria::Value>;
+extern template class ::rocket::cow_hashmap<::rocket::prehashed_string,
+    ::asteria::Value, ::rocket::prehashed_string::hash>;
+extern template class ::rocket::optional<::asteria::V_boolean>;
+extern template class ::rocket::optional<::asteria::V_integer>;
+extern template class ::rocket::optional<::asteria::V_real>;
+extern template class ::rocket::optional<::asteria::V_string>;
+extern template class ::rocket::optional<::asteria::V_opaque>;
+extern template class ::rocket::optional<::asteria::V_function>;
+extern template class ::rocket::optional<::asteria::V_array>;
+extern template class ::rocket::optional<::asteria::V_object>;
 #endif
