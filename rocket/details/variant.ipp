@@ -351,9 +351,9 @@ dispatch_xswap(size_t k, void* dptr, void* sptr)
       nt_funcs(k, dptr, sptr);
     else
       wrapped_xswap<typename aligned_union<0,
-              typename conditional<is_trivially_move_assignable<altsT>::value,
-                                   altsT, char>::type...>
-                                   ::type>(dptr, sptr);
+          typename conditional<is_trivially_move_assignable<altsT>::value,
+                               altsT, char>::type...>
+                               ::type>(dptr, sptr);
   }
 
 }  // namespace details_variant
