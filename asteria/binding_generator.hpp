@@ -33,10 +33,9 @@ class Binding_Generator
 
   public:
     constexpr
-    Binding_Generator(cow_string::shallow_type name,
-           const char* params, const char* file, int line) noexcept
-      : m_name(name),
-        m_params(params), m_file(file), m_line(line)
+    Binding_Generator(cow_string::shallow_type name, const char* params,
+                      const char* file, int line) noexcept
+      : m_name(name), m_params(params), m_file(file), m_line(line)
       { }
 
   public:
