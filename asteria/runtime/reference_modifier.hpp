@@ -99,7 +99,7 @@ class Reference_Modifier
     is_object_key() const noexcept
       { return this->index() == index_object_key;  }
 
-    const cow_string&
+    const phsh_string&
     as_object_key() const
       { return this->m_stor.as<index_object_key>().key; }
 
