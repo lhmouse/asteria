@@ -298,7 +298,7 @@ min(lhsT&& lhs, rhsT&& rhs)
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
-typename select_type<typename select_type<lhsT&&, rhsT&&>::type, restT&&...>::type
+typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 min(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
   {
     return noadl::min(noadl::min(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
@@ -315,7 +315,7 @@ max(lhsT&& lhs, rhsT&& rhs)
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
-typename select_type<typename select_type<lhsT&&, rhsT&&>::type, restT&&...>::type
+typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 max(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
   {
     return noadl::max(noadl::max(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
