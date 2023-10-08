@@ -89,7 +89,7 @@ do_parse_command_line(int argc, char** argv)
 
     opt<bool> verbose;
     opt<bool> interactive;
-    opt<int8_t> optimize;
+    opt<long> optimize;
 
     opt<cow_string> path;
     cow_vector<Value> args;
@@ -122,7 +122,7 @@ do_parse_command_line(int argc, char** argv)
 
         case 'O': {
           // If `-O` is specified without an argument, it is equivalent to `-O1`.
-          optimize = int8_t(1);
+          optimize = 1;
           if(!optarg || !*optarg)
             continue;
 
@@ -132,7 +132,7 @@ do_parse_command_line(int argc, char** argv)
             exit_printf(exit_invalid_argument,
                   "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
 
-          optimize = static_cast<int8_t>(val);
+          optimize = val;
           continue;
         }
 
@@ -183,7 +183,7 @@ do_parse_command_line(int argc, char** argv)
     // effectively decreases optimization in comparison to when it wasn't
     // specified.
     if(optimize)
-      repl_script.options().optimization_level = *optimize;
+      repl_script.options().optimization_level = uint8_t(*optimize);
 
     // These arguments are always overwritten.
     repl_file = path.move_value_or(sref("-"));

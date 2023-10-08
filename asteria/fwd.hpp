@@ -669,7 +669,7 @@ using optV_function  = V_function;
 using optV_array     = opt<V_array>;
 using optV_object    = opt<V_object>;
 
-// Indices of fundamental types
+// Value types
 enum Type : uint8_t
   {
     type_null      = 0,
@@ -861,7 +861,7 @@ struct Compiler_Options_fragment<1>
     bool implicit_global_names = false;
 
     // Enable optimization.
-    int8_t optimization_level = 2;
+    uint8_t optimization_level = 2;
   };
 
 template<>
