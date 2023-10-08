@@ -24,20 +24,17 @@ tell_precedence() const noexcept
       case index_logical_and:
         return this->m_stor.as<index_logical_and>().assign
                  ? precedence_assignment
-                 :
-                   precedence_logical_and;
+                 : precedence_logical_and;
 
       case index_logical_or:
         return this->m_stor.as<index_logical_or>().assign
                  ? precedence_assignment
-                 :
-                   precedence_logical_or;
+                 : precedence_logical_or;
 
       case index_coalescence:
         return this->m_stor.as<index_coalescence>().assign
                  ? precedence_assignment
-                 :
-                   precedence_coalescence;
+                 : precedence_coalescence;
 
       case index_general: {
         const auto& altr = this->m_stor.as<index_general>();

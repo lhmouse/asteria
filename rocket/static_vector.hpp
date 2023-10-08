@@ -293,8 +293,7 @@ class static_vector
       {
         return (this->size() < n)
                  ? this->append(n - this->size(), params...)
-                 :
-                   this->pop_back(this->size() - n);
+                 : this->pop_back(this->size() - n);
       }
 
     static constexpr

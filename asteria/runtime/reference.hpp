@@ -160,8 +160,7 @@ class Reference
       {
         return this->is_variable()
             ? unerase_pointer_cast<Variable>(this->m_var)
-            :
-              nullptr;
+            : nullptr;
       }
 
     ASTERIA_INCOMPLET(Variable)
@@ -184,8 +183,7 @@ class Reference
       {
         return this->is_ptc_args()
             ? unerase_pointer_cast<PTC_Arguments>(this->m_ptca)
-            :
-              nullptr;
+            : nullptr;
       }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
@@ -258,8 +256,7 @@ class Reference
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
             ? this->m_value
-            :
-              this->do_dereference_readonly_slow();
+            : this->do_dereference_readonly_slow();
       }
 
     ROCKET_ALWAYS_INLINE
@@ -268,8 +265,7 @@ class Reference
       {
         return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
             ? this->m_value
-            :
-              this->do_mutate_into_temporary_slow();
+            : this->do_mutate_into_temporary_slow();
       }
 
     ROCKET_ALWAYS_INLINE
@@ -278,8 +274,7 @@ class Reference
       {
         return ROCKET_EXPECT(!this->is_ptc_args())
             ? *this
-            :
-              this->do_finish_call_slow(global);
+            : this->do_finish_call_slow(global);
       }
 
     Value&

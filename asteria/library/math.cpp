@@ -51,8 +51,7 @@ std_math_log(V_real base, V_real x)
 
     auto r = ::log2(base);
     return ::std::isgreater(r, 1) ? ::log2(x) / r
-             :
-               ::std::numeric_limits<double>::quiet_NaN();
+             : ::std::numeric_limits<double>::quiet_NaN();
   }
 
 V_real

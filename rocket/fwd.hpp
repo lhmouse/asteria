@@ -353,8 +353,7 @@ constexpr
 typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
   {
-    return (xv < lo) ? ::std::forward<loT>(lo) :
-           (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv);
+    return (xv < lo) ? ::std::forward<loT>(lo) : (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv);
   }
 
 template<typename resultT, typename xvT, typename loT, typename upT>
@@ -363,8 +362,7 @@ resultT
 clamp_cast(xvT&& xv, loT&& lo, upT&& up)
   {
     return static_cast<resultT>(
-             (xv < lo) ? ::std::forward<loT>(lo) :
-             (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv));
+             (xv < lo) ? ::std::forward<loT>(lo) : (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv));
   }
 
 template<typename iteratorT>

@@ -702,8 +702,7 @@ std_json_format(Value value, optV_string indent, optV_boolean json5)
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty())
         ? do_format_nonrecursive(value, json5 == true, Indenter_none())
-        :
-          do_format_nonrecursive(value, json5 == true, Indenter_string(*indent));
+        : do_format_nonrecursive(value, json5 == true, Indenter_string(*indent));
   }
 
 V_string
@@ -712,8 +711,7 @@ std_json_format(Value value, V_integer indent, optV_boolean json5)
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0)
         ? do_format_nonrecursive(value, json5 == true, Indenter_none())
-        :
-          do_format_nonrecursive(value, json5 == true, Indenter_spaces(indent));
+        : do_format_nonrecursive(value, json5 == true, Indenter_spaces(indent));
   }
 
 Value

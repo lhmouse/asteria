@@ -59,8 +59,7 @@ enum Punctuator : uint8_t
     punctuator_brace_op    = 46,  // {
     punctuator_brace_cl    = 47,  // }
     punctuator_comma       = 48,  // ,
-    punctuator_colon       = 49,  // :
-    punctuator_semicol     = 50,  // ;
+    punctuator_colon       = 49,  // : punctuator_semicol     = 50,  // ;
     punctuator_cmp_3way    = 51,  // <=>
     punctuator_coales      = 52,  // ??
     punctuator_coales_eq   = 53,  // ??=

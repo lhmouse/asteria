@@ -79,8 +79,7 @@ class Token_Stream
       {
         return this->m_rtoks.empty()
                  ? Source_Location(sref("[end]"), -1, -1)
-                 :
-                   this->m_rtoks.back().sloc();
+                 : this->m_rtoks.back().sloc();
       }
 
     // This function parses characters from the input stream and fills

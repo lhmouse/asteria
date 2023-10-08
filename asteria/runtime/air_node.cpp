@@ -123,8 +123,7 @@ do_get_first_operand(Reference_Stack& stack, bool assign)
   {
     return assign
         ? stack.top().dereference_mutable()
-        :
-          stack.mut_top().mut_temporary();
+        : stack.mut_top().mut_temporary();
   }
 
 AIR_Status
@@ -422,8 +421,7 @@ struct Traits_if_statement
         // Check the value of the condition.
         return (ctx.stack().top().dereference_readonly().test() != up.u8v[0])
                   ? do_execute_block(sp.queues[0], ctx)
-                  :
-                    do_execute_block(sp.queues[1], ctx);
+                  : do_execute_block(sp.queues[1], ctx);
       }
   };
 
@@ -1152,8 +1150,7 @@ struct Traits_branch_expression
         // Check the value of the condition.
         return ctx.stack().top().dereference_readonly().test()
                   ? do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[0])
-                  :
-                    do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
+                  : do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
       }
   };
 
@@ -1194,8 +1191,7 @@ struct Traits_coalescence
         // Check the value of the condition.
         return ctx.stack().top().dereference_readonly().is_null()
                     ? do_evaluate_subexpression(ctx, up.u8v[0], queue)
-                    :
-                      air_status_next;
+                    : air_status_next;
       }
   };
 
@@ -1338,8 +1334,7 @@ struct Traits_function_call
 
         return ROCKET_EXPECT(ptc == ptc_aware_none)
                  ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
-                 :
-                   do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
+                 : do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
       }
   };
 
@@ -4342,8 +4337,7 @@ struct Traits_variadic_call
 
         return ROCKET_EXPECT(ptc == ptc_aware_none)
                  ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
-                 :
-                   do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
+                 : do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
       }
   };
 

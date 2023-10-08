@@ -635,8 +635,7 @@ class cow_function
     type() const
       {
         return this->m_fptr ? typeid(simple_function)
-                 :
-                   typeid(*(this->m_sptr.get()));  // may throw `std::bad_typeid`
+                 : typeid(*(this->m_sptr.get()));  // may throw `std::bad_typeid`
       }
 
     tinyfmt&

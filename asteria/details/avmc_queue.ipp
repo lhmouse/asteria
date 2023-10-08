@@ -130,14 +130,12 @@ struct Sparam_traits
     static constexpr Relocator* reloc_opt =
         ::std::is_trivially_copyable<SparamT>::value
             ? nullptr
-            :
-              do_nontrivial_reloc<SparamT>;
+            : do_nontrivial_reloc<SparamT>;
 
     static constexpr Destructor* dtor_opt =
         ::std::is_trivially_destructible<SparamT>::value
             ? nullptr
-            :
-              do_nontrivial_dtor<SparamT>;
+            : do_nontrivial_dtor<SparamT>;
 
     static constexpr Var_Getter* vget_opt =
         select_get_variables<SparamT>();

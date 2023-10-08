@@ -423,8 +423,7 @@ class basic_cow_string
       {
         return (this->size() < n)
                  ? this->append(n - this->size(), c)
-                 :
-                   this->pop_back(this->size() - n);
+                 : this->pop_back(this->size() - n);
       }
 
     constexpr
@@ -2148,8 +2147,7 @@ class basic_cow_string
       {
         return (this->size() >= n)
                  ? (noadl::xmemcmp(this->data(), s, n) | (this->size() > n))
-                 :
-                   ~(noadl::xmemcmp(s, this->data(), this->size()) | 1);
+                 : ~(noadl::xmemcmp(s, this->data(), this->size()) | 1);
       }
 
     constexpr
@@ -2215,8 +2213,7 @@ class basic_cow_string
         size_type tlen = this->do_clamp_substr(tpos, tn);
         return (tlen >= n)
                  ? (noadl::xmemcmp(this->data() + tpos, s, n) | (tlen > n))
-                 :
-                   ~(noadl::xmemcmp(s, this->data() + tpos, tlen) | 1);
+                 : ~(noadl::xmemcmp(s, this->data() + tpos, tlen) | 1);
       }
 
     constexpr
