@@ -30,7 +30,7 @@ int main()
         }
         catch(e) {
           std.io.putf("Caught exception: $1\n", e);
-          assert std.string.find(e, "a function call which returned no value") != null;
+          assert std.string.find(e, "Void reference not dereferenceable") != null;
         }
 
         assert sth == 10;

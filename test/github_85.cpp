@@ -18,7 +18,7 @@ int main()
         }
         catch(e) {
           assert typeof e == "string";
-          assert std.string.find(e, "uninitialized");
+          assert std.string.find(e, "not initialized");
         }
 
         var a = 42;
@@ -28,7 +28,7 @@ int main()
         }
         catch(e) {
           assert typeof e == "string";
-          assert std.string.find(e, "uninitialized");
+          assert std.string.find(e, "not initialized");
         }
         assert a == 42;
 

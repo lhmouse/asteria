@@ -11,213 +11,164 @@ namespace asteria {
 
 class Reference
   {
-  public:
-    enum Index : uint8_t
-      {
-        index_invalid    = 0,
-        index_void       = 1,
-        index_temporary  = 2,
-        index_variable   = 3,
-        index_ptc_args   = 4,
-      };
-
   private:
     Value m_value;
     rcfwd_ptr<Variable> m_var;
-    rcfwd_ptr<PTC_Arguments> m_ptca;
-    union {
-      Index m_index;
-      void* m_init_index;  // force initialization of padding bits
-    };
+    rcfwd_ptr<PTC_Arguments> m_ptc;
     cow_vector<Reference_Modifier> m_mods;
+    Xref m_xref = xref_invalid;
 
   public:
     // Constructors and assignment operators
     constexpr
     Reference() noexcept
-      :
-        m_init_index()
       {
       }
 
     Reference(const Reference& other) noexcept
       :
-        m_init_index(other.m_init_index),
-        m_mods(other.m_mods)
+        m_var(other.m_var),
+        m_ptc(other.m_ptc),
+        m_mods(other.m_mods),
+        m_xref(other.m_xref)
       {
-        if(other.m_index == index_temporary)
+        if(this->m_xref == xref_temporary)
           this->m_value = other.m_value;
-        else if(other.m_index == index_variable)
-          this->m_var = other.m_var;
-        else if(other.m_index == index_ptc_args)
-          this->m_ptca = other.m_ptca;
       }
 
     Reference&
     operator=(const Reference& other) & noexcept
       {
-        if(other.m_index == index_temporary)
+        if(other.m_xref == xref_temporary)
           this->m_value = other.m_value;
-        else if(other.m_index == index_variable)
+        else if(other.m_var)
           this->m_var = other.m_var;
-        else if(other.m_index == index_ptc_args)
-          this->m_ptca = other.m_ptca;
+        else if(other.m_ptc)
+          this->m_ptc = other.m_ptc;
 
-        this->m_init_index = other.m_init_index;
         this->m_mods = other.m_mods;
+        this->m_xref = other.m_xref;
         return *this;
       }
 
     Reference(Reference&& other) noexcept
+      :
+        m_var(::std::move(other.m_var)),
+        m_ptc(::std::move(other.m_ptc)),
+        m_mods(::std::move(other.m_mods)),
+        m_xref(::std::exchange(other.m_xref, xref_invalid))
       {
-        // Don't play with this at home!
-        char* tbytes = (char*) this;
-        char* obytes = (char*) &other;
-        ::memcpy(tbytes, obytes, sizeof(*this));
-        ::memset(obytes, 0, sizeof(*this));
+        if(this->m_xref == xref_temporary)
+          this->m_value = ::std::move(other.m_value);
       }
 
     Reference&
     operator=(Reference&& other) & noexcept
       {
-        this->swap(other);
+        if(other.m_xref == xref_temporary)
+          this->m_value = ::std::move(other.m_value);
+        else if(other.m_var)
+          this->m_var = ::std::move(other.m_var);
+        else if(other.m_ptc)
+          this->m_ptc = ::std::move(other.m_ptc);
+
+        this->m_mods = ::std::move(other.m_mods);
+        this->m_xref = ::std::exchange(other.m_xref, xref_invalid);
         return *this;
       }
 
     Reference&
     swap(Reference& other) noexcept
       {
-        // Don't play with this at home!
-        char ebytes[sizeof(*this)];
-        char* tbytes = (char*) this;
-        char* obytes = (char*) &other;
-        ::memcpy(ebytes, tbytes, sizeof(*this));
-        ::memcpy(tbytes, obytes, sizeof(*this));
-        ::memcpy(obytes, ebytes, sizeof(*this));
+        this->m_value.swap(other.m_value);
+        this->m_var.swap(other.m_var);
+        this->m_ptc.swap(other.m_ptc);
+        this->m_mods.swap(other.m_mods);
+        ::std::swap(this->m_xref, other.m_xref);
         return *this;
       }
 
   private:
+    [[noreturn]]
+    void
+    do_throw_not_dereferenceable() const;
+
     const Value&
     do_dereference_readonly_slow() const;
 
-    Value&
-    do_mutate_into_temporary_slow();
-
-    Reference&
-    do_finish_call_slow(Global_Context& global);
+    void
+    do_use_function_result_slow(Global_Context& global);
 
   public:
     // Accessors
-    Index
-    index() const noexcept
-      { return this->m_index;  }
-
     bool
     is_invalid() const noexcept
-      { return this->index() == index_invalid;  }
+      { return this->m_xref == xref_invalid;  }
 
     Reference&
-    set_invalid() noexcept
+    clear() noexcept
       {
-        this->m_index = index_invalid;
+        this->m_value = nullopt;
+        this->m_var.reset();
+        this->m_ptc.reset();
+        this->m_mods.clear();
+        this->m_xref = xref_invalid;
         return *this;
       }
 
     bool
     is_void() const noexcept
-      { return this->index() == index_void;  }
+      { return this->m_xref == xref_void;  }
 
     Reference&
     set_void() noexcept
       {
-        this->m_index = index_void;
+        this->m_xref = xref_void;
         return *this;
       }
 
     bool
     is_temporary() const noexcept
-      { return this->index() == index_temporary;  }
+      { return this->m_xref == xref_temporary;  }
 
     template<typename XValT,
     ROCKET_ENABLE_IF(::std::is_assignable<Value&, XValT&&>::value)>
     Reference&
-    set_temporary(XValT&& xval) noexcept
+    set_temporary(XValT&& xval)
       {
         this->m_value = ::std::forward<XValT>(xval);
         this->m_mods.clear();
-        this->m_index = index_temporary;
+        this->m_xref = xref_temporary;
         return *this;
       }
 
     bool
     is_variable() const noexcept
-      { return this->index() == index_variable;  }
-
-    ASTERIA_INCOMPLET(Variable)
-    refcnt_ptr<Variable>
-    get_variable_opt() const noexcept
-      {
-        return this->is_variable()
-            ? unerase_pointer_cast<Variable>(this->m_var)
-            : nullptr;
-      }
+      { return this->m_xref == xref_variable;  }
 
     ASTERIA_INCOMPLET(Variable)
     Reference&
-    set_variable(const refcnt_ptr<Variable>& var) noexcept
+    set_variable(const refcnt_ptr<Variable>& var)
       {
+        ROCKET_ASSERT(var != nullptr);
         this->m_var = var;
         this->m_mods.clear();
-        this->m_index = index_variable;
+        this->m_xref = xref_variable;
         return *this;
       }
 
     bool
-    is_ptc_args() const noexcept
-      { return this->index() == index_ptc_args;  }
-
-    ASTERIA_INCOMPLET(PTC_Arguments)
-    refcnt_ptr<PTC_Arguments>
-    get_ptc_args_opt() const noexcept
-      {
-        return this->is_ptc_args()
-            ? unerase_pointer_cast<PTC_Arguments>(this->m_ptca)
-            : nullptr;
-      }
+    is_ptc() const noexcept
+      { return this->m_xref == xref_ptc;  }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     Reference&
-    set_ptc_args(const refcnt_ptr<PTC_Arguments>& ptca) noexcept
+    set_ptc(const refcnt_ptr<PTC_Arguments>& ptc)
       {
-        this->m_ptca = ptca;
-        this->m_index = index_ptc_args;
-        return *this;
-      }
-
-    // This is used by garbage collection.
-    void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
-
-    // A modifier is created by a dot or bracket operator.
-    // For instance, the expression `obj.x[42]` results in a reference having two
-    // modifiers. Modifiers can be removed to yield references to ancestor objects.
-    // Removing the last modifier shall yield the constant `null`.
-    const cow_vector<Reference_Modifier>&
-    get_modifiers() const noexcept
-      { return this->m_mods;  }
-
-    Reference&
-    set_modifiers(const cow_vector<Reference_Modifier>& mods) noexcept
-      {
-        this->m_mods = mods;
-        return *this;
-      }
-
-    Reference&
-    clear_modifiers() noexcept
-      {
+        ROCKET_ASSERT(ptc != nullptr);
+        this->m_ptc = ptc;
         this->m_mods.clear();
+        this->m_xref = xref_ptc;
         return *this;
       }
 
@@ -226,59 +177,89 @@ class Reference
     Reference&
     push_modifier(XModT&& xmod)
       {
+        if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
+          this->do_throw_not_dereferenceable();
+
         this->m_mods.emplace_back(::std::forward<XModT>(xmod));
         return *this;
       }
 
     Reference&
-    pop_modifier()
+    pop_modifier(size_t count = 1) noexcept
       {
-        if((this->m_index != index_temporary) && (this->m_index != index_variable))
-          return *this;
+        if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
+          this->do_throw_not_dereferenceable();
 
-        if(this->m_mods.empty()) {
-          // Set to `null`.
-          this->m_value = nullopt;
-          this->m_index = index_temporary;
+        if(count <= this->m_mods.size()) {
+          this->m_mods.pop_back(count);
           return *this;
         }
 
-        // Drop a modifier.
-        this->m_mods.pop_back();
+        this->m_value = nullopt;
+        this->m_mods.clear();
+        this->m_xref = xref_temporary;
         return *this;
       }
 
-    // These are conceptual read/write functions.
-    // Some references are placeholders that do not denote values.
-    ROCKET_ALWAYS_INLINE
+    // These functions are used internally by the runtime, whose names have been
+    // obscured to make them less likely to be misused. In order to access the
+    // value, `dereference_*()` functions shall be called instead.
+    ASTERIA_INCOMPLET(Variable)
+    refcnt_ptr<Variable>
+    unphase_variable_opt() const noexcept
+      { return unerase_pointer_cast<Variable>(this->m_var);  }
+
+    ASTERIA_INCOMPLET(PTC_Arguments)
+    refcnt_ptr<PTC_Arguments>
+    unphase_ptc_opt() const noexcept
+      { return unerase_pointer_cast<PTC_Arguments>(this->m_ptc);  }
+
+    void
+    check_function_result(Global_Context& global)
+      {
+        if(this->m_xref == xref_ptc)
+          this->do_use_function_result_slow(global);
+
+        if((this->m_xref != xref_void) && (this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
+          this->do_throw_not_dereferenceable();
+      }
+
+    void
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+
+    // Get the target value.
     const Value&
     dereference_readonly() const
       {
-        return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
-            ? this->m_value
-            : this->do_dereference_readonly_slow();
-      }
+        if((this->m_xref == xref_temporary) && this->m_mods.empty())
+          return this->m_value;
 
-    ROCKET_ALWAYS_INLINE
-    Value&
-    mut_temporary()
-      {
-        return ROCKET_EXPECT(this->is_temporary() && this->m_mods.empty())
-            ? this->m_value
-            : this->do_mutate_into_temporary_slow();
-      }
-
-    ROCKET_ALWAYS_INLINE
-    Reference&
-    finish_call(Global_Context& global)
-      {
-        return ROCKET_EXPECT(!this->is_ptc_args())
-            ? *this
-            : this->do_finish_call_slow(global);
+        return this->do_dereference_readonly_slow();
       }
 
     Value&
     dereference_mutable() const;
+
+    Value&
+    dereference_copy()
+      {
+        if((this->m_xref == xref_temporary) && this->m_mods.empty())
+          return this->m_value;
+
+        if(this->m_xref == xref_temporary) {
+          // Ensure the value is copied before being moved, so we never assign
+          // an element into its own container.
+          auto val = this->do_dereference_readonly_slow();
+          this->m_value = ::std::move(val);
+          this->m_mods.clear();
+          return this->m_value;
+        }
+
+        this->m_value = this->do_dereference_readonly_slow();
+        this->m_mods.clear();
+        this->m_xref = xref_temporary;
+        return this->m_value;
+      }
 
     Value
     dereference_unset() const;

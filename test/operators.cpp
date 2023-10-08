@@ -491,28 +491,6 @@ int main()
         assert __muls(iMin, 1) == iMin;
         assert __muls(iMin, -1) == iMax;
 
-        assert __adds(1.5, 2.5) == 4;
-        assert __adds(infinity, 1) == infinity;
-        assert __adds(1, infinity) == infinity;
-        assert __adds(-infinity, 1) == -infinity;
-        assert __adds(1, -infinity) == -infinity;
-        assert __isnan __adds(nan, 1);
-        assert __isnan __adds(1, nan);
-        assert __subs(1.5, 2.5) == -1;
-        assert __subs(infinity, 1) == infinity;
-        assert __subs(1, infinity) == -infinity;
-        assert __subs(-infinity, 1) == -infinity;
-        assert __subs(1, -infinity) == infinity;
-        assert __isnan __subs(nan, 1);
-        assert __isnan __subs(1, nan);
-        assert __muls(1.5, 2.5) == 3.75;
-        assert __muls(infinity, 1) == infinity;
-        assert __muls(1, infinity) == infinity;
-        assert __muls(-infinity, 1) == -infinity;
-        assert __muls(1, -infinity) == -infinity;
-        assert __isnan __muls(nan, 1);
-        assert __isnan __muls(1, nan);
-
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     code.execute();

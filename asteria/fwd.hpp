@@ -159,7 +159,7 @@ class AVMC_Queue;
 // Runtime
 enum Xop : uint8_t;
 enum AIR_Status : uint8_t;
-enum PTC_Aware : int8_t;  // This is a bitmask!
+enum PTC_Aware : uint8_t;
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
@@ -259,17 +259,17 @@ using rcfwd_ptr = refcnt_ptr<typename ::rocket::copy_cv<
 template<typename TargetT, typename RealT>
 constexpr
 TargetT
-unerase_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
+unerase_cast(const rcfwd<RealT>* ptr) noexcept  // like `static_cast`
   {
-    return static_cast<TargetT>(ptr.get());
+    return static_cast<TargetT>(ptr);
   }
 
 template<typename TargetT, typename RealT>
 constexpr
 TargetT
-unerase_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_cast`
+unerase_cast(rcfwd<RealT>* ptr) noexcept  // like `static_cast`
   {
-    return static_cast<TargetT>(ptr.get());
+    return static_cast<TargetT>(ptr);
   }
 
 template<typename TargetT, typename RealT>
@@ -706,14 +706,19 @@ ROCKET_CONST
 const char*
 describe_type(Type type) noexcept;
 
-// Value comparison results
-enum Compare : uint8_t
+// Reference types
+enum Xref : uint8_t
   {
-    compare_unordered  = 0,  // The LHS operand is unordered with the RHS operand.
-    compare_greater    = 1,  // The LHS operand is greater than the RHS operand.
-    compare_less       = 2,  // The LHS operand is less than the RHS operand.
-    compare_equal      = 3,  // The LHS operand is equal to the RHS operand.
+    xref_invalid    = 0,
+    xref_void       = 1,
+    xref_temporary  = 2,
+    xref_variable   = 3,
+    xref_ptc        = 4,
   };
+
+ROCKET_CONST
+const char*
+describe_xref(Xref xref) noexcept;
 
 // Stack frame types
 enum Frame_Type : uint8_t
@@ -806,12 +811,21 @@ ROCKET_CONST
 const char*
 describe_compiler_status(Compiler_Status status) noexcept;
 
+// Value comparison results
+enum Compare : uint8_t
+  {
+    compare_unordered  = 0b00,
+    compare_greater    = 0b01,
+    compare_less       = 0b10,
+    compare_equal      = 0b11,
+  };
+
 // API versioning of the standard library
 enum API_Version : uint32_t
   {
     api_version_none       = 0x00000000,  // no standard library
     api_version_0001_0000  = 0x00010000,  // version 1.0
-    api_version_sentinel /* auto inc */,  // [subtract one to get the maximum version number]
+    api_version_sentinel   /* auto */,    // (max version + 1)
     api_version_latest     = 0xFFFFFFFF,  // everything
   };
 

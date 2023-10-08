@@ -100,10 +100,13 @@ Global_Context(API_Version version)
       });
 
     // Allocate the global variable `std`.
-    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
+    const auto gcoll = unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     auto vstd = gcoll->create_variable(gc_generation_oldest);
-    vstd->initialize(::std::move(ostd), Variable::state_immutable);
+
+    vstd->initialize(::std::move(ostd));
+    vstd->set_immutable();
+
     this->do_mut_named_reference(nullptr, sref("std")).set_variable(vstd);
     this->m_vstd = ::std::move(vstd);
   }
@@ -111,11 +114,11 @@ Global_Context(API_Version version)
 Global_Context::
 ~Global_Context()
   {
-    // Perform the final garbage collection. Note if there are still cyclic
-    // references afterwards, they are left uncollected!
     this->do_clear_named_references();
 
-    const auto gcoll = unerase_cast<Garbage_Collector*>(this->m_gcoll);
+    // Perform the final garbage collection. Note if there are still cyclic
+    // references afterwards, they are left uncollected!
+    const auto gcoll = unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     gcoll->finalize();
   }

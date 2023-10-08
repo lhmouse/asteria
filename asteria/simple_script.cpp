@@ -23,7 +23,7 @@ get_global_variable_opt(phsh_stringR name) const noexcept
       return nullptr;
 
     // Errors are ignored.
-    return gref->get_variable_opt();
+    return gref->unphase_variable_opt();
   }
 
 refcnt_ptr<Variable>
@@ -31,7 +31,7 @@ Simple_Script::
 open_global_variable(phsh_stringR name)
   {
     auto& ref = this->m_global.insert_named_reference(name);
-    auto var = ref.get_variable_opt();
+    auto var = ref.unphase_variable_opt();
     if(var)
       return var;
 

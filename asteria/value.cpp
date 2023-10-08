@@ -123,9 +123,10 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
     // Expand recursion by hand with a stack.
     auto qval = this;
     cow_vector<Rbr_Element> stack;
+    const refcnt_ptr<Variable> null_variable_ptr;
 
   r:
-    if((qval->m_stor.index() >= type_opaque) && staged.insert(qval, nullptr))
+    if(staged.insert(qval, null_variable_ptr))  // mark once
       switch(qval->m_stor.index()) {
         case type_opaque:
           qval->m_stor.as<V_opaque>().collect_variables(staged, temp);
@@ -156,9 +157,6 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
           }
           break;
         }
-
-        default:
-          ASTERIA_TERMINATE(("Invalid value type (type `$1`)"), this->type());
       }
 
     while(stack.size())

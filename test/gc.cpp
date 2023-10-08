@@ -76,7 +76,7 @@ int main()
       code.execute();
     }
     ASTERIA_TEST_CHECK(foreign->use_count() == 1);
-    ASTERIA_TEST_CHECK(foreign->is_uninitialized() == false);
+    ASTERIA_TEST_CHECK(foreign->is_initialized() == true);
     ASTERIA_TEST_CHECK(foreign->get_value().type() == type_string);
     foreign = nullptr;
 

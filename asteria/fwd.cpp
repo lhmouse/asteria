@@ -65,7 +65,8 @@ cow_function::
 invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
     this->invoke_ptc_aware(self, global, ::std::move(stack));
-    return self.finish_call(global);
+    self.check_function_result(global);
+    return self;
   }
 
 const char*
@@ -101,6 +102,30 @@ describe_type(Type type) noexcept
 
       default:
         return "[unknown data type]";
+    }
+  }
+
+const char*
+describe_xref(Xref xref) noexcept
+  {
+    switch(xref) {
+      case xref_invalid:
+        return "uninitialized reference";
+
+      case xref_void:
+        return "void";
+
+      case xref_temporary:
+        return "temporary value";
+
+      case xref_variable:
+        return "variable";
+
+      case xref_ptc:
+        return "pending proper tail call";
+
+      default:
+        return "[unknown reference type]";
     }
   }
 

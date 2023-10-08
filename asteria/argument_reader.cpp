@@ -97,7 +97,7 @@ void
 Argument_Reader::
 optional(Reference& out)
   {
-    out.set_invalid();
+    out.clear();
     this->do_prepare_parameter("[reference]");
 
     auto qref = this->do_peek_argument();

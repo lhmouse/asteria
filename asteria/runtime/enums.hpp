@@ -88,13 +88,13 @@ enum AIR_Status : uint8_t
     air_status_continue_for     = 9,
   };
 
-// Tail call optimization (PTC) awareness bitmask
-enum PTC_Aware : int8_t
+// Proper tail call (PTC) awareness
+enum PTC_Aware : uint8_t
   {
-    ptc_aware_none    =  0,  // allow PTC only in `return`
-    ptc_aware_void    = -1,  // call and discard results
-    ptc_aware_by_ref  =  1,  // call and forward results by reference
-    ptc_aware_by_val  =  3,  // call and forward results by value
+    ptc_aware_none    = 0,
+    ptc_aware_by_ref  = 1,
+    ptc_aware_by_val  = 2,
+    ptc_aware_void    = 3,
   };
 
 }  // namespace asteria

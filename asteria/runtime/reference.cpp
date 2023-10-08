@@ -16,157 +16,13 @@
 #include "../utils.hpp"
 namespace asteria {
 
-const Value&
+void
 Reference::
-do_dereference_readonly_slow() const
+do_throw_not_dereferenceable() const
   {
-    const Value* qval;
-
-    // Get the root value.
-    switch(this->index()) {
-      case index_invalid:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to use a bypassed variable or reference"));
-
-      case index_void:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to use the result of a function call which returned no value"));
-
-      case index_temporary:
-        qval = &(this->m_value);
-        break;
-
-      case index_variable: {
-        auto qvar = unerase_cast<Variable*>(this->m_var);
-        if(!qvar)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to use a moved-away reference (this is probably a bug)"));
-
-        if(qvar->is_uninitialized())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to reference an uninitialized variable"));
-
-        qval = &(qvar->get_value());
-        break;
-      }
-
-      case index_ptc_args:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Tail call wrapper not dereferenceable"));
-
-      default:
-        ASTERIA_TERMINATE((
-            "Invalid reference type enumeration (index `$1`)"),
-            this->index());
-    }
-
-    // Apply modifiers.
-    auto bpos = this->m_mods.begin();
-    auto epos = this->m_mods.end();
-
-    while(bpos != epos)
-      if(!(qval = bpos++->apply_read_opt(*qval)))
-        return null_value;
-
-    return *qval;
-  }
-
-Value&
-Reference::
-do_mutate_into_temporary_slow()
-  {
-    // Dereference and copy the value. Don't move-assign a value into itself.
-    auto val = this->dereference_readonly();
-    this->set_temporary(::std::move(val));
-    return this->m_value;
-  }
-
-Reference&
-Reference::
-do_finish_call_slow(Global_Context& global)
-  {
-    // We must rebuild the backtrace using this queue if an exception is thrown.
-    cow_vector<refcnt_ptr<PTC_Arguments>> frames;
-    refcnt_ptr<PTC_Arguments> ptca;
-    int ptc_conj = ptc_aware_by_ref;
-    Reference_Stack alt_stack;
-
-    try {
-      // Unpack all frames recursively.
-      // Note that `*this` is overwritten before the wrapped function is called.
-      while(this->m_index == index_ptc_args) {
-        ROCKET_ASSERT(this->m_ptca.use_count() == 1);
-        ptca.reset(static_cast<PTC_Arguments*>(this->m_ptca.release()));
-        this->m_index = index_invalid;
-
-        // Get the `this` reference and all the other arguments.
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_single_step_trap, ptca->sloc());
-        auto& stack = ptca->stack();
-        *this = ::std::move(stack.mut_top());
-        stack.pop();
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptca->sloc(), ptca->target());
-
-        // Record this frame.
-        frames.emplace_back(ptca);
-        ptc_conj |= ptca->ptc_aware();
-
-        // Perform a non-tail call.
-        ptca->target().invoke_ptc_aware(*this, global, ::std::move(stack));
-      }
-
-      // Check for deferred expressions.
-      while(frames.size()) {
-        // Pop frames in reverse order.
-        ptca = ::std::move(frames.mut_back());
-        frames.pop_back();
-
-        if(ptca->defer().size()) {
-          // Create a dummy context for evaluation of deferred expressions.
-          Executive_Context fctx(Executive_Context::M_defer(), global, ptca->stack(),
-                                 alt_stack, ::std::move(ptca->defer()));
-          fctx.on_scope_exit(air_status_next);
-        }
-
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptca->sloc(), ptca->target(), *this);
-      }
-    }
-    catch(Runtime_Error& except) {
-      // Check for deferred expressions.
-      while(frames.size()) {
-        // Pop frames in reverse order.
-        ptca = ::std::move(frames.mut_back());
-        frames.pop_back();
-
-        // Note that if we arrive here, there must have been an exception thrown when
-        // unpacking the last frame (i.e. the last call did not return), so the last
-        // frame does not have its enclosing function set.
-        except.push_frame_plain(ptca->sloc(), sref("[proper tail call]"));
-
-        if(auto qcall = ptca->caller_opt())
-          except.push_frame_func(qcall->sloc(), qcall->func());
-
-        if(ptca->defer().size()) {
-          // Create a dummy context for evaluation of deferred expressions.
-          Executive_Context fctx(Executive_Context::M_defer(), global, ptca->stack(),
-                                 alt_stack, ::std::move(ptca->defer()));
-          fctx.on_scope_exit(except);
-        }
-
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptca->sloc(), ptca->target(), except);
-      }
-      throw;
-    }
-
-    if(!this->is_void()) {
-      // If any of the calls inbetween is void, the result is void.
-      // If all of the calls inbetween are by reference, the result is by reference.
-      if(ptc_conj == ptc_aware_void)
-        this->set_void();
-      else if(ptc_conj != ptc_aware_by_ref)
-        this->mut_temporary();
-    }
-
-    return *this;
+    ASTERIA_THROW_RUNTIME_ERROR((
+        "Reference type `$1` not dereferenceable"),
+        describe_xref(this->m_xref));
   }
 
 void
@@ -180,123 +36,217 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         temp.insert(var.get(), var);
   }
 
+const Value&
+Reference::
+do_dereference_readonly_slow() const
+  {
+    const Value* valp = nullptr;
+    size_t mi = 0;
+
+    switch(this->m_xref) {
+      case xref_invalid:
+        ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+
+      case xref_void:
+        ASTERIA_THROW_RUNTIME_ERROR(("Void reference not dereferenceable"));
+
+      case xref_temporary:
+        valp = &(this->m_value);
+        break;
+
+      case xref_variable: {
+        auto var = unerase_cast<Variable*>(this->m_var.get());
+        ROCKET_ASSERT(var);
+
+        if(!var->is_initialized())
+          ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+
+        valp = &(var->get_value());
+        break;
+      }
+
+      case xref_ptc:
+        ASTERIA_THROW_RUNTIME_ERROR(("Proper tail call not expanded"));
+
+      default:
+        ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
+    }
+
+    while(valp && (mi != this->m_mods.size()))
+      valp = this->m_mods[mi++].apply_read_opt(*valp);
+
+    if(!valp)
+      return null_value;
+
+    return *valp;
+  }
+
 Value&
 Reference::
 dereference_mutable() const
   {
-    Value* qval;
+    Value* valp = nullptr;
+    size_t mi = 0;
 
-    // Get the root value.
-    switch(this->index()) {
-      case index_invalid:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to use a bypassed variable or reference"));
+    switch(this->m_xref) {
+      case xref_invalid:
+        ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
 
-      case index_void:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to use the result of a function call which returned no value"));
+      case xref_void:
+        ASTERIA_THROW_RUNTIME_ERROR(("Void reference not dereferenceable"));
 
-      case index_temporary:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to modify a temporary `$1`"),
-            this->m_value);
+      case xref_temporary:
+        ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a temporary value"));
 
-      case index_variable: {
-        auto qvar = unerase_cast<Variable*>(this->m_var);
-        if(!qvar)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to use a moved-away reference (this is probably a bug)"));
+      case xref_variable: {
+        auto var = unerase_cast<Variable*>(this->m_var.get());
+        ROCKET_ASSERT(var);
 
-        if(qvar->is_uninitialized())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to reference an uninitialized variable"));
+        if(!var->is_initialized())
+          ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
 
-        if(!qvar->is_mutable())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to modify an immutable variable"));
+        if(var->is_immutable())
+          ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a `const` variable"));
 
-        qval = &(qvar->mut_value());
+        valp = &(var->mut_value());
         break;
       }
 
-      case index_ptc_args:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Tail call wrapper not dereferenceable"));
+      case xref_ptc:
+        ASTERIA_THROW_RUNTIME_ERROR(("Proper tail call not expanded"));
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid reference type enumeration (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
     }
 
-    // Apply modifiers.
-    auto bpos = this->m_mods.begin();
-    auto epos = this->m_mods.end();
+    while(valp && (mi != this->m_mods.size()))
+      valp = &(this->m_mods[mi++].apply_open(*valp));
 
-    while(bpos != epos)
-      qval = &(bpos++->apply_open(*qval));
-
-    return *qval;
+    return *valp;
   }
 
 Value
 Reference::
 dereference_unset() const
   {
-    Value* qval;
+    Value* valp = nullptr;
+    size_t mi = 0;
 
-    // Get the root value.
-    switch(this->index()) {
-      case index_invalid:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to use a bypassed variable or reference"));
+    switch(this->m_xref) {
+      case xref_invalid:
+        ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
 
-      case index_void:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to use the result of a function call which returned no value"));
+      case xref_void:
+        ASTERIA_THROW_RUNTIME_ERROR(("Void reference not dereferenceable"));
 
-      case index_temporary:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Attempt to modify a temporary `$1`"),
-            this->m_value);
+      case xref_temporary:
+        ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a temporary value"));
 
-      case index_variable: {
-        auto qvar = unerase_cast<Variable*>(this->m_var);
-        if(!qvar)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to use a moved-away reference (this is probably a bug)"));
+      case xref_variable: {
+        auto var = unerase_cast<Variable*>(this->m_var.get());
+        ROCKET_ASSERT(var);
 
-        if(qvar->is_uninitialized())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Attempt to reference an uninitialized variable"));
+        if(!var->is_initialized())
+          ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
 
-        qval = &(qvar->mut_value());
+        if(var->is_immutable())
+          ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a `const` variable"));
+
+        valp = &(var->mut_value());
         break;
       }
 
-      case index_ptc_args:
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Tail call wrapper not dereferenceable"));
+      case xref_ptc:
+        ASTERIA_THROW_RUNTIME_ERROR(("Proper tail call not expanded"));
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid reference type enumeration (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
     }
 
-    // Apply modifiers except the last one.
-    auto bpos = this->m_mods.begin();
-    auto epos = this->m_mods.end();
+    if(this->m_mods.size() == 0)
+      ASTERIA_THROW_RUNTIME_ERROR(("Only elements of an array or object may be unset"));
 
-    if(bpos == epos)
-      ASTERIA_THROW_RUNTIME_ERROR((
-          "Root values cannot be unset"));
+    while(valp && (mi != this->m_mods.size() - 1))
+      valp = this->m_mods[mi++].apply_write_opt(*valp);
 
-    while(bpos != epos - 1)
-      if(!(qval = bpos++->apply_write_opt(*qval)))
-        return null_value;
+    if(!valp)
+      return null_value;
 
-    return bpos->apply_unset(*qval);
+    return this->m_mods[mi].apply_unset(*valp);
+  }
+
+void
+Reference::
+do_use_function_result_slow(Global_Context& global)
+  {
+    refcnt_ptr<PTC_Arguments> ptc;
+    cow_vector<refcnt_ptr<PTC_Arguments>> frames;
+    bool is_void = false;
+    bool by_value = false;
+    Reference_Stack alt_stack;
+
+    try {
+      while(this->m_xref == xref_ptc) {
+        ptc.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
+        ROCKET_ASSERT(ptc.use_count() == 1);
+        frames.emplace_back(ptc);
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_single_step_trap, ptc->sloc());
+
+        // Get the `this` reference and all the other arguments.
+        *this = ::std::move(ptc->stack().mut_top());
+        ptc->stack().pop();
+
+        if(ptc->ptc_aware() == ptc_aware_void)
+          is_void = true;
+        else if(ptc->ptc_aware() == ptc_aware_by_val)
+          by_value = true;
+
+        // Perform a non-tail call.
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptc->sloc(), ptc->target());
+        ptc->target().invoke_ptc_aware(*this, global, ::std::move(ptc->stack()));
+      }
+
+      while(frames.size()) {
+        ptc = ::std::move(frames.mut_back());
+        frames.pop_back();
+
+        if(ptc->defer().size())
+          Executive_Context(Executive_Context::M_defer(),
+                global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+            .on_scope_exit(air_status_next);
+
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(),
+                                 ptc->target(), *this);
+      }
+    }
+    catch(Runtime_Error& except) {
+      while(frames.size()) {
+        ptc = ::std::move(frames.mut_back());
+        frames.pop_back();
+
+        // Note that if we arrive here, there must have been an exception thrown
+        // when unpacking the last frame (i.e. the last call did not return), so
+        // the last frame does not have its enclosing function set.
+        except.push_frame_plain(ptc->sloc(), sref("[proper tail call]"));
+
+        if(auto qcall = ptc->caller_opt())
+          except.push_frame_func(qcall->sloc(), qcall->func());
+
+        if(ptc->defer().size())
+          Executive_Context(Executive_Context::M_defer(),
+                global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+            .on_scope_exit(except);
+
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptc->sloc(),
+                                 ptc->target(), except);
+      }
+      throw;
+    }
+
+    if(is_void)
+      this->set_void();
+    else if(by_value && (this->m_xref != xref_void))
+      this->dereference_copy();
   }
 
 }  // namespace asteria
