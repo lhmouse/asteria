@@ -224,7 +224,8 @@ struct Wrapped_Index
 
     constexpr
     Wrapped_Index(ptrdiff_t ssize, int64_t sindex) noexcept
-      : nappend(0), nprepend(0),
+      :
+        nappend(0), nprepend(0),
         rindex(0)
       {
         ROCKET_ASSERT(ssize >= 0);

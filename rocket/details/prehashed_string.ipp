@@ -8,7 +8,8 @@ namespace details_prehashed_string {
 
 template<typename stringT, typename hashT, typename eqT>
 class string_storage
-  : private allocator_wrapper_base_for<hashT>::type,
+  :
+    private allocator_wrapper_base_for<hashT>::type,
     private allocator_wrapper_base_for<eqT>::type
   {
   public:
@@ -28,11 +29,13 @@ class string_storage
     template<typename... paramsT>
     explicit constexpr
     string_storage(const hasher& hf, const key_equal& eq, paramsT&&... params)
-      : hasher_base(hf),
+      :
+        hasher_base(hf),
         key_equal_base(eq),
         m_str(::std::forward<paramsT>(params)...),
         m_hval(this->as_hasher()(this->m_str))
-      { }
+      {
+      }
 
     string_storage(const string_storage&) = delete;
     string_storage& operator=(const string_storage&) = delete;

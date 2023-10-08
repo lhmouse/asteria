@@ -191,8 +191,10 @@ class Statement
     constexpr
     Statement(XStmtT&& xstmt)
        noexcept(::std::is_nothrow_constructible<decltype(m_stor), XStmtT&&>::value)
-      : m_stor(::std::forward<XStmtT>(xstmt))
-      { }
+      :
+        m_stor(::std::forward<XStmtT>(xstmt))
+      {
+      }
 
     template<typename XStmtT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XStmtT&&>::value)>
@@ -218,12 +220,7 @@ class Statement
 
     bool
     is_empty_return() const noexcept
-      {
-        if(this->index() != index_return)
-          return false;
-        else
-          return this->m_stor.as<index_return>().expr.units.empty();
-      }
+      { return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.units.empty();  }
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,

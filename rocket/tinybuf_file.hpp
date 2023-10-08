@@ -15,7 +15,8 @@ namespace rocket {
 
 template<typename charT>
 class basic_tinybuf_file
-  : public basic_tinybuf<charT>
+  :
+    public basic_tinybuf<charT>
   {
   public:
     using char_type     = charT;
@@ -35,17 +36,22 @@ class basic_tinybuf_file
   public:
     constexpr
     basic_tinybuf_file() noexcept
-      { }
+      {
+      }
 
     explicit
     basic_tinybuf_file(file_type&& file) noexcept
-      : m_file(::std::move(file))
-      { }
+      :
+        m_file(::std::move(file))
+      {
+      }
 
     explicit
     basic_tinybuf_file(handle_type fp, closer_type cl) noexcept
-      : m_file(fp, cl)
-      { }
+      :
+        m_file(fp, cl)
+      {
+      }
 
     explicit
     basic_tinybuf_file(const char* path, open_mode mode)
@@ -57,7 +63,8 @@ class basic_tinybuf_file
     // move-constructible.
     basic_tinybuf_file(basic_tinybuf_file&& other)
       noexcept(is_nothrow_move_constructible<file_type>::value)
-      : m_file(::std::move(other.m_file)),
+      :
+        m_file(::std::move(other.m_file)),
         m_mbst_g(noadl::exchange(other.m_mbst_g)),
         m_mbst_p(noadl::exchange(other.m_mbst_p))
       {

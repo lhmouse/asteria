@@ -17,7 +17,8 @@ namespace asteria {
 namespace {
 
 class CRC32_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::uLong m_reg;
@@ -38,7 +39,8 @@ class CRC32_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     CRC32_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -124,7 +126,8 @@ do_construct_CRC32(V_object& result)
   }
 
 class FNV1a32_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     uint32_t m_reg;
@@ -145,7 +148,8 @@ class FNV1a32_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     FNV1a32_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -250,7 +254,8 @@ do_copy_SHA_result(const ::std::array<unsigned char, N>& bytes)
   }
 
 class MD5_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::MD5_CTX m_reg[1];
@@ -271,7 +276,8 @@ class MD5_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     MD5_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -358,7 +364,8 @@ do_construct_MD5(V_object& result)
   }
 
 class SHA1_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::SHA_CTX m_reg[1];
@@ -379,7 +386,8 @@ class SHA1_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     SHA1_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -466,7 +474,8 @@ do_construct_SHA1(V_object& result)
   }
 
 class SHA224_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::SHA256_CTX m_reg[1];
@@ -487,7 +496,8 @@ class SHA224_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     SHA224_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -574,7 +584,8 @@ do_construct_SHA224(V_object& result)
   }
 
 class SHA256_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::SHA256_CTX m_reg[1];
@@ -595,7 +606,8 @@ class SHA256_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     SHA256_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -682,7 +694,8 @@ do_construct_SHA256(V_object& result)
   }
 
 class SHA384_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::SHA512_CTX m_reg[1];
@@ -703,7 +716,8 @@ class SHA384_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     SHA384_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -790,7 +804,8 @@ do_construct_SHA384(V_object& result)
   }
 
 class SHA512_Hasher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::SHA512_CTX m_reg[1];
@@ -811,7 +826,8 @@ class SHA512_Hasher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     SHA512_Hasher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override

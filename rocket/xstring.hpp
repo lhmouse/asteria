@@ -31,7 +31,8 @@ xstrlen(charT* str) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrlen(str))
                            ? details_xstring::maybe_constexpr::ystrlen(str)
-                           : details_xstring::ystrlen(str);
+                           :
+                             details_xstring::ystrlen(str);
   }
 
 template<typename charT>
@@ -41,7 +42,8 @@ xstrchr(charT* str, typename identity<charT>::type target) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrchr(str, target) == str)
                            ? details_xstring::maybe_constexpr::ystrchr(str, target)
-                           : details_xstring::ystrchr(str, target);
+                           :
+                             details_xstring::ystrchr(str, target);
   }
 
 template<typename charT>
@@ -51,7 +53,8 @@ xmemchr(charT* str, typename identity<charT>::type target, size_t len) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemchr(str, target, len) == str)
                            ? details_xstring::maybe_constexpr::ymemchr(str, target, len)
-                           : details_xstring::ymemchr(str, target, len);
+                           :
+                             details_xstring::ymemchr(str, target, len);
   }
 
 template<typename charT>
@@ -61,7 +64,8 @@ xstrcmp(const charT* lhs, const charT* rhs) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrcmp(lhs, rhs))
                            ? details_xstring::maybe_constexpr::ystrcmp(lhs, rhs)
-                           : details_xstring::ystrcmp(lhs, rhs);
+                           :
+                             details_xstring::ystrcmp(lhs, rhs);
   }
 
 template<typename charT>
@@ -71,7 +75,8 @@ xstreq(const charT* lhs, const charT* rhs) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrcmp(lhs, rhs))
                           ? (details_xstring::maybe_constexpr::ystrcmp(lhs, rhs) == 0)
-                          : (details_xstring::ystrcmp(lhs, rhs) == 0);
+                          :
+                            (details_xstring::ystrcmp(lhs, rhs) == 0);
   }
 
 template<typename charT>
@@ -81,7 +86,8 @@ xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len))
                            ? details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len)
-                           : details_xstring::ymemcmp(lhs, rhs, len);
+                           :
+                             details_xstring::ymemcmp(lhs, rhs, len);
   }
 
 template<typename charT>
@@ -91,7 +97,8 @@ xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len))
                           ? (details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len) == 0)
-                          : (::memcmp(lhs, rhs, sizeof(charT) * len) == 0);
+                          :
+                            (::memcmp(lhs, rhs, sizeof(charT) * len) == 0);
   }
 
 template<typename charT>
@@ -109,7 +116,8 @@ xmempset(charT* out, typename identity<charT>::type elem, size_t len) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymempset(out, elem, len) == out)
                            ? details_xstring::maybe_constexpr::ymempset(out, elem, len)
-                           : details_xstring::ymempset(out, elem, len);
+                           :
+                             details_xstring::ymempset(out, elem, len);
   }
 
 template<typename charT>
@@ -127,7 +135,8 @@ xstrpcpy(charT* out, const typename identity<charT>::type* str) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrpcpy(out, str) == out)
                            ? details_xstring::maybe_constexpr::ystrpcpy(out, str)
-                           : details_xstring::ystrpcpy(out, str);
+                           :
+                             details_xstring::ystrpcpy(out, str);
   }
 
 template<typename charT>
@@ -145,7 +154,8 @@ xmempcpy(charT* out, const typename identity<charT>::type* str, size_t len) noex
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymempcpy(out, str, len) == out)
                            ? details_xstring::maybe_constexpr::ymempcpy(out, str, len)
-                           : details_xstring::ymempcpy(out, str, len);
+                           :
+                             details_xstring::ymempcpy(out, str, len);
   }
 
 template<typename charT>

@@ -31,8 +31,10 @@ class Argument_Reader
   public:
     explicit
     Argument_Reader(stringR name, Reference_Stack&& stack) noexcept
-      : m_name(name), m_stack(::std::move(stack))
-      { }
+      :
+        m_name(name), m_stack(::std::move(stack))
+      {
+      }
 
   private:
     inline

@@ -24,23 +24,30 @@ struct ebo_placeholder
     template<typename noopT>
     constexpr
     ebo_placeholder(noopT&&) noexcept
-      { }
+      {
+      }
   };
 
 template<typename baseT, size_t indexT, typename... othersT>
 struct ebo_select_aux
-  : allocator_wrapper_base_for<baseT>  // no duplicate
-  { };
+  :
+    allocator_wrapper_base_for<baseT>  // no duplicate
+  {
+  };
 
 template<typename baseT, size_t indexT, typename... othersT>
 struct ebo_select_aux<baseT, indexT, baseT, othersT...>
-  : identity<ebo_placeholder<indexT>>  // duplicate
-  { };
+  :
+    identity<ebo_placeholder<indexT>>  // duplicate
+  {
+  };
 
 template<typename baseT, size_t indexT, typename firstT, typename... restT>
 struct ebo_select_aux<baseT, indexT, firstT, restT...>
-  : ebo_select_aux<baseT, indexT, restT...>  // recursive
-  { };
+  :
+    ebo_select_aux<baseT, indexT, restT...>  // recursive
+  {
+  };
 
 template<typename baseT, typename... othersT>
 using ebo_select  = typename ebo_select_aux<baseT, sizeof...(othersT), othersT...>::type;
@@ -103,7 +110,8 @@ class basic_bucket
 
 template<typename allocT, typename hashT>
 struct basic_storage
-  : public storage_header,
+  :
+    public storage_header,
     public allocator_wrapper_base_for<allocT>::type,
     public ebo_select<hashT, allocT>
   {
@@ -118,7 +126,8 @@ struct basic_storage
 
     basic_storage(unknown_function* xdtor, const allocator_type& xalloc,
                   const hasher& hf, size_type xnblk) noexcept
-      : allocator_wrapper_base_for<allocT>::type(xalloc),
+      :
+        allocator_wrapper_base_for<allocT>::type(xalloc),
         ebo_select<hashT, allocT>(hf),
         nblk(xnblk)
       {
@@ -327,7 +336,8 @@ struct storage_traits
 
 template<typename allocT, typename hashT, typename eqT>
 class storage_handle
-  : private allocator_wrapper_base_for<allocT>::type,
+  :
+    private allocator_wrapper_base_for<allocT>::type,
     private ebo_select<hashT, allocT>,
     private ebo_select<eqT, allocT, hashT>
   {
@@ -360,24 +370,30 @@ class storage_handle
       noexcept(conjunction<is_nothrow_constructible<allocator_type>,
                            is_nothrow_constructible<hasher>,
                            is_nothrow_constructible<key_equal>>::value)
-      : allocator_base(),
+      :
+        allocator_base(),
         ebo_select<hashT, allocT>(),
         ebo_select<eqT, allocT, hashT>()
-      { }
+      {
+      }
 
     constexpr
     storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
-      : allocator_base(alloc),
+      :
+        allocator_base(alloc),
         ebo_select<hashT, allocT>(hf),
         ebo_select<eqT, allocT, hashT>(eq)
-      { }
+      {
+      }
 
     constexpr
     storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
-      : allocator_base(::std::move(alloc)),
+      :
+        allocator_base(::std::move(alloc)),
         ebo_select<hashT, allocT>(hf),
         ebo_select<eqT, allocT, hashT>(eq)
-      { }
+      {
+      }
 
 #ifdef __cpp_constexpr_dynamic_alloc
     constexpr
@@ -810,7 +826,8 @@ class hashmap_iterator
   private:
     // This constructor is called by the container.
     hashmap_iterator(bucketT* begin, size_t ncur, size_t nend) noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
+      :
+        m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       {
         // Go to the first following non-empty bucket if any.
         while((this->m_cur != this->m_end) && !*(this->m_cur))
@@ -820,17 +837,21 @@ class hashmap_iterator
   public:
     constexpr
     hashmap_iterator() noexcept
-      : m_begin(), m_cur(), m_end()
-      { }
+      :
+        m_begin(), m_cur(), m_end()
+      {
+      }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
     constexpr
     hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
-      : m_begin(other.m_begin),
+      :
+        m_begin(other.m_begin),
         m_cur(other.m_cur),
         m_end(other.m_end)
-      { }
+      {
+      }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>

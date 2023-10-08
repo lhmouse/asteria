@@ -9,7 +9,8 @@
 namespace asteria {
 
 class Abstract_Context
-  : public rcfwd<Abstract_Context>
+  :
+    public rcfwd<Abstract_Context>
   {
   public:
     struct M_plain     { };

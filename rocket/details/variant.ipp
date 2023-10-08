@@ -9,32 +9,42 @@ namespace details_variant {
 // Get the index of `T` in `S`.
 template<size_t N, typename T, typename... S>
 struct type_finder
-  { };
+  {
+  };
 
 template<size_t N, typename T, typename... S>
 struct type_finder<N, T, T, S...>
-  : integral_constant<size_t, N>  // found
-  { };
+  :
+    integral_constant<size_t, N>  // found
+  {
+  };
 
 template<size_t N, typename T, typename M, typename... S>
 struct type_finder<N, T, M, S...>
-  : type_finder<N + 1, T, S...>
-  { };
+  :
+    type_finder<N + 1, T, S...>
+  {
+  };
 
 // Get the `N`-th type in `S`.
 template<size_t N, typename... S>
 struct type_getter
-  { };
+  {
+  };
 
 template<typename M, typename... S>
 struct type_getter<0, M, S...>
-  : enable_if<true, M>  // found
-  { };
+  :
+    enable_if<true, M>  // found
+  {
+  };
 
 template<size_t N, typename M, typename... S>
 struct type_getter<N, M, S...>
-  : type_getter<N - 1, S...>
-  { };
+  :
+    type_getter<N - 1, S...>
+  {
+  };
 
 // Define types for static lookup tables.
 template<bool... bitsT>

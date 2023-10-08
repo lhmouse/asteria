@@ -11,7 +11,8 @@
 namespace asteria {
 
 class Runtime_Error
-  : public virtual exception
+  :
+    public virtual exception
   {
   public:
     enum class M_throw;
@@ -30,17 +31,20 @@ class Runtime_Error
     template<typename XValT>
     explicit
     Runtime_Error(M_throw, XValT&& xval, const Source_Location& sloc)
-      : m_value(::std::forward<XValT>(xval))
+      :
+        m_value(::std::forward<XValT>(xval))
       { this->do_backtrace({ frame_type_throw, sloc, this->m_value });  }
 
     explicit
     Runtime_Error(M_assert, const Source_Location& sloc, stringR msg)
-      : m_value("assertion failure: " + msg)
+      :
+        m_value("assertion failure: " + msg)
       { this->do_backtrace({ frame_type_assert, sloc, this->m_value });  }
 
     explicit
     Runtime_Error(M_native, stringR msg)
-      : m_value(msg)
+      :
+        m_value(msg)
       { this->do_backtrace({ frame_type_native, { }, this->m_value });  }
 
   private:

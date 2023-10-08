@@ -8,7 +8,8 @@ namespace details_unique_handle {
 
 template<typename handleT, typename closerT>
 class stored_handle
-  : private allocator_wrapper_base_for<closerT>::type
+  :
+    private allocator_wrapper_base_for<closerT>::type
   {
   public:
     using handle_type  = handleT;
@@ -23,15 +24,18 @@ class stored_handle
   public:
     explicit constexpr
     stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
-      : closer_base(),
+      :
+        closer_base(),
         m_hv(this->as_closer().null())
-      { }
+      {
+      }
 
     template<typename... clparamsT>
     explicit constexpr
     stored_handle(handle_type hv, clparamsT&&... clparams)
       noexcept(is_nothrow_constructible<closer_type, clparamsT&&...>::value)
-      : closer_base(::std::forward<clparamsT>(clparams)...),
+      :
+        closer_base(::std::forward<clparamsT>(clparams)...),
         m_hv(::std::move(hv))  { }
 
     ~stored_handle()
@@ -84,8 +88,10 @@ class default_closer_wrapper
   public:
     constexpr  // non-explicit
     default_closer_wrapper(closerT&& xcl)
-      : m_cl(::std::forward<closerT>(xcl))
-      { }
+      :
+        m_cl(::std::forward<closerT>(xcl))
+      {
+      }
 
   public:
     constexpr

@@ -28,7 +28,8 @@ do_zlib_throw_error(const char* fname, const ::z_stream* strm, int err)
   }
 
 class Deflator final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::z_stream m_strm[1] = { };
@@ -79,7 +80,8 @@ class Deflator final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     Deflator*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
@@ -217,7 +219,8 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
   }
 
 class Inflator final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     ::z_stream m_strm[1] = { };
@@ -268,7 +271,8 @@ class Inflator final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     Inflator*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override

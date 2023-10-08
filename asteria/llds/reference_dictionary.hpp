@@ -19,7 +19,8 @@ class Reference_Dictionary
   public:
     explicit constexpr
     Reference_Dictionary() noexcept
-      { }
+      {
+      }
 
     Reference_Dictionary(Reference_Dictionary&& other) noexcept
       {
@@ -29,7 +30,8 @@ class Reference_Dictionary
     Reference_Dictionary&
     operator=(Reference_Dictionary&& other) & noexcept
       {
-        return this->swap(other);
+        this->swap(other);
+        return *this;
       }
 
     Reference_Dictionary&

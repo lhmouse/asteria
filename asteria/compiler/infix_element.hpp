@@ -82,8 +82,10 @@ class Infix_Element
     constexpr
     Infix_Element(XElemT&& xelem)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XElemT&&>::value)
-      : m_stor(::std::forward<XElemT>(xelem))
-      { }
+      :
+        m_stor(::std::forward<XElemT>(xelem))
+      {
+      }
 
     template<typename XElemT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XElemT&&>::value)>

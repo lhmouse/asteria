@@ -11,7 +11,8 @@
 namespace asteria {
 
 class Compiler_Error
-  : public virtual exception
+  :
+    public virtual exception
   {
   public:
     enum class M_status;
@@ -28,15 +29,19 @@ class Compiler_Error
   public:
     explicit
     Compiler_Error(M_status, Compiler_Status xstat, const Source_Location& xsloc)
-      : m_stat(xstat), m_sloc(xsloc),
+      :
+        m_stat(xstat), m_sloc(xsloc),
         m_desc(::rocket::sref(describe_compiler_status(xstat)))
-      { this->do_compose_message();  }
+      {
+        this->do_compose_message();
+      }
 
     template<typename... ParamsT>
     explicit
     Compiler_Error(M_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
-      : m_stat(xstat), m_sloc(xsloc)
+      :
+        m_stat(xstat), m_sloc(xsloc)
       {
         format(this->m_fmt, templ, params...);
         this->m_desc = this->m_fmt.extract_string();
@@ -47,7 +52,8 @@ class Compiler_Error
     explicit
     Compiler_Error(M_add_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
-      : m_stat(xstat), m_sloc(xsloc)
+      :
+        m_stat(xstat), m_sloc(xsloc)
       {
         format(this->m_fmt, templ, params...);
         this->m_desc = this->m_fmt.extract_string();

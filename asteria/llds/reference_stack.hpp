@@ -19,7 +19,8 @@ class Reference_Stack
   public:
     explicit constexpr
     Reference_Stack() noexcept
-      { }
+      {
+      }
 
     Reference_Stack(Reference_Stack&& other) noexcept
       {
@@ -29,7 +30,8 @@ class Reference_Stack
     Reference_Stack&
     operator=(Reference_Stack&& other) & noexcept
       {
-        return this->swap(other);
+        this->swap(other);
+        return *this;
       }
 
     Reference_Stack&

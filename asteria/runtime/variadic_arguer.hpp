@@ -10,7 +10,8 @@
 namespace asteria {
 
 class Variadic_Arguer final
-  : public rcfwd<Variadic_Arguer>,
+  :
+    public rcfwd<Variadic_Arguer>,
     public Abstract_Function
   {
   private:
@@ -21,13 +22,17 @@ class Variadic_Arguer final
   public:
     explicit
     Variadic_Arguer(const Source_Location& xsloc, stringR xfunc)
-      : m_sloc(xsloc), m_func(xfunc)
-      { }
+      :
+        m_sloc(xsloc), m_func(xfunc)
+      {
+      }
 
     explicit
     Variadic_Arguer(const Variadic_Arguer& other, const cow_vector<Reference>& xvargs)
-      : m_sloc(other.m_sloc), m_func(other.m_func), m_vargs(xvargs)
-      { }
+      :
+        m_sloc(other.m_sloc), m_func(other.m_func), m_vargs(xvargs)
+      {
+      }
 
   public:
     const Source_Location&

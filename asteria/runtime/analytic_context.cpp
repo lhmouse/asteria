@@ -9,7 +9,8 @@ namespace asteria {
 Analytic_Context::
 Analytic_Context(M_function, Abstract_Context* parent_opt,
                  const cow_vector<phsh_string>& params)
-  : m_parent_opt(parent_opt)
+  :
+    m_parent_opt(parent_opt)
   {
     // Set parameters, which are local references.
     for(const auto& name : params) {

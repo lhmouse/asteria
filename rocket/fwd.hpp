@@ -173,18 +173,24 @@ using ::std::memory_order_seq_cst;
 
 template<typename typeT>
 struct remove_cvref
-  : remove_cv<typename remove_reference<typeT>::type>
-  { };
+  :
+    remove_cv<typename remove_reference<typeT>::type>
+  {
+  };
 
 template<typename typeT>
 struct is_nothrow_swappable
-  : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
-  { };
+  :
+    integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
+  {
+  };
 
 template<typename typeT>
 struct identity
-  : enable_if<true, typeT>
-  { };
+  :
+    enable_if<true, typeT>
+  {
+  };
 
 template<typename containerT>
 constexpr
@@ -230,43 +236,59 @@ exchange(valueT& ref, withT&&... with)
 
 template<typename... typesT>
 struct conjunction
-  : true_type
-  { };
+  :
+    true_type
+  {
+  };
 
 template<typename firstT, typename... restT>
 struct conjunction<firstT, restT...>
-  : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
-  { };
+  :
+    conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
+  {
+  };
 
 template<typename... typesT>
 struct disjunction
-  : false_type
-  { };
+  :
+    false_type
+  {
+  };
 
 template<typename firstT, typename... restT>
 struct disjunction<firstT, restT...>
-  : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
-  { };
+  :
+    conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv
-  : identity<targetT>
-  { };
+  :
+    identity<targetT>
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv<targetT, const sourceT>
-  : add_const<targetT>
-  { };
+  :
+    add_const<targetT>
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv<targetT, volatile sourceT>
-  : add_volatile<targetT>
-  { };
+  :
+    add_volatile<targetT>
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv<targetT, const volatile sourceT>
-  : add_cv<targetT>
-  { };
+  :
+    add_cv<targetT>
+  {
+  };
 
 #include "details/fwd.ipp"
 
@@ -280,13 +302,17 @@ xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
 
 template<typename firstT, typename secondT, typename... restT>
 struct select_type
-  : select_type<typename select_type<firstT, secondT>::type, restT...>
-  { };
+  :
+    select_type<typename select_type<firstT, secondT>::type, restT...>
+  {
+  };
 
 template<typename firstT, typename secondT>
 struct select_type<firstT, secondT>
-  : identity<decltype(true ? ::std::declval<firstT()>()() : ::std::declval<secondT()>()())>
-  { };
+  :
+    identity<decltype(true ? ::std::declval<firstT()>()() : ::std::declval<secondT()>()())>
+  {
+  };
 
 template<typename lhsT, typename rhsT>
 constexpr
@@ -343,23 +369,31 @@ clamp_cast(xvT&& xv, loT&& lo, upT&& up)
 
 template<typename iteratorT>
 struct is_input_iterator
-  : details_fwd::is_input_iterator_aux<iteratorT, void>
-  { };
+  :
+    details_fwd::is_input_iterator_aux<iteratorT, void>
+  {
+  };
 
 template<typename targetT, typename... candiatesT>
 struct is_any_type_of
-  : false_type
-  { };
+  :
+    false_type
+  {
+  };
 
 template<typename targetT, typename... restT>
 struct is_any_type_of<targetT, targetT, restT...>
-  : true_type
-  { };
+  :
+    true_type
+  {
+  };
 
 template<typename targetT, typename firstT, typename... restT>
 struct is_any_type_of<targetT, firstT, restT...>
-  : is_any_type_of<targetT, restT...>
-  { };
+  :
+    is_any_type_of<targetT, restT...>
+  {
+  };
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
@@ -741,23 +775,27 @@ arent(xvalueT&& xval)
 
 template<intmax_t valueT>
 struct lowest_signed
-  : details_fwd::integer_selector<intmax_t, valueT,
+  :
+    details_fwd::integer_selector<intmax_t, valueT,
          signed char,
          signed short,
          signed int,
          signed long,
          signed long long>
-  { };
+  {
+  };
 
 template<uintmax_t valueT>
 struct lowest_unsigned
-  : details_fwd::integer_selector<uintmax_t, valueT,
+  :
+    details_fwd::integer_selector<uintmax_t, valueT,
          unsigned char,
          unsigned short,
          unsigned int,
          unsigned long,
          unsigned long long>
-  { };
+  {
+  };
 
 // Fancy pointer conversion
 template<typename pointerT>

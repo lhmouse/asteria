@@ -8,7 +8,8 @@ namespace details_linear_buffer {
 
 template<typename allocT>
 class basic_storage
-  : private allocator_wrapper_base_for<allocT>::type
+  :
+    private allocator_wrapper_base_for<allocT>::type
   {
   public:
     using allocator_type  = allocT;
@@ -26,18 +27,24 @@ class basic_storage
   public:
     constexpr
     basic_storage() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : allocator_base()
-      { }
+      :
+        allocator_base()
+      {
+      }
 
     explicit constexpr
     basic_storage(const allocator_type& alloc) noexcept
-      : allocator_base(alloc)
-      { }
+      :
+        allocator_base(alloc)
+      {
+      }
 
     explicit constexpr
     basic_storage(allocator_type&& alloc) noexcept
-      : allocator_base(::std::move(alloc))
-      { }
+      :
+        allocator_base(::std::move(alloc))
+      {
+      }
 
     ~basic_storage()
       { this->deallocate();  }

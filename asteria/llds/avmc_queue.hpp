@@ -30,14 +30,20 @@ class AVMC_Queue
   public:
     explicit constexpr
     AVMC_Queue() noexcept
-      { }
+      {
+      }
 
     AVMC_Queue(AVMC_Queue&& other) noexcept
-      { this->swap(other);  }
+      {
+        this->swap(other);
+      }
 
     AVMC_Queue&
     operator=(AVMC_Queue&& other) & noexcept
-      { return this->swap(other);  }
+      {
+        this->swap(other);
+        return *this;
+      }
 
     AVMC_Queue&
     swap(AVMC_Queue& other) noexcept

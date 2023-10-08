@@ -26,7 +26,8 @@ class IOF_Sentry
   public:
     explicit
     IOF_Sentry(::FILE* sentry, IOF_Mode mode)
-      : m_fp(sentry)
+      :
+        m_fp(sentry)
       {
         int orient_req = (mode & 0b01) ? +1 : -1;
         char mode_req[4] = "?b";

@@ -75,7 +75,8 @@ struct Module_Comparator
 
 Global_Context::
 Global_Context(API_Version version)
-  : m_gcoll(::rocket::make_refcnt<Garbage_Collector>()),
+  :
+    m_gcoll(::rocket::make_refcnt<Garbage_Collector>()),
     m_prng(::rocket::make_refcnt<Random_Engine>()),
     m_ldrlk(::rocket::make_refcnt<Module_Loader>())
   {

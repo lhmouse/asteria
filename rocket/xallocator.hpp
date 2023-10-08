@@ -11,11 +11,13 @@ namespace rocket {
 
 template<typename allocT>
 struct allocator_wrapper_base_for
-  : conditional<
+  :
+    conditional<
       is_final<allocT>::value,
       details_xallocator::final_wrapper<allocT>,
       allocT>
-  { };
+  {
+  };
 
 template<typename allocT>
 void
@@ -55,22 +57,29 @@ propagate_allocator_on_swap(allocT& lhs, allocT& rhs) noexcept
 
 template<typename allocT>
 struct is_std_allocator
-  : false_type
-  { };
+  :
+    false_type
+  {
+  };
 
 template<typename valueT>
 struct is_std_allocator<::std::allocator<valueT>>
-  : true_type
-  { };
+  :
+    true_type
+  {
+  };
 
 template<typename allocT>
 struct is_always_equal_allocator
 #ifdef __cpp_lib_allocator_traits_is_always_equal
-  : allocator_traits<allocT>::is_always_equal
+  :
+    allocator_traits<allocT>::is_always_equal
 #else
-  : is_std_allocator<allocT>
+  :
+    is_std_allocator<allocT>
 #endif
-  { };
+  {
+  };
 
 }  // namespace rocket
 #endif

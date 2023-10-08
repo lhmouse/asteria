@@ -13,7 +13,8 @@ namespace rocket {
 
 template<typename charT>
 class basic_tinybuf
-  : public tinybuf_base
+  :
+    public tinybuf_base
   {
   public:
     using char_type  = charT;

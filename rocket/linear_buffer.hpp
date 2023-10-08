@@ -40,30 +40,38 @@ class basic_linear_buffer
   public:
     constexpr
     basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : m_stor()
-      { }
+      :
+        m_stor()
+      {
+      }
 
     explicit constexpr
     basic_linear_buffer(const allocator_type& alloc) noexcept
-      : m_stor(alloc)
-      { }
+      :
+        m_stor(alloc)
+      {
+      }
 
     basic_linear_buffer(const basic_linear_buffer& other)
-      : m_stor(allocator_traits<allocator_type>::select_on_container_copy_construction(
+      :
+        m_stor(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                      other.m_stor.as_allocator()))
       { this->putn(other.data(), other.size());  }
 
     basic_linear_buffer(const basic_linear_buffer& other, const allocator_type& alloc)
-      : m_stor(alloc)
+      :
+        m_stor(alloc)
       { this->putn(other.data(), other.size());  }
 
     basic_linear_buffer(basic_linear_buffer&& other) noexcept
-      : m_stor(::std::move(other.m_stor.as_allocator()))
+      :
+        m_stor(::std::move(other.m_stor.as_allocator()))
       { this->do_exchange_with(other);  }
 
     basic_linear_buffer(basic_linear_buffer&& other, const allocator_type& alloc)
       noexcept(is_always_equal_allocator<allocator_type>::value)
-      : m_stor(alloc)
+      :
+        m_stor(alloc)
       {
         if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc))
           // If the allocators compare equal, they can deallocate memory allocated by each other.

@@ -56,8 +56,10 @@ class basic_shallow_string
     ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     explicit constexpr
     basic_shallow_string(const charT* ptr) noexcept
-      : m_ptr(ptr), m_len(noadl::xstrlen(ptr))
-      { }
+      :
+        m_ptr(ptr), m_len(noadl::xstrlen(ptr))
+      {
+      }
 
   public:
     constexpr
@@ -147,63 +149,79 @@ class basic_cow_string
     // 24.3.2.2, construct/copy/destroy
     constexpr
     basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : m_ref(s_zstr), m_sth()
-      { }
+      :
+        m_ref(s_zstr), m_sth()
+      {
+      }
 
     explicit constexpr
     basic_cow_string(const allocator_type& alloc) noexcept
-      : m_ref(s_zstr), m_sth(alloc)
-      { }
+      :
+        m_ref(s_zstr), m_sth(alloc)
+      {
+      }
 
     constexpr
     basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
-      : m_ref(sh), m_sth(alloc)
-      { }
+      :
+        m_ref(sh), m_sth(alloc)
+      {
+      }
 
     basic_cow_string(const basic_cow_string& other) noexcept
-      : m_ref(other.m_ref),
+      :
+        m_ref(other.m_ref),
         m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                     other.m_sth.as_allocator()))
       { this->m_sth.share_with(other.m_sth);  }
 
     basic_cow_string(const basic_cow_string& other, const allocator_type& alloc) noexcept
-      : m_ref(other.m_ref), m_sth(alloc)
+      :
+        m_ref(other.m_ref), m_sth(alloc)
       { this->m_sth.share_with(other.m_sth);  }
 
     basic_cow_string(basic_cow_string&& other) noexcept
-      : m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(::std::move(other.m_sth.as_allocator()))
+      :
+        m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(::std::move(other.m_sth.as_allocator()))
       { this->m_sth.exchange_with(other.m_sth);  }
 
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
-      : m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(alloc)
+      :
+        m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(alloc)
       { this->m_sth.exchange_with(other.m_sth);  }
 
     basic_cow_string(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       { this->append(init);  }
 
     basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
                      const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       { this->append(other, pos, n);  }
 
     explicit  // no implicit conversion from string literal; see `sref()`.
     basic_cow_string(const value_type* s, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       { this->append(s);  }
 
     basic_cow_string(const value_type* s, size_type n, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       { this->append(s, n);  }
 
     basic_cow_string(size_type n, value_type c, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       { this->append(n, c);  }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     basic_cow_string(inputT first, inputT last, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       { this->append(::std::move(first), ::std::move(last));  }
 
     basic_cow_string&
@@ -405,7 +423,8 @@ class basic_cow_string
       {
         return (this->size() < n)
                  ? this->append(n - this->size(), c)
-                 : this->pop_back(this->size() - n);
+                 :
+                   this->pop_back(this->size() - n);
       }
 
     constexpr
@@ -1306,7 +1325,8 @@ class basic_cow_string
         return ROCKET_EXPECT(n <= 0x100)
             ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
                         text_begin, text_end, pattern_begin, pattern_end, npos)
-            : details_cow_string::do_boyer_moore_horspool_search<size_type>(
+            :
+              details_cow_string::do_boyer_moore_horspool_search<size_type>(
                         text_begin, text_end, pattern_begin, pattern_end, npos);
       }
 
@@ -1423,7 +1443,8 @@ class basic_cow_string
         return d - (ROCKET_EXPECT(n <= 0x100)
             ? details_cow_string::do_boyer_moore_horspool_search<uint8_t>(
                    text_rbegin, text_rend, pattern_rbegin, pattern_rend, d - npos)
-            : details_cow_string::do_boyer_moore_horspool_search<size_type>(
+            :
+              details_cow_string::do_boyer_moore_horspool_search<size_type>(
                    text_rbegin, text_rend, pattern_rbegin, pattern_rend, d - npos));
       }
 
@@ -2127,7 +2148,8 @@ class basic_cow_string
       {
         return (this->size() >= n)
                  ? (noadl::xmemcmp(this->data(), s, n) | (this->size() > n))
-                 : ~(noadl::xmemcmp(s, this->data(), this->size()) | 1);
+                 :
+                   ~(noadl::xmemcmp(s, this->data(), this->size()) | 1);
       }
 
     constexpr
@@ -2193,7 +2215,8 @@ class basic_cow_string
         size_type tlen = this->do_clamp_substr(tpos, tn);
         return (tlen >= n)
                  ? (noadl::xmemcmp(this->data() + tpos, s, n) | (tlen > n))
-                 : ~(noadl::xmemcmp(s, this->data() + tpos, tlen) | 1);
+                 :
+                   ~(noadl::xmemcmp(s, this->data() + tpos, tlen) | 1);
       }
 
     constexpr

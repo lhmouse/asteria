@@ -13,7 +13,8 @@ struct storage_header
 
 template<typename allocT>
 struct basic_storage
-  : public storage_header,
+  :
+    public storage_header,
     public allocator_wrapper_base_for<allocT>::type
   {
     using allocator_type   = allocT;
@@ -24,7 +25,8 @@ struct basic_storage
     union { value_type data[1];  };
 
     basic_storage(const allocator_type& xalloc, size_type xnblk) noexcept
-      : allocator_wrapper_base_for<allocT>::type(xalloc),
+      :
+        allocator_wrapper_base_for<allocT>::type(xalloc),
         nblk(xnblk)
       {
 #ifdef ROCKET_DEBUG
@@ -63,7 +65,8 @@ struct basic_storage
 
 template<typename allocT>
 class storage_handle
-  : private allocator_wrapper_base_for<allocT>::type
+  :
+    private allocator_wrapper_base_for<allocT>::type
   {
   public:
     using allocator_type   = allocT;
@@ -82,18 +85,24 @@ class storage_handle
   public:
     constexpr
     storage_handle() noexcept
-      : allocator_base()
-      { }
+      :
+        allocator_base()
+      {
+      }
 
     explicit constexpr
     storage_handle(const allocator_type& alloc) noexcept
-      : allocator_base(alloc)
-      { }
+      :
+        allocator_base(alloc)
+      {
+      }
 
     explicit constexpr
     storage_handle(allocator_type&& alloc) noexcept
-      : allocator_base(::std::move(alloc))
-      { }
+      :
+        allocator_base(::std::move(alloc))
+      {
+      }
 
 #ifdef __cpp_constexpr_dynamic_alloc
     constexpr
@@ -296,23 +305,29 @@ class string_iterator
     // This constructor is called by the container.
     constexpr
     string_iterator(charT* begin, size_t ncur, size_t nend) noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
-      { }
+      :
+        m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
+      {
+      }
 
   public:
     constexpr
     string_iterator() noexcept
-      : m_begin(), m_cur(), m_end()
-      { }
+      :
+        m_begin(), m_cur(), m_end()
+      {
+      }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     constexpr
     string_iterator(const string_iterator<stringT, ycharT>& other) noexcept
-      : m_begin(other.m_begin),
+      :
+        m_begin(other.m_begin),
         m_cur(other.m_cur),
         m_end(other.m_end)
-      { }
+      {
+      }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>

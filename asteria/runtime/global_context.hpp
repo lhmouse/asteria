@@ -10,7 +10,8 @@
 namespace asteria {
 
 class Global_Context
-  : public Abstract_Context
+  :
+    public Abstract_Context
   {
   private:
     Recursion_Sentry m_sentry;

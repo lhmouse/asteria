@@ -42,7 +42,8 @@ Indenter::
   }
 
 class Indenter_none final
-  : public Indenter
+  :
+    public Indenter
   {
   public:
     explicit
@@ -72,7 +73,8 @@ class Indenter_none final
   };
 
 class Indenter_string final
-  : public Indenter
+  :
+    public Indenter
   {
   private:
     cow_string m_add;
@@ -81,8 +83,10 @@ class Indenter_string final
   public:
     explicit
     Indenter_string(stringR add)
-      : m_add(add), m_cur(sref("\n"))
-      { }
+      :
+        m_add(add), m_cur(sref("\n"))
+      {
+      }
 
   public:
     void
@@ -111,7 +115,8 @@ class Indenter_string final
   };
 
 class Indenter_spaces final
-  : public Indenter
+  :
+    public Indenter
   {
   private:
     size_t m_add;
@@ -120,8 +125,10 @@ class Indenter_spaces final
   public:
     explicit
     Indenter_spaces(int64_t add)
-      : m_add(::rocket::clamp_cast<size_t>(add, 0, 10)), m_cur(0)
-      { }
+      :
+        m_add(::rocket::clamp_cast<size_t>(add, 0, 10)), m_cur(0)
+      {
+      }
 
   public:
     void
@@ -695,7 +702,8 @@ std_json_format(Value value, optV_string indent, optV_boolean json5)
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty())
         ? do_format_nonrecursive(value, json5 == true, Indenter_none())
-        : do_format_nonrecursive(value, json5 == true, Indenter_string(*indent));
+        :
+          do_format_nonrecursive(value, json5 == true, Indenter_string(*indent));
   }
 
 V_string
@@ -704,7 +712,8 @@ std_json_format(Value value, V_integer indent, optV_boolean json5)
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0)
         ? do_format_nonrecursive(value, json5 == true, Indenter_none())
-        : do_format_nonrecursive(value, json5 == true, Indenter_spaces(indent));
+        :
+          do_format_nonrecursive(value, json5 == true, Indenter_spaces(indent));
   }
 
 Value

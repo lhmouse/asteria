@@ -24,7 +24,8 @@ class basic_tinyfmt;
 
 template<typename elementT, typename deleterT>
 class refcnt_base
-  : public virtual details_refcnt_ptr::refcnt_cJveMKH5bI7L,
+  :
+    public virtual details_refcnt_ptr::refcnt_cJveMKH5bI7L,
     private virtual allocator_wrapper_base_for<deleterT>::type
   {
   public:
@@ -112,35 +113,47 @@ class refcnt_ptr
   public:
     constexpr
     refcnt_ptr(nullptr_t = nullptr) noexcept
-      : m_sth()
-      { }
+      :
+        m_sth()
+      {
+      }
 
     explicit constexpr
     refcnt_ptr(pointer ptr) noexcept
-      : m_sth(ptr)
-      { }
+      :
+        m_sth(ptr)
+      {
+      }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
-      : m_sth(other.m_sth.fork())
-      { }
+      :
+        m_sth(other.m_sth.fork())
+      {
+      }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
                                     pointer>::value)>
     refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
-      : m_sth(other.m_sth.release())
-      { }
+      :
+        m_sth(other.m_sth.release())
+      {
+      }
 
     refcnt_ptr(const refcnt_ptr& other) noexcept
-      : m_sth(other.m_sth.fork())
-      { }
+      :
+        m_sth(other.m_sth.fork())
+      {
+      }
 
     refcnt_ptr(refcnt_ptr&& other) noexcept
-      : m_sth(other.m_sth.release())
-      { }
+      :
+        m_sth(other.m_sth.release())
+      {
+      }
 
     refcnt_ptr&
     operator=(nullptr_t) & noexcept

@@ -10,7 +10,8 @@ namespace rocket {
 
 template<typename charT, typename allocT = allocator<charT>>
 class basic_tinyfmt_ln
-  : public basic_tinyfmt<charT>
+  :
+    public basic_tinyfmt<charT>
   {
   public:
     using char_type     = charT;
@@ -38,7 +39,8 @@ class basic_tinyfmt_ln
     explicit
     basic_tinyfmt_ln(paramsT&&... params)
       noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
-      : m_buf(::std::forward<paramsT>(params)...)
+      :
+        m_buf(::std::forward<paramsT>(params)...)
       {
       }
 

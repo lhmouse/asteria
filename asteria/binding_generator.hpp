@@ -35,8 +35,10 @@ class Binding_Generator
     constexpr
     Binding_Generator(cow_string::shallow_type name, const char* params,
                       const char* file, int line) noexcept
-      : m_name(name), m_params(params), m_file(file), m_line(line)
-      { }
+      :
+        m_name(name), m_params(params), m_file(file), m_line(line)
+      {
+      }
 
   public:
     // These functions are invoked by `ASTERIA_BINDING()`.

@@ -10,7 +10,8 @@
 namespace asteria {
 
 class Executive_Context
-  : public Abstract_Context
+  :
+    public Abstract_Context
   {
   private:
     Executive_Context* m_parent_opt;
@@ -30,10 +31,12 @@ class Executive_Context
     // Its parent context shall outlast itself.
     explicit
     Executive_Context(M_plain, Executive_Context& parent)
-      : m_parent_opt(&parent),
+      :
+        m_parent_opt(&parent),
         m_global(parent.m_global), m_stack(parent.m_stack),
         m_alt_stack(parent.m_alt_stack)
-      { }
+      {
+      }
 
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
@@ -43,7 +46,8 @@ class Executive_Context
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
                       Reference_Stack& alt_stack,
                       cow_bivector<Source_Location, AVMC_Queue>&& defer)
-      : m_parent_opt(),
+      :
+        m_parent_opt(),
         m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
         m_defer(::std::move(defer))  { }
 

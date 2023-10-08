@@ -25,13 +25,17 @@ class variant
   public:
     template<typename targetT>
     struct index_of
-      : details_variant::type_finder<0, targetT, altsT...>
-      { };
+      :
+        details_variant::type_finder<0, targetT, altsT...>
+      {
+      };
 
     template<size_t indexT>
     struct alternative_at
-      : details_variant::type_getter<indexT, altsT...>
-      { };
+      :
+        details_variant::type_getter<indexT, altsT...>
+      {
+      };
 
     static constexpr size_t alternative_size = sizeof...(altsT);
 
@@ -73,8 +77,10 @@ class variant
     // 23.7.3.1, constructors
     constexpr
     variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
-      : m_init_stor(), m_init_index()
-      { }
+      :
+        m_init_stor(), m_init_index()
+      {
+      }
 
     template<typename paramT,
     ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>

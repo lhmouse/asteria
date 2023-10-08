@@ -69,7 +69,8 @@ class BMH_Searcher
   public:
     inline
     BMH_Searcher(IterT pbegin, IterT pend)
-      : m_pbegin(pbegin), m_pend(pend)
+      :
+        m_pbegin(pbegin), m_pend(pend)
       {
         const ptrdiff_t plen = this->m_pend - this->m_pbegin;
         if(plen <= 0)
@@ -310,7 +311,8 @@ operator<<(tinyfmt& fmt, const PCRE2_Error& err)
   }
 
 class PCRE2_Matcher final
-  : public Abstract_Opaque
+  :
+    public Abstract_Opaque
   {
   private:
     cow_string m_patt;
@@ -325,7 +327,8 @@ class PCRE2_Matcher final
   public:
     explicit
     PCRE2_Matcher(const V_string& patt, const optV_array& opts)
-      : m_patt(patt), m_opts(PCRE2_NEVER_UTF | PCRE2_NEVER_UCP),
+      :
+        m_patt(patt), m_opts(PCRE2_NEVER_UTF | PCRE2_NEVER_UCP),
         m_code(::pcre2_code_free), m_match(::pcre2_match_data_free)
       {
         // Check options.
@@ -359,7 +362,8 @@ class PCRE2_Matcher final
 
     explicit
     PCRE2_Matcher(const PCRE2_Matcher& other, int)
-      : m_patt(other.m_patt), m_opts(other.m_opts),
+      :
+        m_patt(other.m_patt), m_opts(other.m_opts),
         m_code(::pcre2_code_free), m_match(::pcre2_match_data_free)
       {
         // Copy the regular expression.
@@ -415,7 +419,8 @@ class PCRE2_Matcher final
 
     void
     get_variables(Variable_HashMap&, Variable_HashMap&) const override
-      { }
+      {
+      }
 
     PCRE2_Matcher*
     clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override

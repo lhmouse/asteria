@@ -55,7 +55,8 @@ do_add_handler()
   }
 
 struct Handler_exit final
-  : Handler
+  :
+    Handler
   {
     const char*
     cmd() const override
@@ -112,7 +113,8 @@ struct Handler_exit final
   };
 
 struct Handler_help final
-  : Handler
+  :
+    Handler
   {
     const char*
     cmd() const override
@@ -172,7 +174,8 @@ struct Handler_help final
   };
 
 struct Handler_heredoc final
-  : Handler
+  :
+    Handler
   {
     const char*
     cmd() const override
@@ -211,7 +214,8 @@ struct Handler_heredoc final
   };
 
 struct Handler_source final
-  : Handler
+  :
+    Handler
   {
     const char*
     cmd() const override
@@ -323,7 +327,8 @@ struct Handler_source final
   };
 
 struct Handler_again final
-  : Handler
+  :
+    Handler
   {
     const char*
     cmd() const override

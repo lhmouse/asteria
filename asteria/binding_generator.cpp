@@ -22,7 +22,8 @@ operator->*(target_R_gsa& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_R_gsa* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -65,7 +66,8 @@ operator->*(target_R_ga& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_R_ga* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -108,7 +110,8 @@ operator->*(target_R_sa& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_R_sa* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -151,7 +154,8 @@ operator->*(target_R_a& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_R_a* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -194,7 +198,8 @@ operator->*(target_V_gsa& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_V_gsa* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -237,7 +242,8 @@ operator->*(target_V_ga& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_V_ga* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -280,7 +286,8 @@ operator->*(target_V_sa& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_V_sa* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -323,7 +330,8 @@ operator->*(target_V_a& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_V_a* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -366,7 +374,8 @@ operator->*(target_Z_gsa& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_Z_gsa* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -409,7 +418,8 @@ operator->*(target_Z_ga& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_Z_ga* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -452,7 +462,8 @@ operator->*(target_Z_sa& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_Z_sa* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -495,7 +506,8 @@ operator->*(target_Z_a& target) const
 
         explicit
         Thunk(const Binding_Generator* gen, target_Z_a* target)
-          : m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+          :
+            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }

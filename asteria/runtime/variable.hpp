@@ -9,7 +9,8 @@
 namespace asteria {
 
 class Variable final
-  : public rcfwd<Variable>
+  :
+    public rcfwd<Variable>
   {
   public:
     enum State : uint8_t
@@ -27,7 +28,8 @@ class Variable final
   public:
     explicit
     Variable() noexcept
-      { }
+      {
+      }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);

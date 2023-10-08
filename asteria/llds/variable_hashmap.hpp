@@ -20,7 +20,8 @@ class Variable_HashMap
   public:
     explicit constexpr
     Variable_HashMap() noexcept
-      { }
+      {
+      }
 
     Variable_HashMap(Variable_HashMap&& other) noexcept
       {
@@ -30,7 +31,8 @@ class Variable_HashMap
     Variable_HashMap&
     operator=(Variable_HashMap&& other) & noexcept
       {
-        return this->swap(other);
+        this->swap(other);
+        return *this;
       }
 
     Variable_HashMap&

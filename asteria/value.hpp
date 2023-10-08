@@ -21,24 +21,31 @@ class Value
     // Constructors and assignment operators
     constexpr
     Value(nullopt_t = nullopt) noexcept
-      : m_bytes()
-      { }
+      :
+        m_bytes()
+      {
+      }
 
     template<typename XValT,
     ROCKET_ENABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                    typename details_value::Valuable<XValT>::via_type&&>::value)
-      : m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
-      { }
+      :
+        m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
+      {
+      }
 
     template<typename XValT,
     ROCKET_DISABLE_IF(details_value::Valuable<XValT>::direct_init::value)>
     Value(XValT&& xval)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                    typename details_value::Valuable<XValT>::via_type&&>::value)
-      : m_bytes()
-      { details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));  }
+      :
+        m_bytes()
+      {
+        details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
+      }
 
     template<typename XValT,
     ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<XValT>::via_type)>
@@ -52,8 +59,10 @@ class Value
       }
 
     Value(const Value& other) noexcept
-      : m_stor(other.m_stor)
-      { }
+      :
+        m_stor(other.m_stor)
+      {
+      }
 
     Value&
     operator=(const Value& other) & noexcept
@@ -116,16 +125,16 @@ class Value
 
     bool
     is_null() const noexcept
-      { return this->type() == type_null;  }
+      { return this->m_stor.index() == type_null;  }
 
     bool
     is_boolean() const noexcept
-      { return this->type() == type_boolean;  }
+      { return this->m_stor.index() == type_boolean;  }
 
     V_boolean
     as_boolean() const
       {
-        if(this->type() == type_boolean)
+        if(this->m_stor.index() == type_boolean)
           return this->m_stor.as<V_boolean>();
 
         this->do_throw_type_mismatch("`boolean`");
@@ -134,7 +143,7 @@ class Value
     V_boolean&
     mut_boolean()
       {
-        if(this->type() == type_boolean)
+        if(this->m_stor.index() == type_boolean)
           return this->m_stor.mut<V_boolean>();
 
         this->do_throw_type_mismatch("`boolean`");
@@ -142,12 +151,12 @@ class Value
 
     bool
     is_integer() const noexcept
-      { return this->type() == type_integer;  }
+      { return this->m_stor.index() == type_integer;  }
 
     V_integer
     as_integer() const
       {
-        if(this->type() == type_integer)
+        if(this->m_stor.index() == type_integer)
           return this->m_stor.as<V_integer>();
 
         this->do_throw_type_mismatch("`integer`");
@@ -156,7 +165,7 @@ class Value
     V_integer&
     mut_integer()
       {
-        if(this->type() == type_integer)
+        if(this->m_stor.index() == type_integer)
           return this->m_stor.mut<V_integer>();
 
         this->do_throw_type_mismatch("`integer`");
@@ -169,10 +178,10 @@ class Value
     V_real
     as_real() const
       {
-        if(this->type() == type_real)
+        if(this->m_stor.index() == type_real)
           return this->m_stor.as<V_real>();
 
-        if(this->type() == type_integer)
+        if(this->m_stor.index() == type_integer)
           return static_cast<V_real>(this->m_stor.as<V_integer>());
 
         this->do_throw_type_mismatch("`integer` or `real`");
@@ -181,10 +190,10 @@ class Value
     V_real&
     mut_real()
       {
-        if(this->type() == type_real)
+        if(this->m_stor.index() == type_real)
           return this->m_stor.mut<V_real>();
 
-        if(this->type() == type_integer)
+        if(this->m_stor.index() == type_integer)
           return this->m_stor.emplace<V_real>(
                    static_cast<V_real>(this->m_stor.mut<V_integer>()));
 
@@ -193,12 +202,12 @@ class Value
 
     bool
     is_string() const noexcept
-      { return this->type() == type_string;  }
+      { return this->m_stor.index() == type_string;  }
 
     const V_string&
     as_string() const
       {
-        if(this->type() == type_string)
+        if(this->m_stor.index() == type_string)
           return this->m_stor.as<V_string>();
 
         this->do_throw_type_mismatch("`string`");
@@ -207,7 +216,7 @@ class Value
     V_string&
     mut_string()
       {
-        if(this->type() == type_string)
+        if(this->m_stor.index() == type_string)
           return this->m_stor.mut<V_string>();
 
         this->do_throw_type_mismatch("`string`");
@@ -215,12 +224,12 @@ class Value
 
     bool
     is_function() const noexcept
-      { return this->type() == type_function;  }
+      { return this->m_stor.index() == type_function;  }
 
     const V_function&
     as_function() const
       {
-        if(this->type() == type_function)
+        if(this->m_stor.index() == type_function)
           return this->m_stor.as<V_function>();
 
         this->do_throw_type_mismatch("`function`");
@@ -229,7 +238,7 @@ class Value
     V_function&
     mut_function()
       {
-        if(this->type() == type_function)
+        if(this->m_stor.index() == type_function)
           return this->m_stor.mut<V_function>();
 
         this->do_throw_type_mismatch("`function`");
@@ -237,12 +246,12 @@ class Value
 
     bool
     is_opaque() const noexcept
-      { return this->type() == type_opaque;  }
+      { return this->m_stor.index() == type_opaque;  }
 
     const V_opaque&
     as_opaque() const
       {
-        if(this->type() == type_opaque)
+        if(this->m_stor.index() == type_opaque)
           return this->m_stor.as<V_opaque>();
 
         this->do_throw_type_mismatch("`opaque`");
@@ -251,7 +260,7 @@ class Value
     V_opaque&
     mut_opaque()
       {
-        if(this->type() == type_opaque)
+        if(this->m_stor.index() == type_opaque)
           return this->m_stor.mut<V_opaque>();
 
         this->do_throw_type_mismatch("`opaque`");
@@ -259,12 +268,12 @@ class Value
 
     bool
     is_array() const noexcept
-      { return this->type() == type_array;  }
+      { return this->m_stor.index() == type_array;  }
 
     const V_array&
     as_array() const
       {
-        if(this->type() == type_array)
+        if(this->m_stor.index() == type_array)
           return this->m_stor.as<V_array>();
 
         this->do_throw_type_mismatch("`array`");
@@ -273,7 +282,7 @@ class Value
     V_array&
     mut_array()
       {
-        if(this->type() == type_array)
+        if(this->m_stor.index() == type_array)
           return this->m_stor.mut<V_array>();
 
         this->do_throw_type_mismatch("`array`");
@@ -281,12 +290,12 @@ class Value
 
     bool
     is_object() const noexcept
-      { return this->type() == type_object;  }
+      { return this->m_stor.index() == type_object;  }
 
     const V_object&
     as_object() const
       {
-        if(this->type() == type_object)
+        if(this->m_stor.index() == type_object)
           return this->m_stor.as<V_object>();
 
         this->do_throw_type_mismatch("`object`");
@@ -295,7 +304,7 @@ class Value
     V_object&
     mut_object()
       {
-        if(this->type() == type_object)
+        if(this->m_stor.index() == type_object)
           return this->m_stor.mut<V_object>();
 
         this->do_throw_type_mismatch("`object`");

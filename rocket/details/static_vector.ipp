@@ -8,7 +8,8 @@ namespace details_static_vector {
 
 template<typename allocT, size_t capacityT>
 class storage_handle
-  : private allocator_wrapper_base_for<allocT>::type
+  :
+    private allocator_wrapper_base_for<allocT>::type
   {
   public:
     using allocator_type   = allocT;
@@ -42,13 +43,16 @@ class storage_handle
   public:
     constexpr
     storage_handle() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : allocator_base(),
+      :
+        allocator_base(),
         m_init_nelem(0)
-      { }
+      {
+      }
 
     explicit
     storage_handle(const allocator_type& alloc) noexcept
-      : allocator_base(alloc),
+      :
+        allocator_base(alloc),
         m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
@@ -58,7 +62,8 @@ class storage_handle
 
     explicit
     storage_handle(allocator_type&& alloc) noexcept
-      : allocator_base(::std::move(alloc)),
+      :
+        allocator_base(::std::move(alloc)),
         m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
@@ -287,23 +292,29 @@ class vector_iterator
     // This constructor is called by the container.
     constexpr
     vector_iterator(valueT* begin, size_t ncur, size_t nend) noexcept
-      : m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
-      { }
+      :
+        m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
+      {
+      }
 
   public:
     constexpr
     vector_iterator() noexcept
-      : m_begin(), m_cur(), m_end()
-      { }
+      :
+        m_begin(), m_cur(), m_end()
+      {
+      }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     constexpr
     vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
-      : m_begin(other.m_begin),
+      :
+        m_begin(other.m_begin),
         m_cur(other.m_cur),
         m_end(other.m_end)
-      { }
+      {
+      }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>

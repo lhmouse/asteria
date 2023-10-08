@@ -80,8 +80,10 @@ class cow_hashmap
       noexcept(conjunction<is_nothrow_constructible<allocator_type>,
                            is_nothrow_constructible<hasher>,
                            is_nothrow_constructible<key_equal>>::value)
-      : m_sth()
-      { }
+      :
+        m_sth()
+      {
+      }
 
     explicit constexpr
     cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(),
@@ -90,13 +92,16 @@ class cow_hashmap
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_constructible<key_equal>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(alloc, hf, eq)
-      { }
+      :
+        m_sth(alloc, hf, eq)
+      {
+      }
 
     cow_hashmap(const cow_hashmap& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
+      :
+        m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                    other.m_sth.as_allocator()),
               other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.share_with(other.m_sth);  }
@@ -104,70 +109,88 @@ class cow_hashmap
     cow_hashmap(const cow_hashmap& other, const allocator_type& alloc)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
+      :
+        m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.share_with(other.m_sth);  }
 
     cow_hashmap(cow_hashmap&& other)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(),
+      :
+        m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(),
               other.m_sth.as_key_equal())
       { this->m_sth.exchange_with(other.m_sth);  }
 
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc)
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
+      :
+        m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.exchange_with(other.m_sth);  }
 
     explicit
     cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                 const allocator_type& alloc = allocator_type())
-      : cow_hashmap(alloc, hf, eq)
+      :
+        cow_hashmap(alloc, hf, eq)
       { this->reserve(res_arg);  }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg = 0, const hasher& hf = hasher(),
                 const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
-      : cow_hashmap(res_arg, hf, eq, alloc)
+      :
+        cow_hashmap(res_arg, hf, eq, alloc)
       { this->assign(::std::move(first), ::std::move(last));  }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0,
                 const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                 const allocator_type& alloc = allocator_type())
-      : cow_hashmap(res_arg, hf, eq, alloc)
+      :
+        cow_hashmap(res_arg, hf, eq, alloc)
       { this->assign(init.begin(), init.end());  }
 
     cow_hashmap(size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hf, key_equal(), alloc)
-      { }
+      :
+        cow_hashmap(res_arg, hf, key_equal(), alloc)
+      {
+      }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf,
                 const allocator_type& alloc)
-      : cow_hashmap(::std::move(first), ::std::move(last), res_arg, hf, key_equal(), alloc)
-      { }
+      :
+        cow_hashmap(::std::move(first), ::std::move(last), res_arg, hf, key_equal(), alloc)
+      {
+      }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf,
                 const allocator_type& alloc)
-      : cow_hashmap(init, res_arg, hf, key_equal(), alloc)
-      { }
+      :
+        cow_hashmap(init, res_arg, hf, key_equal(), alloc)
+      {
+      }
 
     cow_hashmap(size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
-      { }
+      :
+        cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+      {
+      }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(::std::move(first), ::std::move(last), res_arg, hasher(), key_equal(), alloc)
-      { }
+      :
+        cow_hashmap(::std::move(first), ::std::move(last), res_arg, hasher(), key_equal(), alloc)
+      {
+      }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(init, res_arg, hasher(), key_equal(), alloc)
-      { }
+      :
+        cow_hashmap(init, res_arg, hasher(), key_equal(), alloc)
+      {
+      }
 
     cow_hashmap&
     operator=(const cow_hashmap& other) & noexcept

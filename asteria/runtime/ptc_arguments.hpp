@@ -10,7 +10,8 @@
 namespace asteria {
 
 class PTC_Arguments final
-  : public rcfwd<PTC_Arguments>
+  :
+    public rcfwd<PTC_Arguments>
   {
   private:
     // These describe characteristics of the function call.
@@ -29,7 +30,8 @@ class PTC_Arguments final
     explicit
     PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
                   const cow_function& target, Reference_Stack&& stack)
-      : m_sloc(sloc), m_ptc(ptc),
+      :
+        m_sloc(sloc), m_ptc(ptc),
         m_target(target), m_stack(::std::move(stack))  { }
 
   public:

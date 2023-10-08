@@ -36,7 +36,8 @@ class optional
     // 19.6.3.1, constructors
     constexpr
     optional(nullopt_t = nullopt) noexcept
-      { }
+      {
+      }
 
     optional(const value_type& value)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
@@ -193,7 +194,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? this->do_throw_valueless()
-                 : this->m_stor.front();
+                 :
+                   this->m_stor.front();
       }
 
     reference
@@ -201,7 +203,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? this->do_throw_valueless()
-                 : this->m_stor.mut_front();
+                 :
+                   this->m_stor.mut_front();
       }
 
     // N.B. This is a non-standard extension.
@@ -210,7 +213,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? nullptr
-                 : this->m_stor.data();
+                 :
+                   this->m_stor.data();
       }
 
     // N.B. This is a non-standard extension.
@@ -219,7 +223,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? nullptr
-                 : this->m_stor.mut_data();
+                 :
+                   this->m_stor.mut_data();
       }
 
     // N.B. The return type differs from `std::variant`.
@@ -229,7 +234,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? ::std::forward<defvalT>(defval)
-                 : this->m_stor.front();
+                 :
+                   this->m_stor.front();
       }
 
     // N.B. The return type differs from `std::variant`.
@@ -239,7 +245,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? ::std::forward<defvalT>(defval)
-                 : this->m_stor.mut_front();
+                 :
+                   this->m_stor.mut_front();
       }
 
     // N.B. This is a non-standard extension.
@@ -249,7 +256,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? ::std::forward<defvalT>(defval)
-                 : ::std::move(this->m_stor.mut_front());
+                 :
+                   ::std::move(this->m_stor.mut_front());
       }
 
     constexpr
@@ -295,7 +303,8 @@ class optional
       {
         return this->m_stor.empty()
                  ? this->m_stor.emplace_back(::std::forward<paramsT>(params)...)
-                 : this->m_stor.mut_front();
+                 :
+                   this->m_stor.mut_front();
       }
   };
 

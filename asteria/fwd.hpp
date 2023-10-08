@@ -290,7 +290,8 @@ unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // lik
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque
-  : public rcfwd<Abstract_Opaque>
+  :
+    public rcfwd<Abstract_Opaque>
   {
     explicit
     Abstract_Opaque() noexcept = default;
@@ -328,7 +329,8 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   }
 
 struct Abstract_Function
-  : public rcfwd<Abstract_Function>
+  :
+    public rcfwd<Abstract_Function>
   {
     explicit
     Abstract_Function() noexcept = default;
@@ -369,21 +371,29 @@ class cow_opaque
   public:
     constexpr
     cow_opaque(nullptr_t = nullptr) noexcept
-      { }
+      {
+      }
 
     template<typename OpaqT>
     cow_opaque(const refcnt_ptr<OpaqT>& sptr) noexcept
-      : m_sptr(sptr)
-      { }
+      :
+        m_sptr(sptr)
+      {
+      }
 
     template<typename OpaqT>
     cow_opaque(refcnt_ptr<OpaqT>&& sptr) noexcept
-      : m_sptr(::std::move(sptr))
-      { }
+      :
+        m_sptr(::std::move(sptr))
+      {
+      }
 
     cow_opaque&
     operator=(nullptr_t) &
-      { return this->reset();  }
+      {
+        this->reset();
+        return *this;
+      }
 
     cow_opaque&
     swap(cow_opaque& other) noexcept
@@ -532,26 +542,36 @@ class cow_function
   public:
     constexpr
     cow_function(nullptr_t = nullptr) noexcept
-      { }
+      {
+      }
 
     constexpr
     cow_function(const char* desc, simple_function* fptr) noexcept
-      : m_desc(desc), m_fptr(fptr)
-      { }
+      :
+        m_desc(desc), m_fptr(fptr)
+      {
+      }
 
     template<typename FuncT>
     cow_function(const refcnt_ptr<FuncT>& sptr) noexcept
-      : m_sptr(sptr)
-      { }
+      :
+        m_sptr(sptr)
+      {
+      }
 
     template<typename FuncT>
     cow_function(refcnt_ptr<FuncT>&& sptr) noexcept
-      : m_sptr(::std::move(sptr))
-      { }
+      :
+        m_sptr(::std::move(sptr))
+      {
+      }
 
     cow_function&
     operator=(nullptr_t) &
-      { return this->reset();  }
+      {
+        this->reset();
+        return *this;
+      }
 
     cow_function&
     swap(cow_function& other) noexcept
@@ -615,7 +635,8 @@ class cow_function
     type() const
       {
         return this->m_fptr ? typeid(simple_function)
-                 : typeid(*(this->m_sptr.get()));  // may throw `std::bad_typeid`
+                 :
+                   typeid(*(this->m_sptr.get()));  // may throw `std::bad_typeid`
       }
 
     tinyfmt&
@@ -813,12 +834,15 @@ struct Compiler_Options_fragment;
 
 template<uint32_t versionT>
 struct Compiler_Options_template<versionT>
-  : Compiler_Options_template<versionT, versionT>
-  { };
+  :
+    Compiler_Options_template<versionT, versionT>
+  {
+  };
 
 template<uint32_t versionT, uint32_t fragmentT>
 struct Compiler_Options_template<versionT, fragmentT>
-  : Compiler_Options_template<versionT, fragmentT - 1>, Compiler_Options_fragment<fragmentT>
+  :
+    Compiler_Options_template<versionT, fragmentT - 1>, Compiler_Options_fragment<fragmentT>
   {
     // All members from `Compiler_Options_fragment<fragmentT>` have been brought in.
     // This struct does not define anything by itself.

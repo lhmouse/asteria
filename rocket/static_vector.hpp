@@ -52,42 +52,52 @@ class static_vector
   public:
     // 26.3.11.2, construct/copy/destroy
     static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
-      : m_sth()
-      { }
+      :
+        m_sth()
+      {
+      }
 
     explicit
     static_vector(const allocator_type& alloc) noexcept
-      : m_sth(alloc)
-      { }
+      :
+        m_sth(alloc)
+      {
+      }
 
     static_vector(const static_vector& other)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
-      : m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
+      :
+        m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                       other.m_sth.as_allocator()))
       { this->m_sth.copy_from(other.m_sth);  }
 
     static_vector(const static_vector& other, const allocator_type& alloc)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
-      : m_sth(alloc)
+      :
+        m_sth(alloc)
       { this->m_sth.copy_from(other.m_sth);  }
 
     static_vector(static_vector&& other)
       noexcept(is_nothrow_move_constructible<value_type>::value)
-      : m_sth(::std::move(other.m_sth.as_allocator()))
+      :
+        m_sth(::std::move(other.m_sth.as_allocator()))
       { this->m_sth.move_from(::std::move(other.m_sth));  }
 
     static_vector(static_vector&& other, const allocator_type& alloc)
       noexcept(is_nothrow_move_constructible<value_type>::value)
-      : m_sth(alloc)
+      :
+        m_sth(alloc)
       { this->m_sth.move_from(::std::move(other.m_sth));  }
 
     explicit
     static_vector(size_type n, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       { this->append(n);  }
 
     static_vector(size_type n, const value_type& value, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       { this->append(n, value);  }
 
     // N.B. This is a non-standard extension.
@@ -95,17 +105,20 @@ class static_vector
     ROCKET_ENABLE_IF(is_constructible<value_type, const firstT&, const restT&...>::value),
     ROCKET_DISABLE_IF(is_convertible<const firstT&, allocator_type>::value)>
     static_vector(size_type n, const firstT& first, const restT&... rest)
-      : static_vector()
+      :
+        static_vector()
       { this->append(n, first, rest...);  }
 
     template<typename inputT,
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       { this->append(::std::move(first), ::std::move(last));  }
 
     static_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       { this->append(init.begin(), init.end());  }
 
     static_vector&
@@ -280,7 +293,8 @@ class static_vector
       {
         return (this->size() < n)
                  ? this->append(n - this->size(), params...)
-                 : this->pop_back(this->size() - n);
+                 :
+                   this->pop_back(this->size() - n);
       }
 
     static constexpr

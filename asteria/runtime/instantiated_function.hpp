@@ -10,7 +10,8 @@
 namespace asteria {
 
 class Instantiated_Function final
-  : public Abstract_Function
+  :
+    public Abstract_Function
   {
   private:
     cow_vector<phsh_string> m_params;
@@ -21,7 +22,8 @@ class Instantiated_Function final
     explicit
     Instantiated_Function(const cow_vector<phsh_string>& params, refcnt_ptr<Variadic_Arguer>&& zvarg,
                           const cow_vector<AIR_Node>& code)
-      : m_params(params), m_zvarg(::std::move(zvarg))
+      :
+        m_params(params), m_zvarg(::std::move(zvarg))
       { this->do_solidify(code);  }
 
   private:

@@ -9,15 +9,19 @@ namespace details_fwd {
 // `is_input_iterator`
 template<typename iteratorT, typename = void>
 struct is_input_iterator_aux
-  : false_type
-  { };
+  :
+    false_type
+  {
+  };
 
 template<typename iteratorT>
 struct is_input_iterator_aux<iteratorT,
              ROCKET_VOID_DECLTYPE(static_cast<::std::input_iterator_tag>(
                     typename iterator_traits<iteratorT>::iterator_category()))>
-  : true_type
-  { };
+  :
+    true_type
+  {
+  };
 
 // `estimate_distance()`
 template<typename iteratorT>
@@ -45,39 +49,51 @@ struct integer_selector;
 
 template<typename integerT, integerT valueT, typename firstT, typename... remainingT>
 struct integer_selector<integerT, valueT, firstT, remainingT...>
-  : conditional<firstT(valueT) != valueT,
+  :
+    conditional<firstT(valueT) != valueT,
                 integer_selector<integerT, valueT, remainingT...>,
                 identity<firstT>>::type
-  { };
+  {
+  };
 
 // `static_or_dynamic_cast()`
 template<typename targetT, typename sourceT, typename = void>
 struct can_static_cast
-  : false_type
-  { };
+  :
+    false_type
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct can_static_cast<targetT, sourceT,
            ROCKET_VOID_DECLTYPE(static_cast<targetT>(::std::declval<sourceT>()))>
-  : true_type
-  { };
+  :
+    true_type
+  {
+  };
 
 template<typename targetT, typename sourceT, typename = void>
 struct can_dynamic_cast
-  : false_type
-  { };
+  :
+    false_type
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct can_dynamic_cast<targetT, sourceT,
            ROCKET_VOID_DECLTYPE(dynamic_cast<targetT>(::std::declval<sourceT>()))>
-  : true_type
-  { };
+  :
+    true_type
+  {
+  };
 
 template<typename targetT, typename sourceT>
 struct use_static_cast_aux
-  : integral_constant<bool,
+  :
+    integral_constant<bool,
           can_static_cast<targetT, sourceT>::value || !can_dynamic_cast<targetT, sourceT>::value>
-  { };
+  {
+  };
 
 template<typename targetT, typename sourceT>
 constexpr
@@ -102,13 +118,17 @@ struct binder_eq
 
     constexpr
     binder_eq(const valueT& xval) noexcept(is_nothrow_copy_constructible<valueT>::value)
-      : m_val(xval)
-      { }
+      :
+        m_val(xval)
+      {
+      }
 
     constexpr
     binder_eq(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
-      : m_val(::std::move(xval))
-      { }
+      :
+        m_val(::std::move(xval))
+      {
+      }
 
     template<typename xvalueT>
     constexpr
@@ -124,13 +144,17 @@ struct binder_ne
 
     constexpr
     binder_ne(const valueT& xval) noexcept(is_nothrow_copy_constructible<valueT>::value)
-      : m_val(xval)
-      { }
+      :
+        m_val(xval)
+      {
+      }
 
     constexpr
     binder_ne(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
-      : m_val(::std::move(xval))
-      { }
+      :
+        m_val(::std::move(xval))
+      {
+      }
 
     template<typename xvalueT>
     constexpr

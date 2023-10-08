@@ -9,7 +9,8 @@
 namespace asteria {
 
 class Garbage_Collector final
-  : public rcfwd<Garbage_Collector>
+  :
+    public rcfwd<Garbage_Collector>
   {
   private:
     int m_recur = 0;
@@ -28,7 +29,8 @@ class Garbage_Collector final
   public:
     explicit
     Garbage_Collector() noexcept
-      { }
+      {
+      }
 
   private:
     inline

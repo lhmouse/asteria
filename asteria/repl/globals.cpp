@@ -15,7 +15,8 @@ namespace asteria {
 namespace {
 
 struct Verbose_Hooks final
-  :  Abstract_Hooks
+  :
+     Abstract_Hooks
   {
     ::rocket::tinyfmt_str m_fmt;  // reusable storage
 

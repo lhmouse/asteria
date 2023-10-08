@@ -9,7 +9,8 @@
 namespace asteria {
 
 class Analytic_Context
-  : public Abstract_Context
+  :
+    public Abstract_Context
   {
   private:
     Abstract_Context* m_parent_opt;
@@ -19,8 +20,10 @@ class Analytic_Context
     // Its parent context shall outlast itself.
     explicit
     Analytic_Context(M_plain, Abstract_Context& parent)
-      : m_parent_opt(&parent)
-      { }
+      :
+        m_parent_opt(&parent)
+      {
+      }
 
     // A function context may have a parent.
     // Names found in ancestor contexts will be bound into the

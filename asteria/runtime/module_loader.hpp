@@ -9,7 +9,8 @@
 namespace asteria {
 
 class Module_Loader final
-  : public rcfwd<Module_Loader>
+  :
+    public rcfwd<Module_Loader>
   {
   public:
     class Unique_Stream;  // RAII wrapper
@@ -21,7 +22,8 @@ class Module_Loader final
   public:
     explicit
     Module_Loader() noexcept
-      { }
+      {
+      }
 
   private:
     locked_stream_pair*
