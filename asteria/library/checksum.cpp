@@ -38,7 +38,7 @@ class CRC32_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -147,7 +147,7 @@ class FNV1a32_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -275,7 +275,7 @@ class MD5_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -385,7 +385,7 @@ class SHA1_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -495,7 +495,7 @@ class SHA224_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -605,7 +605,7 @@ class SHA256_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -715,7 +715,7 @@ class SHA384_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -825,7 +825,7 @@ class SHA512_Hasher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 

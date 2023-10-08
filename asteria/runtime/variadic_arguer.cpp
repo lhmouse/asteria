@@ -16,10 +16,10 @@ describe(tinyfmt& fmt) const
 
 void
 Variadic_Arguer::
-get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     for(const auto& arg : this->m_vargs)
-      arg.get_variables(staged, temp);
+      arg.collect_variables(staged, temp);
   }
 
 Reference&

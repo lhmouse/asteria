@@ -390,7 +390,7 @@ class AIR_Node
     // This is necessary because the body of a closure shall not have been
     // solidified.
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
 inline

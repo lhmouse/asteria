@@ -171,9 +171,9 @@ do_finish_call_slow(Global_Context& global)
 
 void
 Reference::
-get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    this->m_value.get_variables(staged, temp);
+    this->m_value.collect_variables(staged, temp);
 
     if(auto var = unerase_pointer_cast<Variable>(this->m_var))
       if(staged.insert(&(this->m_var), var))

@@ -100,7 +100,7 @@ do_call_get_variables(Variable_HashMap& staged, Variable_HashMap& temp,
                       const Header* head)
   {
     auto ptr = reinterpret_cast<const SparamT*>(head->sparam);
-    ptr->get_variables(staged, temp);
+    ptr->collect_variables(staged, temp);
   }
 
 template<typename SparamT, typename = void>
@@ -114,7 +114,7 @@ struct select_get_variables
 template<typename SparamT>
 struct select_get_variables<SparamT,
     ROCKET_VOID_DECLTYPE(
-      ::std::declval<const SparamT&>().get_variables(
+      ::std::declval<const SparamT&>().collect_variables(
           ::std::declval<Variable_HashMap&>(),  // staged
           ::std::declval<Variable_HashMap&>()   // temp
         ))>

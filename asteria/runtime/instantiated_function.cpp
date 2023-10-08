@@ -36,9 +36,9 @@ describe(tinyfmt& fmt) const
 
 void
 Instantiated_Function::
-get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    this->m_queue.get_variables(staged, temp);
+    this->m_queue.collect_variables(staged, temp);
   }
 
 Reference&

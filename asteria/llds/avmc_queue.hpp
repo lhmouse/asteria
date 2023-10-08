@@ -140,7 +140,7 @@ class AVMC_Queue
     execute(Executive_Context& ctx) const;
 
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
 inline

@@ -54,10 +54,10 @@ clear_cache() noexcept
 
 void
 Reference_Stack::
-get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     for(uint32_t refi = 0;  refi != this->m_einit;  ++ refi)
-      this->m_bptr[refi].get_variables(staged, temp);
+      this->m_bptr[refi].collect_variables(staged, temp);
   }
 
 }  // namespace asteria

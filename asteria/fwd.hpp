@@ -309,7 +309,7 @@ struct Abstract_Opaque
     // collection from running.
     virtual
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const = 0;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const = 0;
 
     // This function is called when a mutable reference is requested and the current
     // instance is shared. If this function returns a null pointer, the shared
@@ -348,7 +348,7 @@ struct Abstract_Function
     // collection from running.
     virtual
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const = 0;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const = 0;
 
     // This function may return a proper tail call wrapper.
     virtual
@@ -446,10 +446,10 @@ class cow_opaque
     describe(tinyfmt& fmt) const;
 
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
         if(this->m_sptr)
-          this->m_sptr->get_variables(staged, temp);
+          this->m_sptr->collect_variables(staged, temp);
       }
 
     template<typename OpaqueT = Abstract_Opaque>
@@ -642,10 +642,10 @@ class cow_function
     describe(tinyfmt& fmt) const;
 
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
         if(this->m_sptr)
-          this->m_sptr->get_variables(staged, temp);
+          this->m_sptr->collect_variables(staged, temp);
       }
 
     Reference&

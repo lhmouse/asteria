@@ -79,7 +79,7 @@ class Deflator final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
@@ -270,7 +270,7 @@ class Inflator final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 

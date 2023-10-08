@@ -247,7 +247,7 @@ execute(Executive_Context& ctx) const
 
 void
 AVMC_Queue::
-get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     auto next = this->m_bptr;
     const auto eptr = this->m_bptr + this->m_used;

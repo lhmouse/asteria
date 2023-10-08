@@ -36,7 +36,7 @@ operator->*(target_R_gsa& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -80,7 +80,7 @@ operator->*(target_R_ga& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -124,7 +124,7 @@ operator->*(target_R_sa& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -168,7 +168,7 @@ operator->*(target_R_a& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -212,7 +212,7 @@ operator->*(target_V_gsa& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -256,7 +256,7 @@ operator->*(target_V_ga& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -300,7 +300,7 @@ operator->*(target_V_sa& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -344,7 +344,7 @@ operator->*(target_V_a& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -388,7 +388,7 @@ operator->*(target_Z_gsa& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -432,7 +432,7 @@ operator->*(target_Z_ga& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -476,7 +476,7 @@ operator->*(target_Z_sa& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 
@@ -520,7 +520,7 @@ operator->*(target_Z_a& target) const
           }
 
         void
-        get_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
           {
           }
 

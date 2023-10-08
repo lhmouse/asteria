@@ -43,7 +43,7 @@ do_collect_generation(uint32_t gen)
       // initialized to one.
       var->set_gc_ref(1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
-      var->get_value().get_variables(this->m_staged, this->m_temp_1);
+      var->get_value().collect_variables(this->m_staged, this->m_temp_1);
     }
 
     this->m_temp_1.clear();
@@ -77,7 +77,7 @@ do_collect_generation(uint32_t gen)
       this->m_temp_1.erase(var.get());
       this->m_unreach.erase(var.get());
 
-      var->get_value().get_variables(this->m_staged, this->m_temp_2);
+      var->get_value().collect_variables(this->m_staged, this->m_temp_2);
 
       if(next_opt && tracked.erase(var.get()))
         try {

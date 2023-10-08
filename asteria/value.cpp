@@ -118,7 +118,7 @@ do_destroy_variant_slow() noexcept
 
 void
 Value::
-do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
+do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -128,11 +128,11 @@ do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
     if((qval->m_stor.index() >= type_opaque) && staged.insert(qval, nullptr))
       switch(qval->m_stor.index()) {
         case type_opaque:
-          qval->m_stor.as<V_opaque>().get_variables(staged, temp);
+          qval->m_stor.as<V_opaque>().collect_variables(staged, temp);
           break;
 
         case type_function:
-          qval->m_stor.as<V_function>().get_variables(staged, temp);
+          qval->m_stor.as<V_function>().collect_variables(staged, temp);
           break;
 
         case type_array: {

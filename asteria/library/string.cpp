@@ -418,7 +418,7 @@ class PCRE2_Matcher final
       }
 
     void
-    get_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 

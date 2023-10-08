@@ -105,7 +105,7 @@ class Value
     do_destroy_variant_slow() noexcept;
 
     void
-    do_get_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
+    do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
     [[noreturn]]
     void
@@ -312,10 +312,10 @@ class Value
 
     // This is used by garbage collection.
     void
-    get_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
         if(ROCKET_UNEXPECT(this->type() >= type_opaque))
-          this->do_get_variables_slow(staged, temp);
+          this->do_collect_variables_slow(staged, temp);
       }
 
     // This performs the builtin conversion to boolean values.
