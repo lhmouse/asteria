@@ -157,6 +157,7 @@ class Reference_Stack;
 class AVMC_Queue;
 
 // Runtime
+enum Xop : uint8_t;
 enum AIR_Status : uint8_t;
 enum PTC_Aware : int8_t;  // This is a bitmask!
 struct Abstract_Hooks;
@@ -183,7 +184,6 @@ enum Punctuator : uint8_t;
 enum Keyword : uint8_t;
 enum Jump_Target : uint8_t;
 enum Precedence : uint8_t;
-enum Xop : uint8_t;
 class Compiler_Error;
 class Token;
 class Token_Stream;
@@ -669,7 +669,7 @@ operator<<(tinyfmt& fmt, const cow_function& func)
     return func.describe(fmt);
   }
 
-// Fundamental types
+// Value types
 using V_null      = nullopt_t;
 using V_boolean   = bool;
 using V_integer   = int64_t;
@@ -689,7 +689,6 @@ using optV_function  = V_function;
 using optV_array     = opt<V_array>;
 using optV_object    = opt<V_object>;
 
-// Value types
 enum Type : uint8_t
   {
     type_null      = 0,

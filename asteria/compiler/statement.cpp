@@ -20,12 +20,11 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
     if(name.empty())
       return;
 
-    // Record this name.
+    // Inject this name.
     if(names_opt && !find(*names_opt, name))
       names_opt->emplace_back(name);
 
-    // Just ensure the name exists.
-    ctx.insert_named_reference(name).set_invalid();
+    ctx.insert_named_reference(name);
   }
 
 cow_vector<AIR_Node>&

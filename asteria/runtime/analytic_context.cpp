@@ -20,15 +20,15 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
         break;
 
       // Its contents are out of interest.
-      this->do_mut_named_reference(nullptr, name).set_invalid();
+      this->do_mut_named_reference(nullptr, name);
     }
 
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update
     // 'executive_context.cpp' as well.
-    this->do_mut_named_reference(nullptr, sref("__varg")).set_invalid();
-    this->do_mut_named_reference(nullptr, sref("__this")).set_invalid();
-    this->do_mut_named_reference(nullptr, sref("__func")).set_invalid();
+    this->do_mut_named_reference(nullptr, sref("__varg"));
+    this->do_mut_named_reference(nullptr, sref("__this"));
+    this->do_mut_named_reference(nullptr, sref("__func"));
   }
 
 Analytic_Context::

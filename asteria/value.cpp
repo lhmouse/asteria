@@ -194,9 +194,9 @@ void
 Value::
 do_throw_type_mismatch(const char* desc) const
   {
-    ::rocket::sprintf_and_throw<::std::invalid_argument>(
-          "Value: type mismatch (expecting %s, but value had type `%s`)",
-          desc, describe_type(this->type()));
+    ASTERIA_THROW((
+        "Value type mismatch (expecting `$1`, got `$2`)"),
+        desc, describe_type(this->type()));
   }
 
 Compare
@@ -364,9 +364,7 @@ print(tinyfmt& fmt) const
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid value type (type `$1`)"),
-            qval->type());
+        ASTERIA_TERMINATE(("Invalid value type (type `$1`)"), this->type());
     }
 
     while(stack.size())
