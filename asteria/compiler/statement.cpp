@@ -501,24 +501,15 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.units.empty()) {
-          // If no expression is provided, return a void reference.
-          AIR_Node::S_simple_status xnode = { air_status_return_void };
-          code.emplace_back(::std::move(xnode));
-        }
-        else if(altr.by_ref) {
-          // This may be PTC'd.
-          do_generate_expression(code, opts, global, ctx, ptc_aware_by_ref, altr.expr);
-
-          // Forward the result as is.
-          AIR_Node::S_simple_status xnode = { air_status_return_ref };
+          AIR_Node::S_return_statement xnode = { altr.expr.sloc, false, true };
           code.emplace_back(::std::move(xnode));
         }
         else {
-          // This may be PTC'd.
-          do_generate_expression(code, opts, global, ctx, ptc_aware_by_val, altr.expr);
+          do_generate_expression(code, opts, global, ctx,
+                                 altr.by_ref ? ptc_aware_by_ref : ptc_aware_by_val,
+                                 altr.expr);
 
-          // Convert the result to an rvalue and return it.
-          AIR_Node::S_return_value xnode = { altr.expr.sloc };
+          AIR_Node::S_return_statement xnode = { altr.expr.sloc, altr.by_ref, false };
           code.emplace_back(::std::move(xnode));
         }
         return code;

@@ -274,9 +274,6 @@ struct Sparam_defer
 
 struct Traits_clear_stack
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     ROCKET_FLATTEN static
     AIR_Status
     execute(Executive_Context& ctx)
@@ -288,9 +285,6 @@ struct Traits_clear_stack
 
 struct Traits_execute_block
   {
-    // `up` is unused.
-    // `sp` is the solidified body.
-
     static
     AVMC_Queue
     make_sparam(bool& reachable, const AIR_Node::S_execute_block& altr)
@@ -310,9 +304,6 @@ struct Traits_execute_block
 
 struct Traits_declare_variable
   {
-    // `up` is unused.
-    // `sp` is the source location and name;
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_declare_variable& altr)
@@ -349,9 +340,6 @@ struct Traits_declare_variable
 
 struct Traits_initialize_variable
   {
-    // `up` is `immutable`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_initialize_variable& altr)
@@ -391,9 +379,6 @@ struct Traits_initialize_variable
 
 struct Traits_if_statement
   {
-    // `up` is `negative`.
-    // `sp` is the two branches.
-
     static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_if_statement& altr)
@@ -427,9 +412,6 @@ struct Traits_if_statement
 
 struct Traits_switch_statement
   {
-    // `up` is unused.
-    // `sp` is ... everything.
-
     static
     Sparam_switch
     make_sparam(bool& /*reachable*/, const AIR_Node::S_switch_statement& altr)
@@ -507,9 +489,6 @@ struct Traits_switch_statement
 
 struct Traits_do_while_statement
   {
-    // `up` is `negative`.
-    // `sp` is the loop body and condition.
-
     static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
@@ -555,9 +534,6 @@ struct Traits_do_while_statement
 
 struct Traits_while_statement
   {
-    // `up` is `negative`.
-    // `sp` is the condition and loop body.
-
     static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
@@ -603,9 +579,6 @@ struct Traits_while_statement
 
 struct Traits_for_each_statement
   {
-    // `up` is unused.
-    // `sp` is ... everything.
-
     static
     Sparam_for_each
     make_sparam(bool& /*reachable*/, const AIR_Node::S_for_each_statement& altr)
@@ -720,9 +693,6 @@ struct Traits_for_each_statement
 
 struct Traits_for_statement
   {
-    // `up` is unused.
-    // `sp` is ... everything.
-
     static
     Sparam_queues_4
     make_sparam(bool& /*reachable*/, const AIR_Node::S_for_statement& altr)
@@ -776,9 +746,6 @@ struct Traits_for_statement
 
 struct Traits_try_statement
   {
-    // `up` is unused.
-    // `sp` is ... everything.
-
     static
     Sparam_try_catch
     make_sparam(bool& reachable, const AIR_Node::S_try_statement& altr)
@@ -858,9 +825,6 @@ struct Traits_try_statement
 
 struct Traits_throw_statement
   {
-    // `up` is unused.
-    // `sp` is the source location.
-
     static
     Source_Location
     make_sparam(bool& reachable, const AIR_Node::S_throw_statement& altr)
@@ -882,9 +846,6 @@ struct Traits_throw_statement
 
 struct Traits_assert_statement
   {
-    // `up` is unused.
-    // `sp` is the source location.
-
     static
     Sparam_sloc_text
     make_sparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
@@ -912,9 +873,6 @@ struct Traits_assert_statement
 
 struct Traits_simple_status
   {
-    // `up` is `status`.
-    // `sp` is unused.
-
     static
     AVMC_Queue::Uparam
     make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
@@ -937,9 +895,6 @@ struct Traits_simple_status
 
 struct Traits_check_argument
   {
-    // `up` is `by_ref`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_check_argument& altr)
@@ -960,18 +915,21 @@ struct Traits_check_argument
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        // Ensure the argument is dereferenceable.
-        auto& top = ctx.stack().mut_top();
-        (void) (up.u8v[0] ? top.dereference_readonly() : top.mut_temporary());
+        if(up.u8v[0]) {
+          // The argument is passed by reference, but it always has to be
+          // dereferenceable.
+          ctx.stack().top().dereference_readonly();
+          return air_status_next;
+        }
+
+        // The argument is passed by copy, so convert it to a temporary.
+        ctx.stack().mut_top().mut_temporary();
         return air_status_next;
       }
   };
 
 struct Traits_push_global_reference
   {
-    // `up` is unused.
-    // `sp` is the source location and name;
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_push_global_reference& altr)
@@ -1004,9 +962,6 @@ struct Traits_push_global_reference
 
 struct Traits_push_local_reference
   {
-    // `up` is the depth.
-    // `sp` is the source location and name;
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_push_local_reference& altr)
@@ -1059,9 +1014,6 @@ struct Traits_push_local_reference
 
 struct Traits_push_bound_reference
   {
-    // `up` is unused.
-    // `sp` is the reference to push.
-
     static
     Reference
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_bound_reference& altr)
@@ -1080,9 +1032,6 @@ struct Traits_push_bound_reference
 
 struct Traits_define_function
   {
-    // `up` is unused.
-    // `sp` is ... everything.
-
     static
     Sparam_func
     make_sparam(bool& /*reachable*/, const AIR_Node::S_define_function& altr)
@@ -1113,9 +1062,6 @@ struct Traits_define_function
 
 struct Traits_branch_expression
   {
-    // `up` is `assign`.
-    // `sp` is the branches.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_branch_expression& altr)
@@ -1156,9 +1102,6 @@ struct Traits_branch_expression
 
 struct Traits_coalescence
   {
-    // `up` is `assign`.
-    // `sp` is the null branch.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_coalescence& altr)
@@ -1275,9 +1218,6 @@ do_integer_check_mul(V_integer x, V_integer y)
 
 struct Traits_function_call
   {
-    // `up` is `nargs` and `ptc`.
-    // `sp` is the source location.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_function_call& altr)
@@ -1340,9 +1280,6 @@ struct Traits_function_call
 
 struct Traits_member_access
   {
-    // `up` is unused.
-    // `sp` is the name.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_member_access& altr)
@@ -1370,9 +1307,6 @@ struct Traits_member_access
 
 struct Traits_push_unnamed_array
   {
-    // `up` is `nelems`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_push_unnamed_array& altr)
@@ -1410,9 +1344,6 @@ struct Traits_push_unnamed_array
 
 struct Traits_push_unnamed_object
   {
-    // `up` is unused.
-    // `sp` is the list of keys.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_push_unnamed_object& altr)
@@ -1447,46 +1378,50 @@ struct Traits_push_unnamed_object
       }
   };
 
-struct Traits_return_value
+struct Traits_return_statement
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
-    get_symbols(const AIR_Node::S_return_value& altr)
+    get_symbols(const AIR_Node::S_return_statement& altr)
       {
         return altr.sloc;
       }
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_return_value& /*altr*/)
+    make_uparam(bool& reachable, const AIR_Node::S_return_statement& altr)
       {
         reachable = false;
-        return { };
+
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.by_ref;
+        up.u8v[1] = altr.is_void;
+        return up;
       }
+
 
     ROCKET_FLATTEN static
     AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam /*up*/)
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        // Void references are forwarded verbatim.
-        auto& top = ctx.stack().mut_top();
-        if(top.is_void())
+        if(up.u8v[1] || ctx.stack().top().is_void())
           return air_status_return_void;
 
-        // Ensure the argument is dereferenceable.
-        (void) top.mut_temporary();
+        if(up.u8v[0]) {
+          // The result is passed by reference, but it always has to be
+          // dereferenceable.
+          ctx.stack().top().dereference_readonly();
+          return air_status_return_ref;
+        }
+
+        // The result is passed by copy, so convert it to a temporary.
+        ctx.stack().mut_top().mut_temporary();
         return air_status_return_ref;
       }
   };
 
 struct Traits_push_temporary
   {
-    // `up` is unused.
-    // `sp` is the value to push.
-
     static
     Value
     make_sparam(bool& /*reachable*/, const AIR_Node::S_push_temporary& altr)
@@ -1505,9 +1440,6 @@ struct Traits_push_temporary
 
 struct Traits_apply_xop_inc
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1564,9 +1496,6 @@ struct Traits_apply_xop_inc
 
 struct Traits_apply_xop_dec
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1623,9 +1552,6 @@ struct Traits_apply_xop_dec
 
 struct Traits_apply_xop_subscr
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1669,9 +1595,6 @@ struct Traits_apply_xop_subscr
 
 struct Traits_apply_xop_pos
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1701,9 +1624,6 @@ struct Traits_apply_xop_pos
 
 struct Traits_apply_xop_neg
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1753,9 +1673,6 @@ struct Traits_apply_xop_neg
 
 struct Traits_apply_xop_notb
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1813,9 +1730,6 @@ struct Traits_apply_xop_notb
 
 struct Traits_apply_xop_notl
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1848,9 +1762,6 @@ struct Traits_apply_xop_notl
 
 struct Traits_apply_xop_unset
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1872,9 +1783,6 @@ struct Traits_apply_xop_unset
 
 struct Traits_apply_xop_countof
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1934,9 +1842,6 @@ struct Traits_apply_xop_countof
 
 struct Traits_apply_xop_typeof
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -1969,9 +1874,6 @@ struct Traits_apply_xop_typeof
 
 struct Traits_apply_xop_sqrt
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2019,9 +1921,6 @@ struct Traits_apply_xop_sqrt
 
 struct Traits_apply_xop_isnan
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2070,9 +1969,6 @@ struct Traits_apply_xop_isnan
 
 struct Traits_apply_xop_isinf
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2121,9 +2017,6 @@ struct Traits_apply_xop_isinf
 
 struct Traits_apply_xop_abs
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2174,9 +2067,6 @@ struct Traits_apply_xop_abs
 
 struct Traits_apply_xop_sign
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2224,9 +2114,6 @@ struct Traits_apply_xop_sign
 
 struct Traits_apply_xop_round
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2272,9 +2159,6 @@ struct Traits_apply_xop_round
 
 struct Traits_apply_xop_floor
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2320,9 +2204,6 @@ struct Traits_apply_xop_floor
 
 struct Traits_apply_xop_ceil
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2368,9 +2249,6 @@ struct Traits_apply_xop_ceil
 
 struct Traits_apply_xop_trunc
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2416,9 +2294,6 @@ struct Traits_apply_xop_trunc
 
 struct Traits_apply_xop_iround
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2464,9 +2339,6 @@ struct Traits_apply_xop_iround
 
 struct Traits_apply_xop_ifloor
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2512,9 +2384,6 @@ struct Traits_apply_xop_ifloor
 
 struct Traits_apply_xop_iceil
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2560,9 +2429,6 @@ struct Traits_apply_xop_iceil
 
 struct Traits_apply_xop_itrunc
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2608,9 +2474,6 @@ struct Traits_apply_xop_itrunc
 
 struct Traits_apply_xop_cmp_eq
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2646,9 +2509,6 @@ struct Traits_apply_xop_cmp_eq
 
 struct Traits_apply_xop_cmp_ne
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2684,9 +2544,6 @@ struct Traits_apply_xop_cmp_ne
 
 struct Traits_apply_xop_cmp_lt
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2727,9 +2584,6 @@ struct Traits_apply_xop_cmp_lt
 
 struct Traits_apply_xop_cmp_gt
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2770,9 +2624,6 @@ struct Traits_apply_xop_cmp_gt
 
 struct Traits_apply_xop_cmp_lte
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2813,9 +2664,6 @@ struct Traits_apply_xop_cmp_lte
 
 struct Traits_apply_xop_cmp_gte
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2856,9 +2704,6 @@ struct Traits_apply_xop_cmp_gte
 
 struct Traits_apply_xop_cmp_3way
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2912,9 +2757,6 @@ struct Traits_apply_xop_cmp_3way
 
 struct Traits_apply_xop_cmp_un
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -2949,9 +2791,6 @@ struct Traits_apply_xop_cmp_un
 
 struct Traits_apply_xop_add
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3021,9 +2860,6 @@ struct Traits_apply_xop_add
 
 struct Traits_apply_xop_sub
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3085,9 +2921,6 @@ struct Traits_apply_xop_sub
 
 struct Traits_apply_xop_mul
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3187,9 +3020,6 @@ struct Traits_apply_xop_mul
 
 struct Traits_apply_xop_div
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3256,9 +3086,6 @@ struct Traits_apply_xop_div
 
 struct Traits_apply_xop_mod
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3325,9 +3152,6 @@ struct Traits_apply_xop_mod
 
 struct Traits_apply_xop_sll
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3408,9 +3232,6 @@ struct Traits_apply_xop_sll
 
 struct Traits_apply_xop_srl
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3491,9 +3312,6 @@ struct Traits_apply_xop_srl
 
 struct Traits_apply_xop_sla
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3586,9 +3404,6 @@ struct Traits_apply_xop_sla
 
 struct Traits_apply_xop_sra
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3666,9 +3481,6 @@ struct Traits_apply_xop_sra
 
 struct Traits_apply_xop_andb
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3739,9 +3551,6 @@ struct Traits_apply_xop_andb
 
 struct Traits_apply_xop_orb
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3813,9 +3622,6 @@ struct Traits_apply_xop_orb
 
 struct Traits_apply_xop_xorb
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3887,9 +3693,6 @@ struct Traits_apply_xop_xorb
 
 struct Traits_apply_xop_assign
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3911,9 +3714,6 @@ struct Traits_apply_xop_assign
 
 struct Traits_apply_xop_fma
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3963,9 +3763,6 @@ struct Traits_apply_xop_fma
 
 struct Traits_apply_xop_head
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -3986,9 +3783,6 @@ struct Traits_apply_xop_head
 
 struct Traits_apply_xop_tail
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4009,9 +3803,6 @@ struct Traits_apply_xop_tail
 
 struct Traits_unpack_struct_array
   {
-    // `up` is `immutable` and `nelems`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_unpack_struct_array& altr)
@@ -4068,9 +3859,6 @@ struct Traits_unpack_struct_array
 
 struct Traits_unpack_struct_object
   {
-    // `up` is `immutable`.
-    // `sp` is the list of keys.
-
     static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
@@ -4133,9 +3921,6 @@ struct Traits_unpack_struct_object
 
 struct Traits_define_null_variable
   {
-    // `up` is `immutable`.
-    // `sp` is the source location and name.
-
     static
     AVMC_Queue::Uparam
     make_uparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
@@ -4182,9 +3967,6 @@ struct Traits_define_null_variable
 
 struct Traits_single_step_trap
   {
-    // `up` is unused.
-    // `sp` is the source location.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_single_step_trap& altr)
@@ -4210,9 +3992,6 @@ struct Traits_single_step_trap
 
 struct Traits_variadic_call
   {
-    // `up` is `ptc`.
-    // `sp` is the source location.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_variadic_call& altr)
@@ -4343,9 +4122,6 @@ struct Traits_variadic_call
 
 struct Traits_defer_expression
   {
-    // `up` is unused.
-    // `sp` is the source location and body.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_defer_expression& altr)
@@ -4384,9 +4160,6 @@ struct Traits_defer_expression
 
 struct Traits_import_call
   {
-    // `up` is `nargs`.
-    // `sp` is the source location and compiler options.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_import_call& altr)
@@ -4484,9 +4257,6 @@ struct Traits_import_call
 
 struct Traits_declare_reference
   {
-    // `up` is unused.
-    // `sp` is the name;
-
     static
     Sparam_name
     make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_reference& altr)
@@ -4507,9 +4277,6 @@ struct Traits_declare_reference
 
 struct Traits_initialize_reference
   {
-    // `up` is unused.
-    // `sp` is the name;
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_initialize_reference& altr)
@@ -4539,9 +4306,6 @@ struct Traits_initialize_reference
 
 struct Traits_catch_expression
   {
-    // `up` is unused.
-    // `sp` is the body expression.
-
     static
     AVMC_Queue
     make_sparam(bool& /*reachable*/, const AIR_Node::S_catch_expression& altr)
@@ -4579,9 +4343,6 @@ struct Traits_catch_expression
 
 struct Traits_apply_xop_lzcnt
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4624,9 +4385,6 @@ struct Traits_apply_xop_lzcnt
 
 struct Traits_apply_xop_tzcnt
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4669,9 +4427,6 @@ struct Traits_apply_xop_tzcnt
 
 struct Traits_apply_xop_popcnt
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4714,9 +4469,6 @@ struct Traits_apply_xop_popcnt
 
 struct Traits_apply_xop_addm
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4762,9 +4514,6 @@ struct Traits_apply_xop_addm
 
 struct Traits_apply_xop_subm
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4810,9 +4559,6 @@ struct Traits_apply_xop_subm
 
 struct Traits_apply_xop_mulm
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4858,9 +4604,6 @@ struct Traits_apply_xop_mulm
 
 struct Traits_apply_xop_adds
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4916,9 +4659,6 @@ struct Traits_apply_xop_adds
 
 struct Traits_apply_xop_subs
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -4974,9 +4714,6 @@ struct Traits_apply_xop_subs
 
 struct Traits_apply_xop_muls
   {
-    // `up` is `assign`.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -5032,9 +4769,6 @@ struct Traits_apply_xop_muls
 
 struct Traits_apply_xop_random
   {
-    // `up` is unused.
-    // `sp` is unused.
-
     static
     const Source_Location&
     get_symbols(const AIR_Node::S_apply_operator& altr)
@@ -5467,7 +5201,7 @@ rebind_opt(Abstract_Context& ctx) const
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
-      case index_return_value:
+      case index_return_statement:
       case index_push_temporary:
         return nullopt;
 
@@ -5804,9 +5538,9 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_catch_expression>(queue,
                        this->m_stor.as<index_catch_expression>());
 
-      case index_return_value:
-        return do_solidify<Traits_return_value>(queue,
-                       this->m_stor.as<index_return_value>());
+      case index_return_statement:
+        return do_solidify<Traits_return_statement>(queue,
+                       this->m_stor.as<index_return_statement>());
 
       case index_push_temporary:
         return do_solidify<Traits_push_temporary>(queue,
@@ -5952,7 +5686,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
       }
 
-      case index_return_value:
+      case index_return_statement:
         return;
 
       case index_push_temporary: {

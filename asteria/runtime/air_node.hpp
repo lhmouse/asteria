@@ -245,9 +245,11 @@ class AIR_Node
         cow_vector<AIR_Node> code_body;
       };
 
-    struct S_return_value
+    struct S_return_statement
       {
         Source_Location sloc;
+        bool by_ref;
+        bool is_void;
       };
 
     struct S_push_temporary
@@ -293,7 +295,7 @@ class AIR_Node
         index_declare_reference      = 33,
         index_initialize_reference   = 34,
         index_catch_expression       = 35,
-        index_return_value           = 36,
+        index_return_statement       = 36,
         index_push_temporary         = 37,
       };
 
@@ -336,7 +338,7 @@ class AIR_Node
         ,S_declare_reference      // 33,
         ,S_initialize_reference   // 34,
         ,S_catch_expression       // 35,
-        ,S_return_value           // 36,
+        ,S_return_statement       // 36,
         ,S_push_temporary         // 37,
       )>
       m_stor;
