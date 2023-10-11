@@ -208,7 +208,8 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
       ASTERIA_BINDING(
         "std.zlib.Deflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
-      {        auto& defl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
+      {
+        auto& defl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -401,7 +402,8 @@ do_construct_Inflator(V_object& result, V_string format)
       ASTERIA_BINDING(
         "std.zlib.Inflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
-      {        auto& infl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
+      {
+        auto& infl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
 
         reader.start_overload();
         if(reader.end_overload())
