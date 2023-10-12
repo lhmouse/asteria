@@ -3269,7 +3269,7 @@ struct Traits_apply_xop_sla
 
           // Shift the operand to the left by `count` bits, with overflow checking.
           int64_t count = ::rocket::min(rhs.as_integer(), 63);
-          if((int64_t) ((uint64_t) val << count) >> count != val)
+          if((val != 0) && ((count != rhs.as_integer()) || (((val >> 63) ^ val) >> (63 - count) != 0)))
             ASTERIA_THROW_RUNTIME_ERROR((
                 "Arithmetic left shift overflow (operands were `$1` and `$2`)"),
                 lhs, rhs);
