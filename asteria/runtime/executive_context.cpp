@@ -132,7 +132,7 @@ do_on_scope_exit_slow(AIR_Status status)
     if(status == air_status_return_ref) {
       // If a PTC wrapper was returned, append all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
-      auto ptc = this->m_stack->mut_top().unphase_ptc_opt();
+      const auto ptc = this->m_stack->mut_top().unphase_ptc_opt();
       if(ptc) {
         ptc->defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
         return;

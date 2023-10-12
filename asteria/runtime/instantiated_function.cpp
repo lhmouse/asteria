@@ -72,8 +72,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_return_ref: {
         // In case of PTCs, set up source location. This cannot be set at the
         // call site where such information isn't available.
-        auto ptc = stack.top().unphase_ptc_opt();
-        if(ptc)
+        if(auto ptc = stack.top().unphase_ptc_opt())
           ptc->set_caller(this->m_zvarg);
 
         // Return the reference at the top of `stack`.
