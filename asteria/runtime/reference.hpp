@@ -172,6 +172,14 @@ class Reference
         return *this;
       }
 
+    size_t
+    count_modifiers() const noexcept
+      { return this->m_mods.size();  }
+
+    void
+    clear_modifiers() noexcept
+      { this->m_mods.clear();  }
+
     template<typename XModT,
     ROCKET_ENABLE_IF(::std::is_constructible<Reference_Modifier, XModT&&>::value)>
     Reference&
