@@ -22,10 +22,9 @@ load_and_execute_single_noreturn()
       exit_printf(exit_compiler_error, "! error: %s", stdex.what());
     }
 
-    // Execute the script, passing all command-line arguments to it.
+    // Execute the script, passing all command-line arguments to it. If the
+    // script exits without returning a value, success is assumed.
     auto ref = repl_script.execute(::std::move(repl_args));
-
-    // If the script exits without returning a value, success is assumed.
     if(ref.is_void())
       ::quick_exit(exit_success);
 

@@ -125,7 +125,9 @@ read_execute_print_single()
     cow_string real_name;
     Token_Stream tstrm(repl_script.options());
     Statement_Sequence stmtq(repl_script.options());
+
     Reference ref;
+    ::rocket::tinyfmt_str fmt;
 
     try {
       // The snippet may be a sequence of statements or an expression.
@@ -188,13 +190,11 @@ read_execute_print_single()
       return repl_printf("! error: %s", stdex.what());
     }
 
-    // Stringify the result.
     if(ref.is_void())
-      return repl_printf("* result #%lu: void", repl_index);
+      fmt << "void";
+    else
+      ref.dereference_readonly().dump(fmt);
 
-    const auto& val = ref.dereference_readonly();
-    ::rocket::tinyfmt_str fmt;
-    val.dump(fmt);
     return repl_printf("* result #%lu: %s", repl_index, fmt.c_str());
   }
 
