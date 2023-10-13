@@ -206,22 +206,18 @@ do_use_function_result_slow(Global_Context& global)
         // Evaluate deferred expressions.
         if(ptc->defer().size())
           Executive_Context(Executive_Context::M_defer(),
-                global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
             .on_scope_exit(air_status_next);
 
         // Check the result.
-        if(ptc->ptc_aware() == ptc_aware_void) {
-          deref_once = true;
+        if(ptc->ptc_aware() == ptc_aware_void)
           this->m_xref = xref_void;
-        }
-        else if((this->m_xref != xref_void) && !deref_once && (ptc->ptc_aware() == ptc_aware_by_ref)) {
-          deref_once = true;
+        else if((this->m_xref != xref_void) && (ptc->ptc_aware() == ptc_aware_by_ref) && !deref_once) {
           this->dereference_readonly();
-        }
-        else if((this->m_xref != xref_void) && (ptc->ptc_aware() == ptc_aware_by_val)) {
           deref_once = true;
-          this->dereference_copy();
         }
+        else if((this->m_xref != xref_void) && (ptc->ptc_aware() == ptc_aware_by_val))
+          this->dereference_copy();
 
         ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(), ptc->target(), *this);
       }
@@ -243,7 +239,7 @@ do_use_function_result_slow(Global_Context& global)
         // Evaluate deferred expressions.
         if(ptc->defer().size())
           Executive_Context(Executive_Context::M_defer(),
-                global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
             .on_scope_exit(except);
 
         ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptc->sloc(), ptc->target(), except);
