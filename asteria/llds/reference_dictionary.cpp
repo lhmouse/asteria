@@ -119,7 +119,7 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
           [&](const details_reference_dictionary::Bucket& r) { return r.key_equals(key);  });
 
-    if(*qbkt)
+    if(!*qbkt)
       return false;
 
     // Destroy the bucket.
