@@ -13,15 +13,9 @@ Analytic_Context(M_function, Abstract_Context* parent_opt,
     m_parent_opt(parent_opt)
   {
     // Set parameters, which are local references.
-    for(const auto& name : params) {
-      // Nothing is set for the variadic placeholder, but the parameter
-      // list terminates here.
-      if(name == sref("..."))
-        break;
-
-      // Its contents are out of interest.
-      this->do_mut_named_reference(nullptr, name);
-    }
+    for(const auto& name : params)
+      if(name != sref("..."))
+        this->do_mut_named_reference(nullptr, name);
 
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update

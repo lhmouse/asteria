@@ -43,33 +43,29 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     // Set arguments. As arguments are evaluated from left to right, the
     // reference at the top is the last argument.
-    size_t nargs = stack.size();
+    size_t arg_counter = stack.size();
+    bool has_ellipsis = false;
 
-    for(const auto& name : params) {
-      // The variadic placeholder terminates this parameter list.
-      if(name == sref("...")) {
-        // Move all arguments into the variadic argument getter.
-        while(nargs != 0)
-          this->m_lazy_args.emplace_back(::std::move(stack.mut_top(--nargs)));
+    for(const auto& name : params)
+      if(name != sref("...")) {
+        auto& param = this->do_mut_named_reference(nullptr, name);
+        param.set_temporary(nullopt);
 
-        // Nothing is set for the variadic placeholder, but the parameter
-        // list terminates here.
-        break;
+        // Try popping an argument and assign it to this parameter.
+        if(arg_counter != 0)
+          param = ::std::move(stack.mut_top(-- arg_counter));
       }
-
-      // Try popping an argument from `stack` and assign it to this parameter.
-      // If no more arguments follow, declare a constant `null`.
-      if(nargs != 0)
-        this->do_mut_named_reference(nullptr, name) = ::std::move(stack.mut_top(--nargs));
       else
-        this->do_mut_named_reference(nullptr, name).set_temporary(nullopt);
-    }
+        has_ellipsis = true;
 
-    // All arguments must have been consumed.
-    if(nargs != 0)
+    if(!has_ellipsis && (arg_counter != 0))
       ASTERIA_THROW_RUNTIME_ERROR((
           "Too many arguments passed to `$1`"),
           zvarg->func());
+
+    // Move all arguments into the variadic argument getter.
+    while(arg_counter != 0)
+      this->m_lazy_args.emplace_back(::std::move(stack.mut_top(-- arg_counter)));
   }
 
 Executive_Context::
