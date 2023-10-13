@@ -62,7 +62,7 @@ class const_bitset
         for(size_t k = 0;  k != sizeof...(bitsT);  ++k)
           if(bits[k]) {
             this->m_popcnt ++;
-            this->m_words[k / 32] |= (UINT32_C(1) << k % 32);
+            this->m_words[k / 32] |= (1U << k % 32);
           }
       }
 
@@ -75,7 +75,7 @@ class const_bitset
         else if(this->m_popcnt == sizeof...(bitsT))
           return true;
         else
-          return this->m_words[k / 32] & (UINT32_C(1) << k % 32);
+          return this->m_words[k / 32] & (1U << k % 32);
       }
   };
 

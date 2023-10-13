@@ -258,7 +258,7 @@ std_numeric_sign(V_integer value)
 V_integer
 std_numeric_sign(V_real value)
   {
-    return ::std::signbit(value) ? INT64_C(-1) : 0;
+    return ::std::signbit(value) ? -1LL : 0;
   }
 
 V_boolean
@@ -514,7 +514,7 @@ std_numeric_rotl(V_integer m, V_integer x, V_integer n)
 
     // The shift count is modulo `m` so all values are defined.
     uint64_t ireg = static_cast<uint64_t>(x);
-    uint64_t mask = (UINT64_C(1) << (m - 1) << 1) - 1;
+    uint64_t mask = (2ULL << (m - 1)) - 1;
     int64_t sh = n % m;
     if(sh != 0) {
       // Normalize the shift count.
@@ -538,7 +538,7 @@ std_numeric_rotr(V_integer m, V_integer x, V_integer n)
 
     // The shift count is modulo `m` so all values are defined.
     uint64_t ireg = static_cast<uint64_t>(x);
-    uint64_t mask = (UINT64_C(1) << (m - 1) << 1) - 1;
+    uint64_t mask = (2ULL << (m - 1)) - 1;
     int64_t sh = n % m;
     if(sh != 0) {
       // Normalize the shift count.

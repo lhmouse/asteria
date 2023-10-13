@@ -103,40 +103,40 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     // Neutralize control characters: ['\x00','\x1F'] and '\x7F'.
     for(char c : msg)
       switch(c) {
-        break; case 0x00:  data += "[NUL]";
-        break; case 0x01:  data += "[SOH]";
-        break; case 0x02:  data += "[STX]";
-        break; case 0x03:  data += "[ETX]";
-        break; case 0x04:  data += "[EOT]";
-        break; case 0x05:  data += "[ENQ]";
-        break; case 0x06:  data += "[ACK]";
-        break; case 0x07:  data += "[BEL]";
-        break; case 0x08:  data += "[BS]";
-        break; case 0x09:  data += "\t";    // HT
-        break; case 0x0A:  data += "\x1B\x45\t";  // LF
-        break; case 0x0B:  data += "[VT]";
-        break; case 0x0C:  data += "[FF]";
-        break; case 0x0D:                   // CR
-        break; case 0x0E:  data += "[SO]";
-        break; case 0x0F:  data += "[SI]";
-        break; case 0x10:  data += "[DLE]";
-        break; case 0x11:  data += "[DC1]";
-        break; case 0x12:  data += "[DC2]";
-        break; case 0x13:  data += "[DC3]";
-        break; case 0x14:  data += "[DC4]";
-        break; case 0x15:  data += "[NAK]";
-        break; case 0x16:  data += "[SYN]";
-        break; case 0x17:  data += "[ETB]";
-        break; case 0x18:  data += "[CAN]";
-        break; case 0x19:  data += "[EM]";
-        break; case 0x1A:  data += "[SUB]";
-        break; case 0x1B:  data += "[ESC]";
-        break; case 0x1C:  data += "[FS]";
-        break; case 0x1D:  data += "[GS]";
-        break; case 0x1E:  data += "[RS]";
-        break; case 0x1F:  data += "[US]";
+        break; case 0x00U:  data += "[NUL]";
+        break; case 0x01U:  data += "[SOH]";
+        break; case 0x02U:  data += "[STX]";
+        break; case 0x03U:  data += "[ETX]";
+        break; case 0x04U:  data += "[EOT]";
+        break; case 0x05U:  data += "[ENQ]";
+        break; case 0x06U:  data += "[ACK]";
+        break; case 0x07U:  data += "[BEL]";
+        break; case 0x08U:  data += "[BS]";
+        break; case 0x09U:  data += "\t";    // HT
+        break; case 0x0AU:  data += "\x1B\x45\t";  // LF
+        break; case 0x0BU:  data += "[VT]";
+        break; case 0x0CU:  data += "[FF]";
+        break; case 0x0DU:                   // CR
+        break; case 0x0EU:  data += "[SO]";
+        break; case 0x0FU:  data += "[SI]";
+        break; case 0x10U:  data += "[DLE]";
+        break; case 0x11U:  data += "[DC1]";
+        break; case 0x12U:  data += "[DC2]";
+        break; case 0x13U:  data += "[DC3]";
+        break; case 0x14U:  data += "[DC4]";
+        break; case 0x15U:  data += "[NAK]";
+        break; case 0x16U:  data += "[SYN]";
+        break; case 0x17U:  data += "[ETB]";
+        break; case 0x18U:  data += "[CAN]";
+        break; case 0x19U:  data += "[EM]";
+        break; case 0x1AU:  data += "[SUB]";
+        break; case 0x1BU:  data += "[ESC]";
+        break; case 0x1CU:  data += "[FS]";
+        break; case 0x1DU:  data += "[GS]";
+        break; case 0x1EU:  data += "[RS]";
+        break; case 0x1FU:  data += "[US]";
         break; default:    data += c;       // verbatim
-        break; case 0x7F:  data += "[DEL]";
+        break; case 0x7FU:  data += "[DEL]";
       }
 
     // Remove trailing space characters.
@@ -183,18 +183,16 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
 bool
 utf8_encode(char*& pos, char32_t cp) noexcept
   {
-    if(cp < 0x80) {
+    if(cp < 0x80U) {
       // This character takes only one byte.
       *(pos++) = (char) cp;
       return true;
     }
 
-    if((0xD800 <= cp) && (cp < 0xE000))
-      // Surrogates are reserved for UTF-16.
+    if((0xD800U <= cp) && (cp < 0xE000U))
       return false;
 
-    if(cp >= 0x110000)
-      // Code point is too large.
+    if(cp >= 0x110000U)
       return false;
 
     // Encode bits into a byte.
@@ -202,20 +200,20 @@ utf8_encode(char*& pos, char32_t cp) noexcept
       { *(pos++) = (char) ((~m << 1) | (cp >> sh & m));  };
 
     // Encode the code point now. The result may be 2, 3 or 4 bytes.
-    if(cp < 0x800) {
-      encode_one( 6, 0x1F);
-      encode_one( 0, 0x3F);
+    if(cp < 0x800U) {
+      encode_one( 6, 0x1FU);
+      encode_one( 0, 0x3FU);
     }
-    else if(cp < 0x10000) {
-      encode_one(12, 0x0F);
-      encode_one( 6, 0x3F);
-      encode_one( 0, 0x3F);
+    else if(cp < 0x10000U) {
+      encode_one(12, 0x0FU);
+      encode_one( 6, 0x3FU);
+      encode_one( 0, 0x3FU);
     }
     else {
-      encode_one(18, 0x07);
-      encode_one(12, 0x3F);
-      encode_one( 6, 0x3F);
-      encode_one( 0, 0x3F);
+      encode_one(18, 0x07U);
+      encode_one(12, 0x3FU);
+      encode_one( 6, 0x3FU);
+      encode_one( 0, 0x3FU);
     }
     return true;
   }
@@ -241,47 +239,39 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
       return false;
 
     // Read the first byte.
-    cp = *(pos++) & 0xFF;
-    if(cp < 0x80)
-      // This sequence contains only one byte.
+    cp = (unsigned char) *(pos++) & 0xFFU;
+    if(cp < 0x80U)
       return true;
-
-    if((cp < 0xC0) || (0xF8 <= cp))
-      // This is not a leading character.
+    else if((cp < 0xC0U) || (0xF8U <= cp))
       return false;
 
     // Calculate the number of bytes in this code point.
-    uint32_t u8len = 2U + (cp >= 0xE0) + (cp >= 0xF0);
+    uint32_t u8len = 2U + (cp >= 0xE0U) + (cp >= 0xF0U);
     ROCKET_ASSERT(u8len >= 2);
     ROCKET_ASSERT(u8len <= 4);
     if(u8len > avail)
-      // No enough characters have been provided.
       return false;
 
     // Unset bits that are not part of the payload.
-    cp &= UINT32_C(0xFF) >> u8len;
+    cp &= 0xFFU >> u8len;
 
     // Accumulate trailing code units.
     for(size_t i = 1;  i < u8len;  ++i) {
-      char32_t cu = *(pos++) & 0xFF;
-      if((cu < 0x80) || (0xC0 <= cu))
-        // This trailing character is not valid.
+      char32_t cu = (unsigned char) *(pos++) & 0xFFU;
+      if((cu < 0x80U) || (0xC0U <= cu))
         return false;
-      cp = (cp << 6) | (cu & 0x3F);
+      cp = (cp << 6) | (cu & 0x3FU);
     }
 
-    if((0xD800 <= cp) && (cp < 0xE000))
-      // Surrogates are reserved for UTF-16.
+    if((0xD800U <= cp) && (cp < 0xE000U))
       return false;
 
-    if(cp >= 0x110000)
-      // Code point is too large.
+    if(cp >= 0x110000U)
       return false;
 
     // Re-encode it and check for overlong sequences.
-    uint32_t milen = 1U + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000);
+    uint32_t milen = 1U + (cp >= 0x80U) + (cp >= 0x800U) + (cp >= 0x10000U);
     if(milen != u8len)
-      // Overlong sequences are not allowed.
       return false;
 
     return true;
@@ -306,23 +296,20 @@ utf8_decode(char32_t& cp, stringR text, size_t& offset)
 bool
 utf16_encode(char16_t*& pos, char32_t cp) noexcept
   {
-    if((0xD800 <= cp) && (cp < 0xE000))
-      // Surrogates are reserved for UTF-16.
+    if((0xD800U <= cp) && (cp < 0xE000U))
       return false;
 
-    if(cp < 0x10000) {
-      // This character takes only one code unit.
+    if(cp < 0x10000U) {
       *(pos++) = (char16_t) cp;
       return true;
     }
 
-    if(cp >= 0x110000)
-      // Code point is too large.
+    if(cp >= 0x110000U)
       return false;
 
     // Write surrogates.
-    *(pos++) = (char16_t) (0xD800 + ((cp - 0x10000) >> 10));
-    *(pos++) = (char16_t) (0xDC00 + (cp & 0x3FF));
+    *(pos++) = (char16_t) (0xD800U + ((cp - 0x10000U) >> 10));
+    *(pos++) = (char16_t) (0xDC00U + (cp & 0x3FFU));
     return true;
   }
 
@@ -347,26 +334,22 @@ utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept
       return false;
 
     // Read the first code unit.
-    cp = *(pos++) & 0xFFFF;
-    if((cp < 0xD800) || (0xE000 <= cp))
-      // This sequence contains only one code unit.
+    cp = *(pos++) & 0xFFFFU;
+    if((cp < 0xD800U) || (0xE000U <= cp))
       return true;
 
-    if(cp >= 0xDC00)
-      // A trailing surrogate is not allowed unless following a leading surrogate.
+    if(cp >= 0xDC00U)
       return false;
 
     if(avail < 2)
-      // No enough code units have been provided.
       return false;
 
     // Read the trailing surrogate.
     char16_t cu = *(pos++);
-    if((cu < 0xDC00) || (0xE000 <= cu))
-      // Only a trailing surrogate is allowed to follow a leading surrogate.
+    if((cu < 0xDC00U) || (0xE000U <= cu))
       return false;
 
-    cp = 0x10000 + ((cp & 0x3FF) << 10) + (cu & 0x3FF);
+    cp = 0x10000U + ((cp & 0x3FFU) << 10) + (cu & 0x3FFU);
     return true;
   }
 

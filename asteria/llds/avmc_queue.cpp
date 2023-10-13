@@ -17,7 +17,7 @@ do_destroy_nodes(bool xfree) noexcept
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += UINT32_C(1) + qnode->nheaders;
+      next += 1U + qnode->nheaders;
 
       // Destroy `sparam`, if any.
       if(qnode->meta_ver && qnode->pv_meta->dtor_opt)
@@ -69,7 +69,7 @@ do_reallocate(uint32_t nadd)
     while(ROCKET_EXPECT(offset != this->m_used)) {
       auto qnode = bptr + offset;
       auto qfrom = bold + offset;
-      offset += UINT32_C(1) + qnode->nheaders;
+      offset += 1U + qnode->nheaders;
 
       // Relocate `sparam`, if any.
       if(qnode->meta_ver && qnode->pv_meta->reloc_opt)
@@ -110,7 +110,7 @@ do_reserve_one(Uparam uparam, size_t size)
     // The others can occur in any order.
     auto qnode = this->m_bptr + this->m_used;
     qnode->uparam = uparam;
-    qnode->nheaders = static_cast<uint8_t>(nheaders_p1 - UINT32_C(1));
+    qnode->nheaders = static_cast<uint8_t>(nheaders_p1 - 1U);
     qnode->meta_ver = 0;
     return qnode;
   }
@@ -129,7 +129,7 @@ do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_o
 
     // Accept this node.
     qnode->pv_exec = exec;
-    this->m_used += UINT32_C(1) + qnode->nheaders;
+    this->m_used += 1U + qnode->nheaders;
     return qnode;
   }
 
@@ -164,7 +164,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
     // Accept this node.
     qnode->pv_meta = meta.release();
     qnode->meta_ver = meta_ver;
-    this->m_used += UINT32_C(1) + qnode->nheaders;
+    this->m_used += 1U + qnode->nheaders;
     return qnode;
   }
 
@@ -184,7 +184,7 @@ execute(Executive_Context& ctx) const
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += UINT32_C(1) + qnode->nheaders;
+      next += 1U + qnode->nheaders;
       AIR_Status status;
 
       switch(qnode->meta_ver) {
@@ -253,7 +253,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
     const auto eptr = this->m_bptr + this->m_used;
     while(ROCKET_EXPECT(next != eptr)) {
       auto qnode = next;
-      next += UINT32_C(1) + qnode->nheaders;
+      next += 1U + qnode->nheaders;
 
       if(qnode->meta_ver == 0)
         continue;
