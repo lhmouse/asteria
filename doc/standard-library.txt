@@ -1110,8 +1110,7 @@
 	  integer or real. Be advised that `-0.0` is distinct from `0.0`,
 	  despite the equality.
 
-	* Returns `-1` if `value` is negative, or `0` otherwise, of the
-	  same type as `value`.
+	* Returns the sign bit as a boolean value.
 
 `std.numeric.is_finite(value)`
 

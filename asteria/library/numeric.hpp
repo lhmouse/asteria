@@ -15,10 +15,10 @@ V_real
 std_numeric_abs(V_real value);
 
 // `std.numeric.sign`
-V_integer
+V_boolean
 std_numeric_sign(V_integer value);
 
-V_real
+V_boolean
 std_numeric_sign(V_real value);
 
 // `std.numeric.is_finite`

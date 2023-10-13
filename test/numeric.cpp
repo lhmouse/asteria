@@ -23,16 +23,16 @@ int main()
         assert std.numeric.abs(-nan) <=> 0 == "[unordered]";
         assert typeof std.numeric.abs(42.5) == "real";
 
-        assert std.numeric.sign(+42) ==  0;
-        assert std.numeric.sign(-42) == -1;
-        assert typeof std.numeric.sign(42) == "integer";
-        assert std.numeric.sign(+42.5) ==  0;
-        assert std.numeric.sign(-42.5) == -1;
-        assert std.numeric.sign(+infinity) ==  0;
-        assert std.numeric.sign(-infinity) == -1;
-        assert std.numeric.sign(+nan) ==  0;
-        assert std.numeric.sign(-nan) == -1;
-        assert typeof std.numeric.sign(42.5) == "real";
+        assert std.numeric.sign(+42) ==  false;
+        assert std.numeric.sign(-42) == true;
+        assert typeof std.numeric.sign(42) == "boolean";
+        assert std.numeric.sign(+42.5) == false;
+        assert std.numeric.sign(-42.5) == true;
+        assert std.numeric.sign(+infinity) == false;
+        assert std.numeric.sign(-infinity) == true;
+        assert std.numeric.sign(+nan) == false;
+        assert std.numeric.sign(-nan) == true;
+        assert typeof std.numeric.sign(42.5) == "boolean";
 
         assert std.numeric.is_finite(+5) == true;
         assert std.numeric.is_finite(-5) == true;
@@ -385,12 +385,12 @@ int main()
         assert typeof std.numeric.parse("+0x4321.4") == "real";
         assert std.numeric.parse("-0x4321.4") == -17185.25;
         assert typeof std.numeric.parse("-0x4321.4") == "real";
-        assert __sign std.numeric.parse(" 1e-10000") ==  0;
-        assert __sign std.numeric.parse("+1e-10000") ==  0;
-        assert __sign std.numeric.parse("-1e-10000") == -1;
-        assert __sign std.numeric.parse(" 0.0") ==  0;
-        assert __sign std.numeric.parse("+0.0") ==  0;
-        assert __sign std.numeric.parse("-0.0") == -1;
+        assert __sign std.numeric.parse(" 1e-10000") == false;
+        assert __sign std.numeric.parse("+1e-10000") == false;
+        assert __sign std.numeric.parse("-1e-10000") == true;
+        assert __sign std.numeric.parse(" 0.0") == false;
+        assert __sign std.numeric.parse("+0.0") == false;
+        assert __sign std.numeric.parse("-0.0") == true;
         assert std.numeric.parse(" infinity") == +infinity;
         assert std.numeric.parse("+infinity") == +infinity;
         assert std.numeric.parse("-infinity") == -infinity;

@@ -249,16 +249,16 @@ std_numeric_abs(V_real value)
     return ::std::abs(value);
   }
 
-V_integer
+V_boolean
 std_numeric_sign(V_integer value)
   {
-    return value >> 63;
+    return value < 0;
   }
 
-V_real
+V_boolean
 std_numeric_sign(V_real value)
   {
-    return ::std::signbit(value) ? -1.0 : 0.0;
+    return ::std::signbit(value);
   }
 
 V_boolean

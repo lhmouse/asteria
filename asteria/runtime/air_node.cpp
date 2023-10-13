@@ -2018,19 +2018,13 @@ struct Traits_apply_xop_sign
         auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
-          V_integer& val = rhs.mut_integer();
-
-          // Populate the operand with its sign bit.
-          val >>= 63;
+          // Get the sign bit.
+          rhs = rhs.as_integer() < 0;
           return air_status_next;
         }
         else if(rhs.type() == type_real) {
-          V_real& val = rhs.mut_real();
-
-          // Populate the operand with its sign bit.
-          int64_t bits;
-          ::memcpy(&bits, &val, sizeof(val));
-          rhs = bits >> 63;
+          // Get the sign bit.
+          rhs = ::std::signbit(rhs.as_real());
           return air_status_next;
         }
         else
