@@ -51,7 +51,7 @@ class Recursion_Sentry
   private:
     [[noreturn]]
     void
-    do_throw_stack_overflow(size_t usage, size_t limit) const;
+    do_throw_stack_overflow(size_t usage, uint32_t limit) const;
 
     void
     do_check() const
@@ -59,7 +59,7 @@ class Recursion_Sentry
         // Estimate stack usage.
         size_t usage = (size_t) ::std::abs((char*) this->m_base - (char*) this);
         if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
-          this->do_throw_stack_overflow(usage, size_t(1) << stack_mask_bits);
+          this->do_throw_stack_overflow(usage, 1U << stack_mask_bits);
       }
 
   public:
