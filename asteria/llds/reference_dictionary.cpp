@@ -103,6 +103,7 @@ insert(phsh_stringR key, bool* newly)
     ::rocket::construct(qbkt->kstor, key);
     ::rocket::construct(qbkt->vstor);
     this->m_size ++;
+
     return qbkt->vstor[0];
   }
 

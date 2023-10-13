@@ -97,6 +97,7 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
     qbkt->key_opt = key;
     ::rocket::construct(qbkt->vstor, var);
     this->m_size ++;
+
     return true;
   }
 
