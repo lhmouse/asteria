@@ -16,6 +16,9 @@ do_rehash(uint32_t nbkt)
       // Extend the storage.
       ROCKET_ASSERT(nbkt >= this->m_size * 2);
 
+      if(nbkt >= 0x7FFF000U / sizeof(details_reference_dictionary::Bucket))
+        throw ::std::bad_alloc();
+
       bptr = (details_reference_dictionary::Bucket*) ::calloc(nbkt, sizeof(details_reference_dictionary::Bucket));
       if(!bptr)
         throw ::std::bad_alloc();
