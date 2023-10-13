@@ -181,46 +181,54 @@ do_use_function_result_slow(Global_Context& global)
   {
     refcnt_ptr<PTC_Arguments> ptc;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
-    bool is_void = false;
-    bool by_value = false;
     Reference_Stack alt_stack;
+    bool deref_once = false;
 
     try {
+      // Unpack frames until a non-PTC result is encountered.
       while(this->m_xref == xref_ptc) {
         ptc.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
         ROCKET_ASSERT(ptc.use_count() == 1);
-        frames.emplace_back(ptc);
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_single_step_trap, ptc->sloc());
-
-        // Get the `this` reference and all the other arguments.
-        *this = ::std::move(ptc->stack().mut_top());
-        ptc->stack().pop();
-
-        if(ptc->ptc_aware() == ptc_aware_void)
-          is_void = true;
-        else if(ptc->ptc_aware() == ptc_aware_by_val)
-          by_value = true;
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptc->sloc(), ptc->target());
 
         // Perform a non-tail call.
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptc->sloc(), ptc->target());
+        frames.emplace_back(ptc);
+        *this = ::std::move(ptc->stack().mut_top());
+        ptc->stack().pop();
         ptc->target().invoke_ptc_aware(*this, global, ::std::move(ptc->stack()));
       }
 
-      while(frames.size()) {
+      // This is the normal return path.
+      while(!frames.empty()) {
         ptc = ::std::move(frames.mut_back());
         frames.pop_back();
 
+        // Evaluate deferred expressions.
         if(ptc->defer().size())
           Executive_Context(Executive_Context::M_defer(),
                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
             .on_scope_exit(air_status_next);
 
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(),
-                                 ptc->target(), *this);
+        // Check the result.
+        if(ptc->ptc_aware() == ptc_aware_void) {
+          deref_once = true;
+          this->m_xref = xref_void;
+        }
+        else if((this->m_xref != xref_void) && !deref_once && (ptc->ptc_aware() == ptc_aware_by_ref)) {
+          deref_once = true;
+          this->dereference_readonly();
+        }
+        else if((this->m_xref != xref_void) && (ptc->ptc_aware() == ptc_aware_by_val)) {
+          deref_once = true;
+          this->dereference_copy();
+        }
+
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(), ptc->target(), *this);
       }
     }
     catch(Runtime_Error& except) {
-      while(frames.size()) {
+      // This is the exceptional path.
+      while(!frames.empty()) {
         ptc = ::std::move(frames.mut_back());
         frames.pop_back();
 
@@ -232,21 +240,18 @@ do_use_function_result_slow(Global_Context& global)
         if(auto qcall = ptc->caller_opt())
           except.push_frame_func(qcall->sloc(), qcall->func());
 
+        // Evaluate deferred expressions.
         if(ptc->defer().size())
           Executive_Context(Executive_Context::M_defer(),
                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
             .on_scope_exit(except);
 
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptc->sloc(),
-                                 ptc->target(), except);
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptc->sloc(), ptc->target(), except);
       }
+
+      // The exception object has been updated, so rethrow it.
       throw;
     }
-
-    if(is_void)
-      this->set_void();
-    else if(by_value && (this->m_xref != xref_void))
-      this->dereference_copy();
   }
 
 }  // namespace asteria
