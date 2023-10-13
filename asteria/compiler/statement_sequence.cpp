@@ -417,16 +417,6 @@ do_accept_block_opt(Token_Stream& tstrm, Scope_Flags scfl)
     return ::std::move(xstmt);
   }
 
-opt<Statement>
-do_accept_block_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
-  {
-    auto qblock = do_accept_block_opt(tstrm, scfl);
-    if(!qblock)
-      return nullopt;
-
-    return ::std::move(*qblock);
-  }
-
 opt<Statement::S_expression>
 do_accept_equal_initializer_opt(Token_Stream& tstrm)
   {
@@ -436,7 +426,12 @@ do_accept_equal_initializer_opt(Token_Stream& tstrm)
     if(!kpunct)
       return nullopt;
 
-    return do_accept_expression_opt(tstrm);
+    auto kexpr = do_accept_expression_opt(tstrm);
+    if(!kexpr)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_expression_expected, tstrm.next_sloc());
+
+    return ::std::move(*kexpr);
   }
 
 opt<Statement::S_expression>
@@ -448,7 +443,12 @@ do_accept_ref_initializer_opt(Token_Stream& tstrm)
     if(!kpunct)
       return nullopt;
 
-    return do_accept_expression_opt(tstrm);
+    auto kexpr = do_accept_expression_opt(tstrm);
+    if(!kexpr)
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_expression_expected, tstrm.next_sloc());
+
+    return ::std::move(*kexpr);
   }
 
 opt<Statement>
@@ -1430,8 +1430,8 @@ do_accept_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
     //   block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    if(auto qstmt = do_accept_block_statement_opt(tstrm, scfl))
-      return qstmt;
+    if(auto qblock = do_accept_block_opt(tstrm, scfl))
+      return ::std::move(*qblock);
 
     if(auto qstmt = do_accept_nonblock_statement_opt(tstrm, scfl))
       return qstmt;
@@ -1652,6 +1652,7 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
 
     op_sloc = tstrm.next_sloc();
     auto qblock = do_accept_block_opt(tstrm, scope_plain);
+
     if(!qblock) {
       // Try `equal-initializer`.
       auto qinit = do_accept_equal_initializer_opt(tstrm);
@@ -1661,6 +1662,7 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
         qblock = do_blockify_statement(::std::move(xstmt));
       }
     }
+
     if(!qblock) {
       // Try `ref-initializer`.
       auto qinit = do_accept_ref_initializer_opt(tstrm);
@@ -1670,6 +1672,7 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
         qblock = do_blockify_statement(::std::move(xstmt));
       }
     }
+
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_brace_or_initializer_expected, tstrm.next_sloc());
