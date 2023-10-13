@@ -14,7 +14,7 @@ probe_origin(size_t size, size_t hval) noexcept
   {
     // Make a fixed-point value in the interval [0,1), and then multiply
     // `size` by it to get an index in the middle.
-    return (size_t) ((hval * 0x9E3779B9U & 0xFFFFFFFFULL) * size >> 32);
+    return (size_t) (hval * 0x9E3779B9U % 0x100000000ULL * size >> 32);
   }
 
 template<typename bucketT, typename predictorT>
