@@ -32,7 +32,7 @@ int main()
         assert std.numeric.sign(-infinity) == -1;
         assert std.numeric.sign(+nan) ==  0;
         assert std.numeric.sign(-nan) == -1;
-        assert typeof std.numeric.sign(42.5) == "integer";
+        assert typeof std.numeric.sign(42.5) == "real";
 
         assert std.numeric.is_finite(+5) == true;
         assert std.numeric.is_finite(-5) == true;

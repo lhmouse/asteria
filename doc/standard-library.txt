@@ -1106,11 +1106,12 @@
 
 `std.numeric.sign(value)`
 
-	* Propagates the sign bit of the number `value`, which may be an
-	  integer or real, to all bits of an integer. Be advised that
-	  `-0.0` is distinct from `0.0` despite the equality.
+	* Gets the sign bit of the number `value`, which may be either an
+	  integer or real. Be advised that `-0.0` is distinct from `0.0`,
+	  despite the equality.
 
-	* Returns `-1` if `value` is negative, or `0` otherwise.
+	* Returns `-1` if `value` is negative, or `0` otherwise, of the
+	  same type as `value`.
 
 `std.numeric.is_finite(value)`
 

@@ -255,10 +255,10 @@ std_numeric_sign(V_integer value)
     return value >> 63;
   }
 
-V_integer
+V_real
 std_numeric_sign(V_real value)
   {
-    return ::std::signbit(value) ? -1LL : 0;
+    return ::std::signbit(value) ? -1.0 : 0.0;
   }
 
 V_boolean

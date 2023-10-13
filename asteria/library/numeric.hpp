@@ -18,7 +18,7 @@ std_numeric_abs(V_real value);
 V_integer
 std_numeric_sign(V_integer value);
 
-V_integer
+V_real
 std_numeric_sign(V_real value);
 
 // `std.numeric.is_finite`
