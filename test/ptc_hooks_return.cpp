@@ -16,20 +16,16 @@ int main()
 
         virtual
         void
-        on_function_call(const Source_Location& sloc, const cow_function& target)
+        on_function_call(const Source_Location& sloc, const cow_function&) override
           {
-            (void)target;
             this->fmt << "call " << sloc.line() << "; ";
           }
 
         virtual
         void
-        on_function_except(const Source_Location& sloc, const cow_function& target,
-                           const Runtime_Error& except)
+        on_function_return(const Source_Location& sloc, const cow_function&, const Reference&) override
           {
-            (void)target;
-            (void)except;
-            this->fmt << "except " << sloc.line() << "; ";
+            this->fmt << "return " << sloc.line() << "; ";
           }
       };
 
@@ -42,7 +38,7 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
 
         func no_ptc_throw() {
-          throw "boom";
+          return 1;
         }
 
         func no_ptc_three() {
@@ -62,17 +58,17 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     hooks->fmt.clear_string();
-    ASTERIA_TEST_CHECK_CATCH(code.execute());
+    code.execute();
     ::fprintf(stderr, "no_ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 60; call 57; call 53; call 49; except 49; except 53; except 57; except 60; ");
+        "call 56; call 53; call 49; call 45; return 45; return 49; return 53; return 56; ");
 
     code.reload_string(
       sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func ptc_throw() {
-          throw "boom";
+          return 1;
         }
 
         func ptc_three() {
@@ -92,8 +88,8 @@ int main()
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     hooks->fmt.clear_string();
-    ASTERIA_TEST_CHECK_CATCH(code.execute());
+    code.execute();
     ::fprintf(stderr, "ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 90; call 87; call 83; call 79; except 79; except 83; except 87; except 90; ");
+        "call 86; call 83; call 79; call 75; return 75; return 79; return 83; return 86; ");
   }
