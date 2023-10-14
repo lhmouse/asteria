@@ -64,9 +64,9 @@ Reference&
 cow_function::
 invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
-    this->invoke_ptc_aware(self, global, ::std::move(stack));
-    self.check_function_result(global);
-    return self;
+    auto& result = this->invoke_ptc_aware(self, global, ::std::move(stack));
+    result.check_function_result(global);
+    return result;
   }
 
 const char*
