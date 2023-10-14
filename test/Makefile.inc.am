@@ -53,6 +53,7 @@ check_PROGRAMS +=  \
   %reldir%/ini.test  \
   %reldir%/csv.test  \
   %reldir%/binding_variable.test  \
+  %reldir%/ptc_hooks.test  \
   ${END}
 
 EXTRA_DIST +=  \
