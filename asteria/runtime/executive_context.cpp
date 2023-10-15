@@ -152,7 +152,7 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       }
       catch(Runtime_Error& except) {
         except.push_frame_defer(pair.first);
-        this->on_scope_exit_exceptional(except);
+        this->do_on_scope_exit_exceptional_slow(except);
         throw;
       }
     }
