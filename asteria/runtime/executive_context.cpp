@@ -123,60 +123,58 @@ defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
 
 void
 Executive_Context::
-do_on_scope_exit_slow(AIR_Status status)
+do_on_scope_exit_normal_slow(AIR_Status status)
   {
+    // Stash the result reference, if any.
+    Reference self;
     if(status == air_status_return_ref) {
       // If a PTC wrapper was returned, append all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
-      const auto ptc = this->m_stack->mut_top().unphase_ptc_opt();
-      if(ptc) {
+      if(this->m_stack->top().is_ptc()) {
+        const auto ptc = this->m_stack->top().unphase_ptc_opt();
+        ROCKET_ASSERT(ptc);
         ptc->defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
         return;
       }
+
+      self = ::std::move(this->m_stack->mut_top());
     }
 
-    // Stash the result reference.
-    Reference self;
-    if(status == air_status_return_ref)
-      self = ::std::move(this->m_stack->mut_top());
-
     // Execute all deferred expressions backwards.
-    while(this->m_defer.size()) {
+    while(!this->m_defer.empty()) {
       auto pair = ::std::move(this->m_defer.mut_back());
       this->m_defer.pop_back();
 
       // Execute it.
       // If an exception is thrown, append a frame and rethrow it.
       try {
-        AIR_Status status_def = pair.second.execute(*this);
-        ROCKET_ASSERT(status_def == air_status_next);
+        pair.second.execute(*this);
       }
       catch(Runtime_Error& except) {
         except.push_frame_defer(pair.first);
-        this->on_scope_exit(except);
+        this->on_scope_exit_exceptional(except);
         throw;
       }
     }
 
     // Restore the result reference.
     if(!self.is_invalid())
-      this->m_stack->mut_top() = ::std::move(self);
+      this->m_stack->push() = ::std::move(self);
   }
 
 void
 Executive_Context::
-do_on_scope_exit_slow(Runtime_Error& except)
+do_on_scope_exit_exceptional_slow(Runtime_Error& except)
   {
     // Execute all deferred expressions backwards.
-    while(this->m_defer.size()) {
+    while(!this->m_defer.empty()) {
       auto pair = ::std::move(this->m_defer.mut_back());
       this->m_defer.pop_back();
 
       // Execute it.
       // If an exception is thrown, replace `except` with it.
       try {
-        AIR_Status status_def = pair.second.execute(*this);
-        ROCKET_ASSERT(status_def == air_status_next);
+        pair.second.execute(*this);
       }
       catch(Runtime_Error& nested) {
         except = nested;

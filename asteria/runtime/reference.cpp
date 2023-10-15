@@ -212,7 +212,7 @@ do_use_function_result_slow(Global_Context& global)
         if(ptc->defer().size())
           Executive_Context(Executive_Context::M_defer(),
                  global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
-            .on_scope_exit(air_status_next);
+            .on_scope_exit_normal(air_status_next);
 
         // Check the result.
         if((ptc->ptc_aware() == ptc_aware_by_val) && (this->m_xref != xref_void))
@@ -239,7 +239,7 @@ do_use_function_result_slow(Global_Context& global)
         if(ptc->defer().size())
           Executive_Context(Executive_Context::M_defer(),
                  global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
-            .on_scope_exit(except);
+            .on_scope_exit_exceptional(except);
 
         ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptc->sloc(), ptc->target(), except);
       }

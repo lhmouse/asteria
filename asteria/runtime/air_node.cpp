@@ -95,7 +95,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
     }
 
     // Evaluate the subexpression.
-    auto status = queue.execute(ctx);
+    AIR_Status status = queue.execute(ctx);
     ROCKET_ASSERT(status == air_status_next);
     auto value = ctx.stack().top().dereference_readonly();
     ctx.stack().pop();
@@ -107,15 +107,15 @@ AIR_Status
 do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
   {
     Executive_Context ctx_next(Executive_Context::M_plain(), ctx);
-    AIR_Status status;
+    AIR_Status status = air_status_next;
     try {
       status = queue.execute(ctx_next);
     }
     catch(Runtime_Error& except) {
-      ctx_next.on_scope_exit(except);
+      ctx_next.on_scope_exit_exceptional(except);
       throw;
     }
-    ctx_next.on_scope_exit(status);
+    ctx_next.on_scope_exit_normal(status);
     return status;
   }
 
@@ -422,7 +422,7 @@ struct Traits_switch_statement
           }
 
           // Evaluate the operand and check whether it equals `cond`.
-          auto status = sp.queues_labels[i].execute(ctx);
+          AIR_Status status = sp.queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
           if(ctx.stack().top().dereference_readonly().compare(cond) == compare_equal) {
             target_index = i;
@@ -435,7 +435,7 @@ struct Traits_switch_statement
 
         // Skip this statement if no matching clause has been found.
         Executive_Context ctx_body(Executive_Context::M_plain(), ctx);
-        AIR_Status status;
+        AIR_Status status = air_status_next;
         try {
           for(size_t i = 0;  i < nclauses;  ++i)
             if(i < target_index) {
@@ -446,17 +446,19 @@ struct Traits_switch_statement
             else {
               // Execute the body of this clause.
               status = sp.queues_bodies[i].execute(ctx_body);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
+                status = air_status_next;
                 break;
+              }
               else if(status != air_status_next)
-                return status;
+                break;
             }
         }
         catch(Runtime_Error& except) {
-          ctx_body.on_scope_exit(except);
+          ctx_body.on_scope_exit_exceptional(except);
           throw;
         }
-        ctx_body.on_scope_exit(status);
+        ctx_body.on_scope_exit_normal(status);
         return air_status_next;
       }
   };
@@ -486,15 +488,17 @@ struct Traits_do_while_statement
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
-        // This is the same as the `do...while` statement in C.
+        AIR_Status status = air_status_next;
         for(;;) {
           // Execute the body.
-          auto status = do_execute_block(sp.queues[0], ctx);
-          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
+          status = do_execute_block(sp.queues[0], ctx);
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
+            status = air_status_next;
             break;
+          }
           else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                  air_status_continue_while }))
-            return status;
+            break;
 
           // Check the condition.
           status = sp.queues[1].execute(ctx);
@@ -502,7 +506,7 @@ struct Traits_do_while_statement
           if(ctx.stack().top().dereference_readonly().test() == up.u8v[0])
             break;
         }
-        return air_status_next;
+        return status;
       }
   };
 
@@ -531,23 +535,25 @@ struct Traits_while_statement
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
-        // This is the same as the `while` statement in C.
+        AIR_Status status = air_status_next;
         for(;;) {
           // Check the condition.
-          auto status = sp.queues[0].execute(ctx);
+          status = sp.queues[0].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
           if(ctx.stack().top().dereference_readonly().test() == up.u8v[0])
             break;
 
           // Execute the body.
           status = do_execute_block(sp.queues[1], ctx);
-          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
+            status = air_status_next;
             break;
+          }
           else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                  air_status_continue_while }))
-            return status;
+            break;
         }
-        return air_status_next;
+        return status;
       }
   };
 
@@ -584,7 +590,7 @@ struct Traits_for_each_statement
 
         // Evaluate the range initializer and set the range up, which isn't going to
         // change for all loops.
-        auto status = sp.queue_init.execute(ctx_for);
+        AIR_Status status = sp.queue_init.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
         mapped = ::std::move(ctx_for.stack().mut_top());
 
@@ -592,7 +598,7 @@ struct Traits_for_each_statement
         switch(weaken_enum(range.type())) {
           case type_null:
             // Do nothing.
-            return air_status_next;
+            break;
 
           case type_array: {
             const auto& arr = range.as_array();
@@ -615,13 +621,15 @@ struct Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+                status = air_status_next;
                 break;
+              }
               else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                      air_status_continue_for }))
-                return status;
+                break;
             }
-            return air_status_next;
+            break;
           }
 
           case type_object: {
@@ -645,16 +653,18 @@ struct Traits_for_each_statement
 
               // Execute the loop body.
               status = do_execute_block(sp.queue_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+                status = air_status_next;
                 break;
+              }
               else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                      air_status_continue_for }))
-                return status;
+                break;
 
               // Restore the mapped reference.
               mapped.pop_modifier();
             }
-            return air_status_next;
+            break;
           }
 
           default:
@@ -664,6 +674,7 @@ struct Traits_for_each_statement
             except.push_frame_plain(sp.sloc_init, sref(""));
             throw except;
         }
+        return status;
       }
   };
 
@@ -692,31 +703,31 @@ struct Traits_for_statement
 
         // Execute the loop initializer, which shall only be a definition or an expression
         // statement.
-        auto status = sp.queues[0].execute(ctx_for);
+        AIR_Status status = sp.queues[0].execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
         for(;;) {
-          // Check the condition.
+          // Check the condition. There is a special case: If the condition is empty,
+          // then the loop is infinite.
           status = sp.queues[1].execute(ctx_for);
           ROCKET_ASSERT(status == air_status_next);
-
-          // This is a special case: If the condition is empty then the loop is infinite.
-          if(!ctx_for.stack().empty() &&
-             !ctx_for.stack().top().dereference_readonly().test())
+          if(!ctx_for.stack().empty() && !ctx_for.stack().top().dereference_readonly().test())
             break;
 
           // Execute the body.
           status = do_execute_block(sp.queues[3], ctx_for);
-          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+            status = air_status_next;
             break;
+          }
           else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                  air_status_continue_for }))
-            return status;
+            break;
 
           // Execute the increment.
           status = sp.queues[2].execute(ctx_for);
           ROCKET_ASSERT(status == air_status_next);
         }
-        return air_status_next;
+        return status;
       }
   };
 
@@ -742,7 +753,7 @@ struct Traits_try_statement
       try {
         // Execute the `try` block. If no exception is thrown, this will have
         // little overhead. This is almost identical to JavaScript.
-        auto status = do_execute_block(sp.queue_try, ctx);
+        AIR_Status status = do_execute_block(sp.queue_try, ctx);
         if(status == air_status_return_ref)
           ctx.stack().mut_top().check_function_result(ctx.global());
         return status;
@@ -766,18 +777,17 @@ struct Traits_try_statement
           V_array backtrace;
           for(size_t i = 0;  i < except.count_frames();  ++i) {
             const auto& f = except.frame(i);
-
-            // Translate each frame into a human-readable format.
             V_object r;
+
             r.try_emplace(sref("frame"), sref(f.what_type()));
             r.try_emplace(sref("file"), f.file());
             r.try_emplace(sref("line"), f.line());
             r.try_emplace(sref("column"), f.column());
             r.try_emplace(sref("value"), f.value());
 
-            // Append this frame.
             backtrace.emplace_back(::std::move(r));
           }
+
           ctx_catch.insert_named_reference(sref("__backtrace"))
               .set_temporary(::std::move(backtrace));
 
@@ -785,11 +795,11 @@ struct Traits_try_statement
           status = sp.queue_catch.execute(ctx_catch);
         }
         catch(Runtime_Error& nested) {
-          ctx_catch.on_scope_exit(nested);
+          ctx_catch.on_scope_exit_exceptional(nested);
           nested.push_frame_catch(sp.sloc_catch, except.value());
           throw;
         }
-        ctx_catch.on_scope_exit(status);
+        ctx_catch.on_scope_exit_normal(status);
         return status;
       }
   };
@@ -858,7 +868,7 @@ struct Traits_simple_status
     AIR_Status
     execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
-        auto status = static_cast<AIR_Status>(up.u8v[0]);
+        AIR_Status status = static_cast<AIR_Status>(up.u8v[0]);
         ROCKET_ASSERT(status != air_status_next);
         return status;
       }
@@ -4187,7 +4197,7 @@ struct Traits_catch_expression
         Value val;
 
         try {
-          auto status = queue.execute(ctx);
+          AIR_Status status = queue.execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
         }
         catch(Runtime_Error& except) {

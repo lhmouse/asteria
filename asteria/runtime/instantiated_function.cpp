@@ -46,21 +46,21 @@ Instantiated_Function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
     // Create the stack and context for this function.
-    AIR_Status status;
     Reference_Stack alt_stack;
     Executive_Context ctx_func(Executive_Context::M_function(), global, stack, alt_stack,
           this->m_zvarg, this->m_params, ::std::move(self));
 
     // Execute the function body.
+    AIR_Status status = air_status_next;
     try {
       status = this->m_queue.execute(ctx_func);
     }
     catch(Runtime_Error& except) {
-      ctx_func.on_scope_exit(except);
+      ctx_func.on_scope_exit_exceptional(except);
       except.push_frame_func(this->m_zvarg->sloc(), this->m_zvarg->func());
       throw;
     }
-    ctx_func.on_scope_exit(status);
+    ctx_func.on_scope_exit_normal(status);
 
     switch(status) {
       case air_status_next:

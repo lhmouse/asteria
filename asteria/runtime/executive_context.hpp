@@ -72,10 +72,10 @@ class Executive_Context
     do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
 
     void
-    do_on_scope_exit_slow(AIR_Status status);
+    do_on_scope_exit_normal_slow(AIR_Status status);
 
     void
-    do_on_scope_exit_slow(Runtime_Error& except);
+    do_on_scope_exit_exceptional_slow(Runtime_Error& except);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
@@ -105,17 +105,17 @@ class Executive_Context
     // Note that these functions may throw arbitrary exceptions, which
     // is why RAII is inapplicable.
     void
-    on_scope_exit(AIR_Status status)
+    on_scope_exit_normal(AIR_Status status)
       {
-        if(ROCKET_UNEXPECT(this->m_defer.size()))
-          this->do_on_scope_exit_slow(status);
+        if(!this->m_defer.empty())
+          this->do_on_scope_exit_normal_slow(status);
       }
 
     void
-    on_scope_exit(Runtime_Error& except)
+    on_scope_exit_exceptional(Runtime_Error& except)
       {
-        if(ROCKET_UNEXPECT(this->m_defer.size()))
-          this->do_on_scope_exit_slow(except);
+        if(!this->m_defer.empty())
+          this->do_on_scope_exit_exceptional_slow(except);
       }
   };
 
