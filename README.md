@@ -1,12 +1,6 @@
 # The Asteria Programming Language
 
 ![asteria](asteria.png)
-
-|CI            |Category                   |Host OS         |Build Status     |Remarks          |
-|:-------------|:--------------------------|:---------------|:----------------|:----------------|
-|[**Cirrus CI**](https://cirrus-ci.com/github/lhmouse/asteria) |:1st_place_medal:Primary   |Linux (Ubuntu)  |[![Build Status](https://api.cirrus-ci.com/github/lhmouse/asteria.svg)](https://cirrus-ci.com/github/lhmouse/asteria) |       |
-|[**AppVeyor**](https://ci.appveyor.com/project/lhmouse/asteria) |:2nd_place_medal:Secondary |Windows (MSYS2) |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |Standard I/O not in **UTF-32**.  |
-
 ![README](README.png)
 
 |Compiler     |Category                   |Remarks          |
