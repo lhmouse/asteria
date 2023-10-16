@@ -2,7 +2,7 @@
 
 # setup
 export CXX=${CXX:-"g++"}
-export CFLAGS='-O0 -g0'
+export CXXFLAGS='-O0 -g0'
 export DISTCHECK_CONFIGURE_FLAGS="${CONFIGURE_OPTS}"
 
 # build
