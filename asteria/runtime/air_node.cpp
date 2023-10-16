@@ -1352,24 +1352,6 @@ struct Traits_return_statement
       }
   };
 
-struct Traits_push_temporary
-  {
-    static
-    Value
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_temporary& altr)
-      {
-        return altr.value;
-      }
-
-    ROCKET_FLATTEN static
-    AIR_Status
-    execute(Executive_Context& ctx, const Value& value)
-      {
-        ctx.stack().push().set_temporary(value);
-        return air_status_next;
-      }
-  };
-
 struct Traits_apply_xop_inc
   {
     static
@@ -4928,12 +4910,6 @@ rebind_opt(Abstract_Context& ctx) const
         if(qref->is_invalid())
           ASTERIA_THROW_RUNTIME_ERROR(("Use of bypassed variable or reference `$1`"), altr.name);
 
-        // Optimize temporaries a little.
-        if(qref->is_temporary()) {
-          S_push_temporary xnode = { qref->dereference_readonly() };
-          return ::std::move(xnode);
-        }
-
         S_push_bound_reference xnode = { *qref };
         return ::std::move(xnode);
       }
@@ -5022,7 +4998,6 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_return_statement:
-      case index_push_temporary:
         return nullopt;
 
       default:
@@ -5362,10 +5337,6 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_return_statement>(queue,
                        this->m_stor.as<index_return_statement>());
 
-      case index_push_temporary:
-        return do_solidify<Traits_push_temporary>(queue,
-                       this->m_stor.as<index_push_temporary>());
-
       default:
         ASTERIA_TERMINATE((
             "Invalid AIR node type (index `$1`)"),
@@ -5508,12 +5479,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       case index_return_statement:
         return;
-
-      case index_push_temporary: {
-        const auto& altr = this->m_stor.as<index_push_temporary>();
-        altr.value.collect_variables(staged, temp);
-        return;
-      }
 
       default:
         ASTERIA_TERMINATE((
