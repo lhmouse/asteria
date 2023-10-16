@@ -74,7 +74,7 @@ There are 9 data types:
 |`boolean`    |`Boolean`       |`boolean`  |`bool`                        |                                                   |
 |`integer`    |N/A             |`long`     |`std::int64_t`                |signed 64-bit integer in two's complement          |
 |`real`       |`Number`        |`double`   |`double`                      |IEEE-754 double-precision floating-point number    |
-|`string`     |N/A             |`byte[]`   |`std::string`                 |octet string, commonly refered as byte string      |
+|`string`     |N/A             |`byte[]`   |`std::string`                 |octet string, commonly referred  as byte string      |
 |`opaque`     |N/A             |`Object`   |`std::any`                    |opaque value used by bindings                      |
 |`function`   |`Function`      |N/A        |N/A                           |functions and closures                             |
 |`array`      |`Array`         |N/A        |`std::vector<`<br/>&emsp;`std::any>`       |                                                   |
