@@ -76,31 +76,7 @@ do_solidify_nodes(cow_vector<AVMC_Queue>& queue, const cow_vector<cow_vector<AIR
   {
     queue.resize(code.size());
     for(size_t k = 0;  k != code.size();  ++k)
-      do_solidify_nodes(queue.mut(k), code.at(k));
-  }
-
-AIR_Status
-do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
-  {
-    // If the queue is empty, leave the condition on the top of the stack.
-    if(queue.empty())
-      return air_status_next;
-
-    if(!assign) {
-      // If this is not a compound assignment, discard the top which will be
-      // overwritten anyway, then evaluate the subexpression. The status code
-      // must be forwarded as is, because PTCs may return `air_status_return_ref`.
-      ctx.stack().pop();
-      return queue.execute(ctx);
-    }
-
-    // Evaluate the subexpression.
-    AIR_Status status = queue.execute(ctx);
-    ROCKET_ASSERT(status == air_status_next);
-    auto value = ctx.stack().top().dereference_readonly();
-    ctx.stack().pop();
-    ctx.stack().top().dereference_mutable() = ::std::move(value);
-    return air_status_next;
+      do_solidify_nodes(queue.mut(k), code[k]);
   }
 
 AIR_Status
@@ -117,6 +93,16 @@ do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     }
     ctx_next.on_scope_exit_normal(status);
     return status;
+  }
+
+void
+do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, size_t count)
+  {
+    alt_stack.clear();
+    ROCKET_ASSERT(count <= stack.size());
+    for(size_t k = count - 1;  k != SIZE_MAX;  --k)
+      alt_stack.push() = ::std::move(stack.mut_top(k));
+    stack.pop(count);
   }
 
 AIR_Status
@@ -147,14 +133,31 @@ do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function&
     return air_status_return_ref;
   }
 
-void
-do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, size_t count)
+AIR_Status
+do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
   {
-    alt_stack.clear();
-    ROCKET_ASSERT(count <= stack.size());
-    for(size_t k = count - 1;  k != SIZE_MAX;  --k)
-      alt_stack.push() = ::std::move(stack.mut_top(k));
-    stack.pop(count);
+    // If the queue is empty, leave the condition on the top of the stack.
+    if(queue.empty())
+      return air_status_next;
+
+    if(!assign) {
+      // If this is not a compound assignment, discard the top which will be
+      // overwritten anyway, then evaluate the subexpression. The status code
+      // must be forwarded as is, because PTCs may return `air_status_return_ref`.
+      ctx.stack().pop();
+      return queue.execute(ctx);
+    }
+
+    // Evaluate the subexpression.
+    AIR_Status status = queue.execute(ctx);
+    ROCKET_ASSERT(status == air_status_next);
+
+    // Assign the result to the first operand. The result has to be copied,
+    // in case that a reference to an element of the LHS operand is returned.
+    auto value = ctx.stack().top().dereference_readonly();
+    ctx.stack().pop();
+    ctx.stack().top().dereference_mutable() = ::std::move(value);
+    return air_status_next;
   }
 
 // These are user-defined parameter types for AVMC nodes.
@@ -186,8 +189,8 @@ struct Sparam_import
 template<typename ContainerT>
 inline
 void
-do_collect_variables_for_each(ContainerT& cont, Variable_HashMap& staged,
-                              Variable_HashMap& temp)
+do_collect_variables_for_each(Variable_HashMap& staged, Variable_HashMap& temp,
+                              const ContainerT& cont)
   {
     for(const auto& r : cont)
       r.collect_variables(staged, temp);
@@ -201,7 +204,7 @@ struct Sparam_queues
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        do_collect_variables_for_each(this->queues, staged, temp);
+        do_collect_variables_for_each(staged, temp, this->queues);
       }
   };
 
@@ -218,8 +221,8 @@ struct Sparam_switch
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        do_collect_variables_for_each(this->queues_labels, staged, temp);
-        do_collect_variables_for_each(this->queues_bodies, staged, temp);
+        do_collect_variables_for_each(staged, temp, this->queues_labels);
+        do_collect_variables_for_each(staged, temp, this->queues_bodies);
       }
   };
 
@@ -266,7 +269,7 @@ struct Sparam_func
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        do_collect_variables_for_each(this->code_body, staged, temp);
+        do_collect_variables_for_each(staged, temp, this->code_body);
       }
   };
 
@@ -278,7 +281,7 @@ struct Sparam_defer
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        do_collect_variables_for_each(this->code_body, staged, temp);
+        do_collect_variables_for_each(staged, temp, this->code_body);
       }
   };
 
@@ -5344,68 +5347,67 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_clear_stack:
         return;
 
-      case index_execute_block: {
-        const auto& altr = this->m_stor.as<index_execute_block>();
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_execute_block:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_execute_block>().code_body);
         return;
-      }
 
       case index_declare_variable:
       case index_initialize_variable:
         return;
 
-      case index_if_statement: {
-        const auto& altr = this->m_stor.as<index_if_statement>();
-        do_collect_variables_for_each(altr.code_true, staged, temp);
-        do_collect_variables_for_each(altr.code_false, staged, temp);
+      case index_if_statement:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_if_statement>().code_true);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_if_statement>().code_false);
         return;
-      }
 
-      case index_switch_statement: {
-        const auto& altr = this->m_stor.as<index_switch_statement>();
-        for(size_t i = 0;  i < altr.code_labels.size();  ++i) {
-          do_collect_variables_for_each(altr.code_labels.at(i), staged, temp);
-          do_collect_variables_for_each(altr.code_bodies.at(i), staged, temp);
-        }
+      case index_switch_statement:
+        for(const auto& label : this->m_stor.as<index_switch_statement>().code_labels)
+          do_collect_variables_for_each(staged, temp, label);
+        for(const auto& body : this->m_stor.as<index_switch_statement>().code_bodies)
+          do_collect_variables_for_each(staged, temp, body);
         return;
-      }
 
-      case index_do_while_statement: {
-        const auto& altr = this->m_stor.as<index_do_while_statement>();
-        do_collect_variables_for_each(altr.code_body, staged, temp);
-        do_collect_variables_for_each(altr.code_cond, staged, temp);
+      case index_do_while_statement:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_do_while_statement>().code_body);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_do_while_statement>().code_cond);
         return;
-      }
 
-      case index_while_statement: {
-        const auto& altr = this->m_stor.as<index_while_statement>();
-        do_collect_variables_for_each(altr.code_cond, staged, temp);
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_while_statement:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_while_statement>().code_cond);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_while_statement>().code_body);
         return;
-      }
 
-      case index_for_each_statement: {
-        const auto& altr = this->m_stor.as<index_for_each_statement>();
-        do_collect_variables_for_each(altr.code_init, staged, temp);
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_for_each_statement:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_for_each_statement>().code_init);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_for_each_statement>().code_body);
         return;
-      }
 
-      case index_for_statement: {
-        const auto& altr = this->m_stor.as<index_for_statement>();
-        do_collect_variables_for_each(altr.code_init, staged, temp);
-        do_collect_variables_for_each(altr.code_cond, staged, temp);
-        do_collect_variables_for_each(altr.code_step, staged, temp);
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_for_statement:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_for_statement>().code_init);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_for_statement>().code_cond);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_for_statement>().code_step);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_for_statement>().code_body);
         return;
-      }
 
-      case index_try_statement: {
-        const auto& altr = this->m_stor.as<index_try_statement>();
-        do_collect_variables_for_each(altr.code_try, staged, temp);
-        do_collect_variables_for_each(altr.code_catch, staged, temp);
+      case index_try_statement:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_try_statement>().code_try);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_try_statement>().code_catch);
         return;
-      }
 
       case index_throw_statement:
       case index_assert_statement:
@@ -5415,30 +5417,27 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_push_local_reference:
         return;
 
-      case index_push_bound_reference: {
-        const auto& altr = this->m_stor.as<index_push_bound_reference>();
-        altr.ref.collect_variables(staged, temp);
+      case index_push_bound_reference:
+        this->m_stor.as<index_push_bound_reference>().ref
+                       .collect_variables(staged, temp);
         return;
-      }
 
-      case index_define_function: {
-        const auto& altr = this->m_stor.as<index_define_function>();
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_define_function:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_define_function>().code_body);
         return;
-      }
 
-      case index_branch_expression: {
-        const auto& altr = this->m_stor.as<index_branch_expression>();
-        do_collect_variables_for_each(altr.code_true, staged, temp);
-        do_collect_variables_for_each(altr.code_false, staged, temp);
+      case index_branch_expression:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_branch_expression>().code_true);
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_branch_expression>().code_false);
         return;
-      }
 
-      case index_coalescence: {
-        const auto& altr = this->m_stor.as<index_coalescence>();
-        do_collect_variables_for_each(altr.code_null, staged, temp);
+      case index_coalescence:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_coalescence>().code_null);
         return;
-      }
 
       case index_function_call:
       case index_member_access:
@@ -5452,22 +5451,20 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_variadic_call:
         return;
 
-      case index_defer_expression: {
-        const auto& altr = this->m_stor.as<index_defer_expression>();
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_defer_expression:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_defer_expression>().code_body);
         return;
-      }
 
       case index_import_call:
       case index_declare_reference:
       case index_initialize_reference:
         return;
 
-      case index_catch_expression: {
-        const auto& altr = this->m_stor.as<index_catch_expression>();
-        do_collect_variables_for_each(altr.code_body, staged, temp);
+      case index_catch_expression:
+        do_collect_variables_for_each(staged, temp,
+                       this->m_stor.as<index_catch_expression>().code_body);
         return;
-      }
 
       case index_return_statement:
         return;
