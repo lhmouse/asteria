@@ -978,15 +978,11 @@ struct Traits_push_local_reference
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(name);
         if(!qref)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Undeclared identifier `$1`"),
-              name);
+          ASTERIA_THROW_RUNTIME_ERROR(("Undeclared identifier `$1`"), name);
 
         // Check if control flow has bypassed its initialization.
         if(qref->is_invalid())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Use of bypassed variable or reference `$1`"),
-              name);
+          ASTERIA_THROW_RUNTIME_ERROR(("Use of bypassed variable or reference `$1`"), name);
 
         ctx.stack().push() = *qref;
         return air_status_next;
@@ -4768,12 +4764,10 @@ inline
 bool
 do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
-    using disp = solidify_disp<TraitsT, NodeT,
-                     has_uparam<TraitsT, NodeT>::value,
-                     has_sparam<TraitsT, NodeT>::value>;
-
+    constexpr bool has_up = has_uparam<TraitsT, NodeT>::value;
+    constexpr bool has_sp = has_sparam<TraitsT, NodeT>::value;
     bool reachable = true;
-    disp::append(reachable, queue, altr);
+    solidify_disp<TraitsT, NodeT, has_up, has_sp>::append(reachable, queue, altr);
     return reachable;
   }
 
@@ -4932,9 +4926,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Check if control flow has bypassed its initialization.
         if(qref->is_invalid())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Use of bypassed variable or reference `$1`"),
-              altr.name);
+          ASTERIA_THROW_RUNTIME_ERROR(("Use of bypassed variable or reference `$1`"), altr.name);
 
         // Optimize temporaries a little.
         if(qref->is_temporary()) {
