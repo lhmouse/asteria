@@ -119,6 +119,44 @@ do_execute_block(const AVMC_Queue& queue, Executive_Context& ctx)
     return status;
   }
 
+AIR_Status
+do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_function& target,
+                  Global_Context& global, Reference_Stack&& stack)
+  {
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
+    try {
+      target.invoke(self, global, ::std::move(stack));
+    }
+    catch(Runtime_Error& except) {
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, sloc, target, except);
+      throw;
+    }
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
+    return air_status_next;
+  }
+
+AIR_Status
+do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function& target,
+               PTC_Aware ptc, Reference_Stack&& stack)
+  {
+    // Pack arguments for this PTC, and return `air_status_return_ref` to allow
+    // the result to be unpacked outside; otherwise a null reference is returned
+    // instead of this PTC wrapper, which can then never be unpacked.
+    stack.push() = ::std::move(self);
+    self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack)));
+    return air_status_return_ref;
+  }
+
+void
+do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, size_t count)
+  {
+    alt_stack.clear();
+    ROCKET_ASSERT(count <= stack.size());
+    for(size_t k = count - 1;  k != SIZE_MAX;  --k)
+      alt_stack.push() = ::std::move(stack.mut_top(k));
+    stack.pop(count);
+  }
+
 // These are user-defined parameter types for AVMC nodes.
 // The `enumerate_variables()` callback is optional.
 
@@ -775,16 +813,13 @@ struct Traits_try_statement
 
           // Set backtrace frames.
           V_array backtrace;
-          for(size_t i = 0;  i < except.count_frames();  ++i) {
-            const auto& f = except.frame(i);
+          for(size_t k = 0;  k < except.count_frames();  ++k) {
             V_object r;
-
-            r.try_emplace(sref("frame"), sref(f.what_type()));
-            r.try_emplace(sref("file"), f.file());
-            r.try_emplace(sref("line"), f.line());
-            r.try_emplace(sref("column"), f.column());
-            r.try_emplace(sref("value"), f.value());
-
+            r.try_emplace(sref("frame"), sref(except.frame(k).what_type()));
+            r.try_emplace(sref("file"), except.frame(k).file());
+            r.try_emplace(sref("line"), except.frame(k).line());
+            r.try_emplace(sref("column"), except.frame(k).column());
+            r.try_emplace(sref("value"), except.frame(k).value());
             backtrace.emplace_back(::std::move(r));
           }
 
@@ -1111,44 +1146,6 @@ struct Traits_coalescence
       }
   };
 
-AIR_Status
-do_invoke_nontail(Reference& self, const Source_Location& sloc, const cow_function& target,
-                  Global_Context& global, Reference_Stack&& stack)
-  {
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
-    try {
-      target.invoke(self, global, ::std::move(stack));
-    }
-    catch(Runtime_Error& except) {
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, sloc, target, except);
-      throw;
-    }
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
-    return air_status_next;
-  }
-
-AIR_Status
-do_invoke_tail(Reference& self, const Source_Location& sloc, const cow_function& target,
-               PTC_Aware ptc, Reference_Stack&& stack)
-  {
-    // Pack arguments for this PTC, and return `air_status_return_ref` to allow
-    // the result to be unpacked outside; otherwise a null reference is returned
-    // instead of this PTC wrapper, which can then never be unpacked.
-    stack.push() = ::std::move(self);
-    self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack)));
-    return air_status_return_ref;
-  }
-
-void
-do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, size_t count)
-  {
-    alt_stack.clear();
-    ROCKET_ASSERT(count <= stack.size());
-    for(size_t k = count - 1;  k != SIZE_MAX;  --k)
-      alt_stack.push() = ::std::move(stack.mut_top(k));
-    stack.pop(count);
-  }
-
 struct Traits_function_call
   {
     static
@@ -1191,12 +1188,9 @@ struct Traits_function_call
         // Copy the target, which shall be of type `function`.
         auto value = stack.top().dereference_readonly();
         if(value.is_null())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Target function not found"));
+          ASTERIA_THROW_RUNTIME_ERROR(("Target function not found"));
         else if(!value.is_function())
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Target value not a function (value `$1`)"),
-              value);
+          ASTERIA_THROW_RUNTIME_ERROR(("Target value not a function (value `$1`)"), value);
 
         const auto& target = value.as_function();
         auto& self = stack.mut_top().pop_modifier();
@@ -3875,18 +3869,19 @@ struct Traits_variadic_call
         // Initialize arguments.
         auto& stack = ctx.stack();
         auto& alt_stack = ctx.alt_stack();
-        alt_stack.clear();
 
         auto value = stack.top().dereference_readonly();
         switch(weaken_enum(value.type())) {
           case type_null:
-            // Leave `stack` empty.
+            // There is no argument.
+            alt_stack.clear();
             break;
 
           case type_array: {
             auto& vals = value.mut_array();
 
             // Push all arguments backwards as temporaries.
+            alt_stack.clear();
             while(!vals.empty()) {
               alt_stack.push().set_temporary(::std::move(vals.mut_back()));
               vals.pop_back();
@@ -3899,6 +3894,7 @@ struct Traits_variadic_call
 
             // Pass an empty argument stack to get the number of arguments to generate.
             // This destroys the `self` reference so we have to copy it first.
+            alt_stack.clear();
             auto gself = stack.mut_top().pop_modifier();
             do_invoke_nontail(stack.mut_top(), sloc, gfunc, ctx.global(), ::std::move(alt_stack));
             value = stack.top().dereference_readonly();
@@ -3909,25 +3905,22 @@ struct Traits_variadic_call
                   "Invalid number of variadic arguments (value `$1`)"),
                   value);
 
-            int64_t nvargs = value.as_integer();
-            if((nvargs < 0) || (nvargs > INT32_MAX))
+            uint32_t nvargs = ::rocket::clamp_cast<uint32_t>(value.as_integer(), 0, INT32_MAX);
+            if(nvargs != value.as_integer())
               ASTERIA_THROW_RUNTIME_ERROR((
                   "Number of variadic arguments not acceptable (value `$1`)"),
-                  nvargs);
+                  value);
 
             // Prepare `self` references for all upcoming  calls.
-            for(int64_t k = 0;  k < nvargs;  ++k)
+            for(uint32_t k = 0;  k < nvargs;  ++k)
               stack.push() = gself;
 
-            // Generate arguments and push them onto `stack`.
-            // The top is the first argument.
-            for(int64_t k = 0;  k < nvargs;  ++k) {
-              // Initialize arguments for the generator function.
+            // Generate arguments and push them onto `stack`. The top is the
+            // first argument.
+            for(uint32_t k = 0;  k < nvargs;  ++k) {
               alt_stack.clear();
-              alt_stack.push().set_temporary(k);
-
-              // Generate an argument. Ensure it is dereferenceable.
-              auto& arg = stack.mut_top(static_cast<size_t>(k));
+              alt_stack.push().set_temporary(V_integer(k));
+              auto& arg = stack.mut_top(k);
               do_invoke_nontail(arg, sloc, gfunc, ctx.global(), ::std::move(alt_stack));
               arg.dereference_readonly();
             }
@@ -3935,8 +3928,7 @@ struct Traits_variadic_call
             // Pop arguments and re-push them into the alternative stack.
             // This reverses all arguments so the top will be the last argument.
             alt_stack.clear();
-
-            for(int64_t k = 0;  k < nvargs;  ++k) {
+            for(uint32_t k = 0;  k < nvargs;  ++k) {
               alt_stack.push() = ::std::move(stack.mut_top());
               stack.pop();
             }

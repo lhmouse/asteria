@@ -19,9 +19,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                   Reference_Stack& alt_stack, const refcnt_ptr<Variadic_Arguer>& zvarg,
                   const cow_vector<phsh_string>& params, Reference&& self)
   :
-    m_parent_opt(),
-    m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack),
-    m_zvarg(zvarg)
+    m_parent_opt(nullptr), m_global(&global), m_stack(&stack),
+    m_alt_stack(&alt_stack), m_zvarg(zvarg)
   {
     if(self.is_temporary()) {
       // If the self reference is null, it is likely that `this` isn't ever
