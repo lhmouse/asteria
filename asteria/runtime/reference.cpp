@@ -181,6 +181,7 @@ do_use_function_result_slow(Global_Context& global)
   {
     refcnt_ptr<PTC_Arguments> ptc;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
+    opt<Value> result_value;
     Reference_Stack alt_stack;
 
     try {
@@ -201,7 +202,7 @@ do_use_function_result_slow(Global_Context& global)
       if(ptc->ptc_aware() == ptc_aware_void)
         this->m_xref = xref_void;
       else if(this->m_xref != xref_void)
-        this->dereference_readonly();
+        result_value = this->dereference_readonly();
 
       // This is the normal return path.
       while(!frames.empty()) {
@@ -214,9 +215,13 @@ do_use_function_result_slow(Global_Context& global)
                  global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
             .on_scope_exit_normal(air_status_next);
 
-        // Check the result.
-        if((ptc->ptc_aware() == ptc_aware_by_val) && (this->m_xref != xref_void))
-          this->dereference_copy();
+        // Convert the result.
+        if((ptc->ptc_aware() == ptc_aware_by_val) && result_value) {
+          this->m_value = ::std::move(*result_value);
+          result_value.reset();
+          this->m_mods.clear();
+          this->m_xref = xref_temporary;
+        }
 
         ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(), ptc->target(), *this);
       }
