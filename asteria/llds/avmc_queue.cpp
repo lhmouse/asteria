@@ -11,78 +11,56 @@ namespace asteria {
 
 void
 AVMC_Queue::
-do_destroy_nodes(bool xfree) noexcept
+do_reallocate(uint32_t estor)
   {
-    auto next = this->m_bptr;
-    const auto eptr = this->m_bptr + this->m_used;
-    while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = next;
-      next += 1U + qnode->nheaders;
+    Header* bptr = nullptr;
 
-      // Destroy `sparam`, if any.
-      if(qnode->meta_ver && qnode->pv_meta->dtor_opt)
-        qnode->pv_meta->dtor_opt(qnode);
+    if(estor != 0) {
+      // Extend the storage.
+      ROCKET_ASSERT(estor >= this->m_used);
 
-      // Deallocate the vtable and symbols.
-      if(qnode->meta_ver)
-        delete qnode->pv_meta;
-    }
+      if(estor >= 0x7FFF000U / sizeof(Header))
+        throw ::std::bad_alloc();
+
+      bptr = (Header*) ::realloc((void*) this->m_bptr, estor * sizeof(Header));
+      if(!bptr)
+        throw ::std::bad_alloc();
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
+      ::memset((void*) (bptr + this->m_einit), 0xC3, (estor - this->m_einit) * sizeof(Header));
 #endif
+    }
+    else {
+      // Free the storage.
+      auto next = this->m_bptr;
+      const auto eptr = this->m_bptr + this->m_used;
+      while(ROCKET_EXPECT(next != eptr)) {
+        auto qnode = next;
+        next += 1U + qnode->nheaders;
 
-    this->m_used = 0xDEADBEEF;
-    if(!xfree)
-      return;
+        if(qnode->meta_ver != 0) {
+          unique_ptr<Metadata> meta(qnode->pv_meta);
 
-    // Deallocate the old table.
-    auto bold = ::std::exchange(this->m_bptr, (Header*)0xDEADBEEF);
-    auto esold = ::std::exchange(this->m_estor, (size_t)0xBEEFDEAD);
-    ::rocket::freeN<Header>(bold, esold);
-  }
+          // If `sparam` has a destructor, invoke it.
+          if(qnode->pv_meta->dtor_opt)
+            qnode->pv_meta->dtor_opt(qnode);
+        }
+      }
 
-void
-AVMC_Queue::
-do_reallocate(uint32_t nadd)
-  {
-    // Allocate a new table.
-    constexpr size_t nheaders_max = UINT32_MAX / sizeof(Header);
-    if(nheaders_max - this->m_used < nadd)
-      throw ::std::bad_alloc();
-
-    uint32_t estor = this->m_used + nadd;
-    auto bptr = ::rocket::allocN<Header>(estor);
-
-    // Perform a bitwise copy of all contents of the old block.
-    // This copies all existent headers and trivial data.
-    // Note that the size is unchanged.
-    auto bold = ::std::exchange(this->m_bptr, bptr);
-    ::std::memcpy(bptr, bold, this->m_used * sizeof(Header));
-    auto esold = ::std::exchange(this->m_estor, estor);
-    if(ROCKET_EXPECT(!bold))
-      return;
-
-    // Move old non-trivial nodes if any.
-    // Warning: no exception shall be thrown from the code below.
-    uint32_t offset = 0;
-    while(ROCKET_EXPECT(offset != this->m_used)) {
-      auto qnode = bptr + offset;
-      auto qfrom = bold + offset;
-      offset += 1U + qnode->nheaders;
-
-      // Relocate `sparam`, if any.
-      if(qnode->meta_ver && qnode->pv_meta->reloc_opt)
-        qnode->pv_meta->reloc_opt(qnode, qfrom);
+#ifdef ROCKET_DEBUG
+      ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
+#endif
+      ::free(this->m_bptr);
+      this->m_used = 0;
     }
 
-    // Deallocate the old table.
-    ::rocket::freeN<Header>(bold, esold);
+    this->m_bptr = bptr;
+    this->m_estor = estor;
   }
 
 details_avmc_queue::Header*
 AVMC_Queue::
-do_reserve_one(Uparam uparam, size_t size)
+do_allocate_node_storage(Uparam uparam, size_t size)
   {
     constexpr size_t size_max = UINT8_MAX * sizeof(Header) - 1;
     if(size > size_max)
@@ -90,28 +68,24 @@ do_reserve_one(Uparam uparam, size_t size)
           "Invalid AVMC node size (`$1` > `$2`)"),
           size, size_max);
 
-    // Round the size up to the nearest number of headers.
-    // This shall not result in overflows.
-    size_t nheaders_p1 = (sizeof(Header) * 2 - 1 + size) / sizeof(Header);
-
-    // Allocate a new memory block as needed.
-    if(ROCKET_UNEXPECT(this->m_estor - this->m_used < nheaders_p1)) {
-      size_t nadd = nheaders_p1;
+    // Round the size up to the nearest number of headers. This shall not result
+    // in overflows.
+    uint32_t nheaders_p1 = ((uint32_t) (sizeof(Header) * 2 - 1 + size) / sizeof(Header));
+    if(this->m_estor - this->m_used < nheaders_p1) {
+      // Extend the storage.
+      uint32_t size_to_reserve = this->m_used + nheaders_p1;
 #ifndef ROCKET_DEBUG
-      // Reserve more space for non-debug builds.
-      nadd |= this->m_used * 4;
+      size_to_reserve |= this->m_used * 3;
 #endif
-      this->do_reallocate(static_cast<uint32_t>(nadd));
+      this->do_reallocate(size_to_reserve);
     }
     ROCKET_ASSERT(this->m_estor - this->m_used >= nheaders_p1);
 
-    // Append a new node.
-    // `uparam` is overlapped with `nheaders` so it must be assigned first.
-    // The others can occur in any order.
+    // Append a new node. `uparam` is overlapped with `nheaders` so it must
+    // be assigned first. The others can occur in any order.
     auto qnode = this->m_bptr + this->m_used;
     qnode->uparam = uparam;
-    qnode->nheaders = static_cast<uint8_t>(nheaders_p1 - 1U);
-    qnode->meta_ver = 0;
+    qnode->nheaders = (uint8_t) (nheaders_p1 - 1U);
     return qnode;
   }
 
@@ -121,7 +95,7 @@ do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_o
   {
     // Copy source data if `data_opt` is non-null. Fill zeroes otherwise.
     // This operation will not throw exceptions.
-    auto qnode = this->do_reserve_one(uparam, size);
+    auto qnode = this->do_allocate_node_storage(uparam, size);
     if(data_opt)
       ::std::memcpy(qnode->sparam, data_opt, size);
     else if(size)
@@ -129,6 +103,7 @@ do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_o
 
     // Accept this node.
     qnode->pv_exec = exec;
+    qnode->meta_ver = 0;
     this->m_used += 1U + qnode->nheaders;
     return qnode;
   }
@@ -136,14 +111,13 @@ do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_o
 details_avmc_queue::Header*
 AVMC_Queue::
 do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
-                     Var_Getter* vget_opt, Relocator* reloc_opt, Destructor* dtor_opt,
-                     size_t size, Constructor* ctor_opt, intptr_t ctor_arg)
+                     Var_Getter* vget_opt, Destructor* dtor_opt, size_t size,
+                     Constructor* ctor_opt, intptr_t ctor_arg)
   {
     // Allocate metadata for this node.
-    auto meta = ::rocket::make_unique<details_avmc_queue::Metadata>();
+    unique_ptr<Metadata> meta(new Metadata);
     uint8_t meta_ver = 1;
 
-    meta->reloc_opt = reloc_opt;
     meta->dtor_opt = dtor_opt;
     meta->vget_opt = vget_opt;
     meta->exec = exec;
@@ -155,7 +129,7 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
 
     // Invoke the constructor if `ctor_opt` is non-null. Fill zeroes otherwise.
     // If an exception is thrown, there is no effect.
-    auto qnode = this->do_reserve_one(uparam, size);
+    auto qnode = this->do_allocate_node_storage(uparam, size);
     if(ctor_opt)
       ctor_opt(qnode, ctor_arg);
     else if(size)
@@ -170,10 +144,34 @@ do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_
 
 void
 AVMC_Queue::
+clear() noexcept
+  {
+    auto next = this->m_bptr;
+    const auto eptr = this->m_bptr + this->m_used;
+    while(ROCKET_EXPECT(next != eptr)) {
+      auto qnode = next;
+      next += 1U + qnode->nheaders;
+
+      if(qnode->meta_ver != 0) {
+        unique_ptr<Metadata> meta(qnode->pv_meta);
+
+        // If `sparam` has a destructor, invoke it.
+        if(qnode->pv_meta->dtor_opt)
+          qnode->pv_meta->dtor_opt(qnode);
+      }
+    }
+
+#ifdef ROCKET_DEBUG
+    ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
+#endif
+    this->m_used = 0;
+  }
+
+void
+AVMC_Queue::
 finalize()
   {
     // TODO: Add JIT support.
-    this->do_reallocate(0);
   }
 
 AIR_Status

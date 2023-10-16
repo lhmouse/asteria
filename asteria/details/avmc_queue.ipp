@@ -34,7 +34,6 @@ struct Header;
 
 // These are prototypes for callbacks.
 using Constructor  = void (Header* head, intptr_t arg);
-using Relocator    = void (Header* head, Header* from);
 using Destructor   = void (Header* head);
 using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
 using Var_Getter   = void (Variable_HashMap& staged, Variable_HashMap& temp,
@@ -43,7 +42,6 @@ using Var_Getter   = void (Variable_HashMap& staged, Variable_HashMap& temp,
 struct Metadata
   {
     // Version 1
-    Relocator* reloc_opt;  // if null then bitwise copy is performed
     Destructor* dtor_opt;  // if null then no cleanup is performed
     Var_Getter* vget_opt;  // if null then no variable shall exist
     Executor* exec;        // executor function, must not be null
@@ -72,17 +70,6 @@ struct Header
 
     alignas(max_align_t) char sparam[];
   };
-
-template<typename SparamT>
-inline
-void
-do_nontrivial_reloc(Header* head, Header* from)
-  {
-    auto ptr = reinterpret_cast<SparamT*>(head->sparam);
-    auto src = reinterpret_cast<SparamT*>(from->sparam);
-    ::rocket::construct(ptr, ::std::move(*src));
-    ::rocket::destroy(src);
-  }
 
 template<typename SparamT>
 inline
@@ -127,11 +114,6 @@ struct select_get_variables<SparamT,
 template<typename SparamT>
 struct Sparam_traits
   {
-    static constexpr Relocator* reloc_opt =
-        ::std::is_trivially_copyable<SparamT>::value
-            ? nullptr
-            : do_nontrivial_reloc<SparamT>;
-
     static constexpr Destructor* dtor_opt =
         ::std::is_trivially_destructible<SparamT>::value
             ? nullptr

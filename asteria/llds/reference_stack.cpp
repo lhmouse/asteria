@@ -29,15 +29,14 @@ do_reallocate(uint32_t estor)
     }
     else {
       // Free the storage.
-      this->m_etop = 0;
-
       while(this->m_einit != 0)
-        ::rocket::destroy(this->m_bptr + -- this->m_einit);
+        ::rocket::destroy(this->m_bptr + (-- this->m_einit));
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
 #endif
       ::free(this->m_bptr);
+      this->m_etop = 0;
     }
 
     this->m_bptr = bptr;
@@ -49,7 +48,7 @@ Reference_Stack::
 clear_cache() noexcept
   {
     while(this->m_einit != this->m_etop)
-      ::rocket::destroy(this->m_bptr + -- this->m_einit);
+      ::rocket::destroy(this->m_bptr + (-- this->m_einit));
   }
 
 void

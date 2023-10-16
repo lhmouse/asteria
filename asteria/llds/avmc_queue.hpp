@@ -20,7 +20,6 @@ class AVMC_Queue
   private:
     using Metadata     = details_avmc_queue::Metadata;
     using Constructor  = details_avmc_queue::Constructor;
-    using Relocator    = details_avmc_queue::Relocator;
     using Destructor   = details_avmc_queue::Destructor;
 
     Header* m_bptr = nullptr;  // beginning of storage
@@ -56,15 +55,12 @@ class AVMC_Queue
 
   private:
     void
-    do_destroy_nodes(bool xfree) noexcept;
-
-    void
-    do_reallocate(uint32_t nadd);
+    do_reallocate(uint32_t estor);
 
     // Reserve storage for the next node. `size` is the size of `sparam` to initialize.
     inline
     Header*
-    do_reserve_one(Uparam uparam, size_t size);
+    do_allocate_node_storage(Uparam uparam, size_t size);
 
     // Append a new node to the end. `size` is the size of `sparam` to initialize.
     // If `data_opt` is specified, it should point to the buffer containing data to copy.
@@ -77,14 +73,14 @@ class AVMC_Queue
     // `sparam` is filled with zeroes.
     Header*
     do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
-                         Var_Getter* vget_opt, Relocator* reloc_opt, Destructor* dtor_opt,
-                         size_t size, Constructor* ctor_opt, intptr_t ctor_arg);
+                         Var_Getter* vget_opt, Destructor* dtor_opt, size_t size,
+                         Constructor* ctor_opt, intptr_t ctor_arg);
 
   public:
     ~AVMC_Queue()
       {
         if(this->m_bptr)
-          this->do_destroy_nodes(true);
+          this->do_reallocate(0);
       }
 
     bool
@@ -92,14 +88,7 @@ class AVMC_Queue
       { return this->m_used == 0;  }
 
     void
-    clear() noexcept
-      {
-        if(this->m_used)
-          this->do_destroy_nodes(false);
-
-        // Clean invalid data up.
-        this->m_used = 0;
-      }
+    clear() noexcept;
 
     // Append a node. This allows you to bind an arbitrary function.
     template<typename XSparamT>
@@ -114,10 +103,9 @@ class AVMC_Queue
         if(::std::is_trivial<Sparam>::value && !vget_opt && !sloc_opt)
           return this->do_append_trivial(up, exec, sizeof(sp), ::std::addressof(sp));
 
-        return this->do_append_nontrivial(up, exec, sloc_opt, vget_opt,
-                          Traits::reloc_opt, Traits::dtor_opt, sizeof(sp),
-                          details_avmc_queue::do_forward_ctor<XSparamT>,
-                          reinterpret_cast<intptr_t>(::std::addressof(sp)));
+        return this->do_append_nontrivial(up, exec, sloc_opt, vget_opt, Traits::dtor_opt,
+                                          sizeof(sp), details_avmc_queue::do_forward_ctor<XSparamT>,
+                                          reinterpret_cast<intptr_t>(::std::addressof(sp)));
       }
 
     Header*
@@ -126,8 +114,7 @@ class AVMC_Queue
         if(!sloc_opt)
           return this->do_append_trivial(up, exec, 0, nullptr);
 
-        return this->do_append_nontrivial(up, exec, sloc_opt,
-                           nullptr, nullptr, nullptr, 0, nullptr, 0);
+        return this->do_append_nontrivial(up, exec, sloc_opt, nullptr, nullptr, 0, nullptr, 0);
       }
 
     // Mark this queue ready for execution. No nodes may be appended hereafter.
