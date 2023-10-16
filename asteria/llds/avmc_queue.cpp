@@ -25,10 +25,6 @@ do_reallocate(uint32_t estor)
       bptr = (Header*) ::realloc((void*) this->m_bptr, estor * sizeof(Header));
       if(!bptr)
         throw ::std::bad_alloc();
-
-#ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
-#endif
     }
     else {
       // Free the storage.
