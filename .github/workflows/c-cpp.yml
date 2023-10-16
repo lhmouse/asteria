@@ -1,0 +1,50 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+    - master
+    - releases/*
+
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  ubuntu:
+    name: Ubuntu native build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: >-
+           sudo apt-get install -y --no-install-recommends autoconf automake
+           libtool g++ gettext make libedit-dev libpcre2-dev libssl-dev zlib1g-dev
+
+    - name: Run tests
+      run: ./ci/build.sh
+
+  msys2:
+    name: MSYS2 native build
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MSYS
+
+    - name: Install dependencies
+      run: >-
+           pacman -S --noconfirm autoconf automake libtool gcc gettext make
+           libedit-devel pcre2-devel openssl-devel zlib-devel libiconv-devel
+
+    - name: Run tests
+      run: ./ci/build.sh
