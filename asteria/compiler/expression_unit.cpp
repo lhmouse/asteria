@@ -56,7 +56,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         // If a named reference is found, it will not be replaced or hidden by a
         // later-declared one.
         const Reference* qref;
-        Abstract_Context* qctx = &ctx;
+        const Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
 
         for(;;) {

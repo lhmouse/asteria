@@ -32,7 +32,7 @@ class Global_Context
     do_is_analytic() const noexcept final
       { return false;  }
 
-    Abstract_Context*
+    const Abstract_Context*
     do_get_parent_opt() const noexcept final
       { return nullptr;  }
 

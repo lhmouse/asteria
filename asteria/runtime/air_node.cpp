@@ -1009,7 +1009,7 @@ struct Traits_push_local_reference
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, phsh_stringR name)
       {
         // Get the context.
-        Executive_Context* qctx = &ctx;
+        const Executive_Context* qctx = &ctx;
         for(uint32_t k = 0;  k != up.u32;  ++k)
           qctx = qctx->get_parent_opt();
 
@@ -4888,7 +4888,7 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<index_push_local_reference>();
 
         // Get the context.
-        Abstract_Context* qctx = &ctx;
+        const Abstract_Context* qctx = &ctx;
         for(uint32_t k = 0;  k != altr.depth;  ++k)
           qctx = qctx->get_parent_opt();
 

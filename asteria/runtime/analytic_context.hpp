@@ -13,7 +13,7 @@ class Analytic_Context
     public Abstract_Context
   {
   private:
-    Abstract_Context* m_parent_opt;
+    const Abstract_Context* m_parent_opt;
 
   public:
     // A plain context must have a parent context.
@@ -37,7 +37,7 @@ class Analytic_Context
     do_is_analytic() const noexcept final
       { return true;  }
 
-    Abstract_Context*
+    const Abstract_Context*
     do_get_parent_opt() const noexcept override
       { return this->m_parent_opt;  }
 
@@ -48,7 +48,7 @@ class Analytic_Context
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
 
-    Abstract_Context*
+    const Abstract_Context*
     get_parent_opt() const noexcept
       { return this->m_parent_opt;  }
   };

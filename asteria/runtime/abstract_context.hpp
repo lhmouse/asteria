@@ -32,7 +32,7 @@ class Abstract_Context
     do_is_analytic() const noexcept = 0;
 
     virtual
-    Abstract_Context*
+    const Abstract_Context*
     do_get_parent_opt() const noexcept = 0;
 
     // This function is called when a name is not found in `m_named_refs`.
@@ -57,7 +57,7 @@ class Abstract_Context
     is_analytic() const noexcept
       { return this->do_is_analytic();  }
 
-    Abstract_Context*
+    const Abstract_Context*
     get_parent_opt() const noexcept
       { return this->do_get_parent_opt();  }
 

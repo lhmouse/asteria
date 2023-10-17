@@ -14,7 +14,7 @@ class Executive_Context
     public Abstract_Context
   {
   private:
-    Executive_Context* m_parent_opt;
+    const Executive_Context* m_parent_opt;
 
     // Store some references to the enclosing function,
     // so they are not passed here and there upon each native call.
@@ -64,7 +64,7 @@ class Executive_Context
     do_is_analytic() const noexcept final
       { return false;  }
 
-    Abstract_Context*
+    const Abstract_Context*
     do_get_parent_opt() const noexcept override
       { return this->m_parent_opt;  }
 
@@ -80,7 +80,7 @@ class Executive_Context
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
 
-    Executive_Context*
+    const Executive_Context*
     get_parent_opt() const noexcept
       { return this->m_parent_opt;  }
 
