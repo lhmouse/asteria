@@ -44,9 +44,8 @@ do_destroy_variant_slow() noexcept
     s_stupid_end[-1] = 2;
 #endif
 
-    // Expand arrays and objects by hand.
-    // This blows the entire C++ object model up. Don't play with this at home!
-    ::rocket::linear_buffer byte_stack;
+    // Expand arrays and objects by hand. Don't play with this at home!
+    ::rocket::cow_vector<bytes_type> stack;
 
   r:
     if(this->m_stor.index() >= type_string)
@@ -66,10 +65,11 @@ do_destroy_variant_slow() noexcept
         case type_array: {
           auto& altr = this->m_stor.mut<type_array>();
           if(!altr.empty() && altr.unique()) {
-            // Move raw bytes into `byte_stack`.
-            char* adata = (char*) altr.mut_data();
-            byte_stack.putn(adata, altr.size() * sizeof(*this));
-            ::memset(adata, 0, altr.size() * sizeof(*this));
+            for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
+              // Move raw bytes into `stack`.
+              stack.push_back(it->m_bytes);
+              ::memset(&(it->m_bytes), 0, sizeof(bytes_type));
+            }
           }
           altr.~V_array();
           break;
@@ -78,11 +78,10 @@ do_destroy_variant_slow() noexcept
         case type_object: {
           auto& altr = this->m_stor.mut<type_object>();
           if(!altr.empty() && altr.unique()) {
-            // Move raw bytes into `byte_stack`.
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
-              char* adata = (char*) &(it->second);
-              byte_stack.putn(adata, sizeof(*this));
-              ::memset(adata, 0, sizeof(*this));
+              // Move raw bytes into `stack`.
+              stack.push_back(it->second.m_bytes);
+              ::memset(&(it->second.m_bytes), 0, sizeof(bytes_type));
             }
           }
           altr.~V_object();
@@ -93,17 +92,14 @@ do_destroy_variant_slow() noexcept
           ASTERIA_TERMINATE(("Invalid value type (type `$1`)"), this->type());
       }
 
-    if(!byte_stack.empty()) {
-      // Pop an element.
-      ROCKET_ASSERT(byte_stack.size() >= sizeof(*this));
-      char* adata = (char*) this;
-      ::memcpy(adata, byte_stack.end() - sizeof(*this), sizeof(*this));
-      byte_stack.unaccept(sizeof(*this));
+    if(!stack.empty()) {
+      this->m_bytes = stack.back();
+      stack.pop_back();
       goto r;
     }
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_bytes, 0xEB, sizeof(*this));
+    ::std::memset(&(this->m_bytes), 0xEB, sizeof(bytes_type));
 #endif
   }
   catch(exception& stdex) {

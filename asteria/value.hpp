@@ -12,12 +12,12 @@ class Value
   {
   private:
     using variant_type =
-      ::rocket::variant<
-            V_null, V_boolean, V_integer, V_real, V_string,
-            V_opaque, V_function, V_array, V_object>;
+            ::rocket::variant<
+                  V_null, V_boolean, V_integer, V_real, V_string,
+                  V_opaque, V_function, V_array, V_object>;
 
     using bytes_type =
-        ::std::aligned_storage<sizeof(variant_type), 16U>::type;
+            ::std::aligned_storage<sizeof(variant_type), 16U>::type;
 
     union {
       variant_type m_stor;
@@ -79,25 +79,22 @@ class Value
       }
 
     Value(Value&& other) noexcept
+      :
+        m_bytes(::std::exchange(other.m_bytes, bytes_type()))  // HACK
       {
-        // Don't play with this at home!
-        this->m_bytes = other.m_bytes;
-        other.m_bytes = bytes_type();
       }
 
     Value&
     operator=(Value&& other) & noexcept
       {
-        // Don't play with this at home!
-        ::std::swap(this->m_bytes, other.m_bytes);
+        ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
       }
 
     Value&
     swap(Value& other) noexcept
       {
-        // Don't play with this at home!
-        ::std::swap(this->m_bytes, other.m_bytes);
+        ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
       }
 
