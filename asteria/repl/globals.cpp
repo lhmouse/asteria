@@ -48,45 +48,40 @@ struct Verbose_Hooks final
         if(sig == 0)
           return;
 
-#if defined(__GLIBC__) && (__GLIBC__ * 10000 + __GLIBC_MINOR__ >= 20032)
-        const char* sigdescr = ::sigdescr_np(sig);
-#else
-        const char* sigdescr = ::sys_siglist[sig];
-#endif  // GLIBC
+        // Does the REPL have to be thread-safe anyway?
+        const char* sigstr = ::strsignal(sig);
 
-        this->do_verbose_trace(sloc, "Received signal $1: $2", sig, sigdescr);
+        this->do_verbose_trace(sloc, "Received signal $1: $2", sig, sigstr);
 
-        ASTERIA_THROW(("Signal $1 received: $2", "[thrown from '$3']"), sig, sigdescr, sloc);
+        ::rocket::sprintf_and_throw<::std::runtime_error>(
+              "Received signal %d: %s\n[interrupted at '%s:%d']",
+              sig, sigstr, sloc.c_file(), sloc.line());
       }
 
     void
     on_variable_declare(const Source_Location& sloc, phsh_stringR name) override
       {
-        this->do_verbose_trace(sloc,
-            "Declaring variable `$1`", name);
+        this->do_verbose_trace(sloc, "Declaring variable `$1`", name);
       }
 
     void
     on_function_call(const Source_Location& sloc, const cow_function& target) override
       {
-        this->do_verbose_trace(sloc,
-            "Initiating function call: $1", target);
+        this->do_verbose_trace(sloc, "Initiating function call: $1", target);
       }
 
     void
     on_function_return(const Source_Location& sloc, const cow_function& target,
                        const Reference&) override
       {
-        this->do_verbose_trace(sloc,
-            "Returned from function call: $1", target);
+        this->do_verbose_trace(sloc, "Returned from function call: $1", target);
       }
 
     void
     on_function_except(const Source_Location& sloc, const cow_function& target,
                        const Runtime_Error&) override
       {
-        this->do_verbose_trace(sloc,
-            "Caught an exception inside function call: $1", target);
+        this->do_verbose_trace(sloc, "Caught an exception inside function call: $1", target);
       }
   };
 

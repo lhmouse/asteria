@@ -251,20 +251,16 @@ struct Handler_source final
           // If the HOME directory cannot be determined, delete the tilde
           // so it becomes an absolute path, like in BASH.
           // I am too lazy to add support for `~+` or `~-` here.
+          args.mut(0).erase(0, 1);
           const char* home = ::secure_getenv("HOME");
-          if(!home)
-            args.mut(0).erase(0, 1);
-          else
-            args.mut(0).replace(0, 1, home);
+          if(home)
+            args.mut(0).insert(0, home);
         }
 
         unique_ptr<char, void (void*)> abspath(::free);
         abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
         if(!abspath)
-          ASTERIA_THROW((
-              "Could not open script file '$1'",
-              "[`realpath()` failed: ${errno:full}]"),
-              args[0]);
+          return repl_printf("! could not open '%s': %m", args[0].c_str());
 
         repl_printf("* loading file '%s'...", abspath.get());
         ::rocket::tinybuf_file file;
