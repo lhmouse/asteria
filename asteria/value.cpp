@@ -96,7 +96,8 @@ do_destroy_variant_slow() noexcept
     if(!byte_stack.empty()) {
       // Pop an element.
       ROCKET_ASSERT(byte_stack.size() >= sizeof(*this));
-      ::memcpy(this->m_bytes, byte_stack.end() - sizeof(*this), sizeof(*this));
+      char* adata = (char*) this;
+      ::memcpy(adata, byte_stack.end() - sizeof(*this), sizeof(*this));
       byte_stack.unaccept(sizeof(*this));
       goto r;
     }

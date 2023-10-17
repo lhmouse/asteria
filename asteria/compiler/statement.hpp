@@ -161,28 +161,27 @@ class Statement
       };
 
   private:
-    ::rocket::variant<
-      ROCKET_CDR(
-        ,S_expression  //  0,
-        ,S_block       //  1,
-        ,S_variables   //  2,
-        ,S_function    //  3,
-        ,S_if          //  4,
-        ,S_switch      //  5,
-        ,S_do_while    //  6,
-        ,S_while       //  7,
-        ,S_for_each    //  8,
-        ,S_for         //  9,
-        ,S_try         // 10,
-        ,S_break       // 11,
-        ,S_continue    // 12,
-        ,S_throw       // 13,
-        ,S_return      // 14,
-        ,S_assert      // 15,
-        ,S_defer       // 16,
-        ,S_references  // 17,
-      )>
-      m_stor;
+    ASTERIA_VARIANT(
+      m_stor
+        , S_expression  //  0
+        , S_block       //  1
+        , S_variables   //  2
+        , S_function    //  3
+        , S_if          //  4
+        , S_switch      //  5
+        , S_do_while    //  6
+        , S_while       //  7
+        , S_for_each    //  8
+        , S_for         //  9
+        , S_try         // 10
+        , S_break       // 11
+        , S_continue    // 12
+        , S_throw       // 13
+        , S_return      // 14
+        , S_assert      // 15
+        , S_defer       // 16
+        , S_references  // 17
+      );
 
   public:
     // Constructors and assignment operators

@@ -43,15 +43,14 @@ class Reference_Modifier
       };
 
   private:
-    ::rocket::variant<
-      ROCKET_CDR(
-        ,S_array_index   // 0,
-        ,S_object_key    // 1,
-        ,S_array_head    // 2,
-        ,S_array_tail    // 3,
-        ,S_array_random  // 4,
-      )>
-      m_stor;
+    ASTERIA_VARIANT(
+      m_stor
+        , S_array_index   // 0,
+        , S_object_key    // 1,
+        , S_array_head    // 2,
+        , S_array_tail    // 3,
+        , S_array_random  // 4,
+      );
 
   public:
     // Constructors and assignment operators

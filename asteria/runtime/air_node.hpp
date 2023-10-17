@@ -294,47 +294,46 @@ class AIR_Node
       };
 
   private:
-    ::rocket::variant<
-      ROCKET_CDR(
-        ,S_clear_stack            //  0,
-        ,S_execute_block          //  1,
-        ,S_declare_variable       //  2,
-        ,S_initialize_variable    //  3,
-        ,S_if_statement           //  4,
-        ,S_switch_statement       //  5,
-        ,S_do_while_statement     //  6,
-        ,S_while_statement        //  7,
-        ,S_for_each_statement     //  8,
-        ,S_for_statement          //  9,
-        ,S_try_statement          // 10,
-        ,S_throw_statement        // 11,
-        ,S_assert_statement       // 12,
-        ,S_simple_status          // 13,
-        ,S_check_argument         // 14,
-        ,S_push_global_reference  // 15,
-        ,S_push_local_reference   // 16,
-        ,S_push_bound_reference   // 17,
-        ,S_define_function        // 18,
-        ,S_branch_expression      // 19,
-        ,S_coalescence            // 20,
-        ,S_function_call          // 21,
-        ,S_member_access          // 22,
-        ,S_push_unnamed_array     // 23,
-        ,S_push_unnamed_object    // 24,
-        ,S_apply_operator         // 25,
-        ,S_unpack_struct_array    // 26,
-        ,S_unpack_struct_object   // 27,
-        ,S_define_null_variable   // 28,
-        ,S_single_step_trap       // 29,
-        ,S_variadic_call          // 30,
-        ,S_defer_expression       // 31,
-        ,S_import_call            // 32,
-        ,S_declare_reference      // 33,
-        ,S_initialize_reference   // 34,
-        ,S_catch_expression       // 35,
-        ,S_return_statement       // 36,
-      )>
-      m_stor;
+    ASTERIA_VARIANT(
+      m_stor
+        , S_clear_stack            //  0
+        , S_execute_block          //  1
+        , S_declare_variable       //  2
+        , S_initialize_variable    //  3
+        , S_if_statement           //  4
+        , S_switch_statement       //  5
+        , S_do_while_statement     //  6
+        , S_while_statement        //  7
+        , S_for_each_statement     //  8
+        , S_for_statement          //  9
+        , S_try_statement          // 10
+        , S_throw_statement        // 11
+        , S_assert_statement       // 12
+        , S_simple_status          // 13
+        , S_check_argument         // 14
+        , S_push_global_reference  // 15
+        , S_push_local_reference   // 16
+        , S_push_bound_reference   // 17
+        , S_define_function        // 18
+        , S_branch_expression      // 19
+        , S_coalescence            // 20
+        , S_function_call          // 21
+        , S_member_access          // 22
+        , S_push_unnamed_array     // 23
+        , S_push_unnamed_object    // 24
+        , S_apply_operator         // 25
+        , S_unpack_struct_array    // 26
+        , S_unpack_struct_object   // 27
+        , S_define_null_variable   // 28
+        , S_single_step_trap       // 29
+        , S_variadic_call          // 30
+        , S_defer_expression       // 31
+        , S_import_call            // 32
+        , S_declare_reference      // 33
+        , S_initialize_reference   // 34
+        , S_catch_expression       // 35
+        , S_return_statement       // 36
+      );
 
   public:
     // Constructors and assignment operators

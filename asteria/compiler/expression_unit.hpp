@@ -125,25 +125,24 @@ class Expression_Unit
       };
 
   private:
-    ::rocket::variant<
-      ROCKET_CDR(
-        ,S_literal           //  0,
-        ,S_local_reference   //  1,
-        ,S_closure_function  //  2,
-        ,S_branch            //  3,
-        ,S_function_call     //  4,
-        ,S_member_access     //  5,
-        ,S_operator_rpn      //  6,
-        ,S_unnamed_array     //  7,
-        ,S_unnamed_object    //  8,
-        ,S_coalescence       //  9,
-        ,S_global_reference  // 10,
-        ,S_variadic_call     // 11,
-        ,S_argument_finish   // 12,
-        ,S_import_call       // 13,
-        ,S_catch             // 14,
-      )>
-      m_stor;
+    ASTERIA_VARIANT(
+      m_stor
+        , S_literal           //  0
+        , S_local_reference   //  1
+        , S_closure_function  //  2
+        , S_branch            //  3
+        , S_function_call     //  4
+        , S_member_access     //  5
+        , S_operator_rpn      //  6
+        , S_unnamed_array     //  7
+        , S_unnamed_object    //  8
+        , S_coalescence       //  9
+        , S_global_reference  // 10
+        , S_variadic_call     // 11
+        , S_argument_finish   // 12
+        , S_import_call       // 13
+        , S_catch             // 14
+      );
 
   public:
     // Constructors and assignment operators

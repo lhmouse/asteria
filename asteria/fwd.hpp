@@ -62,6 +62,9 @@ namespace noadl = asteria;
     C& operator=(C&&) & noexcept = delete;  \
     virtual ~C()  // no semicolon
 
+#define ASTERIA_VARIANT(m, ...)  \
+    ::rocket::variant<__VA_ARGS__> m  // no semicolon
+
 #define ASTERIA_INCOMPLET(T)  \
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
 

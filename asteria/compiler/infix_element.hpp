@@ -64,16 +64,15 @@ class Infix_Element
       };
 
   private:
-    ::rocket::variant<
-      ROCKET_CDR(
-        ,S_head         // 0,
-        ,S_ternary      // 1,
-        ,S_logical_and  // 2,
-        ,S_logical_or   // 3,
-        ,S_coalescence  // 4,
-        ,S_general      // 5,
-      )>
-      m_stor;
+    ASTERIA_VARIANT(
+      m_stor
+        , S_head         // 0
+        , S_ternary      // 1
+        , S_logical_and  // 2
+        , S_logical_or   // 3
+        , S_coalescence  // 4
+        , S_general      // 5
+      );
 
   public:
     // Constructors and assignment operators

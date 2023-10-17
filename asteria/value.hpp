@@ -11,10 +11,17 @@ namespace asteria {
 class Value
   {
   private:
+    using variant_type =
+      ::rocket::variant<
+            V_null, V_boolean, V_integer, V_real, V_string,
+            V_opaque, V_function, V_array, V_object>;
+
+    using bytes_type =
+        ::std::aligned_storage<sizeof(variant_type), 16U>::type;
+
     union {
-      ::rocket::variant<V_null, V_boolean, V_integer, V_real,
-                   V_string, V_opaque, V_function, V_array, V_object> m_stor;
-      char m_bytes[sizeof(m_stor)];
+      variant_type m_stor;
+      bytes_type m_bytes;
     };
 
   public:
@@ -74,16 +81,15 @@ class Value
     Value(Value&& other) noexcept
       {
         // Don't play with this at home!
-        char* tbytes = (char*) this;
-        char* obytes = (char*) &other;
-        ::memcpy(tbytes, obytes, sizeof(*this));
-        ::memset(obytes, 0, sizeof(*this));
+        this->m_bytes = other.m_bytes;
+        other.m_bytes = bytes_type();
       }
 
     Value&
     operator=(Value&& other) & noexcept
       {
-        this->swap(other);
+        // Don't play with this at home!
+        ::std::swap(this->m_bytes, other.m_bytes);
         return *this;
       }
 
@@ -91,12 +97,7 @@ class Value
     swap(Value& other) noexcept
       {
         // Don't play with this at home!
-        char ebytes[sizeof(*this)];
-        char* tbytes = (char*) this;
-        char* obytes = (char*) &other;
-        ::memcpy(ebytes, tbytes, sizeof(*this));
-        ::memcpy(tbytes, obytes, sizeof(*this));
-        ::memcpy(obytes, ebytes, sizeof(*this));
+        ::std::swap(this->m_bytes, other.m_bytes);
         return *this;
       }
 
