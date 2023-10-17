@@ -73,14 +73,10 @@ class Module_Loader::Unique_Stream
     Unique_Stream&
     do_reset(const refcnt_ptr<Module_Loader>& loader, locked_stream_pair* strm) noexcept
       {
-        auto qloader = ::std::exchange(this->m_loader, loader);
-        auto qstrm = ::std::exchange(this->m_strm, strm);
-        if(!qstrm)
-          return *this;
-
-        // Unlock the old stream if one has been assigned.
-        ROCKET_ASSERT(qloader);
-        qloader->do_unlock_stream(qstrm);
+        auto qloader = ::rocket::exchange(this->m_loader, loader);
+        auto qstrm = ::rocket::exchange(this->m_strm, strm);
+        if(qloader && qstrm)
+          qloader->do_unlock_stream(qstrm);
         return *this;
       }
 

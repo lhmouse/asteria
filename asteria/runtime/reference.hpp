@@ -56,7 +56,7 @@ class Reference
         m_var(::std::move(other.m_var)),
         m_ptc(::std::move(other.m_ptc)),
         m_mods(::std::move(other.m_mods)),
-        m_xref(::std::exchange(other.m_xref, xref_invalid))
+        m_xref(::rocket::exchange(other.m_xref))
       {
         if(this->m_xref == xref_temporary)
           this->m_value = ::std::move(other.m_value);
@@ -73,7 +73,7 @@ class Reference
           this->m_ptc = ::std::move(other.m_ptc);
 
         this->m_mods = ::std::move(other.m_mods);
-        this->m_xref = ::std::exchange(other.m_xref, xref_invalid);
+        this->m_xref = ::rocket::exchange(other.m_xref);
         return *this;
       }
 

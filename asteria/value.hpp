@@ -80,7 +80,7 @@ class Value
 
     Value(Value&& other) noexcept
       :
-        m_bytes(::std::exchange(other.m_bytes, bytes_type()))  // HACK
+        m_bytes(::rocket::exchange(other.m_bytes))  // HACK
       {
       }
 
