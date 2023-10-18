@@ -15,7 +15,7 @@ apply_read_opt(const Value& parent) const
     switch(this->index()) {
       case index_array_index: {
         // Get the element at the given index.
-        const auto& altr = this->m_stor.as<index_array_index>();
+        const auto& altr = this->m_stor.as<S_array_index>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
           return nullptr;
@@ -35,7 +35,7 @@ apply_read_opt(const Value& parent) const
 
       case index_object_key: {
         // Get the value with the given key.
-        const auto& altr = this->m_stor.as<index_object_key>();
+        const auto& altr = this->m_stor.as<S_object_key>();
         if(parent.is_null()) {
           // Members of null values are also null values.
           return nullptr;
@@ -87,7 +87,7 @@ apply_read_opt(const Value& parent) const
 
       case index_array_random: {
         // Get a random element.
-        const auto& altr = this->m_stor.as<index_array_random>();
+        const auto& altr = this->m_stor.as<S_array_random>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
           return nullptr;
@@ -119,7 +119,7 @@ apply_write_opt(Value& parent) const
     switch(this->index()) {
       case index_array_index: {
         // Get the element at the given index.
-        const auto& altr = this->m_stor.as<index_array_index>();
+        const auto& altr = this->m_stor.as<S_array_index>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
           return nullptr;
@@ -139,7 +139,7 @@ apply_write_opt(Value& parent) const
 
       case index_object_key: {
         // Get the value with the given key.
-        const auto& altr = this->m_stor.as<index_object_key>();
+        const auto& altr = this->m_stor.as<S_object_key>();
         if(parent.is_null()) {
           // Members of null values are also null values.
           return nullptr;
@@ -191,7 +191,7 @@ apply_write_opt(Value& parent) const
 
       case index_array_random: {
         // Get a random element.
-        const auto& altr = this->m_stor.as<index_array_random>();
+        const auto& altr = this->m_stor.as<S_array_random>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
           return nullptr;
@@ -223,7 +223,7 @@ apply_open(Value& parent) const
     switch(this->index()) {
       case index_array_index: {
         // Get the element at the given index.
-        const auto& altr = this->m_stor.as<index_array_index>();
+        const auto& altr = this->m_stor.as<S_array_index>();
         if(parent.is_null()) {
           // Empty arrays are created if null values are encountered.
           parent = V_array();
@@ -245,7 +245,7 @@ apply_open(Value& parent) const
 
       case index_object_key: {
         // Get the value with the given key.
-        const auto& altr = this->m_stor.as<index_object_key>();
+        const auto& altr = this->m_stor.as<S_object_key>();
         if(parent.is_null()) {
           // Empty objects are created if null values are encountered.
           parent = V_object();
@@ -301,7 +301,7 @@ apply_open(Value& parent) const
 
       case index_array_random: {
         // Get a random element.
-        const auto& altr = this->m_stor.as<index_array_random>();
+        const auto& altr = this->m_stor.as<S_array_random>();
         if(parent.is_null()) {
           // Empty arrays are created if null values are encountered.
           parent = V_array();
@@ -334,7 +334,7 @@ apply_unset(Value& parent) const
     switch(this->index()) {
       case index_array_index: {
         // Get the element at the given index.
-        const auto& altr = this->m_stor.as<index_array_index>();
+        const auto& altr = this->m_stor.as<S_array_index>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
           return nullopt;
@@ -356,7 +356,7 @@ apply_unset(Value& parent) const
 
       case index_object_key: {
         // Get the value with the given key.
-        const auto& altr = this->m_stor.as<index_object_key>();
+        const auto& altr = this->m_stor.as<S_object_key>();
         if(parent.is_null()) {
           // Members of null values are also null values.
           return nullopt;
@@ -418,7 +418,7 @@ apply_unset(Value& parent) const
 
       case index_array_random: {
         // Get a random element.
-        const auto& altr = this->m_stor.as<index_array_random>();
+        const auto& altr = this->m_stor.as<S_array_random>();
         if(parent.is_null()) {
           // Elements of null values are also null values.
           return nullopt;

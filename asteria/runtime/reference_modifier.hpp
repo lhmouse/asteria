@@ -92,7 +92,7 @@ class Reference_Modifier
 
     int64_t
     as_array_index() const
-      { return this->m_stor.as<index_array_index>().index; }
+      { return this->m_stor.as<S_array_index>().index; }
 
     bool
     is_object_key() const noexcept
@@ -100,7 +100,7 @@ class Reference_Modifier
 
     const phsh_string&
     as_object_key() const
-      { return this->m_stor.as<index_object_key>().key; }
+      { return this->m_stor.as<S_object_key>().key; }
 
     bool
     is_array_head() const noexcept

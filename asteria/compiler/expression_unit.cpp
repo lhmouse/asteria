@@ -40,7 +40,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
   {
     switch(this->index()) {
       case index_literal: {
-        const auto& altr = this->m_stor.as<index_literal>();
+        const auto& altr = this->m_stor.as<S_literal>();
 
         // Copy the value as is.
         AIR_Node::S_push_bound_reference xnode = { };
@@ -50,7 +50,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_local_reference: {
-        const auto& altr = this->m_stor.as<index_local_reference>();
+        const auto& altr = this->m_stor.as<S_local_reference>();
 
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a
@@ -95,7 +95,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_closure_function: {
-        const auto& altr = this->m_stor.as<index_closure_function>();
+        const auto& altr = this->m_stor.as<S_closure_function>();
 
         // Generate code
         AIR_Optimizer optmz(opts);
@@ -109,7 +109,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_branch: {
-        const auto& altr = this->m_stor.as<index_branch>();
+        const auto& altr = this->m_stor.as<S_branch>();
 
         // Both branches may be PTC'd unless this is a compound assignment operation.
         auto rptc = altr.assign ? ptc_aware_none : ptc;
@@ -126,7 +126,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_function_call: {
-        const auto& altr = this->m_stor.as<index_function_call>();
+        const auto& altr = this->m_stor.as<S_function_call>();
 
         // Check whether PTC is disabled.
         auto rptc = !opts.proper_tail_calls ? ptc_aware_none : ptc;
@@ -138,7 +138,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_member_access: {
-        const auto& altr = this->m_stor.as<index_member_access>();
+        const auto& altr = this->m_stor.as<S_member_access>();
 
         // Encode arguments.
         AIR_Node::S_member_access xnode = { altr.sloc, altr.name };
@@ -147,7 +147,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_operator_rpn: {
-        const auto& altr = this->m_stor.as<index_operator_rpn>();
+        const auto& altr = this->m_stor.as<S_operator_rpn>();
 
         // Encode arguments.
         AIR_Node::S_apply_operator xnode = { altr.sloc, altr.xop, altr.assign };
@@ -156,7 +156,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_unnamed_array: {
-        const auto& altr = this->m_stor.as<index_unnamed_array>();
+        const auto& altr = this->m_stor.as<S_unnamed_array>();
 
         // Encode arguments.
         AIR_Node::S_push_unnamed_array xnode = { altr.sloc, altr.nelems };
@@ -165,7 +165,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_unnamed_object: {
-        const auto& altr = this->m_stor.as<index_unnamed_object>();
+        const auto& altr = this->m_stor.as<S_unnamed_object>();
 
         // Encode arguments.
         AIR_Node::S_push_unnamed_object xnode = { altr.sloc, altr.keys };
@@ -174,7 +174,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_coalescence: {
-        const auto& altr = this->m_stor.as<index_coalescence>();
+        const auto& altr = this->m_stor.as<S_coalescence>();
 
         // The branch may be PTC'd unless this is a compound assignment operation.
         auto rptc = altr.assign ? ptc_aware_none : ptc;
@@ -189,7 +189,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_global_reference: {
-        const auto& altr = this->m_stor.as<index_global_reference>();
+        const auto& altr = this->m_stor.as<S_global_reference>();
 
         // This name is always looked up in the global context.
         AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
@@ -198,7 +198,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_variadic_call: {
-        const auto& altr = this->m_stor.as<index_variadic_call>();
+        const auto& altr = this->m_stor.as<S_variadic_call>();
 
         // Encode arguments.
         AIR_Node::S_variadic_call xnode = { altr.sloc, opts.proper_tail_calls
@@ -208,7 +208,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_argument_finish: {
-        const auto& altr = this->m_stor.as<index_argument_finish>();
+        const auto& altr = this->m_stor.as<S_argument_finish>();
 
         // Encode arguments.
         AIR_Node::S_check_argument xnode = { altr.sloc, altr.by_ref };
@@ -217,7 +217,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_import_call: {
-        const auto& altr = this->m_stor.as<index_import_call>();
+        const auto& altr = this->m_stor.as<S_import_call>();
 
         // Encode arguments.
         AIR_Node::S_import_call xnode = { opts, altr.sloc, altr.nargs };
@@ -226,7 +226,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       case index_catch: {
-        const auto& altr = this->m_stor.as<index_catch>();
+        const auto& altr = this->m_stor.as<S_catch>();
 
         // Generate code for the operand, which shall be evaluated on a separate
         // context and shall not be PTC'd.

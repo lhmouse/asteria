@@ -15,37 +15,37 @@ print(tinyfmt& fmt) const
       case index_keyword:
         // keyword `if`
         fmt << "keyword `";
-        fmt << stringify_keyword(this->m_stor.as<index_keyword>().kwrd);
+        fmt << stringify_keyword(this->m_stor.as<S_keyword>().kwrd);
         return fmt << "`";
 
       case index_punctuator:
         // punctuator `;`
         fmt << "punctuator `";
-        fmt << stringify_punctuator(this->m_stor.as<index_punctuator>().punct);
+        fmt << stringify_punctuator(this->m_stor.as<S_punctuator>().punct);
         return fmt << "`";
 
       case index_identifier:
         // identifier `meow`
         fmt << "identifier `";
-        fmt << this->m_stor.as<index_identifier>().name;
+        fmt << this->m_stor.as<S_identifier>().name;
         return fmt << "`";
 
       case index_integer_literal:
         // integer-literal `42`
         fmt << "integer-literal `";
-        fmt << this->m_stor.as<index_integer_literal>().val;
+        fmt << this->m_stor.as<S_integer_literal>().val;
         return fmt << "`";
 
       case index_real_literal:
         // real-literal `123.456`
         fmt << "real-literal `";
-        fmt << this->m_stor.as<index_real_literal>().val;
+        fmt << this->m_stor.as<S_real_literal>().val;
         return fmt << "`";
 
       case index_string_literal: {
         // string-literal "hello world"
         fmt << "string-literal \"";
-        const auto& val = this->m_stor.as<index_string_literal>().val;
+        const auto& val = this->m_stor.as<S_string_literal>().val;
         c_quote(fmt, val.data(), val.size());
         return fmt << "\"";
       }

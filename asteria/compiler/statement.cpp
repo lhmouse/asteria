@@ -125,7 +125,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
   {
     switch(this->index()) {
       case index_expression: {
-        const auto& altr = this->m_stor.as<index_expression>();
+        const auto& altr = this->m_stor.as<S_expression>();
 
         // Evaluate the expression. Its value is discarded.
         do_generate_expression(code, opts, global, ctx, ptc, altr);
@@ -133,7 +133,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_block: {
-        const auto& altr = this->m_stor.as<index_block>();
+        const auto& altr = this->m_stor.as<S_block>();
 
         // Generate code for the body. This can be PTC'd.
         auto code_body = do_generate_block(opts, global, ctx, ptc, altr);
@@ -145,7 +145,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_variables: {
-        const auto& altr = this->m_stor.as<index_variables>();
+        const auto& altr = this->m_stor.as<S_variables>();
 
         // Get the number of variables to declare.
         auto nvars = altr.slocs.size();
@@ -223,7 +223,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_function: {
-        const auto& altr = this->m_stor.as<index_function>();
+        const auto& altr = this->m_stor.as<S_function>();
 
         // Create a dummy reference for further name lookups.
         do_user_declare(names_opt, ctx, altr.name);
@@ -248,7 +248,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_if: {
-        const auto& altr = this->m_stor.as<index_if>();
+        const auto& altr = this->m_stor.as<S_if>();
 
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
@@ -268,7 +268,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_switch: {
-        const auto& altr = this->m_stor.as<index_switch>();
+        const auto& altr = this->m_stor.as<S_switch>();
 
         // Generate code for the control expression.
         ROCKET_ASSERT(!altr.ctrl.units.empty());
@@ -308,7 +308,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_do_while: {
-        const auto& altr = this->m_stor.as<index_do_while>();
+        const auto& altr = this->m_stor.as<S_do_while>();
 
         // Generate code for the body.
         // Loop statements cannot be PTC'd.
@@ -326,7 +326,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_while: {
-        const auto& altr = this->m_stor.as<index_while>();
+        const auto& altr = this->m_stor.as<S_while>();
 
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.units.empty());
@@ -344,7 +344,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_for_each: {
-        const auto& altr = this->m_stor.as<index_for_each>();
+        const auto& altr = this->m_stor.as<S_for_each>();
 
         // Note that the key and value references outlasts every iteration, so we have to create
         // an outer contexts here.
@@ -368,7 +368,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_for: {
-        const auto& altr = this->m_stor.as<index_for>();
+        const auto& altr = this->m_stor.as<S_for>();
 
         // Note that names declared in the first segment of a for-statement outlasts every
         // iteration, so we have to create an outer contexts here.
@@ -392,7 +392,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_try: {
-        const auto& altr = this->m_stor.as<index_try>();
+        const auto& altr = this->m_stor.as<S_try>();
 
         // Generate code for the `try` body.
         auto code_try = do_generate_block(opts, global, ctx, ptc, altr.body_try);
@@ -415,7 +415,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_break: {
-        const auto& altr = this->m_stor.as<index_break>();
+        const auto& altr = this->m_stor.as<S_break>();
 
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
@@ -451,7 +451,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_continue: {
-        const auto& altr = this->m_stor.as<index_continue>();
+        const auto& altr = this->m_stor.as<S_continue>();
 
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
@@ -484,7 +484,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_throw: {
-        const auto& altr = this->m_stor.as<index_throw>();
+        const auto& altr = this->m_stor.as<S_throw>();
 
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
@@ -497,7 +497,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_return: {
-        const auto& altr = this->m_stor.as<index_return>();
+        const auto& altr = this->m_stor.as<S_return>();
 
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.units.empty()) {
@@ -516,7 +516,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_assert: {
-        const auto& altr = this->m_stor.as<index_assert>();
+        const auto& altr = this->m_stor.as<S_assert>();
 
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
@@ -529,7 +529,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_defer: {
-        const auto& altr = this->m_stor.as<index_defer>();
+        const auto& altr = this->m_stor.as<S_defer>();
 
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.units.empty());
@@ -542,7 +542,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       case index_references: {
-        const auto& altr = this->m_stor.as<index_references>();
+        const auto& altr = this->m_stor.as<S_references>();
 
         // Get the number of references to declare.
         auto nvars = altr.slocs.size();

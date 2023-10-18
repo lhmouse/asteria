@@ -219,7 +219,7 @@ class Statement
 
     bool
     is_empty_return() const noexcept
-      { return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.units.empty();  }
+      { return (this->m_stor.index() == index_return) && this->m_stor.as<S_return>().expr.units.empty();  }
 
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,

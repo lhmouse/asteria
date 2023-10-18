@@ -4759,7 +4759,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       case index_execute_block: {
-        const auto& altr = this->m_stor.as<index_execute_block>();
+        const auto& altr = this->m_stor.as<S_execute_block>();
 
         // Rebind the body.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
@@ -4776,7 +4776,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       case index_if_statement: {
-        const auto& altr = this->m_stor.as<index_if_statement>();
+        const auto& altr = this->m_stor.as<S_if_statement>();
 
         // Rebind both branches.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
@@ -4790,7 +4790,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_switch_statement: {
-        const auto& altr = this->m_stor.as<index_switch_statement>();
+        const auto& altr = this->m_stor.as<S_switch_statement>();
 
         // Rebind all clauses.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
@@ -4804,7 +4804,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_do_while_statement: {
-        const auto& altr = this->m_stor.as<index_do_while_statement>();
+        const auto& altr = this->m_stor.as<S_do_while_statement>();
 
         // Rebind the body and the condition.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
@@ -4818,7 +4818,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_while_statement: {
-        const auto& altr = this->m_stor.as<index_while_statement>();
+        const auto& altr = this->m_stor.as<S_while_statement>();
 
         // Rebind the condition and the body.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
@@ -4832,7 +4832,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_for_each_statement: {
-        const auto& altr = this->m_stor.as<index_for_each_statement>();
+        const auto& altr = this->m_stor.as<S_for_each_statement>();
 
         // Rebind the range initializer and the body.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
@@ -4847,7 +4847,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_for_statement: {
-        const auto& altr = this->m_stor.as<index_for_statement>();
+        const auto& altr = this->m_stor.as<S_for_statement>();
 
         // Rebind the initializer, the condition, the loop increment and the body.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
@@ -4864,7 +4864,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_try_statement: {
-        const auto& altr = this->m_stor.as<index_try_statement>();
+        const auto& altr = this->m_stor.as<S_try_statement>();
 
         // Rebind the `try` and `catch` clauses.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
@@ -4885,7 +4885,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       case index_push_local_reference: {
-        const auto& altr = this->m_stor.as<index_push_local_reference>();
+        const auto& altr = this->m_stor.as<S_push_local_reference>();
 
         // Get the context.
         const Abstract_Context* qctx = &ctx;
@@ -4913,7 +4913,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       case index_define_function: {
-        const auto& altr = this->m_stor.as<index_define_function>();
+        const auto& altr = this->m_stor.as<S_define_function>();
 
         // Rebind the function body.
         Analytic_Context ctx_func(Analytic_Context::M_function(),
@@ -4927,7 +4927,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_branch_expression: {
-        const auto& altr = this->m_stor.as<index_branch_expression>();
+        const auto& altr = this->m_stor.as<S_branch_expression>();
 
         // Rebind the expression.
         bool dirty = false;
@@ -4940,7 +4940,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_coalescence: {
-        const auto& altr = this->m_stor.as<index_coalescence>();
+        const auto& altr = this->m_stor.as<S_coalescence>();
 
         // Rebind the expression.
         bool dirty = false;
@@ -4964,7 +4964,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       case index_defer_expression: {
-        const auto& altr = this->m_stor.as<index_defer_expression>();
+        const auto& altr = this->m_stor.as<S_defer_expression>();
 
         // Rebind the expression.
         bool dirty = false;
@@ -4981,7 +4981,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       case index_catch_expression: {
-        const auto& altr = this->m_stor.as<index_catch_expression>();
+        const auto& altr = this->m_stor.as<S_catch_expression>();
 
         // Rebind the expression.
         bool dirty = false;
@@ -5009,106 +5009,106 @@ solidify(AVMC_Queue& queue) const
     switch(this->index()) {
       case index_clear_stack:
         return do_solidify<Traits_clear_stack>(queue,
-                       this->m_stor.as<index_clear_stack>());
+                       this->m_stor.as<S_clear_stack>());
 
       case index_execute_block:
         return do_solidify<Traits_execute_block>(queue,
-                       this->m_stor.as<index_execute_block>());
+                       this->m_stor.as<S_execute_block>());
 
       case index_declare_variable:
         return do_solidify<Traits_declare_variable>(queue,
-                       this->m_stor.as<index_declare_variable>());
+                       this->m_stor.as<S_declare_variable>());
 
       case index_initialize_variable:
         return do_solidify<Traits_initialize_variable>(queue,
-                       this->m_stor.as<index_initialize_variable>());
+                       this->m_stor.as<S_initialize_variable>());
 
       case index_if_statement:
         return do_solidify<Traits_if_statement>(queue,
-                       this->m_stor.as<index_if_statement>());
+                       this->m_stor.as<S_if_statement>());
 
       case index_switch_statement:
         return do_solidify<Traits_switch_statement>(queue,
-                       this->m_stor.as<index_switch_statement>());
+                       this->m_stor.as<S_switch_statement>());
 
       case index_do_while_statement:
         return do_solidify<Traits_do_while_statement>(queue,
-                       this->m_stor.as<index_do_while_statement>());
+                       this->m_stor.as<S_do_while_statement>());
 
       case index_while_statement:
         return do_solidify<Traits_while_statement>(queue,
-                       this->m_stor.as<index_while_statement>());
+                       this->m_stor.as<S_while_statement>());
 
       case index_for_each_statement:
         return do_solidify<Traits_for_each_statement>(queue,
-                       this->m_stor.as<index_for_each_statement>());
+                       this->m_stor.as<S_for_each_statement>());
 
       case index_for_statement:
         return do_solidify<Traits_for_statement>(queue,
-                       this->m_stor.as<index_for_statement>());
+                       this->m_stor.as<S_for_statement>());
 
       case index_try_statement:
         return do_solidify<Traits_try_statement>(queue,
-                       this->m_stor.as<index_try_statement>());
+                       this->m_stor.as<S_try_statement>());
 
       case index_throw_statement:
         return do_solidify<Traits_throw_statement>(queue,
-                       this->m_stor.as<index_throw_statement>());
+                       this->m_stor.as<S_throw_statement>());
 
       case index_assert_statement:
         return do_solidify<Traits_assert_statement>(queue,
-                       this->m_stor.as<index_assert_statement>());
+                       this->m_stor.as<S_assert_statement>());
 
       case index_simple_status:
         return do_solidify<Traits_simple_status>(queue,
-                       this->m_stor.as<index_simple_status>());
+                       this->m_stor.as<S_simple_status>());
 
       case index_check_argument:
         return do_solidify<Traits_check_argument>(queue,
-                       this->m_stor.as<index_check_argument>());
+                       this->m_stor.as<S_check_argument>());
 
       case index_push_global_reference:
         return do_solidify<Traits_push_global_reference>(queue,
-                       this->m_stor.as<index_push_global_reference>());
+                       this->m_stor.as<S_push_global_reference>());
 
       case index_push_local_reference:
         return do_solidify<Traits_push_local_reference>(queue,
-                       this->m_stor.as<index_push_local_reference>());
+                       this->m_stor.as<S_push_local_reference>());
 
       case index_push_bound_reference:
         return do_solidify<Traits_push_bound_reference>(queue,
-                       this->m_stor.as<index_push_bound_reference>());
+                       this->m_stor.as<S_push_bound_reference>());
 
       case index_define_function:
         return do_solidify<Traits_define_function>(queue,
-                       this->m_stor.as<index_define_function>());
+                       this->m_stor.as<S_define_function>());
 
       case index_branch_expression:
         return do_solidify<Traits_branch_expression>(queue,
-                       this->m_stor.as<index_branch_expression>());
+                       this->m_stor.as<S_branch_expression>());
 
       case index_coalescence:
         return do_solidify<Traits_coalescence>(queue,
-                       this->m_stor.as<index_coalescence>());
+                       this->m_stor.as<S_coalescence>());
 
       case index_function_call:
         return do_solidify<Traits_function_call>(queue,
-                       this->m_stor.as<index_function_call>());
+                       this->m_stor.as<S_function_call>());
 
       case index_member_access:
         return do_solidify<Traits_member_access>(queue,
-                       this->m_stor.as<index_member_access>());
+                       this->m_stor.as<S_member_access>());
 
       case index_push_unnamed_array:
         return do_solidify<Traits_push_unnamed_array>(queue,
-                       this->m_stor.as<index_push_unnamed_array>());
+                       this->m_stor.as<S_push_unnamed_array>());
 
       case index_push_unnamed_object:
         return do_solidify<Traits_push_unnamed_object>(queue,
-                       this->m_stor.as<index_push_unnamed_object>());
+                       this->m_stor.as<S_push_unnamed_object>());
 
       case index_apply_operator: {
-        const auto& altr = this->m_stor.as<index_apply_operator>();
+        const auto& altr = this->m_stor.as<S_apply_operator>();
         switch(altr.xop) {
           case xop_inc:
             return do_solidify<Traits_apply_xop_inc>(queue, altr);
@@ -5290,47 +5290,47 @@ solidify(AVMC_Queue& queue) const
 
       case index_unpack_struct_array:
         return do_solidify<Traits_unpack_struct_array>(queue,
-                       this->m_stor.as<index_unpack_struct_array>());
+                       this->m_stor.as<S_unpack_struct_array>());
 
       case index_unpack_struct_object:
         return do_solidify<Traits_unpack_struct_object>(queue,
-                       this->m_stor.as<index_unpack_struct_object>());
+                       this->m_stor.as<S_unpack_struct_object>());
 
       case index_define_null_variable:
         return do_solidify<Traits_define_null_variable>(queue,
-                       this->m_stor.as<index_define_null_variable>());
+                       this->m_stor.as<S_define_null_variable>());
 
       case index_single_step_trap:
         return do_solidify<Traits_single_step_trap>(queue,
-                       this->m_stor.as<index_single_step_trap>());
+                       this->m_stor.as<S_single_step_trap>());
 
       case index_variadic_call:
         return do_solidify<Traits_variadic_call>(queue,
-                       this->m_stor.as<index_variadic_call>());
+                       this->m_stor.as<S_variadic_call>());
 
       case index_defer_expression:
         return do_solidify<Traits_defer_expression>(queue,
-                       this->m_stor.as<index_defer_expression>());
+                       this->m_stor.as<S_defer_expression>());
 
       case index_import_call:
         return do_solidify<Traits_import_call>(queue,
-                       this->m_stor.as<index_import_call>());
+                       this->m_stor.as<S_import_call>());
 
       case index_declare_reference:
         return do_solidify<Traits_declare_reference>(queue,
-                       this->m_stor.as<index_declare_reference>());
+                       this->m_stor.as<S_declare_reference>());
 
       case index_initialize_reference:
         return do_solidify<Traits_initialize_reference>(queue,
-                       this->m_stor.as<index_initialize_reference>());
+                       this->m_stor.as<S_initialize_reference>());
 
       case index_catch_expression:
         return do_solidify<Traits_catch_expression>(queue,
-                       this->m_stor.as<index_catch_expression>());
+                       this->m_stor.as<S_catch_expression>());
 
       case index_return_statement:
         return do_solidify<Traits_return_statement>(queue,
-                       this->m_stor.as<index_return_statement>());
+                       this->m_stor.as<S_return_statement>());
 
       default:
         ASTERIA_TERMINATE((
@@ -5349,7 +5349,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       case index_execute_block:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_execute_block>().code_body);
+                       this->m_stor.as<S_execute_block>().code_body);
         return;
 
       case index_declare_variable:
@@ -5358,55 +5358,55 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       case index_if_statement:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_if_statement>().code_true);
+                       this->m_stor.as<S_if_statement>().code_true);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_if_statement>().code_false);
+                       this->m_stor.as<S_if_statement>().code_false);
         return;
 
       case index_switch_statement:
-        for(const auto& label : this->m_stor.as<index_switch_statement>().code_labels)
+        for(const auto& label : this->m_stor.as<S_switch_statement>().code_labels)
           do_collect_variables_for_each(staged, temp, label);
-        for(const auto& body : this->m_stor.as<index_switch_statement>().code_bodies)
+        for(const auto& body : this->m_stor.as<S_switch_statement>().code_bodies)
           do_collect_variables_for_each(staged, temp, body);
         return;
 
       case index_do_while_statement:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_do_while_statement>().code_body);
+                       this->m_stor.as<S_do_while_statement>().code_body);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_do_while_statement>().code_cond);
+                       this->m_stor.as<S_do_while_statement>().code_cond);
         return;
 
       case index_while_statement:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_while_statement>().code_cond);
+                       this->m_stor.as<S_while_statement>().code_cond);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_while_statement>().code_body);
+                       this->m_stor.as<S_while_statement>().code_body);
         return;
 
       case index_for_each_statement:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_for_each_statement>().code_init);
+                       this->m_stor.as<S_for_each_statement>().code_init);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_for_each_statement>().code_body);
+                       this->m_stor.as<S_for_each_statement>().code_body);
         return;
 
       case index_for_statement:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_for_statement>().code_init);
+                       this->m_stor.as<S_for_statement>().code_init);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_for_statement>().code_cond);
+                       this->m_stor.as<S_for_statement>().code_cond);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_for_statement>().code_step);
+                       this->m_stor.as<S_for_statement>().code_step);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_for_statement>().code_body);
+                       this->m_stor.as<S_for_statement>().code_body);
         return;
 
       case index_try_statement:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_try_statement>().code_try);
+                       this->m_stor.as<S_try_statement>().code_try);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_try_statement>().code_catch);
+                       this->m_stor.as<S_try_statement>().code_catch);
         return;
 
       case index_throw_statement:
@@ -5418,25 +5418,25 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
 
       case index_push_bound_reference:
-        this->m_stor.as<index_push_bound_reference>().ref
+        this->m_stor.as<S_push_bound_reference>().ref
                        .collect_variables(staged, temp);
         return;
 
       case index_define_function:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_define_function>().code_body);
+                       this->m_stor.as<S_define_function>().code_body);
         return;
 
       case index_branch_expression:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_branch_expression>().code_true);
+                       this->m_stor.as<S_branch_expression>().code_true);
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_branch_expression>().code_false);
+                       this->m_stor.as<S_branch_expression>().code_false);
         return;
 
       case index_coalescence:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_coalescence>().code_null);
+                       this->m_stor.as<S_coalescence>().code_null);
         return;
 
       case index_function_call:
@@ -5453,7 +5453,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       case index_defer_expression:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_defer_expression>().code_body);
+                       this->m_stor.as<S_defer_expression>().code_body);
         return;
 
       case index_import_call:
@@ -5463,7 +5463,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       case index_catch_expression:
         do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<index_catch_expression>().code_body);
+                       this->m_stor.as<S_catch_expression>().code_body);
         return;
 
       case index_return_statement:

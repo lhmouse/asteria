@@ -22,22 +22,22 @@ tell_precedence() const noexcept
         return precedence_assignment;
 
       case index_logical_and:
-        return this->m_stor.as<index_logical_and>().assign
+        return this->m_stor.as<S_logical_and>().assign
                  ? precedence_assignment
                  : precedence_logical_and;
 
       case index_logical_or:
-        return this->m_stor.as<index_logical_or>().assign
+        return this->m_stor.as<S_logical_or>().assign
                  ? precedence_assignment
                  : precedence_logical_or;
 
       case index_coalescence:
-        return this->m_stor.as<index_coalescence>().assign
+        return this->m_stor.as<S_coalescence>().assign
                  ? precedence_assignment
                  : precedence_coalescence;
 
       case index_general: {
-        const auto& altr = this->m_stor.as<index_general>();
+        const auto& altr = this->m_stor.as<S_general>();
         if(altr.assign)
           return precedence_assignment;
 
