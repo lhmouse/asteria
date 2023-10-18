@@ -266,8 +266,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       if(!kpunct)
         throw Compiler_Error(Compiler_Error::M_add_format(),
                   comma_allowed ? compiler_status_closing_bracket_or_comma_expected
-                      :
-                        compiler_status_closing_bracket_or_identifier_expected, tstrm.next_sloc(),
+                                : compiler_status_closing_bracket_or_identifier_expected,
+                  tstrm.next_sloc(),
                   "[unmatched `[` at '$1']", op_sloc);
 
       // Make the list different from a plain, sole one.
@@ -302,8 +302,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       if(!kpunct)
         throw Compiler_Error(Compiler_Error::M_add_format(),
                   comma_allowed ? compiler_status_closing_brace_or_comma_expected
-                      :
-                        compiler_status_closing_brace_or_identifier_expected, tstrm.next_sloc(),
+                                : compiler_status_closing_brace_or_identifier_expected,
+                  tstrm.next_sloc(),
                   "[unmatched `{` at '$1']", op_sloc);
 
       // Make the list different from a plain, sole one.
@@ -1736,8 +1736,8 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
                 comma_allowed ? compiler_status_closing_bracket_or_comma_expected
-                    :
-                      compiler_status_closing_bracket_or_expression_expected, tstrm.next_sloc(),
+                              : compiler_status_closing_bracket_or_expression_expected,
+                tstrm.next_sloc(),
                 "[unmatched `[` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
@@ -1793,8 +1793,8 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
                 comma_allowed ? compiler_status_closing_brace_or_comma_expected
-                    :
-                      compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc(),
+                              : compiler_status_closing_brace_or_json5_key_expected,
+                tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
@@ -2067,8 +2067,8 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
                 comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
-                    :
-                      compiler_status_closing_parenthesis_or_argument_expected, tstrm.next_sloc(),
+                              : compiler_status_closing_parenthesis_or_argument_expected,
+                tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
@@ -2215,8 +2215,8 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
                 comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
-                    :
-                      compiler_status_closing_parenthesis_or_argument_expected, tstrm.next_sloc(),
+                              : compiler_status_closing_parenthesis_or_argument_expected,
+                tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", sloc);
 
     Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };

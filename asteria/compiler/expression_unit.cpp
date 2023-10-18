@@ -90,7 +90,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           }
 
           // Search in the outer context.
-          ++depth;
+          ++ depth;
         }
       }
 
