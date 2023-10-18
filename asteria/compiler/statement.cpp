@@ -255,8 +255,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.cond);
 
         // The result will have been pushed onto the top of the stack.
-        // Generate code for both branches.
-        // Both can be PTC'd.
+        // Generate code for both branches. Both can be PTC'd.
         auto code_true = do_generate_block(opts, global, ctx, ptc, altr.branch_true);
         auto code_false = do_generate_block(opts, global, ctx, ptc, altr.branch_false);
 
