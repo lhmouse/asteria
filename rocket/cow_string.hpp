@@ -797,6 +797,18 @@ class basic_cow_string
       }
 
     basic_cow_string&
+    operator>>(size_type n) &
+      {
+        return this->pop_back(n);
+      }
+
+    basic_cow_string&&
+    operator>>(size_type n) &&
+      {
+        return ::std::move(this->pop_back(n));
+      }
+
+    basic_cow_string&
     replace(size_type tpos, size_type tn, shallow_type sh)
       {
         return this->replace(tpos, tn, sh.data(), sh.size());
