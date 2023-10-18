@@ -21,14 +21,7 @@ class Instantiated_Function final
   public:
     explicit
     Instantiated_Function(const cow_vector<phsh_string>& params, refcnt_ptr<Variadic_Arguer>&& zvarg,
-                          const cow_vector<AIR_Node>& code)
-      :
-        m_params(params), m_zvarg(::std::move(zvarg))
-      { this->do_solidify(code);  }
-
-  private:
-    void
-    do_solidify(const cow_vector<AIR_Node>& code);
+                          const cow_vector<AIR_Node>& code);
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);

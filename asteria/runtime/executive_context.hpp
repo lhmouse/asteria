@@ -30,7 +30,7 @@ class Executive_Context
     // A plain context must have a parent context.
     // Its parent context shall outlast itself.
     explicit
-    Executive_Context(M_plain, Executive_Context& parent)
+    Executive_Context(M_plain, const Executive_Context& parent)
       :
         m_parent_opt(&parent), m_global(parent.m_global), m_stack(parent.m_stack),
         m_alt_stack(parent.m_alt_stack)

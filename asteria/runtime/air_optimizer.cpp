@@ -33,10 +33,10 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     // Generate code for all statements.
     for(size_t k = 0;  k + 1 < stmts.size();  ++k)
       stmts.at(k).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-              stmts.at(k + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
+                       stmts.at(k + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
 
     stmts.back().generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-            ptc_aware_void);
+                       ptc_aware_void);
 
     // Check whether optimization is enabled during translation.
     if(this->m_opts.optimization_level < 2)
@@ -57,11 +57,10 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
       return;
 
     // Create a context of the function body.
-    Analytic_Context ctx_func(Analytic_Context::M_function(),
-                              ctx_opt, this->m_params);
+    Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
-    // Rebind all nodes recursively.
-    // Don't trigger copy-on-write unless a node needs rewriting.
+    // Rebind all nodes recursively. Don't trigger copy-on-write unless a node
+    // requires rewriting.
     for(size_t k = 0;  k < code.size();  ++k)
       if(auto qnode = code.at(k).rebind_opt(ctx_func))
         this->m_code.mut(k) = ::std::move(*qnode);
@@ -80,14 +79,13 @@ create_function(const Source_Location& sloc, stringR name)
     // Compose the function signature.
     // We only do this if `name` really looks like a function name.
     cow_string func = name;
-    if(is_cmask(name.front(), cmask_namei) && (name.back() != ')')) {
-      func << '(';
-      if(this->m_params.size()) {
-        func << this->m_params[0];
-        for(size_t k = 1;  k < this->m_params.size();  ++k)
-          func << ", " << this->m_params[k];
-      }
-      func << ')';
+    if(is_cmask(name.front(), cmask_namei) && is_cmask(name.back(), cmask_namei)) {
+      func << "(";
+      for(size_t k = 0;  k < this->m_params.size();  ++k)
+        func << this->m_params.at(k) << ", ";
+      if(this->m_params.size() != 0)
+        func >> 2U;
+      func << ")";
     }
 
     // Instantiate the function.

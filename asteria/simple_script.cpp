@@ -59,7 +59,6 @@ reload(stringR name, Statement_Sequence&& stmtq)
     // Instantiate the function.
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, this->m_params, this->m_global, stmtq);
-
     Source_Location sloc(name, 0, 0);
     this->m_func = optmz.create_function(sloc, sref("[file scope]"));
   }

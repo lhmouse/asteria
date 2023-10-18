@@ -20,6 +20,7 @@ union Uparam
 
     struct {
       uint16_t _do_not_use_1_;
+      bool b8v[6];
       uint8_t u8v[6];
     };
 
@@ -33,21 +34,20 @@ struct Metadata;
 struct Header;
 
 // These are prototypes for callbacks.
+using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
 using Constructor  = void (Header* head, intptr_t arg);
 using Destructor   = void (Header* head);
-using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
-using Var_Getter   = void (Variable_HashMap& staged, Variable_HashMap& temp,
-                           const Header* head);
+using Var_Getter   = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
 
 struct Metadata
   {
     // Version 1
+    Executor* exec;        // executor function, must not be null
     Destructor* dtor_opt;  // if null then no cleanup is performed
     Var_Getter* vget_opt;  // if null then no variable shall exist
-    Executor* exec;        // executor function, must not be null
 
     // Version 2
-    Source_Location syms;  // symbols
+    Source_Location sloc;  // symbols
   };
 
 // This is the header of each variable-length element that is stored in an AVMC

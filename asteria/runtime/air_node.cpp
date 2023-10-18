@@ -434,7 +434,7 @@ struct Traits_switch_statement
       {
         Sparam_switch sp;
         do_solidify_nodes(sp.queues_labels, altr.code_labels);
-        do_solidify_nodes(sp.queues_bodies, altr.code_bodies);
+        do_solidify_nodes(sp.queues_bodies, altr.code_clauses);
         sp.names_added = altr.names_added;
         return sp;
       }
@@ -4798,7 +4798,7 @@ rebind_opt(Abstract_Context& ctx) const
         auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_labels, ctx);  // this is not part of the body!
-        do_rebind_nodes(dirty, bound.code_bodies, ctx_body);
+        do_rebind_nodes(dirty, bound.code_clauses, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
@@ -5366,7 +5366,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_switch_statement:
         for(const auto& label : this->m_stor.as<S_switch_statement>().code_labels)
           do_collect_variables_for_each(staged, temp, label);
-        for(const auto& body : this->m_stor.as<S_switch_statement>().code_bodies)
+        for(const auto& body : this->m_stor.as<S_switch_statement>().code_clauses)
           do_collect_variables_for_each(staged, temp, body);
         return;
 

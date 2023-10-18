@@ -14,14 +14,14 @@ class AVMC_Queue
   public:
     using Uparam      = details_avmc_queue::Uparam;
     using Header      = details_avmc_queue::Header;
+
     using Executor    = details_avmc_queue::Executor;
+    using Constructor = details_avmc_queue::Constructor;
+    using Destructor  = details_avmc_queue::Destructor;
     using Var_Getter  = details_avmc_queue::Var_Getter;
+    using Metadata    = details_avmc_queue::Metadata;
 
   private:
-    using Metadata     = details_avmc_queue::Metadata;
-    using Constructor  = details_avmc_queue::Constructor;
-    using Destructor   = details_avmc_queue::Destructor;
-
     Header* m_bptr = nullptr;  // beginning of storage
     uint32_t m_used = 0;       // used storage in number of `Header`s [!]
     uint32_t m_estor = 0;      // allocated storage in number of `Header`s [!]

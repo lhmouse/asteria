@@ -14,17 +14,18 @@
 namespace asteria {
 
 Instantiated_Function::
-~Instantiated_Function()
+Instantiated_Function(const cow_vector<phsh_string>& params, refcnt_ptr<Variadic_Arguer>&& zvarg,
+                      const cow_vector<AIR_Node>& code)
+  :
+    m_params(params), m_zvarg(::std::move(zvarg))
   {
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue);  });
+    this->m_queue.finalize();
   }
 
-void
 Instantiated_Function::
-do_solidify(const cow_vector<AIR_Node>& code)
+~Instantiated_Function()
   {
-    this->m_queue.clear();
-    ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(this->m_queue);  });
-    this->m_queue.finalize();
   }
 
 tinyfmt&
