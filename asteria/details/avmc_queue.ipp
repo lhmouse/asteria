@@ -13,20 +13,36 @@ namespace details_avmc_queue {
 union Uparam
   {
     struct {
-      uint16_t _do_not_use_0_;
-      uint16_t u16;
-      uint32_t u32;
+      char _x1[2];
+      bool b1, b2, b3, b4, b5, b6;
     };
-
     struct {
-      uint16_t _do_not_use_1_;
-      bool b8v[6];
-      uint8_t u8v[6];
+      char _x2[2];
+      char c1, c2, c3, c4, c5, c6;
     };
-
     struct {
-      uint16_t _do_not_use_2_;
-      uint16_t u16p[3];
+      char _x3[2];
+      int8_t i1, i2, i3, i4, i5, i6;
+    };
+    struct {
+      char _x4[2];
+      uint8_t u1, u2, u3, u4, u5, u6;
+    };
+    struct {
+      char _x5[2];
+      int16_t i12, i34, i56;
+    };
+    struct {
+      char _x6[2];
+      uint16_t u12, u34, u56;
+    };
+    struct {
+      char _x7[4];
+      int32_t i3456;
+    };
+    struct {
+      char _x8[4];
+      uint32_t u3456;
     };
   };
 

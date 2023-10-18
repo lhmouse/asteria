@@ -62,13 +62,12 @@ do_return_rebound_opt(bool dirty, NodeT&& xnode)
     return res;
   }
 
-bool
+void
 do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
     queue.clear();
-    bool r = ::rocket::all_of(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
+    ::rocket::for_each(code, [&](const AIR_Node& node) { return node.solidify(queue);  });
     queue.finalize();
-    return r;
   }
 
 void
@@ -304,10 +303,10 @@ struct Traits_execute_block
   {
     static
     AVMC_Queue
-    make_sparam(bool& reachable, const AIR_Node::S_execute_block& altr)
+    make_sparam(const AIR_Node::S_execute_block& altr)
       {
         AVMC_Queue queue;
-        reachable &= do_solidify_nodes(queue, altr.code_body);
+        do_solidify_nodes(queue, altr.code_body);
         return queue;
       }
 
@@ -330,7 +329,7 @@ struct Traits_declare_variable
 
     static
     Sparam_sloc_name
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_variable& altr)
+    make_sparam(const AIR_Node::S_declare_variable& altr)
       {
         Sparam_sloc_name sp;
         sp.sloc = altr.sloc;
@@ -366,10 +365,10 @@ struct Traits_initialize_variable
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_initialize_variable& altr)
+    make_uparam(const AIR_Node::S_initialize_variable& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.immutable;
+        up.b1 = altr.immutable;
         return up;
       }
 
@@ -388,7 +387,7 @@ struct Traits_initialize_variable
         ctx.stack().pop();
 
         var->initialize(::std::move(val));
-        var->set_immutable(up.u8v[0]);
+        var->set_immutable(up.b1);
         return air_status_next;
       }
   };
@@ -397,21 +396,20 @@ struct Traits_if_statement
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_if_statement& altr)
+    make_uparam(const AIR_Node::S_if_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.negative;
+        up.b1 = altr.negative;
         return up;
       }
 
     static
     Sparam_queues_2
-    make_sparam(bool& reachable, const AIR_Node::S_if_statement& altr)
+    make_sparam(const AIR_Node::S_if_statement& altr)
       {
         Sparam_queues_2 sp;
-        bool rtrue = do_solidify_nodes(sp.queues[0], altr.code_true);
-        bool rfalse = do_solidify_nodes(sp.queues[1], altr.code_false);
-        reachable &= rtrue | rfalse;
+        do_solidify_nodes(sp.queues[0], altr.code_true);
+        do_solidify_nodes(sp.queues[1], altr.code_false);
         return sp;
       }
 
@@ -420,7 +418,7 @@ struct Traits_if_statement
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        return (ctx.stack().top().dereference_readonly().test() != up.u8v[0])
+        return (ctx.stack().top().dereference_readonly().test() != up.b1)
                   ? do_execute_block(sp.queues[0], ctx)
                   : do_execute_block(sp.queues[1], ctx);
       }
@@ -430,7 +428,7 @@ struct Traits_switch_statement
   {
     static
     Sparam_switch
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_switch_statement& altr)
+    make_sparam(const AIR_Node::S_switch_statement& altr)
       {
         Sparam_switch sp;
         do_solidify_nodes(sp.queues_labels, altr.code_labels);
@@ -508,19 +506,19 @@ struct Traits_do_while_statement
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_do_while_statement& altr)
+    make_uparam(const AIR_Node::S_do_while_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.negative;
+        up.b1 = altr.negative;
         return up;
       }
 
     static
     Sparam_queues_2
-    make_sparam(bool& reachable, const AIR_Node::S_do_while_statement& altr)
+    make_sparam(const AIR_Node::S_do_while_statement& altr)
       {
         Sparam_queues_2 sp;
-        reachable &= do_solidify_nodes(sp.queues[0], altr.code_body);
+        do_solidify_nodes(sp.queues[0], altr.code_body);
         do_solidify_nodes(sp.queues[1], altr.code_cond);
         return sp;
       }
@@ -544,7 +542,7 @@ struct Traits_do_while_statement
           // Check the condition.
           status = sp.queues[1].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().top().dereference_readonly().test() == up.u8v[0])
+          if(ctx.stack().top().dereference_readonly().test() == up.b1)
             break;
         }
         return status;
@@ -555,16 +553,16 @@ struct Traits_while_statement
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
+    make_uparam(const AIR_Node::S_while_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.negative;
+        up.b1 = altr.negative;
         return up;
       }
 
     static
     Sparam_queues_2
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_while_statement& altr)
+    make_sparam(const AIR_Node::S_while_statement& altr)
       {
         Sparam_queues_2 sp;
         do_solidify_nodes(sp.queues[0], altr.code_cond);
@@ -581,7 +579,7 @@ struct Traits_while_statement
           // Check the condition.
           status = sp.queues[0].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().top().dereference_readonly().test() == up.u8v[0])
+          if(ctx.stack().top().dereference_readonly().test() == up.b1)
             break;
 
           // Execute the body.
@@ -602,7 +600,7 @@ struct Traits_for_each_statement
   {
     static
     Sparam_for_each
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_for_each_statement& altr)
+    make_sparam(const AIR_Node::S_for_each_statement& altr)
       {
         Sparam_for_each sp;
         sp.name_key = altr.name_key;
@@ -723,7 +721,7 @@ struct Traits_for_statement
   {
     static
     Sparam_queues_4
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_for_statement& altr)
+    make_sparam(const AIR_Node::S_for_statement& altr)
       {
         Sparam_queues_4 sp;
         do_solidify_nodes(sp.queues[0], altr.code_init);
@@ -776,15 +774,14 @@ struct Traits_try_statement
   {
     static
     Sparam_try_catch
-    make_sparam(bool& reachable, const AIR_Node::S_try_statement& altr)
+    make_sparam(const AIR_Node::S_try_statement& altr)
       {
         Sparam_try_catch sp;
         sp.sloc_try = altr.sloc_try;
-        bool rtry = do_solidify_nodes(sp.queue_try, altr.code_try);
+        do_solidify_nodes(sp.queue_try, altr.code_try);
         sp.sloc_catch = altr.sloc_catch;
         sp.name_except = altr.name_except;
-        bool rcatch = do_solidify_nodes(sp.queue_catch, altr.code_catch);
-        reachable &= rtry | rcatch;
+        do_solidify_nodes(sp.queue_catch, altr.code_catch);
         return sp;
       }
 
@@ -846,9 +843,8 @@ struct Traits_throw_statement
   {
     static
     Source_Location
-    make_sparam(bool& reachable, const AIR_Node::S_throw_statement& altr)
+    make_sparam(const AIR_Node::S_throw_statement& altr)
       {
-        reachable = false;
         return altr.sloc;
       }
 
@@ -867,7 +863,7 @@ struct Traits_assert_statement
   {
     static
     Sparam_sloc_text
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_assert_statement& altr)
+    make_sparam(const AIR_Node::S_assert_statement& altr)
       {
         Sparam_sloc_text sp;
         sp.sloc = altr.sloc;
@@ -894,11 +890,10 @@ struct Traits_simple_status
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_simple_status& altr)
+    make_uparam(const AIR_Node::S_simple_status& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = weaken_enum(altr.status);
-        reachable = altr.status != air_status_next;
+        up.u1 = weaken_enum(altr.status);
         return up;
       }
 
@@ -906,7 +901,7 @@ struct Traits_simple_status
     AIR_Status
     execute(Executive_Context& /*ctx*/, AVMC_Queue::Uparam up)
       {
-        AIR_Status status = static_cast<AIR_Status>(up.u8v[0]);
+        AIR_Status status = static_cast<AIR_Status>(up.u1);
         ROCKET_ASSERT(status != air_status_next);
         return status;
       }
@@ -923,10 +918,10 @@ struct Traits_check_argument
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_check_argument& altr)
+    make_uparam(const AIR_Node::S_check_argument& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.by_ref;
+        up.b1 = altr.by_ref;
         return up;
       }
 
@@ -934,7 +929,7 @@ struct Traits_check_argument
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        if(up.u8v[0]) {
+        if(up.b1) {
           // The argument is passed by reference, but it always has to be
           // dereferenceable.
           ctx.stack().top().dereference_readonly();
@@ -958,7 +953,7 @@ struct Traits_push_global_reference
 
     static
     phsh_string
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_global_reference& altr)
+    make_sparam(const AIR_Node::S_push_global_reference& altr)
       {
         return altr.name;
       }
@@ -990,16 +985,16 @@ struct Traits_push_local_reference
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
+    make_uparam(const AIR_Node::S_push_local_reference& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u32 = altr.depth;
+        up.u3456 = altr.depth;
         return up;
       }
 
     static
     phsh_string
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_local_reference& altr)
+    make_sparam(const AIR_Node::S_push_local_reference& altr)
       {
         return altr.name;
       }
@@ -1010,7 +1005,7 @@ struct Traits_push_local_reference
       {
         // Get the context.
         const Executive_Context* qctx = &ctx;
-        for(uint32_t k = 0;  k != up.u32;  ++k)
+        for(uint32_t k = 0;  k != up.u3456;  ++k)
           qctx = qctx->get_parent_opt();
 
         // Look for the name in the context.
@@ -1031,7 +1026,7 @@ struct Traits_push_bound_reference
   {
     static
     Reference
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_bound_reference& altr)
+    make_sparam(const AIR_Node::S_push_bound_reference& altr)
       {
         return altr.ref;
       }
@@ -1049,7 +1044,7 @@ struct Traits_define_function
   {
     static
     Sparam_func
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_define_function& altr)
+    make_sparam(const AIR_Node::S_define_function& altr)
       {
         Sparam_func sp;
         sp.opts = altr.opts;
@@ -1082,21 +1077,20 @@ struct Traits_branch_expression
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_branch_expression& altr)
+    make_uparam(const AIR_Node::S_branch_expression& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
     static
     Sparam_queues_2
-    make_sparam(bool& reachable, const AIR_Node::S_branch_expression& altr)
+    make_sparam(const AIR_Node::S_branch_expression& altr)
       {
         Sparam_queues_2 sp;
-        bool rtrue = do_solidify_nodes(sp.queues[0], altr.code_true);
-        bool rfalse = do_solidify_nodes(sp.queues[1], altr.code_false);
-        reachable &= rtrue | rfalse;
+        do_solidify_nodes(sp.queues[0], altr.code_true);
+        do_solidify_nodes(sp.queues[1], altr.code_false);
         return sp;
       }
 
@@ -1106,8 +1100,8 @@ struct Traits_branch_expression
       {
         // Check the value of the condition.
         return ctx.stack().top().dereference_readonly().test()
-                    ? do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[0])
-                    : do_evaluate_subexpression(ctx, up.u8v[0], sp.queues[1]);
+                    ? do_evaluate_subexpression(ctx, up.b1, sp.queues[0])
+                    : do_evaluate_subexpression(ctx, up.b1, sp.queues[1]);
       }
   };
 
@@ -1122,16 +1116,16 @@ struct Traits_coalescence
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
+    make_uparam(const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
     static
     AVMC_Queue
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_coalescence& altr)
+    make_sparam(const AIR_Node::S_coalescence& altr)
       {
         AVMC_Queue queue;
         do_solidify_nodes(queue, altr.code_null);
@@ -1144,7 +1138,7 @@ struct Traits_coalescence
       {
         // Check the value of the condition.
         return ctx.stack().top().dereference_readonly().is_null()
-                    ? do_evaluate_subexpression(ctx, up.u8v[0], queue)
+                    ? do_evaluate_subexpression(ctx, up.b1, queue)
                     : air_status_next;
       }
   };
@@ -1160,18 +1154,17 @@ struct Traits_function_call
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_function_call& altr)
+    make_uparam(const AIR_Node::S_function_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u32 = altr.nargs;
-        up.u8v[0] = static_cast<uint8_t>(altr.ptc);
-        reachable &= (altr.ptc == ptc_aware_none);
+        up.u3456 = altr.nargs;
+        up.u1 = static_cast<uint8_t>(altr.ptc);
         return up;
       }
 
     static
     Source_Location
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_function_call& altr)
+    make_sparam(const AIR_Node::S_function_call& altr)
       {
         return altr.sloc;
       }
@@ -1186,7 +1179,7 @@ struct Traits_function_call
         // Pop arguments off the stack backwards.
         auto& alt_stack = ctx.alt_stack();
         auto& stack = ctx.stack();
-        do_pop_positional_arguments(alt_stack, stack, up.u32);
+        do_pop_positional_arguments(alt_stack, stack, up.u3456);
 
         // Copy the target, which shall be of type `function`.
         auto value = stack.top().dereference_readonly();
@@ -1197,7 +1190,7 @@ struct Traits_function_call
 
         const auto& target = value.as_function();
         auto& self = stack.mut_top().pop_modifier();
-        const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
+        const auto ptc = static_cast<PTC_Aware>(up.u1);
 
         stack.clear_cache();
         alt_stack.clear_cache();
@@ -1219,7 +1212,7 @@ struct Traits_member_access
 
     static
     phsh_string
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_member_access& altr)
+    make_sparam(const AIR_Node::S_member_access& altr)
       {
         return altr.name;
       }
@@ -1247,10 +1240,10 @@ struct Traits_push_unnamed_array
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_array& altr)
+    make_uparam(const AIR_Node::S_push_unnamed_array& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u32 = altr.nelems;
+        up.u3456 = altr.nelems;
         return up;
       }
 
@@ -1260,7 +1253,7 @@ struct Traits_push_unnamed_array
       {
         // Pop elements from the stack and store them in an array backwards.
         V_array array;
-        array.resize(up.u32);
+        array.resize(up.u3456);
         for(auto it = array.mut_rbegin();  it != array.rend();  ++it) {
           *it = ctx.stack().top().dereference_readonly();
           ctx.stack().pop();
@@ -1283,7 +1276,7 @@ struct Traits_push_unnamed_object
 
     static
     cow_vector<phsh_string>
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_push_unnamed_object& altr)
+    make_sparam(const AIR_Node::S_push_unnamed_object& altr)
       {
         return altr.keys;
       }
@@ -1319,12 +1312,11 @@ struct Traits_return_statement
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_return_statement& altr)
+    make_uparam(const AIR_Node::S_return_statement& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.by_ref;
-        up.u8v[1] = altr.is_void;
-        reachable = false;
+        up.b1 = altr.by_ref;
+        up.b2 = altr.is_void;
         return up;
       }
 
@@ -1333,10 +1325,10 @@ struct Traits_return_statement
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        if(up.u8v[1] || ctx.stack().top().is_void())
+        if(up.b2 || ctx.stack().top().is_void())
           return air_status_return_void;
 
-        if(up.u8v[0]) {
+        if(up.b1) {
           // The result is passed by reference, but it always has to be
           // dereferenceable.
           ctx.stack().top().dereference_readonly();
@@ -1353,10 +1345,10 @@ struct Traits_push_constant
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_push_constant& altr)
+    make_uparam(const AIR_Node::S_push_constant& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.airc;
+        up.u1 = altr.airc;
         return up;
       }
 
@@ -1364,7 +1356,7 @@ struct Traits_push_constant
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        switch(up.u8v[0]) {
+        switch(up.u1) {
           case air_constant_null:
             ctx.stack().push().set_temporary(nullopt);
             break;
@@ -1397,11 +1389,11 @@ struct Traits_push_constant_int48
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& reachable, const AIR_Node::S_push_constant_int48& altr)
+    make_uparam(const AIR_Node::S_push_constant_int48& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u16 = (uint16_t) altr.hi;
-        up.u32 = altr.lo;
+        up.u12 = (uint16_t) altr.hi;
+        up.u3456 = altr.lo;
         return up;
       }
 
@@ -1410,7 +1402,7 @@ struct Traits_push_constant_int48
     AIR_Status
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
       {
-        int64_t val = (int64_t)(int16_t) up.u16 << 32 | up.u32;
+        int64_t val = (int64_t)(int16_t) up.u12 << 32 | up.u3456;
         ctx.stack().push().set_temporary(val);
         return air_status_next;
       }
@@ -1426,10 +1418,10 @@ struct Traits_apply_xop_inc
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1452,7 +1444,7 @@ struct Traits_apply_xop_inc
                 "Integer increment overflow (operand was `$1`)"),
                 val);
 
-          if(up.u8v[0])
+          if(up.b1)
             top.set_temporary(val);
 
           val = result;
@@ -1464,7 +1456,7 @@ struct Traits_apply_xop_inc
           // Overflow will result in an infinity, so this is safe.
           double result = val + 1;
 
-          if(up.u8v[0])
+          if(up.b1)
             top.set_temporary(val);
 
           val = result;
@@ -1488,10 +1480,10 @@ struct Traits_apply_xop_dec
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1514,7 +1506,7 @@ struct Traits_apply_xop_dec
                 "Integer decrement overflow (operand was `$1`)"),
                 val);
 
-          if(up.u8v[0])
+          if(up.b1)
             top.set_temporary(val);
 
           val = result;
@@ -1526,7 +1518,7 @@ struct Traits_apply_xop_dec
           // Overflow will result in an infinity, so this is safe.
           double result = val - 1;
 
-          if(up.u8v[0])
+          if(up.b1)
             top.set_temporary(val);
 
           val = result;
@@ -1589,10 +1581,10 @@ struct Traits_apply_xop_pos
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1602,7 +1594,7 @@ struct Traits_apply_xop_pos
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // There is nothing to do.
         (void) rhs;
@@ -1621,10 +1613,10 @@ struct Traits_apply_xop_neg
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1634,7 +1626,7 @@ struct Traits_apply_xop_neg
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           V_integer& val = rhs.mut_integer();
@@ -1678,10 +1670,10 @@ struct Traits_apply_xop_notb
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1691,7 +1683,7 @@ struct Traits_apply_xop_notb
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_boolean) {
           V_boolean& val = rhs.mut_boolean();
@@ -1733,10 +1725,10 @@ struct Traits_apply_xop_notl
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1746,7 +1738,7 @@ struct Traits_apply_xop_notl
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Perform logical NOT operation on the operand.
         rhs = !rhs.test();
@@ -1788,10 +1780,10 @@ struct Traits_apply_xop_countof
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1801,7 +1793,7 @@ struct Traits_apply_xop_countof
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_null) {
           // `countof null` is defined to be zero.
@@ -1841,10 +1833,10 @@ struct Traits_apply_xop_typeof
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1854,7 +1846,7 @@ struct Traits_apply_xop_typeof
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Yield the type name of the operand, as a string.
         rhs = V_string(::rocket::sref(describe_type(rhs.type())));
@@ -1873,10 +1865,10 @@ struct Traits_apply_xop_sqrt
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1886,7 +1878,7 @@ struct Traits_apply_xop_sqrt
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.is_real()) {
           // Yield the arithmetic square root of the operand. Integers are
@@ -1912,10 +1904,10 @@ struct Traits_apply_xop_isnan
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1925,7 +1917,7 @@ struct Traits_apply_xop_isnan
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is never a NaN.
@@ -1955,10 +1947,10 @@ struct Traits_apply_xop_isinf
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -1968,7 +1960,7 @@ struct Traits_apply_xop_isinf
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is never an infinity.
@@ -1998,10 +1990,10 @@ struct Traits_apply_xop_abs
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2011,7 +2003,7 @@ struct Traits_apply_xop_abs
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           V_integer& val = rhs.mut_integer();
@@ -2053,10 +2045,10 @@ struct Traits_apply_xop_sign
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2066,7 +2058,7 @@ struct Traits_apply_xop_sign
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // Get the sign bit.
@@ -2096,10 +2088,10 @@ struct Traits_apply_xop_round
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2109,7 +2101,7 @@ struct Traits_apply_xop_round
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2138,10 +2130,10 @@ struct Traits_apply_xop_floor
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2151,7 +2143,7 @@ struct Traits_apply_xop_floor
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2180,10 +2172,10 @@ struct Traits_apply_xop_ceil
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2193,7 +2185,7 @@ struct Traits_apply_xop_ceil
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2222,10 +2214,10 @@ struct Traits_apply_xop_trunc
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2235,7 +2227,7 @@ struct Traits_apply_xop_trunc
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2264,10 +2256,10 @@ struct Traits_apply_xop_iround
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2277,7 +2269,7 @@ struct Traits_apply_xop_iround
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2306,10 +2298,10 @@ struct Traits_apply_xop_ifloor
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2319,7 +2311,7 @@ struct Traits_apply_xop_ifloor
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2348,10 +2340,10 @@ struct Traits_apply_xop_iceil
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2361,7 +2353,7 @@ struct Traits_apply_xop_iceil
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2390,10 +2382,10 @@ struct Traits_apply_xop_itrunc
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2403,7 +2395,7 @@ struct Traits_apply_xop_itrunc
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           // An integer is always exact.
@@ -2432,10 +2424,10 @@ struct Traits_apply_xop_cmp_eq
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2447,7 +2439,7 @@ struct Traits_apply_xop_cmp_eq
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the two operands are equal. Unordered values are
         // considered to compare unequal.
@@ -2467,10 +2459,10 @@ struct Traits_apply_xop_cmp_ne
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2482,7 +2474,7 @@ struct Traits_apply_xop_cmp_ne
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the two operands are not equal. Unordered values
         // are considered to compare unequal.
@@ -2502,10 +2494,10 @@ struct Traits_apply_xop_cmp_lt
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2517,7 +2509,7 @@ struct Traits_apply_xop_cmp_lt
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the LHS operand is less than the RHS operand. If
         // they are unordered, an exception shall be thrown.
@@ -2543,10 +2535,10 @@ struct Traits_apply_xop_cmp_gt
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2558,7 +2550,7 @@ struct Traits_apply_xop_cmp_gt
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the LHS operand is greater than the RHS operand. If
         // they are unordered, an exception shall be thrown.
@@ -2584,10 +2576,10 @@ struct Traits_apply_xop_cmp_lte
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2599,7 +2591,7 @@ struct Traits_apply_xop_cmp_lte
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the LHS operand is less than or equal to the RHS
         // operand. If they are unordered, an exception shall be thrown.
@@ -2625,10 +2617,10 @@ struct Traits_apply_xop_cmp_gte
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2640,7 +2632,7 @@ struct Traits_apply_xop_cmp_gte
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the LHS operand is greater than or equal to the RHS
         // operand. If they are unordered, an exception shall be thrown.
@@ -2666,10 +2658,10 @@ struct Traits_apply_xop_cmp_3way
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2681,7 +2673,7 @@ struct Traits_apply_xop_cmp_3way
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Perform 3-way comparison of both operands.
         Compare cmp = lhs.compare(rhs);
@@ -2708,10 +2700,10 @@ struct Traits_apply_xop_cmp_un
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2723,7 +2715,7 @@ struct Traits_apply_xop_cmp_un
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the two operands are unordered.
         lhs = lhs.compare(rhs) == compare_unordered;
@@ -2742,10 +2734,10 @@ struct Traits_apply_xop_add
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2757,7 +2749,7 @@ struct Traits_apply_xop_add
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           V_boolean& val = lhs.mut_boolean();
@@ -2815,10 +2807,10 @@ struct Traits_apply_xop_sub
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2830,7 +2822,7 @@ struct Traits_apply_xop_sub
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           V_boolean& val = lhs.mut_boolean();
@@ -2880,10 +2872,10 @@ struct Traits_apply_xop_mul
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -2926,7 +2918,7 @@ struct Traits_apply_xop_mul
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           V_boolean& val = lhs.mut_boolean();
@@ -3010,10 +3002,10 @@ struct Traits_apply_xop_div
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3025,7 +3017,7 @@ struct Traits_apply_xop_div
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -3072,10 +3064,10 @@ struct Traits_apply_xop_mod
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3087,7 +3079,7 @@ struct Traits_apply_xop_mod
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -3134,10 +3126,10 @@ struct Traits_apply_xop_sll
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3149,7 +3141,7 @@ struct Traits_apply_xop_sll
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() != type_integer)
           ASTERIA_THROW_RUNTIME_ERROR((
@@ -3208,10 +3200,10 @@ struct Traits_apply_xop_srl
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3223,7 +3215,7 @@ struct Traits_apply_xop_srl
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() != type_integer)
           ASTERIA_THROW_RUNTIME_ERROR((
@@ -3282,10 +3274,10 @@ struct Traits_apply_xop_sla
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3297,7 +3289,7 @@ struct Traits_apply_xop_sla
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() != type_integer)
           ASTERIA_THROW_RUNTIME_ERROR((
@@ -3356,10 +3348,10 @@ struct Traits_apply_xop_sra
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3371,7 +3363,7 @@ struct Traits_apply_xop_sra
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() != type_integer)
           ASTERIA_THROW_RUNTIME_ERROR((
@@ -3425,10 +3417,10 @@ struct Traits_apply_xop_andb
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3440,7 +3432,7 @@ struct Traits_apply_xop_andb
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           V_boolean& val = lhs.mut_boolean();
@@ -3489,10 +3481,10 @@ struct Traits_apply_xop_orb
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3504,7 +3496,7 @@ struct Traits_apply_xop_orb
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           V_boolean& val = lhs.mut_boolean();
@@ -3553,10 +3545,10 @@ struct Traits_apply_xop_xorb
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3568,7 +3560,7 @@ struct Traits_apply_xop_xorb
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_boolean() && rhs.is_boolean()) {
           V_boolean& val = lhs.mut_boolean();
@@ -3638,10 +3630,10 @@ struct Traits_apply_xop_fma
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -3655,7 +3647,7 @@ struct Traits_apply_xop_fma
         const auto& mid = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
           V_real& val = lhs.mut_real();
@@ -3726,11 +3718,11 @@ struct Traits_unpack_struct_array
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_array& altr)
+    make_uparam(const AIR_Node::S_unpack_struct_array& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u32 = altr.nelems;
-        up.u8v[0] = altr.immutable;
+        up.u3456 = altr.nelems;
+        up.b1 = altr.immutable;
         return up;
       }
 
@@ -3753,7 +3745,7 @@ struct Traits_unpack_struct_array
         if(val.is_array())
           arr = ::std::move(val.mut_array());
 
-        for(uint32_t i = up.u32 - 1;  i != UINT32_MAX;  --i) {
+        for(uint32_t i = up.u3456 - 1;  i != UINT32_MAX;  --i) {
           // Get the variable back.
           auto var = ctx.stack().top().unphase_variable_opt();
           ROCKET_ASSERT(var && !var->is_initialized());
@@ -3765,7 +3757,7 @@ struct Traits_unpack_struct_array
             elem = &null_value;
 
           var->initialize(*elem);
-          var->set_immutable(up.u8v[0]);
+          var->set_immutable(up.b1);
         }
         return air_status_next;
       }
@@ -3775,10 +3767,10 @@ struct Traits_unpack_struct_object
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
+    make_uparam(const AIR_Node::S_unpack_struct_object& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.immutable;
+        up.b1 = altr.immutable;
         return up;
       }
 
@@ -3791,7 +3783,7 @@ struct Traits_unpack_struct_object
 
     static
     cow_vector<phsh_string>
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_unpack_struct_object& altr)
+    make_sparam(const AIR_Node::S_unpack_struct_object& altr)
       {
         return altr.keys;
       }
@@ -3827,7 +3819,7 @@ struct Traits_unpack_struct_object
             elem = &null_value;
 
           var->initialize(*elem);
-          var->set_immutable(up.u8v[0]);
+          var->set_immutable(up.b1);
         }
         return air_status_next;
       }
@@ -3837,10 +3829,10 @@ struct Traits_define_null_variable
   {
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
+    make_uparam(const AIR_Node::S_define_null_variable& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.immutable;
+        up.b1 = altr.immutable;
         return up;
       }
 
@@ -3853,7 +3845,7 @@ struct Traits_define_null_variable
 
     static
     Sparam_sloc_name
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_define_null_variable& altr)
+    make_sparam(const AIR_Node::S_define_null_variable& altr)
       {
         Sparam_sloc_name sp;
         sp.sloc = altr.sloc;
@@ -3873,7 +3865,7 @@ struct Traits_define_null_variable
 
         // Initialize the variable to `null`.
         var->initialize(nullopt);
-        var->set_immutable(up.u8v[0]);
+        var->set_immutable(up.b1);
         return air_status_next;
       }
   };
@@ -3889,7 +3881,7 @@ struct Traits_single_step_trap
 
     static
     Source_Location
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_single_step_trap& altr)
+    make_sparam(const AIR_Node::S_single_step_trap& altr)
       {
         return altr.sloc;
       }
@@ -3914,16 +3906,16 @@ struct Traits_variadic_call
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
+    make_uparam(const AIR_Node::S_variadic_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = static_cast<uint8_t>(altr.ptc);
+        up.u1 = static_cast<uint8_t>(altr.ptc);
         return up;
       }
 
     static
     Source_Location
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_variadic_call& altr)
+    make_sparam(const AIR_Node::S_variadic_call& altr)
       {
         return altr.sloc;
       }
@@ -4020,7 +4012,7 @@ struct Traits_variadic_call
 
         const auto& target = value.as_function();
         auto& self = ctx.stack().mut_top().pop_modifier();
-        const auto ptc = static_cast<PTC_Aware>(up.u8v[0]);
+        const auto ptc = static_cast<PTC_Aware>(up.u1);
 
         stack.clear_cache();
         alt_stack.clear_cache();
@@ -4042,7 +4034,7 @@ struct Traits_defer_expression
 
     static
     Sparam_defer
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_defer_expression& altr)
+    make_sparam(const AIR_Node::S_defer_expression& altr)
       {
         Sparam_defer sp;
         sp.sloc = altr.sloc;
@@ -4080,16 +4072,16 @@ struct Traits_import_call
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
+    make_uparam(const AIR_Node::S_import_call& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u32 = altr.nargs;
+        up.u3456 = altr.nargs;
         return up;
       }
 
     static
     Sparam_import
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_import_call& altr)
+    make_sparam(const AIR_Node::S_import_call& altr)
       {
         Sparam_import sp;
         sp.opts = altr.opts;
@@ -4107,8 +4099,8 @@ struct Traits_import_call
         // Pop arguments off the stack backwards.
         auto& alt_stack = ctx.alt_stack();
         auto& stack = ctx.stack();
-        ROCKET_ASSERT(up.u32 != 0);
-        do_pop_positional_arguments(alt_stack, stack, up.u32 - 1);
+        ROCKET_ASSERT(up.u3456 != 0);
+        do_pop_positional_arguments(alt_stack, stack, up.u3456 - 1);
 
         // Copy the filename, which shall be of type `string`.
         auto value = stack.top().dereference_readonly();
@@ -4170,7 +4162,7 @@ struct Traits_declare_reference
   {
     static
     Sparam_name
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_declare_reference& altr)
+    make_sparam(const AIR_Node::S_declare_reference& altr)
       {
         Sparam_name sp;
         sp.name = altr.name;
@@ -4197,7 +4189,7 @@ struct Traits_initialize_reference
 
     static
     Sparam_name
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_initialize_reference& altr)
+    make_sparam(const AIR_Node::S_initialize_reference& altr)
       {
         Sparam_name sp;
         sp.name = altr.name;
@@ -4219,7 +4211,7 @@ struct Traits_catch_expression
   {
     static
     AVMC_Queue
-    make_sparam(bool& /*reachable*/, const AIR_Node::S_catch_expression& altr)
+    make_sparam(const AIR_Node::S_catch_expression& altr)
       {
         AVMC_Queue queue;
         do_solidify_nodes(queue, altr.code_body);
@@ -4263,10 +4255,10 @@ struct Traits_apply_xop_lzcnt
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4276,7 +4268,7 @@ struct Traits_apply_xop_lzcnt
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           V_integer& val = rhs.mut_integer();
@@ -4303,10 +4295,10 @@ struct Traits_apply_xop_tzcnt
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4316,7 +4308,7 @@ struct Traits_apply_xop_tzcnt
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           V_integer& val = rhs.mut_integer();
@@ -4343,10 +4335,10 @@ struct Traits_apply_xop_popcnt
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4356,7 +4348,7 @@ struct Traits_apply_xop_popcnt
       {
         // This operator is unary.
         auto& top = ctx.stack().mut_top();
-        auto& rhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& rhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(rhs.type() == type_integer) {
           V_integer& val = rhs.mut_integer();
@@ -4383,10 +4375,10 @@ struct Traits_apply_xop_addm
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4398,7 +4390,7 @@ struct Traits_apply_xop_addm
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -4426,10 +4418,10 @@ struct Traits_apply_xop_subm
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4441,7 +4433,7 @@ struct Traits_apply_xop_subm
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -4469,10 +4461,10 @@ struct Traits_apply_xop_mulm
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4484,7 +4476,7 @@ struct Traits_apply_xop_mulm
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -4512,10 +4504,10 @@ struct Traits_apply_xop_adds
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4527,7 +4519,7 @@ struct Traits_apply_xop_adds
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -4556,10 +4548,10 @@ struct Traits_apply_xop_subs
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4571,7 +4563,7 @@ struct Traits_apply_xop_subs
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -4600,10 +4592,10 @@ struct Traits_apply_xop_muls
 
     static
     AVMC_Queue::Uparam
-    make_uparam(bool& /*reachable*/, const AIR_Node::S_apply_operator& altr)
+    make_uparam(const AIR_Node::S_apply_operator& altr)
       {
         AVMC_Queue::Uparam up;
-        up.u8v[0] = altr.assign;
+        up.b1 = altr.assign;
         return up;
       }
 
@@ -4615,7 +4607,7 @@ struct Traits_apply_xop_muls
         const auto& rhs = ctx.stack().top().dereference_readonly();
         ctx.stack().pop();
         auto& top = ctx.stack().mut_top();
-        auto& lhs = up.u8v[0] ? top.dereference_mutable() : top.dereference_copy();
+        auto& lhs = up.b1 ? top.dereference_mutable() : top.dereference_copy();
 
         if(lhs.is_integer() && rhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
@@ -4686,8 +4678,7 @@ struct has_uparam
 template<typename TraitsT, typename NodeT>
 struct has_uparam<TraitsT, NodeT,
     ROCKET_VOID_DECLTYPE(
-        TraitsT::make_uparam(::std::declval<bool&>(),
-            ::std::declval<const NodeT&>()))>
+        TraitsT::make_uparam(::std::declval<const NodeT&>()))>
   :
     ::std::true_type
   {
@@ -4703,8 +4694,7 @@ struct has_sparam
 template<typename TraitsT, typename NodeT>
 struct has_sparam<TraitsT, NodeT,
     ROCKET_VOID_DECLTYPE(
-        TraitsT::make_sparam(::std::declval<bool&>(),
-            ::std::declval<const NodeT&>()))>
+        TraitsT::make_sparam(::std::declval<const NodeT&>()))>
   :
     ::std::true_type
   {
@@ -4722,20 +4712,18 @@ struct solidify_disp<TraitsT, NodeT, true, true>  // uparam, sparam
       {
         return TraitsT::execute(ctx,
             static_cast<typename ::std::decay<decltype(
-                TraitsT::make_uparam(::std::declval<bool&>(),
-                    ::std::declval<const NodeT&>()))>::type>(head->uparam),
+                TraitsT::make_uparam(::std::declval<const NodeT&>()))>::type>(head->uparam),
             reinterpret_cast<const typename ::std::decay<decltype(
-                TraitsT::make_sparam(::std::declval<bool&>(),
-                    ::std::declval<const NodeT&>()))>::type&>(head->sparam));
+                TraitsT::make_sparam(::std::declval<const NodeT&>()))>::type&>(head->sparam));
       }
 
     static
     void
-    append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
+    append(AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
-            TraitsT::make_uparam(reachable, altr),
-            TraitsT::make_sparam(reachable, altr));
+            TraitsT::make_uparam(altr),
+            TraitsT::make_sparam(altr));
       }
   };
 
@@ -4748,17 +4736,16 @@ struct solidify_disp<TraitsT, NodeT, false, true>  // uparam, sparam
       {
         return TraitsT::execute(ctx,
             reinterpret_cast<const typename ::std::decay<decltype(
-                TraitsT::make_sparam(::std::declval<bool&>(),
-                    ::std::declval<const NodeT&>()))>::type&>(head->sparam));
+                TraitsT::make_sparam(::std::declval<const NodeT&>()))>::type&>(head->sparam));
       }
 
     static
     void
-    append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
+    append(AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
             AVMC_Queue::Uparam(),
-            TraitsT::make_sparam(reachable, altr));
+            TraitsT::make_sparam(altr));
       }
   };
 
@@ -4771,16 +4758,15 @@ struct solidify_disp<TraitsT, NodeT, true, false>  // uparam, sparam
       {
         return TraitsT::execute(ctx,
             static_cast<typename ::std::decay<decltype(
-                TraitsT::make_uparam(::std::declval<bool&>(),
-                    ::std::declval<const NodeT&>()))>::type>(head->uparam));
+                TraitsT::make_uparam(::std::declval<const NodeT&>()))>::type>(head->uparam));
       }
 
     static
     void
-    append(bool& reachable, AVMC_Queue& queue, const NodeT& altr)
+    append(AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr),
-            TraitsT::make_uparam(reachable, altr));
+            TraitsT::make_uparam(altr));
       }
   };
 
@@ -4796,7 +4782,7 @@ struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
 
     static
     void
-    append(bool& /*reachable*/, AVMC_Queue& queue, const NodeT& altr)
+    append(AVMC_Queue& queue, const NodeT& altr)
       {
         queue.append(thunk, symbol_getter<TraitsT, NodeT>::opt(altr));
       }
@@ -4804,14 +4790,12 @@ struct solidify_disp<TraitsT, NodeT, false, false>  // uparam, sparam
 
 template<typename TraitsT, typename NodeT>
 inline
-bool
+void
 do_solidify(AVMC_Queue& queue, const NodeT& altr)
   {
     constexpr bool has_up = has_uparam<TraitsT, NodeT>::value;
     constexpr bool has_sp = has_sparam<TraitsT, NodeT>::value;
-    bool reachable = true;
-    solidify_disp<TraitsT, NodeT, has_up, has_sp>::append(reachable, queue, altr);
-    return reachable;
+    solidify_disp<TraitsT, NodeT, has_up, has_sp>::append(queue, altr);
   }
 
 }  // namespace
@@ -4827,11 +4811,11 @@ rebind_opt(Abstract_Context& ctx) const
       case index_execute_block: {
         const auto& altr = this->m_stor.as<S_execute_block>();
 
-        // Rebind the body.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        // Rebind the body in a nested scope.
         bool dirty = false;
         auto bound = altr;
 
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -4844,11 +4828,11 @@ rebind_opt(Abstract_Context& ctx) const
       case index_if_statement: {
         const auto& altr = this->m_stor.as<S_if_statement>();
 
-        // Rebind both branches.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        // Rebind both branches in a nested scope.
         bool dirty = false;
         auto bound = altr;
 
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         do_rebind_nodes(dirty, bound.code_true, ctx_body);
         do_rebind_nodes(dirty, bound.code_false, ctx_body);
 
@@ -4858,12 +4842,15 @@ rebind_opt(Abstract_Context& ctx) const
       case index_switch_statement: {
         const auto& altr = this->m_stor.as<S_switch_statement>();
 
-        // Rebind all clauses.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        // Rebind all labels and clauses.
+        // Labels are to be evaluated in the same scope as the condition
+        // expression, and are not parts of the body.
         bool dirty = false;
         auto bound = altr;
 
-        do_rebind_nodes(dirty, bound.code_labels, ctx);  // this is not part of the body!
+        do_rebind_nodes(dirty, bound.code_labels, ctx);
+
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         do_rebind_nodes(dirty, bound.code_clauses, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -4872,13 +4859,15 @@ rebind_opt(Abstract_Context& ctx) const
       case index_do_while_statement: {
         const auto& altr = this->m_stor.as<S_do_while_statement>();
 
-        // Rebind the body and the condition.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        // Rebind the body and the condition expression.
+        // The condition expression is not a part of the body.
         bool dirty = false;
         auto bound = altr;
 
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
-        do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
+
+        do_rebind_nodes(dirty, bound.code_cond, ctx);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
@@ -4886,12 +4875,14 @@ rebind_opt(Abstract_Context& ctx) const
       case index_while_statement: {
         const auto& altr = this->m_stor.as<S_while_statement>();
 
-        // Rebind the condition and the body.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        // Rebind the condition expression and the body.
+        // The condition expression is not a part of the body.
         bool dirty = false;
         auto bound = altr;
 
-        do_rebind_nodes(dirty, bound.code_cond, ctx);  // this is not part of the body!
+        do_rebind_nodes(dirty, bound.code_cond, ctx);
+
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -4901,12 +4892,18 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<S_for_each_statement>();
 
         // Rebind the range initializer and the body.
-        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx_for);
+        // The range key and mapped references are declared in a dedicated scope
+        // where the initializer is to be evaluated. The body is to be executed
+        // in an inner scope, created and destroyed for each iteration.
         bool dirty = false;
         auto bound = altr;
 
+        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
+        ctx_for.insert_named_reference(altr.name_key);
+        ctx_for.insert_named_reference(altr.name_mapped);
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
+
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -4915,15 +4912,19 @@ rebind_opt(Abstract_Context& ctx) const
       case index_for_statement: {
         const auto& altr = this->m_stor.as<S_for_statement>();
 
-        // Rebind the initializer, the condition, the loop increment and the body.
-        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx_for);
+        // Rebind the initializer, condition expression and step expression.
+        // All these are declared in a dedicated scope where the initializer
+        // is to be evaluated. The body is to be executed in an inner scope,
+        // created and destroyed for each iteration.
         bool dirty = false;
         auto bound = altr;
 
+        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
         do_rebind_nodes(dirty, bound.code_cond, ctx_for);
         do_rebind_nodes(dirty, bound.code_step, ctx_for);
+
+        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -4933,12 +4934,15 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<S_try_statement>();
 
         // Rebind the `try` and `catch` clauses.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         bool dirty = false;
         auto bound = altr;
 
-        do_rebind_nodes(dirty, bound.code_try, ctx_body);
-        do_rebind_nodes(dirty, bound.code_catch, ctx_body);
+        Analytic_Context ctx_try(Analytic_Context::M_plain(), ctx);
+        do_rebind_nodes(dirty, bound.code_try, ctx_try);
+
+        Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
+        ctx_catch.insert_named_reference(altr.name_except);
+        do_rebind_nodes(dirty, bound.code_catch, ctx_catch);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
@@ -4958,20 +4962,19 @@ rebind_opt(Abstract_Context& ctx) const
         for(uint32_t k = 0;  k != altr.depth;  ++k)
           qctx = qctx->get_parent_opt();
 
-        // Don't bind placeholder references in analytic contexts.
         if(qctx->is_analytic())
           return nullopt;
 
-        // Look for the name in the context.
+        // Look for the name.
         auto qref = qctx->get_named_reference_opt(altr.name);
         if(!qref)
           return nullopt;
 
-        // Check if control flow has bypassed its initialization.
         if(qref->is_invalid())
           ASTERIA_THROW_RUNTIME_ERROR(("Use of bypassed variable or reference `$1`"), altr.name);
 
-        S_push_bound_reference xnode = { *qref };
+        // Bind this reference.
+        AIR_Node::S_push_bound_reference xnode = { *qref };
         return ::std::move(xnode);
       }
 
@@ -4982,11 +4985,12 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<S_define_function>();
 
         // Rebind the function body.
-        Analytic_Context ctx_func(Analytic_Context::M_function(),
-                                  &ctx, altr.params);
+        // This is the only scenario where names in the outer scope are visible
+        // to the body of a function.
         bool dirty = false;
         auto bound = altr;
 
+        Analytic_Context ctx_func(Analytic_Context::M_function(), &ctx, altr.params);
         do_rebind_nodes(dirty, bound.code_body, ctx_func);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -4995,7 +4999,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_branch_expression: {
         const auto& altr = this->m_stor.as<S_branch_expression>();
 
-        // Rebind the expression.
+        // Rebind both branches.
         bool dirty = false;
         auto bound = altr;
 
@@ -5008,7 +5012,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_coalescence: {
         const auto& altr = this->m_stor.as<S_coalescence>();
 
-        // Rebind the expression.
+        // Rebind the null branch.
         bool dirty = false;
         auto bound = altr;
 
@@ -5064,13 +5068,182 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid AIR node type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid AIR node type (index `$1`)"), this->index());
     }
   }
 
-bool
+void
+AIR_Node::
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+  {
+    switch(this->index()) {
+      case index_clear_stack:
+        return;
+
+      case index_execute_block: {
+        const auto& altr = this->m_stor.as<S_execute_block>();
+
+        // Collect variables from the body.
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_declare_variable:
+      case index_initialize_variable:
+        return;
+
+      case index_if_statement: {
+        const auto& altr = this->m_stor.as<S_if_statement>();
+
+        // Collect variables from both branches.
+        do_collect_variables_for_each(staged, temp, altr.code_true);
+        do_collect_variables_for_each(staged, temp, altr.code_false);
+        return;
+      }
+
+      case index_switch_statement: {
+        const auto& altr = this->m_stor.as<S_switch_statement>();
+
+        // Collect variables from all labels and clauses.
+        for(const auto& r : altr.code_labels)
+          do_collect_variables_for_each(staged, temp, r);
+        for(const auto& r : altr.code_clauses)
+          do_collect_variables_for_each(staged, temp, r);
+        return;
+      }
+
+      case index_do_while_statement: {
+        const auto& altr = this->m_stor.as<S_do_while_statement>();
+
+        // Collect variables from the body and the condition expression.
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        do_collect_variables_for_each(staged, temp, altr.code_cond);
+        return;
+      }
+
+      case index_while_statement: {
+        const auto& altr = this->m_stor.as<S_while_statement>();
+
+        // Collect variables from the condition expression and the body.
+        do_collect_variables_for_each(staged, temp, altr.code_cond);
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_for_each_statement: {
+        const auto& altr = this->m_stor.as<S_for_each_statement>();
+
+        // Collect variables from the range initializer and the body.
+        do_collect_variables_for_each(staged, temp, altr.code_init);
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_for_statement: {
+        const auto& altr = this->m_stor.as<S_for_statement>();
+
+        // Collect variables from the initializer, condition expression and
+        // step expression.
+        do_collect_variables_for_each(staged, temp, altr.code_init);
+        do_collect_variables_for_each(staged, temp, altr.code_cond);
+        do_collect_variables_for_each(staged, temp, altr.code_step);
+        return;
+      }
+
+      case index_try_statement: {
+        const auto& altr = this->m_stor.as<S_try_statement>();
+
+        // Collect variables from the `try` and `catch` clauses.
+        do_collect_variables_for_each(staged, temp, altr.code_try);
+        do_collect_variables_for_each(staged, temp, altr.code_catch);
+        return;
+      }
+
+      case index_throw_statement:
+      case index_assert_statement:
+      case index_simple_status:
+      case index_check_argument:
+      case index_push_global_reference:
+      case index_push_local_reference:
+        return;
+
+      case index_push_bound_reference: {
+        const auto& altr = this->m_stor.as<S_push_bound_reference>();
+
+        // Collect variables from the bound reference.
+        altr.ref.collect_variables(staged, temp);
+        return;
+      }
+
+      case index_define_function: {
+        const auto& altr = this->m_stor.as<S_define_function>();
+
+        // Collect variables from the function body.
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_branch_expression: {
+        const auto& altr = this->m_stor.as<S_branch_expression>();
+
+        // Collect variables from both branches.
+        do_collect_variables_for_each(staged, temp, altr.code_true);
+        do_collect_variables_for_each(staged, temp, altr.code_false);
+        return;
+      }
+
+      case index_coalescence: {
+        const auto& altr = this->m_stor.as<S_coalescence>();
+
+        // Collect variables from the null branch.
+        do_collect_variables_for_each(staged, temp, altr.code_null);
+        return;
+      }
+
+      case index_function_call:
+      case index_member_access:
+      case index_push_unnamed_array:
+      case index_push_unnamed_object:
+      case index_apply_operator:
+      case index_unpack_struct_array:
+      case index_unpack_struct_object:
+      case index_define_null_variable:
+      case index_single_step_trap:
+      case index_variadic_call:
+        return;
+
+      case index_defer_expression: {
+        const auto& altr = this->m_stor.as<S_defer_expression>();
+
+        // Collect variables from the expression.
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_import_call:
+      case index_declare_reference:
+      case index_initialize_reference:
+        return;
+
+      case index_catch_expression: {
+        const auto& altr = this->m_stor.as<S_catch_expression>();
+
+        // Collect variables from the expression.
+        do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_return_statement:
+      case index_push_constant:
+      case index_push_constant_int48:
+        return;
+
+      default:
+        ASTERIA_TERMINATE(("Invalid AIR node type (index `$1`)"), this->index());
+    }
+  }
+
+void
 AIR_Node::
 solidify(AVMC_Queue& queue) const
   {
@@ -5407,145 +5580,6 @@ solidify(AVMC_Queue& queue) const
       case index_push_constant_int48:
         return do_solidify<Traits_push_constant_int48>(queue,
                        this->m_stor.as<S_push_constant_int48>());
-
-      default:
-        ASTERIA_TERMINATE((
-            "Invalid AIR node type (index `$1`)"),
-            this->index());
-    }
-  }
-
-void
-AIR_Node::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
-  {
-    switch(this->index()) {
-      case index_clear_stack:
-        return;
-
-      case index_execute_block:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_execute_block>().code_body);
-        return;
-
-      case index_declare_variable:
-      case index_initialize_variable:
-        return;
-
-      case index_if_statement:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_if_statement>().code_true);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_if_statement>().code_false);
-        return;
-
-      case index_switch_statement:
-        for(const auto& label : this->m_stor.as<S_switch_statement>().code_labels)
-          do_collect_variables_for_each(staged, temp, label);
-        for(const auto& body : this->m_stor.as<S_switch_statement>().code_clauses)
-          do_collect_variables_for_each(staged, temp, body);
-        return;
-
-      case index_do_while_statement:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_do_while_statement>().code_body);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_do_while_statement>().code_cond);
-        return;
-
-      case index_while_statement:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_while_statement>().code_cond);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_while_statement>().code_body);
-        return;
-
-      case index_for_each_statement:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_for_each_statement>().code_init);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_for_each_statement>().code_body);
-        return;
-
-      case index_for_statement:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_for_statement>().code_init);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_for_statement>().code_cond);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_for_statement>().code_step);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_for_statement>().code_body);
-        return;
-
-      case index_try_statement:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_try_statement>().code_try);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_try_statement>().code_catch);
-        return;
-
-      case index_throw_statement:
-      case index_assert_statement:
-      case index_simple_status:
-      case index_check_argument:
-      case index_push_global_reference:
-      case index_push_local_reference:
-        return;
-
-      case index_push_bound_reference:
-        this->m_stor.as<S_push_bound_reference>().ref
-                       .collect_variables(staged, temp);
-        return;
-
-      case index_define_function:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_define_function>().code_body);
-        return;
-
-      case index_branch_expression:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_branch_expression>().code_true);
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_branch_expression>().code_false);
-        return;
-
-      case index_coalescence:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_coalescence>().code_null);
-        return;
-
-      case index_function_call:
-      case index_member_access:
-      case index_push_unnamed_array:
-      case index_push_unnamed_object:
-      case index_apply_operator:
-      case index_unpack_struct_array:
-      case index_unpack_struct_object:
-      case index_define_null_variable:
-      case index_single_step_trap:
-      case index_variadic_call:
-        return;
-
-      case index_defer_expression:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_defer_expression>().code_body);
-        return;
-
-      case index_import_call:
-      case index_declare_reference:
-      case index_initialize_reference:
-        return;
-
-      case index_catch_expression:
-        do_collect_variables_for_each(staged, temp,
-                       this->m_stor.as<S_catch_expression>().code_body);
-        return;
-
-      case index_return_statement:
-      case index_push_constant:
-      case index_push_constant_int48:
-        return;
 
       default:
         ASTERIA_TERMINATE((

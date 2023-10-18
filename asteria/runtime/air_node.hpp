@@ -384,22 +384,19 @@ class AIR_Node
     index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
-    // Rebind this node.
-    // If this node refers to a local reference, which has been allocated in an
-    // executive context now, we need to replace `*this` with a copy of it.
+    // If this node denotes a local reference which is allocated in an executive
+    // context, replace it with a copy of the reference.
     opt<AIR_Node>
     rebind_opt(Abstract_Context& ctx) const;
-
-    // Compress this IR node.
-    // The return value indicates whether this node terminates control flow i.e.
-    // all subsequent nodes are unreachable.
-    bool
-    solidify(AVMC_Queue& queue) const;
 
     // This is necessary because the body of a closure shall not have been
     // solidified.
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+
+    // Compress this IR node into `queue` for execution.
+    void
+    solidify(AVMC_Queue& queue) const;
   };
 
 inline
