@@ -252,6 +252,17 @@ class AIR_Node
         bool is_void;
       };
 
+    struct S_push_constant
+      {
+        AIR_Constant airc;
+      };
+
+    struct S_push_constant_int48
+      {
+        int16_t hi;
+        uint32_t lo;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -291,6 +302,8 @@ class AIR_Node
         index_initialize_reference   = 34,
         index_catch_expression       = 35,
         index_return_statement       = 36,
+        index_push_constant          = 37,
+        index_push_constant_int48    = 38,
       };
 
   private:
@@ -333,6 +346,8 @@ class AIR_Node
         , S_initialize_reference   // 34
         , S_catch_expression       // 35
         , S_return_statement       // 36
+        , S_push_constant          // 37,
+        , S_push_constant_int48    // 38,
       );
 
   public:

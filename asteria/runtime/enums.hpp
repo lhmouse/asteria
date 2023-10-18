@@ -88,6 +88,17 @@ enum AIR_Status : uint8_t
     air_status_continue_for     = 9,
   };
 
+// Hard-coded constants in IR
+enum AIR_Constant : uint8_t
+  {
+    air_constant_null       = 0,
+    air_constant_true       = 1,
+    air_constant_false      = 2,
+    air_constant_empty_str  = 3,
+    air_constant_empty_arr  = 4,
+    air_constant_empty_obj  = 5,
+  };
+
 // Proper tail call (PTC) awareness
 enum PTC_Aware : uint8_t
   {

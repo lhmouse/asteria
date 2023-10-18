@@ -162,6 +162,7 @@ class AVMC_Queue;
 // Runtime
 enum Xop : uint8_t;
 enum AIR_Status : uint8_t;
+enum AIR_Constant : uint8_t;
 enum PTC_Aware : uint8_t;
 struct Abstract_Hooks;
 class Runtime_Error;

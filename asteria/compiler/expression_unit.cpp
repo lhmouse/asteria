@@ -42,7 +42,59 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_literal: {
         const auto& altr = this->m_stor.as<S_literal>();
 
-        // Copy the value as is.
+        if(altr.value.is_null()) {
+          // `null`
+          AIR_Node::S_push_constant xnode = { air_constant_null };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
+
+        if(altr.value.is_boolean() && (altr.value.as_boolean() == true)) {
+          // `true`
+          AIR_Node::S_push_constant xnode = { air_constant_true };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
+
+        if(altr.value.is_boolean() && (altr.value.as_boolean() == false)) {
+          // `false`
+          AIR_Node::S_push_constant xnode = { air_constant_false };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
+
+        if(altr.value.is_integer()) {
+          int64_t t = (int64_t) ((uint64_t) altr.value.as_integer() << 16) >> 16;
+          if(t == altr.value.as_integer()) {
+            // small integer
+            AIR_Node::S_push_constant_int48 xnode = { (int16_t) (t >> 32), (uint32_t) t };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+        }
+
+        if(altr.value.is_string() && altr.value.as_string().empty()) {
+          // `""`
+          AIR_Node::S_push_constant xnode = { air_constant_empty_str };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
+
+        if(altr.value.is_array() && altr.value.as_array().empty()) {
+          // `[]`
+          AIR_Node::S_push_constant xnode = { air_constant_empty_arr };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
+
+        if(altr.value.is_object() && altr.value.as_object().empty()) {
+          // `{}`
+          AIR_Node::S_push_constant xnode = { air_constant_empty_obj };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
+
+        // Copy the 'uncommon' value.
         AIR_Node::S_push_bound_reference xnode = { };
         xnode.ref.set_temporary(altr.value);
         code.emplace_back(::std::move(xnode));

@@ -1349,6 +1349,72 @@ struct Traits_return_statement
       }
   };
 
+struct Traits_push_constant
+  {
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& reachable, const AIR_Node::S_push_constant& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u8v[0] = altr.airc;
+        return up;
+      }
+
+    ROCKET_FLATTEN static
+    AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        switch(up.u8v[0]) {
+          case air_constant_null:
+            ctx.stack().push().set_temporary(nullopt);
+            break;
+
+          case air_constant_true:
+            ctx.stack().push().set_temporary(true);
+            break;
+
+          case air_constant_false:
+            ctx.stack().push().set_temporary(false);
+            break;
+
+          case air_constant_empty_str:
+            ctx.stack().push().set_temporary(V_string());
+            break;
+
+          case air_constant_empty_arr:
+            ctx.stack().push().set_temporary(V_array());
+            break;
+
+          case air_constant_empty_obj:
+            ctx.stack().push().set_temporary(V_object());
+            break;
+        }
+        return air_status_next;
+      }
+  };
+
+struct Traits_push_constant_int48
+  {
+    static
+    AVMC_Queue::Uparam
+    make_uparam(bool& reachable, const AIR_Node::S_push_constant_int48& altr)
+      {
+        AVMC_Queue::Uparam up;
+        up.u16 = (uint16_t) altr.hi;
+        up.u32 = altr.lo;
+        return up;
+      }
+
+
+    ROCKET_FLATTEN static
+    AIR_Status
+    execute(Executive_Context& ctx, AVMC_Queue::Uparam up)
+      {
+        int64_t val = (int64_t)(int16_t) up.u16 << 32 | up.u32;
+        ctx.stack().push().set_temporary(val);
+        return air_status_next;
+      }
+  };
 struct Traits_apply_xop_inc
   {
     static
@@ -4993,6 +5059,8 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       case index_return_statement:
+      case index_push_constant:
+      case index_push_constant_int48:
         return nullopt;
 
       default:
@@ -5332,6 +5400,14 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_return_statement>(queue,
                        this->m_stor.as<S_return_statement>());
 
+      case index_push_constant:
+        return do_solidify<Traits_push_constant>(queue,
+                       this->m_stor.as<S_push_constant>());
+
+      case index_push_constant_int48:
+        return do_solidify<Traits_push_constant_int48>(queue,
+                       this->m_stor.as<S_push_constant_int48>());
+
       default:
         ASTERIA_TERMINATE((
             "Invalid AIR node type (index `$1`)"),
@@ -5467,6 +5543,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
 
       case index_return_statement:
+      case index_push_constant:
+      case index_push_constant_int48:
         return;
 
       default:
