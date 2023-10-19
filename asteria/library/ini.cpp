@@ -68,9 +68,7 @@ do_format_check_scalar(const Value& value)
         return false;
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid value type (type `$1`)"),
-            value.type());
+        ASTERIA_TERMINATE(("Invalid value type `$1`"), value.type());
     }
   }
 

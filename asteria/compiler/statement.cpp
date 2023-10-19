@@ -443,9 +443,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           default:
-            ASTERIA_TERMINATE((
-                "Invalid target scope type (target `$1`)"),
-                altr.target);
+            ASTERIA_TERMINATE(("Invalid target scope type `$1`"), altr.target);
         }
       }
 
@@ -476,9 +474,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           default:
-            ASTERIA_TERMINATE((
-                "Invalid target scope type (target `$1`)"),
-                altr.target);
+            ASTERIA_TERMINATE(("Invalid target scope type `$1`"), altr.target);
         }
       }
 
@@ -568,9 +564,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid statement type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid statement type `$1`"), this->index());
     }
   }
 

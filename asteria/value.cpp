@@ -487,9 +487,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid value type (type `$1`)"),
-            qval->type());
+        ASTERIA_TERMINATE(("Invalid value type `$1`"), qval->type());
     }
 
     while(stack.size())

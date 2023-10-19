@@ -80,16 +80,12 @@ tell_precedence() const noexcept
             return precedence_assignment;
 
           default:
-            ASTERIA_TERMINATE((
-                "Invalid operator type (xop `$1`)"),
-                altr.xop);
+            ASTERIA_TERMINATE(("Invalid operator type `$1`"), altr.xop);
         }
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid infix element type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid infix element type `$1`"), this->index());
     }
   }
 
@@ -163,9 +159,7 @@ extract(cow_vector<Expression_Unit>& units)
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid infix element type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid infix element type `$1`"), this->index());
     }
   }
 
@@ -193,9 +187,7 @@ mut_junction() noexcept
         return this->m_stor.mut<index_general>().rhs;
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid infix element type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid infix element type `$1`"), this->index());
     }
   }
 

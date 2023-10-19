@@ -291,9 +291,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid expression unit type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid expression unit type `$1`"), this->index());
     }
   }
 

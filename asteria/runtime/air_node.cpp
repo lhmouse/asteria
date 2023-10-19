@@ -5523,9 +5523,7 @@ solidify(AVMC_Queue& queue) const
             return do_solidify<Traits_apply_xop_random>(queue, altr);
 
           default:
-            ASTERIA_TERMINATE((
-                "Invalid operator type (xop `$1`)"),
-                altr.xop);
+            ASTERIA_TERMINATE(("Invalid operator type `$1`"), altr.xop);
         }
       }
 
@@ -5582,9 +5580,7 @@ solidify(AVMC_Queue& queue) const
                        this->m_stor.as<S_push_constant_int48>());
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid AIR node type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid AIR node type `$1`"), this->index());
     }
   }
 

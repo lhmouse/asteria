@@ -106,9 +106,7 @@ apply_read_opt(const Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid reference modifier type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid reference modifier type `$1`"), this->index());
     }
   }
 
@@ -210,9 +208,7 @@ apply_write_opt(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid reference modifier type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid reference modifier type `$1`"), this->index());
     }
   }
 
@@ -321,9 +317,7 @@ apply_open(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid reference modifier type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid reference modifier type `$1`"), this->index());
     }
   }
 
@@ -439,9 +433,7 @@ apply_unset(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE((
-            "Invalid reference modifier type (index `$1`)"),
-            this->index());
+        ASTERIA_TERMINATE(("Invalid reference modifier type `$1`"), this->index());
     }
   }
 
