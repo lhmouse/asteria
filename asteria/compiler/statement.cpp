@@ -260,7 +260,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_false = do_generate_block(opts, global, ctx, ptc, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_if_statement xnode = { altr.cond.sloc, altr.negative, ::std::move(code_true),
+        AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true),
                                            ::std::move(code_false) };
         code.emplace_back(::std::move(xnode));
         return code;
@@ -300,8 +300,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         }
 
         // Encode arguments.
-        AIR_Node::S_switch_statement xnode = { altr.ctrl.sloc, ::std::move(code_labels),
-                                               ::std::move(code_clauses), ::std::move(names_added) };
+        AIR_Node::S_switch_statement xnode = { ::std::move(code_labels), ::std::move(code_clauses),
+                                               ::std::move(names_added) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -318,8 +318,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
         // Encode arguments.
-        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.cond.sloc,
-                                                 altr.negative, ::std::move(code_cond) };
+        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative,
+                                                 ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -336,8 +336,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_while_statement xnode = { altr.cond.sloc, altr.negative,
-                                              ::std::move(code_cond), ::std::move(code_body) };
+        AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond),
+                                              ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -384,9 +384,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_statement xnode = { ::std::move(code_init), altr.cond.sloc,
-                                            ::std::move(code_cond), ::std::move(code_step),
-                                            ::std::move(code_body) };
+        AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
+                                            ::std::move(code_step), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }

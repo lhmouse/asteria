@@ -51,7 +51,7 @@ struct Header;
 
 // These are prototypes for callbacks.
 using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
-using Constructor  = void (Header* head, intptr_t arg);
+using Constructor  = void (Header* head, void* ctor_arg);
 using Destructor   = void (Header* head);
 using Var_Getter   = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
 
@@ -86,69 +86,6 @@ struct Header
 
     alignas(max_align_t) char sparam[];
   };
-
-template<typename SparamT>
-inline
-void
-do_nontrivial_dtor(Header* head)
-  {
-    auto ptr = reinterpret_cast<SparamT*>(head->sparam);
-    ::rocket::destroy(ptr);
-  }
-
-template<typename SparamT>
-inline
-void
-do_call_get_variables(Variable_HashMap& staged, Variable_HashMap& temp,
-                      const Header* head)
-  {
-    auto ptr = reinterpret_cast<const SparamT*>(head->sparam);
-    ptr->collect_variables(staged, temp);
-  }
-
-template<typename SparamT, typename = void>
-struct select_get_variables
-  {
-    constexpr operator
-    Var_Getter*() const noexcept
-      { return nullptr;  }
-  };
-
-template<typename SparamT>
-struct select_get_variables<SparamT,
-    ROCKET_VOID_DECLTYPE(
-      ::std::declval<const SparamT&>().collect_variables(
-          ::std::declval<Variable_HashMap&>(),  // staged
-          ::std::declval<Variable_HashMap&>()   // temp
-        ))>
-  {
-    constexpr operator
-    Var_Getter*() const noexcept
-      { return do_call_get_variables<SparamT>;  }
-  };
-
-template<typename SparamT>
-struct Sparam_traits
-  {
-    static constexpr Destructor* dtor_opt =
-        ::std::is_trivially_destructible<SparamT>::value
-            ? nullptr
-            : do_nontrivial_dtor<SparamT>;
-
-    static constexpr Var_Getter* vget_opt =
-        select_get_variables<SparamT>();
-  };
-
-template<typename XSparamT>
-inline
-void
-do_forward_ctor(Header* head, intptr_t arg)
-  {
-    using Sparam = typename ::std::decay<XSparamT>::type;
-    auto ptr = reinterpret_cast<Sparam*>(head->sparam);
-    auto src = reinterpret_cast<Sparam*>(arg);
-    ::rocket::construct(ptr, static_cast<XSparamT&&>(*src));
-  }
 
 }  // namespace details_avmc_queue
 }  // namespace asteria

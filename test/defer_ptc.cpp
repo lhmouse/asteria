@@ -18,15 +18,16 @@ int main()
     var ptc;
     var st1, st2;
 
-    // convert the backtrace to somethign comparable
+    // convert the backtrace to something comparable
     func transform_backtrace(st, bt, ln) {
       st = [ ];
+
       // ignore top level calls
       for(each k, v -> bt)
         st[$] = [ v.frame, v.line >= ln - 3 ? 12345 : v.line ];
+
       // print the backtrace
-      std.debug.dump(bt);
-      return ->st;
+      std.debug.logf("$1", std.json.format(bt, 2, true));
     }
 
     func deferred(s) {

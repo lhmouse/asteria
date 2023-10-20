@@ -57,25 +57,6 @@ class AVMC_Queue
     void
     do_reallocate(uint32_t estor);
 
-    // Reserve storage for the next node. `size` is the size of `sparam` to initialize.
-    inline
-    Header*
-    do_allocate_node_storage(Uparam uparam, size_t size);
-
-    // Append a new node to the end. `size` is the size of `sparam` to initialize.
-    // If `data_opt` is specified, it should point to the buffer containing data to copy.
-    // Otherwise, `sparam` is filled with zeroes.
-    Header*
-    do_append_trivial(Uparam uparam, Executor* exec, size_t size, const void* data_opt);
-
-    // Append a new node to the end. `size` is the size of `sparam` to initialize.
-    // If `ctor_opt` is specified, it is called to initialize `sparam`. Otherwise,
-    // `sparam` is filled with zeroes.
-    Header*
-    do_append_nontrivial(Uparam uparam, Executor* exec, const Source_Location* sloc_opt,
-                         Var_Getter* vget_opt, Destructor* dtor_opt, size_t size,
-                         Constructor* ctor_opt, intptr_t ctor_arg);
-
   public:
     ~AVMC_Queue()
       {
@@ -90,34 +71,56 @@ class AVMC_Queue
     void
     clear() noexcept;
 
-    // Append a node. This allows you to bind an arbitrary function.
-    template<typename XSparamT>
+    // Append a new node to the end. `size` is the size of `sparam` to initialize.
+    // If `ctor_opt` is specified, it is called to initialize `sparam`. Otherwise,
+    // `sparam` is filled with zeroes. If `sloc_opt` is specified, it denotes the
+    // symbols for backtracing, which are copied and stored by these functions and
+    // need not be persistent.
     Header*
-    append(Executor& exec, const Source_Location* sloc_opt, Uparam up, XSparamT&& sp)
+    append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
+           void* ctor_arg, Destructor* dtor_opt, Var_Getter* vget_opt = nullptr,
+           const Source_Location* sloc_opt = nullptr);
+
+    Header*
+    append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
+           void* ctor_arg, Destructor* dtor_opt, const Source_Location* sloc_opt)
       {
-        using Sparam = typename ::std::decay<XSparamT>::type;
-        static_assert(::std::is_nothrow_move_constructible<Sparam>::value);
-        using Traits = details_avmc_queue::Sparam_traits<Sparam>;
-
-        Var_Getter* vget_opt = Traits::vget_opt;
-        if(::std::is_trivial<Sparam>::value && !vget_opt && !sloc_opt)
-          return this->do_append_trivial(up, exec, sizeof(sp), ::std::addressof(sp));
-
-        return this->do_append_nontrivial(up, exec, sloc_opt, vget_opt, Traits::dtor_opt,
-                                          sizeof(sp), details_avmc_queue::do_forward_ctor<XSparamT>,
-                                          reinterpret_cast<intptr_t>(::std::addressof(sp)));
+        return this->append(exec, uparam, sparam_size,
+                            ctor_opt, ctor_arg, dtor_opt, nullptr, sloc_opt);
       }
 
     Header*
-    append(Executor& exec, const Source_Location* sloc_opt, Uparam up = { })
+    append(Executor* exec, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
+           Destructor* dtor_opt, Var_Getter* vget_opt = nullptr,
+           const Source_Location* sloc_opt = nullptr)
       {
-        if(!sloc_opt)
-          return this->do_append_trivial(up, exec, 0, nullptr);
-
-        return this->do_append_nontrivial(up, exec, sloc_opt, nullptr, nullptr, 0, nullptr, 0);
+        return this->append(exec, Uparam(), sparam_size,
+                            ctor_opt, ctor_arg, dtor_opt, vget_opt, sloc_opt);
       }
 
-    // Mark this queue ready for execution. No nodes may be appended hereafter.
+    Header*
+    append(Executor* exec, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
+           Destructor* dtor_opt, const Source_Location* sloc_opt)
+      {
+        return this->append(exec, Uparam(), sparam_size,
+                            ctor_opt, ctor_arg, dtor_opt, nullptr, sloc_opt);
+      }
+
+    Header*
+    append(Executor* exec, Uparam uparam, const Source_Location* sloc_opt = nullptr)
+      {
+        return this->append(exec, uparam, 0,
+                            nullptr, nullptr, nullptr, nullptr, sloc_opt);
+      }
+
+    Header*
+    append(Executor* exec, const Source_Location* sloc_opt = nullptr)
+      {
+        return this->append(exec, Uparam(), 0,
+                            nullptr, nullptr, nullptr, nullptr, sloc_opt);
+      }
+
+    // Marks this queue ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.
     void
     finalize();

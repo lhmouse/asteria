@@ -41,7 +41,7 @@ int main()
         }
         catch(e) {
           std.io.putf("Caught exception: $1\n", e);
-          assert std.string.find(e, "bypassed variable or reference `sth`") != null;
+          assert std.string.find(e, "`sth` not initialized") != null;
         }
 
 ///////////////////////////////////////////////////////////////////////////////
