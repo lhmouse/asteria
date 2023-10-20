@@ -16,6 +16,7 @@ check_PROGRAMS +=  \
   %reldir%/gc2.test  \
   %reldir%/gc_loop.test  \
   %reldir%/varg.test  \
+  %reldir%/vcall.test  \
   %reldir%/operators.test  \
   %reldir%/proper_tail_call.test  \
   %reldir%/stack_overflow.test  \
