@@ -1924,16 +1924,6 @@ solidify(AVMC_Queue& queue) const
         up2.b0 = altr.assign;
         up2.u1 = altr.xop;
 
-        enum : uint8_t
-          {
-            u2_ref_unary    = 0,
-            u2_ref_binary   = 1,
-            u2_val_unary    = 2,
-            u2_val_binary   = 3,
-            u2_val_ternary  = 4,
-            u2_val_shift    = 5,
-          };
-
         switch(altr.xop) {
           case xop_inc:
           case xop_dec:
@@ -1941,86 +1931,11 @@ solidify(AVMC_Queue& queue) const
           case xop_head:
           case xop_tail:
           case xop_random:
-            up2.u2 = u2_ref_unary;
-            break;
-
-          case xop_assign:
-          case xop_index:
-            up2.u2 = u2_ref_binary;
-            break;
-
-          case xop_pos:
-          case xop_neg:
-          case xop_notb:
-          case xop_notl:
-          case xop_countof:
-          case xop_typeof:
-          case xop_sqrt:
-          case xop_isnan:
-          case xop_isinf:
-          case xop_abs:
-          case xop_sign:
-          case xop_round:
-          case xop_floor:
-          case xop_ceil:
-          case xop_trunc:
-          case xop_iround:
-          case xop_ifloor:
-          case xop_iceil:
-          case xop_itrunc:
-          case xop_lzcnt:
-          case xop_tzcnt:
-          case xop_popcnt:
-            up2.u2 = u2_val_unary;
-            break;
-
-          case xop_cmp_eq:
-          case xop_cmp_ne:
-          case xop_cmp_lt:
-          case xop_cmp_gt:
-          case xop_cmp_lte:
-          case xop_cmp_gte:
-          case xop_cmp_3way:
-          case xop_cmp_un:
-          case xop_add:
-          case xop_sub:
-          case xop_mul:
-          case xop_div:
-          case xop_mod:
-          case xop_andb:
-          case xop_orb:
-          case xop_xorb:
-          case xop_addm:
-          case xop_subm:
-          case xop_mulm:
-          case xop_adds:
-          case xop_subs:
-          case xop_muls:
-            up2.u2 = u2_val_binary;
-            break;
-
-          case xop_fma:
-            up2.u2 = u2_val_ternary;
-            break;
-
-          case xop_sll:
-          case xop_srl:
-          case xop_sla:
-          case xop_sra:
-            up2.u2 = u2_val_shift;
-            break;
-
-          default:
-            ASTERIA_TERMINATE(("Invalid operator enumerator `$1`"), altr.xop);
-        }
-
-        queue.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
-          {
-            const auto& up = head->uparam;
-
-            switch(up.u2) {
-              case u2_ref_unary: {
+            // unary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
                 auto& top = ctx.stack().mut_top();
 
                 switch(up.u1) {
@@ -2140,7 +2055,27 @@ solidify(AVMC_Queue& queue) const
                 }
               }
 
-              case u2_ref_binary: {
+              // Uparam
+              , up2
+
+              // Sparam
+              // (none)
+
+              // Collector
+              // (none)
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_assign:
+          case xop_index:
+            // binary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
                 auto& rhs = ctx.stack().mut_top().dereference_copy();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
@@ -2177,7 +2112,47 @@ solidify(AVMC_Queue& queue) const
                 }
               }
 
-              case u2_val_unary: {
+              // Uparam
+              , up2
+
+              // Sparam
+              // (none)
+
+              // Collector
+              // (none)
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_pos:
+          case xop_neg:
+          case xop_notb:
+          case xop_notl:
+          case xop_countof:
+          case xop_typeof:
+          case xop_sqrt:
+          case xop_isnan:
+          case xop_isinf:
+          case xop_abs:
+          case xop_sign:
+          case xop_round:
+          case xop_floor:
+          case xop_ceil:
+          case xop_trunc:
+          case xop_iround:
+          case xop_ifloor:
+          case xop_iceil:
+          case xop_itrunc:
+          case xop_lzcnt:
+          case xop_tzcnt:
+          case xop_popcnt:
+            // unary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
                 auto& top = ctx.stack().mut_top();
                 auto& rhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
 
@@ -2536,7 +2511,47 @@ solidify(AVMC_Queue& queue) const
                 }
               }
 
-              case u2_val_binary: {
+              // Uparam
+              , up2
+
+              // Sparam
+              // (none)
+
+              // Collector
+              // (none)
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_cmp_eq:
+          case xop_cmp_ne:
+          case xop_cmp_lt:
+          case xop_cmp_gt:
+          case xop_cmp_lte:
+          case xop_cmp_gte:
+          case xop_cmp_3way:
+          case xop_cmp_un:
+          case xop_add:
+          case xop_sub:
+          case xop_mul:
+          case xop_div:
+          case xop_mod:
+          case xop_andb:
+          case xop_orb:
+          case xop_xorb:
+          case xop_addm:
+          case xop_subm:
+          case xop_mulm:
+          case xop_adds:
+          case xop_subs:
+          case xop_muls:
+            // binary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
@@ -3020,7 +3035,26 @@ solidify(AVMC_Queue& queue) const
                 }
               }
 
-              case u2_val_ternary: {
+              // Uparam
+              , up2
+
+              // Sparam
+              // (none)
+
+              // Collector
+              // (none)
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_fma:
+            // ternary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 const auto& mid = ctx.stack().top().dereference_readonly();
@@ -3050,7 +3084,29 @@ solidify(AVMC_Queue& queue) const
                 }
               }
 
-              case u2_val_shift: {
+              // Uparam
+              , up2
+
+              // Sparam
+              // (none)
+
+              // Collector
+              // (none)
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_sll:
+          case xop_srl:
+          case xop_sla:
+          case xop_sra:
+            // shift
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
@@ -3207,24 +3263,23 @@ solidify(AVMC_Queue& queue) const
                 }
               }
 
-              default:
-                ROCKET_UNREACHABLE();
-            }
-          }
+              // Uparam
+              , up2
 
-          // Uparam
-          , up2
+              // Sparam
+              // (none)
 
-          // Sparam
-          // (none)
+              // Collector
+              // (none)
 
-          // Collector
-          // (none)
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
 
-          // Symbols
-          , &(altr.sloc)
-        );
-        return;
+          default:
+            ASTERIA_TERMINATE(("Invalid operator enumerator `$1`"), altr.xop);
+        }
       }
 
       case index_unpack_struct_array: {
