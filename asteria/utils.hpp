@@ -163,39 +163,6 @@ is_cmask(char ch, uint8_t mask) noexcept
     return noadl::get_cmask(ch) & mask;
   }
 
-// Numeric conversion
-constexpr
-bool
-is_convertible_to_int64(double val) noexcept
-  {
-    return (-0x1p63 <= val) && (val < 0x1p63);
-  }
-
-constexpr
-bool
-is_exact_int64(double val) noexcept
-  {
-    return noadl::is_convertible_to_int64(val) && ((double)(int64_t) val == val);
-  }
-
-inline
-int64_t
-safe_double_to_int64(double val)
-  {
-    if(!noadl::is_convertible_to_int64(val))
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_double_to_int64: value `%.17g` is out of range for an `int64`",
-            val);
-
-    int64_t ival = (int64_t) val;
-    if((double) ival != val)
-      ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_double_to_int64: value `%.17g` is not an exact integer",
-            val);
-
-    return ival;
-  }
-
 // Gets a random number from hardware.
 inline
 uint64_t
@@ -249,6 +216,10 @@ wrap_array_index(ptrdiff_t ssize, int64_t sindex) noexcept
   {
     return Wrapped_Index(ssize, sindex);
   }
+
+// Numeric conversion
+int64_t
+safe_double_to_int64(double val);
 
 // UTF-8 conversion functions
 bool

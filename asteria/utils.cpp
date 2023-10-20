@@ -218,6 +218,24 @@ utf8_encode(char*& pos, char32_t cp) noexcept
     return true;
   }
 
+int64_t
+safe_double_to_int64(double val)
+  {
+    ::feclearexcept(FE_ALL_EXCEPT);
+    int64_t ival = ::llrint(val);
+    int fex = ::fetestexcept(FE_ALL_EXCEPT);
+
+    if(fex & FE_OVERFLOW)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "safe_double_to_int64: `%.17g` is not representable as an `int64`", val);
+
+    if(fex != 0)
+      ::rocket::sprintf_and_throw<::std::invalid_argument>(
+            "safe_double_to_int64: `%.17g` is not an exact integer", val);
+
+    return ival;
+  }
+
 bool
 utf8_encode(cow_string& text, char32_t cp)
   {
