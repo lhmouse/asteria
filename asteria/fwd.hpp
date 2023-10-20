@@ -198,9 +198,10 @@ class Statement_Sequence;
 class AIR_Optimizer;
 
 // This typedef is for native bindings.
-using simple_function = Reference& (Reference& self,  // `this` (in) and return (out)
-                                    Global_Context& global,
-                                    Reference_Stack&& stack);  // positional arguments
+using simple_function =
+    Reference& (Reference& self,           // `this` (in) / return (out)
+                Global_Context& global,    // global scope
+                Reference_Stack&& stack);  // positional arguments
 
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
@@ -357,7 +358,7 @@ struct Abstract_Function
     // This function may return a proper tail call wrapper.
     virtual
     Reference&
-    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& args) const = 0;
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const = 0;
   };
 
 inline
