@@ -260,7 +260,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_false = do_generate_block(opts, global, ctx, ptc, altr.branch_false);
 
         // Encode arguments.
-        AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true),
+        AIR_Node::S_if_statement xnode = { altr.cond.sloc, altr.negative, ::std::move(code_true),
                                            ::std::move(code_false) };
         code.emplace_back(::std::move(xnode));
         return code;
@@ -275,14 +275,14 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
         // Generate code for all clauses.
         cow_vector<cow_vector<AIR_Node>> code_labels;
-        cow_vector<cow_vector<AIR_Node>> code_bodies;
+        cow_vector<cow_vector<AIR_Node>> code_clauses;
         cow_vector<cow_vector<phsh_string>> names_added;
 
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
         auto nclauses = altr.labels.size();
-        ROCKET_ASSERT(nclauses == altr.bodies.size());
+        ROCKET_ASSERT(nclauses == altr.clauses.size());
 
         for(size_t i = 0;  i < nclauses;  ++i) {
           // Generate code for `case` labels, or create empty code for the `default` label.
@@ -295,13 +295,13 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
           // Generate code for the clause and accumulate names.
           // This cannot be PTC'd.
-          do_generate_statement_list(code_bodies.emplace_back(), &(names_added.emplace_back()),
-                                     global, ctx_body, opts, ptc_aware_none, altr.bodies[i]);
+          do_generate_statement_list(code_clauses.emplace_back(), &(names_added.emplace_back()),
+                                     global, ctx_body, opts, ptc_aware_none, altr.clauses[i]);
         }
 
         // Encode arguments.
-        AIR_Node::S_switch_statement xnode = { ::std::move(code_labels), ::std::move(code_bodies),
-                                               ::std::move(names_added) };
+        AIR_Node::S_switch_statement xnode = { altr.ctrl.sloc, ::std::move(code_labels),
+                                               ::std::move(code_clauses), ::std::move(names_added) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -318,8 +318,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
         // Encode arguments.
-        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative,
-                                                 ::std::move(code_cond) };
+        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.cond.sloc,
+                                                 altr.negative, ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -336,8 +336,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond),
-                                              ::std::move(code_body) };
+        AIR_Node::S_while_statement xnode = { altr.cond.sloc, altr.negative,
+                                              ::std::move(code_cond), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -345,8 +345,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       case index_for_each: {
         const auto& altr = this->m_stor.as<S_for_each>();
 
-        // Note that the key and value references outlasts every iteration, so we have to create
-        // an outer contexts here.
+        // Note that the key and value references outlasts every iteration, so we
+        // have to create an outer contexts here.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
         do_user_declare(names_opt, ctx_for, altr.name_key);
         do_user_declare(names_opt, ctx_for, altr.name_mapped);
@@ -369,8 +369,8 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       case index_for: {
         const auto& altr = this->m_stor.as<S_for>();
 
-        // Note that names declared in the first segment of a for-statement outlasts every
-        // iteration, so we have to create an outer contexts here.
+        // Note that names declared in the first segment of a for-statement outlasts
+        // every iteration, so we have to create an outer contexts here.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
 
         // Generate code for the initializer, the condition and the loop increment.
@@ -384,8 +384,9 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
         // Encode arguments.
-        AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
-                                            ::std::move(code_step), ::std::move(code_body) };
+        AIR_Node::S_for_statement xnode = { ::std::move(code_init), altr.cond.sloc,
+                                            ::std::move(code_cond), ::std::move(code_step),
+                                            ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
         return code;
       }

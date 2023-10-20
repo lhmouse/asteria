@@ -2047,6 +2047,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
 
       Expression_Unit::S_argument_finish xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
       units.emplace_back(::std::move(xunit));
+
       nargs += 1;
       if(nargs >= 0x100000)
         throw Compiler_Error(Compiler_Error::M_status(),
@@ -2199,6 +2200,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
 
       Expression_Unit::S_argument_finish xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
       units.emplace_back(::std::move(xunit));
+
       nargs += 1;
       if(nargs >= 0x100000)
         throw Compiler_Error(Compiler_Error::M_status(),

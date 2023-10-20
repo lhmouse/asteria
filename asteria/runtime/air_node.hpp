@@ -36,6 +36,7 @@ class AIR_Node
 
     struct S_if_statement
       {
+        Source_Location sloc_cond;
         bool negative;
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
@@ -43,6 +44,7 @@ class AIR_Node
 
     struct S_switch_statement
       {
+        Source_Location sloc_ctrl;
         cow_vector<cow_vector<AIR_Node>> code_labels;
         cow_vector<cow_vector<AIR_Node>> code_clauses;
         cow_vector<cow_vector<phsh_string>> names_added;
@@ -51,12 +53,14 @@ class AIR_Node
     struct S_do_while_statement
       {
         cow_vector<AIR_Node> code_body;
+        Source_Location sloc_cond;
         bool negative;
         cow_vector<AIR_Node> code_cond;
       };
 
     struct S_while_statement
       {
+        Source_Location sloc_cond;
         bool negative;
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_body;
@@ -74,6 +78,7 @@ class AIR_Node
     struct S_for_statement
       {
         cow_vector<AIR_Node> code_init;
+        Source_Location sloc_cond;
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_step;
         cow_vector<AIR_Node> code_body;
@@ -247,8 +252,8 @@ class AIR_Node
 
     struct S_push_constant_int48
       {
-        int16_t hi;
-        uint32_t lo;
+        int16_t high;
+        uint32_t low;
       };
 
     enum Index : uint8_t

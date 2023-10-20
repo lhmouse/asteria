@@ -14,35 +14,35 @@ union Uparam
   {
     struct {
       char _x1[2];
-      bool b1, b2, b3, b4, b5, b6;
+      bool b0, b1, b2, b3, b4, b5;
     };
     struct {
       char _x2[2];
-      char c1, c2, c3, c4, c5, c6;
+      char c0, c1, c2, c3, c4, c5;
     };
     struct {
       char _x3[2];
-      int8_t i1, i2, i3, i4, i5, i6;
+      int8_t i0, i1, i2, i3, i4, i5;
     };
     struct {
       char _x4[2];
-      uint8_t u1, u2, u3, u4, u5, u6;
+      uint8_t u0, u1, u2, u3, u4, u5;
     };
     struct {
       char _x5[2];
-      int16_t i12, i34, i56;
+      int16_t i01, i23, i45;
     };
     struct {
       char _x6[2];
-      uint16_t u12, u34, u56;
+      uint16_t u01, u23, u45;
     };
     struct {
       char _x7[4];
-      int32_t i3456;
+      int32_t i2345;
     };
     struct {
       char _x8[4];
-      uint32_t u3456;
+      uint32_t u2345;
     };
   };
 

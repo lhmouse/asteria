@@ -50,7 +50,7 @@ class Statement
       {
         S_expression ctrl;
         cow_vector<S_expression> labels;
-        cow_vector<S_block> bodies;
+        cow_vector<S_block> clauses;
       };
 
     struct S_do_while
