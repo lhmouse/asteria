@@ -2264,7 +2264,10 @@ do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
-    Expression_Unit::S_member_access xunit = { sloc, ::std::move(*qkey) };
+    Expression_Unit::S_literal xname = { ::std::move(*qkey) };
+    units.emplace_back(::std::move(xname));
+
+    Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
     units.emplace_back(::std::move(xunit));
     return true;
   }

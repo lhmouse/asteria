@@ -189,15 +189,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         return code;
       }
 
-      case index_member_access: {
-        const auto& altr = this->m_stor.as<S_member_access>();
-
-        // Encode arguments.
-        AIR_Node::S_member_access xnode = { altr.sloc, altr.name };
-        code.emplace_back(::std::move(xnode));
-        return code;
-      }
-
       case index_operator_rpn: {
         const auto& altr = this->m_stor.as<S_operator_rpn>();
 
@@ -221,21 +212,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // Encode arguments.
         AIR_Node::S_push_unnamed_object xnode = { altr.sloc, altr.keys };
-        code.emplace_back(::std::move(xnode));
-        return code;
-      }
-
-      case index_coalescence: {
-        const auto& altr = this->m_stor.as<S_coalescence>();
-
-        // The branch may be PTC'd unless this is a compound assignment operation.
-        auto rptc = altr.assign ? ptc_aware_none : ptc;
-
-        // Generate code for the branch.
-        auto code_null = do_generate_code_branch(opts, global, ctx, rptc, altr.branch_null);
-
-        // Encode arguments.
-        AIR_Node::S_coalescence xnode = { altr.sloc, ::std::move(code_null), altr.assign };
         code.emplace_back(::std::move(xnode));
         return code;
       }

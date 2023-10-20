@@ -45,17 +45,11 @@ class Expression_Unit
         uint32_t nargs;
       };
 
-    struct S_member_access
-      {
-        Source_Location sloc;
-        phsh_string name;
-      };
-
     struct S_operator_rpn
       {
         Source_Location sloc;
         Xop xop;
-        bool assign;  // ignored for `++`, `--`, `[]` and `=`
+        bool assign;
       };
 
     struct S_unnamed_array
@@ -68,13 +62,6 @@ class Expression_Unit
       {
         Source_Location sloc;
         cow_vector<phsh_string> keys;
-      };
-
-    struct S_coalescence
-      {
-        Source_Location sloc;
-        cow_vector<Expression_Unit> branch_null;
-        bool assign;
       };
 
     struct S_global_reference
@@ -112,16 +99,14 @@ class Expression_Unit
         index_closure_function  =  2,
         index_branch            =  3,
         index_function_call     =  4,
-        index_member_access     =  5,
-        index_operator_rpn      =  6,
-        index_unnamed_array     =  7,
-        index_unnamed_object    =  8,
-        index_coalescence       =  9,
-        index_global_reference  = 10,
-        index_variadic_call     = 11,
-        index_argument_finish   = 12,
-        index_import_call       = 13,
-        index_catch             = 14,
+        index_operator_rpn      =  5,
+        index_unnamed_array     =  6,
+        index_unnamed_object    =  7,
+        index_global_reference  =  8,
+        index_variadic_call     =  9,
+        index_argument_finish   = 10,
+        index_import_call       = 11,
+        index_catch             = 12,
       };
 
   private:
@@ -132,16 +117,14 @@ class Expression_Unit
         , S_closure_function  //  2
         , S_branch            //  3
         , S_function_call     //  4
-        , S_member_access     //  5
-        , S_operator_rpn      //  6
-        , S_unnamed_array     //  7
-        , S_unnamed_object    //  8
-        , S_coalescence       //  9
-        , S_global_reference  // 10
-        , S_variadic_call     // 11
-        , S_argument_finish   // 12
-        , S_import_call       // 13
-        , S_catch             // 14
+        , S_operator_rpn      //  5
+        , S_unnamed_array     //  6
+        , S_unnamed_object    //  7
+        , S_global_reference  //  8
+        , S_variadic_call     //  9
+        , S_argument_finish   // 10
+        , S_import_call       // 11
+        , S_catch             // 12
       );
 
   public:

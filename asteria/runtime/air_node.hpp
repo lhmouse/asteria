@@ -143,13 +143,7 @@ class AIR_Node
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
         bool assign;
-      };
-
-    struct S_coalescence
-      {
-        Source_Location sloc;
-        cow_vector<AIR_Node> code_null;
-        bool assign;
+        bool coalescence;
       };
 
     struct S_function_call
@@ -157,12 +151,6 @@ class AIR_Node
         Source_Location sloc;
         uint32_t nargs;
         PTC_Aware ptc;
-      };
-
-    struct S_member_access
-      {
-        Source_Location sloc;
-        phsh_string name;
       };
 
     struct S_push_unnamed_array
@@ -285,25 +273,23 @@ class AIR_Node
         index_push_bound_reference   = 17,
         index_define_function        = 18,
         index_branch_expression      = 19,
-        index_coalescence            = 20,
-        index_function_call          = 21,
-        index_member_access          = 22,
-        index_push_unnamed_array     = 23,
-        index_push_unnamed_object    = 24,
-        index_apply_operator         = 25,
-        index_unpack_struct_array    = 26,
-        index_unpack_struct_object   = 27,
-        index_define_null_variable   = 28,
-        index_single_step_trap       = 29,
-        index_variadic_call          = 30,
-        index_defer_expression       = 31,
-        index_import_call            = 32,
-        index_declare_reference      = 33,
-        index_initialize_reference   = 34,
-        index_catch_expression       = 35,
-        index_return_statement       = 36,
-        index_push_constant          = 37,
-        index_push_constant_int48    = 38,
+        index_function_call          = 20,
+        index_push_unnamed_array     = 21,
+        index_push_unnamed_object    = 22,
+        index_apply_operator         = 23,
+        index_unpack_struct_array    = 24,
+        index_unpack_struct_object   = 25,
+        index_define_null_variable   = 26,
+        index_single_step_trap       = 27,
+        index_variadic_call          = 28,
+        index_defer_expression       = 29,
+        index_import_call            = 30,
+        index_declare_reference      = 31,
+        index_initialize_reference   = 32,
+        index_catch_expression       = 33,
+        index_return_statement       = 34,
+        index_push_constant          = 35,
+        index_push_constant_int48    = 36,
       };
 
   private:
@@ -329,25 +315,23 @@ class AIR_Node
         , S_push_bound_reference   // 17
         , S_define_function        // 18
         , S_branch_expression      // 19
-        , S_coalescence            // 20
-        , S_function_call          // 21
-        , S_member_access          // 22
-        , S_push_unnamed_array     // 23
-        , S_push_unnamed_object    // 24
-        , S_apply_operator         // 25
-        , S_unpack_struct_array    // 26
-        , S_unpack_struct_object   // 27
-        , S_define_null_variable   // 28
-        , S_single_step_trap       // 29
-        , S_variadic_call          // 30
-        , S_defer_expression       // 31
-        , S_import_call            // 32
-        , S_declare_reference      // 33
-        , S_initialize_reference   // 34
-        , S_catch_expression       // 35
-        , S_return_statement       // 36
-        , S_push_constant          // 37,
-        , S_push_constant_int48    // 38,
+        , S_function_call          // 20
+        , S_push_unnamed_array     // 21
+        , S_push_unnamed_object    // 22
+        , S_apply_operator         // 23
+        , S_unpack_struct_array    // 24
+        , S_unpack_struct_object   // 25
+        , S_define_null_variable   // 26
+        , S_single_step_trap       // 27
+        , S_variadic_call          // 28
+        , S_defer_expression       // 29
+        , S_import_call            // 30
+        , S_declare_reference      // 31
+        , S_initialize_reference   // 32
+        , S_catch_expression       // 33
+        , S_return_statement       // 34
+        , S_push_constant          // 35
+        , S_push_constant_int48    // 36
       );
 
   public:
