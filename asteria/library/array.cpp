@@ -77,7 +77,7 @@ do_find_opt(Global_Context& global, Reference_Stack& stack,
       }
       else {
         // `target` is a plain value.
-        result = it->compare(target) == compare_equal;
+        result = it->compare_partial(target) == compare_equal;
       }
       if(result == match)
         return ::std::move(it);
@@ -86,12 +86,12 @@ do_find_opt(Global_Context& global, Reference_Stack& stack,
   }
 
 Compare
-do_compare(Global_Context& global, Reference_Stack& stack,
-           const optV_function& kcomp, const Value& lhs, const Value& rhs)
+do_compare_total(Global_Context& global, Reference_Stack& stack,
+                 const optV_function& kcomp, const Value& lhs, const Value& rhs)
   {
     // Use the builtin 3-way comparison operator if no comparator is provided.
     if(ROCKET_EXPECT(!kcomp))
-      return lhs.compare(rhs);
+      return lhs.compare_total(rhs);
 
     // Set up arguments for the user-defined comparator.
     stack.clear();
@@ -102,7 +102,7 @@ do_compare(Global_Context& global, Reference_Stack& stack,
     Reference self;
     self.set_temporary(nullopt);
     kcomp.invoke(self, global, ::std::move(stack));
-    return self.dereference_readonly().compare(V_integer(0));
+    return self.dereference_readonly().compare_total(V_integer(0));
   }
 
 template<typename IterT>
@@ -120,11 +120,7 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + (dist >> 1);
-      auto cmp = do_compare(global, stack, kcomp, target, *mpos);
-      if(cmp == compare_unordered)
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Unordered elements (operands were `$1` and `$2`)"),
-            target, *mpos);
+      auto cmp = do_compare_total(global, stack, kcomp, target, *mpos);
 
       if(cmp == compare_equal)
         return { ::std::move(mpos), true };
@@ -151,11 +147,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + dist / 2;
-      auto cmp = do_compare(global, stack, kcomp, target, *mpos);
-      if(cmp == compare_unordered)
-        ASTERIA_THROW_RUNTIME_ERROR((
-            "Unordered elements (operands were `$1` and `$2`)"),
-            target, *mpos);
+      auto cmp = do_compare_total(global, stack, kcomp, target, *mpos);
 
       if(pred(cmp))
         epos = mpos;
@@ -393,24 +385,19 @@ std_array_exclude_not(Global_Context& global, V_array data, V_integer from, optV
 V_boolean
 std_array_is_sorted(Global_Context& global, V_array data, optV_function comparator)
   {
-    if(data.size() == 0)
+    auto pos = data.begin();
+    if(pos == data.end())
       return true;
 
     // The first element shall not be unordered with itself.
     Reference_Stack stack;
-    auto comp = do_compare(global, stack, comparator, data.front(), data.front());
-    if(comp != compare_equal)
+    if(do_compare_total(global, stack, comparator, *pos, *pos) != compare_equal)
       return false;
 
-    if(data.size() <= 1)
-      return true;
-
-    // Check remaining elements.
-    for(size_t k = 1;  k < data.size();  ++k) {
-      comp = do_compare(global, stack, comparator, data.at(k - 1), data.at(k));
-      if((comp != compare_less) && (comp != compare_equal))
+    while(++pos != data.end())
+      if(do_compare_total(global, stack, comparator, pos[-1], pos[0]) == compare_greater)
         return false;
-    }
+
     return true;
   }
 
@@ -462,7 +449,7 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
     // Merge blocks of exponential sizes.
     Reference_Stack stack;
     auto compare = [&](const Value& lhs, const Value& rhs)
-        { return do_compare(global, stack, comparator, lhs, rhs);  };
+      { return do_compare_total(global, stack, comparator, lhs, rhs);  };
 
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
@@ -484,7 +471,7 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
     // Merge blocks of exponential sizes.
     Reference_Stack stack;
     auto compare = [&](const Value& lhs, const Value& rhs)
-        { return do_compare(global, stack, comparator, lhs, rhs);  };
+      { return do_compare_total(global, stack, comparator, lhs, rhs);  };
 
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
@@ -518,8 +505,7 @@ std_array_ksort(Global_Context& global, V_object object, optV_function comparato
     // Merge blocks of exponential sizes. Keys are known to be unique.
     Reference_Stack stack;
     auto compare = [&](const Value& lhs, const Value& rhs)
-        { return do_compare(global, stack, comparator,
-                            lhs.as_array().at(0), rhs.as_array().at(0));  };
+      { return do_compare_total(global, stack, comparator, lhs.as_array().at(0), rhs.as_array().at(0));  };
 
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
@@ -534,39 +520,28 @@ std_array_ksort(Global_Context& global, V_object object, optV_function comparato
 Value
 std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
-    // Return `null` if `data` is empty.
-    auto qmax = data.begin();
-    if(qmax == data.end())
-      return nullopt;
-
-    // Compare `*qmax` with the other elements, ignoring unordered elements.
+    Value result;
     Reference_Stack stack;
-    for(auto it = qmax + 1;  it != data.end();  ++it)
-      if(do_compare(global, stack, comparator, *qmax, *it) == compare_less)
-        qmax = it;
-    return *qmax;
+    for(const auto& r : data)
+      if(result.is_null() || (!r.is_null() && do_compare_total(global, stack, comparator, result, r) == compare_less))
+        result = r;
+    return result;
   }
 
 Value
 std_array_min_of(Global_Context& global, V_array data, optV_function comparator)
   {
-    // Return `null` if `data` is empty.
-    auto qmin = data.begin();
-    if(qmin == data.end())
-      return nullopt;
-
-    // Compare `*qmin` with the other elements, ignoring unordered elements.
+    Value result;
     Reference_Stack stack;
-    for(auto it = qmin + 1;  it != data.end();  ++it)
-      if(do_compare(global, stack, comparator, *qmin, *it) == compare_greater)
-        qmin = it;
-    return *qmin;
+    for(const auto& r : data)
+      if(result.is_null() || (!r.is_null() && do_compare_total(global, stack, comparator, result, r) == compare_greater))
+        result = r;
+    return result;
   }
 
 V_array
 std_array_reverse(V_array data)
   {
-    // This is an easy matter, isn't it?
     return V_array(data.move_rbegin(), data.move_rend());
   }
 

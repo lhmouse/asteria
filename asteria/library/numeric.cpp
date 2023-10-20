@@ -300,47 +300,21 @@ std_numeric_is_nan(V_real value)
 Value
 std_numeric_max(cow_vector<Value> values)
   {
-    Value res;
-    for(const auto& val : values) {
-      if(val.is_null())
-        continue;
-
-      if(!res.is_null()) {
-        auto cmp = res.compare(val);
-        if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operands were `$1` and `$2`)"),
-              cmp, val);
-
-        if(cmp != compare_less)
-          continue;
-      }
-      res = val;
-    }
-    return res;
+    Value result;
+    for(const auto& r : values)
+      if(result.is_null() || (result.compare_partial(r) == compare_less))
+        result = r;
+    return result;
   }
 
 Value
 std_numeric_min(cow_vector<Value> values)
   {
-    Value res;
-    for(const auto& val : values) {
-      if(val.is_null())
-        continue;
-
-      if(!res.is_null()) {
-        auto cmp = res.compare(val);
-        if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operands were `$1` and `$2`)"),
-              cmp, val);
-
-        if(cmp != compare_greater)
-          continue;
-      }
-      res = val;
-    }
-    return res;
+    Value result;
+    for(const auto& r : values)
+      if(result.is_null() || (result.compare_partial(r) == compare_greater))
+        result = r;
+    return result;
   }
 
 V_integer

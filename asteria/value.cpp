@@ -194,9 +194,18 @@ do_throw_type_mismatch(const char* desc) const
         desc, describe_type(this->type()));
   }
 
+void
+Value::
+do_throw_uncomparable_with(const Value& other) const
+  {
+    ASTERIA_THROW((
+        "Values not comparable (operands were `$1` and `$2`)"),
+        *this, other);
+  }
+
 Compare
 Value::
-compare(const Value& other) const noexcept
+compare_partial(const Value& other) const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;

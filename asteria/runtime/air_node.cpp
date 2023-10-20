@@ -463,7 +463,7 @@ struct Traits_switch_statement
           // Evaluate the operand and check whether it equals `cond`.
           AIR_Status status = sp.queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().top().dereference_readonly().compare(cond) == compare_equal) {
+          if(ctx.stack().top().dereference_readonly().compare_partial(cond) == compare_equal) {
             target_index = i;
             break;
           }
@@ -2383,7 +2383,7 @@ struct Traits_apply_xop_cmp_eq
 
         // Check whether the two operands are equal. Unordered values are
         // considered to compare unequal.
-        lhs = lhs.compare(rhs) == compare_equal;
+        lhs = lhs.compare_partial(rhs) == compare_equal;
         return air_status_next;
       }
   };
@@ -2418,7 +2418,7 @@ struct Traits_apply_xop_cmp_ne
 
         // Check whether the two operands are not equal. Unordered values
         // are considered to compare unequal.
-        lhs = lhs.compare(rhs) != compare_equal;
+        lhs = lhs.compare_partial(rhs) != compare_equal;
         return air_status_next;
       }
   };
@@ -2453,13 +2453,7 @@ struct Traits_apply_xop_cmp_lt
 
         // Check whether the LHS operand is less than the RHS operand. If
         // they are unordered, an exception shall be thrown.
-        Compare cmp = lhs.compare(rhs);
-        if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operands were `$1` and `$2`)"),
-              lhs, rhs);
-
-        lhs = cmp == compare_less;
+        lhs = lhs.compare_total(rhs) == compare_less;
         return air_status_next;
       }
   };
@@ -2494,13 +2488,7 @@ struct Traits_apply_xop_cmp_gt
 
         // Check whether the LHS operand is greater than the RHS operand. If
         // they are unordered, an exception shall be thrown.
-        Compare cmp = lhs.compare(rhs);
-        if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operands were `$1` and `$2`)"),
-              lhs, rhs);
-
-        lhs = cmp == compare_greater;
+        lhs = lhs.compare_total(rhs) == compare_greater;
         return air_status_next;
       }
   };
@@ -2535,13 +2523,7 @@ struct Traits_apply_xop_cmp_lte
 
         // Check whether the LHS operand is less than or equal to the RHS
         // operand. If they are unordered, an exception shall be thrown.
-        Compare cmp = lhs.compare(rhs);
-        if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operands were `$1` and `$2`)"),
-              lhs, rhs);
-
-        lhs = cmp != compare_greater;
+        lhs = lhs.compare_total(rhs) != compare_greater;
         return air_status_next;
       }
   };
@@ -2576,13 +2558,7 @@ struct Traits_apply_xop_cmp_gte
 
         // Check whether the LHS operand is greater than or equal to the RHS
         // operand. If they are unordered, an exception shall be thrown.
-        Compare cmp = lhs.compare(rhs);
-        if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
-              "Values not comparable (operands were `$1` and `$2`)"),
-              lhs, rhs);
-
-        lhs = cmp != compare_less;
+        lhs = lhs.compare_total(rhs) != compare_less;
         return air_status_next;
       }
   };
@@ -2616,7 +2592,7 @@ struct Traits_apply_xop_cmp_3way
         auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
 
         // Perform 3-way comparison of both operands.
-        Compare cmp = lhs.compare(rhs);
+        Compare cmp = lhs.compare_partial(rhs);
         if(cmp == compare_unordered)
           lhs = sref("[unordered]");
         else {
@@ -2658,7 +2634,7 @@ struct Traits_apply_xop_cmp_un
         auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
 
         // Check whether the two operands are unordered.
-        lhs = lhs.compare(rhs) == compare_unordered;
+        lhs = lhs.compare_partial(rhs) == compare_unordered;
         return air_status_next;
       }
   };

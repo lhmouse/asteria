@@ -109,6 +109,10 @@ class Value
     void
     do_throw_type_mismatch(const char* desc) const;
 
+    [[noreturn]]
+    void
+    do_throw_uncomparable_with(const Value& other) const;
+
   public:
     ~Value()
       {
@@ -312,7 +316,7 @@ class Value
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       {
-        if(ROCKET_UNEXPECT(this->type() >= type_opaque))
+        if(this->type() >= type_opaque)
           this->do_collect_variables_slow(staged, temp);
       }
 
@@ -344,9 +348,19 @@ class Value
         }
       }
 
-    // This performs the builtin comparison with another value.
+    // These perform the builtin comparison.
     Compare
-    compare(const Value& other) const noexcept;
+    compare_partial(const Value& other) const;
+
+    Compare
+    compare_total(const Value& other) const
+      {
+        auto cmp = this->compare_partial(other);
+        if(cmp != compare_unordered)
+          return cmp;
+
+        this->do_throw_uncomparable_with(other);
+      }
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&

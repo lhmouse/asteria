@@ -212,14 +212,14 @@ int main()
                             == ["aaa","abb","baa","bbb"];
 
         assert std.array.max_of([ ]) == null;
-        assert std.array.max_of([5,null,3,"meow",7,4]) == 7;
+        assert std.array.max_of([5,null,3,null,7,4]) == 7;
         assert std.array.max_of([ ], func(x,y) = y<=> x) == null;
-        assert std.array.max_of([5,null,3,"meow",7,4], func(x,y) = y<=> x) == 3;
+        assert std.array.max_of([5,null,3,null,7,4], func(x,y) = y<=> x) == 3;
 
         assert std.array.min_of([ ]) == null;
-        assert std.array.min_of([5,null,3,"meow",7,4]) == 3;
+        assert std.array.min_of([5,null,3,null,7,4]) == 3;
         assert std.array.min_of([ ], func(x,y) = y<=> x) == null;
-        assert std.array.min_of([5,null,3,"meow",7,4], func(x,y) = y<=> x) == 7;
+        assert std.array.min_of([5,null,3,null,7,4], func(x,y) = y<=> x) == 7;
 
         assert std.array.reverse([]) == [];
         assert std.array.reverse([0]) == [0];
