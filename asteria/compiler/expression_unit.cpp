@@ -181,7 +181,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<S_function_call>();
 
         // Check whether PTC is disabled.
-        auto rptc = !opts.proper_tail_calls ? ptc_aware_none : ptc;
+        auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
         // Encode arguments.
         AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, rptc };
@@ -252,9 +252,11 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_variadic_call: {
         const auto& altr = this->m_stor.as<S_variadic_call>();
 
+        // Check whether PTC is disabled.
+        auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
+
         // Encode arguments.
-        AIR_Node::S_variadic_call xnode = { altr.sloc, opts.proper_tail_calls
-                                                         ? ptc : ptc_aware_none };
+        AIR_Node::S_variadic_call xnode = { altr.sloc, rptc };
         code.emplace_back(::std::move(xnode));
         return code;
       }
