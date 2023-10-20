@@ -172,7 +172,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true),
-                                                ::std::move(code_false), altr.assign };
+                                                ::std::move(code_false), altr.assign,
+                                                altr.coalescence };
         code.emplace_back(::std::move(xnode));
         return code;
       }

@@ -37,6 +37,7 @@ class Expression_Unit
         cow_vector<Expression_Unit> branch_true;
         cow_vector<Expression_Unit> branch_false;
         bool assign;
+        bool coalescence;
       };
 
     struct S_function_call

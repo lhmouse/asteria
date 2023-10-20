@@ -1081,6 +1081,7 @@ struct Traits_branch_expression
       {
         AVMC_Queue::Uparam up;
         up.b1 = altr.assign;
+        up.b2 = altr.coalescence;
         return up;
       }
 
@@ -1099,47 +1100,14 @@ struct Traits_branch_expression
     execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const Sparam_queues_2& sp)
       {
         // Check the value of the condition.
-        return ctx.stack().top().dereference_readonly().test()
-                    ? do_evaluate_subexpression(ctx, up.b1, sp.queues[0])
+        bool cond;
+        if(up.b2 == false)
+          cond = ctx.stack().top().dereference_readonly().test();
+        else
+          cond = ctx.stack().top().dereference_readonly().is_null();
+
+        return cond ? do_evaluate_subexpression(ctx, up.b1, sp.queues[0])
                     : do_evaluate_subexpression(ctx, up.b1, sp.queues[1]);
-      }
-  };
-
-struct Traits_coalescence
-  {
-    static
-    const Source_Location&
-    get_symbols(const AIR_Node::S_coalescence& altr)
-      {
-        return altr.sloc;
-      }
-
-    static
-    AVMC_Queue::Uparam
-    make_uparam(const AIR_Node::S_coalescence& altr)
-      {
-        AVMC_Queue::Uparam up;
-        up.b1 = altr.assign;
-        return up;
-      }
-
-    static
-    AVMC_Queue
-    make_sparam(const AIR_Node::S_coalescence& altr)
-      {
-        AVMC_Queue queue;
-        do_solidify_nodes(queue, altr.code_null);
-        return queue;
-      }
-
-    ROCKET_FLATTEN static
-    AIR_Status
-    execute(Executive_Context& ctx, AVMC_Queue::Uparam up, const AVMC_Queue& queue)
-      {
-        // Check the value of the condition.
-        return ctx.stack().top().dereference_readonly().is_null()
-                    ? do_evaluate_subexpression(ctx, up.b1, queue)
-                    : air_status_next;
       }
   };
 
@@ -1198,34 +1166,6 @@ struct Traits_function_call
         return ROCKET_EXPECT(ptc == ptc_aware_none)
                  ? do_invoke_nontail(self, sloc, target, ctx.global(), ::std::move(alt_stack))
                  : do_invoke_tail(self, sloc, target, ptc, ::std::move(alt_stack));
-      }
-  };
-
-struct Traits_member_access
-  {
-    static
-    const Source_Location&
-    get_symbols(const AIR_Node::S_member_access& altr)
-      {
-        return altr.sloc;
-      }
-
-    static
-    phsh_string
-    make_sparam(const AIR_Node::S_member_access& altr)
-      {
-        return altr.name;
-      }
-
-    ROCKET_FLATTEN static
-    AIR_Status
-    execute(Executive_Context& ctx, phsh_stringR name)
-      {
-        Reference_Modifier::S_object_key xmod = { name };
-        ctx.stack().mut_top().push_modifier(::std::move(xmod));
-
-        ctx.stack().top().dereference_readonly();
-        return air_status_next;
       }
   };
 
@@ -5009,20 +4949,7 @@ rebind_opt(Abstract_Context& ctx) const
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
-      case index_coalescence: {
-        const auto& altr = this->m_stor.as<S_coalescence>();
-
-        // Rebind the null branch.
-        bool dirty = false;
-        auto bound = altr;
-
-        do_rebind_nodes(dirty, bound.code_null, ctx);
-
-        return do_return_rebound_opt(dirty, ::std::move(bound));
-      }
-
       case index_function_call:
-      case index_member_access:
       case index_push_unnamed_array:
       case index_push_unnamed_object:
       case index_apply_operator:
@@ -5192,16 +5119,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
       }
 
-      case index_coalescence: {
-        const auto& altr = this->m_stor.as<S_coalescence>();
-
-        // Collect variables from the null branch.
-        do_collect_variables_for_each(staged, temp, altr.code_null);
-        return;
-      }
-
       case index_function_call:
-      case index_member_access:
       case index_push_unnamed_array:
       case index_push_unnamed_object:
       case index_apply_operator:
@@ -5328,17 +5246,9 @@ solidify(AVMC_Queue& queue) const
         return do_solidify<Traits_branch_expression>(queue,
                        this->m_stor.as<S_branch_expression>());
 
-      case index_coalescence:
-        return do_solidify<Traits_coalescence>(queue,
-                       this->m_stor.as<S_coalescence>());
-
       case index_function_call:
         return do_solidify<Traits_function_call>(queue,
                        this->m_stor.as<S_function_call>());
-
-      case index_member_access:
-        return do_solidify<Traits_member_access>(queue,
-                       this->m_stor.as<S_member_access>());
 
       case index_push_unnamed_array:
         return do_solidify<Traits_push_unnamed_array>(queue,

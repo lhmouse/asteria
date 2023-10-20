@@ -107,7 +107,8 @@ extract(cow_vector<Expression_Unit>& units)
 
         // Construct a branch unit from both branches, then append it to `units`.
         Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true),
-                                            ::std::move(altr.branch_false), altr.assign };
+                                            ::std::move(altr.branch_false), altr.assign,
+                                            false };
         units.emplace_back(::std::move(xunit));
         return;
       }
@@ -118,7 +119,7 @@ extract(cow_vector<Expression_Unit>& units)
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then
         // append it to `units`.
         Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), { },
-                                            altr.assign };
+                                            altr.assign, false };
         units.emplace_back(::std::move(xunit));
         return;
       }
@@ -129,7 +130,7 @@ extract(cow_vector<Expression_Unit>& units)
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then
         // append it to `units`.
         Expression_Unit::S_branch xunit = { altr.sloc, { }, ::std::move(altr.branch_false),
-                                            altr.assign };
+                                            altr.assign, false };
         units.emplace_back(::std::move(xunit));
         return;
       }
@@ -138,8 +139,8 @@ extract(cow_vector<Expression_Unit>& units)
         auto& altr = this->m_stor.mut<index_coalescence>();
 
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Expression_Unit::S_coalescence xunit = { altr.sloc, ::std::move(altr.branch_null),
-                                                 altr.assign };
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_null), { },
+                                            altr.assign, true };
         units.emplace_back(::std::move(xunit));
         return;
       }
