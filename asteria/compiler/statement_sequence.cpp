@@ -2246,7 +2246,7 @@ do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& ts
                 compiler_status_closing_bracket_expected, tstrm.next_sloc(),
                 "[unmatched `[` at '$1']", sloc);
 
-    Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
+    Expression_Unit::S_operator_rpn xunit = { sloc, xop_index, false };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -2269,7 +2269,7 @@ do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream
     Expression_Unit::S_literal xname = { ::std::move(*qkey) };
     units.emplace_back(::std::move(xname));
 
-    Expression_Unit::S_operator_rpn xunit = { sloc, xop_subscr, false };
+    Expression_Unit::S_operator_rpn xunit = { sloc, xop_index, false };
     units.emplace_back(::std::move(xunit));
     return true;
   }

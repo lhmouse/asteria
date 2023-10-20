@@ -5243,7 +5243,7 @@ solidify(AVMC_Queue& queue) const
           case xop_dec:
             return do_solidify<Traits_apply_xop_dec>(queue, altr);
 
-          case xop_subscr:
+          case xop_index:
             return do_solidify<Traits_apply_xop_subscr>(queue, altr);
 
           case xop_pos:

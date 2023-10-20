@@ -12,7 +12,7 @@ enum Xop : uint8_t
   {
     xop_inc       =  0,  // ++
     xop_dec       =  1,  // --
-    xop_subscr    =  2,  // []
+    xop_index     =  2,  // []
     xop_pos       =  3,  // +
     xop_neg       =  4,  // -
     xop_notb      =  5,  // ~

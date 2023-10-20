@@ -15,7 +15,7 @@ describe_xop(Xop xop) noexcept
       case xop_dec:
         return "--";
 
-      case xop_subscr:
+      case xop_index:
         return "[]";
 
       case xop_pos:
