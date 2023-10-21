@@ -153,7 +153,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
       // The result value has to be copied, in case that a reference to an element
       // of the LHS operand is returned.
       queue.execute(ctx);
-      auto val = ctx.stack().top().dereference_readonly();
+      auto& val = ctx.stack().mut_top().dereference_copy();
       ctx.stack().pop();
       ctx.stack().top().dereference_mutable() = ::std::move(val);
       return air_status_next;
