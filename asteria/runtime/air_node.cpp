@@ -2571,6 +2571,12 @@ solidify(AVMC_Queue& queue) const
                     return air_status_next;
                   }
 
+                  case xop_cmp_un: {
+                    // Check whether the two operands are unordered.
+                    lhs = lhs.compare_partial(rhs) == compare_unordered;
+                    return air_status_next;
+                  }
+
                   case xop_cmp_lt: {
                     // Check whether the LHS operand is less than the RHS operand. If
                     // they are unordered, an exception shall be thrown.
@@ -2600,19 +2606,29 @@ solidify(AVMC_Queue& queue) const
                   }
 
                   case xop_cmp_3way: {
-                    // Perform 3-way comparison.
-                    auto cmp = lhs.compare_partial(rhs);
-                    if(ROCKET_UNEXPECT(cmp == compare_unordered))
-                      lhs = sref("[unordered]");
-                    else
-                      lhs = -1LL + (cmp != compare_less) + (cmp == compare_greater);
-                    return air_status_next;
-                  }
+                    // Defines a partial ordering on all values. For unordered operands,
+                    // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
+                    // the same result.
+                    switch(lhs.compare_partial(rhs)) {
+                      case compare_unordered:
+                        lhs = sref("[unordered]");
+                        return air_status_next;
 
-                  case xop_cmp_un: {
-                    // Check whether the two operands are unordered.
-                    lhs = lhs.compare_partial(rhs) == compare_unordered;
-                    return air_status_next;
+                      case compare_greater:
+                        lhs = +1;
+                        return air_status_next;
+
+                      case compare_less:
+                        lhs = -1;
+                        return air_status_next;
+
+                      case compare_equal:
+                        lhs = 0;
+                        return air_status_next;
+
+                      default:
+                        ROCKET_ASSERT(false);
+                    }
                   }
 
                   case xop_add: {
