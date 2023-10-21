@@ -30,7 +30,6 @@ do_backtrace(Backtrace_Frame&& new_frm)
         this->m_frames.append(nested.m_frames.move_begin(), nested.m_frames.move_end());
       }
       catch(...) {
-        ::fprintf(stderr, "WARNING: An unknown exception has been ignored.\n");
       }
 
     // Push a new frame.

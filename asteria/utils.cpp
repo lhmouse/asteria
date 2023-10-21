@@ -225,7 +225,7 @@ safe_double_to_int64(double val)
     int64_t ival = ::llrint(val);
     int fex = ::fetestexcept(FE_ALL_EXCEPT);
 
-    if(fex & FE_OVERFLOW)
+    if(fex & FE_INVALID)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
             "safe_double_to_int64: `%.17g` is not representable as an `int64`", val);
 
