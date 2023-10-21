@@ -874,13 +874,11 @@ std_string_trim(V_string text, optV_string reject)
     // Get the index of the first byte to keep.
     size_t bpos = text.find_not_of(rchars);
     if(bpos == V_string::npos)
-      // There is no byte to keep. Return an empty string.
-      return { };
+      return sref("");
 
     // Get the index of the last byte to keep.
     size_t epos = text.rfind_not_of(rchars) + 1;
     if((bpos == 0) && (epos == text.size()))
-      // There is no byte to strip. Make use of reference counting.
       return text;
 
     // Return the remaining part of `text`.
@@ -892,17 +890,13 @@ std_string_triml(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
-      // There is no byte to strip. Make use of reference counting.
       return text;
 
     // Get the index of the first byte to keep.
     size_t bpos = text.find_not_of(rchars);
     if(bpos == V_string::npos)
-      // There is no byte to keep. Return an empty string.
-      return { };
-
-    if(bpos == 0)
-      // There is no byte to strip. Make use of reference counting.
+      return sref("");
+    else if(bpos == 0)
       return text;
 
     // Return the remaining part of `text`.
@@ -914,17 +908,13 @@ std_string_trimr(V_string text, optV_string reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0)
-      // There is no byte to strip. Make use of reference counting.
       return text;
 
     // Get the index of the last byte to keep.
     size_t epos = text.rfind_not_of(rchars) + 1;
     if(epos == 0)
-      // There is no byte to keep. Return an empty string.
-      return { };
-
-    if(epos == text.size())
-      // There is no byte to strip. Make use of reference counting.
+      return sref("");
+    else if(epos == text.size())
       return text;
 
     // Return the remaining part of `text`.
@@ -977,6 +967,7 @@ std_string_to_upper(V_string text)
       // Fork the string as needed.
       if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
+
       wptr[i] = t;
     }
     return res;
@@ -1022,13 +1013,10 @@ std_string_translate(V_string text, V_string inputs, optV_string outputs)
       if(ROCKET_UNEXPECT(!wptr))
         wptr = res.mut_data();
 
-      if(!outputs || (ipos >= outputs->size()))
-        // Erase the byte if there is no replacement.
-        // N.B. This must cause no reallocation.
-        res.erase(i--, 1);
+      if(outputs && (ipos < outputs->size()))
+        wptr[i] = outputs->at(ipos);
       else
-        // Replace the character.
-        wptr[i] = outputs->data()[ipos];
+        res.erase(i--, 1);
     }
     return res;
   }
