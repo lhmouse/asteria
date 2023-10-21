@@ -7,51 +7,53 @@
 #include "fwd.hpp"
 namespace rocket {
 
-#include "details/ascii_case.ipp"
-
-// Classification
-constexpr
-bool
-ascii_is_alpha(char c) noexcept
-  {
-    return details_ascii_case::cmask_of(c) != 0;
-  }
-
 constexpr
 bool
 ascii_is_upper(char c) noexcept
   {
-    return details_ascii_case::cmask_of(c) == 1;
+    return (c >= 'A') && (c <= 'Z');
   }
 
 constexpr
 bool
 ascii_is_lower(char c) noexcept
   {
-    return details_ascii_case::cmask_of(c) == 2;
+    return (c >= 'a') && (c <= 'z');
   }
 
-// Conversion
+constexpr
+bool
+ascii_is_alpha(char c) noexcept
+  {
+    return (c >= 'A') && (c <= 'z') && (((c - 'A') & 0x1F) <= 25);
+  }
+
 constexpr
 char
 ascii_to_upper(char c) noexcept
   {
-    return static_cast<char>(details_ascii_case::to_upper(c));
+    return static_cast<char>(c & ((0xDF00 | (c - 'a') | ('z' - c)) >> 8));
   }
 
 constexpr
 char
 ascii_to_lower(char c) noexcept
   {
-    return static_cast<char>(details_ascii_case::to_lower(c));
+    return static_cast<char>(c | ((0x2000 & ('A' - c - 1) & (c - 'Z' - 1)) >> 8));
   }
 
-// Comparison
 constexpr
 bool
 ascii_ci_equal(char x, char y) noexcept
   {
-    return details_ascii_case::to_lower(x) == details_ascii_case::to_lower(y);
+    return noadl::ascii_to_lower(x) == noadl::ascii_to_lower(y);
+  }
+
+constexpr
+int
+ascii_ci_compare(char x, char y) noexcept
+  {
+    return (noadl::ascii_to_lower(x) & 0xFF) - (noadl::ascii_to_lower(y) & 0xFF);
   }
 
 constexpr
@@ -64,7 +66,7 @@ ascii_ci_equal(const char* sx, size_t nx, const char* sy, size_t ny) noexcept
 
     // Perform character-wise comparison of two strings of `nx` characters.
     for(size_t k = 0;  k != nx;  ++k)
-      if(!noadl::ascii_ci_equal(sx[k], sy[k]))
+      if(noadl::ascii_ci_compare(sx[k], sy[k]) != 0)
         return false;
 
     // All characters are equal.
@@ -73,41 +75,35 @@ ascii_ci_equal(const char* sx, size_t nx, const char* sy, size_t ny) noexcept
 
 constexpr
 int
-ascii_ci_compare(char x, char y) noexcept
-  {
-    return (int) details_ascii_case::to_lower(x) - (int) details_ascii_case::to_lower(y);
-  }
-
-constexpr
-int
 ascii_ci_compare(const char* sx, size_t nx, const char* sy, size_t ny) noexcept
   {
-    // Compare the longest initial substring.
-    // If any characters compare unequal, return immediately.
+    // Get the length of the common initial substring.
     size_t n = noadl::min(nx, ny);
 
+    // If any characters compare unequal, return immediately.
     for(size_t k = 0;  k != n;  ++k)
-      if(int r = noadl::ascii_ci_compare(sx[k], sy[k]))
-        return r;
-
-    // The substrings compare equal.
-    // If the lengths compare equal, the strings are totally equal.
-    if(nx == ny)
-      return 0;
+      if(int diff = noadl::ascii_ci_compare(sx[k], sy[k]))
+        return diff;
 
     // Compare the lengths.
-    return (nx < ny) ? -1 : +1;
+    if(nx != ny)
+      return (nx < ny) ? -1 : +1;
+
+    // All characters are equal.
+    return 0;
   }
 
-// Hash
 constexpr
 size_t
-ascii_ci_hash(const char* s, size_t n) noexcept
+ascii_ci_hash(const char* sp, size_t n) noexcept
   {
     // Implement the FNV-1a hash algorithm.
-    uint32_t reg = 0x811C9DC5;
+    uint32_t reg = 0x811C9DC5U;
+
     for(size_t k = 0;  k != n;  ++k)
-      reg = (reg ^ details_ascii_case::to_lower(s[k])) * 0x1000193;
+      reg ^= static_cast<uint8_t>(noadl::ascii_to_lower(sp[k])),
+        reg *= 0x1000193U;
+
     return reg;
   }
 

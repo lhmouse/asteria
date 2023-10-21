@@ -18,7 +18,6 @@ nobase_include_HEADERS +=  \
   %reldir%/details/static_vector.ipp  \
   %reldir%/details/array.ipp  \
   %reldir%/details/linear_buffer.ipp  \
-  %reldir%/details/ascii_case.ipp  \
   %reldir%/details/format.ipp  \
   %reldir%/compiler.h  \
   %reldir%/assert.hpp  \
