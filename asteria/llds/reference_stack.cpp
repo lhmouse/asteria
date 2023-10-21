@@ -45,7 +45,7 @@ do_reallocate(uint32_t estor)
 
 void
 Reference_Stack::
-clear_cache() noexcept
+clear_red_zone() noexcept
   {
     while(this->m_einit != this->m_etop)
       ::rocket::destroy(this->m_bptr + (-- this->m_einit));

@@ -1810,8 +1810,7 @@ solidify(AVMC_Queue& queue) const
 
             const auto& target = val.as_function();
             auto& self = stack.mut_top().pop_modifier();
-            stack.clear_cache();
-            alt_stack.clear_cache();
+            stack.clear_red_zone();
 
             return ROCKET_EXPECT(up.u0 == ptc_aware_none)
                      ? do_invoke_nontail(self, ctx.global(), sloc, target, ::std::move(alt_stack))
@@ -3557,8 +3556,7 @@ solidify(AVMC_Queue& queue) const
 
             const auto& target = val.as_function();
             auto& self = stack.mut_top().pop_modifier();
-            stack.clear_cache();
-            alt_stack.clear_cache();
+            stack.clear_red_zone();
 
             return ROCKET_EXPECT(up.u0 == ptc_aware_none)
                      ? do_invoke_nontail(self, ctx.global(), sloc, target, ::std::move(alt_stack))
@@ -3703,8 +3701,7 @@ solidify(AVMC_Queue& queue) const
 
             Source_Location script_sloc(path, 0, 0);
             auto target = optmz.create_function(script_sloc, sref("[file scope]"));
-            stack.clear_cache();
-            alt_stack.clear_cache();
+            stack.clear_red_zone();
 
             // Invoke the script. `this` is `null`.
             auto& self = stack.mut_top();

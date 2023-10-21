@@ -4,6 +4,7 @@
 #include "precompiled.ipp"
 #include "fwd.hpp"
 #include "runtime/reference.hpp"
+#include "llds/reference_stack.hpp"
 #include "utils.hpp"
 namespace asteria {
 
@@ -50,6 +51,8 @@ Reference&
 cow_function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
+    stack.clear_red_zone();
+
     if(auto fptr = this->m_fptr)
       return fptr(self, global, ::std::move(stack));  // static
 

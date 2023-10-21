@@ -73,7 +73,7 @@ class Reference_Stack
       }
 
     void
-    clear_cache() noexcept;
+    clear_red_zone() noexcept;
 
     const Reference&
     top(size_t index = 0) const noexcept
