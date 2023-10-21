@@ -227,7 +227,7 @@ safe_double_to_int64(double val)
 
     if(fex & FE_INVALID)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_double_to_int64: `%.17g` is not representable as an `int64`", val);
+            "safe_double_to_int64: `%.17g` is not representable as a 64-bit integer", val);
 
     if(fex != 0)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
