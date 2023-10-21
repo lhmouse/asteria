@@ -3138,7 +3138,7 @@ solidify(AVMC_Queue& queue) const
                     else if(lhs.is_string()) {
                       V_string& val = lhs.mut_string();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.erase(0, tlen);
                       val.append(tlen, ' ');
                       return air_status_next;
@@ -3146,7 +3146,7 @@ solidify(AVMC_Queue& queue) const
                     else if(lhs.is_array()) {
                       V_array& val = lhs.mut_array();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.erase(0, tlen);
                       val.append(tlen);
                       return air_status_next;
@@ -3172,7 +3172,7 @@ solidify(AVMC_Queue& queue) const
                     else if(lhs.is_string()) {
                       V_string& val = lhs.mut_string();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.pop_back(tlen);
                       val.insert(0, tlen, ' ');
                       return air_status_next;
@@ -3180,7 +3180,7 @@ solidify(AVMC_Queue& queue) const
                     else if(lhs.is_array()) {
                       V_array& val = lhs.mut_array();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.pop_back(tlen);
                       val.insert(0, tlen);
                       return air_status_next;
@@ -3211,14 +3211,14 @@ solidify(AVMC_Queue& queue) const
                     else if(lhs.is_string()) {
                       V_string& val = lhs.mut_string();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.append(tlen, ' ');
                       return air_status_next;
                     }
                     else if(lhs.is_array()) {
                       V_array& val = lhs.mut_array();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.append(tlen);
                       return air_status_next;
                     }
@@ -3241,14 +3241,14 @@ solidify(AVMC_Queue& queue) const
                     else if(lhs.is_string()) {
                       V_string& val = lhs.mut_string();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.pop_back(tlen);
                       return air_status_next;
                     }
                     else if(lhs.is_array()) {
                       V_array& val = lhs.mut_array();
 
-                      size_t tlen = ::rocket::min((size_t) rhs.as_integer(), val.size());
+                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
                       val.pop_back(tlen);
                       return air_status_next;
                     }
