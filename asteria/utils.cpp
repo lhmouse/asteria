@@ -180,44 +180,6 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
     throw ::std::runtime_error(data.c_str());
   }
 
-bool
-utf8_encode(char*& pos, char32_t cp) noexcept
-  {
-    if(cp < 0x80U) {
-      // This character takes only one byte.
-      *(pos++) = (char) cp;
-      return true;
-    }
-
-    if((0xD800U <= cp) && (cp < 0xE000U))
-      return false;
-
-    if(cp >= 0x110000U)
-      return false;
-
-    // Encode bits into a byte.
-    auto encode_one = [&](int sh, char32_t m)
-      { *(pos++) = (char) ((~m << 1) | (cp >> sh & m));  };
-
-    // Encode the code point now. The result may be 2, 3 or 4 bytes.
-    if(cp < 0x800U) {
-      encode_one( 6, 0x1FU);
-      encode_one( 0, 0x3FU);
-    }
-    else if(cp < 0x10000U) {
-      encode_one(12, 0x0FU);
-      encode_one( 6, 0x3FU);
-      encode_one( 0, 0x3FU);
-    }
-    else {
-      encode_one(18, 0x07U);
-      encode_one(12, 0x3FU);
-      encode_one( 6, 0x3FU);
-      encode_one( 0, 0x3FU);
-    }
-    return true;
-  }
-
 int64_t
 safe_double_to_int64(double val)
   {
@@ -234,6 +196,40 @@ safe_double_to_int64(double val)
             "safe_double_to_int64: `%.17g` is not an exact integer", val);
 
     return ival;
+  }
+
+bool
+utf8_encode(char*& pos, char32_t cp) noexcept
+  {
+    if(ROCKET_EXPECT(cp < 0x80U)) {
+      // This character takes only one byte.
+      *(pos++) = (char) cp;
+      return true;
+    }
+
+    if(((cp >= 0xD800U) && (cp < 0xE000U)) || (cp >= 0x110000U))
+      return false;
+
+#define do_utf8_encode_one_(sh, m)  \
+      (*(pos++) = (char) ((~m << 1) | (cp >> sh & m)))  // no semicolon
+
+    // Encode the code point now. The result may be 2, 3 or 4 bytes.
+    if(cp < 0x800U) {
+      do_utf8_encode_one_( 6, 0x1FU);
+      do_utf8_encode_one_( 0, 0x3FU);
+    }
+    else if(cp < 0x10000U) {
+      do_utf8_encode_one_(12, 0x0FU);
+      do_utf8_encode_one_( 6, 0x3FU);
+      do_utf8_encode_one_( 0, 0x3FU);
+    }
+    else {
+      do_utf8_encode_one_(18, 0x07U);
+      do_utf8_encode_one_(12, 0x3FU);
+      do_utf8_encode_one_( 6, 0x3FU);
+      do_utf8_encode_one_( 0, 0x3FU);
+    }
+    return true;
   }
 
 bool
@@ -257,16 +253,14 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
       return false;
 
     // Read the first byte.
-    cp = (unsigned char) *(pos++) & 0xFFU;
+    cp = (uint8_t) *(pos++);
     if(cp < 0x80U)
       return true;
-    else if((cp < 0xC0U) || (0xF8U <= cp))
+    else if((cp < 0xC0U) || (cp >= 0xF8U))
       return false;
 
     // Calculate the number of bytes in this code point.
     uint32_t u8len = 2U + (cp >= 0xE0U) + (cp >= 0xF0U);
-    ROCKET_ASSERT(u8len >= 2);
-    ROCKET_ASSERT(u8len <= 4);
     if(u8len > avail)
       return false;
 
@@ -274,22 +268,16 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
     cp &= 0xFFU >> u8len;
 
     // Accumulate trailing code units.
-    for(size_t i = 1;  i < u8len;  ++i) {
-      char32_t cu = (unsigned char) *(pos++) & 0xFFU;
-      if((cu < 0x80U) || (0xC0U <= cu))
+    for(size_t i = 1;  i < u8len;  ++i)
+      if(((uint8_t) *pos >= 0x80U) || ((uint8_t) *pos < 0xC0U))
+        cp = (cp << 6) | ((uint8_t) *(pos++) & 0x3FU);
+      else
         return false;
-      cp = (cp << 6) | (cu & 0x3FU);
-    }
 
-    if((0xD800U <= cp) && (cp < 0xE000U))
+    if(((cp >= 0xD800U) && (cp < 0xE000U)) || (cp >= 0x110000U))
       return false;
 
-    if(cp >= 0x110000U)
-      return false;
-
-    // Re-encode it and check for overlong sequences.
-    uint32_t milen = 1U + (cp >= 0x80U) + (cp >= 0x800U) + (cp >= 0x10000U);
-    if(milen != u8len)
+    if(1U + (cp >= 0x80U) + (cp >= 0x800U) + (cp >= 0x10000U) != u8len)
       return false;
 
     return true;
@@ -314,16 +302,13 @@ utf8_decode(char32_t& cp, stringR text, size_t& offset)
 bool
 utf16_encode(char16_t*& pos, char32_t cp) noexcept
   {
-    if((0xD800U <= cp) && (cp < 0xE000U))
+    if(((cp >= 0xD800U) && (cp < 0xE000U)) || (cp >= 0x110000U))
       return false;
 
     if(cp < 0x10000U) {
       *(pos++) = (char16_t) cp;
       return true;
     }
-
-    if(cp >= 0x110000U)
-      return false;
 
     // Write surrogates.
     *(pos++) = (char16_t) (0xD800U + ((cp - 0x10000U) >> 10));
@@ -352,8 +337,8 @@ utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept
       return false;
 
     // Read the first code unit.
-    cp = *(pos++) & 0xFFFFU;
-    if((cp < 0xD800U) || (0xE000U <= cp))
+    cp = *(pos++);
+    if(ROCKET_EXPECT((cp < 0xD800U) || (cp >= 0xE000U)))
       return true;
 
     if(cp >= 0xDC00U)
@@ -364,7 +349,7 @@ utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept
 
     // Read the trailing surrogate.
     char16_t cu = *(pos++);
-    if((cu < 0xDC00U) || (0xE000U <= cu))
+    if((cu < 0xDC00U) || (cu >= 0xE000U))
       return false;
 
     cp = 0x10000U + ((cp & 0x3FFU) << 10) + (cu & 0x3FFU);
