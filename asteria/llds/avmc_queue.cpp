@@ -178,19 +178,16 @@ execute(Executive_Context& ctx) const
             status = qnode->pv_meta->exec(ctx, qnode);
             break;
           }
+          catch(Runtime_Error& except) {
+            // Modify the exception in place and rethrow it without copying it.
+            except.push_frame_plain(qnode->pv_meta->sloc);
+            throw;
+          }
           catch(exception& stdex) {
-            auto known = dynamic_cast<Runtime_Error*>(&stdex);
-            if(known) {
-              // Modify the exception in place and rethrow it without copying it.
-              known->push_frame_plain(qnode->pv_meta->sloc);
-              throw;
-            }
-            else {
-              // Replace the active exception.
-              Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-              except.push_frame_plain(qnode->pv_meta->sloc);
-              throw except;
-            }
+            // Replace the active exception.
+            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
+            except.push_frame_plain(qnode->pv_meta->sloc);
+            throw except;
           }
       }
 

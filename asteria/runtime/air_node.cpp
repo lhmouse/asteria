@@ -1199,9 +1199,8 @@ solidify(AVMC_Queue& queue) const
               return status;
             }
             else
-              throw Runtime_Error(Runtime_Error::M_throw(),
-                        format_string("Range value not iterable (value `$1`)", range),
-                        sp.sloc_init);
+              throw Runtime_Error(Runtime_Error::M_assert(), sp.sloc_init,
+                        format_string("Range value not iterable (value `$1`)", range));
           }
 
           // Uparam

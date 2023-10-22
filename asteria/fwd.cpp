@@ -61,17 +61,14 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       if(auto ptr = this->m_sptr.get())
         return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
     }
+    catch(Runtime_Error& except) {
+      // Forward the exception.
+      throw;
+    }
     catch(exception& stdex) {
-      auto known = dynamic_cast<Runtime_Error*>(&stdex);
-      if(known) {
-        // Forward the exception.
-        throw;
-      }
-      else {
-        // Replace the active exception.
-        Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-        throw except;
-      }
+      // Replace the active exception.
+      Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
+      throw except;
     }
 
     throw Runtime_Error(Runtime_Error::M_format(),
