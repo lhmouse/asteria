@@ -130,46 +130,41 @@ read_execute_print_single()
     ::rocket::tinyfmt_str fmt;
 
     try {
-      // The snippet may be a sequence of statements or an expression.
-      // First, try parsing it as the former.
+      // Try parsing the snippet as an expression.
       real_name = repl_file;
       if(ROCKET_EXPECT(real_name.empty())) {
         char strbuf[64];
-        ::sprintf(strbuf, "snippet #%lu", repl_index);
+        ::sprintf(strbuf, "expression #%lu", repl_index);
         real_name.assign(strbuf);
       }
 
       ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
       tstrm.reload(real_name, 1, ::std::move(cbuf));
-      stmtq.reload(::std::move(tstrm));
+      stmtq.reload_oneline(::std::move(tstrm));
 
       repl_script.reload(real_name, ::std::move(stmtq));
+      repl_file = ::std::move(real_name);
       repl_file = ::std::move(real_name);
     }
     catch(Compiler_Error& except) {
       try {
-        // Try parsing the snippet as an expression.
+        // Try parsing it as a sequence of statements instead.
         real_name = repl_file;
         if(ROCKET_EXPECT(real_name.empty())) {
           char strbuf[64];
-          ::sprintf(strbuf, "expression #%lu", repl_index);
+          ::sprintf(strbuf, "snippet #%lu", repl_index);
           real_name.assign(strbuf);
         }
 
         ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
         tstrm.reload(real_name, 1, ::std::move(cbuf));
-        stmtq.reload_oneline(::std::move(tstrm));
+        stmtq.reload(::std::move(tstrm));
 
         repl_script.reload(real_name, ::std::move(stmtq));
-        repl_file = ::std::move(real_name);
       }
       catch(Compiler_Error& again) {
-        // If the snippet doesn't look like an expression, report the
-        // previous error.
-        return repl_printf("! exception: %s",
-                 ((again.line() == 1) && (again.column() == 1)
-                  && (again.status() == compiler_status_expression_expected))
-                        ? except.what() : again.what());
+        // It can't be parsed either way, so fail.
+        return repl_printf("! exception: %s", again.what());
       }
     }
 
