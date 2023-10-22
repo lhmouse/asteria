@@ -147,10 +147,6 @@ read_execute_print_single()
       repl_file = ::std::move(real_name);
     }
     catch(Compiler_Error& except) {
-      // Check whether the input looks like an expression.
-      if(except.status() != compiler_status_semicolon_expected)
-        return repl_printf("! error: %s", except.what());
-
       try {
         // Try parsing the snippet as an expression.
         real_name = repl_file;
@@ -170,10 +166,10 @@ read_execute_print_single()
       catch(Compiler_Error& again) {
         // If the snippet doesn't look like an expression, report the
         // previous error.
-        if((again.line() == 1) && (again.column() == 1) && (again.status() == compiler_status_expression_expected))
-          return repl_printf("! error: %s", except.what());
-
-        return repl_printf("! error: %s", again.what());
+        return repl_printf("! error: %s",
+                 ((again.line() == 1) && (again.column() == 1)
+                  && (again.status() == compiler_status_expression_expected))
+                        ? except.what() : again.what());
       }
     }
 
