@@ -59,15 +59,13 @@ class cow_vector
     cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_sth()
-      {
-      }
+      { }
 
     explicit constexpr
     cow_vector(const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
-      {
-      }
+      { }
 
     cow_vector(const cow_vector& other) noexcept
       :

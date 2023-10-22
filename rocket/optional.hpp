@@ -36,8 +36,7 @@ class optional
     // 19.6.3.1, constructors
     constexpr
     optional(nullopt_t = nullopt) noexcept
-      {
-      }
+      { }
 
     optional(const value_type& value)
       noexcept(is_nothrow_copy_constructible<value_type>::value)

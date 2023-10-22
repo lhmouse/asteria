@@ -115,15 +115,13 @@ class refcnt_ptr
     refcnt_ptr(nullptr_t = nullptr) noexcept
       :
         m_sth()
-      {
-      }
+      { }
 
     explicit constexpr
     refcnt_ptr(pointer ptr) noexcept
       :
         m_sth(ptr)
-      {
-      }
+      { }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
@@ -131,8 +129,7 @@ class refcnt_ptr
     refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
       :
         m_sth(other.m_sth.fork())
-      {
-      }
+      { }
 
     template<typename yelementT,
     ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
@@ -140,20 +137,17 @@ class refcnt_ptr
     refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
       :
         m_sth(other.m_sth.release())
-      {
-      }
+      { }
 
     refcnt_ptr(const refcnt_ptr& other) noexcept
       :
         m_sth(other.m_sth.fork())
-      {
-      }
+      { }
 
     refcnt_ptr(refcnt_ptr&& other) noexcept
       :
         m_sth(other.m_sth.release())
-      {
-      }
+      { }
 
     refcnt_ptr&
     operator=(nullptr_t) & noexcept

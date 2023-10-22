@@ -49,41 +49,35 @@ class unique_handle
     unique_handle() noexcept(is_nothrow_constructible<closer_type>::value)
       :
         m_sth()
-      {
-      }
+      { }
 
     explicit constexpr
     unique_handle(const closer_type& cl) noexcept
       :
         m_sth(cl.null(), cl)
-      {
-      }
+      { }
 
     explicit constexpr
     unique_handle(handle_type hv) noexcept(is_nothrow_constructible<closer_type>::value)
       :
         m_sth(::std::move(hv))
-      {
-      }
+      { }
 
     constexpr
     unique_handle(handle_type hv, const closer_type& cl) noexcept
       :
         m_sth(::std::move(hv), cl)
-      {
-      }
+      { }
 
     unique_handle(unique_handle&& other) noexcept
       :
         unique_handle(other.m_sth.release(), ::std::move(other.m_sth.as_closer()))
-      {
-      }
+      { }
 
     unique_handle(unique_handle&& other, const closer_type& cl) noexcept
       :
         unique_handle(other.m_sth.release(), cl)
-      {
-      }
+      { }
 
     // 23.11.1.2.3, assignment
     unique_handle&

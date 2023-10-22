@@ -19,8 +19,7 @@ class Reference_Dictionary
   public:
     explicit constexpr
     Reference_Dictionary() noexcept
-      {
-      }
+      { }
 
     Reference_Dictionary(Reference_Dictionary&& other) noexcept
       {

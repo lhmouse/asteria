@@ -34,8 +34,7 @@ class Executive_Context
       :
         m_parent_opt(&parent), m_global(parent.m_global), m_stack(parent.m_stack),
         m_alt_stack(parent.m_alt_stack)
-      {
-      }
+      { }
 
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
@@ -48,8 +47,7 @@ class Executive_Context
       :
         m_parent_opt(nullptr), m_global(&global), m_stack(&stack),
         m_alt_stack(&alt_stack), m_defer(::std::move(defer))
-      {
-      }
+      { }
 
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which

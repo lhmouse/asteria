@@ -36,22 +36,19 @@ class basic_tinybuf_file
   public:
     constexpr
     basic_tinybuf_file() noexcept
-      {
-      }
+      { }
 
     explicit
     basic_tinybuf_file(file_type&& file) noexcept
       :
         m_file(::std::move(file))
-      {
-      }
+      { }
 
     explicit
     basic_tinybuf_file(handle_type fp, closer_type cl) noexcept
       :
         m_file(fp, cl)
-      {
-      }
+      { }
 
     explicit
     basic_tinybuf_file(const char* path, open_mode mode)
@@ -67,8 +64,7 @@ class basic_tinybuf_file
         m_file(::std::move(other.m_file)),
         m_mbst_g(noadl::exchange(other.m_mbst_g)),
         m_mbst_p(noadl::exchange(other.m_mbst_p))
-      {
-      }
+      { }
 
     basic_tinybuf_file&
     operator=(basic_tinybuf_file&& other) &

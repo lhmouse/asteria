@@ -24,8 +24,7 @@ class bit_mask
   public:
     constexpr
     bit_mask() noexcept
-      {
-      }
+      { }
 
     constexpr
     bit_mask(initializer_list<size_t> indices) noexcept

@@ -19,8 +19,7 @@ class Statement_Sequence
     Statement_Sequence(const Compiler_Options& opts) noexcept
       :
         m_opts(opts)
-      {
-      }
+      { }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Statement_Sequence);

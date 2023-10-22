@@ -22,15 +22,13 @@ class posix_fd_closer
     posix_fd_closer() noexcept
       :
         m_cl(::close)
-      {
-      }
+      { }
 
     constexpr
     posix_fd_closer(closer_type cl) noexcept
       :
         m_cl(cl)
-      {
-      }
+      { }
 
   public:
     constexpr operator

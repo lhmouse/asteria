@@ -376,22 +376,19 @@ class cow_opaque
   public:
     constexpr
     cow_opaque(nullptr_t = nullptr) noexcept
-      {
-      }
+      { }
 
     template<typename OpaqT>
     cow_opaque(const refcnt_ptr<OpaqT>& sptr) noexcept
       :
         m_sptr(sptr)
-      {
-      }
+      { }
 
     template<typename OpaqT>
     cow_opaque(refcnt_ptr<OpaqT>&& sptr) noexcept
       :
         m_sptr(::std::move(sptr))
-      {
-      }
+      { }
 
     cow_opaque&
     operator=(nullptr_t) &
@@ -547,29 +544,25 @@ class cow_function
   public:
     constexpr
     cow_function(nullptr_t = nullptr) noexcept
-      {
-      }
+      { }
 
     constexpr
     cow_function(const char* desc, simple_function* fptr) noexcept
       :
         m_desc(desc), m_fptr(fptr)
-      {
-      }
+      { }
 
     template<typename FuncT>
     cow_function(const refcnt_ptr<FuncT>& sptr) noexcept
       :
         m_sptr(sptr)
-      {
-      }
+      { }
 
     template<typename FuncT>
     cow_function(refcnt_ptr<FuncT>&& sptr) noexcept
       :
         m_sptr(::std::move(sptr))
-      {
-      }
+      { }
 
     cow_function&
     operator=(nullptr_t) &

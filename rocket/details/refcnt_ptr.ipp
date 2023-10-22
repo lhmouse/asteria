@@ -52,15 +52,13 @@ class stored_pointer
     stored_pointer() noexcept
       :
         m_ptr()
-      {
-      }
+      { }
 
     explicit constexpr
     stored_pointer(pointer ptr) noexcept
       :
         m_ptr(::std::move(ptr))
-      {
-      }
+      { }
 
     ~stored_pointer()
       { this->reset(nullptr);  }

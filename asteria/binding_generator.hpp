@@ -37,8 +37,7 @@ class Binding_Generator
                       const char* file, int line) noexcept
       :
         m_name(name), m_params(params), m_file(file), m_line(line)
-      {
-      }
+      { }
 
   public:
     // These functions are invoked by `ASTERIA_BINDING()`.

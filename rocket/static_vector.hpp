@@ -54,15 +54,13 @@ class static_vector
     static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_sth()
-      {
-      }
+      { }
 
     explicit
     static_vector(const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
-      {
-      }
+      { }
 
     static_vector(const static_vector& other)
       noexcept(is_nothrow_copy_constructible<value_type>::value)

@@ -32,8 +32,7 @@ class basic_tinybuf_str
     basic_tinybuf_str(const allocator_type& alloc) noexcept
       :
         m_str(alloc)
-      {
-      }
+      { }
 
     constexpr
     basic_tinybuf_str() noexcept(is_nothrow_default_constructible<string_type>::value)  { }
@@ -42,8 +41,7 @@ class basic_tinybuf_str
     basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_str(alloc), m_mode(mode)
-      {
-      }
+      { }
 
     template<typename xstrT,
     ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&, const allocator_type&>::value)>
@@ -52,8 +50,7 @@ class basic_tinybuf_str
       noexcept(is_nothrow_constructible<string_type, xstrT&&, const allocator_type>::value)
       :
         m_str(::std::forward<xstrT>(xstr), alloc), m_mode(mode)
-      {
-      }
+      { }
 
     // The copy and move constructors are necessary because `basic_tinybuf`
     // is not move-constructible.
@@ -61,14 +58,12 @@ class basic_tinybuf_str
       noexcept(is_nothrow_copy_constructible<string_type>::value)
       :
         tinybuf_type(), m_str(other.m_str), m_off(other.m_off), m_mode(other.m_mode)
-      {
-      }
+      { }
 
     basic_tinybuf_str(const basic_tinybuf_str& other, const allocator_type& alloc) noexcept
       :
         m_str(other.m_str, alloc), m_off(other.m_off), m_mode(other.m_mode)
-      {
-      }
+      { }
 
     basic_tinybuf_str&
     operator=(const basic_tinybuf_str& other) &

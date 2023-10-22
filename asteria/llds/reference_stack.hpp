@@ -19,8 +19,7 @@ class Reference_Stack
   public:
     explicit constexpr
     Reference_Stack() noexcept
-      {
-      }
+      { }
 
     Reference_Stack(Reference_Stack&& other) noexcept
       {

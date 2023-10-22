@@ -22,8 +22,7 @@ class Variable final
   public:
     explicit
     Variable() noexcept
-      {
-      }
+      { }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);

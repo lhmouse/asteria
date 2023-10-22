@@ -22,15 +22,13 @@ class posix_file_closer
     posix_file_closer() noexcept
       :
         m_cl(::fclose)
-      {
-      }
+      { }
 
     constexpr
     posix_file_closer(closer_type cl) noexcept
       :
         m_cl(cl)
-      {
-      }
+      { }
 
   public:
     constexpr operator

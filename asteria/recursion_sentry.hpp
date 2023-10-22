@@ -23,15 +23,13 @@ class Recursion_Sentry
     Recursion_Sentry() noexcept
       :
         m_base(this)
-      {
-      }
+      { }
 
     explicit constexpr
     Recursion_Sentry(const void* base) noexcept
       :
         m_base(base)
-      {
-      }
+      { }
 
     Recursion_Sentry(const Recursion_Sentry& other)  // copy constructor
       :

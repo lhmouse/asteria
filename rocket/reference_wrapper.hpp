@@ -31,8 +31,7 @@ class reference_wrapper
     reference_wrapper(otherT& other) noexcept
       :
         m_ptr(::std::addressof(other))
-      {
-      }
+      { }
 
     template<typename otherT,
     ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
@@ -40,8 +39,7 @@ class reference_wrapper
     reference_wrapper(const reference_wrapper<otherT>& other) noexcept
       :
         m_ptr(other.m_ptr)
-      {
-      }
+      { }
 
   public:
     // access

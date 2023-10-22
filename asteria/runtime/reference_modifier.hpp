@@ -61,8 +61,7 @@ class Reference_Modifier
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XModT&&>::value)
       :
         m_stor(::std::forward<XModT>(xmod))
-      {
-      }
+      { }
 
     template<typename XModT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XModT&&>::value)>

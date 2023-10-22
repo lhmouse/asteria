@@ -87,22 +87,19 @@ class storage_handle
     storage_handle() noexcept
       :
         allocator_base()
-      {
-      }
+      { }
 
     explicit constexpr
     storage_handle(const allocator_type& alloc) noexcept
       :
         allocator_base(alloc)
-      {
-      }
+      { }
 
     explicit constexpr
     storage_handle(allocator_type&& alloc) noexcept
       :
         allocator_base(::std::move(alloc))
-      {
-      }
+      { }
 
 #ifdef __cpp_constexpr_dynamic_alloc
     constexpr
@@ -307,16 +304,14 @@ class string_iterator
     string_iterator(charT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
-      {
-      }
+      { }
 
   public:
     constexpr
     string_iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
-      {
-      }
+      { }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
@@ -326,8 +321,7 @@ class string_iterator
         m_begin(other.m_begin),
         m_cur(other.m_cur),
         m_end(other.m_end)
-      {
-      }
+      { }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>

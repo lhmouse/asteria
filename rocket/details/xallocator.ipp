@@ -19,8 +19,7 @@ class final_wrapper
       noexcept(is_nothrow_constructible<allocT, paramsT&&...>::value)
       :
         m_alloc(::std::forward<paramsT>(params)...)
-      {
-      }
+      { }
 
   public:
     constexpr operator

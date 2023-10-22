@@ -46,8 +46,7 @@ class storage_handle
       :
         allocator_base(),
         m_init_nelem(0)
-      {
-      }
+      { }
 
     explicit
     storage_handle(const allocator_type& alloc) noexcept
@@ -294,16 +293,14 @@ class vector_iterator
     vector_iterator(valueT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
-      {
-      }
+      { }
 
   public:
     constexpr
     vector_iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
-      {
-      }
+      { }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
@@ -313,8 +310,7 @@ class vector_iterator
         m_begin(other.m_begin),
         m_cur(other.m_cur),
         m_end(other.m_end)
-      {
-      }
+      { }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>

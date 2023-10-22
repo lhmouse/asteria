@@ -27,8 +27,7 @@ class stored_handle
       :
         closer_base(),
         m_hv(this->as_closer().null())
-      {
-      }
+      { }
 
     template<typename... clparamsT>
     explicit constexpr
@@ -90,8 +89,7 @@ class default_closer_wrapper
     default_closer_wrapper(closerT&& xcl)
       :
         m_cl(::std::forward<closerT>(xcl))
-      {
-      }
+      { }
 
   public:
     constexpr

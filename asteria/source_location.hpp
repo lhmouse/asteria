@@ -18,14 +18,12 @@ class Source_Location
     Source_Location() noexcept
       :
         m_file(sref("[unknown]")), m_line(-1), m_column(-1)
-      {
-      }
+      { }
 
     Source_Location(stringR xfile, int xline, int xcolumn) noexcept
       :
         m_file(xfile), m_line(xline), m_column(xcolumn)
-      {
-      }
+      { }
 
     Source_Location&
     swap(Source_Location& other) noexcept

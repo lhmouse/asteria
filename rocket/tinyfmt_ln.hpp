@@ -31,8 +31,7 @@ class basic_tinyfmt_ln
     // default-constructed.
     basic_tinyfmt_ln()
       noexcept(is_nothrow_default_constructible<tinybuf_type>::value)
-      {
-      }
+      { }
 
     template<typename... paramsT,
     ROCKET_ENABLE_IF(is_constructible<tinybuf_type, paramsT&&...>::value)>
@@ -41,8 +40,7 @@ class basic_tinyfmt_ln
       noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
       :
         m_buf(::std::forward<paramsT>(params)...)
-      {
-      }
+      { }
 
     basic_tinyfmt_ln&
     swap(basic_tinyfmt_ln& other)

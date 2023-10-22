@@ -29,8 +29,7 @@ class AVMC_Queue
   public:
     explicit constexpr
     AVMC_Queue() noexcept
-      {
-      }
+      { }
 
     AVMC_Queue(AVMC_Queue&& other) noexcept
       {

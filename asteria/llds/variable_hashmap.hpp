@@ -20,8 +20,7 @@ class Variable_HashMap
   public:
     explicit constexpr
     Variable_HashMap() noexcept
-      {
-      }
+      { }
 
     Variable_HashMap(Variable_HashMap&& other) noexcept
       {

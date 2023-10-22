@@ -34,8 +34,7 @@ class string_storage
         key_equal_base(eq),
         m_str(::std::forward<paramsT>(params)...),
         m_hval(this->as_hasher()(this->m_str))
-      {
-      }
+      { }
 
     string_storage(const string_storage&) = delete;
     string_storage& operator=(const string_storage&) = delete;

@@ -31,8 +31,7 @@ class basic_tinybuf_ln
     basic_tinybuf_ln(const allocator_type& alloc) noexcept
       :
         m_ln(alloc)
-      {
-      }
+      { }
 
     constexpr
     basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)  { }
@@ -41,8 +40,7 @@ class basic_tinybuf_ln
     basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_ln(alloc), m_mode(mode)
-      {
-      }
+      { }
 
     template<typename xlnT,
     ROCKET_ENABLE_IF(is_constructible<buffer_type, xlnT&&, const allocator_type&>::value)>
@@ -51,8 +49,7 @@ class basic_tinybuf_ln
       noexcept(is_nothrow_constructible<buffer_type, xlnT&&, const allocator_type>::value)
       :
         m_ln(::std::forward<xlnT>(xln), alloc), m_mode(mode)
-      {
-      }
+      { }
 
     // The copy and move constructors are necessary because `basic_tinybuf`
     // is not move-constructible.
@@ -60,14 +57,12 @@ class basic_tinybuf_ln
       noexcept(is_nothrow_copy_constructible<buffer_type>::value)
       :
         tinybuf_type(), m_ln(other.m_ln), m_mode(other.m_mode)
-      {
-      }
+      { }
 
     basic_tinybuf_ln(const basic_tinybuf_ln& other, const allocator_type& alloc) noexcept
       :
         m_ln(other.m_ln, alloc), m_mode(other.m_mode)
-      {
-      }
+      { }
 
     basic_tinybuf_ln&
     operator=(const basic_tinybuf_ln& other) &
@@ -82,14 +77,12 @@ class basic_tinybuf_ln
       noexcept(is_nothrow_move_constructible<buffer_type>::value)
       :
         tinybuf_type(), m_ln(::std::move(other.m_ln)), m_mode(noadl::exchange(other.m_mode))
-      {
-      }
+      { }
 
     basic_tinybuf_ln(basic_tinybuf_ln&& other, const allocator_type& alloc) noexcept
       :
         m_ln(::std::move(other.m_ln), alloc), m_mode(noadl::exchange(other.m_mode))
-      {
-      }
+      { }
 
     basic_tinybuf_ln&
     operator=(basic_tinybuf_ln& other) &&

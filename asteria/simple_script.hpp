@@ -22,8 +22,7 @@ class Simple_Script
     Simple_Script(API_Version version = api_version_latest)
       :
         m_global(version)
-      {
-      }
+      { }
 
   public:
     const Compiler_Options&

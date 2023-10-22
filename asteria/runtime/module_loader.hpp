@@ -22,8 +22,7 @@ class Module_Loader final
   public:
     explicit
     Module_Loader() noexcept
-      {
-      }
+      { }
 
   private:
     locked_stream_pair*

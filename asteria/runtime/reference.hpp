@@ -22,8 +22,7 @@ class Reference
     // Constructors and assignment operators
     constexpr
     Reference() noexcept
-      {
-      }
+      { }
 
     Reference(const Reference& other) noexcept
       :

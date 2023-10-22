@@ -22,8 +22,7 @@ class Analytic_Context
     Analytic_Context(M_plain, Abstract_Context& parent)
       :
         m_parent_opt(&parent)
-      {
-      }
+      { }
 
     // A function context may have a parent.
     // Names found in ancestor contexts will be bound into the

@@ -58,8 +58,7 @@ class basic_shallow_string
     basic_shallow_string(const charT* ptr) noexcept
       :
         m_ptr(ptr), m_len(noadl::xstrlen(ptr))
-      {
-      }
+      { }
 
   public:
     constexpr
@@ -151,22 +150,19 @@ class basic_cow_string
     basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(s_zstr), m_sth()
-      {
-      }
+      { }
 
     explicit constexpr
     basic_cow_string(const allocator_type& alloc) noexcept
       :
         m_ref(s_zstr), m_sth(alloc)
-      {
-      }
+      { }
 
     constexpr
     basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_ref(sh), m_sth(alloc)
-      {
-      }
+      { }
 
     basic_cow_string(const basic_cow_string& other) noexcept
       :

@@ -192,8 +192,7 @@ class Statement
        noexcept(::std::is_nothrow_constructible<decltype(m_stor), XStmtT&&>::value)
       :
         m_stor(::std::forward<XStmtT>(xstmt))
-      {
-      }
+      { }
 
     template<typename XStmtT,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XStmtT&&>::value)>

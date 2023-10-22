@@ -29,8 +29,7 @@ class Garbage_Collector final
   public:
     explicit
     Garbage_Collector() noexcept
-      {
-      }
+      { }
 
   private:
     inline

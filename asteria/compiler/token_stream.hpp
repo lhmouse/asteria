@@ -21,8 +21,7 @@ class Token_Stream
     Token_Stream(const Compiler_Options& opts) noexcept
       :
         m_opts(opts)
-      {
-      }
+      { }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Token_Stream);

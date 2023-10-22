@@ -42,15 +42,13 @@ class basic_linear_buffer
     basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_stor()
-      {
-      }
+      { }
 
     explicit constexpr
     basic_linear_buffer(const allocator_type& alloc) noexcept
       :
         m_stor(alloc)
-      {
-      }
+      { }
 
     basic_linear_buffer(const basic_linear_buffer& other)
       :
