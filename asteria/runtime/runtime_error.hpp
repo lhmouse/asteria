@@ -141,7 +141,7 @@ class Runtime_Error
     push_frame_plain(const Source_Location& sloc, stringR remarks = cow_string())
       {
         Frame frm;
-        frm.type = frame_type_catch;
+        frm.type = frame_type_plain;
         frm.sloc = sloc;
         frm.value = remarks;
         this->do_insert_backtrace_frame(::std::move(frm));

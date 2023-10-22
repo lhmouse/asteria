@@ -185,45 +185,56 @@ do_use_function_result_slow(Global_Context& global)
     Reference_Stack alt_stack;
 
     try {
-      // Unpack frames until a non-PTC result is encountered.
-      while(this->m_xref == xref_ptc) {
-        ptc.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
-        ROCKET_ASSERT(ptc.use_count() == 1);
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptc->sloc(), ptc->target());
+      try {
+        // Unpack frames until a non-PTC result is encountered.
+        while(this->m_xref == xref_ptc) {
+          ptc.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
+          ROCKET_ASSERT(ptc.use_count() == 1);
+          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptc->sloc(), ptc->target());
 
-        // Perform a non-tail call.
-        frames.emplace_back(ptc);
-        *this = ::std::move(ptc->stack().mut_top());
-        ptc->stack().pop();
-        ptc->target().invoke_ptc_aware(*this, global, ::std::move(ptc->stack()));
-      }
-
-      // Check the result.
-      if(ptc->ptc_aware() == ptc_aware_void)
-        this->m_xref = xref_void;
-      else if(this->m_xref != xref_void)
-        result_value = this->dereference_readonly();
-
-      // This is the normal return path.
-      while(!frames.empty()) {
-        ptc = ::std::move(frames.mut_back());
-        frames.pop_back();
-
-        // Evaluate deferred expressions.
-        if(ptc->defer().size())
-          Executive_Context(Executive_Context::M_defer(),
-                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
-            .on_scope_exit_normal(air_status_next);
-
-        // Convert the result.
-        if((ptc->ptc_aware() == ptc_aware_by_val) && result_value) {
-          this->m_value = ::std::move(*result_value);
-          result_value.reset();
-          this->m_mods.clear();
-          this->m_xref = xref_temporary;
+          // Perform a non-tail call.
+          frames.emplace_back(ptc);
+          *this = ::std::move(ptc->stack().mut_top());
+          ptc->stack().pop();
+          ptc->target().invoke_ptc_aware(*this, global, ::std::move(ptc->stack()));
         }
 
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(), ptc->target(), *this);
+        // Check the result.
+        if(ptc->ptc_aware() == ptc_aware_void)
+          this->m_xref = xref_void;
+        else if(this->m_xref != xref_void)
+          result_value = this->dereference_readonly();
+
+        // This is the normal return path.
+        while(!frames.empty()) {
+          ptc = ::std::move(frames.mut_back());
+          frames.pop_back();
+
+          // Evaluate deferred expressions.
+          if(ptc->defer().size())
+            Executive_Context(Executive_Context::M_defer(),
+                   global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+              .on_scope_exit_normal(air_status_next);
+
+          // Convert the result.
+          if((ptc->ptc_aware() == ptc_aware_by_val) && result_value) {
+            this->m_value = ::std::move(*result_value);
+            result_value.reset();
+            this->m_mods.clear();
+            this->m_xref = xref_temporary;
+          }
+
+          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(), ptc->target(), *this);
+        }
+      }
+      catch(Runtime_Error& except) {
+        // Forward the exception.
+        throw;
+      }
+      catch(exception& stdex) {
+        // Replace the active exception.
+        Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
+        throw except;
       }
     }
     catch(Runtime_Error& except) {
