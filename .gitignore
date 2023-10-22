@@ -32,6 +32,7 @@
 /sbin/
 /tmp/
 /var/
+/callgrind/
 
 *.save*
 *.swp
@@ -44,4 +45,3 @@
 *.deb
 *.stackdump
 core.*
-callgrind.*
