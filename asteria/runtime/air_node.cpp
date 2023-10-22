@@ -2526,12 +2526,12 @@ solidify(AVMC_Queue& queue) const
 
           case xop_cmp_eq:
           case xop_cmp_ne:
+          case xop_cmp_un:
           case xop_cmp_lt:
           case xop_cmp_gt:
           case xop_cmp_lte:
           case xop_cmp_gte:
           case xop_cmp_3way:
-          case xop_cmp_un:
           case xop_add:
           case xop_sub:
           case xop_mul:
