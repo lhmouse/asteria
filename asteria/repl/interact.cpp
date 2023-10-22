@@ -107,7 +107,7 @@ read_execute_print_single()
         handle_repl_command(::std::move(cmdline));
       }
       catch(exception& stdex) {
-        return repl_printf("! error: %s", stdex.what());
+        return repl_printf("! exception: %s", stdex.what());
       }
     }
 
@@ -166,7 +166,7 @@ read_execute_print_single()
       catch(Compiler_Error& again) {
         // If the snippet doesn't look like an expression, report the
         // previous error.
-        return repl_printf("! error: %s",
+        return repl_printf("! exception: %s",
                  ((again.line() == 1) && (again.column() == 1)
                   && (again.status() == compiler_status_expression_expected))
                         ? except.what() : again.what());
@@ -183,7 +183,7 @@ read_execute_print_single()
       ref = repl_script.execute(::std::move(repl_args));
     }
     catch(exception& stdex) {
-      return repl_printf("! error: %s", stdex.what());
+      return repl_printf("! exception: %s", stdex.what());
     }
 
     if(ref.is_void())

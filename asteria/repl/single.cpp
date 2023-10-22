@@ -19,7 +19,7 @@ load_and_execute_single_noreturn()
     }
     catch(exception& stdex) {
       // Print the error and exit.
-      exit_printf(exit_compiler_error, "! error: %s", stdex.what());
+      exit_printf(exit_compiler_error, "! exception: %s", stdex.what());
     }
 
     // Execute the script, passing all command-line arguments to it. If the

@@ -70,7 +70,7 @@ a value:
   #3:1> func novalue() { }       \
      2> std.io.putfln("novalue = $1", novalue());
   * running 'snippet #4'...
-  ! error: runtime error: attempt to use the result of a function call which returned no value
+  ! exception: runtime error: attempt to use the result of a function call which returned no value
   [backtrace frames:
     0) native code at 'asteria/runtime/reference.cpp:56:0': "attempt to use the result of a function call which returned no value"
     1)   expression at 'snippet #4:2:31': ""
