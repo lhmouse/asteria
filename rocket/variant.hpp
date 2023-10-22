@@ -334,8 +334,8 @@ class variant
     size_t
     index() const noexcept
       {
-        return ROCKET_ASSERT(this->m_index < alternative_size),
-               this->m_index;
+        ROCKET_ASSERT(this->m_index < alternative_size);
+        return this->m_index;
       }
 
     const type_info&
