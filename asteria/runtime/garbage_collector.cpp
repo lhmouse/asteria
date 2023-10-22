@@ -85,7 +85,7 @@ do_collect_generation(uint32_t gen)
           next_opt->insert(var.get(), var);
           *count_opt += 1;
         }
-        catch(exception& /*stdex*/) {
+        catch(...) {
           tracked.insert(var.get(), var);
         }
     }

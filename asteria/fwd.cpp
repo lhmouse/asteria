@@ -4,6 +4,7 @@
 #include "precompiled.ipp"
 #include "fwd.hpp"
 #include "runtime/reference.hpp"
+#include "runtime/runtime_error.hpp"
 #include "llds/reference_stack.hpp"
 #include "utils.hpp"
 namespace asteria {
@@ -53,14 +54,28 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
   {
     stack.clear_red_zone();
 
-    if(auto fptr = this->m_fptr)
-      return fptr(self, global, ::std::move(stack));  // static
+    try {
+      if(auto fptr = this->m_fptr)
+        return fptr(self, global, ::std::move(stack));  // static
 
-    if(auto ptr = this->m_sptr.get())
-      return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
+      if(auto ptr = this->m_sptr.get())
+        return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
+    }
+    catch(exception& stdex) {
+      auto known = dynamic_cast<Runtime_Error*>(&stdex);
+      if(known) {
+        // Forward the exception.
+        throw;
+      }
+      else {
+        // Replace the active exception.
+        Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
+        throw except;
+      }
+    }
 
-    ::rocket::sprintf_and_throw<::std::invalid_argument>(
-                "cow_function: attempt to call a null function");
+    throw Runtime_Error(Runtime_Error::M_format(),
+              "cow_function: attempt to call a null function");
   }
 
 Reference&

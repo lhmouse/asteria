@@ -164,35 +164,13 @@ execute(Executive_Context& ctx) const
       switch(qnode->meta_ver) {
         case 0:
           // There is no metadata or symbols.
-          try {
-            status = qnode->pv_exec(ctx, qnode);
-            break;
-          }
-          catch(Runtime_Error& except) {
-            // Forward the exception.
-            throw;
-          }
-          catch(exception& stdex) {
-            // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-            throw except;
-          }
+          status = qnode->pv_exec(ctx, qnode);
+          break;
 
         case 1:
           // There is metadata without symbols.
-          try {
-            status = qnode->pv_meta->exec(ctx, qnode);
-            break;
-          }
-          catch(Runtime_Error& except) {
-            // Forward the exception.
-            throw;
-          }
-          catch(exception& stdex) {
-            // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-            throw except;
-          }
+          status = qnode->pv_meta->exec(ctx, qnode);
+          break;
 
         default:
           // There is metadata and symbols.
@@ -200,16 +178,19 @@ execute(Executive_Context& ctx) const
             status = qnode->pv_meta->exec(ctx, qnode);
             break;
           }
-          catch(Runtime_Error& except) {
-            // Modify the exception in place and rethrow it without copying it.
-            except.push_frame_plain(qnode->pv_meta->sloc);
-            throw;
-          }
           catch(exception& stdex) {
-            // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-            except.push_frame_plain(qnode->pv_meta->sloc);
-            throw except;
+            auto known = dynamic_cast<Runtime_Error*>(&stdex);
+            if(known) {
+              // Modify the exception in place and rethrow it without copying it.
+              known->push_frame_plain(qnode->pv_meta->sloc);
+              throw;
+            }
+            else {
+              // Replace the active exception.
+              Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
+              except.push_frame_plain(qnode->pv_meta->sloc);
+              throw except;
+            }
           }
       }
 
