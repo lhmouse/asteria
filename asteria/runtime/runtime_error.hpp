@@ -75,18 +75,6 @@ class Runtime_Error
 
     template<typename XValT>
     void
-    push_frame_throw(const Source_Location& sloc, XValT&& xval)
-      {
-        // Start a new backtrace.
-        this->m_value = ::std::forward<XValT>(xval);
-        this->m_ins_at = 0;
-
-        // Append the first frame to the current backtrace.
-        this->do_insert_frame({ frame_type_throw, sloc, this->m_value });
-      }
-
-    template<typename XValT>
-    void
     push_frame_catch(const Source_Location& sloc, XValT&& xval)
       {
         // Append a new frame to the current backtrace.
