@@ -174,7 +174,7 @@ execute(Executive_Context& ctx) const
           }
           catch(exception& stdex) {
             // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
+            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
             throw except;
           }
 
@@ -190,7 +190,7 @@ execute(Executive_Context& ctx) const
           }
           catch(exception& stdex) {
             // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
+            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
             throw except;
           }
 
@@ -202,13 +202,13 @@ execute(Executive_Context& ctx) const
           }
           catch(Runtime_Error& except) {
             // Modify the exception in place and rethrow it without copying it.
-            except.push_frame_plain(qnode->pv_meta->sloc, sref(""));
+            except.push_frame_plain(qnode->pv_meta->sloc);
             throw;
           }
           catch(exception& stdex) {
             // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_native(), cow_string(stdex.what()));
-            except.push_frame_plain(qnode->pv_meta->sloc, sref(""));
+            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
+            except.push_frame_plain(qnode->pv_meta->sloc);
             throw except;
           }
       }

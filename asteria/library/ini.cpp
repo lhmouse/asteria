@@ -17,16 +17,16 @@ tinyfmt&
 do_format_key(tinyfmt& fmt, stringR key)
   {
     if(key.empty())
-      ASTERIA_THROW_RUNTIME_ERROR(("Empty key is not allowed"));
+      ASTERIA_THROW(("Empty key is not allowed"));
 
     if(key.find_of(s_reject) != cow_string::npos)
-      ASTERIA_THROW_RUNTIME_ERROR(("Key contains invalid characters: $1"), key);
+      ASTERIA_THROW(("Key contains invalid characters: $1"), key);
 
     if(key.find_of(s_space) == 0)
-      ASTERIA_THROW_RUNTIME_ERROR(("Key shall not begin with a space: $1"), key);
+      ASTERIA_THROW(("Key shall not begin with a space: $1"), key);
 
     if(key.rfind_of(s_space) == key.size() - 1)
-      ASTERIA_THROW_RUNTIME_ERROR(("Key shall not end with a space: $1"), key);
+      ASTERIA_THROW(("Key shall not end with a space: $1"), key);
 
     return fmt << key;
   }
@@ -49,13 +49,13 @@ do_format_check_scalar(const Value& value)
           return true;
 
         if(str.find_of(s_reject) != cow_string::npos)
-          ASTERIA_THROW_RUNTIME_ERROR(("Value contains invalid characters: $1"), str);
+          ASTERIA_THROW(("Value contains invalid characters: $1"), str);
 
         if(str.find_of(s_space) == 0)
-          ASTERIA_THROW_RUNTIME_ERROR(("Value shall not begin with a space: $1"), str);
+          ASTERIA_THROW(("Value shall not begin with a space: $1"), str);
 
         if(str.rfind_of(s_space) == str.size() - 1)
-          ASTERIA_THROW_RUNTIME_ERROR(("Value shall not end with a space: $1"), str);
+          ASTERIA_THROW(("Value shall not end with a space: $1"), str);
 
         return true;
       }
@@ -113,12 +113,12 @@ do_ini_parse(tinybuf& buf)
       // if the line begins with an open bracket, it shall start a section.
       if(line.front() == '[') {
         if(line.back() != ']')
-          ASTERIA_THROW_RUNTIME_ERROR(("Invalid section name on line $1"), nlines);
+          ASTERIA_THROW(("Invalid section name on line $1"), nlines);
 
         // Trim the section name.
         pos = line.find_not_of(1, s_space);
         if(pos == line.size() - 1)
-          ASTERIA_THROW_RUNTIME_ERROR(("Empty section name on line $1"), nlines);
+          ASTERIA_THROW(("Empty section name on line $1"), nlines);
 
         // Make a copy of the section name that is just large enough.
         key.assign(line, 1, line.size() - 2);
@@ -135,7 +135,7 @@ do_ini_parse(tinybuf& buf)
       if(eqpos != cow_string::npos) {
         pos = line.rfind_not_of(eqpos - 1, s_space);
         if(pos == cow_string::npos)
-          ASTERIA_THROW_RUNTIME_ERROR(("Empty property name on line $1"), nlines);
+          ASTERIA_THROW(("Empty property name on line $1"), nlines);
 
         // Make copies of the key and value that are just large enough.
         key.assign(line, 0, pos + 1);
@@ -228,7 +228,7 @@ std_ini_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
     if(!fp)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not open file '$1'",
           "[`fopen()` failed: ${errno:full}]"),
           path);

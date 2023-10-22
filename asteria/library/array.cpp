@@ -175,7 +175,7 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
         if(unique && (bout != output.begin())) {
           auto cmp = compare(bout[-1], elem);
           if(cmp == compare_unordered)
-            ASTERIA_THROW_RUNTIME_ERROR((
+            ASTERIA_THROW((
                 "Elements not comparable (operands were `$1` and `$2`)"),
                 bout[-1], elem);
 
@@ -207,7 +207,7 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
         // Compare the first elements from both blocks.
         auto cmp = compare(bpos[0][0], bpos[1][0]);
         if(cmp == compare_unordered)
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Elements not comparable (operands were `$1` and `$2`)"),
               bpos[0][0], bpos[1][0]);
 

@@ -56,7 +56,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     }
     catch(Runtime_Error& except) {
       ctx_func.on_scope_exit_exceptional(except);
-      except.push_frame_func(this->m_zvarg->sloc(), this->m_zvarg->func());
+      except.push_frame_function(this->m_zvarg->sloc(), this->m_zvarg->func());
       throw;
     }
     ctx_func.on_scope_exit_normal(status);

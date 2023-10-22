@@ -53,7 +53,7 @@ class IOF_Sentry
 
         // Check for earlier errors.
         if(::ferror_unlocked(sentry))
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Standard stream error (mode `$2`, error bit set)"),
               mode_req);
       }
@@ -78,13 +78,13 @@ do_write_utf8_common(const IOF_Sentry& sentry, stringR text)
       // Decode a code point from `text`.
       char32_t cp;
       if(!utf8_decode(cp, text, off))
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid UTF-8 string (text `$1`, byte offset `$2`)"),
             text, off);
 
       // Insert it into the output stream.
       if(::fputwc_unlocked((wchar_t)cp, sentry) == WEOF)
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Error writing standard output",
             "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
@@ -128,7 +128,7 @@ std_io_getc()
 
     wch = ::fgetwc_unlocked(sentry);
     if((wch == WEOF) && ::ferror_unlocked(sentry))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Error reading standard input",
           "[`fgetwc_unlocked()` failed: ${errno:full}]"));
 
@@ -148,7 +148,7 @@ std_io_getln()
     for(;;) {
       wch = ::fgetwc_unlocked(sentry);
       if((wch == WEOF) && ::ferror_unlocked(sentry))
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Error reading standard input",
             "[`fgetwc_unlocked()` failed: ${errno:full}]"));
 
@@ -156,7 +156,7 @@ std_io_getln()
         break;
 
       if(!utf8_encode(u8str, (char32_t) wch))
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid UTF code point from standard input (value `$1`)"),
             wch);
     }
@@ -175,17 +175,17 @@ std_io_putc(V_integer value)
     const IOF_Sentry sentry(stdout, iof_mode_output_wide);
 
     if((value < 0) || (value > 0x10FFFF))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid UTF code point (value `$1`)"),
           value);
 
     if(!utf8_encode(u8ptr, (char32_t) value))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid UTF code point (value `$1`)"),
           value);
 
     if(::fputwc_unlocked((wchar_t) value, sentry) == WEOF)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
@@ -211,7 +211,7 @@ std_io_putln(V_string value)
     ncps = do_write_utf8_common(sentry, value);
 
     if(::fputwc_unlocked(L'\n', sentry) == WEOF)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
@@ -237,7 +237,7 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
     ncps = do_format_write_utf8_common(sentry, templ, values);
 
     if(::fputwc_unlocked(L'\n', sentry) == WEOF)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Error writing standard output",
           "[`fputwc_unlocked()` failed: ${errno:full}]"));
 
@@ -261,7 +261,7 @@ std_io_read(optV_integer limit)
       auto batch_pos = data.insert(data.end(), nbatch, '*');
       nread = ::fread_unlocked(&*batch_pos, 1, nbatch, sentry);
       if((nread != nbatch) && ::ferror_unlocked(sentry))
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Error reading standard input",
             "[`fgetwc_unlocked()` failed: ${errno:full}]"));
 
@@ -283,7 +283,7 @@ std_io_write(V_string data)
     const IOF_Sentry sentry(stdout, iof_mode_output_narrow);
 
     if(::fwrite_unlocked(data.data(), 1, data.size(), sentry) != data.size())
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Error writing standard output",
           "[`fwrite_unlocked()` failed: ${errno:full}]"));
 
@@ -294,7 +294,7 @@ void
 std_io_flush()
   {
     if(::fflush(nullptr) == EOF)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Error flushing standard streams",
           "[`fflush()` failed: ${errno:full}]"));
   }

@@ -21,30 +21,23 @@ Runtime_Error::
 
 void
 Runtime_Error::
-do_backtrace(Backtrace_Frame&& new_frm)
-  {
-    // Unpack nested exceptions, if any.
+do_backtrace()
+  try {
     if(auto eptr = ::std::current_exception())
-      try {
-        ::std::rethrow_exception(eptr);
-      }
-      catch(Runtime_Error& nested) {
-        this->m_frames.append(nested.m_frames.move_begin(), nested.m_frames.move_end());
-      }
-      catch(...) {
-      }
-
-    // Push a new frame.
-    this->do_insert_frame(::std::move(new_frm));
+      ::std::rethrow_exception(eptr);
+  }
+  catch(Runtime_Error& nested) {
+    this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
+  }
+  catch(...) {
   }
 
 void
 Runtime_Error::
-do_insert_frame(Backtrace_Frame&& new_frm)
+do_insert_backtrace_frame(Frame&& frm)
   {
-    // Insert the frame. Note exception safety.
-    this->m_frames.insert(this->m_ins_at, ::std::move(new_frm));
-    this->m_ins_at++;
+    this->m_frames.insert(this->m_frame_ins, ::std::move(frm));
+    this->m_frame_ins ++;
 
     // Rebuild the message using new frames. The storage may be reused.
     // Strings are written verbatim. All the others are formatted.
@@ -63,26 +56,30 @@ do_insert_frame(Backtrace_Frame&& new_frm)
     sbuf.emplace_back();
 
     // Append stack frames.
-    this->m_fmt << "\n[backtrace frames:\n";
+    this->m_fmt << "\n[backtrace frames:";
     for(size_t k = 0;  k < this->m_frames.size();  ++k) {
-      const auto& frm = this->m_frames[k];
+      const auto& r = this->m_frames.at(k);
+
+      // Write frame information.
       nump.put_DU(k + 1);
       ::std::copy_backward(nump.begin(), nump.end(), sbuf.mut_end() - 1);
-      format(this->m_fmt, "  $1) $2 at '$3': ", sbuf.data(), frm.what_type(), frm.sloc());
+      this->m_fmt << "\n  " << sbuf.data() << ") "
+                  << describe_frame_type(r.type) << " at '" << r.sloc << "': ";
 
-      this->m_frame_fmt.clear_string();
-      frm.value().print(this->m_frame_fmt);
+      // Write the value in this frame.
+      this->m_tempf.clear_string();
+      r.value.print(this->m_tempf);
+      const auto& vstr = this->m_tempf.get_string();
 
-      if(this->m_frame_fmt.length() > 120) {
-        size_t nchars_omitted = this->m_frame_fmt.length() - 100;
-        this->m_fmt.putn(this->m_frame_fmt.c_str(), this->m_frame_fmt.length() - nchars_omitted);
-        nump.put_DU(nchars_omitted);
-        format(this->m_fmt, " ... ($1 characters omitted)\n", nchars_omitted);
+      if(vstr.size() > 100) {
+        constexpr size_t trunc_to = 80;
+        this->m_fmt.putn(vstr.data(), trunc_to);
+        this->m_fmt << " ... (" << (vstr.size() - trunc_to) << " characters omitted)";
       }
       else
-        this->m_fmt << this->m_frame_fmt.get_string() << '\n';
+        this->m_fmt.putn(vstr.data(), vstr.size());
     }
-    this->m_fmt << "  -- end of backtrace frames]";
+    this->m_fmt << "\n  -- end of backtrace frames]";
   }
 
 }  // namespace asteria

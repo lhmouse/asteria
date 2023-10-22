@@ -21,7 +21,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
@@ -41,7 +41,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
@@ -56,7 +56,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -74,7 +74,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -93,7 +93,7 @@ apply_read_opt(const Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -123,7 +123,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
@@ -143,7 +143,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
@@ -158,7 +158,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -176,7 +176,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -195,7 +195,7 @@ apply_write_opt(Value& parent) const
           return nullptr;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -225,7 +225,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
@@ -247,7 +247,7 @@ apply_open(Value& parent) const
           parent = V_object();
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
@@ -262,7 +262,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -282,7 +282,7 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -303,13 +303,13 @@ apply_open(Value& parent) const
           parent = V_array();
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
         auto& arr = parent.mut_array();
         if(arr.empty())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Cannot write to random element of an empty array"));
 
         size_t r = ::rocket::probe_origin(arr.size(), altr.seed);
@@ -334,7 +334,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Integer subscript not applicable (parent type `$1`; index `$2`)"),
               describe_type(parent.type()), altr.index);
 
@@ -356,7 +356,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_object())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "String subscript not applicable (parent type `$1`; key `$2`)"),
               describe_type(parent.type()), altr.key);
 
@@ -377,7 +377,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Head operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -397,7 +397,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Tail operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 
@@ -418,7 +418,7 @@ apply_unset(Value& parent) const
           return nullopt;
         }
         else if(!parent.is_array())
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Random operator not applicable (parent type `$1`)"),
               describe_type(parent.type()));
 

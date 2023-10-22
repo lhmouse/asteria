@@ -20,7 +20,7 @@ void
 Reference::
 do_throw_not_dereferenceable() const
   {
-    ASTERIA_THROW_RUNTIME_ERROR((
+    ASTERIA_THROW((
         "Reference type `$1` not dereferenceable"),
         describe_xref(this->m_xref));
   }
@@ -45,10 +45,10 @@ do_dereference_readonly_slow() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+        ASTERIA_THROW(("Reference not initialized"));
 
       case xref_void:
-        ASTERIA_THROW_RUNTIME_ERROR(("Void reference not dereferenceable"));
+        ASTERIA_THROW(("Void reference not dereferenceable"));
 
       case xref_temporary:
         valp = &(this->m_value);
@@ -59,14 +59,14 @@ do_dereference_readonly_slow() const
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+          ASTERIA_THROW(("Reference not initialized"));
 
         valp = &(var->get_value());
         break;
       }
 
       case xref_ptc:
-        ASTERIA_THROW_RUNTIME_ERROR(("Proper tail call not expanded"));
+        ASTERIA_THROW(("Proper tail call not expanded"));
 
       default:
         ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
@@ -90,30 +90,30 @@ dereference_mutable() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+        ASTERIA_THROW(("Reference not initialized"));
 
       case xref_void:
-        ASTERIA_THROW_RUNTIME_ERROR(("Void reference not dereferenceable"));
+        ASTERIA_THROW(("Void reference not dereferenceable"));
 
       case xref_temporary:
-        ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a temporary value"));
+        ASTERIA_THROW(("Attempt to modify a temporary value"));
 
       case xref_variable: {
         auto var = unerase_cast<Variable*>(this->m_var.get());
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+          ASTERIA_THROW(("Reference not initialized"));
 
         if(var->is_immutable())
-          ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a `const` variable"));
+          ASTERIA_THROW(("Attempt to modify a `const` variable"));
 
         valp = &(var->mut_value());
         break;
       }
 
       case xref_ptc:
-        ASTERIA_THROW_RUNTIME_ERROR(("Proper tail call not expanded"));
+        ASTERIA_THROW(("Proper tail call not expanded"));
 
       default:
         ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
@@ -134,37 +134,37 @@ dereference_unset() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+        ASTERIA_THROW(("Reference not initialized"));
 
       case xref_void:
-        ASTERIA_THROW_RUNTIME_ERROR(("Void reference not dereferenceable"));
+        ASTERIA_THROW(("Void reference not dereferenceable"));
 
       case xref_temporary:
-        ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a temporary value"));
+        ASTERIA_THROW(("Attempt to modify a temporary value"));
 
       case xref_variable: {
         auto var = unerase_cast<Variable*>(this->m_var.get());
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          ASTERIA_THROW_RUNTIME_ERROR(("Reference not initialized"));
+          ASTERIA_THROW(("Reference not initialized"));
 
         if(var->is_immutable())
-          ASTERIA_THROW_RUNTIME_ERROR(("Attempt to modify a `const` variable"));
+          ASTERIA_THROW(("Attempt to modify a `const` variable"));
 
         valp = &(var->mut_value());
         break;
       }
 
       case xref_ptc:
-        ASTERIA_THROW_RUNTIME_ERROR(("Proper tail call not expanded"));
+        ASTERIA_THROW(("Proper tail call not expanded"));
 
       default:
         ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
     }
 
     if(this->m_mods.size() == 0)
-      ASTERIA_THROW_RUNTIME_ERROR(("Only elements of an array or object may be unset"));
+      ASTERIA_THROW(("Only elements of an array or object may be unset"));
 
     while(valp && (mi != this->m_mods.size() - 1))
       valp = this->m_mods[mi++].apply_write_opt(*valp);
@@ -238,7 +238,7 @@ do_use_function_result_slow(Global_Context& global)
         except.push_frame_plain(ptc->sloc(), sref("[proper tail call]"));
 
         if(auto qcall = ptc->caller_opt())
-          except.push_frame_func(qcall->sloc(), qcall->func());
+          except.push_frame_function(qcall->sloc(), qcall->func());
 
         // Evaluate deferred expressions.
         if(ptc->defer().size())

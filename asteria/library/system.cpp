@@ -249,7 +249,7 @@ std_system_gc_count_variables(Global_Context& global, V_integer generation)
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid generation `$1`"),
           generation);
 
@@ -264,7 +264,7 @@ std_system_gc_get_threshold(Global_Context& global, V_integer generation)
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid generation `$1`"),
           generation);
 
@@ -279,7 +279,7 @@ std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_inte
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid generation `$1`"),
           generation);
 
@@ -297,7 +297,7 @@ std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
     if(generation_limit) {
       rglimit = ::rocket::clamp_cast<GC_Generation>(*generation_limit, 0, 2);
       if(rglimit != *generation_limit)
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid generation limit `$1`"),
             *generation_limit);
     }
@@ -469,7 +469,7 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
     // Launch the program.
     ::pid_t pid;
     if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not spawn process '$1'",
           "[`posix_spawnp()` failed: ${errno:full}]"),
           cmd);
@@ -479,7 +479,7 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
       // Note: `waitpid()` may return if the child has been stopped or continued.
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Error awaiting child process '$1'",
             "[`waitpid()` failed: ${errno:full}]"),
             pid);
@@ -499,14 +499,14 @@ std_system_proc_daemonize()
     // processes later.
     ::rocket::unique_posix_fd tfd(::socket(AF_UNIX, SOCK_STREAM, 0));
     if(tfd == -1)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not create blackhole stream",
           "[`socket()` failed: ${errno:full}]"));
 
     // Create the CHILD process and wait.
     ::pid_t cpid = ::fork();
     if(cpid == -1)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not create child process",
           "[`fork()` failed: ${errno:full}]"));
 

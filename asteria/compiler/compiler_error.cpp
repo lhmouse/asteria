@@ -25,10 +25,8 @@ do_compose_message()
   {
     // Rebuild the message. The storage may be reused.
     this->m_fmt.clear_string();
-    this->m_fmt << "compiler error: " << this->m_desc;
-
-    // Write the status code in digital form.
-    format(this->m_fmt, "\n[status $1 at '$2']", this->m_stat, this->m_sloc);
+    this->m_fmt << "compiler error: " << this->m_desc
+                << "\n[status " << this->m_stat << " at '" << this->m_sloc << "']";
   }
 
 }  // namespace asteria

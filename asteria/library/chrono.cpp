@@ -119,7 +119,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
       else {
         // Use the given GMT offset.
         if((*utc_offset <= -1440) || (*utc_offset >= +1440))
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "UTC time offset out of range (`$1` exceeds 1440 minutes)"),
               utc_offset);
 
@@ -239,7 +239,7 @@ std_chrono_parse(V_string time_str)
       rptr ++;
 
     if(rptr != eptr)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid date/time string `$1`"),
           time_str);
 

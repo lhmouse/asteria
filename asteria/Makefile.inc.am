@@ -25,7 +25,6 @@ nobase_include_HEADERS +=  \
   %reldir%/runtime/reference_modifier.hpp  \
   %reldir%/runtime/variable.hpp  \
   %reldir%/runtime/ptc_arguments.hpp  \
-  %reldir%/runtime/backtrace_frame.hpp  \
   %reldir%/runtime/runtime_error.hpp  \
   %reldir%/runtime/abstract_context.hpp  \
   %reldir%/runtime/analytic_context.hpp  \

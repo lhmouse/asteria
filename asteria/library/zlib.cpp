@@ -22,7 +22,7 @@ do_zlib_throw_error(const char* fname, const ::z_stream* strm, int err)
     else if(err == Z_MEM_ERROR)
       msg = "memory allocation failure";
 
-    ASTERIA_THROW_RUNTIME_ERROR((
+    ASTERIA_THROW((
         "zlib error: $1\n[`$2()` returned `$3`]"),
         msg, fname, err);
   }
@@ -438,7 +438,7 @@ do_wbits(const V_string& format)
     if(do_streq_ci(format, sref("raw")))
       return -15;
 
-    ASTERIA_THROW_RUNTIME_ERROR((
+    ASTERIA_THROW((
         "Invalid compression format `$1`"), format);
   }
 
@@ -449,7 +449,7 @@ do_level(const optV_integer& level)
       return Z_DEFAULT_COMPRESSION;
 
     if(*level < 0)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Negative compression level `$1`"), *level);
 
     return ::rocket::clamp_cast<int>(*level,

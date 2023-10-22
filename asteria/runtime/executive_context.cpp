@@ -36,7 +36,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
       this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
     }
     else
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid `this` reference passed to `$1`"),
           zvarg->func());
 
@@ -58,7 +58,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
         has_ellipsis = true;
 
     if(!has_ellipsis && (arg_counter != 0))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Too many arguments passed to `$1`"),
           zvarg->func());
 

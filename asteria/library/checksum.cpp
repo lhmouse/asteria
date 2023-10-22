@@ -929,7 +929,7 @@ do_hash_file(const V_string& path)
     // Open the file for reading.
     ::rocket::unique_posix_fd fd(::open(path.safe_c_str(), O_RDONLY));
     if(!fd)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not open file '$1'",
           "[`open()` failed: ${errno:full}]"),
           path);
@@ -937,7 +937,7 @@ do_hash_file(const V_string& path)
     // Get the file mode and preferred I/O block size.
     struct ::stat stb;
     if(::fstat(fd, &stb) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not get information about source file '$1'",
           "[`fstat()` failed: ${errno:full}]"),
           path);
@@ -956,7 +956,7 @@ do_hash_file(const V_string& path)
         if(nread == 0)
           break;
 
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Error reading file '$1'",
             "[`read()` failed: ${errno:full}]"),
             path);

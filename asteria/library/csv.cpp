@@ -125,7 +125,7 @@ do_csv_parse(tinybuf& buf)
     }
 
     if(quote_at_line != 0)
-      ASTERIA_THROW_RUNTIME_ERROR(("Unmatched \" at line $1"), quote_at_line);
+      ASTERIA_THROW(("Unmatched \" at line $1"), quote_at_line);
 
     return root;
   }
@@ -190,7 +190,7 @@ std_csv_parse_file(V_string path)
     // Try opening the file.
     ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
     if(!fp)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not open file '$1'",
           "[`fopen()` failed: ${errno:full}]"),
           path);

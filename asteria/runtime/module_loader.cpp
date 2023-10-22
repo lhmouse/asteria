@@ -22,7 +22,7 @@ do_lock_stream(const char* path)
     // Open the file first.
     ::rocket::unique_posix_file file(::fopen(path, "rb"));
     if(!file)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not open script file '$1'",
           "[`fopen()` failed: ${errno:full}]"),
           path);
@@ -31,7 +31,7 @@ do_lock_stream(const char* path)
     int fd = ::fileno(file);
     struct ::stat info;
     if(::fstat(fd, &info))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not get properties of script file '$1'",
           "[`fstat()` failed: ${errno:full}]"),
           path);
@@ -40,7 +40,7 @@ do_lock_stream(const char* path)
     auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
     auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));
     if(!result.second)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Recursive import denied (loading '$1', file ID `$2`)"),
           path, skey);
 
@@ -48,7 +48,7 @@ do_lock_stream(const char* path)
     // This has to come last because we want user-friendly error messages.
     // Keep in mind that `file` is now null.
     if(::flock(fd, LOCK_EX) != 0)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Could not lock script file '$1'",
           "[`fcntl()` failed: ${errno:full}]"),
           path);

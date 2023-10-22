@@ -181,7 +181,6 @@ class Module_Loader;
 class Variadic_Arguer;
 class Instantiated_Function;
 class AIR_Node;
-class Backtrace_Frame;
 
 // Compiler
 enum Punctuator : uint8_t;

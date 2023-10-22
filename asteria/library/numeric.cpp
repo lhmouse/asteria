@@ -16,7 +16,7 @@ int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
     if(!(lower <= upper))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Bounds not valid (`$1` is not less than or equal to `$2`)"),
           lower, upper);
 
@@ -27,7 +27,7 @@ double
 do_verify_bounds(double lower, double upper)
   {
     if(!::std::islessequal(lower, upper))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Bounds not valid (`$1` is not less than or equal to `$2`)"),
           lower, upper);
 
@@ -216,7 +216,7 @@ do_unpack(void bswap(WordT&), const V_string& text)
     V_array values;
 
     if(text.size() / sizeof(un) * sizeof(un) != text.size())
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
             "String length `$1` not divisible by `$2`"),
             text.size(), sizeof(un));
 
@@ -236,7 +236,7 @@ V_integer
 std_numeric_abs(V_integer value)
   {
     if(value == INT64_MIN)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Integer absolute value overflow (value `$1`)"),
           value);
 
@@ -441,12 +441,12 @@ std_numeric_random(Global_Context& global, optV_real limit)
     if(limit) {
       switch(::std::fpclassify(*limit)) {
         case FP_ZERO:
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Random number limit shall not be zero"));
 
         case FP_INFINITE:
         case FP_NAN:
-          ASTERIA_THROW_RUNTIME_ERROR((
+          ASTERIA_THROW((
               "Random number limit shall be finite (limit `$1`)"), *limit);
 
         default:
@@ -480,7 +480,7 @@ V_integer
 std_numeric_rotl(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid modulo bit count (`$1` is not between 0 and 64)"), m);
 
     if(m == 0)
@@ -504,7 +504,7 @@ V_integer
 std_numeric_rotr(V_integer m, V_integer x, V_integer n)
   {
     if((m < 0) || (m > 64))
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "Invalid modulo bit count (`$1` is not between 0 and 64)"), m);
 
     if(m == 0)
@@ -546,7 +546,7 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid exponent base for binary notation (`$1` is not 2)"),
             *ebase);
       }
@@ -566,7 +566,7 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
             *ebase);
       }
@@ -586,13 +586,13 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid exponent base for decimal notation (`$1` is not 10)"),
             *ebase);
       }
 
       default:
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid number base (base `$1` is not one of { 2, 10, 16 })"),
             *base);
     }
@@ -618,7 +618,7 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid exponent base for binary notation (`$1` is not 2)"),
             *ebase);
       }
@@ -636,7 +636,7 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
             *ebase);
       }
@@ -654,13 +654,13 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           break;
         }
 
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid exponent base for decimal notation (`$1` is not 10)"),
             *ebase);
       }
 
       default:
-        ASTERIA_THROW_RUNTIME_ERROR((
+        ASTERIA_THROW((
             "Invalid number base (base `$1` is not one of { 2, 10, 16 })"),
             *base);
     }
@@ -673,13 +673,13 @@ std_numeric_parse(V_string text)
     static constexpr char s_spaces[] = " \f\n\r\t\v";
     size_t tpos = text.find_not_of(s_spaces);
     if(tpos == V_string::npos)
-      ASTERIA_THROW_RUNTIME_ERROR(("Blank string"));
+      ASTERIA_THROW(("Blank string"));
 
     // Try parsing the string as a real number first.
     ::rocket::ascii_numget numg;
     size_t tlen = text.rfind_not_of(s_spaces) + 1 - tpos;
     if(numg.parse_D(text.data() + tpos, tlen) != tlen)
-      ASTERIA_THROW_RUNTIME_ERROR((
+      ASTERIA_THROW((
           "String not convertible to a number (text `$1`)"), text);
 
     if(text.find('.') == V_string::npos) {
