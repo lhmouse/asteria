@@ -5,12 +5,14 @@
 #include "runtime_error.hpp"
 #include "enums.hpp"
 namespace asteria {
+namespace {
 
-static_assert(
-    ::std::is_nothrow_copy_constructible<Runtime_Error>::value &&
-    ::std::is_nothrow_move_constructible<Runtime_Error>::value &&
-    ::std::is_nothrow_copy_assignable<Runtime_Error>::value &&
-    ::std::is_nothrow_move_assignable<Runtime_Error>::value);
+static_assert(::std::is_nothrow_copy_constructible<Runtime_Error>::value);
+static_assert(::std::is_nothrow_move_constructible<Runtime_Error>::value);
+static_assert(::std::is_nothrow_copy_assignable<Runtime_Error>::value);
+static_assert(::std::is_nothrow_move_assignable<Runtime_Error>::value);
+
+}  // namespace
 
 Runtime_Error::
 ~Runtime_Error()

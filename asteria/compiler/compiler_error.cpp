@@ -5,12 +5,14 @@
 #include "compiler_error.hpp"
 #include "enums.hpp"
 namespace asteria {
+namespace {
 
-static_assert(
-    ::std::is_nothrow_copy_constructible<Compiler_Error>::value &&
-    ::std::is_nothrow_move_constructible<Compiler_Error>::value &&
-    ::std::is_nothrow_copy_assignable<Compiler_Error>::value &&
-    ::std::is_nothrow_move_assignable<Compiler_Error>::value);
+static_assert(::std::is_nothrow_copy_constructible<Compiler_Error>::value);
+static_assert(::std::is_nothrow_move_constructible<Compiler_Error>::value);
+static_assert(::std::is_nothrow_copy_assignable<Compiler_Error>::value);
+static_assert(::std::is_nothrow_move_assignable<Compiler_Error>::value);
+
+}  // namespace
 
 Compiler_Error::
 ~Compiler_Error()
