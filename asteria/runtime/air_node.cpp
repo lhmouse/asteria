@@ -168,7 +168,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue&
   }
 
 void
-do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t count)
+do_pop_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t count)
   {
     ROCKET_ASSERT(count <= stack.size());
     alt_stack.clear();
@@ -178,28 +178,29 @@ do_pop_positional_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, 
   }
 
 AIR_Status
-do_invoke_nontail(Reference& self, Global_Context& global,  const Source_Location& sloc,
-                 const cow_function& target, Reference_Stack&& stack)
+do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
+                     const Source_Location& sloc, const cow_function& target,
+                     Reference_Stack&& stack)
   {
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
-    try {
-      target.invoke(self, global, ::std::move(stack));
+    if(ptc != ptc_aware_none) {
+      // Pack proper tail call arguments into `self`.
+      stack.push() = ::std::move(self);
+      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack)));
+      return air_status_return_ref;
     }
-    catch(Runtime_Error& except) {
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, sloc, target, except);
-      throw;
+    else {
+      // Perform a normal function call.
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
+      try {
+        target.invoke(self, global, ::std::move(stack));
+      }
+      catch(Runtime_Error& except) {
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, sloc, target, except);
+        throw;
+      }
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
+      return air_status_next;
     }
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
-    return air_status_next;
-  }
-
-AIR_Status
-do_invoke_tail(Reference& self, PTC_Aware ptc, const Source_Location& sloc,
-              const cow_function& target, Reference_Stack&& stack)
-  {
-    stack.push() = ::std::move(self);
-    self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack)));
-    return air_status_return_ref;
   }
 
 template<typename ContainerT>
@@ -1799,7 +1800,7 @@ solidify(AVMC_Queue& queue) const
 
             auto& alt_stack = ctx.alt_stack();
             auto& stack = ctx.stack();
-            do_pop_positional_arguments(alt_stack, stack, up.u2345);
+            do_pop_arguments(alt_stack, stack, up.u2345);
 
             // Copy the target, which shall be of type `function`.
             auto val = stack.top().dereference_readonly();
@@ -1811,10 +1812,8 @@ solidify(AVMC_Queue& queue) const
             const auto& target = val.as_function();
             auto& self = stack.mut_top().pop_modifier();
             stack.clear_red_zone();
-
-            return ROCKET_EXPECT(up.u0 == ptc_aware_none)
-                     ? do_invoke_nontail(self, ctx.global(), sloc, target, ::std::move(alt_stack))
-                     : do_invoke_tail(self, static_cast<PTC_Aware>(up.u0), sloc, target, ::std::move(alt_stack));
+            return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
+                                        target, ::std::move(alt_stack));
           }
 
           // Uparam
@@ -3533,7 +3532,8 @@ solidify(AVMC_Queue& queue) const
               // it first.
               auto gself = stack.mut_top().pop_modifier();
               alt_stack.clear();
-              do_invoke_nontail(stack.mut_top(), ctx.global(), sloc, gfunc, ::std::move(alt_stack));
+              do_invoke_maybe_tail(stack.mut_top(), ctx.global(), ptc_aware_none, sloc,
+                                   gfunc, ::std::move(alt_stack));
               const auto gnargs = stack.top().dereference_readonly();
               stack.pop();
 
@@ -3554,11 +3554,12 @@ solidify(AVMC_Queue& queue) const
                 stack.push() = gself;
                 alt_stack.clear();
                 alt_stack.push().set_temporary(k);
-                do_invoke_nontail(stack.mut_top(), ctx.global(), sloc, gfunc, ::std::move(alt_stack));
+                do_invoke_maybe_tail(stack.mut_top(), ctx.global(), ptc_aware_none, sloc,
+                                     gfunc, ::std::move(alt_stack));
                 stack.top().dereference_readonly();
               }
 
-              do_pop_positional_arguments(alt_stack, stack, static_cast<uint32_t>(gnargs.as_integer()));
+              do_pop_arguments(alt_stack, stack, static_cast<uint32_t>(gnargs.as_integer()));
             }
             else
               ASTERIA_THROW_RUNTIME_ERROR(("Invalid argument generator (value `$1`)"), val);
@@ -3573,10 +3574,8 @@ solidify(AVMC_Queue& queue) const
             const auto& target = val.as_function();
             auto& self = stack.mut_top().pop_modifier();
             stack.clear_red_zone();
-
-            return ROCKET_EXPECT(up.u0 == ptc_aware_none)
-                     ? do_invoke_nontail(self, ctx.global(), sloc, target, ::std::move(alt_stack))
-                     : do_invoke_tail(self, static_cast<PTC_Aware>(up.u0), sloc, target, ::std::move(alt_stack));
+            return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
+                                        target, ::std::move(alt_stack));
           }
 
           // Uparam
@@ -3670,7 +3669,7 @@ solidify(AVMC_Queue& queue) const
             auto& alt_stack = ctx.alt_stack();
             auto& stack = ctx.stack();
             ROCKET_ASSERT(up.u2345 != 0);
-            do_pop_positional_arguments(alt_stack, stack, up.u2345 - 1);
+            do_pop_arguments(alt_stack, stack, up.u2345 - 1);
 
             // Get the path of the file to import, which shall be a string.
             auto val = stack.top().dereference_readonly();
@@ -3715,15 +3714,12 @@ solidify(AVMC_Queue& queue) const
             AIR_Optimizer optmz(sp.opts);
             optmz.reload(nullptr, script_params, ctx.global(), stmtq);
 
-            Source_Location script_sloc(path, 0, 0);
-            auto target = optmz.create_function(script_sloc, sref("[file scope]"));
-            stack.clear_red_zone();
-
             // Invoke the script. `this` is `null`.
-            auto& self = stack.mut_top();
-            self.set_temporary(nullopt);
-            do_invoke_nontail(self, ctx.global(), sloc, target, ::std::move(alt_stack));
-            return air_status_next;
+            auto target = optmz.create_function(Source_Location(path, 0, 0), sref("[file scope]"));
+            auto& self = stack.mut_top().set_temporary(nullopt);
+            stack.clear_red_zone();
+            return do_invoke_maybe_tail(self, ctx.global(), ptc_aware_none, sloc,
+                                        target, ::std::move(alt_stack));
           }
 
           // Uparam
