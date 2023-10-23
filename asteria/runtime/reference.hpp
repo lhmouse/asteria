@@ -40,9 +40,9 @@ class Reference
       {
         if(other.m_xref == xref_temporary)
           this->m_value = other.m_value;
-        else if(other.m_var)
+        else if(other.m_xref == xref_variable)
           this->m_var = other.m_var;
-        else if(other.m_ptc)
+        else if(other.m_xref == xref_ptc)
           this->m_ptc = other.m_ptc;
 
         this->m_mods = other.m_mods;
@@ -66,9 +66,9 @@ class Reference
       {
         if(other.m_xref == xref_temporary)
           this->m_value = ::std::move(other.m_value);
-        else if(other.m_var)
+        else if(other.m_xref == xref_variable)
           this->m_var = ::std::move(other.m_var);
-        else if(other.m_ptc)
+        else if(other.m_xref == xref_ptc)
           this->m_ptc = ::std::move(other.m_ptc);
 
         this->m_mods = ::std::move(other.m_mods);
