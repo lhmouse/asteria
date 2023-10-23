@@ -927,25 +927,27 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                                    Scope_Flags scfl)
   {
     // for-complement-range ::=
-    //   "each" identifier "," identifier "->" expression ")" statement
+    //   "each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")" statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
     if(!qkwrd)
       return nullopt;
 
-    auto qkname = do_accept_identifier_opt(tstrm, true);
-    if(!qkname)
+    cow_string key;
+    auto qmapped = do_accept_identifier_opt(tstrm, true);
+    if(!qmapped)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-    if(!kpunct)
-      throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_comma_expected, tstrm.next_sloc());
-
-    auto qvname = do_accept_identifier_opt(tstrm, true);
-    if(!qvname)
-      throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_identifier_expected, tstrm.next_sloc());
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_colon, punctuator_assign });
+    if(kpunct) {
+      // Move the first identifier into the key and expect the name for mapped
+      // references.
+      key = ::std::move(*qmapped);
+      qmapped = do_accept_identifier_opt(tstrm, true);
+      if(!qmapped)
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_identifier_expected, tstrm.next_sloc());
+    }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_arrow });
     if(!kpunct)
@@ -969,9 +971,8 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
 
-    Statement::S_for_each xstmt = { ::std::move(*qkname), ::std::move(*qvname),
-                                    ::std::move(sloc_init), ::std::move(*qinit),
-                                    ::std::move(*qblock) };
+    Statement::S_for_each xstmt = { ::std::move(key), ::std::move(*qmapped), ::std::move(sloc_init),
+                                    ::std::move(*qinit), ::std::move(*qblock) };
     return ::std::move(xstmt);
   }
 

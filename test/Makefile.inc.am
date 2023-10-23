@@ -57,6 +57,7 @@ check_PROGRAMS +=  \
   %reldir%/ptc_hooks_throw.test  \
   %reldir%/ptc_hooks_return.test  \
   %reldir%/switch_defer.test  \
+  %reldir%/for_each.test  \
   ${END}
 
 EXTRA_DIST +=  \

@@ -128,7 +128,7 @@ for-complement ::=
 	for-complement-range | for-complement-triplet
 
 for-complement-range ::=
-	"each" identifier "," identifier "->" expression ")" statement
+	"each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")" statement
 
 for-complement-triplet ::=
 	for-initializer expression ? ";" expression ? ")" statement

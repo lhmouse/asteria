@@ -339,7 +339,8 @@ rebind_opt(Abstract_Context& ctx) const
         S_for_each_statement bound = altr;
 
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
-        ctx_for.insert_named_reference(altr.name_key);
+        if(!altr.name_key.empty())
+          ctx_for.insert_named_reference(altr.name_key);
         ctx_for.insert_named_reference(altr.name_mapped);
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
 
@@ -1123,9 +1124,8 @@ solidify(AVMC_Queue& queue) const
             Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
 
             // Create key and mapped references.
-            auto& key = ctx_for.insert_named_reference(sp.name_key);
-            auto& mapped = ctx_for.insert_named_reference(sp.name_mapped);
             refcnt_ptr<Variable> kvar;
+            auto& mapped = ctx_for.insert_named_reference(sp.name_mapped);
 
             // Evaluate the range initializer and set the range up, which isn't
             // going to change for all loops.
@@ -1140,19 +1140,21 @@ solidify(AVMC_Queue& queue) const
             }
             else if(range.is_array()) {
               const auto& arr = range.as_array();
+              mapped.push_modifier(Reference_Modifier::S_array_head());  // placeholder
               for(int64_t i = 0;  i < arr.ssize();  ++i) {
                 // Set the key variable which is the subscript of the mapped
                 // element in the array.
-                if(!kvar) {
-                  kvar = ctx.global().garbage_collector()->create_variable();
-                  key.set_variable(kvar);
+                if(!sp.name_key.empty()) {
+                  if(!kvar) {
+                    kvar = ctx.global().garbage_collector()->create_variable();
+                    ctx_for.insert_named_reference(sp.name_key).set_variable(kvar);
+                  }
+                  kvar->initialize(i);
+                  kvar->set_immutable();
                 }
-                else
-                  mapped.pop_modifier();
 
-                kvar->initialize(i);
-                kvar->set_immutable();
-
+                // Set the mapped reference.
+                mapped.pop_modifier();
                 Reference_Modifier::S_array_index xmod = { i };
                 mapped.push_modifier(::std::move(xmod));
                 mapped.dereference_readonly();
@@ -1171,19 +1173,21 @@ solidify(AVMC_Queue& queue) const
             }
             else if(range.is_object()) {
               const auto& obj = range.as_object();
+              mapped.push_modifier(Reference_Modifier::S_array_head());  // placeholder
               for(auto it = obj.begin();  it != obj.end();  ++it) {
                 // Set the key variable which is the name of the mapped element
                 // in the object.
-                if(!kvar) {
-                  kvar = ctx.global().garbage_collector()->create_variable();
-                  key.set_variable(kvar);
+                if(!sp.name_key.empty()) {
+                  if(!kvar) {
+                    kvar = ctx.global().garbage_collector()->create_variable();
+                    ctx_for.insert_named_reference(sp.name_key).set_variable(kvar);
+                  }
+                  kvar->initialize(it->first.rdstr());
+                  kvar->set_immutable();
                 }
-                else
-                  mapped.pop_modifier();
 
-                kvar->initialize(it->first.rdstr());
-                kvar->set_immutable();
-
+                // Set the mapped reference.
+                mapped.pop_modifier();
                 Reference_Modifier::S_object_key xmod = { it->first };
                 mapped.push_modifier(::std::move(xmod));
                 mapped.dereference_readonly();
@@ -1197,9 +1201,6 @@ solidify(AVMC_Queue& queue) const
                 else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
                                                        air_status_continue_for }))
                   break;
-
-                // Restore the mapped reference.
-                mapped.pop_modifier();
               }
               return status;
             }
