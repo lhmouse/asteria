@@ -58,20 +58,20 @@ class Reference
         m_xref(::rocket::exchange(other.m_xref))
       {
         if(this->m_xref == xref_temporary)
-          this->m_value = ::std::move(other.m_value);
+          this->m_value.swap(other.m_value);
       }
 
     Reference&
     operator=(Reference&& other) & noexcept
       {
         if(other.m_xref == xref_temporary)
-          this->m_value = ::std::move(other.m_value);
+          this->m_value.swap(other.m_value);
         else if(other.m_xref == xref_variable)
-          this->m_var = ::std::move(other.m_var);
+          this->m_var.swap(other.m_var);
         else if(other.m_xref == xref_ptc)
-          this->m_ptc = ::std::move(other.m_ptc);
+          this->m_ptc.swap(other.m_ptc);
 
-        this->m_mods = ::std::move(other.m_mods);
+        this->m_mods.swap(other.m_mods);
         this->m_xref = ::rocket::exchange(other.m_xref);
         return *this;
       }
@@ -257,7 +257,7 @@ class Reference
           // Ensure the value is copied before being moved, so we never assign
           // an element into its own container.
           auto val = this->do_dereference_readonly_slow();
-          this->m_value = ::std::move(val);
+          this->m_value.swap(val);
           this->m_mods.clear();
           return this->m_value;
         }
