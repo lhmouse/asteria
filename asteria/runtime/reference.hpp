@@ -58,14 +58,14 @@ class Reference
         m_xref(::rocket::exchange(other.m_xref))
       {
         if(this->m_xref == xref_temporary)
-          this->m_value.swap(other.m_value);
+          this->m_value = ::std::move(other.m_value);
       }
 
     Reference&
     operator=(Reference&& other) & noexcept
       {
         if(other.m_xref == xref_temporary)
-          this->m_value.swap(other.m_value);
+          this->m_value = ::std::move(other.m_value);
         else if(other.m_xref == xref_variable)
           this->m_var.swap(other.m_var);
         else if(other.m_xref == xref_ptc)
