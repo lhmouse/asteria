@@ -172,8 +172,13 @@ do_pop_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t co
   {
     ROCKET_ASSERT(count <= stack.size());
     alt_stack.clear();
-    for(uint32_t k = count - 1;  k != UINT32_MAX;  --k)
-      alt_stack.push() = ::std::move(stack.mut_top(k));
+
+    for(uint32_t k = 0;  k != count;  ++k)
+      alt_stack.push();
+
+    for(uint32_t k = 0;  k != count;  ++k)
+      alt_stack.mut_top(k) = ::std::move(stack.mut_top(k));
+
     stack.pop(count);
   }
 
