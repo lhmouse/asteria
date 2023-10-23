@@ -1808,11 +1808,10 @@ solidify(AVMC_Queue& queue) const
             else if(!val.is_function())
               ASTERIA_THROW(("Attempt to call a non-function (value `$1`)"), val);
 
-            const auto& target = val.as_function();
             auto& self = stack.mut_top().pop_modifier();
             stack.clear_red_zone();
             return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
-                                        target, ::std::move(alt_stack));
+                                        val.as_function(), ::std::move(alt_stack));
           }
 
           // Uparam
@@ -3570,11 +3569,10 @@ solidify(AVMC_Queue& queue) const
             else if(!val.is_function())
               ASTERIA_THROW(("Attempt to call a non-function (value `$1`)"), val);
 
-            const auto& target = val.as_function();
             auto& self = stack.mut_top().pop_modifier();
             stack.clear_red_zone();
             return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
-                                        target, ::std::move(alt_stack));
+                                        val.as_function(), ::std::move(alt_stack));
           }
 
           // Uparam
@@ -3712,9 +3710,9 @@ solidify(AVMC_Queue& queue) const
             script_params.emplace_back(sref("..."));
             AIR_Optimizer optmz(sp.opts);
             optmz.reload(nullptr, script_params, ctx.global(), stmtq);
+            auto target = optmz.create_function(Source_Location(path, 0, 0), sref("[file scope]"));
 
             // Invoke the script. `this` is `null`.
-            auto target = optmz.create_function(Source_Location(path, 0, 0), sref("[file scope]"));
             auto& self = stack.mut_top().set_temporary(nullopt);
             stack.clear_red_zone();
             return do_invoke_maybe_tail(self, ctx.global(), ptc_aware_none, sloc,
