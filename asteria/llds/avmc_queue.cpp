@@ -14,7 +14,7 @@ AVMC_Queue::
 do_reallocate(uint32_t estor)
   {
     // Extend the storage.
-    if(estor >= 0x7FFF000U / sizeof(Header))
+    if(estor >= 0x7FFE0000U / sizeof(Header))
       throw ::std::bad_alloc();
 
     ROCKET_ASSERT(estor >= this->m_used);

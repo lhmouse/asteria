@@ -11,7 +11,7 @@ Reference_Stack::
 do_reallocate(uint32_t estor)
   {
     // Extend the storage.
-    if(estor >= 0x7FFF000U / sizeof(Reference))
+    if(estor >= 0x7FFE0000U / sizeof(Reference))
       throw ::std::bad_alloc();
 
     ROCKET_ASSERT(estor >= this->m_einit);

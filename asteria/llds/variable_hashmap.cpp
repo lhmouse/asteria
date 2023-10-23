@@ -11,7 +11,7 @@ Variable_HashMap::
 do_reallocate(uint32_t nbkt)
   {
     // Extend the storage.
-    if(nbkt >= 0x7FFF000U / sizeof(Bucket))
+    if(nbkt >= 0x7FFE0000U / sizeof(Bucket))
       throw ::std::bad_alloc();
 
     ROCKET_ASSERT(nbkt >= this->m_size * 2);
