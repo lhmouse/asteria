@@ -10,52 +10,62 @@ void
 Variable_HashMap::
 do_reallocate(uint32_t nbkt)
   {
-    details_variable_hashmap::Bucket* bptr = nullptr;
+    // Extend the storage.
+    if(nbkt >= 0x7FFF000U / sizeof(Bucket))
+      throw ::std::bad_alloc();
 
-    if(nbkt != 0) {
-      // Extend the storage.
-      ROCKET_ASSERT(nbkt >= this->m_size * 2);
-
-      if(nbkt >= 0x7FFF000U / sizeof(details_variable_hashmap::Bucket))
-        throw ::std::bad_alloc();
-
-      bptr = (details_variable_hashmap::Bucket*) ::calloc(nbkt, sizeof(details_variable_hashmap::Bucket));
-      if(!bptr)
-        throw ::std::bad_alloc();
-    }
-
-    if(this->m_size != 0)
-      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-        if(this->m_bptr[t]) {
-          if(bptr) {
-            // Look for a new bucket for this element. Uniqueness is implied.
-            size_t orel = ::rocket::probe_origin(nbkt, (uintptr_t) this->m_bptr[t].key_opt);
-            auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
-                    [&](const details_variable_hashmap::Bucket&) { return false;  });
-
-            // Relocate the value into the new bucket.
-            ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(details_variable_hashmap::Bucket));
-            ::std::atomic_signal_fence(::std::memory_order_release);
-            this->m_bptr[t].key_opt = nullptr;
-          }
-          else {
-            // Destroy this element.
-            ::rocket::destroy(this->m_bptr[t].vstor);
-            this->m_bptr[t].key_opt = nullptr;
-            this->m_size --;
-          }
-        }
+    ROCKET_ASSERT(nbkt >= this->m_size * 2);
+    auto bptr = (Bucket*) ::calloc(nbkt, sizeof(Bucket));
+    if(!bptr)
+      throw ::std::bad_alloc();
 
     if(this->m_bptr) {
-      // Free the old storage.
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          // Look for a new bucket for this element. Uniqueness is implied.
+          size_t orel = ::rocket::probe_origin(nbkt, (uintptr_t) this->m_bptr[t].key_opt);
+          auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
+                  [&](const Bucket&) { return false;  });
+
+          // Relocate the value into the new bucket.
+          ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(Bucket));
+          ::std::atomic_signal_fence(::std::memory_order_release);
+          this->m_bptr[t].key_opt = nullptr;
+        }
+
 #ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_variable_hashmap::Bucket));
+      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(Bucket));
 #endif
       ::free(this->m_bptr);
     }
 
     this->m_bptr = bptr;
     this->m_nbkt = nbkt;
+  }
+
+void
+Variable_HashMap::
+do_deallocate() noexcept
+  {
+    // Free the storage.
+    if(this->m_bptr) {
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          // Destroy this element.
+          ::rocket::destroy(this->m_bptr[t].vstor);
+          this->m_bptr[t].key_opt = nullptr;
+          this->m_size --;
+        }
+
+#ifdef ROCKET_DEBUG
+      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(Bucket));
+#endif
+      ::free(this->m_bptr);
+    }
+
+    this->m_bptr = nullptr;
+    this->m_size = 0;
+    this->m_nbkt = 0;
   }
 
 void
@@ -88,7 +98,7 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-            [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
+            [&](const Bucket& r) { return r.key_opt == key;  });
 
     if(*qbkt)
       return false;
@@ -111,7 +121,7 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-          [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
+          [&](const Bucket& r) { return r.key_opt == key;  });
 
     if(!*qbkt)
       return false;
@@ -130,7 +140,7 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
       (size_t) (qbkt - this->m_bptr),
       (size_t) (qbkt - this->m_bptr) + 1,
       this->m_nbkt,
-      [&](details_variable_hashmap::Bucket& r) {
+      [&](Bucket& r) {
         // Clear this bucket temporarily.
         ROCKET_ASSERT(r.key_opt);
         const void* saved_key = r.key_opt;
@@ -139,10 +149,10 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
         // Look for a new bucket for this element. Uniqueness is implied.
         size_t orel = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) saved_key);
         auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
-                [&](const details_variable_hashmap::Bucket&) { return false;  });
+                [&](const Bucket&) { return false;  });
 
         // Relocate the value into the new bucket.
-        ::memcpy((void*) qrel, (const void*) &r, sizeof(details_variable_hashmap::Bucket));
+        ::memcpy((void*) qrel, (const void*) &r, sizeof(Bucket));
         ::std::atomic_signal_fence(::std::memory_order_release);
         qrel->key_opt = saved_key;
         return false;

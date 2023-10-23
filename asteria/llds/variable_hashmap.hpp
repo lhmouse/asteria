@@ -12,7 +12,8 @@ namespace asteria {
 class Variable_HashMap
   {
   private:
-    details_variable_hashmap::Bucket* m_bptr = nullptr;  // beginning of bucket storage
+    using Bucket = details_variable_hashmap::Bucket;
+    Bucket* m_bptr = nullptr;  // beginning of bucket storage
     uint32_t m_size = 0;  // number of initialized buckets
     uint32_t m_nbkt = 0;  // number of allocated buckets
     uint32_t m_random = 0;  // used by `extract_variable_opt()`
@@ -44,17 +45,17 @@ class Variable_HashMap
       }
 
   private:
-    // This is the only memory management function. `nbkt` shall specify the
-    // new number of buckets of the hash table. If `nbkt` is zero, any dynamic
-    // storage will be deallocated.
     void
     do_reallocate(uint32_t nbkt);
+
+    void
+    do_deallocate() noexcept;
 
   public:
     ~Variable_HashMap()
       {
         if(this->m_bptr)
-          this->do_reallocate(0);
+          this->do_deallocate();
       }
 
     bool

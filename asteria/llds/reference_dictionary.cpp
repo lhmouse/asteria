@@ -10,52 +10,62 @@ void
 Reference_Dictionary::
 do_reallocate(uint32_t nbkt)
   {
-    details_reference_dictionary::Bucket* bptr = nullptr;
+    // Extend the storage.
+    if(nbkt >= 0x7FFF000U / sizeof(Bucket))
+      throw ::std::bad_alloc();
 
-    if(nbkt != 0) {
-      // Extend the storage.
-      ROCKET_ASSERT(nbkt >= this->m_size * 2);
-
-      if(nbkt >= 0x7FFF000U / sizeof(details_reference_dictionary::Bucket))
-        throw ::std::bad_alloc();
-
-      bptr = (details_reference_dictionary::Bucket*) ::calloc(nbkt, sizeof(details_reference_dictionary::Bucket));
-      if(!bptr)
-        throw ::std::bad_alloc();
-    }
-
-    if(this->m_size != 0)
-      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-        if(this->m_bptr[t]) {
-          if(bptr) {
-            // Look for a new bucket for this element. Uniqueness is implied.
-            size_t orel = ::rocket::probe_origin(nbkt, this->m_bptr[t].khash);
-            auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
-                    [&](const details_reference_dictionary::Bucket&) { return false;  });
-
-            // Relocate the value into the new bucket.
-            ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(details_reference_dictionary::Bucket));
-            ::std::atomic_signal_fence(::std::memory_order_release);
-            this->m_bptr[t].flags = 0;
-          }
-          else {
-            ::rocket::destroy(this->m_bptr[t].kstor);
-            ::rocket::destroy(this->m_bptr[t].vstor);
-            this->m_bptr[t].flags = 0;
-            this->m_size --;
-          }
-        }
+    ROCKET_ASSERT(nbkt >= this->m_size * 2);
+    auto bptr = (Bucket*) ::calloc(nbkt, sizeof(Bucket));
+    if(!bptr)
+      throw ::std::bad_alloc();
 
     if(this->m_bptr) {
-      // Free the old storage.
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          // Look for a new bucket for this element. Uniqueness is implied.
+          size_t orel = ::rocket::probe_origin(nbkt, this->m_bptr[t].khash);
+          auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
+                  [&](const Bucket&) { return false;  });
+
+          // Relocate the value into the new bucket.
+          ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(Bucket));
+          ::std::atomic_signal_fence(::std::memory_order_release);
+          this->m_bptr[t].flags = 0;
+        }
+
 #ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(details_reference_dictionary::Bucket));
+      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(Bucket));
 #endif
       ::free(this->m_bptr);
     }
 
     this->m_bptr = bptr;
     this->m_nbkt = nbkt;
+  }
+
+void
+Reference_Dictionary::
+do_deallocate() noexcept
+  {
+    // Free the storage.
+    if(this->m_bptr) {
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t]) {
+          ::rocket::destroy(this->m_bptr[t].kstor);
+          ::rocket::destroy(this->m_bptr[t].vstor);
+          this->m_bptr[t].flags = 0;
+          this->m_size --;
+        }
+
+#ifdef ROCKET_DEBUG
+      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(Bucket));
+#endif
+      ::free(this->m_bptr);
+    }
+
+    this->m_bptr = nullptr;
+    this->m_size = 0;
+    this->m_nbkt = 0;
   }
 
 void
@@ -89,7 +99,7 @@ insert(phsh_stringR key, bool* newly)
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uint32_t) key.rdhash());
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-            [&](const details_reference_dictionary::Bucket& r) { return r.key_equals(key);  });
+            [&](const Bucket& r) { return r.key_equals(key);  });
 
     if(newly)
       *newly = !*qbkt;
@@ -117,7 +127,7 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uint32_t) key.rdhash());
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-          [&](const details_reference_dictionary::Bucket& r) { return r.key_equals(key);  });
+          [&](const Bucket& r) { return r.key_equals(key);  });
 
     if(!*qbkt)
       return false;
@@ -137,7 +147,7 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
       (size_t) (qbkt - this->m_bptr),
       (size_t) (qbkt - this->m_bptr) + 1,
       this->m_nbkt,
-      [&](details_reference_dictionary::Bucket& r) {
+      [&](Bucket& r) {
         // Clear this bucket temporarily.
         ROCKET_ASSERT(r.flags != 0);
         uint32_t saved_flags = r.flags;
@@ -146,10 +156,10 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
         // Look for a new bucket for this element. Uniqueness is implied.
         size_t orel = ::rocket::probe_origin(this->m_nbkt, r.khash);
         auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
-                [&](const details_reference_dictionary::Bucket&) { return false;  });
+                [&](const Bucket&) { return false;  });
 
         // Relocate the value into the new bucket.
-        ::memcpy((void*) qrel, (const void*) &r, sizeof(details_reference_dictionary::Bucket));
+        ::memcpy((void*) qrel, (const void*) &r, sizeof(Bucket));
         ::std::atomic_signal_fence(::std::memory_order_release);
         qrel->flags = saved_flags;
         return false;

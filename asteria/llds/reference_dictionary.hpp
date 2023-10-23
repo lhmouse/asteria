@@ -12,7 +12,8 @@ namespace asteria {
 class Reference_Dictionary
   {
   private:
-    details_reference_dictionary::Bucket* m_bptr = nullptr;  // beginning of bucket storage
+    using Bucket = details_reference_dictionary::Bucket;
+    Bucket* m_bptr = nullptr;  // beginning of bucket storage
     uint32_t m_size = 0;  // number of initialized buckets
     uint32_t m_nbkt = 0;  // number of allocated buckets
 
@@ -43,17 +44,17 @@ class Reference_Dictionary
       }
 
   private:
-    // This is the only memory management function. `nbkt` shall specify the
-    // new number of buckets of the hash table. If `nbkt` is zero, any dynamic
-    // storage will be deallocated.
     void
     do_reallocate(uint32_t nbkt);
+
+    void
+    do_deallocate() noexcept;
 
   public:
     ~Reference_Dictionary()
       {
         if(this->m_bptr)
-          this->do_reallocate(0);
+          this->do_deallocate();
       }
 
     bool

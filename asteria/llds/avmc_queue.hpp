@@ -14,7 +14,6 @@ class AVMC_Queue
   public:
     using Uparam      = details_avmc_queue::Uparam;
     using Header      = details_avmc_queue::Header;
-
     using Executor    = details_avmc_queue::Executor;
     using Constructor = details_avmc_queue::Constructor;
     using Destructor  = details_avmc_queue::Destructor;
@@ -56,11 +55,14 @@ class AVMC_Queue
     void
     do_reallocate(uint32_t estor);
 
+    void
+    do_deallocate() noexcept;
+
   public:
     ~AVMC_Queue()
       {
         if(this->m_bptr)
-          this->do_reallocate(0);
+          this->do_deallocate();
       }
 
     bool

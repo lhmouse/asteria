@@ -44,17 +44,17 @@ class Reference_Stack
       }
 
   private:
-    // This is the only memory management function. `estor` shall specify the
-    // new number of references to reserve. If `estor` is zero, any dynamic
-    // storage will be deallocated.
     void
     do_reallocate(uint32_t estor);
+
+    void
+    do_deallocate() noexcept;
 
   public:
     ~Reference_Stack()
       {
         if(this->m_bptr)
-          this->do_reallocate(0);
+          this->do_deallocate();
       }
 
     bool

@@ -13,42 +13,18 @@ void
 AVMC_Queue::
 do_reallocate(uint32_t estor)
   {
-    Header* bptr = nullptr;
+    // Extend the storage.
+    if(estor >= 0x7FFF000U / sizeof(Header))
+      throw ::std::bad_alloc();
 
-    if(estor != 0) {
-      // Extend the storage.
-      ROCKET_ASSERT(estor >= this->m_used);
-
-      if(estor >= 0x7FFF000U / sizeof(Header))
-        throw ::std::bad_alloc();
-
-      bptr = (Header*) ::realloc((void*) this->m_bptr, estor * sizeof(Header));
-      if(!bptr)
-        throw ::std::bad_alloc();
-    }
-    else {
-      // Free the storage.
-      auto next = this->m_bptr;
-      const auto eptr = this->m_bptr + this->m_used;
-      while(ROCKET_EXPECT(next != eptr)) {
-        auto qnode = next;
-        next += 1U + qnode->nheaders;
-
-        if(qnode->meta_ver != 0) {
-          unique_ptr<Metadata> meta(qnode->pv_meta);
-
-          // If `sparam` has a destructor, invoke it.
-          if(qnode->pv_meta->dtor_opt)
-            qnode->pv_meta->dtor_opt(qnode);
-        }
-      }
+    ROCKET_ASSERT(estor >= this->m_used);
+    auto bptr = (Header*) ::realloc((void*) this->m_bptr, estor * sizeof(Header));
+    if(!bptr)
+      throw ::std::bad_alloc();
 
 #ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
+    ::memset((void*) (bptr + this->m_used), 0xC3, (estor - this->m_used) * sizeof(Header));
 #endif
-      ::free(this->m_bptr);
-      this->m_used = 0;
-    }
 
     this->m_bptr = bptr;
     this->m_estor = estor;
@@ -56,11 +32,39 @@ do_reallocate(uint32_t estor)
 
 void
 AVMC_Queue::
+do_deallocate() noexcept
+  {
+    // Free the storage.
+    auto next = this->m_bptr;
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
+      auto qnode = next;
+      next += 1U + qnode->nheaders;
+
+      if(qnode->meta_ver != 0) {
+        unique_ptr<Metadata> meta(qnode->pv_meta);
+
+        // If `sparam` has a destructor, invoke it.
+        if(qnode->pv_meta->dtor_opt)
+          qnode->pv_meta->dtor_opt(qnode);
+      }
+    }
+
+#ifdef ROCKET_DEBUG
+    ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
+#endif
+    ::free(this->m_bptr);
+
+    this->m_bptr = nullptr;
+    this->m_used = 0;
+    this->m_estor = 0;
+  }
+
+void
+AVMC_Queue::
 clear() noexcept
   {
     auto next = this->m_bptr;
-    const auto eptr = this->m_bptr + this->m_used;
-    while(ROCKET_EXPECT(next != eptr)) {
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
       auto qnode = next;
       next += 1U + qnode->nheaders;
 
@@ -155,8 +159,7 @@ AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
     auto next = this->m_bptr;
-    const auto eptr = this->m_bptr + this->m_used;
-    while(ROCKET_EXPECT(next != eptr)) {
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
       auto qnode = next;
       next += 1U + qnode->nheaders;
       AIR_Status status;
@@ -202,8 +205,7 @@ AVMC_Queue::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     auto next = this->m_bptr;
-    const auto eptr = this->m_bptr + this->m_used;
-    while(ROCKET_EXPECT(next != eptr)) {
+    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
       auto qnode = next;
       next += 1U + qnode->nheaders;
 
