@@ -421,22 +421,6 @@ estimate_distance(iteratorT first, iteratorT last)
              ::std::move(first), ::std::move(last));
   }
 
-template<typename elementT>
-ROCKET_ALWAYS_INLINE
-elementT*
-allocN(size_t n)
-  {
-    return allocator<elementT>().allocate(n);
-  }
-
-template<typename elementT>
-ROCKET_ALWAYS_INLINE
-void
-freeN(typename identity<elementT>::type* p, size_t n) noexcept
-  {
-    allocator<elementT>().deallocate(p, n);
-  }
-
 template<typename elementT, typename... paramsT>
 ROCKET_ALWAYS_INLINE
 elementT*
