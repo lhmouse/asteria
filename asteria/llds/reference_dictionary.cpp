@@ -8,7 +8,7 @@ namespace asteria {
 
 void
 Reference_Dictionary::
-do_rehash(uint32_t nbkt)
+do_reallocate(uint32_t nbkt)
   {
     details_reference_dictionary::Bucket* bptr = nullptr;
 
@@ -84,7 +84,7 @@ insert(phsh_stringR key, bool* newly)
 
     // Reserve storage for the new element. The load factor is always <= 0.5.
     if(this->m_size >= this->m_nbkt / 2)
-      this->do_rehash(this->m_size * 3 | 5);
+      this->do_reallocate(this->m_size * 3 | 5);
 
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uint32_t) key.rdhash());

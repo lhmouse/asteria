@@ -13,8 +13,8 @@ class Variable_HashMap
   {
   private:
     details_variable_hashmap::Bucket* m_bptr = nullptr;  // beginning of bucket storage
-    uint32_t m_nbkt = 0;  // number of allocated buckets
     uint32_t m_size = 0;  // number of initialized buckets
+    uint32_t m_nbkt = 0;  // number of allocated buckets
     uint32_t m_random = 0;  // used by `extract_variable_opt()`
 
   public:
@@ -38,8 +38,8 @@ class Variable_HashMap
     swap(Variable_HashMap& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_nbkt, other.m_nbkt);
         ::std::swap(this->m_size, other.m_size);
+        ::std::swap(this->m_nbkt, other.m_nbkt);
         return *this;
       }
 
@@ -48,13 +48,13 @@ class Variable_HashMap
     // new number of buckets of the hash table. If `nbkt` is zero, any dynamic
     // storage will be deallocated.
     void
-    do_rehash(uint32_t nbkt);
+    do_reallocate(uint32_t nbkt);
 
   public:
     ~Variable_HashMap()
       {
         if(this->m_bptr)
-          this->do_rehash(0);
+          this->do_reallocate(0);
       }
 
     bool

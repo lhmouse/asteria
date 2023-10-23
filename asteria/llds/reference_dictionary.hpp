@@ -13,8 +13,8 @@ class Reference_Dictionary
   {
   private:
     details_reference_dictionary::Bucket* m_bptr = nullptr;  // beginning of bucket storage
-    uint32_t m_nbkt = 0;  // number of allocated buckets
     uint32_t m_size = 0;  // number of initialized buckets
+    uint32_t m_nbkt = 0;  // number of allocated buckets
 
   public:
     explicit constexpr
@@ -37,8 +37,8 @@ class Reference_Dictionary
     swap(Reference_Dictionary& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_nbkt, other.m_nbkt);
         ::std::swap(this->m_size, other.m_size);
+        ::std::swap(this->m_nbkt, other.m_nbkt);
         return *this;
       }
 
@@ -47,13 +47,13 @@ class Reference_Dictionary
     // new number of buckets of the hash table. If `nbkt` is zero, any dynamic
     // storage will be deallocated.
     void
-    do_rehash(uint32_t nbkt);
+    do_reallocate(uint32_t nbkt);
 
   public:
     ~Reference_Dictionary()
       {
         if(this->m_bptr)
-          this->do_rehash(0);
+          this->do_reallocate(0);
       }
 
     bool

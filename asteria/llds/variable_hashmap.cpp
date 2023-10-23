@@ -8,7 +8,7 @@ namespace asteria {
 
 void
 Variable_HashMap::
-do_rehash(uint32_t nbkt)
+do_reallocate(uint32_t nbkt)
   {
     details_variable_hashmap::Bucket* bptr = nullptr;
 
@@ -83,7 +83,7 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
 
     // Reserve storage for the new element. The load factor is always <= 0.5.
     if(this->m_size >= this->m_nbkt / 2)
-      this->do_rehash(this->m_size * 3 | 57);
+      this->do_reallocate(this->m_size * 3 | 57);
 
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
