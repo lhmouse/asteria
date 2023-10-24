@@ -55,13 +55,14 @@ clear() noexcept
       auto qnode = next;
       next += 1U + qnode->nheaders;
 
-      if(qnode->meta_ver != 0) {
-        unique_ptr<Metadata> meta(qnode->pv_meta);
+      if(qnode->meta_ver == 0)
+        continue;
 
-        // If `sparam` has a destructor, invoke it.
-        if(qnode->pv_meta->dtor_opt)
-          qnode->pv_meta->dtor_opt(qnode);
-      }
+      // Take ownership of metadata.
+      unique_ptr<Metadata> meta(qnode->pv_meta);
+
+      if(qnode->pv_meta->dtor_opt)
+        qnode->pv_meta->dtor_opt(qnode);
     }
 
 #ifdef ROCKET_DEBUG
@@ -199,7 +200,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       if(qnode->meta_ver == 0)
         continue;
 
-      // Invoke the variable enumeration callback.
       if(qnode->pv_meta->vget_opt)
         qnode->pv_meta->vget_opt(staged, temp, qnode);
     }
