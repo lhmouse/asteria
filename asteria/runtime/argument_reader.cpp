@@ -63,7 +63,7 @@ do_peek_argument() const
     if(!this->m_state.matched)
       return nullptr;
 
-    size_t rindex = this->m_stack.size() - this->m_state.nparams;
+    uint32_t rindex = this->m_stack.size() - this->m_state.nparams;
     if(rindex >= this->m_stack.size())
       return nullptr;
 
@@ -72,16 +72,19 @@ do_peek_argument() const
 
 void
 Argument_Reader::
-load_state(size_t index)
+load_state(uint32_t index)
   {
     this->m_state = this->m_saved_states.at(index);
   }
 
 void
 Argument_Reader::
-save_state(size_t index)
+save_state(uint32_t index)
   {
-    this->m_saved_states.append(subsat(index + 1, this->m_saved_states.size()));
+    // Reserve a slot.
+    while(index >= this->m_saved_states.size())
+      this->m_saved_states.emplace_back();
+
     this->m_saved_states.mut(index) = this->m_state;
   }
 
@@ -463,9 +466,8 @@ end_overload()
       return false;
 
     // Ensure no more arguments follow. Note there may be fewer.
-    size_t nargs = this->m_state.nparams;
-    nargs = subsat(this->m_stack.size(), nargs);
-    if(nargs != 0) {
+    uint32_t nparams = this->m_state.nparams;
+    if(this->m_stack.size() > nparams) {
       this->do_mark_match_failure();
       return false;
     }
@@ -486,12 +488,12 @@ end_overload(cow_vector<Reference>& vargs)
       return false;
 
     // Check for variadic arguments. Note the `...` is not a parameter.
-    size_t nargs = this->m_state.nparams;
-    nargs = subsat(this->m_stack.size(), nargs - 1);
-    if(nargs != 0) {
-      vargs.reserve(nargs);
-      while(nargs != 0)
-        vargs.emplace_back(this->m_stack.top(--nargs));
+    uint32_t nparams = this->m_state.nparams - 1;
+    if(this->m_stack.size() > nparams) {
+      uint32_t nvargs = this->m_stack.size() - nparams;
+      vargs.reserve(nvargs);
+      while(nvargs != 0)
+        vargs.emplace_back(this->m_stack.top(--nvargs));
     }
 
     // Accept all arguments.
@@ -510,12 +512,12 @@ end_overload(cow_vector<Value>& vargs)
       return false;
 
     // Check for variadic arguments. Note the `...` is not a parameter.
-    size_t nargs = this->m_state.nparams;
-    nargs = subsat(this->m_stack.size(), nargs - 1);
-    if(nargs != 0) {
-      vargs.reserve(nargs);
-      while(nargs != 0)
-        vargs.emplace_back(this->m_stack.top(--nargs).dereference_readonly());
+    uint32_t nparams = this->m_state.nparams - 1;
+    if(this->m_stack.size() > nparams) {
+      uint32_t nvargs = this->m_stack.size() - nparams;
+      vargs.reserve(nvargs);
+      while(nvargs != 0)
+        vargs.emplace_back(this->m_stack.top(--nvargs).dereference_readonly());
     }
 
     // Accept all arguments.
@@ -529,7 +531,7 @@ throw_no_matching_function_call() const
     // Compose the list of arguments.
     cow_string caller;
     caller << this->m_name << "(";
-    size_t offset = this->m_stack.size() - 1;
+    uint32_t offset = this->m_stack.size() - 1;
     switch(this->m_stack.size()) {
         do {
           caller << ", ";  // fallthrough
@@ -537,7 +539,7 @@ throw_no_matching_function_call() const
           const auto& arg = this->m_stack.top(offset);
           caller << describe_type(arg.dereference_readonly().type());
         }
-        while(-- offset != SIZE_MAX);  // fallthrough
+        while(-- offset != UINT32_MAX);  // fallthrough
       case 0:
         break;
     }
@@ -551,7 +553,7 @@ throw_no_matching_function_call() const
       overloads << "\n  * ";
       cow_string::shallow_type ovld(this->m_overloads.c_str() + offset);
       overloads << this->m_name << "(" << ovld << ")";
-      offset += ovld.length() + 1;
+      offset += (uint32_t) ovld.length() + 1;
     }
     overloads << "\n  -- end of list of overloads]";
 

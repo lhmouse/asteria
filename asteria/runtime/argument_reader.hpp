@@ -65,10 +65,10 @@ class Argument_Reader
     // `index` argument is a subscript of `m_saved_states`, which is
     // resized by `save_state()` as necessary.
     void
-    load_state(size_t index);
+    load_state(uint32_t index);
 
     void
-    save_state(size_t index);
+    save_state(uint32_t index);
 
     // Start an overload. Effectively, this function clears `m_state`.
     void

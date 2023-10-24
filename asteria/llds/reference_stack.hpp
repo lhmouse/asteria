@@ -61,7 +61,7 @@ class Reference_Stack
     empty() const noexcept
       { return this->m_etop == 0;  }
 
-    size_t
+    uint32_t
     size() const noexcept
       { return this->m_etop;  }
 
@@ -75,14 +75,14 @@ class Reference_Stack
     clear_red_zone() noexcept;
 
     const Reference&
-    top(size_t index = 0) const noexcept
+    top(uint32_t index = 0) const noexcept
       {
         ROCKET_ASSERT(index < this->m_etop);
         return *(this->m_bptr + this->m_etop - 1 - index);
       }
 
     Reference&
-    mut_top(size_t index = 0)
+    mut_top(uint32_t index = 0)
       {
         ROCKET_ASSERT(index < this->m_etop);
         return *(this->m_bptr + this->m_etop - 1 - index);
@@ -108,7 +108,7 @@ class Reference_Stack
       }
 
     void
-    pop(size_t count = 1) noexcept
+    pop(uint32_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->m_etop);
         this->m_etop -= (uint32_t) count;

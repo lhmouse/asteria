@@ -61,7 +61,7 @@ class Reference_Dictionary
     empty() const noexcept
       { return this->m_size == 0;  }
 
-    size_t
+    uint32_t
     size() const noexcept
       { return this->m_size;  }
 

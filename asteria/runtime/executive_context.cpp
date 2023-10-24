@@ -28,9 +28,9 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     if(self.is_variable() || !self.dereference_readonly().is_null())
       this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
 
-    // Set arguments. As arguments are evaluated from left to right, the
+    // Set arguments. Because arguments are evaluated from left to right, the
     // reference at the top is the last argument.
-    size_t arg_counter = stack.size();
+    uint32_t nargs = stack.size();
     bool has_ellipsis = false;
 
     for(const auto& name : params)
@@ -39,19 +39,19 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
         param.set_temporary(nullopt);
 
         // Try popping an argument and assign it to this parameter.
-        if(arg_counter != 0)
-          param = ::std::move(stack.mut_top(-- arg_counter));
+        if(nargs != 0)
+          param = ::std::move(stack.mut_top(--nargs));
       }
       else
         has_ellipsis = true;
 
-    if(!has_ellipsis && (arg_counter != 0))
+    if(!has_ellipsis && (nargs != 0))
       throw Runtime_Error(Runtime_Error::M_format(),
                "Too many arguments passed to `$1`", zvarg->func());
 
     // Move all arguments into the variadic argument getter.
-    while(arg_counter != 0)
-      this->m_lazy_args.emplace_back(::std::move(stack.mut_top(-- arg_counter)));
+    while(nargs != 0)
+      this->m_lazy_args.emplace_back(::std::move(stack.mut_top(--nargs)));
   }
 
 Executive_Context::

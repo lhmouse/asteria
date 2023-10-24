@@ -106,16 +106,6 @@ weaken_enum(enumT value) noexcept
     return static_cast<typename ::std::underlying_type<enumT>::type>(value);
   }
 
-// Saturation subtraction
-template<typename uintT,
-ROCKET_ENABLE_IF(::std::is_unsigned<uintT>::value && !::std::is_same<uintT, bool>::value)>
-constexpr
-uintT
-subsat(uintT x, uintT y) noexcept
-  {
-    return (x < y) ? 0 : (x - y);
-  }
-
 // C character types
 enum : uint8_t
   {

@@ -81,7 +81,7 @@ create_function(const Source_Location& sloc, stringR name)
       // If `name` looks like a function name, append the parameter list
       // to form a function signature.
       func << "(";
-      size_t tid = 0;
+      uint32_t tid = 0;
       switch(this->m_params.size()) {
           do {
             func << ", ";  // fallthrough
