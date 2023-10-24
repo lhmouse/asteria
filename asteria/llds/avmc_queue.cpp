@@ -13,7 +13,6 @@ void
 AVMC_Queue::
 do_reallocate(uint32_t estor)
   {
-    // Extend the storage.
     if(estor >= 0x7FFE0000U / sizeof(Header))
       throw ::std::bad_alloc();
 
@@ -34,25 +33,14 @@ void
 AVMC_Queue::
 do_deallocate() noexcept
   {
-    // Free the storage.
-    auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
-      auto qnode = next;
-      next += 1U + qnode->nheaders;
-
-      if(qnode->meta_ver != 0) {
-        unique_ptr<Metadata> meta(qnode->pv_meta);
-
-        // If `sparam` has a destructor, invoke it.
-        if(qnode->pv_meta->dtor_opt)
-          qnode->pv_meta->dtor_opt(qnode);
-      }
-    }
+    if(this->m_bptr) {
+      this->clear();
 
 #ifdef ROCKET_DEBUG
-    ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
+      ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
 #endif
-    ::free(this->m_bptr);
+      ::free(this->m_bptr);
+    }
 
     this->m_bptr = nullptr;
     this->m_used = 0;

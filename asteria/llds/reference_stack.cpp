@@ -10,7 +10,6 @@ void
 Reference_Stack::
 do_reallocate(uint32_t estor)
   {
-    // Extend the storage.
     if(estor >= 0x7FFE0000U / sizeof(Reference))
       throw ::std::bad_alloc();
 
@@ -31,10 +30,9 @@ void
 Reference_Stack::
 do_deallocate() noexcept
   {
-    // Free the storage.
     if(this->m_bptr) {
-      while(this->m_einit != 0)
-        ::rocket::destroy(this->m_bptr + (-- this->m_einit));
+      this->clear();
+      this->clear_red_zone();
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
@@ -43,7 +41,6 @@ do_deallocate() noexcept
     }
 
     this->m_bptr = nullptr;
-    this->m_etop = 0;
     this->m_estor = 0;
   }
 

@@ -10,7 +10,6 @@ void
 Reference_Dictionary::
 do_reallocate(uint32_t nbkt)
   {
-    // Extend the storage.
     if(nbkt >= 0x7FFE0000U / sizeof(Bucket))
       throw ::std::bad_alloc();
 
@@ -47,15 +46,8 @@ void
 Reference_Dictionary::
 do_deallocate() noexcept
   {
-    // Free the storage.
     if(this->m_bptr) {
-      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-        if(this->m_bptr[t]) {
-          ::rocket::destroy(this->m_bptr[t].kstor);
-          ::rocket::destroy(this->m_bptr[t].vstor);
-          this->m_bptr[t].flags = 0;
-          this->m_size --;
-        }
+      this->clear();
 
 #ifdef ROCKET_DEBUG
       ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(Bucket));
@@ -64,7 +56,6 @@ do_deallocate() noexcept
     }
 
     this->m_bptr = nullptr;
-    this->m_size = 0;
     this->m_nbkt = 0;
   }
 
