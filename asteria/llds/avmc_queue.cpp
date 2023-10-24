@@ -43,7 +43,6 @@ do_deallocate() noexcept
     }
 
     this->m_bptr = nullptr;
-    this->m_used = 0;
     this->m_estor = 0;
   }
 
