@@ -81,14 +81,14 @@ create_function(const Source_Location& sloc, stringR name)
       // If `name` looks like a function name, append the parameter list
       // to form a function signature.
       func << "(";
-      auto tparam = this->m_params.begin();
+      size_t tid = 0;
       switch(this->m_params.size()) {
           do {
             func << ", ";  // fallthrough
         default:
-            func << *tparam;
+            func << this->m_params[tid];
           }
-          while(++ tparam != this->m_params.end());  // fallthrough
+          while(++ tid != this->m_params.size());  // fallthrough
         case 0:
           break;
       }
