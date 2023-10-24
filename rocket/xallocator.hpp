@@ -71,11 +71,10 @@ struct is_std_allocator<::std::allocator<valueT>>
 
 template<typename allocT>
 struct is_always_equal_allocator
-#ifdef __cpp_lib_allocator_traits_is_always_equal
   :
+#ifdef __cpp_lib_allocator_traits_is_always_equal
     allocator_traits<allocT>::is_always_equal
 #else
-  :
     is_std_allocator<allocT>
 #endif
   {
