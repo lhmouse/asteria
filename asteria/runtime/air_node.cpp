@@ -213,9 +213,8 @@ void
 do_duplicate_sequence_common(ContainerT& container, int64_t count)
   {
     if(count < 0)
-      ASTERIA_THROW((
-          "Negative duplication count (value was `$2`)"),
-          count);
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Negative duplication count (value was `$2`)", count);
 
     if(container.empty() || (count == 1))
       return;
@@ -228,9 +227,9 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
     // Calculate the result length with overflow checking.
     int64_t rlen;
     if(ROCKET_MUL_OVERFLOW((int64_t) container.size(), count, &rlen) || (rlen > PTRDIFF_MAX))
-      ASTERIA_THROW((
-          "Data length overflow (`$1` * `$2` > `$3`)"),
-          container.size(), count, PTRDIFF_MAX);
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Data length overflow (`$1` * `$2` > `$3`)",
+               container.size(), count, PTRDIFF_MAX);
 
     // Duplicate elements, using binary exponential backoff.
     while(container.ssize() < rlen)
@@ -411,9 +410,8 @@ rebind_opt(Abstract_Context& ctx) const
         if(!qref)
           return nullopt;
         else if(qref->is_invalid())
-          ASTERIA_THROW((
-              "Initialization of variable or reference `$1` bypassed"),
-              altr.name);
+          throw Runtime_Error(Runtime_Error::M_format(),
+               "Initialization of variable or reference `$1` bypassed", altr.name);
 
         // Bind this reference.
         S_push_bound_reference xnode = { *qref };
@@ -1570,9 +1568,12 @@ solidify(AVMC_Queue& queue) const
             // Look for the name in the global context.
             auto qref = ctx.global().get_named_reference_opt(sp.name);
             if(!qref)
-              ASTERIA_THROW(("Undeclared identifier `$1`"), sp.name);
-            else if(qref->is_invalid())
-              ASTERIA_THROW(("Reference `$1` not initialized"), sp.name);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Undeclared identifier `$1`", sp.name);
+
+            if(qref->is_invalid())
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Reference `$1` not initialized", sp.name);
 
             // Push a copy of the reference onto the stack.
             ctx.stack().push() = *qref;
@@ -1622,9 +1623,12 @@ solidify(AVMC_Queue& queue) const
             // Look for the name in the target context.
             auto qref = ctx_at_depth->get_named_reference_opt(sp.name);
             if(!qref)
-              ASTERIA_THROW(("Undeclared identifier `$1`"), sp.name);
-            else if(qref->is_invalid())
-              ASTERIA_THROW(("Reference `$1` not initialized"), sp.name);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Undeclared identifier `$1`", sp.name);
+
+            if(qref->is_invalid())
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Initialization of `$1` bypassed", sp.name);
 
             // Push a copy of the reference onto the stack.
             ctx.stack().push() = *qref;
@@ -1810,9 +1814,12 @@ solidify(AVMC_Queue& queue) const
             // Copy the target, which shall be of type `function`.
             auto val = stack.top().dereference_readonly();
             if(val.is_null())
-              ASTERIA_THROW(("Function not found"));
-            else if(!val.is_function())
-              ASTERIA_THROW(("Attempt to call a non-function (value `$1`)"), val);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Function not found");
+
+            if(!val.is_function())
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Attempt to call a non-function (value `$1`)", val);
 
             auto& self = stack.mut_top().pop_modifier();
             stack.clear_red_zone();
@@ -1952,9 +1959,8 @@ solidify(AVMC_Queue& queue) const
                       // Increment the value with overflow checking.
                       int64_t result;
                       if(ROCKET_ADD_OVERFLOW(val, 1, &result))
-                        ASTERIA_THROW((
-                            "Integer increment overflow (operand was `$1`)"),
-                            val);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer increment overflow (operand was `$1`)", val);
 
                       if(up.b0)
                         top.set_temporary(val);
@@ -1975,9 +1981,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Increment not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Increment not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_dec: {
@@ -1991,9 +1996,8 @@ solidify(AVMC_Queue& queue) const
                       // Decrement the value with overflow checking.
                       int64_t result;
                       if(ROCKET_SUB_OVERFLOW(val, 1, &result))
-                        ASTERIA_THROW((
-                            "Integer decrement overflow (operand was `$1`)"),
-                            val);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer decrement overflow (operand was `$1`)", val);
 
                       if(up.b0)
                         top.set_temporary(val);
@@ -2014,9 +2018,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Decrement not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_unset: {
@@ -2104,9 +2107,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Subscript value not valid (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Subscript value not valid (operand was `$1`)", rhs);
                   }
 
                   default:
@@ -2171,9 +2173,8 @@ solidify(AVMC_Queue& queue) const
 
                       int64_t result;
                       if(ROCKET_SUB_OVERFLOW(0, val, &result))
-                        ASTERIA_THROW((
-                            "Integer negation overflow (operand was `$1`)"),
-                            val);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer negation overflow (operand was `$1`)", val);
 
                       val = result;
                       return air_status_next;
@@ -2189,9 +2190,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Arithmetic negation not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_notb: {
@@ -2213,9 +2213,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Bitwise NOT not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_notl: {
@@ -2243,9 +2242,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`countof` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_typeof: {
@@ -2261,9 +2259,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__sqrt` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_isnan: {
@@ -2278,9 +2275,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__isnan` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_isinf: {
@@ -2295,9 +2291,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__isinf` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_abs: {
@@ -2307,9 +2302,8 @@ solidify(AVMC_Queue& queue) const
 
                       V_integer neg_val;
                       if(ROCKET_SUB_OVERFLOW(0, val, &neg_val))
-                        ASTERIA_THROW((
-                            "Integer negation overflow (operand was `$1`)"),
-                            val);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer negation overflow (operand was `$1`)", val);
 
                       val ^= (val ^ neg_val) & (val >> 63);
                       return air_status_next;
@@ -2323,9 +2317,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__abs` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_sign: {
@@ -2339,9 +2332,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__sign` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_round: {
@@ -2354,9 +2346,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__round` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_floor: {
@@ -2370,9 +2361,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__floor` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_ceil: {
@@ -2386,9 +2376,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__ceil` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_trunc: {
@@ -2401,9 +2390,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__trunc` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_iround: {
@@ -2416,9 +2404,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__iround` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_ifloor: {
@@ -2431,9 +2418,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__ifloor` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_iceil: {
@@ -2446,9 +2432,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__iceil` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_itrunc: {
@@ -2461,9 +2446,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__itrunc` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_lzcnt: {
@@ -2475,9 +2459,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__lzcnt` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_tzcnt: {
@@ -2489,9 +2472,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__tzcnt` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_popcnt: {
@@ -2503,9 +2485,8 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "`__popcnt` not applicable (operand was `$1`)"),
-                          rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                   default:
@@ -2650,9 +2631,9 @@ solidify(AVMC_Queue& queue) const
 
                       int64_t result;
                       if(ROCKET_ADD_OVERFLOW(val, other, &result))
-                        ASTERIA_THROW((
-                            "Integer addition overflow (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer addition overflow (operands were `$1` and `$2`)",
+                                 val, other);
 
                       val = result;
                       return air_status_next;
@@ -2672,9 +2653,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Addition not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Addition not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_sub: {
@@ -2695,9 +2676,9 @@ solidify(AVMC_Queue& queue) const
                       // Perform arithmetic subtraction with overflow checking.
                       int64_t result;
                       if(ROCKET_SUB_OVERFLOW(val, other, &result))
-                        ASTERIA_THROW((
-                            "Integer subtraction overflow (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer subtraction overflow (operands were `$1` and `$2`)",
+                                 val, other);
 
                       val = result;
                       return air_status_next;
@@ -2711,9 +2692,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Subtraction not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Subtraction not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_mul: {
@@ -2733,9 +2714,9 @@ solidify(AVMC_Queue& queue) const
 
                       int64_t result;
                       if(ROCKET_MUL_OVERFLOW(val, other, &result))
-                        ASTERIA_THROW((
-                            "Integer multiplication overflow (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer multiplication overflow (operands were `$1` and `$2`)",
+                                 val, other);
 
                       val = result;
                       return air_status_next;
@@ -2778,9 +2759,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Multiplication not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Multiplication not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_div: {
@@ -2791,14 +2772,14 @@ solidify(AVMC_Queue& queue) const
                       V_integer other = rhs.as_integer();
 
                       if(other == 0)
-                        ASTERIA_THROW((
-                            "Zero as divisor (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Zero as divisor (operands were `$1` and `$2`)",
+                                 val, other);
 
                       if((val == INT64_MIN) && (other == -1))
-                        ASTERIA_THROW((
-                            "Integer division overflow (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer division overflow (operands were `$1` and `$2`)",
+                                 val, other);
 
                       val /= other;
                       return air_status_next;
@@ -2811,9 +2792,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Division not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Division not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_mod: {
@@ -2825,14 +2806,14 @@ solidify(AVMC_Queue& queue) const
                       V_integer other = rhs.as_integer();
 
                       if(other == 0)
-                        ASTERIA_THROW((
-                            "Zero as divisor (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Zero as divisor (operands were `$1` and `$2`)",
+                                 val, other);
 
                       if((val == INT64_MIN) && (other == -1))
-                        ASTERIA_THROW((
-                            "Integer division overflow (operands were `$1` and `$2`)"),
-                            val, other);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Integer division overflow (operands were `$1` and `$2`)",
+                                 val, other);
 
                       val %= other;
                       return air_status_next;
@@ -2845,9 +2826,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Modulo not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Modulo not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_andb: {
@@ -2880,9 +2861,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Bitwise AND not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_orb: {
@@ -2915,9 +2896,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Bitwise OR not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_xorb: {
@@ -2950,9 +2931,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Bitwise XOR not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_addm: {
@@ -2965,9 +2946,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Modular addition not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Modular addition not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_subm: {
@@ -2980,9 +2961,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Modular subtraction not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_mulm: {
@@ -2995,9 +2976,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Modular multiplication not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_adds: {
@@ -3011,9 +2992,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Saturating addition not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Saturating addition not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_subs: {
@@ -3027,9 +3008,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Saturating subtraction not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Saturating subtraction not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_muls: {
@@ -3043,9 +3024,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Saturating multiplication not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Saturating multiplication not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   default:
@@ -3092,9 +3073,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)"),
-                          lhs, mid, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)",
+                               lhs, mid, rhs);
                   }
 
                   default:
@@ -3131,14 +3112,14 @@ solidify(AVMC_Queue& queue) const
                 auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
 
                 if(rhs.type() != type_integer)
-                  ASTERIA_THROW((
-                      "Invalid shift count (operands were `$1` and `$2`)"),
-                      lhs, rhs);
+                  throw Runtime_Error(Runtime_Error::M_format(),
+                           "Invalid shift count (operands were `$1` and `$2`)",
+                           lhs, rhs);
 
                 if(rhs.as_integer() < 0)
-                  ASTERIA_THROW((
-                      "Negative shift count (operands were `$1` and `$2`)"),
-                      lhs, rhs);
+                  throw Runtime_Error(Runtime_Error::M_format(),
+                           "Negative shift count (operands were `$1` and `$2`)",
+                           lhs, rhs);
 
                 switch(up.u1) {
                   case xop_sll: {
@@ -3170,9 +3151,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Logical left shift not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Logical left shift not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_srl: {
@@ -3204,9 +3185,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Logical right shift not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Logical right shift not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_sla: {
@@ -3219,9 +3200,9 @@ solidify(AVMC_Queue& queue) const
 
                       int64_t count = ::rocket::min(rhs.as_integer(), 63);
                       if((val != 0) && ((count != rhs.as_integer()) || (((val >> 63) ^ val) >> (63 - count) != 0)))
-                        ASTERIA_THROW((
-                            "Arithmetic left shift overflow (operands were `$1` and `$2`)"),
-                            lhs, rhs);
+                        throw Runtime_Error(Runtime_Error::M_format(),
+                                 "Arithmetic left shift overflow (operands were `$1` and `$2`)",
+                                 lhs, rhs);
 
                       val <<= count;
                       return air_status_next;
@@ -3241,9 +3222,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Arithmetic left shift not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   case xop_sra: {
@@ -3271,9 +3252,9 @@ solidify(AVMC_Queue& queue) const
                       return air_status_next;
                     }
                     else
-                      ASTERIA_THROW((
-                          "Arithmetic right shift not applicable (operands were `$1` and `$2`)"),
-                          lhs, rhs);
+                      throw Runtime_Error(Runtime_Error::M_format(),
+                               "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                               lhs, rhs);
                   }
 
                   default:
@@ -3318,9 +3299,8 @@ solidify(AVMC_Queue& queue) const
 
             // Make sure it is really an array.
             if(!init.is_null() && !init.is_array())
-              ASTERIA_THROW((
-                  "Initializer was not an array (value was `$1`)"),
-                  init);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Initializer was not an array (value was `$1`)", init);
 
             for(uint32_t i = up.u2345 - 1;  i != UINT32_MAX;  --i) {
               // Pop variables from from right to left.
@@ -3381,9 +3361,8 @@ solidify(AVMC_Queue& queue) const
 
             // Make sure it is really an object.
             if(!init.is_null() && !init.is_object())
-              ASTERIA_THROW((
-                  "Initializer was not an object (value was `$1`)"),
-                  init);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Initializer was not an object (value was `$1`)", init);
 
             for(auto it = sp.keys.rbegin();  it != sp.keys.rend();  ++it) {
               // Pop variables from from right to left.
@@ -3542,14 +3521,12 @@ solidify(AVMC_Queue& queue) const
               stack.pop();
 
               if(!gnargs.is_integer())
-                ASTERIA_THROW((
-                    "Variadic argument count was not valid (value `$1`)"),
-                    gnargs);
+                throw Runtime_Error(Runtime_Error::M_format(),
+                         "Variadic argument count was not valid (value `$1`)", gnargs);
 
               if(gnargs.as_integer() < 0)
-                ASTERIA_THROW((
-                    "Variadic argument count was negative (value `$1`)"),
-                    gnargs);
+                throw Runtime_Error(Runtime_Error::M_format(),
+                         "Variadic argument count was negative (value `$1`)", gnargs);
 
               for(V_integer k = 0;  k != gnargs.as_integer();  ++k) {
                 // Call the argument generator with the variadic argument index as
@@ -3566,14 +3543,18 @@ solidify(AVMC_Queue& queue) const
               do_pop_arguments(alt_stack, stack, static_cast<uint32_t>(gnargs.as_integer()));
             }
             else
-              ASTERIA_THROW(("Invalid argument generator (value `$1`)"), val);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Invalid argument generator (value `$1`)", val);
 
             // Copy the target, which shall be of type `function`.
             val = stack.top().dereference_readonly();
             if(val.is_null())
-              ASTERIA_THROW(("Function not found"));
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Function not found");
+
             else if(!val.is_function())
-              ASTERIA_THROW(("Attempt to call a non-function (value `$1`)"), val);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Attempt to call a non-function (value `$1`)", val);
 
             auto& self = stack.mut_top().pop_modifier();
             stack.clear_red_zone();
@@ -3677,11 +3658,13 @@ solidify(AVMC_Queue& queue) const
             // Get the path of the file to import, which shall be a string.
             auto val = stack.top().dereference_readonly();
             if(!val.is_string())
-              ASTERIA_THROW(("Path was not a string (value `$1`)"), val);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Path was not a string (value `$1`)", val);
 
             auto path = ::std::move(val.mut_string());
             if(path.empty())
-              ASTERIA_THROW(("Path was empty"));
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Path was empty");
 
             if(path[0] != '/') {
               // Convert this relative path to an absolute one.
@@ -3695,10 +3678,8 @@ solidify(AVMC_Queue& queue) const
             unique_ptr<char, void (void*)> abspath(::free);
             abspath.reset(::realpath(path.safe_c_str(), nullptr));
             if(!abspath)
-              ASTERIA_THROW((
-                  "Could not open script file '$1'",
-                  "[`realpath()` failed: ${errno:full}]"),
-                  path);
+              throw Runtime_Error(Runtime_Error::M_format(),
+                       "Could not open script file '$1': ${errno:full}", path);
 
             // Parse the script file.
             path.assign(abspath);
@@ -3716,7 +3697,8 @@ solidify(AVMC_Queue& queue) const
             script_params.emplace_back(sref("..."));
             AIR_Optimizer optmz(sp.opts);
             optmz.reload(nullptr, script_params, ctx.global(), stmtq);
-            auto target = optmz.create_function(Source_Location(path, 0, 0), sref("[file scope]"));
+            auto target = optmz.create_function(Source_Location(path, 0, 0),
+                                                sref("[file scope]"));
 
             // Invoke the script. `this` is `null`.
             auto& self = stack.mut_top().set_temporary(nullopt);

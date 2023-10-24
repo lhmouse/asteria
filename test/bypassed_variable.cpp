@@ -30,7 +30,7 @@ int main()
         }
         catch(e) {
           std.io.putf("Caught exception: $1\n", e);
-          assert std.string.find(e, "Void reference not dereferenceable") != null;
+          assert std.string.find(e, "not dereferenceable") != null;
         }
 
         assert sth == 10;
@@ -41,7 +41,7 @@ int main()
         }
         catch(e) {
           std.io.putf("Caught exception: $1\n", e);
-          assert std.string.find(e, "`sth` not initialized") != null;
+          assert std.string.find(e, "bypassed") != null;
         }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,9 +20,9 @@ void
 Reference::
 do_throw_not_dereferenceable() const
   {
-    ASTERIA_THROW((
-        "Reference type `$1` not dereferenceable"),
-        describe_xref(this->m_xref));
+    throw Runtime_Error(Runtime_Error::M_format(),
+             "Reference type `$1` not dereferenceable",
+             describe_xref(this->m_xref));
   }
 
 void
@@ -45,10 +45,12 @@ do_dereference_readonly_slow() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        ASTERIA_THROW(("Reference not initialized"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Reference not initialized");
 
       case xref_void:
-        ASTERIA_THROW(("Void reference not dereferenceable"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Void reference not dereferenceable");
 
       case xref_temporary:
         valp = &(this->m_value);
@@ -59,14 +61,16 @@ do_dereference_readonly_slow() const
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          ASTERIA_THROW(("Reference not initialized"));
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Reference not initialized");
 
         valp = &(var->get_value());
         break;
       }
 
       case xref_ptc:
-        ASTERIA_THROW(("Proper tail call not expanded"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Proper tail call not expanded");
 
       default:
         ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
@@ -90,30 +94,36 @@ dereference_mutable() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        ASTERIA_THROW(("Reference not initialized"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Reference not initialized");
 
       case xref_void:
-        ASTERIA_THROW(("Void reference not dereferenceable"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Void reference not dereferenceable");
 
       case xref_temporary:
-        ASTERIA_THROW(("Attempt to modify a temporary value"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Attempt to modify a temporary value");
 
       case xref_variable: {
         auto var = unerase_cast<Variable*>(this->m_var.get());
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          ASTERIA_THROW(("Reference not initialized"));
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Reference not initialized");
 
         if(var->is_immutable())
-          ASTERIA_THROW(("Attempt to modify a `const` variable"));
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Attempt to modify a `const` variable");
 
         valp = &(var->mut_value());
         break;
       }
 
       case xref_ptc:
-        ASTERIA_THROW(("Proper tail call not expanded"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Proper tail call not expanded");
 
       default:
         ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
@@ -134,37 +144,44 @@ dereference_unset() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        ASTERIA_THROW(("Reference not initialized"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Reference not initialized");
 
       case xref_void:
-        ASTERIA_THROW(("Void reference not dereferenceable"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Void reference not dereferenceable");
 
       case xref_temporary:
-        ASTERIA_THROW(("Attempt to modify a temporary value"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Attempt to modify a temporary value");
 
       case xref_variable: {
         auto var = unerase_cast<Variable*>(this->m_var.get());
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          ASTERIA_THROW(("Reference not initialized"));
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Reference not initialized");
 
         if(var->is_immutable())
-          ASTERIA_THROW(("Attempt to modify a `const` variable"));
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Attempt to modify a `const` variable");
 
         valp = &(var->mut_value());
         break;
       }
 
       case xref_ptc:
-        ASTERIA_THROW(("Proper tail call not expanded"));
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Proper tail call not expanded");
 
       default:
         ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
     }
 
     if(this->m_mods.size() == 0)
-      ASTERIA_THROW(("Only elements of an array or object may be unset"));
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Only elements of an array or object may be unset");
 
     while(valp && (mi != this->m_mods.size() - 1))
       valp = this->m_mods[mi++].apply_write_opt(*valp);

@@ -46,9 +46,8 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
         has_ellipsis = true;
 
     if(!has_ellipsis && (arg_counter != 0))
-      ASTERIA_THROW((
-          "Too many arguments passed to `$1`"),
-          zvarg->func());
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Too many arguments passed to `$1`", zvarg->func());
 
     // Move all arguments into the variadic argument getter.
     while(arg_counter != 0)
