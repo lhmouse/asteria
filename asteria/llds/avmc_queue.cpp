@@ -76,7 +76,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
        void* ctor_arg, Destructor* dtor_opt, Var_Getter* vget_opt,
        const Source_Location* sloc_opt)
   {
-    size_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
+    size_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1U;
     if(sparam_size > max_sparam_size)
       ASTERIA_THROW((
           "Invalid AVMC node size (`$1` > `$2`)"),
@@ -102,7 +102,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
 
     // Round the size up to the nearest number of headers. This shall not result
     // in overflows.
-    size_t nheaders_p1 = (sizeof(Header) * 2 - 1 + sparam_size) / sizeof(Header);
+    size_t nheaders_p1 = (sizeof(Header) * 2U - 1U + sparam_size) / sizeof(Header);
     if(this->m_estor - this->m_used < nheaders_p1) {
       // Extend the storage.
       uint32_t size_to_reserve = this->m_used + (uint32_t) nheaders_p1;
