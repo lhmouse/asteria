@@ -163,8 +163,8 @@ execute(Executive_Context& ctx) const
           break;
 
         default:
-          // There is metadata and symbols.
           try {
+            // There is metadata and symbols.
             status = qnode->pv_meta->exec(ctx, qnode);
             break;
           }
