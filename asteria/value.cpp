@@ -89,7 +89,7 @@ do_destroy_variant_slow() noexcept
         }
 
         default:
-          ASTERIA_TERMINATE(("Invalid value type (type `$1`)"), this->type());
+          ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->type());
       }
 
     if(!stack.empty()) {
@@ -368,7 +368,7 @@ print(tinyfmt& fmt) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Invalid value type (type `$1`)"), this->type());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->type());
     }
 
     while(stack.size())
@@ -496,7 +496,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Invalid value type `$1`"), qval->type());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), qval->type());
     }
 
     while(stack.size())

@@ -495,7 +495,7 @@ rebind_opt(Abstract_Context& ctx) const
         return nullopt;
 
       default:
-        ASTERIA_TERMINATE(("Invalid AIR node type (index `$1`)"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
     }
   }
 
@@ -655,7 +655,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
 
       default:
-        ASTERIA_TERMINATE(("Invalid AIR node type (index `$1`)"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
     }
   }
 
@@ -3277,7 +3277,7 @@ solidify(AVMC_Queue& queue) const
             return;
 
           default:
-            ASTERIA_TERMINATE(("Invalid operator enumerator `$1`"), altr.xop);
+            ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.xop);
         }
       }
 
@@ -3937,7 +3937,7 @@ solidify(AVMC_Queue& queue) const
                 return air_status_next;
 
               default:
-                 ASTERIA_TERMINATE(("Invalid AIR constant `$1`"), up.u0);
+                 ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), up.u0);
             }
           }
 
@@ -3989,7 +3989,7 @@ solidify(AVMC_Queue& queue) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Invalid AIR node type (index `$1`)"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
     }
   }
 

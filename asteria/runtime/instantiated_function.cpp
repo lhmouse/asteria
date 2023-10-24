@@ -93,7 +93,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
                  "Stray `continue` statement");
 
       default:
-        ASTERIA_TERMINATE(("Invalid AIR status code `$1`"), status);
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
     }
     return self;
   }

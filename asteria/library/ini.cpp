@@ -68,7 +68,7 @@ do_format_check_scalar(const Value& value)
         return false;
 
       default:
-        ASTERIA_TERMINATE(("Invalid value type `$1`"), value.type());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), value.type());
     }
   }
 

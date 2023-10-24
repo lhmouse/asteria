@@ -73,7 +73,7 @@ do_dereference_readonly_slow() const
                  "Proper tail call not expanded");
 
       default:
-        ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
     }
 
     while(valp && (mi != this->m_mods.size()))
@@ -126,7 +126,7 @@ dereference_mutable() const
                  "Proper tail call not expanded");
 
       default:
-        ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
     }
 
     while(valp && (mi != this->m_mods.size()))
@@ -176,7 +176,7 @@ dereference_unset() const
                  "Proper tail call not expanded");
 
       default:
-        ASTERIA_TERMINATE(("Invalid reference type (xref `$1`)"), this->m_xref);
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
     }
 
     if(this->m_mods.size() == 0)

@@ -51,7 +51,7 @@ print(tinyfmt& fmt) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Invalid token type `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
     }
   }
 

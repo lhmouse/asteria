@@ -443,7 +443,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           default:
-            ASTERIA_TERMINATE(("Invalid target scope type `$1`"), altr.target);
+            ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.target);
         }
       }
 
@@ -474,7 +474,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           }
 
           default:
-            ASTERIA_TERMINATE(("Invalid target scope type `$1`"), altr.target);
+            ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.target);
         }
       }
 
@@ -564,7 +564,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
       }
 
       default:
-        ASTERIA_TERMINATE(("Invalid statement type `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
     }
   }
 
