@@ -41,7 +41,6 @@
 #include "../rocket/tinyfmt_file.hpp"
 #include "../rocket/ascii_numget.hpp"
 #include "../rocket/ascii_numput.hpp"
-#include "../rocket/format.hpp"
 #include "../rocket/atomic.hpp"
 
 #include <iterator>

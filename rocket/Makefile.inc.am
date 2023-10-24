@@ -17,8 +17,8 @@ nobase_include_HEADERS +=  \
   %reldir%/details/refcnt_ptr.ipp  \
   %reldir%/details/static_vector.ipp  \
   %reldir%/details/array.ipp  \
+  %reldir%/details/tinyfmt.ipp  \
   %reldir%/details/linear_buffer.ipp  \
-  %reldir%/details/format.ipp  \
   %reldir%/xcompiler.h  \
   %reldir%/fwd.hpp  \
   %reldir%/xassert.hpp  \
@@ -56,7 +56,6 @@ nobase_include_HEADERS +=  \
   %reldir%/tinyfmt_str.hpp  \
   %reldir%/tinyfmt_file.hpp  \
   %reldir%/tinyfmt_ln.hpp  \
-  %reldir%/format.hpp  \
   %reldir%/atomic.hpp  \
   %reldir%/mutex.hpp  \
   %reldir%/recursive_mutex.hpp  \
@@ -81,7 +80,6 @@ lib_librocket_la_SOURCES =  \
   %reldir%/tinyfmt_str.cpp  \
   %reldir%/tinyfmt_file.cpp  \
   %reldir%/tinyfmt_ln.cpp  \
-  %reldir%/format.cpp  \
   %reldir%/prehashed_string.cpp  \
   ${END}
 

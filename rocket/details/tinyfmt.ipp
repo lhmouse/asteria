@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_FORMAT_
-#  error Please include <rocket/format.hpp> instead.
+#ifndef ROCKET_TINYFMT_
+#  error Please include <rocket/tinyfmt.hpp> instead.
 #endif
-namespace details_format {
+namespace details_tinyfmt {
 
 template<typename charT>
 void
@@ -65,4 +65,4 @@ do_format_time_iso(basic_tinyfmt<charT>& fmt, const ::tm& tm, long nsec)
     fmt.putn_latin1(stemp, 29);
   }
 
-}  // namespace details_format
+}  // namespace details_tinyfmt

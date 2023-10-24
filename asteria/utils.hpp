@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "../rocket/tinyfmt_str.hpp"
-#include "../rocket/format.hpp"
 namespace asteria {
 
 // Formatting
