@@ -30,6 +30,7 @@ do_backtrace()
     this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
   }
   catch(...) {
+    // Ignore foreign exceptions.
   }
 
 void
@@ -63,8 +64,8 @@ do_insert_backtrace_frame(Frame&& frm)
       // Write frame information.
       nump.put_DU(k + 1);
       ::std::copy_backward(nump.begin(), nump.end(), sbuf.mut_end() - 1);
-      this->m_fmt << "\n  " << sbuf.data() << ") "
-                  << describe_frame_type(r.type) << " at '" << r.sloc << "': ";
+      this->m_fmt << "\n  " << sbuf.data() << ") " << describe_frame_type(r.type)
+                  << " at '" << r.sloc << "': ";
 
       // Write the value in this frame.
       this->m_tempf.clear_string();

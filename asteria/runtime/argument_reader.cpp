@@ -526,39 +526,38 @@ void
 Argument_Reader::
 throw_no_matching_function_call() const
   {
-    // Compose the list of types of arguments.
-    cow_string arguments;
-    size_t index = this->m_stack.size();
-    switch(index) {
+    // Compose the list of arguments.
+    cow_string caller;
+    caller << this->m_name << "(";
+    size_t offset = this->m_stack.size() - 1;
+    switch(this->m_stack.size()) {
         do {
-          arguments += ", ";  // fallthrough
+          caller << ", ";  // fallthrough
       default:
-          arguments += describe_type(
-                this->m_stack.top(--index).dereference_readonly().type());
+          const auto& arg = this->m_stack.top(offset);
+          caller << describe_type(arg.dereference_readonly().type());
         }
-        while(index != 0);  // fallthrough
-
+        while(-- offset != SIZE_MAX);  // fallthrough
       case 0:
         break;
     }
+    caller << ")";
 
     // Compose the list of overloads.
     cow_string overloads;
-    index = 0;
-    while(index != this->m_overloads.size()) {
-      const char* ovr = this->m_overloads.c_str() + index;
-      size_t len = ::std::strlen(ovr);
-      index += len + 1;
-
-      overloads += "  ";
-      overloads += this->m_name;
-      overloads += "(";
-      overloads.append(ovr, len);
-      overloads += ")\n";
+    overloads << "[list of overloads:";
+    offset = 0;
+    while(offset != this->m_overloads.size()) {
+      overloads << "\n  * ";
+      cow_string::shallow_type ovld(this->m_overloads.c_str() + offset);
+      overloads << this->m_name << "(" << ovld << ")";
+      offset += ovld.length() + 1;
     }
+    overloads << "\n  -- end of list of overloads]";
 
-    // Throw the exception now.
-    ASTERIA_THROW(("No matching function call for `$1($2)`", "[list of overloads:\n$3  -- end of list of overloads]"), this->m_name, arguments, overloads);
+    // Compose the message and throw it.
+    throw Runtime_Error(Runtime_Error::M_format(),
+             "No matching function call for `$1`\n$2", caller, overloads);
   }
 
 }  // namespace asteria

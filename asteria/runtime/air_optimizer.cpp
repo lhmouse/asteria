@@ -76,19 +76,26 @@ cow_function
 AIR_Optimizer::
 create_function(const Source_Location& sloc, stringR name)
   {
-    // Compose the function signature.
-    // We only do this if `name` really looks like a function name.
     cow_string func = name;
-    if(is_cmask(name.front(), cmask_namei) && is_cmask(name.back(), cmask_namei)) {
+    if(is_cmask(func.front(), cmask_namei) && is_cmask(func.back(), cmask_namei | cmask_digit)) {
+      // If `name` looks like a function name, append the parameter list
+      // to form a function signature.
       func << "(";
-      for(size_t k = 0;  k < this->m_params.size();  ++k)
-        func << this->m_params.at(k) << ", ";
-      if(this->m_params.size() != 0)
-        func >> 2U;
+      auto tparam = this->m_params.begin();
+      switch(this->m_params.size()) {
+          do {
+            func << ", ";  // fallthrough
+        default:
+            func << *tparam;
+          }
+          while(++ tparam != this->m_params.end());  // fallthrough
+        case 0:
+          break;
+      }
       func << ")";
     }
 
-    // Instantiate the function.
+    // Instantiate the function object now.
     return ::rocket::make_refcnt<Instantiated_Function>(this->m_params,
                ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::std::move(func)),
                this->m_code);
