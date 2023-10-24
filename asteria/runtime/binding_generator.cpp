@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "precompiled.ipp"
+#include "../precompiled.ipp"
 #include "binding_generator.hpp"
 #include "argument_reader.hpp"
-#include "runtime/reference.hpp"
-#include "utils.hpp"
+#include "reference.hpp"
+#include "../utils.hpp"
 namespace asteria {
 
 cow_function

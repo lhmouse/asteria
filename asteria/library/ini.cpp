@@ -3,8 +3,8 @@
 
 #include "../precompiled.ipp"
 #include "ini.hpp"
-#include "../argument_reader.hpp"
-#include "../binding_generator.hpp"
+#include "../runtime/argument_reader.hpp"
+#include "../runtime/binding_generator.hpp"
 #include "../utils.hpp"
 namespace asteria {
 namespace {

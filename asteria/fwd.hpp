@@ -150,8 +150,6 @@ class Value;
 class Source_Location;
 class Recursion_Sentry;
 class Simple_Script;
-class Argument_Reader;
-class Binding_Generator;
 
 // Low-level data structures
 class Variable_HashMap;
@@ -181,6 +179,8 @@ class Module_Loader;
 class Variadic_Arguer;
 class Instantiated_Function;
 class AIR_Node;
+class Argument_Reader;
+class Binding_Generator;
 
 // Compiler
 enum Punctuator : uint8_t;

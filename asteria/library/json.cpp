@@ -3,9 +3,8 @@
 
 #include "../precompiled.ipp"
 #include "json.hpp"
-#include "../argument_reader.hpp"
-#include "../binding_generator.hpp"
-#include "../runtime/runtime_error.hpp"
+#include "../runtime/argument_reader.hpp"
+#include "../runtime/binding_generator.hpp"
 #include "../runtime/global_context.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/compiler_error.hpp"

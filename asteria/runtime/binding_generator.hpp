@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_BINDING_GENERATOR_
-#define ASTERIA_BINDING_GENERATOR_
+#ifndef ASTERIA_RUNTIME_BINDING_GENERATOR_
+#define ASTERIA_RUNTIME_BINDING_GENERATOR_
 
 #include "fwd.hpp"
 namespace asteria {
