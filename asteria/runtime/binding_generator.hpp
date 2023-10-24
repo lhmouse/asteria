@@ -4,7 +4,7 @@
 #ifndef ASTERIA_RUNTIME_BINDING_GENERATOR_
 #define ASTERIA_RUNTIME_BINDING_GENERATOR_
 
-#include "fwd.hpp"
+#include "../fwd.hpp"
 namespace asteria {
 
 class Binding_Generator
