@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UCHAR_IO_
-#define ROCKET_UCHAR_IO_
+#ifndef ROCKET_XUCHAR_
+#define ROCKET_XUCHAR_
 
 #include "fwd.hpp"
 #include <wchar.h>

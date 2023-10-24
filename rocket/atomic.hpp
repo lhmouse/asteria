@@ -5,7 +5,7 @@
 #define ROCKET_ATOMIC_
 
 #include "fwd.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 namespace rocket {
 
 // Differences from `std::atomic`:

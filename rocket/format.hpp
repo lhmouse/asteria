@@ -5,8 +5,10 @@
 #define ROCKET_FORMAT_
 
 #include "tinyfmt.hpp"
-#include "throw.hpp"
+#include "xthrow.hpp"
 namespace rocket {
+
+#include "details/format.ipp"
 
 template<typename charT>
 struct basic_formatter
@@ -46,8 +48,6 @@ make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value) noexcep
     constexpr auto callback = formatter::template default_callback<valueT>;
     return formatter(callback, ::std::addressof(value));
   }
-
-#include "details/format.ipp"
 
 template<typename charT>
 basic_tinyfmt<charT>&

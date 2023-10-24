@@ -5,7 +5,7 @@
 #define ROCKET_UNIQUE_HANDLE_
 
 #include "fwd.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 #include "xallocator.hpp"
 namespace rocket {
 

@@ -110,7 +110,7 @@ class stored_pointer
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
         if(ptr)
           if(ROCKET_UNEXPECT(ptr->refcnt_cJveMKH5bI7L::drop_reference() == 0))
-            (copy_deleter)(*ptr)(ptr);
+            (copy_deleter) (*ptr)(ptr);
       }
 
     void

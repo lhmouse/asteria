@@ -1,9 +1,9 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "uchar_io.hpp"
+#include "xuchar.hpp"
 #include "unique_ptr.hpp"
-#include "throw.hpp"
+#include "xthrow.hpp"
 #include <limits.h>  // MB_LEN_MAX
 #include <wchar.h>
 #ifdef HAVE_CONFIG_H

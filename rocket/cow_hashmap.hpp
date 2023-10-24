@@ -5,8 +5,8 @@
 #define ROCKET_COW_HASHMAP_
 
 #include "fwd.hpp"
-#include "assert.hpp"
-#include "throw.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
 #include "reference_counter.hpp"
 #include "xallocator.hpp"
 #include "xhashtable.hpp"

@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "mutex.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 #include <condition_variable>
 #include <time.h>
 namespace rocket {

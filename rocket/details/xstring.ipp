@@ -131,7 +131,7 @@ inline namespace maybe_constexpr
         size_t ki = 0;
         for(;;)
           if(lhs[ki] != rhs[ki])
-            return (noadl::xchrtoint(lhs[ki]) < noadl::xchrtoint(rhs[ki])) ? -1 : 1;
+            return (noadl::int_from(lhs[ki]) < noadl::int_from(rhs[ki])) ? -1 : 1;
           else if(lhs[ki] == charT())
             return 0;
           else
@@ -172,7 +172,7 @@ inline namespace maybe_constexpr
           if(ki >= len)
             return 0;
           else if(lhs[ki] != rhs[ki])
-            return (noadl::xchrtoint(lhs[ki]) < noadl::xchrtoint(rhs[ki])) ? -1 : 1;
+            return (noadl::int_from(lhs[ki]) < noadl::int_from(rhs[ki])) ? -1 : 1;
           else
             ki++;
       }

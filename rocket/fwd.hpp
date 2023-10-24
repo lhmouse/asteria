@@ -4,7 +4,7 @@
 #ifndef ROCKET_FWD_
 #define ROCKET_FWD_
 
-#include "compiler.h"
+#include "xcompiler.h"
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()
@@ -753,6 +753,21 @@ details_fwd::binder_ne<typename decay<xvalueT>::type>
 arent(xvalueT&& xval)
   {
     return ::std::forward<xvalueT>(xval);
+  }
+
+template<typename charT>
+ROCKET_PURE constexpr
+int
+int_from(charT c) noexcept
+  {
+    return static_cast<int>(c);
+  }
+
+ROCKET_PURE constexpr
+int
+int_from(char c) noexcept
+  {
+    return static_cast<unsigned char>(c);
   }
 
 template<intmax_t valueT>

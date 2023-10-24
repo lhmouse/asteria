@@ -287,7 +287,7 @@ class basic_tinybuf_str
 
         const char_type* bptr = this->m_str.data() + static_cast<size_t>(this->m_off);
         this->m_off ++;
-        return noadl::xchrtoint(*bptr);
+        return noadl::int_from(*bptr);
       }
 
     // Puts some characters into the stream.

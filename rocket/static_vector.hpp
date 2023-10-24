@@ -5,8 +5,8 @@
 #define ROCKET_STATIC_VECTOR_
 
 #include "fwd.hpp"
-#include "assert.hpp"
-#include "throw.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
 #include "xallocator.hpp"
 namespace rocket {
 

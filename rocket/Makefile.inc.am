@@ -1,9 +1,9 @@
 noinst_LTLIBRARIES += lib/librocket.la
 
 nobase_include_HEADERS +=  \
-  %reldir%/details/compiler_clang.i  \
-  %reldir%/details/compiler_gcc.i  \
-  %reldir%/details/compiler_msvc.i  \
+  %reldir%/details/xcompiler_clang.i  \
+  %reldir%/details/xcompiler_gcc.i  \
+  %reldir%/details/xcompiler_msvc.i  \
   %reldir%/details/fwd.ipp  \
   %reldir%/details/xallocator.ipp  \
   %reldir%/details/xstring.ipp  \
@@ -19,14 +19,15 @@ nobase_include_HEADERS +=  \
   %reldir%/details/array.ipp  \
   %reldir%/details/linear_buffer.ipp  \
   %reldir%/details/format.ipp  \
-  %reldir%/compiler.h  \
-  %reldir%/assert.hpp  \
+  %reldir%/xcompiler.h  \
   %reldir%/fwd.hpp  \
-  %reldir%/throw.hpp  \
+  %reldir%/xassert.hpp  \
+  %reldir%/xthrow.hpp  \
   %reldir%/xallocator.hpp  \
   %reldir%/xstring.hpp  \
   %reldir%/xhashtable.hpp  \
-  %reldir%/uchar_io.hpp  \
+  %reldir%/xuchar.hpp  \
+  %reldir%/xascii.hpp  \
   %reldir%/variant.hpp  \
   %reldir%/unique_handle.hpp  \
   %reldir%/unique_posix_file.hpp  \
@@ -51,7 +52,6 @@ nobase_include_HEADERS +=  \
   %reldir%/tinybuf_ln.hpp  \
   %reldir%/ascii_numput.hpp  \
   %reldir%/ascii_numget.hpp  \
-  %reldir%/ascii_case.hpp  \
   %reldir%/tinyfmt.hpp  \
   %reldir%/tinyfmt_str.hpp  \
   %reldir%/tinyfmt_file.hpp  \
@@ -66,9 +66,9 @@ nobase_include_HEADERS +=  \
   ${END}
 
 lib_librocket_la_SOURCES =  \
-  %reldir%/assert.cpp  \
-  %reldir%/throw.cpp  \
-  %reldir%/uchar_io.cpp  \
+  %reldir%/xassert.cpp  \
+  %reldir%/xthrow.cpp  \
+  %reldir%/xuchar.cpp  \
   %reldir%/cow_string.cpp  \
   %reldir%/linear_buffer.cpp  \
   %reldir%/tinybuf.cpp  \

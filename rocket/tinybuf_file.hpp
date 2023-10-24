@@ -7,7 +7,7 @@
 #include "tinybuf.hpp"
 #include "unique_posix_file.hpp"
 #include "unique_posix_fd.hpp"
-#include "uchar_io.hpp"
+#include "xuchar.hpp"
 #include <fcntl.h>  // ::open()
 #include <stdio.h>  // ::fdopen(), ::fclose()
 #include <errno.h>  // errno

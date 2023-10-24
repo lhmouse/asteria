@@ -202,7 +202,7 @@ class basic_tinybuf_ln
         if(this->m_ln.empty())
           return -1;
 
-        return noadl::xchrtoint(*(this->m_ln.data()));
+        return noadl::int_from(*(this->m_ln.data()));
       }
 
     // Puts some characters into the stream.

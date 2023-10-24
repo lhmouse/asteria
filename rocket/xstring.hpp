@@ -7,21 +7,6 @@
 #include "fwd.hpp"
 namespace rocket {
 
-template<typename charT>
-ROCKET_PURE constexpr
-int
-xchrtoint(charT c) noexcept
-  {
-    return static_cast<int>(c);
-  }
-
-ROCKET_PURE constexpr
-int
-xchrtoint(char c) noexcept
-  {
-    return static_cast<unsigned char>(c);
-  }
-
 #include "details/xstring.ipp"
 
 template<typename charT>

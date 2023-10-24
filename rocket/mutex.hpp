@@ -5,7 +5,7 @@
 #define ROCKET_MUTEX_
 
 #include "fwd.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 #include <mutex>
 namespace rocket {
 

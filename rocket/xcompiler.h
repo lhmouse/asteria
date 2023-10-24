@@ -1,16 +1,16 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COMPILER_
-#define ROCKET_COMPILER_
+#ifndef ROCKET_XCOMPILER_
+#define ROCKET_XCOMPILER_
 
 // Clang may pretend to be GCC or MSVC so has to be checked very first.
 #if defined(__clang__)
-#  include "details/compiler_clang.i"
+#  include "details/xcompiler_clang.i"
 #elif defined(__GNUC__)
-#  include "details/compiler_gcc.i"
+#  include "details/xcompiler_gcc.i"
 #elif defined(_MSC_VER)
-#  include "details/compiler_msvc.i"
+#  include "details/xcompiler_msvc.i"
 #endif
 
 // Ensure all requested macros are defined.
@@ -53,4 +53,4 @@
 #  define NDEBUG  1
 #endif
 
-#endif  // ROCKET_COMPILER_
+#endif  // ROCKET_XCOMPILER_

@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
 #include "ascii_numget.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 namespace rocket {
 namespace {
 

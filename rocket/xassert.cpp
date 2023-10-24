@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "assert.hpp"
+#include "xassert.hpp"
 #include <exception>
 #include <cstdio>
 namespace rocket {

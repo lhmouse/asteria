@@ -5,8 +5,8 @@
 #define ROCKET_COW_STRING_
 
 #include "fwd.hpp"
-#include "assert.hpp"
-#include "throw.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
 #include "reference_counter.hpp"
 #include "xallocator.hpp"
 #include "xstring.hpp"
@@ -1560,8 +1560,8 @@ class basic_cow_string
         for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
+          bitmap[noadl::int_from(*sptr) & 0xFF] = true;
+          overflow |= noadl::int_from(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1569,7 +1569,7 @@ class basic_cow_string
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
           ROCKET_ASSERT(cur != npos);
-          if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
+          if(bitmap[noadl::int_from(this->data()[cur]) & 0xFF]
                && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
@@ -1693,8 +1693,8 @@ class basic_cow_string
         for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
+          bitmap[noadl::int_from(*sptr) & 0xFF] = true;
+          overflow |= noadl::int_from(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1702,7 +1702,7 @@ class basic_cow_string
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
           ROCKET_ASSERT(cur != npos);
-          if(bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
+          if(bitmap[noadl::int_from(this->data()[cur]) & 0xFF]
                && /* in bitmap && */ (!overflow || noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
@@ -1824,8 +1824,8 @@ class basic_cow_string
         for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
+          bitmap[noadl::int_from(*sptr) & 0xFF] = true;
+          overflow |= noadl::int_from(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1833,7 +1833,7 @@ class basic_cow_string
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
           ROCKET_ASSERT(cur != npos);
-          if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
+          if(!bitmap[noadl::int_from(this->data()[cur]) & 0xFF]
                || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
@@ -1955,8 +1955,8 @@ class basic_cow_string
         for(auto sptr = s;  sptr != s + n;  ++ sptr) {
           // Hash the lowest 8 bits into `bitmap`. If other non-zero bits exist,
           // accumulate them into `overflow`.
-          bitmap[noadl::xchrtoint(*sptr) & 0xFF] = true;
-          overflow |= noadl::xchrtoint(*sptr) >> 8;
+          bitmap[noadl::int_from(*sptr) & 0xFF] = true;
+          overflow |= noadl::int_from(*sptr) >> 8;
         }
 
         for(;;) {
@@ -1964,7 +1964,7 @@ class basic_cow_string
           // Otherwise, check whether this is really a match using plain comparison,
           // unlike `std::basic_string` which uses `std::char_traits`.
           ROCKET_ASSERT(cur != npos);
-          if(!bitmap[noadl::xchrtoint(this->data()[cur]) & 0xFF]
+          if(!bitmap[noadl::int_from(this->data()[cur]) & 0xFF]
                || (/* in bitmap && */ overflow && !noadl::xmemchr(s, this->data()[cur], n)))
             return cur;
 
@@ -2341,7 +2341,7 @@ struct basic_cow_string<charT, allocT>::hash
         // Implement the FNV-1a hashing algorithm.
         uint32_t reg = 2166136261U;
         for(charT c : str) {
-          int ch = noadl::xchrtoint(c);
+          int ch = noadl::int_from(c);
 
           // Accumulate bytes in little-endian byte order.
           for(uint32_t k = 0;  k != sizeof(c);  ++k) {

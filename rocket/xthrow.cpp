@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "throw.hpp"
+#include "xthrow.hpp"
 #include <stdarg.h>  // ::va_list
 #include <stdio.h>  // ::vsnprintf()
 namespace rocket {

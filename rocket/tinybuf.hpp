@@ -5,8 +5,8 @@
 #define ROCKET_TINYBUF_
 
 #include "fwd.hpp"
-#include "assert.hpp"
-#include "throw.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
 #include "xstring.hpp"
 #include "tinybuf_base.hpp"
 namespace rocket {
@@ -90,7 +90,7 @@ class basic_tinybuf
       {
         char_type s[1];
         size_t n = this->getn(s, 1);
-        return (n == 0) ? -1 : noadl::xchrtoint(s[0]);
+        return (n == 0) ? -1 : noadl::int_from(s[0]);
       }
 
     // Puts some characters into the stream.

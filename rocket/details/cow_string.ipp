@@ -471,7 +471,7 @@ do_boyer_moore_horspool_search(textT tbegin, textT tend, pattT pbegin, pattT pen
     offsetT offsets[NT] = { };
 
     while(++ pcur != pend) {
-      uint32_t hash = static_cast<uint32_t>(noadl::xchrtoint(pcur[-1])) % NT;
+      uint32_t hash = static_cast<uint32_t>(noadl::int_from(pcur[-1])) % NT;
       offsets[hash] = static_cast<offsetT>(pcur - pbegin);
     }
 
@@ -488,7 +488,7 @@ do_boyer_moore_horspool_search(textT tbegin, textT tend, pattT pbegin, pattT pen
       }
 
       tcur += pend - pbegin;
-      uint32_t hash = static_cast<uint32_t>(noadl::xchrtoint(tcur[-1])) % NT;
+      uint32_t hash = static_cast<uint32_t>(noadl::int_from(tcur[-1])) % NT;
       tcur -= static_cast<ptrdiff_t>(offsets[hash]);
     }
     while(tend - tcur >= pend - pbegin);

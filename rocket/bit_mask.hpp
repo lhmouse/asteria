@@ -5,7 +5,7 @@
 #define ROCKET_BIT_MASK_
 
 #include "fwd.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 namespace rocket {
 
 template<typename valueT>

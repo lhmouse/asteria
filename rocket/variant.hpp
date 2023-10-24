@@ -5,8 +5,8 @@
 #define ROCKET_VARIANT_
 
 #include "fwd.hpp"
-#include "assert.hpp"
-#include "throw.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
 #include <cstring>  // std::memset()
 namespace rocket {
 

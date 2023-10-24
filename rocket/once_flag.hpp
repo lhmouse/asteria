@@ -5,7 +5,7 @@
 #define ROCKET_ONCE_FLAG_
 
 #include "fwd.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 #include <cxxabi.h>
 namespace rocket {
 

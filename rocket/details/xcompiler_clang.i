@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COMPILER_
-#  error Please #include <rocket/compiler.h> instead.
+#ifndef ROCKET_XCOMPILER_
+#  error Please #include <rocket/xcompiler.h> instead.
 #endif
 
-#define ROCKET_ATTRIBUTE_PRINTF(...)        __attribute__((__format__(__gnu_printf__, __VA_ARGS__)))
+#define ROCKET_ATTRIBUTE_PRINTF(...)        __attribute__((__format__(__printf__, __VA_ARGS__)))
 #define ROCKET_SELECTANY                    __attribute__((__weak__))
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NEVER_INLINE                 __attribute__((__noinline__))
@@ -35,11 +35,12 @@
 #define ROCKET_SUB_OVERFLOW(x,y,r)          __builtin_sub_overflow(x,y,r)
 #define ROCKET_MUL_OVERFLOW(x,y,r)          __builtin_mul_overflow(x,y,r)
 
-// Check for libstdc++.
-#if defined(_GLIBCXX_DEBUG)
+// Check for either libc++ or libstdc++.
+#if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
 #  define ROCKET_DEBUG                      1
 #endif
 
-#if defined(__SSE2__) && (__GNUC__ < 11)
+#if defined(__SSE2__) && (__clang_major__ < 8)
 #  define _mm_storeu_si32(ptr, val)         _mm_store_ss((float*) (ptr), _mm_castsi128_ps(val))
+#  define _mm_storeu_si64(ptr, val)         _mm_store_sd((double*) (ptr), _mm_castsi128_pd(val))
 #endif

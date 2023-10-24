@@ -5,7 +5,7 @@
 #define ROCKET_REFERENCE_COUNTER_
 
 #include "fwd.hpp"
-#include "assert.hpp"
+#include "xassert.hpp"
 #include <atomic>  // std::atomic<>
 #include <exception>  // std::terminate()
 namespace rocket {

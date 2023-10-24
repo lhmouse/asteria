@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COMPILER_
-#  error Please #include <rocket/compiler.h> instead.
+#ifndef ROCKET_XCOMPILER_
+#  error Please #include <rocket/xcompiler.h> instead.
 #endif
 
 #define ROCKET_ATTRIBUTE_PRINTF(...)        // not implemented

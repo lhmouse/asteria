@@ -1,8 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ASSERT_
-#define ROCKET_ASSERT_
+#ifndef ROCKET_XASSERT_
+#define ROCKET_XASSERT_
+
+#include "fwd.hpp"
 namespace rocket {
 
 // This is always declared even when assertions are disabled.

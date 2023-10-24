@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_ASCII_CASE_
-#define ROCKET_ASCII_CASE_
+#ifndef ROCKET_XASCII_
+#define ROCKET_XASCII_
 
 #include "fwd.hpp"
 namespace rocket {

@@ -5,8 +5,8 @@
 #define ROCKET_ARRAY_
 
 #include "fwd.hpp"
-#include "assert.hpp"
-#include "throw.hpp"
+#include "xassert.hpp"
+#include "xthrow.hpp"
 namespace rocket {
 
 // Differences from `std::array`:
