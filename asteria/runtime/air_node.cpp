@@ -3787,21 +3787,26 @@ solidify(AVMC_Queue& queue) const
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-            // Evaluate the expression in a `try` block. Its result is discarded.
-            uint32_t stack_size_before_try = ctx.stack().size();
+            // Save the stack.
+            Reference_Stack saved_stack;
+            ctx.stack().swap(saved_stack);
+            ctx.stack().swap(ctx.alt_stack());
+
+            // Evaluate the expression in a `try` block.
             Value exval;
-            AIR_Status status = air_status_next;
             try {
-              status = sp.queue_body.execute(ctx);
+              AIR_Status status = sp.queue_body.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
             }
             catch(Runtime_Error& except) {
               exval = except.value();
             }
 
-            // Restore the stack after the evaluation completes, then push a copy of
-            // the exception object.
-            ctx.stack().pop(ctx.stack().size() - stack_size_before_try);
+            // Restore the stack after the evaluation completes.
+            ctx.stack().swap(ctx.alt_stack());
+            ctx.stack().swap(saved_stack);
+
+            // Push the exception object.
             ctx.stack().push().set_temporary(::std::move(exval));
             return air_status_next;
           }
