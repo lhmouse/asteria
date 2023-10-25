@@ -226,16 +226,13 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         if(opts.optimization_level >= 1) {
           // Try optimizing.
           // https://github.com/lhmouse/asteria/issues/136
-          bool alt_function_call = true;
+          bool alt_stack_clobbered = false;;
 
           for(const auto& arg : altr.args)
             for(const auto& unit : arg.units)
-              if(unit.clobbers_alt_stack()) {
-                alt_function_call = false;
-                break;
-              }
+              alt_stack_clobbered |= unit.clobbers_alt_stack();
 
-          if(alt_function_call) {
+          if(!alt_stack_clobbered) {
             // Evaluate argumetns on `alt_stack` directly.
             AIR_Node::S_alt_clear_stack xstart = { };
             code.emplace_back(::std::move(xstart));
