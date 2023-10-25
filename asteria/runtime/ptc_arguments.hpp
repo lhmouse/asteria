@@ -20,6 +20,7 @@ class PTC_Arguments final
 
     // These are the target function and its arguments.
     cow_function m_target;
+    Reference m_self;
     Reference_Stack m_stack;
 
     // These are captured data.
@@ -28,10 +29,11 @@ class PTC_Arguments final
 
   public:
     explicit
-    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc,
-                  const cow_function& target, Reference_Stack&& stack)
+    PTC_Arguments(const Source_Location& sloc, PTC_Aware ptc, const cow_function& target,
+                  Reference&& self, Reference_Stack&& stack)
       :
-        m_sloc(sloc), m_ptc(ptc), m_target(target), m_stack(::std::move(stack))
+        m_sloc(sloc), m_ptc(ptc), m_target(target),
+        m_self(::std::move(self)), m_stack(::std::move(stack))
       { }
 
   public:
@@ -56,6 +58,14 @@ class PTC_Arguments final
     Reference_Stack&
     stack() noexcept
       { return this->m_stack;  }
+
+    const Reference&
+    self() const noexcept
+      { return this->m_self;  }
+
+    Reference&
+    self() noexcept
+      { return this->m_self;  }
 
     ASTERIA_INCOMPLET(Variadic_Arguer)
     refcnt_ptr<const Variadic_Arguer>

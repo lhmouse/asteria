@@ -196,7 +196,7 @@ void
 Reference::
 do_use_function_result_slow(Global_Context& global)
   {
-    refcnt_ptr<PTC_Arguments> ptc;
+    refcnt_ptr<PTC_Arguments> ptcg;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
     opt<Value> result_value;
     Reference_Stack alt_stack;
@@ -204,66 +204,65 @@ do_use_function_result_slow(Global_Context& global)
     try {
       // Unpack frames until a non-PTC result is encountered.
       while(this->m_xref == xref_ptc) {
-        ptc.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
-        ROCKET_ASSERT(ptc.use_count() == 1);
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptc->sloc(), ptc->target());
+        ptcg.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
+        ROCKET_ASSERT(ptcg.use_count() == 1);
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptcg->sloc(), ptcg->target());
 
         // Perform a non-tail call.
-        frames.emplace_back(ptc);
-        *this = ::std::move(ptc->stack().mut_top());
-        ptc->stack().pop();
-        ptc->target().invoke_ptc_aware(*this, global, ::std::move(ptc->stack()));
+        frames.emplace_back(ptcg);
+        *this = ::std::move(ptcg->self());
+        ptcg->target().invoke_ptc_aware(*this, global, ::std::move(ptcg->stack()));
       }
 
       // Check the result.
-      if(ptc->ptc_aware() == ptc_aware_void)
+      if(ptcg->ptc_aware() == ptc_aware_void)
         this->m_xref = xref_void;
       else if(this->m_xref != xref_void)
         result_value = this->dereference_readonly();
 
       // This is the normal return path.
       while(!frames.empty()) {
-        ptc = ::std::move(frames.mut_back());
+        ptcg = ::std::move(frames.mut_back());
         frames.pop_back();
 
         // Evaluate deferred expressions.
-        if(ptc->defer().size())
+        if(ptcg->defer().size())
           Executive_Context(Executive_Context::M_defer(),
-                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+                 global, ptcg->stack(), alt_stack, ::std::move(ptcg->defer()))
             .on_scope_exit_normal(air_status_next);
 
         // Convert the result.
-        if((ptc->ptc_aware() == ptc_aware_by_val) && result_value) {
+        if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
           this->m_value = ::std::move(*result_value);
           result_value.reset();
           this->m_mods.clear();
           this->m_xref = xref_temporary;
         }
 
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptc->sloc(), ptc->target(), *this);
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptcg->sloc(), ptcg->target(), *this);
       }
     }
     catch(Runtime_Error& except) {
       // This is the exceptional path.
       while(!frames.empty()) {
-        ptc = ::std::move(frames.mut_back());
+        ptcg = ::std::move(frames.mut_back());
         frames.pop_back();
 
         // Note that if we arrive here, there must have been an exception thrown
         // when unpacking the last frame (i.e. the last call did not return), so
         // the last frame does not have its enclosing function set.
-        except.push_frame_plain(ptc->sloc(), sref("[proper tail call]"));
+        except.push_frame_plain(ptcg->sloc(), sref("[proper tail call]"));
 
-        if(auto qcall = ptc->caller_opt())
+        if(auto qcall = ptcg->caller_opt())
           except.push_frame_function(qcall->sloc(), qcall->func());
 
         // Evaluate deferred expressions.
-        if(ptc->defer().size())
+        if(ptcg->defer().size())
           Executive_Context(Executive_Context::M_defer(),
-                 global, ptc->stack(), alt_stack, ::std::move(ptc->defer()))
+                 global, ptcg->stack(), alt_stack, ::std::move(ptcg->defer()))
             .on_scope_exit_exceptional(except);
 
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptc->sloc(), ptc->target(), except);
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptcg->sloc(), ptcg->target(), except);
       }
 
       // The exception object has been updated, so rethrow it.

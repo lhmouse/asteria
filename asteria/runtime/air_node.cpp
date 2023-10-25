@@ -189,8 +189,8 @@ do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
   {
     if(ptc != ptc_aware_none) {
       // Pack proper tail call arguments into `self`.
-      stack.push() = ::std::move(self);
-      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(stack)));
+      auto ptcg = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(self), ::std::move(stack));
+      self.set_ptc(ptcg);
       return air_status_return_ref;
     }
     else {
