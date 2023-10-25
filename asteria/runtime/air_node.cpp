@@ -39,15 +39,6 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
         do_set_rebound(dirty, code.mut(i), ::std::move(*qnode));
   }
 
-void
-do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, Abstract_Context& ctx)
-  {
-    for(size_t k = 0;  k < code.size();  ++k)
-      for(size_t i = 0;  i < code.at(k).size();  ++i)
-        if(auto qnode = code.at(k).at(i).rebind_opt(ctx))
-          do_set_rebound(dirty, code.mut(k).mut(i), ::std::move(*qnode));
-  }
-
 template<typename NodeT>
 opt<AIR_Node>
 do_return_rebound_opt(bool dirty, NodeT&& bound)
@@ -67,20 +58,12 @@ do_collect_variables_for_each(Variable_HashMap& staged, Variable_HashMap& temp,
   }
 
 void
-do_collect_variables_for_each(Variable_HashMap& staged, Variable_HashMap& temp,
-                              const cow_vector<cow_vector<AIR_Node>>& code)
+do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
   {
-    for(size_t k = 0;  k < code.size();  ++k)
-      for(size_t i = 0;  i < code.at(k).size();  ++i)
-        code.at(k).at(i).collect_variables(staged, temp);
-  }
-
-void
-do_collect_variables_for_each(Variable_HashMap& staged, Variable_HashMap& temp,
-                              const cow_vector<AVMC_Queue>& queues)
-  {
-    for(size_t i = 0;  i < queues.size();  ++i)
-      queues.at(i).collect_variables(staged, temp);
+    queue.clear();
+    for(size_t i = 0;  i < code.size();  ++i)
+      code.at(i).solidify(queue);
+    queue.finalize();
   }
 
 using Uparam  = AVMC_Queue::Uparam;
@@ -98,31 +81,6 @@ void
 do_avmc_dtor(Header* head)
   {
     ::rocket::details_variant::wrapped_destroy<SparamT>(head->sparam);
-  }
-
-void
-do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
-  {
-    queue.clear();
-
-    for(size_t i = 0;  i < code.size();  ++i)
-      code.at(i).solidify(queue);
-
-    queue.finalize();
-  }
-
-void
-do_solidify_nodes(cow_vector<AVMC_Queue>& queues, const cow_vector<cow_vector<AIR_Node>>& code)
-  {
-    queues.clear();
-    queues.append(code.size());
-
-    for(size_t k = 0;  k < code.size();  ++k)
-      for(size_t i = 0;  i < code.at(k).size();  ++i)
-        code.at(k).at(i).solidify(queues.mut(k));
-
-    for(size_t k = 0;  k < code.size();  ++k)
-      queues.mut(k).finalize();
   }
 
 AIR_Status
@@ -277,15 +235,21 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<S_switch_statement>();
 
         // Rebind all labels and clauses.
-        // Labels are to be evaluated in the same scope as the condition
-        // expression, and are not parts of the body.
         bool dirty = false;
         S_switch_statement bound = altr;
 
-        do_rebind_nodes(dirty, bound.code_labels, ctx);
-
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
-        do_rebind_nodes(dirty, bound.code_clauses, ctx_body);
+        for(size_t k = 0;  k < bound.clauses.size();  ++k) {
+          // Labels are to be evaluated in the same scope as the condition
+          // expression, and are not parts of the body.
+          for(size_t i = 0;  i < bound.clauses.at(k).code_label.size();  ++i)
+            if(auto qnode = bound.clauses.at(k).code_label.at(i).rebind_opt(ctx))
+              do_set_rebound(dirty, bound.clauses.mut(k).code_label.mut(i), ::std::move(*qnode));
+
+          for(size_t i = 0;  i < bound.clauses.at(k).code_body.size();  ++i)
+            if(auto qnode = bound.clauses.at(k).code_body.at(i).rebind_opt(ctx_body))
+              do_set_rebound(dirty, bound.clauses.mut(k).code_body.mut(i), ::std::move(*qnode));
+        }
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
@@ -527,8 +491,10 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         const auto& altr = this->m_stor.as<S_switch_statement>();
 
         // Collect variables from all labels and clauses.
-        do_collect_variables_for_each(staged, temp, altr.code_labels);
-        do_collect_variables_for_each(staged, temp, altr.code_clauses);
+        for(const auto& clause : altr.clauses) {
+          do_collect_variables_for_each(staged, temp, clause.code_label);
+          do_collect_variables_for_each(staged, temp, clause.code_body);
+        }
         return;
       }
 
@@ -865,42 +831,45 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            cow_vector<AVMC_Queue> queues_labels;
-            cow_vector<AVMC_Queue> queues_clauses;
-            cow_vector<cow_vector<phsh_string>> names_added;
+            struct Clause
+              {
+                AVMC_Queue queue_label;
+                AVMC_Queue queue_body;
+                cow_vector<phsh_string> names_added;
+              };
+
+            cow_vector<Clause> clauses;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queues_labels, altr.code_labels);
-        do_solidify_nodes(sp2.queues_clauses, altr.code_clauses);
-        sp2.names_added = altr.names_added;
+        for(const auto& clause : altr.clauses) {
+          auto& r = sp2.clauses.emplace_back();
+          do_solidify_nodes(r.queue_label, clause.code_label);
+          do_solidify_nodes(r.queue_body, clause.code_body);
+          r.names_added = clause.names_added;
+        }
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-            // Get the number of clauses.
-            size_t nclauses = sp.queues_labels.size();
-            ROCKET_ASSERT(nclauses == sp.queues_clauses.size());
-            ROCKET_ASSERT(nclauses == sp.names_added.size());
-
             // Read the value of the condition and find the target clause for it.
             auto cond = ctx.stack().top().dereference_readonly();
-            size_t target_index = SIZE_MAX;
+            uint32_t target_index = UINT32_MAX;
 
             // This is different from the `switch` statement in C, where `case` labels must
             // have constant operands.
-            for(size_t i = 0;  i < nclauses;  ++i) {
+            for(uint32_t i = 0;  i < sp.clauses.size();  ++i) {
               // This is a `default` clause if the condition is empty, and a `case` clause
               // otherwise.
-              if(sp.queues_labels.at(i).empty()) {
+              if(sp.clauses.at(i).queue_label.empty()) {
                 target_index = i;
                 continue;
               }
 
               // Evaluate the operand and check whether it equals `cond`.
-              AIR_Status status = sp.queues_labels.at(i).execute(ctx);
+              AIR_Status status = sp.clauses.at(i).queue_label.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
               if(ctx.stack().top().dereference_readonly().compare_partial(cond) == compare_equal) {
                 target_index = i;
@@ -908,22 +877,22 @@ solidify(AVMC_Queue& queue) const
               }
             }
 
-            if(target_index >= nclauses)
+            if(target_index >= sp.clauses.size())
               return air_status_next;
 
             // Skip this statement if no matching clause has been found.
             Executive_Context ctx_body(Executive_Context::M_plain(), ctx);
             AIR_Status status = air_status_next;
             try {
-              for(size_t i = 0;  i < nclauses;  ++i)
+              for(size_t i = 0;  i < sp.clauses.size();  ++i)
                 if(i < target_index) {
                   // Inject bypassed variables into the scope.
-                  for(const auto& name : sp.names_added.at(i))
+                  for(const auto& name : sp.clauses.at(i).names_added)
                     ctx_body.insert_named_reference(name);
                 }
                 else {
                   // Execute the body of this clause.
-                  status = sp.queues_clauses.at(i).execute(ctx_body);
+                  status = sp.clauses.at(i).queue_body.execute(ctx_body);
                   if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
                     status = air_status_next;
                     break;
@@ -950,8 +919,10 @@ solidify(AVMC_Queue& queue) const
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            do_collect_variables_for_each(staged, temp, sp.queues_labels);
-            do_collect_variables_for_each(staged, temp, sp.queues_clauses);
+            for(const auto& r : sp.clauses) {
+              r.queue_label.collect_variables(staged, temp);
+              r.queue_body.collect_variables(staged, temp);
+            }
           }
 
           // Symbols

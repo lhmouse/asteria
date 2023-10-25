@@ -273,35 +273,25 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         ROCKET_ASSERT(!altr.ctrl.units.empty());
         do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.ctrl);
 
-        // Generate code for all clauses.
-        cow_vector<cow_vector<AIR_Node>> code_labels;
-        cow_vector<cow_vector<AIR_Node>> code_clauses;
-        cow_vector<cow_vector<phsh_string>> names_added;
-
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
-        auto nclauses = altr.labels.size();
-        ROCKET_ASSERT(nclauses == altr.clauses.size());
+        cow_vector<AIR_Node::S_switch_statement::Clause> clauses;
+        for(const auto& clause : altr.clauses) {
+          auto& r = clauses.emplace_back();
 
-        for(size_t i = 0;  i < nclauses;  ++i) {
           // Generate code for `case` labels, or create empty code for the `default` label.
           // Note labels are not part of the body.
-          if(altr.labels[i].units.empty())
-            code_labels.emplace_back();
-          else
-            do_generate_expression(code_labels.emplace_back(), opts, global, ctx, ptc_aware_none,
-                                   altr.labels[i]);
+          if(!clause.label.units.empty())
+            do_generate_expression(r.code_label, opts, global, ctx, ptc_aware_none, clause.label);
 
           // Generate code for the clause and accumulate names.
-          // This cannot be PTC'd.
-          do_generate_statement_list(code_clauses.emplace_back(), &(names_added.emplace_back()),
-                                     global, ctx_body, opts, ptc_aware_none, altr.clauses[i]);
+          do_generate_statement_list(r.code_body, &(r.names_added), global, ctx_body, opts,
+                                     ptc_aware_none, clause.body);
         }
 
         // Encode arguments.
-        AIR_Node::S_switch_statement xnode = { ::std::move(code_labels), ::std::move(code_clauses),
-                                               ::std::move(names_added) };
+        AIR_Node::S_switch_statement xnode = { ::std::move(clauses) };
         code.emplace_back(::std::move(xnode));
         return code;
       }

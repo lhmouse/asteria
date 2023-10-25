@@ -43,9 +43,14 @@ class AIR_Node
 
     struct S_switch_statement
       {
-        cow_vector<cow_vector<AIR_Node>> code_labels;
-        cow_vector<cow_vector<AIR_Node>> code_clauses;
-        cow_vector<cow_vector<phsh_string>> names_added;
+        struct Clause
+          {
+            cow_vector<AIR_Node> code_label;
+            cow_vector<AIR_Node> code_body;
+            cow_vector<phsh_string> names_added;
+          };
+
+        cow_vector<Clause> clauses;
       };
 
     struct S_do_while_statement

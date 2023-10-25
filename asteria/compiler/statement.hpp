@@ -48,9 +48,14 @@ class Statement
 
     struct S_switch
       {
+        struct Clause
+          {
+            S_expression label;
+            S_block body;
+          };
+
         S_expression ctrl;
-        cow_vector<S_expression> labels;
-        cow_vector<S_block> clauses;
+        cow_vector<Clause> clauses;
       };
 
     struct S_do_while

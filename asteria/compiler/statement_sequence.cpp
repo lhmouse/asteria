@@ -777,8 +777,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
                 "[unmatched `(` at '$1']", op_sloc);
 
     // Parse the block by hand.
-    cow_vector<Statement::S_expression> labels;
-    cow_vector<Statement::S_block> bodies;
+    cow_vector<Statement::S_switch::Clause> clauses;
 
     op_sloc = tstrm.next_sloc();
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
@@ -792,6 +791,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
       if(!qkwrd)
         break;
 
+      auto& clause = clauses.emplace_back();
       if(*qkwrd == keyword_case) {
         // The `case` label requires an expression argument.
         auto qlabel = do_accept_expression_as_rvalue_opt(tstrm);
@@ -799,16 +799,17 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
           throw Compiler_Error(Compiler_Error::M_status(),
                     compiler_status_expression_expected, tstrm.next_sloc());
 
-        labels.emplace_back(::std::move(*qlabel));
+        // Set the label.
+        clause.label = ::std::move(*qlabel);
+        ROCKET_ASSERT(!clause.label.units.empty());
       }
       else {
         // The `default` label takes no argument. There shall be no more than
         // one `default` label within each `switch` statement.
-        if(any_of(labels, [&](const auto& r) { return r.units.empty();  }))
-          throw Compiler_Error(Compiler_Error::M_status(),
-                    compiler_status_multiple_default, label_sloc);
-
-        labels.emplace_back();
+        for(size_t i = 0;  i < clauses.size() - 1;  ++i)
+          if(clauses.at(i).label.units.empty())
+            throw Compiler_Error(Compiler_Error::M_status(),
+                      compiler_status_multiple_default, label_sloc);
       }
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
@@ -816,12 +817,8 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_colon_expected, tstrm.next_sloc());
 
-      cow_vector<Statement> body;
       while(auto qstmt = do_accept_statement_opt(tstrm, scfl | scope_switch))
-        body.emplace_back(::std::move(*qstmt));
-
-      Statement::S_block xstmt = { ::std::move(body) };
-      bodies.emplace_back(::std::move(xstmt));
+        clause.body.stmts.emplace_back(::std::move(*qstmt));
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -830,7 +827,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
                 compiler_status_closing_brace_or_switch_clause_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", op_sloc);
 
-    Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(labels), ::std::move(bodies) };
+    Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(clauses) };
     return ::std::move(xstmt);
   }
 
