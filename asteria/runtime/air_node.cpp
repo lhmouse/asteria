@@ -142,7 +142,8 @@ do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
   {
     if(ptc != ptc_aware_none) {
       // Pack proper tail call arguments into `self`.
-      auto ptcg = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(self), ::std::move(stack));
+      auto ptcg = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(self),
+                                                       ::std::move(stack));
       self.set_ptc(ptcg);
       return air_status_return_ref;
     }
@@ -159,6 +160,24 @@ do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
       ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
       return air_status_next;
     }
+  }
+
+AIR_Status
+do_function_call_common(const Executive_Context& ctx, PTC_Aware ptc, const Source_Location& sloc)
+  {
+    const auto& target_val = ctx.stack().top().dereference_readonly();
+    if(target_val.is_null())
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Function not found");
+
+    if(target_val.type() != type_function)
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Attempt to call a non-function (value `$1`)", target_val);
+
+    auto target = target_val.as_function();
+    auto& self = ctx.stack().mut_top().pop_modifier();  // invalidates `target_val`
+    ctx.stack().clear_red_zone();
+    return do_invoke_maybe_tail(self, ctx.global(), ptc, sloc, target, ::std::move(ctx.alt_stack()));
   }
 
 template<typename ContainerT>
@@ -1772,22 +1791,7 @@ solidify(AVMC_Queue& queue) const
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
             do_pop_arguments(ctx.alt_stack(), ctx.stack(), up.u2345);
-
-            // Get the target function.
-            const auto& target_val = ctx.stack().top().dereference_readonly();
-            if(target_val.is_null())
-              throw Runtime_Error(Runtime_Error::M_format(),
-                       "Function not found");
-
-            if(target_val.type() != type_function)
-              throw Runtime_Error(Runtime_Error::M_format(),
-                       "Attempt to call a non-function (value `$1`)", target_val);
-
-            auto target = target_val.as_function();
-            auto& self = ctx.stack().mut_top().pop_modifier();  // invalidates `target_val`
-            ctx.stack().clear_red_zone();
-            return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
-                                        target, ::std::move(ctx.alt_stack()));
+            return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
           }
 
           // Uparam
@@ -3037,7 +3041,7 @@ solidify(AVMC_Queue& queue) const
                     }
                     else
                       throw Runtime_Error(Runtime_Error::M_format(),
-                               "Fused multiply-add not applicable (operands were `$1`, `$2` and `$3`)",
+                               "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
                                lhs, mid, rhs);
                   }
 
@@ -3162,7 +3166,8 @@ solidify(AVMC_Queue& queue) const
                       V_integer& val = lhs.mut_integer();
 
                       int64_t count = ::rocket::min(rhs.as_integer(), 63);
-                      if((val != 0) && ((count != rhs.as_integer()) || (((val >> 63) ^ val) >> (63 - count) != 0)))
+                      if((val != 0) && ((count != rhs.as_integer())
+                                        || (((val >> 63) ^ val) >> (63 - count) != 0)))
                         throw Runtime_Error(Runtime_Error::M_format(),
                                  "Arithmetic left shift overflow (operands were `$1` and `$2`)",
                                  lhs, rhs);
@@ -3501,21 +3506,7 @@ solidify(AVMC_Queue& queue) const
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Invalid variadic argument generator (value `$1`)", vagen_val);
 
-            // Get the target function.
-            const auto& target_val = ctx.stack().top().dereference_readonly();
-            if(target_val.is_null())
-              throw Runtime_Error(Runtime_Error::M_format(),
-                       "Function not found");
-
-            if(target_val.type() != type_function)
-              throw Runtime_Error(Runtime_Error::M_format(),
-                       "Attempt to call a non-function (value `$1`)", target_val);
-
-            auto target = target_val.as_function();
-            auto& self = ctx.stack().mut_top().pop_modifier();  // invalidates `target_val`
-            ctx.stack().clear_red_zone();
-            return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
-                                        target, ::std::move(ctx.alt_stack()));
+            return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
           }
 
           // Uparam
@@ -3623,8 +3614,8 @@ solidify(AVMC_Queue& queue) const
             if((abs_path[0] != '/') && (src_file[0] == '/'))
               abs_path.insert(0, src_file, 0, src_file.rfind('/') + 1);
 
-            unique_ptr<char, void (void*)> realpathp(::realpath(abs_path.safe_c_str(), nullptr), ::free);
-            if(!realpathp)
+            unique_ptr<char, void (void*)> realpathp(::free);
+            if(!realpathp.reset(::realpath(abs_path.safe_c_str(), nullptr)))
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Could not open script file '$1': ${errno:full}", path_val);
 
@@ -3650,8 +3641,8 @@ solidify(AVMC_Queue& queue) const
             auto target = optmz.create_function(script_sloc, sref("[file scope]"));
             auto& self = ctx.stack().mut_top().set_temporary(nullopt);
             ctx.stack().clear_red_zone();
-            return do_invoke_maybe_tail(self, ctx.global(), ptc_aware_none, sloc,
-                                        target, ::std::move(ctx.alt_stack()));
+            return do_invoke_maybe_tail(self, ctx.global(), ptc_aware_none, sloc, target,
+                                        ::std::move(ctx.alt_stack()));
           }
 
           // Uparam
