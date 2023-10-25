@@ -1611,19 +1611,19 @@ solidify(AVMC_Queue& queue) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Locate the target context.
-            const Executive_Context* ctx_at_depth = &ctx;
+            auto qctx = static_cast<const Executive_Context*>(&ctx);
             for(uint32_t k = 0;  k != up.u2345;  ++k)
-              ctx_at_depth = ctx_at_depth->get_parent_opt();
+              qctx = qctx->get_parent_opt();
 
             // Look for the name in the target context.
-            auto qref = ctx_at_depth->get_named_reference_opt(sp.name);
+            auto qref = qctx->get_named_reference_opt(sp.name);
             if(!qref)
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Undeclared identifier `$1`", sp.name);
 
             if(qref->is_invalid())
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Initialization of `$1` bypassed", sp.name);
+                       "Initialization of `$1` was bypassed", sp.name);
 
             // Push a copy of the reference onto the stack.
             ctx.stack().push() = *qref;

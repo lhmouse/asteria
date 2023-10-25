@@ -107,13 +107,12 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a
         // later-declared one.
-        const Reference* qref;
         const Abstract_Context* qctx = &ctx;
         uint32_t depth = 0;
 
         for(;;) {
           // Look for the name in the current context.
-          qref = qctx->get_named_reference_opt(altr.name);
+          auto qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
             // A reference declared later has been found.
             // Record the context depth for later lookups.
