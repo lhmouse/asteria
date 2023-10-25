@@ -470,6 +470,8 @@ rebind_opt(Abstract_Context& ctx) const
       case index_return_statement:
       case index_push_constant:
       case index_push_constant_int48:
+      case index_alt_clear_stack:
+      case index_alt_function_call:
         return nullopt;
 
       default:
@@ -632,6 +634,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_return_statement:
       case index_push_constant:
       case index_push_constant_int48:
+      case index_alt_clear_stack:
+      case index_alt_function_call:
         return;
 
       default:
@@ -3927,6 +3931,68 @@ solidify(AVMC_Queue& queue) const
 
           // Symbols
           // (none)
+        );
+        return;
+      }
+
+      case index_alt_clear_stack: {
+        const auto& altr = this->m_stor.as<S_alt_clear_stack>();
+
+        (void) altr;
+
+        queue.append(
+          +[](Executive_Context& ctx, const Header* /*head*/) ROCKET_FLATTEN -> AIR_Status
+          {
+            ctx.stack().swap(ctx.alt_stack());
+            ctx.stack().clear();
+            return air_status_next;
+          }
+
+          // Uparam
+          // (none)
+
+          // Sparam
+          // (none)
+
+          // Collector
+          // (none)
+
+          // Symbols
+          // (none)
+        );
+        return;
+      }
+
+      case index_alt_function_call: {
+        const auto& altr = this->m_stor.as<S_alt_function_call>();
+
+        Uparam up2;
+        up2.u0 = altr.ptc;
+
+        queue.append(
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          {
+            const auto& up = head->uparam;
+            const auto& sloc = head->pv_meta->sloc;
+
+            const auto sentry = ctx.global().copy_recursion_sentry();
+            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
+
+            ctx.stack().swap(ctx.alt_stack());
+            return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
+          }
+
+          // Uparam
+          , up2
+
+          // Sparam
+          // (none)
+
+          // Collector
+          // (none)
+
+          // Symbols
+          , &(altr.sloc)
         );
         return;
       }

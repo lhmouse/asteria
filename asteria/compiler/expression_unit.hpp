@@ -167,6 +167,9 @@ class Expression_Unit
     index() const noexcept
       { return static_cast<Index>(this->m_stor.index());  }
 
+    bool
+    clobbers_alt_stack() const noexcept;
+
     cow_vector<AIR_Node>&
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                   const Global_Context& global, Analytic_Context& ctx, PTC_Aware ptc) const;

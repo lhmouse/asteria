@@ -256,6 +256,16 @@ class AIR_Node
         uint32_t low;
       };
 
+    struct S_alt_clear_stack
+      {
+      };
+
+    struct S_alt_function_call
+      {
+        Source_Location sloc;
+        PTC_Aware ptc;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -295,6 +305,8 @@ class AIR_Node
         index_return_statement       = 34,
         index_push_constant          = 35,
         index_push_constant_int48    = 36,
+        index_alt_clear_stack        = 37,
+        index_alt_function_call      = 38,
       };
 
   private:
@@ -337,6 +349,8 @@ class AIR_Node
         , S_return_statement       // 34
         , S_push_constant          // 35
         , S_push_constant_int48    // 36
+        , S_alt_clear_stack        // 37,
+        , S_alt_function_call      // 38,
       );
 
   public:

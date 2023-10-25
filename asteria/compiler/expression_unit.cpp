@@ -33,6 +33,46 @@ do_generate_code_branch(const Compiler_Options& opts, const Global_Context& glob
 
 }  // namespace
 
+bool
+Expression_Unit::
+clobbers_alt_stack() const noexcept
+  {
+    switch(this->index()) {
+      case index_literal:
+      case index_local_reference:
+      case index_closure_function:
+      case index_operator_rpn:
+      case index_unnamed_array:
+      case index_unnamed_object:
+      case index_global_reference:
+      case index_check_argument:
+        return false;
+
+      case index_variadic_call:
+      case index_import_call:
+      case index_function_call:
+      case index_catch:
+        return true;
+
+      case index_branch: {
+        const auto& altr = this->m_stor.as<S_branch>();
+
+        for(const auto& unit : altr.branch_true)
+          if(unit.clobbers_alt_stack())
+            return true;
+
+        for(const auto& unit : altr.branch_false)
+          if(unit.clobbers_alt_stack())
+            return true;
+
+        return false;
+      }
+
+      default:
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+    }
+  }
+
 cow_vector<AIR_Node>&
 Expression_Unit::
 generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
@@ -180,13 +220,41 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_function_call: {
         const auto& altr = this->m_stor.as<S_function_call>();
 
+        // Check whether PTC is disabled.
+        auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
+
+        if(opts.optimization_level >= 1) {
+          // Try optimizing.
+          // https://github.com/lhmouse/asteria/issues/136
+          bool alt_function_call = true;
+
+          for(const auto& arg : altr.args)
+            for(const auto& unit : arg.units)
+              if(unit.clobbers_alt_stack()) {
+                alt_function_call = false;
+                break;
+              }
+
+          if(alt_function_call) {
+            // Evaluate argumetns on `alt_stack` directly.
+            AIR_Node::S_alt_clear_stack xstart = { };
+            code.emplace_back(::std::move(xstart));
+
+            for(const auto& arg : altr.args)
+              for(const auto& unit : arg.units)
+                unit.generate_code(code, opts, global, ctx, ptc_aware_none);
+
+            // Take alternative approach.
+            AIR_Node::S_alt_function_call xnode = { altr.sloc, rptc };
+            code.emplace_back(::std::move(xnode));
+            return code;
+          }
+        }
+
         // Arguments can be evaluated directly on the stack.
         for(const auto& arg : altr.args)
           for(const auto& unit : arg.units)
             unit.generate_code(code, opts, global, ctx, ptc_aware_none);
-
-        // Check whether PTC is disabled.
-        auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
         // Encode arguments.
         AIR_Node::S_function_call xnode = { altr.sloc, (uint32_t) altr.args.size(), rptc };
