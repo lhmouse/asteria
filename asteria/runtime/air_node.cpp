@@ -172,13 +172,8 @@ do_pop_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t co
   {
     ROCKET_ASSERT(count <= stack.size());
     alt_stack.clear();
-
     for(uint32_t k = 0;  k != count;  ++k)
-      alt_stack.push();
-
-    for(uint32_t k = 0;  k != count;  ++k)
-      alt_stack.mut_top(k) = ::std::move(stack.mut_top(k));
-
+      alt_stack.push() = ::std::move(stack.mut_top(count - 1 - k));
     stack.pop(count);
   }
 
@@ -1714,10 +1709,9 @@ solidify(AVMC_Queue& queue) const
             // Instantiate the function.
             AIR_Optimizer optmz(sp.opts);
             optmz.rebind(&ctx, sp.params, sp.code_body);
-            auto target = optmz.create_function(sloc, sp.func);
 
             // Push the function as a temporary value.
-            ctx.stack().push().set_temporary(::std::move(target));
+            ctx.stack().push().set_temporary(optmz.create_function(sloc, sp.func));
             return air_status_next;
           }
 
@@ -1803,28 +1797,26 @@ solidify(AVMC_Queue& queue) const
             const auto& up = head->uparam;
             const auto& sloc = head->pv_meta->sloc;
 
-            // Pop arguments off the stack from right to left.
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
-            auto& alt_stack = ctx.alt_stack();
-            auto& stack = ctx.stack();
-            do_pop_arguments(alt_stack, stack, up.u2345);
+            do_pop_arguments(ctx.alt_stack(), ctx.stack(), up.u2345);
 
-            // Copy the target, which shall be of type `function`.
-            auto val = stack.top().dereference_readonly();
-            if(val.is_null())
+            // Get the target function.
+            const auto& target_val = ctx.stack().top().dereference_readonly();
+            if(target_val.is_null())
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Function not found");
 
-            if(!val.is_function())
+            if(target_val.type() != type_function)
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Attempt to call a non-function (value `$1`)", val);
+                       "Attempt to call a non-function (value `$1`)", target_val);
 
-            auto& self = stack.mut_top().pop_modifier();
-            stack.clear_red_zone();
+            auto target = target_val.as_function();
+            auto& self = ctx.stack().mut_top().pop_modifier();  // invalidates `target_val`
+            ctx.stack().clear_red_zone();
             return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
-                                        val.as_function(), ::std::move(alt_stack));
+                                        target, ::std::move(ctx.alt_stack()));
           }
 
           // Uparam
@@ -3484,82 +3476,75 @@ solidify(AVMC_Queue& queue) const
             const auto& up = head->uparam;
             const auto& sloc = head->pv_meta->sloc;
 
-            // Get the argument generator.
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
-            auto& alt_stack = ctx.alt_stack();
-            auto& stack = ctx.stack();
-            auto val = stack.top().dereference_readonly();
-
-            if(val.is_null()) {
+            auto vagen_val = ctx.stack().top().dereference_readonly();
+            if(vagen_val.type() == type_null) {
               // There is no argument.
-              alt_stack.clear();
-              stack.pop();
+              ctx.alt_stack().clear();
+              ctx.stack().pop();
             }
-            else if(val.is_array()) {
-              const auto& arr = val.as_array();
-
-              // Push all arguments as temporaries from left to right.
-              alt_stack.clear();
-              stack.pop();
-
-              for(size_t k = 0;  k != arr.size();  ++k)
-                alt_stack.push().set_temporary(arr.at(k));
+            else if(vagen_val.type() == type_array) {
+              // Arguments are temporary values.
+              ctx.alt_stack().clear();
+              for(const auto& val : vagen_val.as_array())
+                ctx.alt_stack().push().set_temporary(val);
+              ctx.stack().pop();
             }
-            else if(val.is_function()) {
-              const auto& gfunc = val.as_function();
+            else if(vagen_val.type() == type_function) {
+              // Invoke the generator with no argument to get the number of
+              // variadic arguments to generate. This destroys its `this`
+              // reference so we have to stash it first.
+              auto vagen_self = ctx.stack().mut_top().pop_modifier();
+              ctx.alt_stack().clear();
+              do_invoke_maybe_tail(ctx.stack().mut_top(), ctx.global(), ptc_aware_none, sloc,
+                                   vagen_val.as_function(), ::std::move(ctx.alt_stack()));
+              auto vacount = ctx.stack().top().dereference_readonly();
+              ctx.stack().pop();
 
-              // Pass an empty argument stack to get the number of arguments to
-              // generate. This destroys the `this` reference so we have to stash
-              // it first.
-              auto gself = stack.mut_top().pop_modifier();
-              alt_stack.clear();
-              do_invoke_maybe_tail(stack.mut_top(), ctx.global(), ptc_aware_none, sloc,
-                                   gfunc, ::std::move(alt_stack));
-              const auto gnargs = stack.top().dereference_readonly();
-              stack.pop();
-
-              if(!gnargs.is_integer())
+              if(vacount.type() != type_integer)
                 throw Runtime_Error(Runtime_Error::M_format(),
-                         "Variadic argument count was not valid (value `$1`)", gnargs);
+                         "Variadic argument count was not an integer (value `$1`)", vacount);
 
-              if(gnargs.as_integer() < 0)
+              if((vacount.as_integer() < 0) || (vacount.as_integer() > INT_MAX))
                 throw Runtime_Error(Runtime_Error::M_format(),
-                         "Variadic argument count was negative (value `$1`)", gnargs);
+                         "Variadic argument count was not valid (value `$1`)", vacount);
 
-              for(V_integer k = 0;  k != gnargs.as_integer();  ++k) {
-                // Call the argument generator with the variadic argument index as
-                // its sole argument. The `this` reference is copied from the very
-                // first call.
-                stack.push() = gself;
-                alt_stack.clear();
-                alt_stack.push().set_temporary(k);
-                do_invoke_maybe_tail(stack.mut_top(), ctx.global(), ptc_aware_none, sloc,
-                                     gfunc, ::std::move(alt_stack));
-                stack.top().dereference_readonly();
+              // Generate arguments into `stack`.
+              uint32_t count = (uint32_t) vacount.as_integer();
+              for(uint32_t k = 0;  k != count;  ++k)
+                ctx.stack().push() = vagen_self;
+
+              for(uint32_t k = 0;  k != count;  ++k) {
+                ctx.alt_stack().clear();
+                ctx.alt_stack().push().set_temporary(V_integer(k));
+                do_invoke_maybe_tail(ctx.stack().mut_top(count - 1 - k), ctx.global(), ptc_aware_none,
+                                     sloc, vagen_val.as_function(), ::std::move(ctx.alt_stack()));
+                ctx.stack().top(count - 1 - k).dereference_readonly();
               }
 
-              do_pop_arguments(alt_stack, stack, static_cast<uint32_t>(gnargs.as_integer()));
+              do_pop_arguments(ctx.alt_stack(), ctx.stack(), count);
             }
             else
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Invalid argument generator (value `$1`)", val);
+                       "Invalid variadic argument generator (value `$1`)", vagen_val);
 
-            // Copy the target, which shall be of type `function`.
-            val = stack.top().dereference_readonly();
-            if(val.is_null())
+            // Get the target function.
+            const auto& target_val = ctx.stack().top().dereference_readonly();
+            if(target_val.is_null())
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Function not found");
 
-            else if(!val.is_function())
+            if(target_val.type() != type_function)
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Attempt to call a non-function (value `$1`)", val);
+                       "Attempt to call a non-function (value `$1`)", target_val);
 
-            auto& self = stack.mut_top().pop_modifier();
-            stack.clear_red_zone();
+            auto target = target_val.as_function();
+            auto& self = ctx.stack().mut_top().pop_modifier();  // invalidates `target_val`
+            ctx.stack().clear_red_zone();
             return do_invoke_maybe_tail(self, ctx.global(), static_cast<PTC_Aware>(up.u0), sloc,
-                                        val.as_function(), ::std::move(alt_stack));
+                                        target, ::std::move(ctx.alt_stack()));
           }
 
           // Uparam
@@ -3646,65 +3631,56 @@ solidify(AVMC_Queue& queue) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
 
-            // Pop arguments off the stack from right to left.
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
-            auto& alt_stack = ctx.alt_stack();
-            auto& stack = ctx.stack();
             ROCKET_ASSERT(up.u2345 != 0);
-            do_pop_arguments(alt_stack, stack, up.u2345 - 1);
+            do_pop_arguments(ctx.alt_stack(), ctx.stack(), up.u2345 - 1U);
 
-            // Get the path of the file to import, which shall be a string.
-            auto val = stack.top().dereference_readonly();
-            if(!val.is_string())
+            // Get the path to import.
+            const auto& path_val = ctx.stack().top().dereference_readonly();
+            if(path_val.type() != type_string)
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Path was not a string (value `$1`)", val);
+                       "Path was not a string (value `$1`)", path_val);
 
-            auto path = ::std::move(val.mut_string());
-            if(path.empty())
+            if(path_val.as_string() == "")
+              throw Runtime_Error(Runtime_Error::M_format(), "Path was empty");
+
+            // If the path is relative, resolve it to an absolute one.
+            cow_string abs_path = path_val.as_string();
+            const auto& src_file = sloc.file();
+            if((abs_path[0] != '/') && (src_file[0] == '/'))
+              abs_path.insert(0, src_file, 0, src_file.rfind('/') + 1);
+
+            unique_ptr<char, void (void*)> realpathp(::realpath(abs_path.safe_c_str(), nullptr), ::free);
+            if(!realpathp)
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Path was empty");
+                       "Could not open script file '$1': ${errno:full}", path_val);
 
-            if(path[0] != '/') {
-              // Convert this relative path to an absolute one.
-              size_t slash = sloc.file().rfind('/');
-              if(slash != cow_string::npos)
-                path.insert(0, sloc.file(), 0, slash + 1);
-              else
-                path.insert(0, "/");
-            }
-
-            unique_ptr<char, void (void*)> abspath(::free);
-            abspath.reset(::realpath(path.safe_c_str(), nullptr));
-            if(!abspath)
-              throw Runtime_Error(Runtime_Error::M_format(),
-                       "Could not open script file '$1': ${errno:full}", path);
-
-            // Parse the script file.
-            path.assign(abspath);
+            // Load and parse the file.
             Module_Loader::Unique_Stream istrm;
-            istrm.reset(ctx.global().module_loader(), path.c_str());
+            istrm.reset(ctx.global().module_loader(), realpathp.get());
+            abs_path.assign(realpathp.get());
+            Source_Location script_sloc(abs_path, 0, 0);
 
             Token_Stream tstrm(sp.opts);
-            tstrm.reload(path, 1, ::std::move(istrm.get()));
+            tstrm.reload(abs_path, 1, ::std::move(istrm.get()));
 
             Statement_Sequence stmtq(sp.opts);
             stmtq.reload(::std::move(tstrm));
 
-            // Instantiate the function.
+            // Instantiate the script as a variadic function.
             cow_vector<phsh_string> script_params;
             script_params.emplace_back(sref("..."));
+
             AIR_Optimizer optmz(sp.opts);
             optmz.reload(nullptr, script_params, ctx.global(), stmtq);
-            auto target = optmz.create_function(Source_Location(path, 0, 0),
-                                                sref("[file scope]"));
 
-            // Invoke the script. `this` is `null`.
-            auto& self = stack.mut_top().set_temporary(nullopt);
-            stack.clear_red_zone();
+            auto target = optmz.create_function(script_sloc, sref("[file scope]"));
+            auto& self = ctx.stack().mut_top().set_temporary(nullopt);
+            ctx.stack().clear_red_zone();
             return do_invoke_maybe_tail(self, ctx.global(), ptc_aware_none, sloc,
-                                        target, ::std::move(alt_stack));
+                                        target, ::std::move(ctx.alt_stack()));
           }
 
           // Uparam
