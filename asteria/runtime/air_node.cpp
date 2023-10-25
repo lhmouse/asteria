@@ -3459,15 +3459,14 @@ solidify(AVMC_Queue& queue) const
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
+            ctx.alt_stack().clear();
             auto vagen_val = ctx.stack().top().dereference_readonly();
             if(vagen_val.type() == type_null) {
               // There is no argument.
-              ctx.alt_stack().clear();
               ctx.stack().pop();
             }
             else if(vagen_val.type() == type_array) {
               // Arguments are temporary values.
-              ctx.alt_stack().clear();
               for(const auto& val : vagen_val.as_array())
                 ctx.alt_stack().push().set_temporary(val);
               ctx.stack().pop();
@@ -3477,7 +3476,6 @@ solidify(AVMC_Queue& queue) const
               // variadic arguments to generate. This destroys its `this`
               // reference so we have to stash it first.
               auto vagen_self = ctx.stack().mut_top().pop_modifier();
-              ctx.alt_stack().clear();
               do_invoke_maybe_tail(ctx.stack().mut_top(), ctx.global(), ptc_aware_none, sloc,
                                    vagen_val.as_function(), ::std::move(ctx.alt_stack()));
               auto vacount = ctx.stack().top().dereference_readonly();
