@@ -22,7 +22,7 @@ class AVMC_Queue
 
   private:
     Header* m_bptr = nullptr;  // beginning of storage
-    uint32_t m_used = 0;       // used storage in number of `Header`s [!]
+    uint32_t m_einit = 0;      // used storage in number of `Header`s [!]
     uint32_t m_estor = 0;      // allocated storage in number of `Header`s [!]
 
   public:
@@ -46,8 +46,8 @@ class AVMC_Queue
     swap(AVMC_Queue& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
+        ::std::swap(this->m_einit, other.m_einit);
         ::std::swap(this->m_estor, other.m_estor);
-        ::std::swap(this->m_used, other.m_used);
         return *this;
       }
 
@@ -67,7 +67,7 @@ class AVMC_Queue
 
     bool
     empty() const noexcept
-      { return this->m_used == 0;  }
+      { return this->m_einit == 0;  }
 
     void
     clear() noexcept;

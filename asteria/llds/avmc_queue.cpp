@@ -16,13 +16,13 @@ do_reallocate(uint32_t estor)
     if(estor >= 0x7FFE0000U / sizeof(Header))
       throw ::std::bad_alloc();
 
-    ROCKET_ASSERT(estor >= this->m_used);
+    ROCKET_ASSERT(estor >= this->m_einit);
     auto bptr = (Header*) ::realloc((void*) this->m_bptr, estor * sizeof(Header));
     if(!bptr)
       throw ::std::bad_alloc();
 
 #ifdef ROCKET_DEBUG
-    ::memset((void*) (bptr + this->m_used), 0xC3, (estor - this->m_used) * sizeof(Header));
+    ::memset((void*) (bptr + this->m_einit), 0xC3, (estor - this->m_einit) * sizeof(Header));
 #endif
 
     this->m_bptr = bptr;
@@ -50,10 +50,10 @@ void
 AVMC_Queue::
 clear() noexcept
   {
-    auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
-      auto qnode = next;
-      next += 1U + qnode->nheaders;
+    uint32_t offset = 0;
+    while(ROCKET_EXPECT(offset != this->m_einit)) {
+      auto qnode = this->m_bptr + offset;
+      offset += 1U + qnode->nheaders;
 
       if(qnode->meta_ver == 0)
         continue;
@@ -68,7 +68,7 @@ clear() noexcept
 #ifdef ROCKET_DEBUG
     ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
 #endif
-    this->m_used = 0;
+    this->m_einit = 0;
   }
 
 details_avmc_queue::Header*
@@ -104,19 +104,19 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     // Round the size up to the nearest number of headers. This shall not result
     // in overflows.
     uint32_t nheaders_p1 = (uint32_t) ((sizeof(Header) * 2U - 1U + sparam_size) / sizeof(Header));
-    if(this->m_estor - this->m_used < nheaders_p1) {
+    if(this->m_estor - this->m_einit < nheaders_p1) {
       // Extend the storage.
-      uint32_t size_to_reserve = this->m_used + nheaders_p1;
+      uint32_t size_to_reserve = this->m_einit + nheaders_p1;
 #ifndef ROCKET_DEBUG
-      size_to_reserve |= this->m_used * 3;
+      size_to_reserve |= this->m_einit * 3;
 #endif
       this->do_reallocate(size_to_reserve);
-      ROCKET_ASSERT(this->m_estor - this->m_used >= nheaders_p1);
+      ROCKET_ASSERT(this->m_estor - this->m_einit >= nheaders_p1);
     }
 
     // Append a new node. `uparam` is overlapped with `nheaders` so it must
     // be assigned first. The others can occur in any order.
-    auto qnode = this->m_bptr + this->m_used;
+    auto qnode = this->m_bptr + this->m_einit;
     qnode->uparam = uparam;
     qnode->nheaders = (uint8_t) (nheaders_p1 - 1U);
 
@@ -131,7 +131,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
       qnode->pv_meta = meta.release();
 
     qnode->meta_ver = meta_ver;
-    this->m_used += 1U + qnode->nheaders;
+    this->m_einit += 1U + qnode->nheaders;
     return qnode;
   }
 
@@ -146,10 +146,10 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
-    auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
-      auto qnode = next;
-      next += 1U + qnode->nheaders;
+    uint32_t offset = 0;
+    while(ROCKET_EXPECT(offset != this->m_einit)) {
+      auto qnode = this->m_bptr + offset;
+      offset += 1U + qnode->nheaders;
       AIR_Status status;
 
       switch(qnode->meta_ver) {
@@ -192,10 +192,10 @@ void
 AVMC_Queue::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    auto next = this->m_bptr;
-    while(ROCKET_EXPECT(next != this->m_bptr + this->m_used)) {
-      auto qnode = next;
-      next += 1U + qnode->nheaders;
+    uint32_t offset = 0;
+    while(ROCKET_EXPECT(offset != this->m_einit)) {
+      auto qnode = this->m_bptr + offset;
+      offset += 1U + qnode->nheaders;
 
       if(qnode->meta_ver == 0)
         continue;
