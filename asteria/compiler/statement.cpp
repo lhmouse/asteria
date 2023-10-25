@@ -276,7 +276,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
-        cow_vector<AIR_Node::S_switch_statement::Clause> clauses;
+        cow_vector<AIR_Node::switch_clause> clauses;
         for(const auto& clause : altr.clauses) {
           auto& r = clauses.emplace_back();
 

@@ -41,16 +41,16 @@ class AIR_Node
         cow_vector<AIR_Node> code_false;
       };
 
+    struct switch_clause
+      {
+        cow_vector<AIR_Node> code_label;
+        cow_vector<AIR_Node> code_body;
+        cow_vector<phsh_string> names_added;
+      };
+
     struct S_switch_statement
       {
-        struct Clause
-          {
-            cow_vector<AIR_Node> code_label;
-            cow_vector<AIR_Node> code_body;
-            cow_vector<phsh_string> names_added;
-          };
-
-        cow_vector<Clause> clauses;
+        cow_vector<switch_clause> clauses;
       };
 
     struct S_do_while_statement

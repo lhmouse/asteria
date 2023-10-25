@@ -777,7 +777,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, Scope_Flags scfl)
                 "[unmatched `(` at '$1']", op_sloc);
 
     // Parse the block by hand.
-    cow_vector<Statement::S_switch::Clause> clauses;
+    cow_vector<Statement::switch_clause> clauses;
 
     op_sloc = tstrm.next_sloc();
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });

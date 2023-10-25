@@ -46,16 +46,16 @@ class Statement
         S_block branch_false;
       };
 
+    struct switch_clause
+      {
+        S_expression label;
+        S_block body;
+      };
+
     struct S_switch
       {
-        struct Clause
-          {
-            S_expression label;
-            S_block body;
-          };
-
         S_expression ctrl;
-        cow_vector<Clause> clauses;
+        cow_vector<switch_clause> clauses;
       };
 
     struct S_do_while

@@ -829,15 +829,15 @@ solidify(AVMC_Queue& queue) const
       case index_switch_statement: {
         const auto& altr = this->m_stor.as<S_switch_statement>();
 
+        struct Clause
+          {
+            AVMC_Queue queue_label;
+            AVMC_Queue queue_body;
+            cow_vector<phsh_string> names_added;
+          };
+
         struct Sparam
           {
-            struct Clause
-              {
-                AVMC_Queue queue_label;
-                AVMC_Queue queue_body;
-                cow_vector<phsh_string> names_added;
-              };
-
             cow_vector<Clause> clauses;
           };
 
