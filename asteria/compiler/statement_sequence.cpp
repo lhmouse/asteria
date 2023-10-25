@@ -362,7 +362,7 @@ do_accept_expression_as_rvalue(cow_vector<Expression_Unit>& units, Token_Stream&
     if(!do_accept_expression(units, tstrm))
       return false;
 
-    Expression_Unit::S_argument_finish xunit = { ::std::move(sloc), false };
+    Expression_Unit::S_check_argument xunit = { ::std::move(sloc), false };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -1989,7 +1989,9 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    if(!do_accept_expression(units, tstrm))
+    cow_vector<Expression_Unit::argument> args;
+    args.append(2);
+    if(!do_accept_expression(args.mut(0).units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -1998,7 +2000,7 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_comma_expected, tstrm.next_sloc());
 
-    if(!do_accept_expression(units, tstrm))
+    if(!do_accept_expression(args.mut(1).units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2008,7 +2010,7 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    Expression_Unit::S_variadic_call xunit = { ::std::move(sloc) };
+    Expression_Unit::S_variadic_call xunit = { ::std::move(sloc), ::std::move(args) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -2029,13 +2031,14 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    uint32_t nargs = 0;
+    cow_vector<Expression_Unit::argument> args;
     bool comma_allowed = false;
 
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
       auto refsp = do_accept_reference_specifier_opt(tstrm);
-      bool succ = do_accept_expression(units, tstrm);
+      Expression_Unit::argument arg;
+      bool succ = do_accept_expression(arg.units, tstrm);
       if(refsp && !succ)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
@@ -2043,13 +2046,9 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
       if(!refsp && !succ)
         break;
 
-      Expression_Unit::S_argument_finish xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
-      units.emplace_back(::std::move(xunit));
-
-      nargs += 1;
-      if(nargs >= 0x100000)
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_too_many_elements, tstrm.next_sloc());
+      Expression_Unit::S_check_argument xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
+      arg.units.emplace_back(::std::move(xunit));
+      args.emplace_back(::std::move(arg));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -2058,7 +2057,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
         break;
     }
 
-    if(nargs < 1)
+    if(args.size() < 1)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_argument_expected, tstrm.next_sloc());
 
@@ -2070,7 +2069,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
                 tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    Expression_Unit::S_import_call xunit = { ::std::move(sloc), nargs };
+    Expression_Unit::S_import_call xunit = { ::std::move(sloc), ::std::move(args) };
     units.emplace_back(::std::move(xunit));
     return true;
   }
@@ -2182,13 +2181,14 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
     if(!kpunct)
       return false;
 
-    uint32_t nargs = 0;
+    cow_vector<Expression_Unit::argument> args;
     bool comma_allowed = false;
 
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
       auto refsp = do_accept_reference_specifier_opt(tstrm);
-      bool succ = do_accept_expression(units, tstrm);
+      Expression_Unit::argument arg;
+      bool succ = do_accept_expression(arg.units, tstrm);
       if(refsp && !succ)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
@@ -2196,13 +2196,9 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
       if(!refsp && !succ)
         break;
 
-      Expression_Unit::S_argument_finish xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
-      units.emplace_back(::std::move(xunit));
-
-      nargs += 1;
-      if(nargs >= 0x100000)
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_too_many_elements, tstrm.next_sloc());
+      Expression_Unit::S_check_argument xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
+      arg.units.emplace_back(::std::move(xunit));
+      args.emplace_back(::std::move(arg));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -2219,7 +2215,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
                 tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", sloc);
 
-    Expression_Unit::S_function_call xunit = { ::std::move(sloc), nargs };
+    Expression_Unit::S_function_call xunit = { ::std::move(sloc), ::std::move(args) };
     units.emplace_back(::std::move(xunit));
     return true;
   }

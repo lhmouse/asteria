@@ -180,11 +180,16 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_function_call: {
         const auto& altr = this->m_stor.as<S_function_call>();
 
+        // Arguments can be evaluated directly on the stack.
+        for(const auto& arg : altr.args)
+          for(const auto& unit : arg.units)
+            unit.generate_code(code, opts, global, ctx, ptc_aware_none);
+
         // Check whether PTC is disabled.
         auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.nargs, rptc };
+        AIR_Node::S_function_call xnode = { altr.sloc, (uint32_t) altr.args.size(), rptc };
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -228,6 +233,11 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_variadic_call: {
         const auto& altr = this->m_stor.as<S_variadic_call>();
 
+        // Arguments can be evaluated directly on the stack.
+        for(const auto& arg : altr.args)
+          for(const auto& unit : arg.units)
+            unit.generate_code(code, opts, global, ctx, ptc_aware_none);
+
         // Check whether PTC is disabled.
         auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
@@ -237,8 +247,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         return code;
       }
 
-      case index_argument_finish: {
-        const auto& altr = this->m_stor.as<S_argument_finish>();
+      case index_check_argument: {
+        const auto& altr = this->m_stor.as<S_check_argument>();
 
         // Encode arguments.
         AIR_Node::S_check_argument xnode = { altr.sloc, altr.by_ref };
@@ -249,8 +259,13 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_import_call: {
         const auto& altr = this->m_stor.as<S_import_call>();
 
+        // Arguments can be evaluated directly on the stack.
+        for(const auto& arg : altr.args)
+          for(const auto& unit : arg.units)
+            unit.generate_code(code, opts, global, ctx, ptc_aware_none);
+
         // Encode arguments.
-        AIR_Node::S_import_call xnode = { opts, altr.sloc, altr.nargs };
+        AIR_Node::S_import_call xnode = { opts, altr.sloc, (uint32_t) altr.args.size() };
         code.emplace_back(::std::move(xnode));
         return code;
       }

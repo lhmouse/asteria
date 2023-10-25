@@ -40,10 +40,15 @@ class Expression_Unit
         bool coalescence;
       };
 
+    struct argument
+      {
+        cow_vector<Expression_Unit> units;
+      };
+
     struct S_function_call
       {
         Source_Location sloc;
-        uint32_t nargs;
+        cow_vector<argument> args;
       };
 
     struct S_operator_rpn
@@ -74,9 +79,10 @@ class Expression_Unit
     struct S_variadic_call
       {
         Source_Location sloc;
+        cow_vector<argument> args;
       };
 
-    struct S_argument_finish
+    struct S_check_argument
       {
         Source_Location sloc;
         bool by_ref;
@@ -85,7 +91,7 @@ class Expression_Unit
     struct S_import_call
       {
         Source_Location sloc;
-        uint32_t nargs;
+        cow_vector<argument> args;
       };
 
     struct S_catch
@@ -105,7 +111,7 @@ class Expression_Unit
         index_unnamed_object    =  7,
         index_global_reference  =  8,
         index_variadic_call     =  9,
-        index_argument_finish   = 10,
+        index_check_argument    = 10,
         index_import_call       = 11,
         index_catch             = 12,
       };
@@ -123,7 +129,7 @@ class Expression_Unit
         , S_unnamed_object    //  7
         , S_global_reference  //  8
         , S_variadic_call     //  9
-        , S_argument_finish   // 10
+        , S_check_argument    // 10
         , S_import_call       // 11
         , S_catch             // 12
       );
