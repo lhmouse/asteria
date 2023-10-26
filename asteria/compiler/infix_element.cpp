@@ -105,10 +105,16 @@ extract(cow_vector<Expression_Unit>& units)
       case index_ternary: {
         auto& altr = this->m_stor.mut<index_ternary>();
 
-        // Construct a branch unit from both branches, then append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true),
-                                            ::std::move(altr.branch_false), altr.assign,
-                                            false };
+        // Construct two branch units from the TRUE and FALSE branches.
+        cow_vector<Expression_Unit::branch> branches;
+        branches.append(2);
+        branches.mut(0).type = Expression_Unit::branch_type::branch_type_true;
+        branches.mut(0).units = ::std::move(altr.branch_true);
+        branches.mut(1).type = Expression_Unit::branch_type::branch_type_false;
+        branches.mut(1).units = ::std::move(altr.branch_false);
+
+        // Append them to `units`.
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
         units.emplace_back(::std::move(xunit));
         return;
       }
@@ -116,10 +122,14 @@ extract(cow_vector<Expression_Unit>& units)
       case index_logical_and: {
         auto& altr = this->m_stor.mut<index_logical_and>();
 
-        // Construct a branch unit from the TRUE branch and an empty FALSE branch, then
-        // append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_true), { },
-                                            altr.assign, false };
+        // Construct a branch unit from the TRUE branch.
+        cow_vector<Expression_Unit::branch> branches;
+        branches.append(1);
+        branches.mut(0).type = Expression_Unit::branch_type::branch_type_true;
+        branches.mut(0).units = ::std::move(altr.branch_true);
+
+        // Append it to `units`.
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
         units.emplace_back(::std::move(xunit));
         return;
       }
@@ -127,10 +137,14 @@ extract(cow_vector<Expression_Unit>& units)
       case index_logical_or: {
         auto& altr = this->m_stor.mut<index_logical_or>();
 
-        // Construct a branch unit from an empty TRUE branch and the FALSE branch, then
-        // append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, { }, ::std::move(altr.branch_false),
-                                            altr.assign, false };
+        // Construct a branch unit from the FALSE branch.
+        cow_vector<Expression_Unit::branch> branches;
+        branches.append(1);
+        branches.mut(0).type = Expression_Unit::branch_type::branch_type_false;
+        branches.mut(0).units = ::std::move(altr.branch_false);
+
+        // Append it to `units`.
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
         units.emplace_back(::std::move(xunit));
         return;
       }
@@ -138,9 +152,14 @@ extract(cow_vector<Expression_Unit>& units)
       case index_coalescence: {
         auto& altr = this->m_stor.mut<index_coalescence>();
 
-        // Construct a branch unit from the NULL branch, then append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(altr.branch_null), { },
-                                            altr.assign, true };
+        // Construct a branch unit from the NULL branch.
+        cow_vector<Expression_Unit::branch> branches;
+        branches.append(1);
+        branches.mut(0).type = Expression_Unit::branch_type::branch_type_null;
+        branches.mut(0).units = ::std::move(altr.branch_null);
+
+        // Append it to `units`.
+        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
         units.emplace_back(::std::move(xunit));
         return;
       }

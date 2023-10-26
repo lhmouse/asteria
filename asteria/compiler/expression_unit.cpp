@@ -12,26 +12,6 @@
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
 namespace asteria {
-namespace {
-
-cow_vector<AIR_Node>
-do_generate_code_branch(const Compiler_Options& opts, const Global_Context& global,
-                        Analytic_Context& ctx, PTC_Aware ptc,
-                        const cow_vector<Expression_Unit>& units)
-  {
-    cow_vector<AIR_Node> code;
-    if(units.empty())
-      return code;
-
-    // Expression units other than the last one cannot be PTC'd.
-    for(size_t i = 0;  i + 1 < units.size();  ++i)
-      units.at(i).generate_code(code, opts, global, ctx, ptc_aware_none);
-
-    units.back().generate_code(code, opts, global, ctx, ptc);
-    return code;
-  }
-
-}  // namespace
 
 bool
 Expression_Unit::
@@ -57,13 +37,10 @@ clobbers_alt_stack() const noexcept
       case index_branch: {
         const auto& altr = this->m_stor.as<S_branch>();
 
-        for(const auto& unit : altr.branch_true)
-          if(unit.clobbers_alt_stack())
-            return true;
-
-        for(const auto& unit : altr.branch_false)
-          if(unit.clobbers_alt_stack())
-            return true;
+        for(const auto& br : altr.branches)
+          for(const auto& unit : br.units)
+            if(unit.clobbers_alt_stack())
+              return true;
 
         return false;
       }
@@ -202,17 +179,35 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_branch: {
         const auto& altr = this->m_stor.as<S_branch>();
 
-        // Both branches may be PTC'd unless this is a compound assignment operation.
-        auto rptc = altr.assign ? ptc_aware_none : ptc;
+        // Generate code for branches.
+        array<cow_vector<AIR_Node>, 2> code_branches;
+        for(size_t k = 0;  k < altr.branches.size();  ++k)
+          for(size_t i = 0;  i < altr.branches.at(k).units.size();  ++i)
+            altr.branches.at(k).units.at(i).generate_code(code_branches.mut(k), opts, global, ctx,
+                                    ((i != altr.branches.at(k).units.size() - 1) || altr.assign)
+                                      ? ptc_aware_none : ptc);
 
-        // Generate code for both branches.
-        auto code_true = do_generate_code_branch(opts, global, ctx, rptc, altr.branch_true);
-        auto code_false = do_generate_code_branch(opts, global, ctx, rptc, altr.branch_false);
+        if((altr.branches.size() == 1) && (altr.branches.at(0).type == branch_type_null)) {
+          // Encode a coalescence node.
+          AIR_Node::S_coalesce_expression xnode = { altr.sloc, ::std::move(code_branches.mut(0)),
+                                                    altr.assign };
+          code.emplace_back(::std::move(xnode));
+          return code;
+        }
 
-        // Encode arguments.
-        AIR_Node::S_branch_expression xnode = { altr.sloc, ::std::move(code_true),
-                                                ::std::move(code_false), altr.assign,
-                                                altr.coalescence };
+        // Encode a conditional branch node.
+        AIR_Node::S_branch_expression xnode;
+        xnode.sloc = altr.sloc;
+        xnode.assign = altr.assign;
+
+        for(size_t k = 0;  k < altr.branches.size();  ++k)
+          if(altr.branches.at(k).type == branch_type_true)
+            xnode.code_true = ::std::move(code_branches.mut(k));
+          else if(altr.branches.at(k).type == branch_type_false)
+            xnode.code_false = ::std::move(code_branches.mut(k));
+          else
+            ASTERIA_TERMINATE(("Invalid branch type `$1`"), altr.branches.at(k).type);
+
         code.emplace_back(::std::move(xnode));
         return code;
       }
@@ -340,7 +335,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // Generate code for the operand, which shall be evaluated on a separate
         // context and shall not be PTC'd.
-        auto code_op = do_generate_code_branch(opts, global, ctx, ptc_aware_none, altr.operand);
+        cow_vector<AIR_Node> code_op;
+        for(const auto& unit : altr.operand)
+          unit.generate_code(code_op, opts, global, ctx, ptc_aware_none);
 
         // Encode arguments.
         AIR_Node::S_catch_expression xnode = { ::std::move(code_op) };

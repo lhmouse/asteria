@@ -148,7 +148,6 @@ class AIR_Node
         cow_vector<AIR_Node> code_true;
         cow_vector<AIR_Node> code_false;
         bool assign;
-        bool coalescence;
       };
 
     struct S_function_call
@@ -266,6 +265,13 @@ class AIR_Node
         PTC_Aware ptc;
       };
 
+    struct S_coalesce_expression
+      {
+        Source_Location sloc;
+        cow_vector<AIR_Node> code_null;
+        bool assign;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -307,6 +313,7 @@ class AIR_Node
         index_push_constant_int48    = 36,
         index_alt_clear_stack        = 37,
         index_alt_function_call      = 38,
+        index_coalesce_expression    = 39,
       };
 
   private:
@@ -351,6 +358,7 @@ class AIR_Node
         , S_push_constant_int48    // 36
         , S_alt_clear_stack        // 37,
         , S_alt_function_call      // 38,
+        , S_coalesce_expression    // 39,
       );
 
   public:

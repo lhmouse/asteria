@@ -31,13 +31,24 @@ class Expression_Unit
         cow_vector<Statement> body;
       };
 
+    enum branch_type : uint8_t
+      {
+        branch_type_false = 0,
+        branch_type_true  = 1,
+        branch_type_null  = 2,
+      };
+
+    struct branch
+      {
+        branch_type type;
+        cow_vector<Expression_Unit> units;
+      };
+
     struct S_branch
       {
         Source_Location sloc;
-        cow_vector<Expression_Unit> branch_true;
-        cow_vector<Expression_Unit> branch_false;
+        cow_vector<branch> branches;
         bool assign;
-        bool coalescence;
       };
 
     struct argument

@@ -206,7 +206,7 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
     // Duplicate elements, using binary exponential backoff.
     while(container.ssize() < rlen)
       container.append(container.begin(),
-          container.begin() + ::rocket::min(rlen - container.ssize(), container.ssize()));
+           container.begin() + ::rocket::min(rlen - container.ssize(), container.ssize()));
   }
 
 }  // namespace
@@ -474,6 +474,18 @@ rebind_opt(Abstract_Context& ctx) const
       case index_alt_function_call:
         return nullopt;
 
+      case index_coalesce_expression: {
+        const auto& altr = this->m_stor.as<S_coalesce_expression>();
+
+        // Rebind the null branch.
+        bool dirty = false;
+        S_coalesce_expression bound = altr;
+
+        do_rebind_nodes(dirty, bound.code_null, ctx);
+
+        return do_return_rebound_opt(dirty, ::std::move(bound));
+      }
+
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
     }
@@ -637,6 +649,14 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_alt_clear_stack:
       case index_alt_function_call:
         return;
+
+      case index_coalesce_expression: {
+        const auto& altr = this->m_stor.as<S_coalesce_expression>();
+
+        // Collect variables from the null branch.
+        do_collect_variables_for_each(staged, temp, altr.code_null);
+        return;
+      }
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
@@ -1733,7 +1753,6 @@ solidify(AVMC_Queue& queue) const
 
         Uparam up2;
         up2.b0 = altr.assign;
-        up2.b1 = altr.coalescence;
 
         struct Sparam
           {
@@ -1752,8 +1771,7 @@ solidify(AVMC_Queue& queue) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Read the condition and evaluate the corresponding subexpression.
-            return (up.b1 ? ctx.stack().top().dereference_readonly().is_null()
-                          : ctx.stack().top().dereference_readonly().test())
+            return ctx.stack().top().dereference_readonly().test()
                      ? do_evaluate_subexpression(ctx, up.b0, sp.queue_true)
                      : do_evaluate_subexpression(ctx, up.b0, sp.queue_false);
           }
@@ -3988,6 +4006,51 @@ solidify(AVMC_Queue& queue) const
 
           // Collector
           // (none)
+
+          // Symbols
+          , &(altr.sloc)
+        );
+        return;
+      }
+
+      case index_coalesce_expression: {
+        const auto& altr = this->m_stor.as<S_coalesce_expression>();
+
+        Uparam up2;
+        up2.b0 = altr.assign;
+
+        struct Sparam
+          {
+            AVMC_Queue queue_null;
+          };
+
+        Sparam sp2;
+        do_solidify_nodes(sp2.queue_null, altr.code_null);
+
+        queue.append(
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          {
+            const auto& up = head->uparam;
+            const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+
+            // Read the condition and evaluate the corresponding subexpression.
+            return ctx.stack().top().dereference_readonly().is_null()
+                     ? do_evaluate_subexpression(ctx, up.b0, sp.queue_null)
+                     : air_status_next;
+          }
+
+          // Uparam
+          , up2
+
+          // Sparam
+          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+
+          // Collector
+          , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
+          {
+            const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+            sp.queue_null.collect_variables(staged, temp);
+          }
 
           // Symbols
           , &(altr.sloc)
