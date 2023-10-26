@@ -50,10 +50,10 @@ void
 AVMC_Queue::
 clear() noexcept
   {
-    uint32_t offset = 0;
-    while(ROCKET_EXPECT(offset != this->m_einit)) {
-      auto qnode = this->m_bptr + offset;
-      offset += 1U + qnode->nheaders;
+    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
+    while(offset != 0) {
+      auto qnode = this->m_bptr + this->m_einit + offset;
+      offset += 1L + qnode->nheaders;
 
       if(qnode->meta_ver == 0)
         continue;
@@ -77,7 +77,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
        void* ctor_arg, Destructor* dtor_opt, Var_Getter* vget_opt,
        const Source_Location* sloc_opt)
   {
-    constexpr uint32_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1U;
+    constexpr uint32_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
     if(sparam_size > max_sparam_size)
       ASTERIA_THROW((
           "Invalid AVMC node size (`$1` > `$2`)"),
@@ -103,7 +103,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
 
     // Round the size up to the nearest number of headers. This shall not result
     // in overflows.
-    uint32_t nheaders_p1 = (uint32_t) ((sizeof(Header) * 2U - 1U + sparam_size) / sizeof(Header));
+    uint32_t nheaders_p1 = (uint32_t) ((sizeof(Header) * 2 - 1 + sparam_size) / sizeof(Header));
     if(this->m_estor - this->m_einit < nheaders_p1) {
       // Extend the storage.
       uint32_t size_to_reserve = this->m_einit + nheaders_p1;
@@ -118,7 +118,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     // be assigned first. The others can occur in any order.
     auto qnode = this->m_bptr + this->m_einit;
     qnode->uparam = uparam;
-    qnode->nheaders = (uint8_t) (nheaders_p1 - 1U);
+    qnode->nheaders = (uint8_t) (nheaders_p1 - 1);
 
     if(ctor_opt)
       ctor_opt(qnode, ctor_arg);
@@ -131,7 +131,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
       qnode->pv_meta = meta.release();
 
     qnode->meta_ver = meta_ver;
-    this->m_einit += 1U + qnode->nheaders;
+    this->m_einit += nheaders_p1;
     return qnode;
   }
 
@@ -146,12 +146,12 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
-    uint32_t offset = 0;
-    while(ROCKET_EXPECT(offset != this->m_einit)) {
-      auto qnode = this->m_bptr + offset;
-      offset += 1U + qnode->nheaders;
-      AIR_Status status;
+    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
+    while(offset != 0) {
+      auto qnode = this->m_bptr + this->m_einit + offset;
+      offset += 1L + qnode->nheaders;
 
+      AIR_Status status;
       switch(qnode->meta_ver) {
         case 0:
           // There is no metadata or symbols.
@@ -181,7 +181,6 @@ execute(Executive_Context& ctx) const
             throw except;
           }
       }
-
       if(status != air_status_next)
         return status;
     }
@@ -192,10 +191,10 @@ void
 AVMC_Queue::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    uint32_t offset = 0;
-    while(ROCKET_EXPECT(offset != this->m_einit)) {
-      auto qnode = this->m_bptr + offset;
-      offset += 1U + qnode->nheaders;
+    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
+    while(offset != 0) {
+      auto qnode = this->m_bptr + this->m_einit + offset;
+      offset += 1L + qnode->nheaders;
 
       if(qnode->meta_ver == 0)
         continue;
