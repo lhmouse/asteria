@@ -440,13 +440,12 @@ std_numeric_random(Global_Context& global, optV_real limit)
     if(limit) {
       switch(::std::fpclassify(*limit)) {
         case FP_ZERO:
-          ASTERIA_THROW((
-              "Random number limit shall not be zero"));
+          ASTERIA_THROW(("Random number limit was zero"));
 
         case FP_INFINITE:
         case FP_NAN:
           ASTERIA_THROW((
-              "Random number limit shall be finite (limit `$1`)"), *limit);
+              "Random number limit `$1` was not finite"), *limit);
 
         default:
           ratio *= *limit;

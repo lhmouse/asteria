@@ -587,11 +587,14 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
       ROCKET_ASSERT(*next == charT('$'));
       next ++;
       switch(*next) {
-        case charT('$'): {
+        case charT():
+          noadl::sprintf_and_throw<invalid_argument>(
+              "vformat: dangling `$` at end of template string");
+
+        case charT('$'):
           // literal `$`
           fmt.putc(charT('$'));
           break;
-        }
 
         case charT('0'):
         case charT('1'):
@@ -602,7 +605,8 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
         case charT('6'):
         case charT('7'):
         case charT('8'):
-        case charT('9'): {
+        case charT('9'):
+        {
           // simple placeholder
           uint32_t iarg = static_cast<unsigned char>(*next - charT('0'));
           if(iarg == 0) {
@@ -621,7 +625,8 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
           break;
         }
 
-        case charT('{'): {
+        case charT('{'):
+        {
           // composite placeholder
           next ++;
           base = next;
@@ -716,10 +721,6 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
           }
           break;
         }
-
-        case charT():
-          noadl::sprintf_and_throw<invalid_argument>(
-              "vformat: dangling `$` at end of template string");
 
         default:
           noadl::sprintf_and_throw<invalid_argument>(

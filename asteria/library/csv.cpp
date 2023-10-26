@@ -9,30 +9,6 @@
 namespace asteria {
 namespace {
 
-bool
-do_format_check_scalar(const Value& value)
-  {
-    switch(value.type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real:
-      case type_string:
-        // These values are always convertible to strings.
-        return true;
-
-      case type_opaque:
-      case type_function:
-      case type_array:
-      case type_object:
-        // These values are always ignored.
-        return false;
-
-      default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), value.type());
-    }
-  }
-
 V_array
 do_csv_parse(tinybuf& buf)
   {
@@ -145,7 +121,7 @@ std_csv_format(V_array value)
         if(cellp != row.begin())
           fmt << ",";
 
-        if(!do_format_check_scalar(*cellp))
+        if(cellp->type() >= type_opaque)  // XXX: Not convertible to string?
           continue;
 
         if(cellp->is_string()) {

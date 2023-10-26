@@ -217,6 +217,31 @@ rebind_opt(Abstract_Context& ctx) const
   {
     switch(this->index()) {
       case index_clear_stack:
+      case index_declare_variable:
+      case index_initialize_variable:
+      case index_throw_statement:
+      case index_assert_statement:
+      case index_simple_status:
+      case index_check_argument:
+      case index_push_global_reference:
+      case index_push_bound_reference:
+      case index_function_call:
+      case index_push_unnamed_array:
+      case index_push_unnamed_object:
+      case index_apply_operator:
+      case index_unpack_struct_array:
+      case index_unpack_struct_object:
+      case index_define_null_variable:
+      case index_single_step_trap:
+      case index_variadic_call:
+      case index_import_call:
+      case index_declare_reference:
+      case index_initialize_reference:
+      case index_return_statement:
+      case index_push_constant:
+      case index_push_constant_int48:
+      case index_alt_clear_stack:
+      case index_alt_function_call:
         return nullopt;
 
       case index_execute_block: {
@@ -231,10 +256,6 @@ rebind_opt(Abstract_Context& ctx) const
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
-
-      case index_declare_variable:
-      case index_initialize_variable:
-        return nullopt;
 
       case index_if_statement: {
         const auto& altr = this->m_stor.as<S_if_statement>();
@@ -365,13 +386,6 @@ rebind_opt(Abstract_Context& ctx) const
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
-      case index_throw_statement:
-      case index_assert_statement:
-      case index_simple_status:
-      case index_check_argument:
-      case index_push_global_reference:
-        return nullopt;
-
       case index_push_local_reference: {
         const auto& altr = this->m_stor.as<S_push_local_reference>();
 
@@ -389,15 +403,12 @@ rebind_opt(Abstract_Context& ctx) const
           return nullopt;
         else if(qref->is_invalid())
           throw Runtime_Error(Runtime_Error::M_format(),
-               "Initialization of variable or reference `$1` bypassed", altr.name);
+                   "Initialization of variable or reference `$1` bypassed", altr.name);
 
         // Bind this reference.
         S_push_bound_reference xnode = { *qref };
         return ::std::move(xnode);
       }
-
-      case index_push_bound_reference:
-        return nullopt;
 
       case index_define_function: {
         const auto& altr = this->m_stor.as<S_define_function>();
@@ -427,17 +438,6 @@ rebind_opt(Abstract_Context& ctx) const
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
-      case index_function_call:
-      case index_push_unnamed_array:
-      case index_push_unnamed_object:
-      case index_apply_operator:
-      case index_unpack_struct_array:
-      case index_unpack_struct_object:
-      case index_define_null_variable:
-      case index_single_step_trap:
-      case index_variadic_call:
-        return nullopt;
-
       case index_defer_expression: {
         const auto& altr = this->m_stor.as<S_defer_expression>();
 
@@ -450,11 +450,6 @@ rebind_opt(Abstract_Context& ctx) const
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
 
-      case index_import_call:
-      case index_declare_reference:
-      case index_initialize_reference:
-        return nullopt;
-
       case index_catch_expression: {
         const auto& altr = this->m_stor.as<S_catch_expression>();
 
@@ -466,13 +461,6 @@ rebind_opt(Abstract_Context& ctx) const
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
       }
-
-      case index_return_statement:
-      case index_push_constant:
-      case index_push_constant_int48:
-      case index_alt_clear_stack:
-      case index_alt_function_call:
-        return nullopt;
 
       case index_coalesce_expression: {
         const auto& altr = this->m_stor.as<S_coalesce_expression>();
@@ -497,6 +485,31 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     switch(this->index()) {
       case index_clear_stack:
+      case index_declare_variable:
+      case index_initialize_variable:
+      case index_throw_statement:
+      case index_assert_statement:
+      case index_simple_status:
+      case index_check_argument:
+      case index_push_global_reference:
+      case index_push_local_reference:
+      case index_function_call:
+      case index_push_unnamed_array:
+      case index_push_unnamed_object:
+      case index_apply_operator:
+      case index_unpack_struct_array:
+      case index_unpack_struct_object:
+      case index_define_null_variable:
+      case index_single_step_trap:
+      case index_variadic_call:
+      case index_import_call:
+      case index_declare_reference:
+      case index_initialize_reference:
+      case index_return_statement:
+      case index_push_constant:
+      case index_push_constant_int48:
+      case index_alt_clear_stack:
+      case index_alt_function_call:
         return;
 
       case index_execute_block: {
@@ -506,10 +519,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         do_collect_variables_for_each(staged, temp, altr.code_body);
         return;
       }
-
-      case index_declare_variable:
-      case index_initialize_variable:
-        return;
 
       case index_if_statement: {
         const auto& altr = this->m_stor.as<S_if_statement>();
@@ -578,14 +587,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
       }
 
-      case index_throw_statement:
-      case index_assert_statement:
-      case index_simple_status:
-      case index_check_argument:
-      case index_push_global_reference:
-      case index_push_local_reference:
-        return;
-
       case index_push_bound_reference: {
         const auto& altr = this->m_stor.as<S_push_bound_reference>();
 
@@ -611,17 +612,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
       }
 
-      case index_function_call:
-      case index_push_unnamed_array:
-      case index_push_unnamed_object:
-      case index_apply_operator:
-      case index_unpack_struct_array:
-      case index_unpack_struct_object:
-      case index_define_null_variable:
-      case index_single_step_trap:
-      case index_variadic_call:
-        return;
-
       case index_defer_expression: {
         const auto& altr = this->m_stor.as<S_defer_expression>();
 
@@ -630,11 +620,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         return;
       }
 
-      case index_import_call:
-      case index_declare_reference:
-      case index_initialize_reference:
-        return;
-
       case index_catch_expression: {
         const auto& altr = this->m_stor.as<S_catch_expression>();
 
@@ -642,13 +627,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         do_collect_variables_for_each(staged, temp, altr.code_body);
         return;
       }
-
-      case index_return_statement:
-      case index_push_constant:
-      case index_push_constant_int48:
-      case index_alt_clear_stack:
-      case index_alt_function_call:
-        return;
 
       case index_coalesce_expression: {
         const auto& altr = this->m_stor.as<S_coalesce_expression>();
@@ -681,16 +659,16 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -717,7 +695,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -730,7 +708,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -765,13 +743,13 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -810,10 +788,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -864,7 +842,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -953,7 +931,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -969,7 +947,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1033,7 +1011,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1097,7 +1075,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1217,7 +1195,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -1231,7 +1209,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1293,7 +1271,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -1309,7 +1287,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1390,7 +1368,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -1434,16 +1412,16 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1478,16 +1456,16 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1508,13 +1486,13 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1547,10 +1525,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -1590,13 +1568,13 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -1651,7 +1629,7 @@ solidify(AVMC_Queue& queue) const
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -1679,7 +1657,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -1692,7 +1670,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -1730,7 +1708,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -1820,10 +1798,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -1859,10 +1837,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -1901,13 +1879,13 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -2053,10 +2031,10 @@ solidify(AVMC_Queue& queue) const
               , up2
 
               // Sparam
-              // (none)
+              , 0, nullptr, nullptr, nullptr
 
               // Collector
-              // (none)
+              , nullptr
 
               // Symbols
               , &(altr.sloc)
@@ -2109,10 +2087,10 @@ solidify(AVMC_Queue& queue) const
               , up2
 
               // Sparam
-              // (none)
+              , 0, nullptr, nullptr, nullptr
 
               // Collector
-              // (none)
+              , nullptr
 
               // Symbols
               , &(altr.sloc)
@@ -2487,10 +2465,10 @@ solidify(AVMC_Queue& queue) const
               , up2
 
               // Sparam
-              // (none)
+              , 0, nullptr, nullptr, nullptr
 
               // Collector
-              // (none)
+              , nullptr
 
               // Symbols
               , &(altr.sloc)
@@ -3027,10 +3005,10 @@ solidify(AVMC_Queue& queue) const
               , up2
 
               // Sparam
-              // (none)
+              , 0, nullptr, nullptr, nullptr
 
               // Collector
-              // (none)
+              , nullptr
 
               // Symbols
               , &(altr.sloc)
@@ -3076,10 +3054,10 @@ solidify(AVMC_Queue& queue) const
               , up2
 
               // Sparam
-              // (none)
+              , 0, nullptr, nullptr, nullptr
 
               // Collector
-              // (none)
+              , nullptr
 
               // Symbols
               , &(altr.sloc)
@@ -3256,10 +3234,10 @@ solidify(AVMC_Queue& queue) const
               , up2
 
               // Sparam
-              // (none)
+              , 0, nullptr, nullptr, nullptr
 
               // Collector
-              // (none)
+              , nullptr
 
               // Symbols
               , &(altr.sloc)
@@ -3314,10 +3292,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3379,7 +3357,7 @@ solidify(AVMC_Queue& queue) const
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3427,7 +3405,7 @@ solidify(AVMC_Queue& queue) const
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3448,13 +3426,13 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3533,10 +3511,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3574,7 +3552,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -3672,7 +3650,7 @@ solidify(AVMC_Queue& queue) const
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3702,16 +3680,16 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -3739,13 +3717,13 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3794,7 +3772,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
@@ -3807,7 +3785,7 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -3845,10 +3823,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
@@ -3908,13 +3886,13 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -3940,13 +3918,13 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -3965,16 +3943,16 @@ solidify(AVMC_Queue& queue) const
           }
 
           // Uparam
-          // (none)
+          , Uparam()
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
-          // (none)
+          , nullptr
         );
         return;
       }
@@ -4002,10 +3980,10 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          // (none)
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
-          // (none)
+          , nullptr
 
           // Symbols
           , &(altr.sloc)

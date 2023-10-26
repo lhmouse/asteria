@@ -224,32 +224,34 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
 
     switch(reader.peek(tlen)) {
       case 'n':
-      case 'N': {
+      case 'N':
         if(do_cmask_length(tlen, reader, cmask_namei | cmask_digit) != 3)
           return false;
+        else {
+          // `nan` or `NaN`
+          const char* sptr = reader.data() + tlen - 3;
+          if((sptr[1] != 'a') || (sptr[2] != sptr[0]))
+            return false;
 
-        auto sptr = reader.data() + tlen - 3;
-        if((sptr[1] != 'a') || (sptr[2] != sptr[0]))  // `nan` or `NaN`
-          return false;
-
-        Token::S_real_literal xtoken;
-        xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::quiet_NaN(), sign);
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
-      }
+          Token::S_real_literal xtoken;
+          xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::quiet_NaN(), sign);
+          return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+        }
 
       case 'i':
-      case 'I': {
+      case 'I':
         if(do_cmask_length(tlen, reader, cmask_namei | cmask_digit) != 8)
           return false;
+        else {
+          // `infinity` or `Infinity`
+          const char* sptr = reader.data() + tlen - 8;
+          if(::std::memcmp(sptr + 1, "nfinity", 7) != 0)
+            return false;
 
-        auto sptr = reader.data() + tlen - 8;
-        if(::std::memcmp(sptr + 1, "nfinity", 7) != 0)  // `infinity` or `Infinity`
-          return false;
-
-        Token::S_real_literal xtoken;
-        xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::infinity(), sign);
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
-      }
+          Token::S_real_literal xtoken;
+          xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::infinity(), sign);
+          return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+        }
 
       case '0':
         tstr += reader.peek(tlen);

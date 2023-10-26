@@ -22,8 +22,8 @@ class AVMC_Queue
 
   private:
     Header* m_bptr = nullptr;  // beginning of storage
-    uint32_t m_einit = 0;      // used storage in number of `Header`s [!]
-    uint32_t m_estor = 0;      // allocated storage in number of `Header`s [!]
+    uint32_t m_einit = 0;  // used storage in number of `Header`s [!]
+    uint32_t m_estor = 0;  // allocated storage in number of `Header`s [!]
 
   public:
     explicit constexpr
@@ -81,45 +81,6 @@ class AVMC_Queue
     append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
            void* ctor_arg, Destructor* dtor_opt, Var_Getter* vget_opt = nullptr,
            const Source_Location* sloc_opt = nullptr);
-
-    Header*
-    append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
-           void* ctor_arg, Destructor* dtor_opt, const Source_Location* sloc_opt)
-      {
-        return this->append(exec, uparam, sparam_size,
-                            ctor_opt, ctor_arg, dtor_opt, nullptr, sloc_opt);
-      }
-
-    Header*
-    append(Executor* exec, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
-           Destructor* dtor_opt, Var_Getter* vget_opt = nullptr,
-           const Source_Location* sloc_opt = nullptr)
-      {
-        return this->append(exec, Uparam(), sparam_size,
-                            ctor_opt, ctor_arg, dtor_opt, vget_opt, sloc_opt);
-      }
-
-    Header*
-    append(Executor* exec, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
-           Destructor* dtor_opt, const Source_Location* sloc_opt)
-      {
-        return this->append(exec, Uparam(), sparam_size,
-                            ctor_opt, ctor_arg, dtor_opt, nullptr, sloc_opt);
-      }
-
-    Header*
-    append(Executor* exec, Uparam uparam, const Source_Location* sloc_opt = nullptr)
-      {
-        return this->append(exec, uparam, 0,
-                            nullptr, nullptr, nullptr, nullptr, sloc_opt);
-      }
-
-    Header*
-    append(Executor* exec, const Source_Location* sloc_opt = nullptr)
-      {
-        return this->append(exec, Uparam(), 0,
-                            nullptr, nullptr, nullptr, nullptr, sloc_opt);
-      }
 
     // Marks this queue ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.
