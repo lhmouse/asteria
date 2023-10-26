@@ -50,19 +50,16 @@ void
 AVMC_Queue::
 clear() noexcept
   {
-    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(offset != 0) {
-      auto qnode = this->m_bptr + this->m_einit + offset;
-      offset += 1L + qnode->nheaders;
-
-      if(qnode->meta_ver == 0)
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+      if(head->meta_ver == 0)
         continue;
 
       // Take ownership of metadata.
-      unique_ptr<Metadata> meta(qnode->pv_meta);
+      unique_ptr<Metadata> meta(head->pv_meta);
 
-      if(qnode->pv_meta->dtor_opt)
-        qnode->pv_meta->dtor_opt(qnode);
+      if(head->pv_meta->dtor_opt)
+        head->pv_meta->dtor_opt(head);
     }
 
 #ifdef ROCKET_DEBUG
@@ -116,23 +113,23 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
 
     // Append a new node. `uparam` is overlapped with `nheaders` so it must
     // be assigned first. The others can occur in any order.
-    auto qnode = this->m_bptr + this->m_einit;
-    qnode->uparam = uparam;
-    qnode->nheaders = (uint8_t) (nheaders_p1 - 1);
+    auto head = this->m_bptr + this->m_einit;
+    head->uparam = uparam;
+    head->nheaders = (uint8_t) (nheaders_p1 - 1);
 
     if(ctor_opt)
-      ctor_opt(qnode, ctor_arg);
+      ctor_opt(head, ctor_arg);
     else if(sparam_size != 0)
-      ::std::memset(qnode->sparam, 0, sparam_size);
+      ::std::memset(head->sparam, 0, sparam_size);
 
     if(!meta)
-      qnode->pv_exec = exec;
+      head->pv_exec = exec;
     else
-      qnode->pv_meta = meta.release();
+      head->pv_meta = meta.release();
 
-    qnode->meta_ver = meta_ver;
+    head->meta_ver = meta_ver;
     this->m_einit += nheaders_p1;
-    return qnode;
+    return head;
   }
 
 void
@@ -146,61 +143,56 @@ AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
-    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(offset != 0) {
-      auto qnode = this->m_bptr + this->m_einit + offset;
-      offset += 1L + qnode->nheaders;
-
-      AIR_Status status;
-      switch(qnode->meta_ver) {
+    AIR_Status status = air_status_next;
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+      switch(head->meta_ver) {
         case 0:
           // There is no metadata or symbols.
-          status = qnode->pv_exec(ctx, qnode);
+          status = head->pv_exec(ctx, head);
           break;
 
         case 1:
           // There is metadata without symbols.
-          status = qnode->pv_meta->exec(ctx, qnode);
+          status = head->pv_meta->exec(ctx, head);
           break;
 
         default:
           try {
             // There is metadata and symbols.
-            status = qnode->pv_meta->exec(ctx, qnode);
+            status = head->pv_meta->exec(ctx, head);
             break;
           }
           catch(Runtime_Error& except) {
             // Modify the exception in place and rethrow it without copying it.
-            except.push_frame_plain(qnode->pv_meta->sloc);
+            except.push_frame_plain(head->pv_meta->sloc);
             throw;
           }
           catch(exception& stdex) {
             // Replace the active exception.
             Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-            except.push_frame_plain(qnode->pv_meta->sloc);
+            except.push_frame_plain(head->pv_meta->sloc);
             throw except;
           }
       }
-      if(status != air_status_next)
-        return status;
+
+      if(ROCKET_UNEXPECT(status != air_status_next))
+        break;
     }
-    return air_status_next;
+    return status;
   }
 
 void
 AVMC_Queue::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(offset != 0) {
-      auto qnode = this->m_bptr + this->m_einit + offset;
-      offset += 1L + qnode->nheaders;
-
-      if(qnode->meta_ver == 0)
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+      if(head->meta_ver == 0)
         continue;
 
-      if(qnode->pv_meta->vget_opt)
-        qnode->pv_meta->vget_opt(staged, temp, qnode);
+      if(head->pv_meta->vget_opt)
+        head->pv_meta->vget_opt(staged, temp, head);
     }
   }
 
