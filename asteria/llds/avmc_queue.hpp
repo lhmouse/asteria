@@ -24,6 +24,9 @@ class AVMC_Queue
     Header* m_bptr = nullptr;  // beginning of storage
     uint32_t m_einit = 0;  // used storage in number of `Header`s [!]
     uint32_t m_estor = 0;  // allocated storage in number of `Header`s [!]
+    void* m_jit_code = nullptr;
+    uint32_t m_jit_size = 0;
+    uint32_t m_reserved = 0;
 
   public:
     explicit constexpr
@@ -48,6 +51,8 @@ class AVMC_Queue
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_einit, other.m_einit);
         ::std::swap(this->m_estor, other.m_estor);
+        ::std::swap(this->m_jit_code, other.m_jit_code);
+        ::std::swap(this->m_jit_size, other.m_jit_size);
         return *this;
       }
 

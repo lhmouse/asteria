@@ -7,6 +7,7 @@
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
+#include <sys/mman.h>
 namespace asteria {
 
 void
@@ -66,6 +67,12 @@ clear() noexcept
     ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
 #endif
     this->m_einit = 0;
+
+    if(this->m_jit_code)
+      ::munmap(this->m_jit_code, this->m_jit_size);
+
+    this->m_jit_code = nullptr;
+    this->m_jit_size = 0;
   }
 
 details_avmc_queue::Header*
@@ -137,49 +144,100 @@ AVMC_Queue::
 finalize()
   {
     // TODO: Add JIT support.
+    uint32_t jit_size = 8192;
+    void* jit_code = ::mmap(nullptr, jit_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    ROCKET_ASSERT(jit_code != MAP_FAILED);
+
+    ::memset(jit_code, 0xCC, jit_size);
+    char* j = (char*) jit_code;
+
+    // endbr64
+    *(j++) = '\xF3';
+    *(j++) = '\x0F';
+    *(j++) = '\x1E';
+    *(j++) = '\xFA';
+
+    // push r12            ; align %rsp
+    *(j++) = '\x41';
+    *(j++) = '\x54';
+
+    // mov r12, rdi        ; %r12 = ctx
+    *(j++) = '\x49';
+    *(j++) = '\x89';
+    *(j++) = '\xFC';
+
+    // jmp <code>
+    *(j++) = '\xEB';
+    *(j++) = '\x03';
+
+    char* const jexit = j;
+
+    // pop r12
+    *(j++) = '\x41';
+    *(j++) = '\x5C';
+
+    // ret
+    *(j++) = '\xC3';
+
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+      // mov rdi, r12      ; %rdi = ctx
+      *(j++) = '\x4C';
+      *(j++) = '\x89';
+      *(j++) = '\xE7';
+
+      // movabs rsi, <head>
+      *(j++) = '\x48';
+      *(j++) = '\xBE';
+      ::rocket::xmemrpcpy(j, (const char*) &head, sizeof(head));
+
+      // movabs rax, <exec>
+      *(j++) = '\x48';
+      *(j++) = '\xB8';
+      Executor* exec = (head->meta_ver == 0) ? head->pv_exec : head->pv_meta->exec;
+      ::rocket::xmemrpcpy(j, (const char*) &exec, sizeof(exec));
+
+      // call rax
+      *(j++) = '\xFF';
+      *(j++) = '\xD0';
+
+      // test al, al
+      *(j++) = '\x84';
+      *(j++) = '\xC0';
+
+      // jnz <jexit>
+      *(j++) = '\x0F';
+      *(j++) = '\x85';
+      int32_t end_offset = (int32_t) (jexit - (j + 4));
+      ::rocket::xmemrpcpy(j, (const char*) &end_offset, sizeof(end_offset));
+    }
+
+    // pop r12
+    *(j++) = '\x41';
+    *(j++) = '\x5C';
+
+    // ret
+    *(j++) = '\xC3';
+
+    // *** FINALIZE
+    if(this->m_jit_code)
+      ::munmap(this->m_jit_code, this->m_jit_size);
+
+    ::mprotect(jit_code, jit_size, PROT_READ | PROT_EXEC);
+
+    this->m_jit_code = jit_code;
+    this->m_jit_size = jit_size;
+
   }
 
 AIR_Status
 AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
-    AIR_Status status = air_status_next;
-    const auto eptr = this->m_bptr + this->m_einit;
-    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
-      switch(head->meta_ver) {
-        case 0:
-          // There is no metadata or symbols.
-          status = head->pv_exec(ctx, head);
-          break;
+    if(!this->m_jit_code)
+      return air_status_next;
 
-        case 1:
-          // There is metadata without symbols.
-          status = head->pv_meta->exec(ctx, head);
-          break;
-
-        default:
-          try {
-            // There is metadata and symbols.
-            status = head->pv_meta->exec(ctx, head);
-            break;
-          }
-          catch(Runtime_Error& except) {
-            // Modify the exception in place and rethrow it without copying it.
-            except.push_frame_plain(head->pv_meta->sloc);
-            throw;
-          }
-          catch(exception& stdex) {
-            // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-            except.push_frame_plain(head->pv_meta->sloc);
-            throw except;
-          }
-      }
-
-      if(ROCKET_UNEXPECT(status != air_status_next))
-        break;
-    }
-    return status;
+    return ((AIR_Status (*)(Executive_Context*)) this->m_jit_code)(&ctx);
   }
 
 void
