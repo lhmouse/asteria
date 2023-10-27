@@ -71,7 +71,7 @@ clear() noexcept
 details_avmc_queue::Header*
 AVMC_Queue::
 append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
-       void* ctor_arg, Destructor* dtor_opt, Var_Getter* vget_opt,
+       void* ctor_arg, Destructor* dtor_opt, Variable_Collector* vcoll_opt,
        const Source_Location* sloc_opt)
   {
     constexpr uint32_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
@@ -83,13 +83,13 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     unique_ptr<Metadata> meta;
     uint8_t meta_ver = 0;
 
-    if(ctor_opt || dtor_opt || vget_opt || sloc_opt) {
+    if(ctor_opt || dtor_opt || vcoll_opt || sloc_opt) {
       // Allocate metadata for this node.
       meta.reset(new Metadata());
       meta_ver = 1;
 
       meta->dtor_opt = dtor_opt;
-      meta->vget_opt = vget_opt;
+      meta->vcoll_opt = vcoll_opt;
       meta->exec = exec;
 
       if(sloc_opt) {
@@ -191,8 +191,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       if(head->meta_ver == 0)
         continue;
 
-      if(head->pv_meta->vget_opt)
-        head->pv_meta->vget_opt(staged, temp, head);
+      if(head->pv_meta->vcoll_opt)
+        head->pv_meta->vcoll_opt(staged, temp, head);
     }
   }
 

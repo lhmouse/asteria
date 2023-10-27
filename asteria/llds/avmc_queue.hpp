@@ -12,13 +12,13 @@ namespace asteria {
 class AVMC_Queue
   {
   public:
-    using Uparam      = details_avmc_queue::Uparam;
-    using Header      = details_avmc_queue::Header;
-    using Executor    = details_avmc_queue::Executor;
-    using Constructor = details_avmc_queue::Constructor;
-    using Destructor  = details_avmc_queue::Destructor;
-    using Var_Getter  = details_avmc_queue::Var_Getter;
-    using Metadata    = details_avmc_queue::Metadata;
+    using Uparam              = details_avmc_queue::Uparam;
+    using Header              = details_avmc_queue::Header;
+    using Metadata            = details_avmc_queue::Metadata;
+    using Executor            = details_avmc_queue::Executor;
+    using Constructor         = details_avmc_queue::Sparam_Constructor;
+    using Destructor          = details_avmc_queue::Sparam_Destructor;
+    using Variable_Collector  = details_avmc_queue::Variable_Collector;
 
   private:
     Header* m_bptr = nullptr;  // beginning of storage
@@ -79,8 +79,8 @@ class AVMC_Queue
     // need not be persistent.
     Header*
     append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
-           void* ctor_arg, Destructor* dtor_opt, Var_Getter* vget_opt = nullptr,
-           const Source_Location* sloc_opt = nullptr);
+           void* ctor_arg, Destructor* dtor_opt, Variable_Collector* vcoll_opt,
+           const Source_Location* sloc_opt);
 
     // Marks this queue ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.
