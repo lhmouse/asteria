@@ -3456,56 +3456,54 @@ solidify(AVMC_Queue& queue) const
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
             ctx.alt_stack().clear();
-            auto vagen_val = ctx.stack().top().dereference_readonly();
-            if(vagen_val.type() == type_null) {
+            auto va_gen = ctx.stack().top().dereference_readonly();
+            if(va_gen.type() == type_null) {
               // There is no argument.
               ctx.stack().pop();
               return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
-            else if(vagen_val.type() == type_array) {
+            else if(va_gen.type() == type_array) {
               // Arguments are temporary values.
               ctx.stack().pop();
-              for(const auto& val : vagen_val.as_array())
+              for(const auto& val : va_gen.as_array())
                 ctx.alt_stack().push().set_temporary(val);
               return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
-            else if(vagen_val.type() == type_function) {
+            else if(va_gen.type() == type_function) {
               // Invoke the generator with no argument to get the number of
               // variadic arguments to generate. This destroys its `this`
               // reference so we have to stash it first.
-              auto vagen_self = ctx.stack().mut_top().pop_modifier();
+              auto va_self = ctx.stack().mut_top().pop_modifier();
               do_invoke_maybe_tail(ctx.stack().mut_top(), ctx.global(), ptc_aware_none, sloc,
-                                   vagen_val.as_function(), ::std::move(ctx.alt_stack()));
-              auto vacount = ctx.stack().top().dereference_readonly();
+                                   va_gen.as_function(), ::std::move(ctx.alt_stack()));
+              auto va_num = ctx.stack().top().dereference_readonly();
               ctx.stack().pop();
 
-              if(vacount.type() != type_integer)
+              if(va_num.type() != type_integer)
                 throw Runtime_Error(Runtime_Error::M_format(),
-                         "Variadic argument count was not an integer (value `$1`)", vacount);
+                         "Variadic argument count was not an integer (value `$1`)", va_num);
 
-              if((vacount.as_integer() < 0) || (vacount.as_integer() > INT_MAX))
+              if((va_num.as_integer() < 0) || (va_num.as_integer() > INT_MAX))
                 throw Runtime_Error(Runtime_Error::M_format(),
-                         "Variadic argument count was not valid (value `$1`)", vacount);
+                         "Variadic argument count was not valid (value `$1`)", va_num);
 
               // Generate arguments into `stack`.
-              uint32_t count = (uint32_t) vacount.as_integer();
-              for(uint32_t k = 0;  k != count;  ++k)
-                ctx.stack().push() = vagen_self;
-
-              for(uint32_t k = 0;  k != count;  ++k) {
+              for(V_integer va_idx = 0;  va_idx != va_num.as_integer();  ++va_idx) {
+                auto& va_arg_self = ctx.stack().push();
+                va_arg_self = va_self;
                 ctx.alt_stack().clear();
-                ctx.alt_stack().push().set_temporary(V_integer(k));
-                do_invoke_maybe_tail(ctx.stack().mut_top(count - 1 - k), ctx.global(), ptc_aware_none,
-                                     sloc, vagen_val.as_function(), ::std::move(ctx.alt_stack()));
-                ctx.stack().top(count - 1 - k).dereference_readonly();
+                ctx.alt_stack().push().set_temporary(va_idx);
+                do_invoke_maybe_tail(va_arg_self, ctx.global(), ptc_aware_none, sloc,
+                                     va_gen.as_function(), ::std::move(ctx.alt_stack()));
+                va_arg_self.dereference_readonly();
               }
 
-              do_pop_arguments(ctx.alt_stack(), ctx.stack(), count);
+              do_pop_arguments(ctx.alt_stack(), ctx.stack(), static_cast<uint32_t>(va_num.as_integer()));
               return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
             else
               throw Runtime_Error(Runtime_Error::M_format(),
-                       "Invalid variadic argument generator (value `$1`)", vagen_val);
+                       "Invalid variadic argument generator (value `$1`)", va_gen);
           }
 
           // Uparam
