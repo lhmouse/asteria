@@ -3464,9 +3464,9 @@ solidify(AVMC_Queue& queue) const
             }
             else if(vagen_val.type() == type_array) {
               // Arguments are temporary values.
+              ctx.stack().pop();
               for(const auto& val : vagen_val.as_array())
                 ctx.alt_stack().push().set_temporary(val);
-              ctx.stack().pop();
               return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
             else if(vagen_val.type() == type_function) {
