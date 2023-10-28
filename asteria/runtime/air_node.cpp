@@ -3460,12 +3460,14 @@ solidify(AVMC_Queue& queue) const
             if(vagen_val.type() == type_null) {
               // There is no argument.
               ctx.stack().pop();
+              return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
             else if(vagen_val.type() == type_array) {
               // Arguments are temporary values.
               for(const auto& val : vagen_val.as_array())
                 ctx.alt_stack().push().set_temporary(val);
               ctx.stack().pop();
+              return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
             else if(vagen_val.type() == type_function) {
               // Invoke the generator with no argument to get the number of
@@ -3499,12 +3501,11 @@ solidify(AVMC_Queue& queue) const
               }
 
               do_pop_arguments(ctx.alt_stack(), ctx.stack(), count);
+              return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
             }
             else
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Invalid variadic argument generator (value `$1`)", vagen_val);
-
-            return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
           }
 
           // Uparam
