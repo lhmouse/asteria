@@ -8,11 +8,11 @@ namespace asteria {
 
 void
 Recursion_Sentry::
-do_throw_stack_overflow(size_t usage, uint32_t limit) const
+do_throw_stack_overflow(ptrdiff_t usage) const
   {
-    ASTERIA_THROW((
-        "Stack overflow averted (stack usage `$1` exceeded `$2`)"),
-        usage, limit);
+     ::rocket::sprintf_and_throw<::std::invalid_argument>(
+           "asteria::Recursion_Sentry: stack overflow averted (`%td` > `%ld`)",
+           ::std::abs(usage), 1L << stack_mask_bits);
   }
 
 }  // namespace asteria

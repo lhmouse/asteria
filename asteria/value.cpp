@@ -89,7 +89,7 @@ do_destroy_variant_slow() noexcept
         }
 
         default:
-          ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->type());
+          ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
       }
 
     if(!stack.empty()) {
@@ -189,18 +189,18 @@ void
 Value::
 do_throw_type_mismatch(const char* desc) const
   {
-    ASTERIA_THROW((
-        "Value type mismatch (expecting `$1`, got `$2`)"),
-        desc, describe_type(this->type()));
+    ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          "asteria::Value: type mismatch (expecting `%s`, got `%s`)",
+          desc, describe_type(this->type()));
   }
 
 void
 Value::
 do_throw_uncomparable_with(const Value& other) const
   {
-    ASTERIA_THROW((
-        "Values not comparable (operands were `$1` and `$2`)"),
-        *this, other);
+    ::rocket::sprintf_and_throw<::std::invalid_argument>(
+          "asteria::Value: `%s` and `%s` are not comparable",
+          describe_type(this->type()), describe_type(other.type()));
   }
 
 Compare
@@ -368,7 +368,7 @@ print(tinyfmt& fmt) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->type());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
 
     while(stack.size())

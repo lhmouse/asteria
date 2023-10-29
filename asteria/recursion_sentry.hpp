@@ -10,7 +10,7 @@ namespace asteria {
 class Recursion_Sentry
   {
   public:
-    enum : size_t
+    enum : uint32_t
       {
         stack_mask_bits = 19,  // 512KiB
       };
@@ -34,37 +34,34 @@ class Recursion_Sentry
     Recursion_Sentry(const Recursion_Sentry& other)  // copy constructor
       :
         m_base(other.m_base)
-      {
-        this->do_check();
-      }
+      { this->do_validate_stack_usage();  }
 
     Recursion_Sentry&
     operator=(const Recursion_Sentry& other) &  // copy assignment
       {
         this->m_base = other.m_base;
-        this->do_check();
+        this->do_validate_stack_usage();
         return *this;
       }
 
   private:
     [[noreturn]]
     void
-    do_throw_stack_overflow(size_t usage, uint32_t limit) const;
+    do_throw_stack_overflow(ptrdiff_t usage) const;
 
     void
-    do_check() const
+    do_validate_stack_usage() const
       {
-        // Estimate stack usage.
-        size_t usage = (size_t) ::std::abs((char*) this->m_base - (char*) this);
-        if(ROCKET_UNEXPECT(usage >> stack_mask_bits))
-          this->do_throw_stack_overflow(usage, 1U << stack_mask_bits);
+        ptrdiff_t usage = (char*) this->m_base - (char*) this;
+        if(ROCKET_UNEXPECT(((usage >> stack_mask_bits) + 1) >> 1 != 0))
+          this->do_throw_stack_overflow(usage);
       }
 
   public:
     // Make this class non-trivial.
     ~Recursion_Sentry()
       {
-        __asm__ ("");
+        this->do_validate_stack_usage();
       }
 
     const void*

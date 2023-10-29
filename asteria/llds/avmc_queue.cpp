@@ -74,11 +74,11 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
        void* ctor_arg, Destructor* dtor_opt, Variable_Collector* vcoll_opt,
        const Source_Location* sloc_opt)
   {
-    constexpr uint32_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
+    constexpr size_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
     if(sparam_size > max_sparam_size)
-      ASTERIA_THROW((
-          "Invalid AVMC node size (`$1` > `$2`)"),
-          sparam_size, max_sparam_size);
+       ::rocket::sprintf_and_throw<::std::invalid_argument>(
+             "asteria::AVMC_Queue: `sparam_size` too large (`%zd` > `%zd`)",
+             sparam_size, max_sparam_size);
 
     unique_ptr<Metadata> meta;
     uint8_t meta_ver = 0;
