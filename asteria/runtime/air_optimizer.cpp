@@ -18,7 +18,7 @@ AIR_Optimizer::
 
 void
 AIR_Optimizer::
-reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
        const Global_Context& global, const cow_vector<Statement>& stmts)
   {
     this->m_code.clear();
@@ -31,7 +31,7 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
     for(size_t i = 0;  i < stmts.size();  ++i)
-      stmts.at(i).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
+      stmts.at(i).generate_code(this->m_code, ctx_func, nullptr, global, this->m_opts,
                            ((i != stmts.size() - 1) && !stmts.at(i + 1).is_empty_return())
                              ? ptc_aware_none : ptc_aware_void);
 
@@ -42,7 +42,7 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
 void
 AIR_Optimizer::
-rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
        const cow_vector<AIR_Node>& code)
   {
     this->m_code = code;

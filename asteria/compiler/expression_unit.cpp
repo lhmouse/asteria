@@ -53,7 +53,8 @@ clobbers_alt_stack() const noexcept
 void
 Expression_Unit::
 generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-              const Global_Context& global, Analytic_Context& ctx, PTC_Aware ptc) const
+              const Global_Context& global, const Analytic_Context& ctx,
+              PTC_Aware ptc) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
       case index_literal: {

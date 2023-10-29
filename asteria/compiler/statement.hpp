@@ -230,8 +230,8 @@ class Statement
     // this statement declares new names within `ctx`, those names are appended
     // to `*names_opt`.
     void
-    generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                  const Global_Context& global, Analytic_Context& ctx,
+    generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
+                  cow_vector<phsh_string>* names_opt, const Global_Context& global,
                   const Compiler_Options& opts, PTC_Aware ptc) const;
   };
 

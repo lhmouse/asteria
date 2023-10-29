@@ -181,7 +181,8 @@ class Expression_Unit
     // Generate IR nodes into `code`.
     void
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                  const Global_Context& global, Analytic_Context& ctx, PTC_Aware ptc) const;
+                  const Global_Context& global, const Analytic_Context& ctx,
+                  PTC_Aware ptc) const;
   };
 
 inline
