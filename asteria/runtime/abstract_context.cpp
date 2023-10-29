@@ -30,11 +30,12 @@ Abstract_Context::
 get_named_reference_opt(phsh_stringR name) const
   {
     auto qref = this->m_named_refs.find_opt(name);
-    if(ROCKET_UNEXPECT(!qref) && (name[0] == '_') && (name[1] == '_')) {
-      // Create a lazy reference. Built-in references such as `__func`
-      // are only created when they are mentioned.
-      qref = this->do_create_lazy_reference_opt(nullptr, name);
-    }
+    if(ROCKET_EXPECT(qref) || !name.rdstr().starts_with("__"))
+      return qref;
+
+    // Create a lazy reference. Built-in references such as `__func`
+    // are only created when they are mentioned.
+    qref = this->do_create_lazy_reference_opt(nullptr, name);
     return qref;
   }
 
@@ -44,13 +45,14 @@ insert_named_reference(phsh_stringR name)
   {
     bool newly = false;
     auto& ref = this->m_named_refs.insert(name, &newly);
-    if(ROCKET_UNEXPECT(newly) && (name[0] == '_') && (name[1] == '_')) {
-      // If a built-in reference has been inserted, it may have a default
-      // value, so initialize it. DO NOT CALL THIS FUNCTION INSIDE
-      // `do_create_lazy_reference_opt()`, as it will result in infinite
-      // recursion; call `do_mut_named_reference()` instead.
-      this->do_create_lazy_reference_opt(&ref, name);
-    }
+    if(!ROCKET_EXPECT(newly) || !name.rdstr().starts_with("__"))
+      return ref;
+
+    // If a built-in reference has been inserted, it may have a default
+    // value, so initialize it. DO NOT CALL THIS FUNCTION INSIDE
+    // `do_create_lazy_reference_opt()`, as it will result in infinite
+    // recursion; call `do_mut_named_reference()` instead.
+    this->do_create_lazy_reference_opt(&ref, name);
     return ref;
   }
 

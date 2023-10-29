@@ -77,7 +77,7 @@ clear() noexcept
 
 Reference&
 Reference_Dictionary::
-insert(phsh_stringR key, bool* newly)
+insert(phsh_stringR key, bool* newly_opt)
   {
     if(key.empty())
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
@@ -92,8 +92,8 @@ insert(phsh_stringR key, bool* newly)
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
             [&](const Bucket& r) { return r.key_equals(key);  });
 
-    if(newly)
-      *newly = !*qbkt;
+    if(newly_opt)
+      *newly_opt = !*qbkt;
 
     if(*qbkt)
       return qbkt->vstor[0];
