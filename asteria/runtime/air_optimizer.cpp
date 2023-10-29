@@ -32,10 +32,8 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
     for(size_t i = 0;  i < stmts.size();  ++i)
       stmts.at(i).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-                           (i != stmts.size() - 1)
-                             ? (stmts.at(i + 1).is_empty_return() ? ptc_aware_void
-                                                                  : ptc_aware_none)
-                             : ptc_aware_void);
+                           ((i != stmts.size() - 1) && !stmts.at(i + 1).is_empty_return())
+                             ? ptc_aware_none : ptc_aware_void);
 
     if(this->m_opts.optimization_level >= 2) {
       // TODO: Insert optimization passes
