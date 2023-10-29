@@ -30,12 +30,12 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     // Generate code for the function body.
     Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
-    for(size_t i = 0;  i + 1 < stmts.size();  ++i)
+    for(size_t i = 0;  i < stmts.size();  ++i)
       stmts.at(i).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-                     stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
-
-    stmts.back().generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-                   ptc_aware_void);
+                           (i != stmts.size() - 1)
+                             ? (stmts.at(i + 1).is_empty_return() ? ptc_aware_void
+                                                                  : ptc_aware_none)
+                             : ptc_aware_void);
 
     if(this->m_opts.optimization_level >= 2) {
       // TODO: Insert optimization passes

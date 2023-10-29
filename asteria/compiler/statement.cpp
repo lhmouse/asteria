@@ -50,10 +50,9 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
       return code;
 
     // Generate code for the subexpression itself.
-    for(size_t i = 0;  i + 1 < expr.units.size();  ++i)
-      expr.units.at(i).generate_code(code, opts, global, ctx, ptc_aware_none);
-
-    expr.units.back().generate_code(code, opts, global, ctx, ptc);
+    for(size_t i = 0;  i < expr.units.size();  ++i)
+      expr.units.at(i).generate_code(code, opts, global, ctx,
+                          (i != expr.units.size() - 1) ? ptc_aware_none : ptc);
     return code;
   }
 
@@ -87,11 +86,12 @@ do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* 
       return code;
 
     // Statements other than the last one cannot be the end of function.
-    for(size_t i = 0;  i + 1 < block.stmts.size();  ++i)
+    for(size_t i = 0;  i < block.stmts.size();  ++i)
       block.stmts.at(i).generate_code(code, names_opt, global, ctx, opts,
-              block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
-
-    block.stmts.back().generate_code(code, names_opt, global, ctx, opts, ptc);
+                           (i != block.stmts.size() - 1)
+                             ? (block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void
+                                                                        : ptc_aware_none)
+                             : ptc);
     return code;
   }
 
