@@ -14,7 +14,7 @@ Precedence
 Infix_Element::
 tell_precedence() const noexcept
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_head:
         return precedence_lowest;
 
@@ -85,7 +85,7 @@ tell_precedence() const noexcept
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -93,7 +93,7 @@ void
 Infix_Element::
 extract(cow_vector<Expression_Unit>& units)
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_head: {
         auto& altr = this->m_stor.mut<index_head>();
 
@@ -179,7 +179,7 @@ extract(cow_vector<Expression_Unit>& units)
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -187,7 +187,7 @@ cow_vector<Expression_Unit>&
 Infix_Element::
 mut_junction() noexcept
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_head:
         return this->m_stor.mut<index_head>().units;
 
@@ -207,7 +207,7 @@ mut_junction() noexcept
         return this->m_stor.mut<index_general>().rhs;
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 

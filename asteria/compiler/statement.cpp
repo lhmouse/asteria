@@ -27,15 +27,14 @@ do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
     ctx.insert_named_reference(name);
   }
 
-cow_vector<AIR_Node>&
+void
 do_generate_clear_stack(cow_vector<AIR_Node>& code)
   {
     AIR_Node::S_clear_stack xnode = { };
     code.emplace_back(::std::move(xnode));
-    return code;
   }
 
-cow_vector<AIR_Node>&
+void
 do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                           const Global_Context& global, Analytic_Context& ctx,
                           PTC_Aware ptc, const Statement::S_expression& expr)
@@ -47,23 +46,21 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
     }
 
     if(expr.units.empty())
-      return code;
+      return;
 
     // Generate code for the subexpression itself.
     for(size_t i = 0;  i < expr.units.size();  ++i)
       expr.units.at(i).generate_code(code, opts, global, ctx,
                           (i != expr.units.size() - 1) ? ptc_aware_none : ptc);
-    return code;
   }
 
-cow_vector<AIR_Node>&
+void
 do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                        const Global_Context& global, Analytic_Context& ctx,
                        PTC_Aware ptc, const Statement::S_expression& expr)
   {
     do_generate_clear_stack(code);
     do_generate_subexpression(code, opts, global, ctx, ptc, expr);
-    return code;
   }
 
 cow_vector<AIR_Node>
@@ -76,14 +73,14 @@ do_generate_expression(const Compiler_Options& opts, const Global_Context& globa
     return code;
   }
 
-cow_vector<AIR_Node>&
+void
 do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
                            const Global_Context& global, Analytic_Context& ctx,
                            const Compiler_Options& opts, PTC_Aware ptc,
                            const Statement::S_block& block)
   {
     if(block.stmts.empty())
-      return code;
+      return;
 
     // Statements other than the last one cannot be the end of function.
     for(size_t i = 0;  i < block.stmts.size();  ++i)
@@ -92,7 +89,6 @@ do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* 
                              ? (block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void
                                                                         : ptc_aware_none)
                              : ptc);
-    return code;
   }
 
 cow_vector<AIR_Node>
@@ -117,19 +113,19 @@ do_generate_block(const Compiler_Options& opts, const Global_Context& global,
 
 }  // namespace
 
-cow_vector<AIR_Node>&
+void
 Statement::
 generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
               const Global_Context& global, Analytic_Context& ctx,
               const Compiler_Options& opts, PTC_Aware ptc) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_expression: {
         const auto& altr = this->m_stor.as<S_expression>();
 
         // Evaluate the expression. Its value is discarded.
         do_generate_expression(code, opts, global, ctx, ptc, altr);
-        return code;
+        return;
       }
 
       case index_block: {
@@ -141,7 +137,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Encode arguments.
         AIR_Node::S_execute_block xnode = { ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_variables: {
@@ -219,7 +215,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
             }
           }
         }
-        return code;
+        return;
       }
 
       case index_function: {
@@ -244,7 +240,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode = { altr.sloc, true };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_if: {
@@ -263,7 +259,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true),
                                            ::std::move(code_false) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_switch: {
@@ -293,7 +289,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Encode arguments.
         AIR_Node::S_switch_statement xnode = { ::std::move(clauses) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_do_while: {
@@ -311,7 +307,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative,
                                                  ::std::move(code_cond) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_while: {
@@ -329,7 +325,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond),
                                               ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_for_each: {
@@ -353,7 +349,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, altr.sloc_init,
                                                  ::std::move(code_init), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_for: {
@@ -377,7 +373,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
                                             ::std::move(code_step), ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_try: {
@@ -400,7 +396,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         AIR_Node::S_try_statement xnode = { altr.sloc_try, ::std::move(code_try), altr.sloc_catch,
                                             altr.name_except, ::std::move(code_catch) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_break: {
@@ -411,25 +407,25 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           case jump_target_unspec: {
             AIR_Node::S_simple_status xnode = { air_status_break_unspec };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           case jump_target_switch: {
             AIR_Node::S_simple_status xnode = { air_status_break_switch };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_break_while };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           case jump_target_for: {
             AIR_Node::S_simple_status xnode = { air_status_break_for };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           default:
@@ -445,7 +441,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           case jump_target_unspec: {
             AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           case jump_target_switch:
@@ -454,13 +450,13 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           case jump_target_for: {
             AIR_Node::S_simple_status xnode = { air_status_continue_for };
             code.emplace_back(::std::move(xnode));
-            return code;
+            return;
           }
 
           default:
@@ -478,7 +474,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Encode arguments.
         AIR_Node::S_throw_statement xnode = { altr.sloc };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_return: {
@@ -497,7 +493,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           AIR_Node::S_return_statement xnode = { altr.expr.sloc, altr.by_ref, false };
           code.emplace_back(::std::move(xnode));
         }
-        return code;
+        return;
       }
 
       case index_assert: {
@@ -510,7 +506,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Encode arguments.
         AIR_Node::S_assert_statement xnode = { altr.sloc, altr.msg };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_defer: {
@@ -523,7 +519,7 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         // Encode arguments.
         AIR_Node::S_defer_expression xnode = { altr.sloc, ::std::move(code_body) };
         code.emplace_back(::std::move(xnode));
-        return code;
+        return;
       }
 
       case index_references: {
@@ -550,11 +546,11 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           AIR_Node::S_initialize_reference xnode_init = { altr.slocs.at(i), altr.names.at(i) };
           code.emplace_back(::std::move(xnode_init));
         }
-        return code;
+        return;
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 

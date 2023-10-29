@@ -174,14 +174,12 @@ class Expression_Unit
       }
 
   public:
-    Index
-    index() const noexcept
-      { return static_cast<Index>(this->m_stor.index());  }
-
+    // Checks whether this expression unit may use `alt_stack`.
     bool
     clobbers_alt_stack() const noexcept;
 
-    cow_vector<AIR_Node>&
+    // Generate IR nodes into `code`.
+    void
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                   const Global_Context& global, Analytic_Context& ctx, PTC_Aware ptc) const;
   };

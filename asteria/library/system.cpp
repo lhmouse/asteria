@@ -61,19 +61,13 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
-    switch(weaken_enum(qtok->index())) {
-      case Token::index_identifier:
-        ctxo.key = qtok->as_identifier();
-        break;
-
-      case Token::index_string_literal:
-        ctxo.key = qtok->as_string_literal();
-        break;
-
-      default:
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_identifier_expected, tstrm.next_sloc());
-    }
+    if(qtok->is_identifier())
+      ctxo.key = qtok->as_identifier();
+    else if(qtok->is_string_literal())
+      ctxo.key = qtok->as_string_literal();
+    else
+      throw Compiler_Error(Compiler_Error::M_status(),
+                compiler_status_identifier_expected, tstrm.next_sloc());
 
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();
@@ -97,96 +91,84 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
                 compiler_status_expression_expected, tstrm.next_sloc(),
                 "Value expected");
 
-    switch(weaken_enum(qtok->index())) {
-      case Token::index_punctuator:
-        // Accept an `[` or `{`.
-        if(qtok->as_punctuator() == punctuator_bracket_op) {
-          tstrm.shift();
-
-          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-          if(!kpunct) {
-            stack.emplace_back(Xparse_array());
-            goto parse_next;
-          }
-
-          // Accept an empty array.
-          value = V_array();
-          break;
-        }
-        else if(qtok->as_punctuator() == punctuator_brace_op) {
-          tstrm.shift();
-
-          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-          if(!kpunct) {
-            stack.emplace_back(Xparse_object());
-            do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
-            goto parse_next;
-          }
-
-          // Accept an empty object.
-          value = V_object();
-          break;
-        }
-        else
-          throw Compiler_Error(Compiler_Error::M_format(),
-                    compiler_status_expression_expected, tstrm.next_sloc(),
-                    "Value expected");
-
-      case Token::index_identifier:
-        // Accept a literal.
-        if(qtok->as_identifier() == "null") {
-          tstrm.shift();
-          value = nullopt;
-          break;
-        }
-        else if(qtok->as_identifier() == "true") {
-          tstrm.shift();
-          value = true;
-          break;
-        }
-        else if(qtok->as_identifier() == "false") {
-          tstrm.shift();
-          value = false;
-          break;
-        }
-        else if((qtok->as_identifier() == "Infinity") || (qtok->as_identifier() == "infinity")) {
-          tstrm.shift();
-          value = ::std::numeric_limits<double>::infinity();
-          break;
-        }
-        else if((qtok->as_identifier() == "NaN") || (qtok->as_identifier() == "nan")) {
-          tstrm.shift();
-          value = ::std::numeric_limits<double>::quiet_NaN();
-          break;
-        }
-        else
-          throw Compiler_Error(Compiler_Error::M_format(),
-                    compiler_status_expression_expected, tstrm.next_sloc(),
-                    "Value expected");
-
-      case Token::index_integer_literal:
-        // Accept an integer.
-        value = qtok->as_integer_literal();
+    if(qtok->is_punctuator()) {
+      // Accept an `[` or `{`.
+      if(qtok->as_punctuator() == punctuator_bracket_op) {
         tstrm.shift();
-        break;
 
-      case Token::index_real_literal:
-        // Accept a real number.
-        value = qtok->as_real_literal();
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+        if(!kpunct) {
+          stack.emplace_back(Xparse_array());
+          goto parse_next;
+        }
+
+        // Accept an empty array.
+        value = V_array();
+      }
+      else if(qtok->as_punctuator() == punctuator_brace_op) {
         tstrm.shift();
-        break;
 
-      case Token::index_string_literal:
-        // Accept a UTF-8 string.
-        value = qtok->as_string_literal();
-        tstrm.shift();
-        break;
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+        if(!kpunct) {
+          stack.emplace_back(Xparse_object());
+          do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+          goto parse_next;
+        }
 
-      default:
+        // Accept an empty object.
+        value = V_object();
+      }
+      else
         throw Compiler_Error(Compiler_Error::M_format(),
                   compiler_status_expression_expected, tstrm.next_sloc(),
                   "Value expected");
     }
+    else if(qtok->is_identifier()) {
+      // Accept a literal.
+      if(qtok->as_identifier() == "null") {
+        tstrm.shift();
+        value = nullopt;
+      }
+      else if(qtok->as_identifier() == "true") {
+        tstrm.shift();
+        value = true;
+      }
+      else if(qtok->as_identifier() == "false") {
+        tstrm.shift();
+        value = false;
+      }
+      else if((qtok->as_identifier() == "Infinity") || (qtok->as_identifier() == "infinity")) {
+        tstrm.shift();
+        value = ::std::numeric_limits<double>::infinity();
+      }
+      else if((qtok->as_identifier() == "NaN") || (qtok->as_identifier() == "nan")) {
+        tstrm.shift();
+        value = ::std::numeric_limits<double>::quiet_NaN();
+      }
+      else
+        throw Compiler_Error(Compiler_Error::M_format(),
+                  compiler_status_expression_expected, tstrm.next_sloc(),
+                  "Value expected");
+    }
+    else if(qtok->is_integer_literal()) {
+      // Accept an integer.
+      value = qtok->as_integer_literal();
+      tstrm.shift();
+    }
+    else if(qtok->is_real_literal()) {
+      // Accept a real number.
+      value = qtok->as_real_literal();
+      tstrm.shift();
+    }
+    else if(qtok->is_string_literal()) {
+      // Accept a UTF-8 string.
+      value = qtok->as_string_literal();
+      tstrm.shift();
+    }
+    else
+      throw Compiler_Error(Compiler_Error::M_format(),
+                compiler_status_expression_expected, tstrm.next_sloc(),
+                "Value expected");
 
     while(stack.size()) {
       // Advance to the next element.

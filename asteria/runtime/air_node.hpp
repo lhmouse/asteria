@@ -390,10 +390,6 @@ class AIR_Node
       }
 
   public:
-    Index
-    index() const noexcept
-      { return static_cast<Index>(this->m_stor.index());  }
-
     // If this node denotes a local reference which is allocated in an executive
     // context, replace it with a copy of the reference.
     opt<AIR_Node>

@@ -215,7 +215,7 @@ opt<AIR_Node>
 AIR_Node::
 rebind_opt(Abstract_Context& ctx) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_clear_stack:
       case index_declare_variable:
       case index_initialize_variable:
@@ -475,7 +475,7 @@ rebind_opt(Abstract_Context& ctx) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -483,7 +483,7 @@ void
 AIR_Node::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_clear_stack:
       case index_declare_variable:
       case index_initialize_variable:
@@ -637,7 +637,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -645,7 +645,7 @@ void
 AIR_Node::
 solidify(AVMC_Queue& queue) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_clear_stack: {
         const auto& altr = this->m_stor.as<S_clear_stack>();
 
@@ -4036,7 +4036,7 @@ solidify(AVMC_Queue& queue) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 

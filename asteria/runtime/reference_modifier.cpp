@@ -12,7 +12,7 @@ const Value*
 Reference_Modifier::
 apply_read_opt(const Value& parent) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_array_index: {
         // Get the element at the given index.
         const auto& altr = this->m_stor.as<S_array_index>();
@@ -106,7 +106,7 @@ apply_read_opt(const Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -114,7 +114,7 @@ Value*
 Reference_Modifier::
 apply_write_opt(Value& parent) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_array_index: {
         // Get the element at the given index.
         const auto& altr = this->m_stor.as<S_array_index>();
@@ -208,7 +208,7 @@ apply_write_opt(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -216,7 +216,7 @@ Value&
 Reference_Modifier::
 apply_open(Value& parent) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_array_index: {
         // Get the element at the given index.
         const auto& altr = this->m_stor.as<S_array_index>();
@@ -317,7 +317,7 @@ apply_open(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 
@@ -325,7 +325,7 @@ Value
 Reference_Modifier::
 apply_unset(Value& parent) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_array_index: {
         // Get the element at the given index.
         const auto& altr = this->m_stor.as<S_array_index>();
@@ -433,7 +433,7 @@ apply_unset(Value& parent) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 

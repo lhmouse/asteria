@@ -11,7 +11,7 @@ tinyfmt&
 Token::
 print(tinyfmt& fmt) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
       case index_keyword:
         // keyword `if`
         fmt << "keyword `";
@@ -51,7 +51,7 @@ print(tinyfmt& fmt) const
       }
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->index());
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 

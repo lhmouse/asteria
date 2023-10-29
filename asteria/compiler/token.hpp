@@ -104,13 +104,9 @@ class Token
     length() const noexcept
       { return this->m_length;  }
 
-    Index
-    index() const noexcept
-      { return static_cast<Index>(this->m_stor.index());  }
-
     bool
     is_keyword() const noexcept
-      { return this->index() == index_keyword;  }
+      { return this->m_stor.index() == index_keyword;  }
 
     Keyword
     as_keyword() const
@@ -118,7 +114,7 @@ class Token
 
     bool
     is_punctuator() const noexcept
-      { return this->index() == index_punctuator;  }
+      { return this->m_stor.index() == index_punctuator;  }
 
     Punctuator
     as_punctuator() const
@@ -126,7 +122,7 @@ class Token
 
     bool
     is_identifier() const noexcept
-      { return this->index() == index_identifier;  }
+      { return this->m_stor.index() == index_identifier;  }
 
     const cow_string&
     as_identifier() const
@@ -134,7 +130,7 @@ class Token
 
     bool
     is_integer_literal() const noexcept
-      { return this->index() == index_integer_literal;  }
+      { return this->m_stor.index() == index_integer_literal;  }
 
     int64_t
     as_integer_literal() const
@@ -142,7 +138,7 @@ class Token
 
     bool
     is_real_literal() const noexcept
-      { return this->index() == index_real_literal;  }
+      { return this->m_stor.index() == index_real_literal;  }
 
     double
     as_real_literal() const
@@ -150,7 +146,7 @@ class Token
 
     bool
     is_string_literal() const noexcept
-      { return this->index() == index_string_literal;  }
+      { return this->m_stor.index() == index_string_literal;  }
 
     const cow_string&
     as_string_literal() const

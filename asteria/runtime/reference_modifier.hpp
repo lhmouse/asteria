@@ -81,13 +81,9 @@ class Reference_Modifier
       }
 
   public:
-    Index
-    index() const noexcept
-      { return static_cast<Index>(this->m_stor.index());  }
-
     bool
     is_array_index() const noexcept
-      { return this->index() == index_array_index;  }
+      { return this->m_stor.index() == index_array_index;  }
 
     int64_t
     as_array_index() const
@@ -95,7 +91,7 @@ class Reference_Modifier
 
     bool
     is_object_key() const noexcept
-      { return this->index() == index_object_key;  }
+      { return this->m_stor.index() == index_object_key;  }
 
     const phsh_string&
     as_object_key() const
@@ -103,15 +99,15 @@ class Reference_Modifier
 
     bool
     is_array_head() const noexcept
-      { return this->index() == index_array_head;  }
+      { return this->m_stor.index() == index_array_head;  }
 
     bool
     is_array_tail() const noexcept
-      { return this->index() == index_array_tail;  }
+      { return this->m_stor.index() == index_array_tail;  }
 
     bool
     is_array_random() const noexcept
-      { return this->index() == index_array_random;  }
+      { return this->m_stor.index() == index_array_random;  }
 
     // Apply this modifier on a value.
     const Value*

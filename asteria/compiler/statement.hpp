@@ -217,15 +217,19 @@ class Statement
       }
 
   public:
-    Index
-    index() const noexcept
-      { return static_cast<Index>(this->m_stor.index());  }
-
+    // Checks whether this is `return;`, which terminates the control flow with
+    // a void reference.
     bool
     is_empty_return() const noexcept
-      { return (this->m_stor.index() == index_return) && this->m_stor.as<S_return>().expr.units.empty();  }
+      {
+        return (this->m_stor.index() == index_return)
+               && this->m_stor.as<S_return>().expr.units.empty();
+      }
 
-    cow_vector<AIR_Node>&
+    // Generate IR nodes into `code`. If `names_opt` is not a null pointer and
+    // this statement declares new names within `ctx`, those names are appended
+    // to `*names_opt`.
+    void
     generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
                   const Global_Context& global, Analytic_Context& ctx,
                   const Compiler_Options& opts, PTC_Aware ptc) const;
