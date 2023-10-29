@@ -78,14 +78,28 @@ class Reference_Stack
     top(uint32_t index = 0) const noexcept
       {
         ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop - 1 - index);
+        return *(this->m_bptr + this->m_etop - 1U - index);
       }
 
     Reference&
     mut_top(uint32_t index = 0)
       {
         ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop - 1 - index);
+        return *(this->m_bptr + this->m_etop - 1U - index);
+      }
+
+    const Reference&
+    bottom(uint32_t index = 0) const noexcept
+      {
+        ROCKET_ASSERT(index < this->m_etop);
+        return *(this->m_bptr + index);
+      }
+
+    Reference&
+    mut_bottom(uint32_t index = 0)
+      {
+        ROCKET_ASSERT(index < this->m_etop);
+        return *(this->m_bptr + index);
       }
 
     Reference&
