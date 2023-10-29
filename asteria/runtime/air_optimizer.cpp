@@ -27,22 +27,19 @@ reload(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     if(stmts.empty())
       return;
 
-    // Create a context of the function body.
+    // Generate code for the function body.
     Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
-    // Generate code for all statements.
-    for(size_t k = 0;  k + 1 < stmts.size();  ++k)
-      stmts.at(k).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-                       stmts.at(k + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
+    for(size_t i = 0;  i + 1 < stmts.size();  ++i)
+      stmts.at(i).generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
+                     stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none);
 
     stmts.back().generate_code(this->m_code, nullptr, global, ctx_func, this->m_opts,
-                       ptc_aware_void);
+                   ptc_aware_void);
 
-    // Check whether optimization is enabled during translation.
-    if(this->m_opts.optimization_level < 2)
-      return;
-
-    // TODO: Insert optimization passes
+    if(this->m_opts.optimization_level >= 2) {
+      // TODO: Insert optimization passes
+    }
   }
 
 void
@@ -56,20 +53,16 @@ rebind(Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     if(code.empty())
       return;
 
-    // Create a context of the function body.
+    // Rebind all nodes recursively.
     Analytic_Context ctx_func(Analytic_Context::M_function(), ctx_opt, this->m_params);
 
-    // Rebind all nodes recursively. Don't trigger copy-on-write unless a node
-    // requires rewriting.
     for(size_t k = 0;  k < code.size();  ++k)
       if(auto qnode = code.at(k).rebind_opt(ctx_func))
         this->m_code.mut(k) = ::std::move(*qnode);
 
-    // Check whether optimization is enabled during execution.
-    if(this->m_opts.optimization_level < 3)
-      return;
-
-    // TODO: Insert optimization passes
+    if(this->m_opts.optimization_level >= 3) {
+      // TODO: Insert optimization passes
+    }
   }
 
 cow_function
@@ -87,8 +80,7 @@ create_function(const Source_Location& sloc, stringR name)
             func << ", ";  // fallthrough
         default:
             func << this->m_params[tid];
-          }
-          while(++ tid != this->m_params.size());  // fallthrough
+          } while(++ tid != this->m_params.size());  // fallthrough
         case 0:
           break;
       }

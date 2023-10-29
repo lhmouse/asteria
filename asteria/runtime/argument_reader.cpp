@@ -538,8 +538,7 @@ throw_no_matching_function_call() const
       default:
           const auto& arg = this->m_stack.top(offset);
           caller << describe_type(arg.dereference_readonly().type());
-        }
-        while(-- offset != UINT32_MAX);  // fallthrough
+        } while(-- offset != UINT32_MAX);  // fallthrough
       case 0:
         break;
     }
