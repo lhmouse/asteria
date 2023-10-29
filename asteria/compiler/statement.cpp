@@ -162,29 +162,29 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
           size_t epos = 1;
           bool sb_arr = false;
           bool sb_obj = false;
-          ROCKET_ASSERT(!altr.decls[i].empty());
-          if((altr.decls[i].front() == "[") && (altr.decls[i].back() == "]")) {
+          ROCKET_ASSERT(!altr.decls.at(i).empty());
+          if((altr.decls.at(i).front() == "[") && (altr.decls.at(i).back() == "]")) {
             bpos = 1;
-            epos = altr.decls[i].size() - 1;
+            epos = altr.decls.at(i).size() - 1;
             sb_arr = true;
           }
-          else if((altr.decls[i].front() == "{") && (altr.decls[i].back() == "}")) {
+          else if((altr.decls.at(i).front() == "{") && (altr.decls.at(i).back() == "}")) {
             bpos = 1;
-            epos = altr.decls[i].size() - 1;
+            epos = altr.decls.at(i).size() - 1;
             sb_obj = true;
           }
           else
-            ROCKET_ASSERT(altr.decls[i].size() == 1);
+            ROCKET_ASSERT(altr.decls.at(i).size() == 1);
 
           // Create dummy references for further name lookups.
           for(size_t k = bpos;  k < epos;  ++k)
-            do_user_declare(names_opt, ctx, altr.decls[i][k]);
+            do_user_declare(names_opt, ctx, altr.decls.at(i).at(k));
 
-          if(altr.inits[i].units.empty()) {
+          if(altr.inits.at(i).units.empty()) {
             // If no initializer is provided, no further initialization is required.
             for(size_t k = bpos;  k < epos;  ++k) {
-              AIR_Node::S_define_null_variable xnode = { altr.immutable, altr.slocs[i],
-                                                         altr.decls[i][k] };
+              AIR_Node::S_define_null_variable xnode = { altr.immutable, altr.slocs.at(i),
+                                                         altr.decls.at(i).at(k) };
               code.emplace_back(::std::move(xnode));
             }
           }
@@ -194,27 +194,27 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
 
             // Push uninitialized variables from left to right.
             for(size_t k = bpos;  k < epos;  ++k) {
-              AIR_Node::S_declare_variable xnode = { altr.slocs[i], altr.decls[i][k] };
+              AIR_Node::S_declare_variable xnode = { altr.slocs.at(i), altr.decls.at(i).at(k) };
               code.emplace_back(::std::move(xnode));
             }
 
             // Generate code for the initializer.
             // Note: Do not destroy the stack.
-            do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, altr.inits[i]);
+            do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, altr.inits.at(i));
 
             // Initialize variables.
             if(sb_arr) {
-              AIR_Node::S_unpack_struct_array xnode = { altr.slocs[i], altr.immutable,
+              AIR_Node::S_unpack_struct_array xnode = { altr.slocs.at(i), altr.immutable,
                                                         static_cast<uint32_t>(epos - bpos) };
               code.emplace_back(::std::move(xnode));
             }
             else if(sb_obj) {
-              AIR_Node::S_unpack_struct_object xnode = { altr.slocs[i], altr.immutable,
-                                                         altr.decls[i].subvec(bpos, epos - bpos) };
+              AIR_Node::S_unpack_struct_object xnode = { altr.slocs.at(i), altr.immutable,
+                                                         altr.decls.at(i).subvec(bpos, epos - bpos) };
               code.emplace_back(::std::move(xnode));
             }
             else {
-              AIR_Node::S_initialize_variable xnode = { altr.slocs[i], altr.immutable };
+              AIR_Node::S_initialize_variable xnode = { altr.slocs.at(i), altr.immutable };
               code.emplace_back(::std::move(xnode));
             }
           }
@@ -537,17 +537,17 @@ generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
         for(size_t i = 0;  i < nvars;  ++i) {
           // Note that references don't support structured bindings.
           // Create a dummy references for further name lookups.
-          do_user_declare(names_opt, ctx, altr.names[i]);
+          do_user_declare(names_opt, ctx, altr.names.at(i));
 
           // Declare a void reference.
-          AIR_Node::S_declare_reference xnode_decl = { altr.names[i] };
+          AIR_Node::S_declare_reference xnode_decl = { altr.names.at(i) };
           code.emplace_back(::std::move(xnode_decl));
 
           // Generate code for the initializer.
-          do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.inits[i]);
+          do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.inits.at(i));
 
           // Initialize the reference.
-          AIR_Node::S_initialize_reference xnode_init = { altr.slocs[i], altr.names[i] };
+          AIR_Node::S_initialize_reference xnode_init = { altr.slocs.at(i), altr.names.at(i) };
           code.emplace_back(::std::move(xnode_init));
         }
         return code;
