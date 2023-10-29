@@ -13,23 +13,27 @@ class Reference
   {
   private:
     Value m_value;
+    cow_vector<Reference_Modifier> m_mods;
+    union {
+      Xref m_xref;
+      int* m_xref_st;
+    };
     rcfwd_ptr<Variable> m_var;
     rcfwd_ptr<PTC_Arguments> m_ptc;
-    cow_vector<Reference_Modifier> m_mods;
-    Xref m_xref = xref_invalid;
 
   public:
     // Constructors and assignment operators
     constexpr
     Reference() noexcept
+      : m_xref_st()
       { }
 
     Reference(const Reference& other) noexcept
       :
-        m_var(other.m_var),
-        m_ptc(other.m_ptc),
         m_mods(other.m_mods),
-        m_xref(other.m_xref)
+        m_xref(other.m_xref),
+        m_var(other.m_var),
+        m_ptc(other.m_ptc)
       {
         if(this->m_xref == xref_temporary)
           this->m_value = other.m_value;
@@ -52,10 +56,10 @@ class Reference
 
     Reference(Reference&& other) noexcept
       :
-        m_var(::std::move(other.m_var)),
-        m_ptc(::std::move(other.m_ptc)),
         m_mods(::std::move(other.m_mods)),
-        m_xref(::rocket::exchange(other.m_xref))
+        m_xref(::rocket::exchange(other.m_xref)),
+        m_var(::std::move(other.m_var)),
+        m_ptc(::std::move(other.m_ptc))
       {
         if(this->m_xref == xref_temporary)
           this->m_value.swap(other.m_value);
