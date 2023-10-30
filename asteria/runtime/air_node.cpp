@@ -1109,40 +1109,43 @@ solidify(AVMC_Queue& queue) const
             Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
 
             // Create key and mapped references.
-            refcnt_ptr<Variable> key_var;
-            if(!sp.name_key.empty()) {
-              key_var = ctx.global().garbage_collector()->create_variable();
-              ctx_for.insert_named_reference(sp.name_key).set_variable(key_var);
-            }
-            auto& mapped = ctx_for.insert_named_reference(sp.name_mapped);
+            Reference* qkey_ref = nullptr;
+            if(!sp.name_key.empty())
+              qkey_ref = &(ctx_for.insert_named_reference(sp.name_key));
+            auto& mapped_ref = ctx_for.insert_named_reference(sp.name_mapped);
 
             // Evaluate the range initializer and set the range up, which isn't
             // going to change for all loops.
             AIR_Status status = sp.queue_init.execute(ctx_for);
             ROCKET_ASSERT(status == air_status_next);
-            mapped = ::std::move(ctx_for.stack().mut_top());
+            mapped_ref = ::std::move(ctx_for.stack().mut_top());
 
-            const auto range = mapped.dereference_readonly();
+            const auto range = mapped_ref.dereference_readonly();
             if(range.is_null()) {
               // Do nothing.
               return air_status_next;
             }
             else if(range.is_array()) {
               const auto& arr = range.as_array();
-              mapped.push_modifier(Reference_Modifier::S_array_head());  // placeholder
+              mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
               for(int64_t i = 0;  i < arr.ssize();  ++i) {
                 // Set the key variable which is the subscript of the mapped
                 // element in the array.
-                if(key_var) {
+                if(qkey_ref) {
+                  auto key_var = qkey_ref->unphase_variable_opt();
+                  if(!key_var) {
+                    key_var = ctx.global().garbage_collector()->create_variable();
+                    qkey_ref->set_variable(key_var);
+                  }
                   key_var->initialize(i);
                   key_var->set_immutable();
                 }
 
                 // Set the mapped reference.
-                mapped.pop_modifier();
+                mapped_ref.pop_modifier();
                 Reference_Modifier::S_array_index xmod = { i };
-                mapped.push_modifier(::std::move(xmod));
-                mapped.dereference_readonly();
+                mapped_ref.push_modifier(::std::move(xmod));
+                mapped_ref.dereference_readonly();
 
                 // Execute the loop body.
                 status = do_execute_block(sp.queue_body, ctx_for);
@@ -1158,20 +1161,25 @@ solidify(AVMC_Queue& queue) const
             }
             else if(range.is_object()) {
               const auto& obj = range.as_object();
-              mapped.push_modifier(Reference_Modifier::S_array_head());  // placeholder
+              mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
               for(auto it = obj.begin();  it != obj.end();  ++it) {
                 // Set the key variable which is the name of the mapped element
                 // in the object.
-                if(key_var) {
+                if(qkey_ref) {
+                  auto key_var = qkey_ref->unphase_variable_opt();
+                  if(!key_var) {
+                    key_var = ctx.global().garbage_collector()->create_variable();
+                    qkey_ref->set_variable(key_var);
+                  }
                   key_var->initialize(it->first.rdstr());
                   key_var->set_immutable();
                 }
 
                 // Set the mapped reference.
-                mapped.pop_modifier();
+                mapped_ref.pop_modifier();
                 Reference_Modifier::S_object_key xmod = { it->first };
-                mapped.push_modifier(::std::move(xmod));
-                mapped.dereference_readonly();
+                mapped_ref.push_modifier(::std::move(xmod));
+                mapped_ref.dereference_readonly();
 
                 // Execute the loop body.
                 status = do_execute_block(sp.queue_body, ctx_for);
