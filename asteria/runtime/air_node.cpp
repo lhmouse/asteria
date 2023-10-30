@@ -1109,7 +1109,11 @@ solidify(AVMC_Queue& queue) const
             Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
 
             // Create key and mapped references.
-            refcnt_ptr<Variable> kvar;
+            refcnt_ptr<Variable> key_var;
+            if(!sp.name_key.empty()) {
+              key_var = ctx.global().garbage_collector()->create_variable();
+              ctx_for.insert_named_reference(sp.name_key).set_variable(key_var);
+            }
             auto& mapped = ctx_for.insert_named_reference(sp.name_mapped);
 
             // Evaluate the range initializer and set the range up, which isn't
@@ -1129,13 +1133,9 @@ solidify(AVMC_Queue& queue) const
               for(int64_t i = 0;  i < arr.ssize();  ++i) {
                 // Set the key variable which is the subscript of the mapped
                 // element in the array.
-                if(!sp.name_key.empty()) {
-                  if(!kvar) {
-                    kvar = ctx.global().garbage_collector()->create_variable();
-                    ctx_for.insert_named_reference(sp.name_key).set_variable(kvar);
-                  }
-                  kvar->initialize(i);
-                  kvar->set_immutable();
+                if(key_var) {
+                  key_var->initialize(i);
+                  key_var->set_immutable();
                 }
 
                 // Set the mapped reference.
@@ -1162,13 +1162,9 @@ solidify(AVMC_Queue& queue) const
               for(auto it = obj.begin();  it != obj.end();  ++it) {
                 // Set the key variable which is the name of the mapped element
                 // in the object.
-                if(!sp.name_key.empty()) {
-                  if(!kvar) {
-                    kvar = ctx.global().garbage_collector()->create_variable();
-                    ctx_for.insert_named_reference(sp.name_key).set_variable(kvar);
-                  }
-                  kvar->initialize(it->first.rdstr());
-                  kvar->set_immutable();
+                if(key_var) {
+                  key_var->initialize(it->first.rdstr());
+                  key_var->set_immutable();
                 }
 
                 // Set the mapped reference.
