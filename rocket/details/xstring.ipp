@@ -307,7 +307,7 @@ inline
 wchar_t*
 ymempcpy(wchar_t* out, const wchar_t* str, size_t len) noexcept
   {
-    return (wchar_t*) ::wmempcpy(out, str, len);
+    return ::wmempcpy(out, str, len);
   }
 
 }  // namespace details_xstring

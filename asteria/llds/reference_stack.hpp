@@ -125,7 +125,7 @@ class Reference_Stack
     pop(uint32_t count = 1) noexcept
       {
         ROCKET_ASSERT(count <= this->m_etop);
-        this->m_etop -= (uint32_t) count;
+        this->m_etop -= count;
       }
 
     void
