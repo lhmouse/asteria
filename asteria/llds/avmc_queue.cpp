@@ -50,8 +50,11 @@ void
 AVMC_Queue::
 clear() noexcept
   {
-    const auto eptr = this->m_bptr + this->m_einit;
-    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
+    while(offset != 0) {
+      auto head = this->m_bptr + this->m_einit + offset;
+      offset += 1L + head->nheaders;
+
       if(head->meta_ver == 0)
         continue;
 
@@ -144,8 +147,11 @@ AVMC_Queue::
 execute(Executive_Context& ctx) const
   {
     AIR_Status status = air_status_next;
-    const auto eptr = this->m_bptr + this->m_einit;
-    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
+    while(offset != 0) {
+      auto head = this->m_bptr + this->m_einit + offset;
+      offset += 1L + head->nheaders;
+
       switch(head->meta_ver) {
         case 0:
           // There is no metadata or symbols.
@@ -186,8 +192,11 @@ void
 AVMC_Queue::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    const auto eptr = this->m_bptr + this->m_einit;
-    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
+    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
+    while(offset != 0) {
+      auto head = this->m_bptr + this->m_einit + offset;
+      offset += 1L + head->nheaders;
+
       if(head->meta_ver == 0)
         continue;
 
