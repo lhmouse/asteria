@@ -240,8 +240,14 @@ utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 tinyfmt&
 c_quote(tinyfmt& fmt, const char* data, size_t size);
 
+tinyfmt&
+c_quote(tinyfmt& fmt, const cow_string& data);
+
 cow_string&
 c_quote(cow_string& str, const char* data, size_t size);
+
+cow_string&
+c_quote(cow_string& str, const cow_string& data);
 
 }  // namespace asteria
 #endif

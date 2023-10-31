@@ -45,8 +45,7 @@ print(tinyfmt& fmt) const
       case index_string_literal: {
         // string-literal "hello world"
         fmt << "string-literal \"";
-        const auto& val = this->m_stor.as<S_string_literal>().val;
-        c_quote(fmt, val.data(), val.size());
+        c_quote(fmt, this->m_stor.as<S_string_literal>().val);
         return fmt << "\"";
       }
 

@@ -385,6 +385,12 @@ c_quote(tinyfmt& fmt, const char* data, size_t size)
     return fmt;
   }
 
+tinyfmt&
+c_quote(tinyfmt& fmt, const cow_string& data)
+  {
+    return c_quote(fmt, data.data(), data.size());
+  }
+
 cow_string&
 c_quote(cow_string& str, const char* data, size_t size)
   {
@@ -399,6 +405,12 @@ c_quote(cow_string& str, const char* data, size_t size)
         str += seq;
     }
     return str;
+  }
+
+cow_string&
+c_quote(cow_string& str, const cow_string& data)
+  {
+    return c_quote(str, data.data(), data.size());
   }
 
 }  // namespace asteria

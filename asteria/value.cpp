@@ -327,7 +327,7 @@ print(tinyfmt& fmt) const
 
       case type_string:
         fmt << "\"";
-        c_quote(fmt, qval->m_stor.as<V_string>().data(), qval->m_stor.as<V_string>().size());
+        c_quote(fmt, qval->m_stor.as<V_string>());
         fmt << "\"";
         break;
 
@@ -357,7 +357,7 @@ print(tinyfmt& fmt) const
         if(!altr.empty()) {
           Rbr_object elemo = { &altr, altr.begin() };
           fmt << "{ \"";
-          c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+          c_quote(fmt, elemo.curp->first);
           fmt << "\": ";
           qval = &(elemo.curp->second);
           stack.emplace_back(::std::move(elemo));
@@ -391,7 +391,7 @@ print(tinyfmt& fmt) const
           ++ elemo.curp;
           if(elemo.curp != elemo.refo->end()) {
             fmt << ", \"";
-            c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+            c_quote(fmt, elemo.curp->first);
             fmt << "\": ";
             qval = &(elemo.curp->second);
             goto r;
@@ -446,7 +446,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       case type_string: {
         const auto& altr = qval->m_stor.as<V_string>();
         fmt << "string(" << altr.size() << ") \"";
-        c_quote(fmt, altr.data(), altr.size());
+        c_quote(fmt, altr);
         fmt << "\";";
         break;
       }
@@ -485,7 +485,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           fmt << "object(" << altr.size() << ") {";
           details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
           fmt << "\"";
-          c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+          c_quote(fmt, elemo.curp->first);
           fmt << "\" = ";
           qval = &(elemo.curp->second);
           stack.emplace_back(::std::move(elemo));
@@ -522,7 +522,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           if(elemo.curp != elemo.refo->end()) {
             details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
             fmt << "\"";
-            c_quote(fmt, elemo.curp->first.data(), elemo.curp->first.size());
+            c_quote(fmt, elemo.curp->first);
             fmt << "\" = ";
             qval = &(elemo.curp->second);
             goto r;
