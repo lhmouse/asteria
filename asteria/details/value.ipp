@@ -287,15 +287,17 @@ template<typename XValT>
 using Valuable = Valuable_impl<typename ::rocket::remove_cvref<XValT>::type, void>;
 
 inline
-tinyfmt&
+void
 do_break_line(tinyfmt& fmt, size_t step, size_t next)
   {
     static constexpr char spaces[] = "                       ";
     static constexpr size_t nspaces = ::rocket::xstrlen(spaces);
 
-    // When `step` is zero, separate fields with a single space.
-    if(step == 0)
-      return fmt << spaces[0];
+    if(step == 0) {
+      // When `step` is zero, separate fields with a single space.
+      fmt.putc(' ');
+      return;
+    }
 
     // Otherwise, terminate the current line, and indent the next.
     size_t nrem = next;
@@ -304,7 +306,7 @@ do_break_line(tinyfmt& fmt, size_t step, size_t next)
       nrem -= nspaces;
       fmt.putn(spaces, nspaces);
     }
-    return fmt.putn(spaces, nrem);
+    fmt.putn(spaces, nrem);
   }
 
 }  // namespace details_value
