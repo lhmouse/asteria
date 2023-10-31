@@ -290,23 +290,17 @@ inline
 void
 do_break_line(tinyfmt& fmt, size_t step, size_t next)
   {
-    static constexpr char spaces[] = "                       ";
-    static constexpr size_t nspaces = ::rocket::xstrlen(spaces);
-
     if(step == 0) {
       // When `step` is zero, separate fields with a single space.
       fmt.putc(' ');
-      return;
     }
-
-    // Otherwise, terminate the current line, and indent the next.
-    size_t nrem = next;
-    fmt << '\n';
-    while(ROCKET_UNEXPECT(nrem > nspaces)) {
-      nrem -= nspaces;
-      fmt.putn(spaces, nspaces);
+    else {
+      // Otherwise, terminate the current line, and indent the next.
+      static constexpr char spaces[] = "                       ";
+      fmt.putc('\n');
+      for(size_t t = next, p;  (p = ::rocket::min(t, sizeof(spaces) - 1)) != 0;  t -= p)
+        fmt.putn(spaces, p);
     }
-    fmt.putn(spaces, nrem);
   }
 
 }  // namespace details_value
