@@ -274,64 +274,64 @@ operator<<(basic_tinyfmt<charT>& fmt, const valueT& value)
   }
 
 // ... stupid English, stupid inflection.
-#define ROCKET_TINYFMT_NOUN_IRREGULAR(num, sing, pl)   ((((num) > 0) && ((num) <= 1)) ? (sing) : (pl))
-#define ROCKET_TINYFMT_NOUN_REGULAR(num, sing)         ROCKET_TINYFMT_NOUN_IRREGULAR(num, sing, sing "s")
-#define ROCKET_TINYFMT_NOUN_SAME_PLURAL(num, sing)     ROCKET_TINYFMT_NOUN_IRREGULAR(num, sing, sing)
+#define ROCKET_TINYFMT_NOUN_IRREGULAR(num, sing, pl)   ((((num) > 0) && ((num) <= 1)) ? (" " sing) : (" " pl))
+#define ROCKET_TINYFMT_NOUN_REGULAR(num, sing)         ((((num) > 0) && ((num) <= 1)) ? (" " sing) : (" " sing "s"))
+#define ROCKET_TINYFMT_NOUN_SAME_PLURAL(num, sing)     (" " sing)
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " nanosecond");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "nanosecond");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " microsecond");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "microsecond");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " millisecond");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "millisecond");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " second");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "second");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " minute");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "minute");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " hour");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "hour");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<86400>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " day");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "day");
   }
 
 template<typename charT, typename repT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<604800>>& dur)
   {
-    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), " week");
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "week");
   }
 
 using tinyfmt     = basic_tinyfmt<char>;
