@@ -1589,14 +1589,14 @@ cast_F(float& value, float min, float max) noexcept
           // This value is at least normal, so round the mantissa.
           constexpr uint32_t ulp = 1U << 8;
           uint32_t bits_out = bits & (ulp - 1);
-          this->m_inxct |= (bits_out != 0) && (bits_out != (ulp - 1));
+          this->m_inxct |= (bits_out > 0) && (bits_out < ulp - 1);
           bits_out <<= 1;
           bits_out |= this->m_more;
 
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= 8;
-          bits += (bits_out >= ulp) && (((ulp - bits_out) >> 31) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 31) & (((ulp - bits_out) >> 31) | (bits & 1));
           sh = (int) (bits >> 24) & 1;
           exp += sh;
 
@@ -1615,14 +1615,14 @@ cast_F(float& value, float min, float max) noexcept
           sh = 9 - exp;
           uint32_t ulp = 1U << sh;
           uint32_t bits_out = bits & (ulp - 1);
-          this->m_inxct |= (bits_out != 0) && (bits_out != (ulp - 1));
+          this->m_inxct |= (bits_out > 0) && (bits_out < ulp - 1);
           bits_out <<= 1;
           bits_out |= this->m_more;
 
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= sh;
-          bits += (bits_out >= ulp) && (((ulp - bits_out) >> 31) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 31) & (((ulp - bits_out) >> 31) | (bits & 1));
           sh = (int) (bits >> 23) & 1;
           exp += sh;
 
@@ -1768,14 +1768,14 @@ cast_D(double& value, double min, double max) noexcept
           // This value is at least normal, so round the mantissa.
           constexpr uint64_t ulp = 1ULL << 11;
           uint64_t bits_out = bits & (ulp - 1);
-          this->m_inxct |= (bits_out != 0) && (bits_out != (ulp - 1));
+          this->m_inxct |= (bits_out > 0) && (bits_out < ulp - 1);
           bits_out <<= 1;
           bits_out |= this->m_more;
 
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= 11;
-          bits += (bits_out >= ulp) && (((ulp - bits_out) >> 63) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 63) & (((ulp - bits_out) >> 63) | (bits & 1));
           sh = (int) (bits >> 53) & 1;
           exp += sh;
 
@@ -1794,14 +1794,14 @@ cast_D(double& value, double min, double max) noexcept
           sh = 12 - exp;
           uint64_t ulp = 1ULL << sh;
           uint64_t bits_out = bits & (ulp - 1);
-          this->m_inxct |= (bits_out != 0) && (bits_out != (ulp - 1));
+          this->m_inxct |= (bits_out > 0) && (bits_out < ulp - 1);
           bits_out <<= 1;
           bits_out |= this->m_more;
 
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= sh;
-          bits += (bits_out >= ulp) && (((ulp - bits_out) >> 63) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 63) & (((ulp - bits_out) >> 63) | (bits & 1));
           sh = (int) (bits >> 52) & 1;
           exp += sh;
 
