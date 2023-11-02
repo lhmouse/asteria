@@ -1596,7 +1596,7 @@ cast_F(float& value, float min, float max) noexcept
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= 8;
-          bits += ((ulp - 1 - bits_out) >> 31) & (((ulp - bits_out) >> 31) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 31) & ((ulp - bits_out) >> 31 | bits) & 1;
           sh = (int) (bits >> 24) & 1;
           exp += sh;
 
@@ -1622,7 +1622,7 @@ cast_F(float& value, float min, float max) noexcept
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= sh;
-          bits += ((ulp - 1 - bits_out) >> 31) & (((ulp - bits_out) >> 31) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 31) & ((ulp - bits_out) >> 31 | bits) & 1;
           sh = (int) (bits >> 23) & 1;
           exp += sh;
 
@@ -1775,7 +1775,7 @@ cast_D(double& value, double min, double max) noexcept
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= 11;
-          bits += ((ulp - 1 - bits_out) >> 63) & (((ulp - bits_out) >> 63) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 63) & ((ulp - bits_out) >> 63 | bits) & 1;
           sh = (int) (bits >> 53) & 1;
           exp += sh;
 
@@ -1801,7 +1801,7 @@ cast_D(double& value, double min, double max) noexcept
           // Round the mantissa to even. If rounding effects a carry,
           // the exponent shall be incremented.
           bits >>= sh;
-          bits += ((ulp - 1 - bits_out) >> 63) & (((ulp - bits_out) >> 63) | (bits & 1));
+          bits += ((ulp - 1 - bits_out) >> 63) & ((ulp - bits_out) >> 63 | bits) & 1;
           sh = (int) (bits >> 52) & 1;
           exp += sh;
 
