@@ -355,23 +355,11 @@ do_accept_statement_as_block_opt(Token_Stream& tstrm, Scope_Flags scfl);
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
 
-bool
-do_accept_expression_as_rvalue(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
-  {
-    auto sloc = tstrm.next_sloc();
-    if(!do_accept_expression(units, tstrm))
-      return false;
-
-    Expression_Unit::S_check_argument xunit = { ::std::move(sloc), false };
-    units.emplace_back(::std::move(xunit));
-    return true;
-  }
-
 opt<Statement::S_expression>
 do_accept_expression_opt(Token_Stream& tstrm)
   {
-    cow_vector<Expression_Unit> units;
     auto sloc = tstrm.next_sloc();
+    cow_vector<Expression_Unit> units;
     if(!do_accept_expression(units, tstrm))
       return nullopt;
 
@@ -379,12 +367,27 @@ do_accept_expression_opt(Token_Stream& tstrm)
     return ::std::move(xexpr);
   }
 
+bool
+do_accept_expression_and_check(cow_vector<Expression_Unit>& units, Token_Stream& tstrm, bool by_ref)
+  {
+    auto sloc = tstrm.next_sloc();
+    if(!do_accept_expression(units, tstrm))
+      return false;
+
+    if(by_ref || units.back().maybe_unreadable()) {
+      // XXX: This may convert the result to an rvalue.
+      Expression_Unit::S_check_argument xunit = { ::std::move(sloc), by_ref };
+      units.emplace_back(::std::move(xunit));
+    }
+    return true;
+  }
+
 opt<Statement::S_expression>
 do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
   {
     cow_vector<Expression_Unit> units;
     auto sloc = tstrm.next_sloc();
-    if(!do_accept_expression_as_rvalue(units, tstrm))
+    if(!do_accept_expression_and_check(units, tstrm, false))
       return nullopt;
 
     Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
@@ -1715,7 +1718,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     bool comma_allowed = false;
 
     for(;;) {
-      if(!do_accept_expression_as_rvalue(units, tstrm))
+      if(!do_accept_expression_and_check(units, tstrm, false))
         break;
 
       nelems += 1;
@@ -1775,7 +1778,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_equals_sign_or_colon_expected, tstrm.next_sloc());
 
-      if(!do_accept_expression_as_rvalue(units, tstrm))
+      if(!do_accept_expression_and_check(units, tstrm, false))
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2036,18 +2039,15 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
 
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
-      auto refsp = do_accept_reference_specifier_opt(tstrm);
+      auto ref_sp = do_accept_reference_specifier_opt(tstrm);
       Expression_Unit::argument arg;
-      bool succ = do_accept_expression(arg.units, tstrm);
-      if(refsp && !succ)
+      bool succ = do_accept_expression_and_check(arg.units, tstrm, ref_sp.value_or(false));
+      if(!ref_sp && !succ)
+        break;
+      else if(!succ)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
-      if(!refsp && !succ)
-        break;
-
-      Expression_Unit::S_check_argument xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
-      arg.units.emplace_back(::std::move(xunit));
       args.emplace_back(::std::move(arg));
 
       // Look for the separator.
@@ -2186,18 +2186,15 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
 
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
-      auto refsp = do_accept_reference_specifier_opt(tstrm);
+      auto ref_sp = do_accept_reference_specifier_opt(tstrm);
       Expression_Unit::argument arg;
-      bool succ = do_accept_expression(arg.units, tstrm);
-      if(refsp && !succ)
+      bool succ = do_accept_expression_and_check(arg.units, tstrm, ref_sp.value_or(false));
+      if(!ref_sp && !succ)
+        break;
+      else if(!succ)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
-      if(!refsp && !succ)
-        break;
-
-      Expression_Unit::S_check_argument xunit = { ::std::move(arg_sloc), refsp.value_or(false) };
-      arg.units.emplace_back(::std::move(xunit));
       args.emplace_back(::std::move(arg));
 
       // Look for the separator.

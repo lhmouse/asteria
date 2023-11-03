@@ -34,16 +34,44 @@ clobbers_alt_stack() const noexcept
       case index_catch:
         return true;
 
-      case index_branch: {
-        const auto& altr = this->m_stor.as<S_branch>();
+      case index_branch:
+        return ::rocket::any_of(this->m_stor.as<S_branch>().branches,
+            [](const branch& br) {
+              return ::rocket::any_of(br.units,
+                  [](const Expression_Unit& unit) { return unit.clobbers_alt_stack();  });
+            });
 
-        for(const auto& br : altr.branches)
-          for(const auto& unit : br.units)
-            if(unit.clobbers_alt_stack())
-              return true;
+      default:
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
+    }
+  }
 
+bool
+Expression_Unit::
+maybe_unreadable() const noexcept
+  {
+    switch(static_cast<Index>(this->m_stor.index())) {
+      case index_literal:
+      case index_closure_function:
+      case index_operator_rpn:
+      case index_unnamed_array:
+      case index_unnamed_object:
+      case index_check_argument:
+      case index_catch:
         return false;
-      }
+
+      case index_local_reference:
+      case index_global_reference:
+      case index_function_call:
+      case index_variadic_call:
+      case index_import_call:
+        return true;
+
+      case index_branch:
+        return ::rocket::any_of(this->m_stor.as<S_branch>().branches,
+            [](const branch& br) {
+              return !br.units.empty() && br.units.back().maybe_unreadable();
+            });
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());

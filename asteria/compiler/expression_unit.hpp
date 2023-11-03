@@ -178,6 +178,10 @@ class Expression_Unit
     bool
     clobbers_alt_stack() const noexcept;
 
+    // Checks whether this operation may produce a void reference.
+    bool
+    maybe_unreadable() const noexcept;
+
     // Generate IR nodes into `code`.
     void
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
