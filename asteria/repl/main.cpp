@@ -23,8 +23,7 @@ Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
   -h      show help message then exit
   -I      suppress interactive mode [default = auto]
   -i      force interactive mode [default = auto]
-  -O      equivalent to `-O1`
-  -O[nn]  set optimization level to `nn` [default = 2]
+  -O[n]   set optimization level to `n` [default = 2]
   -V      show version information then exit
   -v      enable verbose mode
 
@@ -87,9 +86,8 @@ do_parse_command_line(int argc, char** argv)
     bool help = false;
     bool version = false;
 
-    opt<bool> verbose;
-    opt<bool> interactive;
-    opt<long> optimize;
+    opt<bool> verbose, interactive;
+    opt<int> optimize;
 
     opt<cow_string> path;
     cow_vector<Value> args;
@@ -120,21 +118,13 @@ do_parse_command_line(int argc, char** argv)
           interactive = true;
           continue;
 
-        case 'O': {
-          // If `-O` is specified without an argument, it is equivalent to `-O1`.
-          optimize = 1;
-          if(!optarg || !*optarg)
-            continue;
-
-          char* ep;
-          long val = ::strtol(optarg, &ep, 10);
-          if((*ep != 0) || (val < 0) || (val > 99))
+        case 'O':
+          if(!optarg || (optarg[0] < '0') || (optarg[0] > '9') || optarg[1])
             exit_printf(exit_invalid_argument,
-                  "%s: invalid optimization level -- '%s'\n", argv[0], optarg);
-
-          optimize = val;
+                  "%s: `-O` requires an integer argument between 0 and 9.", argv[0]);
+          else
+            optimize = optarg[0] - '0';
           continue;
-        }
 
         case 'V':
           version = true;
