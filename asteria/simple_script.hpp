@@ -6,6 +6,8 @@
 
 #include "fwd.hpp"
 #include "runtime/global_context.hpp"
+#include "runtime/reference.hpp"
+#include "llds/reference_stack.hpp"
 namespace asteria {
 
 class Simple_Script
@@ -13,8 +15,6 @@ class Simple_Script
   private:
     Compiler_Options m_opts;
     Global_Context m_global;
-
-    cow_vector<phsh_string> m_params;
     cow_function m_func;
 
   public:
@@ -43,7 +43,7 @@ class Simple_Script
 
     explicit operator
     bool() const noexcept
-      { return bool(this->m_func);  }
+      { return static_cast<bool>(this->m_func);  }
 
     operator
     const cow_function&() const noexcept

@@ -35,9 +35,10 @@ reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
                            ((i != stmts.size() - 1) && !stmts.at(i + 1).is_empty_return())
                              ? ptc_aware_none : ptc_aware_void);
 
-    if(this->m_opts.optimization_level >= 2) {
-      // TODO: Insert optimization passes
-    }
+    if(this->m_opts.optimization_level <= 0)
+      return;
+
+    // TODO: Insert optimization passes
   }
 
 void
@@ -57,10 +58,6 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
     for(size_t k = 0;  k < code.size();  ++k)
       if(auto qnode = code.at(k).rebind_opt(ctx_func))
         this->m_code.mut(k) = ::std::move(*qnode);
-
-    if(this->m_opts.optimization_level >= 3) {
-      // TODO: Insert optimization passes
-    }
   }
 
 cow_function

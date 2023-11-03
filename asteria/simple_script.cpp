@@ -52,15 +52,15 @@ void
 Simple_Script::
 reload(stringR name, Statement_Sequence&& stmtq)
   {
-    // Initialize the argument list. This is done only once.
-    if(this->m_params.empty())
-      this->m_params.emplace_back(sref("..."));
-
     // Instantiate the function.
+    cow_vector<phsh_string> script_params;
+    script_params.emplace_back(sref("..."));
+
     AIR_Optimizer optmz(this->m_opts);
-    optmz.reload(nullptr, this->m_params, this->m_global, stmtq);
-    Source_Location sloc(name, 0, 0);
-    this->m_func = optmz.create_function(sloc, sref("[file scope]"));
+    optmz.reload(nullptr, script_params, this->m_global, stmtq);
+
+    Source_Location script_sloc(name, 0, 0);
+    this->m_func = optmz.create_function(script_sloc, sref("[file scope]"));
   }
 
 void

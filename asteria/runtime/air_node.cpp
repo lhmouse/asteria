@@ -3621,10 +3621,11 @@ solidify(AVMC_Queue& queue) const
                        "Could not open script file '$1': ${errno:full}", path_val);
 
             // Load and parse the file.
-            Module_Loader::Unique_Stream istrm;
-            istrm.reset(ctx.global().module_loader(), realpathp.get());
             abs_path.assign(realpathp.get());
             Source_Location script_sloc(abs_path, 0, 0);
+
+            Module_Loader::Unique_Stream istrm;
+            istrm.reset(ctx.global().module_loader(), realpathp);
 
             Token_Stream tstrm(sp.opts);
             tstrm.reload(abs_path, 1, ::std::move(istrm.get()));
