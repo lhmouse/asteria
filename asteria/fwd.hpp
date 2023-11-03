@@ -437,7 +437,7 @@ class cow_opaque
 
     explicit operator
     bool() const noexcept
-      { return bool(this->m_sptr);  }
+      { return static_cast<bool>(this->m_sptr);  }
 
     const type_info&
     type() const

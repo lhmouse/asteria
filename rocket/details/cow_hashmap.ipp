@@ -86,7 +86,7 @@ class basic_bucket
 
     explicit constexpr operator
     bool() const noexcept
-      { return bool(this->m_qval);  }
+      { return static_cast<bool>(this->m_qval);  }
 
     constexpr
     const value_type&

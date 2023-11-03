@@ -130,7 +130,7 @@ class unique_ptr
 
     explicit constexpr operator
     bool() const noexcept
-      { return bool(this->get());  }
+      { return static_cast<bool>(this->get());  }
 
     constexpr operator
     pointer() const noexcept
