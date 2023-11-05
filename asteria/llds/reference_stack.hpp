@@ -106,19 +106,16 @@ class Reference_Stack
     push()
       {
         if(ROCKET_UNEXPECT(this->m_etop >= this->m_einit)) {
-          // Construct a new reference.
           if(this->m_einit >= this->m_estor)
             this->do_reallocate(this->m_estor / 2 * 3 | 17);
 
+          // Construct a new reference.
           ::rocket::construct(this->m_bptr + this->m_einit);
           this->m_einit ++;
-          this->m_etop = this->m_einit;
         }
-        else {
-          // Reuse a previous one.
-          this->m_etop ++;
-        }
-        return *(this->m_bptr + this->m_etop - 1);
+
+        this->m_etop ++;
+        return *(this->m_bptr + this->m_etop - 1U);
       }
 
     void
