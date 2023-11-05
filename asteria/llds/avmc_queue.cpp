@@ -87,15 +87,16 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     uint8_t meta_ver = 0;
 
     if(ctor_opt || dtor_opt || vcoll_opt || sloc_opt) {
-      // Allocate metadata for this node.
       meta.reset(new Metadata());
       meta_ver = 1;
 
+      // ver. 1
+      meta->exec = exec;
       meta->dtor_opt = dtor_opt;
       meta->vcoll_opt = vcoll_opt;
-      meta->exec = exec;
 
       if(sloc_opt) {
+        // ver. 2
         meta->sloc = *sloc_opt;
         meta_ver = 2;
       }
