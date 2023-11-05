@@ -131,6 +131,21 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
       case index_block: {
         const auto& altr = this->m_stor.as<S_block>();
 
+        // https://github.com/lhmouse/asteria/issues/102
+        // First, unblockify Matryoshka blocks. If the innermost block contains
+        // neither declarations nor `defer` statements, unblockify it, too.
+        auto qblock = &altr;
+        while((qblock->stmts.size() == 1) && (qblock->stmts.at(0).m_stor.index() == index_block))
+          qblock = &(qblock->stmts.at(0).m_stor.as<S_block>());
+
+        if(qblock->stmts.empty())
+          return;
+
+        if(::rocket::all_of(altr.stmts, [](const Statement& st) { return st.is_scopeless();  })) {
+          do_generate_statement_list(code, ctx, nullptr, global, opts, ptc, *qblock);
+          return;
+        }
+
         // Generate code for the body. This can be PTC'd.
         auto code_body = do_generate_block(opts, global, ctx, ptc, altr);
 

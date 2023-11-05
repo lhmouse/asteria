@@ -58,6 +58,7 @@ check_PROGRAMS +=  \
   %reldir%/ptc_hooks_return.test  \
   %reldir%/switch_defer.test  \
   %reldir%/for_each.test  \
+  %reldir%/github_102.test  \
   ${END}
 
 EXTRA_DIST +=  \

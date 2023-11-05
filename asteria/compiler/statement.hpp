@@ -226,6 +226,14 @@ class Statement
                && this->m_stor.as<S_return>().expr.units.empty();
       }
 
+    // Checks whether this statement does not modify the current context.
+    bool
+    is_scopeless() const noexcept
+      {
+        return ::rocket::is_none_of(this->m_stor.index(),
+            { index_variables, index_references, index_function, index_defer });
+      }
+
     // Generate IR nodes into `code`. If `names_opt` is not a null pointer and
     // this statement declares new names within `ctx`, those names are appended
     // to `*names_opt`.
