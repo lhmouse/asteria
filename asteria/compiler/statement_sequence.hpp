@@ -27,21 +27,15 @@ class Statement_Sequence
     // These are accessors and modifiers of options for parsing.
     const Compiler_Options&
     get_options() const noexcept
-      {
-        return this->m_opts;
-      }
+      { return this->m_opts;  }
 
     Compiler_Options&
     mut_options() noexcept
-      {
-        return this->m_opts;
-      }
+      { return this->m_opts;  }
 
     void
     set_options(const Compiler_Options& opts) noexcept
-      {
-        this->m_opts = opts;
-      }
+      { this->m_opts = opts;  }
 
     // These are accessors to the statements in this sequence.
     // Note that the sequence cannot be modified.
