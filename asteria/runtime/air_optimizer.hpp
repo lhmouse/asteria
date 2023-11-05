@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_AIR_OPTIMIZER_
 
 #include "../fwd.hpp"
-#include "air_node.hpp"
 namespace asteria {
 
 class AIR_Optimizer
@@ -47,9 +46,13 @@ class AIR_Optimizer
     get_code() const noexcept
       { return this->m_code;  }
 
+    cow_vector<AIR_Node>&
+    mut_code() noexcept
+      { return this->m_code;  }
+
+
     void
-    clear() noexcept
-      { this->m_code.clear();  }
+    clear() noexcept;
 
     // This function performs code generation.
     // `ctx_opt` is the parent context of this closure.

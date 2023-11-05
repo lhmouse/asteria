@@ -5,7 +5,6 @@
 #define ASTERIA_COMPILER_STATEMENT_SEQUENCE_
 
 #include "../fwd.hpp"
-#include "statement.hpp"
 namespace asteria {
 
 class Statement_Sequence
@@ -43,15 +42,16 @@ class Statement_Sequence
     empty() const noexcept
       { return this->m_stmts.empty();  }
 
-    operator
-    const cow_vector<Statement>&() const noexcept
+    const cow_vector<Statement>&
+    get_statements() const noexcept
+      { return this->m_stmts;  }
+
+    cow_vector<Statement>&
+    mut_statements() noexcept
       { return this->m_stmts;  }
 
     void
-    clear() noexcept
-      {
-        this->m_stmts.clear();
-      }
+    clear() noexcept;
 
     // This function parses tokens from the input stream and fills
     // statements into `*this`. The contents of `*this` are destroyed.

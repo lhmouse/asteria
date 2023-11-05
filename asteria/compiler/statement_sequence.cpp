@@ -2554,6 +2554,13 @@ Statement_Sequence::
 
 void
 Statement_Sequence::
+clear() noexcept
+  {
+    this->m_stmts.clear();
+  }
+
+void
+Statement_Sequence::
 reload(Token_Stream&& tstrm)
   {
     // Destroy the contents of `*this` and reuse their storage, if any.

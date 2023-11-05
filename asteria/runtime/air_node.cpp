@@ -3638,7 +3638,7 @@ solidify(AVMC_Queue& queue) const
             script_params.emplace_back(sref("..."));
 
             AIR_Optimizer optmz(sp.opts);
-            optmz.reload(nullptr, script_params, ctx.global(), stmtq);
+            optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
             auto target = optmz.create_function(script_sloc, sref("[file scope]"));
             auto& self = ctx.stack().mut_top().set_temporary(nullopt);

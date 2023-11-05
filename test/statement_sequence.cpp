@@ -40,5 +40,5 @@ int main()
 
     Statement_Sequence stmtq({ });
     stmtq.reload(::std::move(tstrm));
-    ASTERIA_TEST_CHECK(cow_vector<Statement>(stmtq).size() == 4);
+    ASTERIA_TEST_CHECK(stmtq.get_statements().size() == 4);
   }

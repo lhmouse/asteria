@@ -57,7 +57,7 @@ reload(stringR name, Statement_Sequence&& stmtq)
     script_params.emplace_back(sref("..."));
 
     AIR_Optimizer optmz(this->m_opts);
-    optmz.reload(nullptr, script_params, this->m_global, stmtq);
+    optmz.reload(nullptr, script_params, this->m_global, stmtq.get_statements());
 
     Source_Location script_sloc(name, 0, 0);
     this->m_func = optmz.create_function(script_sloc, sref("[file scope]"));

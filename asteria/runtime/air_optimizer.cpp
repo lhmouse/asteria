@@ -3,6 +3,7 @@
 
 #include "../precompiled.ipp"
 #include "air_optimizer.hpp"
+#include "air_node.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "enums.hpp"
@@ -14,6 +15,13 @@ namespace asteria {
 AIR_Optimizer::
 ~AIR_Optimizer()
   {
+  }
+
+void
+AIR_Optimizer::
+clear() noexcept
+  {
+    this->m_code.clear();
   }
 
 void
