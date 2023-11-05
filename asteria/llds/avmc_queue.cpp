@@ -171,7 +171,7 @@ execute(Executive_Context& ctx) const
             break;
           }
           catch(Runtime_Error& except) {
-            // Modify the exception in place and rethrow it without copying it.
+            // Modify and rethrow the exception in place without copying it.
             except.push_frame_plain(head->pv_meta->sloc);
             throw;
           }
