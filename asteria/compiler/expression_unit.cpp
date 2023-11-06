@@ -237,7 +237,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         if(auto qrconst = code.at(code.size() - 1).get_constant_opt()) {
           const auto& rhs = *qrconst;
 
-          if((altr.xop == xop_index) && (rhs.type() == type_string)) {
+          if((rhs.type() == type_string) && (altr.xop == xop_index)) {
             // Encode a pre-hashed object key.
             AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
             code.mut_back() = ::std::move(xnode);
