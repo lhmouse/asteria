@@ -5,7 +5,6 @@
 #include "simple_script.hpp"
 #include "compiler/token_stream.hpp"
 #include "compiler/statement_sequence.hpp"
-#include "compiler/statement.hpp"
 #include "compiler/expression_unit.hpp"
 #include "runtime/air_optimizer.hpp"
 #include "runtime/variable.hpp"
