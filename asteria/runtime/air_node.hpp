@@ -192,8 +192,8 @@ class AIR_Node
 
     struct S_define_null_variable
       {
-        bool immutable;
         Source_Location sloc;
+        bool immutable;
         phsh_string name;
       };
 

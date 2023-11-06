@@ -22,12 +22,17 @@ class Statement
         cow_vector<Statement> stmts;
       };
 
+    struct variable_declaration
+      {
+        Source_Location sloc;
+        cow_vector<phsh_string> names;
+        S_expression init;
+      };
+
     struct S_variables
       {
         bool immutable;
-        cow_vector<Source_Location> slocs;
-        cow_vector<cow_vector<phsh_string>> decls;
-        cow_vector<S_expression> inits;
+        cow_vector<variable_declaration> decls;
       };
 
     struct S_function
@@ -136,11 +141,16 @@ class Statement
         S_expression expr;
       };
 
+    struct reference_declaration
+      {
+        Source_Location sloc;
+        phsh_string name;
+        S_expression init;
+      };
+
     struct S_references
       {
-        cow_vector<Source_Location> slocs;
-        cow_vector<phsh_string> names;
-        cow_vector<S_expression> inits;
+        cow_vector<reference_declaration> decls;
       };
 
     enum Index : uint8_t

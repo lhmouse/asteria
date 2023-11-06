@@ -479,9 +479,7 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       return nullopt;
 
     // Each declaractor has its own source location.
-    cow_vector<Source_Location> slocs;
-    cow_vector<cow_vector<phsh_string>> decls;
-    cow_vector<Statement::S_expression> inits;
+    cow_vector<Statement::variable_declaration> decls;
 
     for(;;) {
       // Accept a declarator, which may denote a single variable or a structured binding.
@@ -495,9 +493,9 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       if(!qinit)
         qinit.emplace();
 
-      slocs.emplace_back(::std::move(sloc));
-      decls.emplace_back(::std::move(*qdecl));
-      inits.emplace_back(::std::move(*qinit));
+      Statement::variable_declaration decl = { ::std::move(sloc), ::std::move(*qdecl),
+                                               ::std::move(*qinit) };
+      decls.emplace_back(::std::move(decl));
 
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -510,8 +508,7 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_variables xstmt = { false, ::std::move(slocs), ::std::move(decls),
-                                     ::std::move(inits) };
+    Statement::S_variables xstmt = { false, ::std::move(decls) };
     return ::std::move(xstmt);
   }
 
@@ -526,9 +523,7 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       return nullopt;
 
     // Each declaractor has its own source location.
-    cow_vector<Source_Location> slocs;
-    cow_vector<cow_vector<phsh_string>> decls;
-    cow_vector<Statement::S_expression> inits;
+    cow_vector<Statement::variable_declaration> decls;
 
     for(;;) {
       // Accept a declarator, which may denote a single variable or a structured binding.
@@ -543,9 +538,9 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_equals_sign_expected, tstrm.next_sloc());
 
-      slocs.emplace_back(::std::move(sloc));
-      decls.emplace_back(::std::move(*qdecl));
-      inits.emplace_back(::std::move(*qinit));
+      Statement::variable_declaration decl = { ::std::move(sloc), ::std::move(*qdecl),
+                                               ::std::move(*qinit) };
+      decls.emplace_back(::std::move(decl));
 
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -558,8 +553,7 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_variables xstmt = { true, ::std::move(slocs), ::std::move(decls),
-                                     ::std::move(inits) };
+    Statement::S_variables xstmt = { true, ::std::move(decls) };
     return ::std::move(xstmt);
   }
 
@@ -573,9 +567,7 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
       return nullopt;
 
     // Each declaractor has its own source location.
-    cow_vector<Source_Location> slocs;
-    cow_vector<phsh_string> names;
-    cow_vector<Statement::S_expression> inits;
+    cow_vector<Statement::reference_declaration> decls;
 
     for(;;) {
       // Accept the name of this declared reference.
@@ -590,9 +582,9 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_arrow_expected, tstrm.next_sloc());
 
-      slocs.emplace_back(::std::move(sloc));
-      names.emplace_back(::std::move(*qname));
-      inits.emplace_back(::std::move(*qinit));
+      Statement::reference_declaration decl = { ::std::move(sloc), ::std::move(*qname),
+                                                ::std::move(*qinit) };
+      decls.emplace_back(::std::move(decl));
 
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -605,8 +597,7 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_references xstmt = { ::std::move(slocs), ::std::move(names),
-                                      ::std::move(inits) };
+    Statement::S_references xstmt = { ::std::move(decls) };
     return ::std::move(xstmt);
   }
 
