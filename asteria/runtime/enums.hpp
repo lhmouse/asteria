@@ -40,33 +40,33 @@ enum Xop : uint8_t
     xop_cmp_lte   = 27,  // <=
     xop_cmp_gte   = 28,  // >=
     xop_cmp_3way  = 29,  // <=>
-    xop_add       = 30,  // +
-    xop_sub       = 31,  // -
-    xop_mul       = 32,  // *
-    xop_div       = 33,  // /
-    xop_mod       = 34,  // %
-    xop_sll       = 35,  // <<<
-    xop_srl       = 36,  // >>>
-    xop_sla       = 37,  // <<
-    xop_sra       = 38,  // >>
-    xop_andb      = 39,  // &
-    xop_orb       = 40,  // |
-    xop_xorb      = 41,  // ^
-    xop_assign    = 42,  // =
-    xop_fma       = 43,  // __fma()
-    xop_head      = 44,  // [^]
-    xop_tail      = 45,  // [$]
-    xop_lzcnt     = 46,  // __lzcnt
-    xop_tzcnt     = 47,  // __tzcnt
-    xop_popcnt    = 48,  // __popcnt
-    xop_addm      = 49,  // __addm
-    xop_subm      = 50,  // __subm
-    xop_mulm      = 51,  // __mulm
-    xop_adds      = 52,  // __adds
-    xop_subs      = 53,  // __subs
-    xop_muls      = 54,  // __muls
-    xop_random    = 55,  // [?]
-    xop_cmp_un    = 56,  // </>
+    xop_cmp_un    = 30,  // </>
+    xop_add       = 31,  // +
+    xop_sub       = 32,  // -
+    xop_mul       = 33,  // *
+    xop_div       = 34,  // /
+    xop_mod       = 35,  // %
+    xop_sll       = 36,  // <<<
+    xop_srl       = 37,  // >>>
+    xop_sla       = 38,  // <<
+    xop_sra       = 39,  // >>
+    xop_andb      = 40,  // &
+    xop_orb       = 41,  // |
+    xop_xorb      = 42,  // ^
+    xop_assign    = 43,  // =
+    xop_fma       = 44,  // __fma()
+    xop_head      = 45,  // [^]
+    xop_tail      = 46,  // [$]
+    xop_lzcnt     = 47,  // __lzcnt
+    xop_tzcnt     = 48,  // __tzcnt
+    xop_popcnt    = 49,  // __popcnt
+    xop_addm      = 50,  // __addm
+    xop_subm      = 51,  // __subm
+    xop_mulm      = 52,  // __mulm
+    xop_adds      = 53,  // __adds
+    xop_subs      = 54,  // __subs
+    xop_muls      = 55,  // __muls
+    xop_random    = 56,  // [?]
   };
 
 ROCKET_CONST
