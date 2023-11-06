@@ -233,6 +233,18 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_operator_rpn: {
         const auto& altr = this->m_stor.as<S_operator_rpn>();
 
+        // Can this be folded?
+        if(auto qrconst = code.at(code.size() - 1).get_constant_opt()) {
+          const auto& rhs = *qrconst;
+
+          if((altr.xop == xop_index) && (rhs.type() == type_string)) {
+            // Encode a pre-hashed object key.
+            AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
+            code.mut_back() = ::std::move(xnode);
+            return;
+          }
+        }
+
         // Encode arguments.
         AIR_Node::S_apply_operator xnode = { altr.sloc, altr.xop, altr.assign };
         code.emplace_back(::std::move(xnode));

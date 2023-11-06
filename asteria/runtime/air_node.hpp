@@ -266,6 +266,12 @@ class AIR_Node
         bool assign;
       };
 
+    struct S_member_access
+      {
+        Source_Location sloc;
+        phsh_string key;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -307,6 +313,7 @@ class AIR_Node
         index_alt_clear_stack        = 36,
         index_alt_function_call      = 37,
         index_coalesce_expression    = 38,
+        index_member_access          = 39,
       };
 
   private:
@@ -351,6 +358,7 @@ class AIR_Node
         , S_alt_clear_stack        // 36,
         , S_alt_function_call      // 37,
         , S_coalesce_expression    // 38,
+        , S_member_access          // 39,
       );
 
   public:
@@ -382,6 +390,10 @@ class AIR_Node
       }
 
   public:
+    // Gets the constant value, if any.
+    opt<Value>
+    get_constant_opt() const noexcept;
+
     // If this node denotes a local reference which is allocated in an executive
     // context, replace it with a copy of the reference.
     opt<AIR_Node>

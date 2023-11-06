@@ -211,6 +211,26 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
 
 }  // namespace
 
+opt<Value>
+AIR_Node::
+get_constant_opt() const noexcept
+  {
+    if(this->m_stor.index() == index_push_bound_reference) {
+      try {
+        const auto& ref = this->m_stor.as<S_push_bound_reference>().ref;
+        if(ref.is_temporary())
+          return ref.dereference_readonly();
+      }
+      catch(...) { }
+      return nullopt;
+    }
+
+    if(this->m_stor.index() == index_push_constant)
+      return this->m_stor.as<S_push_constant>().val;
+
+    return nullopt;
+  }
+
 opt<AIR_Node>
 AIR_Node::
 rebind_opt(Abstract_Context& ctx) const
@@ -241,6 +261,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_push_constant:
       case index_alt_clear_stack:
       case index_alt_function_call:
+      case index_member_access:
         return nullopt;
 
       case index_execute_block: {
@@ -507,6 +528,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_return_statement:
       case index_alt_clear_stack:
       case index_alt_function_call:
+      case index_member_access:
         return;
 
       case index_execute_block: {
@@ -3981,6 +4003,44 @@ solidify(AVMC_Queue& queue) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             sp.queue_null.collect_variables(staged, temp);
           }
+
+          // Symbols
+          , &(altr.sloc)
+        );
+        return;
+      }
+
+      case index_member_access: {
+        const auto& altr = this->m_stor.as<S_member_access>();
+
+        struct Sparam
+          {
+            phsh_string key;
+          };
+
+        Sparam sp2;
+        sp2.key = altr.key;
+
+        queue.append(
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          {
+            const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+
+            // Push a modifier.
+            Reference_Modifier::S_object_key xmod = { sp.key };
+            ctx.stack().mut_top().push_modifier(::std::move(xmod));
+            ctx.stack().top().dereference_readonly();
+            return air_status_next;
+          }
+
+          // Uparam
+          , Uparam()
+
+          // Sparam
+          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+
+          // Collector
+          , nullptr
 
           // Symbols
           , &(altr.sloc)
