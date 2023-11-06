@@ -811,10 +811,10 @@ describe_compiler_status(Compiler_Status status) noexcept;
 // Value comparison results
 enum Compare : uint8_t
   {
-    compare_unordered  = 0b00,
-    compare_greater    = 0b01,
-    compare_less       = 0b10,
-    compare_equal      = 0b11,
+    compare_unordered  = 0,
+    compare_less       = 1,
+    compare_equal      = 2,
+    compare_greater    = 3,
   };
 
 // API versioning of the standard library

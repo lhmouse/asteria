@@ -209,6 +209,15 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
            container.begin() + ::rocket::min(rlen - container.ssize(), container.ssize()));
   }
 
+Value
+do_compare_result(Compare cmp)
+  {
+    if(ROCKET_UNEXPECT(cmp == compare_unordered))
+      return V_string(sref("[unordered]"));
+    else
+      return V_integer(cmp) - 2;
+  }
+
 }  // namespace
 
 opt<Value>
@@ -2593,26 +2602,8 @@ solidify(AVMC_Queue& queue) const
                     // Defines a partial ordering on all values. For unordered operands,
                     // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
                     // the same result.
-                    switch(lhs.compare_partial(rhs)) {
-                      case compare_unordered:
-                        lhs = sref("[unordered]");
-                        return air_status_next;
-
-                      case compare_greater:
-                        lhs = +1;
-                        return air_status_next;
-
-                      case compare_less:
-                        lhs = -1;
-                        return air_status_next;
-
-                      case compare_equal:
-                        lhs = 0;
-                        return air_status_next;
-
-                      default:
-                        ROCKET_ASSERT(false);
-                    }
+                    lhs = do_compare_result(lhs.compare_partial(rhs));
+                    return air_status_next;
                   }
 
                   case xop_add: {
