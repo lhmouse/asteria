@@ -144,7 +144,6 @@ read_execute_print_single()
 
       repl_script.reload(real_name, ::std::move(stmtq));
       repl_file = ::std::move(real_name);
-      repl_file = ::std::move(real_name);
     }
     catch(Compiler_Error& except) {
       try {
@@ -161,6 +160,7 @@ read_execute_print_single()
         stmtq.reload(::std::move(tstrm));
 
         repl_script.reload(real_name, ::std::move(stmtq));
+        repl_file = ::std::move(real_name);
       }
       catch(Compiler_Error& again) {
         // It can't be parsed either way, so fail.
