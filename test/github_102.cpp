@@ -18,21 +18,21 @@ int main()
     ::rocket::tinybuf_str cbuf(sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-        var a = 1;
+        var a = 1.5;
 
         {
-          a = 5;
+          a = 5.5;
           for(;;)
             break;
         }
 
         {
           var b = a;
-          a = 5;
+          a = 4.5;
         }
 
         {
-          defer a = 6;
+          defer a = 6.5;
         }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,13 +50,13 @@ int main()
     cow_vector<AIR_Node> code;
     cow_vector<phsh_string> names;
     stmts.at(0).generate_code(code, ctx, &names, global, opts, ptc_aware_none);
-    ASTERIA_TEST_CHECK(code.size() == 4);  // clear, declare, 1, initialize
+    ASTERIA_TEST_CHECK(code.size() == 4);  // clear, declare, 1.5, initialize
     ASTERIA_TEST_CHECK(names.size() == 1);  // "a"
 
     code.clear();
     names.clear();
     stmts.at(1).generate_code(code, ctx, &names, global, opts, ptc_aware_none);
-    ASTERIA_TEST_CHECK(code.size() == 5);  // clear, "a", 5, operator `=`, `for` statement
+    ASTERIA_TEST_CHECK(code.size() == 5);  // clear, "a", 5.5, operator `=`, `for` statement
     ASTERIA_TEST_CHECK(names.size() == 0);
 
     code.clear();

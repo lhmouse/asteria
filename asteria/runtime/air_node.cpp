@@ -262,6 +262,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_alt_clear_stack:
       case index_alt_function_call:
       case index_member_access:
+      case index_apply_operator_bi32:
         return nullopt;
 
       case index_execute_block: {
@@ -529,6 +530,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_alt_clear_stack:
       case index_alt_function_call:
       case index_member_access:
+      case index_apply_operator_bi32:
         return;
 
       case index_execute_block: {
@@ -4038,6 +4040,55 @@ solidify(AVMC_Queue& queue) const
 
           // Sparam
           , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+
+          // Collector
+          , nullptr
+
+          // Symbols
+          , &(altr.sloc)
+        );
+        return;
+      }
+
+      case index_apply_operator_bi32: {
+        const auto& altr = this->m_stor.as<S_apply_operator_bi32>();
+
+        Uparam up2;
+        up2.b0 = altr.assign;
+        up2.u1 = altr.xop;
+        up2.i2345 = altr.ri32;
+
+        queue.append(
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          {
+            const auto& up = head->uparam;
+            auto& top = ctx.stack().mut_top();
+
+            switch(up.u1) {
+              case xop_assign: {
+                // `assign` is ignored.
+                top.dereference_mutable() = up.i2345;
+                return air_status_next;
+              }
+
+              case xop_index: {
+                // Push a subscript.
+                Reference_Modifier::S_array_index xmod = { up.i2345 };
+                top.push_modifier(::std::move(xmod));
+                top.dereference_readonly();
+                return air_status_next;
+              }
+
+              default:
+                ASTERIA_TERMINATE(("Constant folding not implemented for `$1`"), up.u1);
+            }
+          }
+
+          // Uparam
+          , up2
+
+          // Sparam
+          , 0, nullptr, nullptr, nullptr
 
           // Collector
           , nullptr

@@ -243,6 +243,15 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             code.mut_back() = ::std::move(xnode);
             return;
           }
+
+          if((rhs.type() == type_integer) && ((int32_t) rhs.as_integer() == rhs.as_integer())
+             && ::rocket::is_any_of(altr.xop, { xop_assign, xop_index })) {
+            // Fold this constant.
+            AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
+                                                      (int32_t) rhs.as_integer() };
+            code.mut_back() = ::std::move(xnode);
+            return;
+          }
         }
 
         // Encode arguments.

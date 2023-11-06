@@ -272,6 +272,14 @@ class AIR_Node
         phsh_string key;
       };
 
+    struct S_apply_operator_bi32
+      {
+        Source_Location sloc;
+        Xop xop;
+        bool assign;
+        int32_t ri32;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -314,6 +322,7 @@ class AIR_Node
         index_alt_function_call      = 37,
         index_coalesce_expression    = 38,
         index_member_access          = 39,
+        index_apply_operator_bi32    = 40,
       };
 
   private:
@@ -359,6 +368,7 @@ class AIR_Node
         , S_alt_function_call      // 37,
         , S_coalesce_expression    // 38,
         , S_member_access          // 39,
+        , S_apply_operator_bi32    // 40,
       );
 
   public:
