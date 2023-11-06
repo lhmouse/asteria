@@ -675,7 +675,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 compiler_status_open_brace_expected, tstrm.next_sloc());
 
     Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname),
-                                    ::std::move(*kparams), ::std::move(qbody->stmts) };
+                                    ::std::move(*kparams), ::std::move(*qbody) };
     return ::std::move(xstmt);
   }
 

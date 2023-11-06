@@ -245,7 +245,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Generate code
         AIR_Optimizer optmz(opts);
-        optmz.reload(&ctx, altr.params, global, altr.body);
+        optmz.reload(&ctx, altr.params, global, altr.body.stmts);
 
         // Encode arguments.
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params,

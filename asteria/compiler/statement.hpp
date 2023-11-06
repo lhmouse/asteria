@@ -35,7 +35,7 @@ class Statement
         Source_Location sloc;
         phsh_string name;
         cow_vector<phsh_string> params;
-        cow_vector<Statement> body;
+        S_block body;
       };
 
     struct S_if
