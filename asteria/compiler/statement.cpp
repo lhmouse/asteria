@@ -14,7 +14,7 @@ namespace asteria {
 namespace {
 
 void
-do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+do_user_declare(Analytic_Context& ctx, cow_vector<phsh_string>* names_opt,
                 const phsh_string& name)
   {
     if(name.empty())
@@ -189,7 +189,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
           // Create dummy references for further name lookups.
           for(size_t k = bpos;  k < epos;  ++k)
-            do_user_declare(names_opt, ctx, altr.decls.at(i).at(k));
+            do_user_declare(ctx, names_opt, altr.decls.at(i).at(k));
 
           if(altr.inits.at(i).units.empty()) {
             // If no initializer is provided, no further initialization is required.
@@ -237,7 +237,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         const auto& altr = this->m_stor.as<S_function>();
 
         // Create a dummy reference for further name lookups.
-        do_user_declare(names_opt, ctx, altr.name);
+        do_user_declare(ctx, names_opt, altr.name);
 
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
@@ -349,8 +349,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         // Note that the key and value references outlasts every iteration, so we
         // have to create an outer contexts here.
         Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
-        do_user_declare(names_opt, ctx_for, altr.name_key);
-        do_user_declare(names_opt, ctx_for, altr.name_mapped);
+        do_user_declare(ctx_for, names_opt, altr.name_key);
+        do_user_declare(ctx_for, names_opt, altr.name_mapped);
 
         // Generate code for the range initializer.
         ROCKET_ASSERT(!altr.init.units.empty());
@@ -398,7 +398,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
-        do_user_declare(names_opt, ctx_catch, altr.name_except);
+        do_user_declare(ctx_catch, names_opt, altr.name_except);
         ctx_catch.insert_named_reference(sref("__backtrace"));
 
         // Generate code for the `catch` body.
@@ -546,7 +546,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         for(size_t i = 0;  i < nvars;  ++i) {
           // Note that references don't support structured bindings.
           // Create a dummy references for further name lookups.
-          do_user_declare(names_opt, ctx, altr.names.at(i));
+          do_user_declare(ctx, names_opt, altr.names.at(i));
 
           // Declare a void reference.
           AIR_Node::S_declare_reference xnode_decl = { altr.names.at(i) };
