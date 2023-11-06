@@ -239,7 +239,6 @@ rebind_opt(Abstract_Context& ctx) const
       case index_initialize_reference:
       case index_return_statement:
       case index_push_constant:
-      case index_push_constant_int48:
       case index_alt_clear_stack:
       case index_alt_function_call:
         return nullopt;
@@ -506,8 +505,6 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_declare_reference:
       case index_initialize_reference:
       case index_return_statement:
-      case index_push_constant:
-      case index_push_constant_int48:
       case index_alt_clear_stack:
       case index_alt_function_call:
         return;
@@ -625,6 +622,14 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
         // Collect variables from the expression.
         do_collect_variables_for_each(staged, temp, altr.code_body);
+        return;
+      }
+
+      case index_push_constant: {
+        const auto& altr = this->m_stor.as<S_push_constant>();
+
+        // Collect variables from the expression.
+        altr.val.collect_variables(staged, temp);
         return;
       }
 
@@ -3841,91 +3846,34 @@ solidify(AVMC_Queue& queue) const
       case index_push_constant: {
         const auto& altr = this->m_stor.as<S_push_constant>();
 
-        Uparam up2;
-        up2.u0 = altr.airc;
+        struct Sparam
+          {
+            Value val;
+          };
+
+        Sparam sp2;
+        sp2.val = altr.val;
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
-
-            // Push a 'cheap' constant.
-            switch(static_cast<AIR_Constant>(up.u0)) {
-              case air_constant_null:
-                // `null`
-                ctx.stack().push().set_temporary(nullopt);
-                return air_status_next;
-
-              case air_constant_true:
-                // `true`
-                ctx.stack().push().set_temporary(true);
-                return air_status_next;
-
-              case air_constant_false:
-                // `false`
-                ctx.stack().push().set_temporary(false);
-                return air_status_next;
-
-              case air_constant_empty_str:
-                // `""`
-                ctx.stack().push().set_temporary(V_string());
-                return air_status_next;
-
-              case air_constant_empty_arr:
-                // `[]`
-                ctx.stack().push().set_temporary(V_array());
-                return air_status_next;
-
-              case air_constant_empty_obj:
-                // `{}`
-                ctx.stack().push().set_temporary(V_object());
-                return air_status_next;
-
-              default:
-                 ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), up.u0);
-            }
-          }
-
-          // Uparam
-          , up2
-
-          // Sparam
-          , 0, nullptr, nullptr, nullptr
-
-          // Collector
-          , nullptr
-
-          // Symbols
-          , nullptr
-        );
-        return;
-      }
-
-      case index_push_constant_int48: {
-        const auto& altr = this->m_stor.as<S_push_constant_int48>();
-
-        Uparam up2;
-        up2.i01 = altr.high;
-        up2.u2345 = altr.low;
-
-        queue.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
-          {
-            const auto& up = head->uparam;
-
-            // Sign-extend the 48-bit integer and push it.
-            ctx.stack().push().set_temporary(up.i01 * 0x100000000LL + up.u2345);
+            const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+            ctx.stack().push().set_temporary(sp.val);
             return air_status_next;
           }
 
           // Uparam
-          , up2
+          , Uparam()
 
           // Sparam
-          , 0, nullptr, nullptr, nullptr
+          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
 
           // Collector
-          , nullptr
+          , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
+          {
+            const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+            sp.val.collect_variables(staged, temp);
+          }
 
           // Symbols
           , nullptr

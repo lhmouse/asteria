@@ -246,13 +246,7 @@ class AIR_Node
 
     struct S_push_constant
       {
-        AIR_Constant airc;
-      };
-
-    struct S_push_constant_int48
-      {
-        int16_t high;
-        uint32_t low;
+        Value val;
       };
 
     struct S_alt_clear_stack
@@ -310,10 +304,9 @@ class AIR_Node
         index_catch_expression       = 33,
         index_return_statement       = 34,
         index_push_constant          = 35,
-        index_push_constant_int48    = 36,
-        index_alt_clear_stack        = 37,
-        index_alt_function_call      = 38,
-        index_coalesce_expression    = 39,
+        index_alt_clear_stack        = 36,
+        index_alt_function_call      = 37,
+        index_coalesce_expression    = 38,
       };
 
   private:
@@ -355,10 +348,9 @@ class AIR_Node
         , S_catch_expression       // 33
         , S_return_statement       // 34
         , S_push_constant          // 35
-        , S_push_constant_int48    // 36
-        , S_alt_clear_stack        // 37,
-        , S_alt_function_call      // 38,
-        , S_coalesce_expression    // 39,
+        , S_alt_clear_stack        // 36,
+        , S_alt_function_call      // 37,
+        , S_coalesce_expression    // 38,
       );
 
   public:
