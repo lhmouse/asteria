@@ -359,13 +359,13 @@ do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
     }
   }
 
-Value
-do_compare_result(Compare cmp)
+void
+do_set_compare_result(Value& out, Compare cmp)
   {
     if(ROCKET_UNEXPECT(cmp == compare_unordered))
-      return V_string(sref("[unordered]"));
+      out = sref("[unordered]");
     else
-      return V_integer(cmp) - 2;
+      out = (int64_t) cmp - compare_equal;
   }
 
 }  // namespace
@@ -2755,7 +2755,7 @@ solidify(AVMC_Queue& queue) const
                     // Defines a partial ordering on all values. For unordered operands,
                     // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
                     // the same result.
-                    lhs = do_compare_result(lhs.compare_partial(rhs));
+                    do_set_compare_result(lhs, lhs.compare_partial(rhs));
                     return air_status_next;
                   }
 
