@@ -570,7 +570,7 @@ rebind_opt(Abstract_Context& ctx) const
         const auto& altr = this->m_stor.as<S_push_local_reference>();
 
         // Get the context.
-        auto qctx = static_cast<const Abstract_Context*>(&ctx);
+        const Abstract_Context* qctx = &ctx;
         for(uint32_t k = 0;  k != altr.depth;  ++k)
           qctx = qctx->get_parent_opt();
 
@@ -1795,7 +1795,7 @@ solidify(AVMC_Queue& queue) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Locate the target context.
-            auto qctx = static_cast<const Executive_Context*>(&ctx);
+            const Executive_Context* qctx = &ctx;
             for(uint32_t k = 0;  k != up.u2345;  ++k)
               qctx = qctx->get_parent_opt();
 
