@@ -233,24 +233,27 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_operator_rpn: {
         const auto& altr = this->m_stor.as<S_operator_rpn>();
 
-        // Can this be folded?
-        if(auto qrconst = code.at(code.size() - 1).get_constant_opt()) {
-          const auto& rhs = *qrconst;
+        if((opts.optimization_level >= 1)) {
+          // Can this be folded?
+          const auto qrhsc = code.at(code.size() - 1).get_constant_opt();
+          if(qrhsc) {
+            const auto& rhs = *qrhsc;
 
-          if((rhs.type() == type_string) && (altr.xop == xop_index)) {
-            // Encode a pre-hashed object key.
-            AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
-            code.mut_back() = ::std::move(xnode);
-            return;
-          }
+            if((rhs.type() == type_string) && (altr.xop == xop_index)) {
+              // Encode a pre-hashed object key.
+              AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
+              code.mut_back() = ::std::move(xnode);
+              return;
+            }
 
-          if((rhs.type() == type_integer) && ((int32_t) rhs.as_integer() == rhs.as_integer())
-             && ::rocket::is_any_of(altr.xop, { xop_assign, xop_index })) {
-            // Fold this constant.
-            AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
-                                                      (int32_t) rhs.as_integer() };
-            code.mut_back() = ::std::move(xnode);
-            return;
+            if((rhs.type() == type_integer) && ((int32_t) rhs.as_integer() == rhs.as_integer())
+               && ::rocket::is_any_of(altr.xop, { xop_assign, xop_index })) {
+              // Fold this constant.
+              AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
+                                                        (int32_t) rhs.as_integer() };
+              code.mut_back() = ::std::move(xnode);
+              return;
+            }
           }
         }
 

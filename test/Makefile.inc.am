@@ -17,7 +17,8 @@ check_PROGRAMS +=  \
   %reldir%/gc_loop.test  \
   %reldir%/varg.test  \
   %reldir%/vcall.test  \
-  %reldir%/operators.test  \
+  %reldir%/operators_o2.test  \
+  %reldir%/operators_o0.test  \
   %reldir%/proper_tail_call.test  \
   %reldir%/stack_overflow.test  \
   %reldir%/structured_binding.test  \

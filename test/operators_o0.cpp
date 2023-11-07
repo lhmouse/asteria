@@ -8,6 +8,7 @@ using namespace ::asteria;
 int main()
   {
     Simple_Script code;
+    code.mut_options().optimization_level = 0;
     code.reload_string(
       sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////

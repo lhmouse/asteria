@@ -30,11 +30,11 @@ class Simple_Script
       { return this->m_opts;  }
 
     Compiler_Options&
-    options() noexcept
+    mut_options() noexcept
       { return this->m_opts;  }
 
     const Global_Context&
-    global() const noexcept
+    mut_global() const noexcept
       { return this->m_global;  }
 
     Global_Context&

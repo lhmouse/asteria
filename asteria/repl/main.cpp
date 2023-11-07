@@ -173,7 +173,7 @@ do_parse_command_line(int argc, char** argv)
     // effectively decreases optimization in comparison to when it wasn't
     // specified.
     if(optimize)
-      repl_script.options().optimization_level = uint8_t(*optimize);
+      repl_script.mut_options().optimization_level = uint8_t(*optimize);
 
     // These arguments are always overwritten.
     repl_file = path.move_value_or(sref("-"));
