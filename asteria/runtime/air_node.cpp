@@ -4478,7 +4478,7 @@ solidify(AVMC_Queue& queue) const
         Uparam up2;
         up2.b0 = altr.assign;
         up2.u1 = altr.xop;
-        up2.i2345 = altr.ri32;
+        up2.i2345 = altr.irhs;
 
         switch(altr.xop) {
           case xop_inc:

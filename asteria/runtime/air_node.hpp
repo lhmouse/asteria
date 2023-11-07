@@ -277,7 +277,7 @@ class AIR_Node
         Source_Location sloc;
         Xop xop;
         bool assign;
-        int32_t ri32;
+        int32_t irhs;
       };
 
     enum Index : uint8_t
