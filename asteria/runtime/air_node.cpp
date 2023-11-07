@@ -204,9 +204,19 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
                container.size(), count, PTRDIFF_MAX);
 
     // Duplicate elements, using binary exponential backoff.
+    container.reserve((size_t) rlen);
     while(container.ssize() < rlen)
       container.append(container.begin(),
-           container.begin() + ::rocket::min(rlen - container.ssize(), container.ssize()));
+           container.begin() + (ptrdiff_t) ::rocket::min(rlen - container.ssize(), container.ssize()));
+  }
+
+void
+do_set_compare_result(Value& out, Compare cmp)
+  {
+    if(ROCKET_UNEXPECT(cmp == compare_unordered))
+      out = sref("[unordered]");
+    else
+      out = (int64_t) cmp - compare_equal;
   }
 
 void
@@ -357,15 +367,6 @@ do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
       default:
         ROCKET_UNREACHABLE();
     }
-  }
-
-void
-do_set_compare_result(Value& out, Compare cmp)
-  {
-    if(ROCKET_UNEXPECT(cmp == compare_unordered))
-      out = sref("[unordered]");
-    else
-      out = (int64_t) cmp - compare_equal;
   }
 
 }  // namespace
