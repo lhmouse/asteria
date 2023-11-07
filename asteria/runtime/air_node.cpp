@@ -209,6 +209,156 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
            container.begin() + ::rocket::min(rlen - container.ssize(), container.ssize()));
   }
 
+void
+do_apply_shift_operator_common(Uparam up, Value& lhs, V_integer rhs)
+  {
+    if(rhs < 0)
+      throw Runtime_Error(Runtime_Error::M_format(),
+               "Negative shift count (operands were `$1` and `$2`)",
+               lhs, rhs);
+
+    switch(up.u1) {
+      case xop_sll: {
+        // Shift the operand to the left. Elements that get shifted out are
+        // discarded. Vacuum elements are filled with default values. The
+        // width of the operand is unchanged.
+        if(lhs.is_integer()) {
+          V_integer& val = lhs.mut_integer();
+
+          int64_t count = rhs;
+          val = (int64_t) ((uint64_t) val << (count & 63));
+          val &= ((count - 64) >> 63);
+          return;
+        }
+        else if(lhs.is_string()) {
+          V_string& val = lhs.mut_string();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.erase(0, tlen);
+          val.append(tlen, ' ');
+          return;
+        }
+        else if(lhs.is_array()) {
+          V_array& val = lhs.mut_array();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.erase(0, tlen);
+          val.append(tlen);
+          return;
+        }
+        else
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Logical left shift not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+      }
+
+      case xop_srl: {
+        // Shift the operand to the right. Elements that get shifted out are
+        // discarded. Vacuum elements are filled with default values. The
+        // width of the operand is unchanged.
+        if(lhs.is_integer()) {
+          V_integer& val = lhs.mut_integer();
+
+          int64_t count = rhs;
+          val = (int64_t) ((uint64_t) val >> (count & 63));
+          val &= ((count - 64) >> 63);
+          return;
+        }
+        else if(lhs.is_string()) {
+          V_string& val = lhs.mut_string();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.pop_back(tlen);
+          val.insert(0, tlen, ' ');
+          return;
+        }
+        else if(lhs.is_array()) {
+          V_array& val = lhs.mut_array();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.pop_back(tlen);
+          val.insert(0, tlen);
+          return;
+        }
+        else
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Logical right shift not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+      }
+
+      case xop_sla: {
+        // Shift the operand to the left. No element is discarded from the
+        // left (for integers this means that bits which get shifted out
+        // shall all be the same with the sign bit). Vacuum elements are
+        // filled with default values.
+        if(lhs.is_integer()) {
+          V_integer& val = lhs.mut_integer();
+
+          int64_t count = ::rocket::min(rhs, 63);
+          if((val != 0) && ((count != rhs)
+                            || (((val >> 63) ^ val) >> (63 - count) != 0)))
+            throw Runtime_Error(Runtime_Error::M_format(),
+                     "Arithmetic left shift overflow (operands were `$1` and `$2`)",
+                     lhs, rhs);
+
+          val <<= count;
+          return;
+        }
+        else if(lhs.is_string()) {
+          V_string& val = lhs.mut_string();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.append(tlen, ' ');
+          return;
+        }
+        else if(lhs.is_array()) {
+          V_array& val = lhs.mut_array();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.append(tlen);
+          return;
+        }
+        else
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+      }
+
+      case xop_sra: {
+        // Shift the operand to the right. Elements that get shifted out are
+        // discarded. No element is filled in the left.
+        if(lhs.is_integer()) {
+          V_integer& val = lhs.mut_integer();
+
+          int64_t count = ::rocket::min(rhs, 63);
+          val >>= count;
+          return;
+        }
+        else if(lhs.is_string()) {
+          V_string& val = lhs.mut_string();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.pop_back(tlen);
+          return;
+        }
+        else if(lhs.is_array()) {
+          V_array& val = lhs.mut_array();
+
+          size_t tlen = ::rocket::min((uint64_t) rhs, val.size());
+          val.pop_back(tlen);
+          return;
+        }
+        else
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+      }
+
+      default:
+        ROCKET_UNREACHABLE();
+    }
+  }
+
 Value
 do_compare_result(Compare cmp)
   {
@@ -3102,156 +3252,15 @@ solidify(AVMC_Queue& queue) const
                 auto& top = ctx.stack().mut_top();
                 auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
 
-                if(rhs.type() != type_integer)
-                  throw Runtime_Error(Runtime_Error::M_format(),
-                           "Invalid shift count (operands were `$1` and `$2`)",
-                           lhs, rhs);
-
-                if(rhs.as_integer() < 0)
-                  throw Runtime_Error(Runtime_Error::M_format(),
-                           "Negative shift count (operands were `$1` and `$2`)",
-                           lhs, rhs);
-
-                switch(up.u1) {
-                  case xop_sll: {
-                    // Shift the operand to the left. Elements that get shifted out are
-                    // discarded. Vacuum elements are filled with default values. The
-                    // width of the operand is unchanged.
-                    if(lhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-
-                      int64_t count = rhs.as_integer();
-                      val = (int64_t) ((uint64_t) val << (count & 63));
-                      val &= ((count - 64) >> 63);
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string()) {
-                      V_string& val = lhs.mut_string();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.erase(0, tlen);
-                      val.append(tlen, ' ');
-                      return air_status_next;
-                    }
-                    else if(lhs.is_array()) {
-                      V_array& val = lhs.mut_array();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.erase(0, tlen);
-                      val.append(tlen);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Logical left shift not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_srl: {
-                    // Shift the operand to the right. Elements that get shifted out are
-                    // discarded. Vacuum elements are filled with default values. The
-                    // width of the operand is unchanged.
-                    if(lhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-
-                      int64_t count = rhs.as_integer();
-                      val = (int64_t) ((uint64_t) val >> (count & 63));
-                      val &= ((count - 64) >> 63);
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string()) {
-                      V_string& val = lhs.mut_string();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.pop_back(tlen);
-                      val.insert(0, tlen, ' ');
-                      return air_status_next;
-                    }
-                    else if(lhs.is_array()) {
-                      V_array& val = lhs.mut_array();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.pop_back(tlen);
-                      val.insert(0, tlen);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Logical right shift not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_sla: {
-                    // Shift the operand to the left. No element is discarded from the
-                    // left (for integers this means that bits which get shifted out
-                    // shall all be the same with the sign bit). Vacuum elements are
-                    // filled with default values.
-                    if(lhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-
-                      int64_t count = ::rocket::min(rhs.as_integer(), 63);
-                      if((val != 0) && ((count != rhs.as_integer())
-                                        || (((val >> 63) ^ val) >> (63 - count) != 0)))
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Arithmetic left shift overflow (operands were `$1` and `$2`)",
-                                 lhs, rhs);
-
-                      val <<= count;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string()) {
-                      V_string& val = lhs.mut_string();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.append(tlen, ' ');
-                      return air_status_next;
-                    }
-                    else if(lhs.is_array()) {
-                      V_array& val = lhs.mut_array();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.append(tlen);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_sra: {
-                    // Shift the operand to the right. Elements that get shifted out are
-                    // discarded. No element is filled in the left.
-                    if(lhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-
-                      int64_t count = ::rocket::min(rhs.as_integer(), 63);
-                      val >>= count;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string()) {
-                      V_string& val = lhs.mut_string();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.pop_back(tlen);
-                      return air_status_next;
-                    }
-                    else if(lhs.is_array()) {
-                      V_array& val = lhs.mut_array();
-
-                      size_t tlen = ::rocket::min((uint64_t) rhs.as_integer(), val.size());
-                      val.pop_back(tlen);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  default:
-                    ROCKET_UNREACHABLE();
+                if(rhs.type() == type_integer) {
+                  // Share this.
+                  do_apply_shift_operator_common(up, lhs, rhs.as_integer());
+                  return air_status_next;
                 }
+
+                throw Runtime_Error(Runtime_Error::M_format(),
+                         "Invalid shift count (operands were `$1` and `$2`)",
+                         lhs, rhs);
               }
 
               // Uparam
@@ -4049,49 +4058,138 @@ solidify(AVMC_Queue& queue) const
         up2.u1 = altr.xop;
         up2.i2345 = altr.ri32;
 
-        queue.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
-          {
-            const auto& up = head->uparam;
-            auto& top = ctx.stack().mut_top();
+        switch(altr.xop) {
+          case xop_inc:
+          case xop_dec:
+          case xop_unset:
+          case xop_head:
+          case xop_tail:
+          case xop_random:
+          case xop_pos:
+          case xop_neg:
+          case xop_notb:
+          case xop_notl:
+          case xop_countof:
+          case xop_typeof:
+          case xop_sqrt:
+          case xop_isnan:
+          case xop_isinf:
+          case xop_abs:
+          case xop_sign:
+          case xop_round:
+          case xop_floor:
+          case xop_ceil:
+          case xop_trunc:
+          case xop_iround:
+          case xop_ifloor:
+          case xop_iceil:
+          case xop_itrunc:
+          case xop_lzcnt:
+          case xop_tzcnt:
+          case xop_popcnt:
+          case xop_cmp_eq:
+          case xop_cmp_ne:
+          case xop_cmp_un:
+          case xop_cmp_lt:
+          case xop_cmp_gt:
+          case xop_cmp_lte:
+          case xop_cmp_gte:
+          case xop_cmp_3way:
+          case xop_add:
+          case xop_sub:
+          case xop_mul:
+          case xop_div:
+          case xop_mod:
+          case xop_andb:
+          case xop_orb:
+          case xop_xorb:
+          case xop_addm:
+          case xop_subm:
+          case xop_mulm:
+          case xop_adds:
+          case xop_subs:
+          case xop_muls:
+          case xop_fma:
+            ASTERIA_TERMINATE(("Constant folding not implemented for `$1`"), altr.xop);
 
-            switch(up.u1) {
-              case xop_assign: {
-                // `assign` is ignored.
-                top.dereference_mutable() = up.i2345;
+          case xop_assign:
+          case xop_index:
+            // binary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
+                auto& top = ctx.stack().mut_top();
+
+                switch(up.u1) {
+                  case xop_assign: {
+                    // `assign` is ignored.
+                    top.dereference_mutable() = up.i2345;
+                    return air_status_next;
+                  }
+
+                  case xop_index: {
+                    // Push a subscript.
+                    Reference_Modifier::S_array_index xmod = { up.i2345 };
+                    top.push_modifier(::std::move(xmod));
+                    top.dereference_readonly();
+                    return air_status_next;
+                  }
+
+                  default:
+                    ROCKET_UNREACHABLE();
+                }
+              }
+
+              // Uparam
+              , up2
+
+              // Sparam
+              , 0, nullptr, nullptr, nullptr
+
+              // Collector
+              , nullptr
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_sll:
+          case xop_srl:
+          case xop_sla:
+          case xop_sra:
+            // shift
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const auto& up = head->uparam;
+                auto& top = ctx.stack().mut_top();
+                auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
+
+                // Share this.
+                do_apply_shift_operator_common(up, lhs, up.i2345);
                 return air_status_next;
               }
 
-              case xop_index: {
-                // Push a subscript.
-                Reference_Modifier::S_array_index xmod = { up.i2345 };
-                top.push_modifier(::std::move(xmod));
-                top.dereference_readonly();
-                return air_status_next;
-              }
+              // Uparam
+              , up2
 
-              default:
-                ASTERIA_TERMINATE(("Constant folding not implemented for `$1`"), up.u1);
-            }
-          }
+              // Sparam
+              , 0, nullptr, nullptr, nullptr
 
-          // Uparam
-          , up2
+              // Collector
+              , nullptr
 
-          // Sparam
-          , 0, nullptr, nullptr, nullptr
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
 
-          // Collector
-          , nullptr
-
-          // Symbols
-          , &(altr.sloc)
-        );
-        return;
+          default:
+            ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
+        }
       }
-
-      default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
   }
 

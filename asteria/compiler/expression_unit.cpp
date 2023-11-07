@@ -247,7 +247,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             }
 
             if((rhs.type() == type_integer) && ((int32_t) rhs.as_integer() == rhs.as_integer())
-               && ::rocket::is_any_of(altr.xop, { xop_assign, xop_index })) {
+               && ::rocket::is_any_of(altr.xop, { xop_assign, xop_index, xop_sll, xop_srl, xop_sla, xop_sra })) {
               // Fold this constant.
               AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
                                                         (int32_t) rhs.as_integer() };
