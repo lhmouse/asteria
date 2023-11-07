@@ -2763,14 +2763,7 @@ solidify(AVMC_Queue& queue) const
                   case xop_add: {
                     // Perform logical OR on two boolean values, or get the sum of two
                     // arithmetic values, or concatenate two strings.
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val |= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_integer() && rhs.is_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
 
@@ -2797,6 +2790,13 @@ solidify(AVMC_Queue& queue) const
                       val.append(other);
                       return air_status_next;
                     }
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val |= other;
+                      return air_status_next;
+                    }
                     else
                       throw Runtime_Error(Runtime_Error::M_format(),
                                "Addition not applicable (operands were `$1` and `$2`)",
@@ -2806,15 +2806,7 @@ solidify(AVMC_Queue& queue) const
                   case xop_sub: {
                     // Perform logical XOR on two boolean values, or get the difference
                     // of two arithmetic values.
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      // Perform logical XOR of the operands.
-                      val ^= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_integer() && rhs.is_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
 
@@ -2836,6 +2828,14 @@ solidify(AVMC_Queue& queue) const
                       val -= other;
                       return air_status_next;
                     }
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      // Perform logical XOR of the operands.
+                      val ^= other;
+                      return air_status_next;
+                    }
                     else
                       throw Runtime_Error(Runtime_Error::M_format(),
                                "Subtraction not applicable (operands were `$1` and `$2`)",
@@ -2846,14 +2846,7 @@ solidify(AVMC_Queue& queue) const
                      // Perform logical AND on two boolean values, or get the product of
                      // two arithmetic values, or duplicate a string or array by a given
                      // times.
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val &= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_integer() && rhs.is_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
 
@@ -2901,6 +2894,13 @@ solidify(AVMC_Queue& queue) const
                       V_array& val = lhs.mut_array();
 
                       do_duplicate_sequence_common(val, count);
+                      return air_status_next;
+                    }
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val &= other;
                       return air_status_next;
                     }
                     else
@@ -2980,14 +2980,7 @@ solidify(AVMC_Queue& queue) const
                     // Perform the bitwise AND operation on all bits of the operands. If
                     // the two operands have different lengths, the result is truncated
                     // to the same length as the shorter one.
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val &= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_integer() && rhs.is_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
 
@@ -3005,6 +2998,13 @@ solidify(AVMC_Queue& queue) const
                         *it = static_cast<char>(*it & *maskp);
                       return air_status_next;
                     }
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val &= other;
+                      return air_status_next;
+                    }
                     else
                       throw Runtime_Error(Runtime_Error::M_format(),
                                "Bitwise AND not applicable (operands were `$1` and `$2`)",
@@ -3015,14 +3015,7 @@ solidify(AVMC_Queue& queue) const
                     // Perform the bitwise OR operation on all bits of the operands. If
                     // the two operands have different lengths, the result is padded to
                     // the same length as the longer one, with zeroes.
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val |= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_integer() && rhs.is_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
 
@@ -3040,6 +3033,13 @@ solidify(AVMC_Queue& queue) const
                         *valp = static_cast<char>(*valp | *it);
                       return air_status_next;
                     }
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val |= other;
+                      return air_status_next;
+                    }
                     else
                       throw Runtime_Error(Runtime_Error::M_format(),
                                "Bitwise OR not applicable (operands were `$1` and `$2`)",
@@ -3050,14 +3050,7 @@ solidify(AVMC_Queue& queue) const
                     // Perform the bitwise XOR operation on all bits of the operands. If
                     // the two operands have different lengths, the result is padded to
                     // the same length as the longer one, with zeroes.
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val ^= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_integer() && rhs.is_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
 
@@ -3073,6 +3066,13 @@ solidify(AVMC_Queue& queue) const
                       auto valp = val.mut_begin();
                       for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
                         *valp = static_cast<char>(*valp ^ *it);
+                      return air_status_next;
+                    }
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val ^= other;
                       return air_status_next;
                     }
                     else
