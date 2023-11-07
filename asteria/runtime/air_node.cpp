@@ -255,7 +255,7 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
             container.begin() + (ptrdiff_t) ::rocket::min(rlen - container.ssize(), container.ssize()));
   }
 
-ROCKET_FLATTEN
+ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
 do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
   {
