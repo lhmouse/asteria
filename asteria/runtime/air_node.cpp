@@ -4123,19 +4123,19 @@ solidify(AVMC_Queue& queue) const
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const uint8_t uxop = head->uparam.u1;
-                const int32_t rhs_i32 = head->uparam.i2345;
+                const V_integer irhs = head->uparam.i2345;
                 auto& top = ctx.stack().mut_top();
 
                 switch(uxop) {
                   case xop_assign: {
                     // `assign` is ignored.
-                    top.dereference_mutable() = rhs_i32;
+                    top.dereference_mutable() = irhs;
                     return air_status_next;
                   }
 
                   case xop_index: {
                     // Push a subscript.
-                    Reference_Modifier::S_array_index xmod = { rhs_i32 };
+                    Reference_Modifier::S_array_index xmod = { irhs };
                     top.push_modifier(::std::move(xmod));
                     top.dereference_readonly();
                     return air_status_next;
@@ -4170,12 +4170,12 @@ solidify(AVMC_Queue& queue) const
               {
                 const bool assign = head->uparam.b0;
                 const uint8_t uxop = head->uparam.u1;
-                const int32_t rhs_i32 = head->uparam.i2345;
+                const V_integer irhs = head->uparam.i2345;
                 auto& top = ctx.stack().mut_top();
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                 // Share this.
-                do_apply_shift_operator_common(uxop, lhs, rhs_i32);
+                do_apply_shift_operator_common(uxop, lhs, irhs);
                 return air_status_next;
               }
 
