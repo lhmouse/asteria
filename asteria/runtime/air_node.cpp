@@ -220,18 +220,18 @@ do_set_compare_result(Value& out, Compare cmp)
   }
 
 void
-do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
+do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer rhs)
   {
-    if(rhs < 0)
-      throw Runtime_Error(Runtime_Error::M_format(),
-               "Negative shift count (operands were `$1` and `$2`)",
-               lhs, rhs);
-
     switch(uxop) {
       case xop_sll: {
         // Shift the operand to the left. Elements that get shifted out are
         // discarded. Vacuum elements are filled with default values. The
         // width of the operand is unchanged.
+        if(rhs < 0)
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Negative shift count (operands were `$1` and `$2`)",
+                   lhs, rhs);
+
         if(lhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
 
@@ -266,6 +266,11 @@ do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
         // Shift the operand to the right. Elements that get shifted out are
         // discarded. Vacuum elements are filled with default values. The
         // width of the operand is unchanged.
+        if(rhs < 0)
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Negative shift count (operands were `$1` and `$2`)",
+                   lhs, rhs);
+
         if(lhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
 
@@ -301,6 +306,11 @@ do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
         // left (for integers this means that bits which get shifted out
         // shall all be the same with the sign bit). Vacuum elements are
         // filled with default values.
+        if(rhs < 0)
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Negative shift count (operands were `$1` and `$2`)",
+                   lhs, rhs);
+
         if(lhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
 
@@ -337,6 +347,11 @@ do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
       case xop_sra: {
         // Shift the operand to the right. Elements that get shifted out are
         // discarded. No element is filled in the left.
+        if(rhs < 0)
+          throw Runtime_Error(Runtime_Error::M_format(),
+                   "Negative shift count (operands were `$1` and `$2`)",
+                   lhs, rhs);
+
         if(lhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
 
@@ -3208,15 +3223,14 @@ solidify(AVMC_Queue& queue) const
                 auto& top = ctx.stack().mut_top();
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                if(rhs.type() == type_integer) {
-                  // Share this.
-                  do_apply_shift_operator_common(uxop, lhs, rhs.as_integer());
-                  return air_status_next;
-                }
+                if(rhs.type() != type_integer)
+                  throw Runtime_Error(Runtime_Error::M_format(),
+                           "Invalid shift count (operands were `$1` and `$2`)",
+                           lhs, rhs);
 
-                throw Runtime_Error(Runtime_Error::M_format(),
-                         "Invalid shift count (operands were `$1` and `$2`)",
-                         lhs, rhs);
+                // Share this.
+                do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
+                return air_status_next;
               }
 
               // Uparam
@@ -4168,7 +4182,7 @@ solidify(AVMC_Queue& queue) const
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                 // Share this.
-                do_apply_shift_operator_common(uxop, lhs, irhs);
+                do_apply_binary_operator_with_integer(uxop, lhs, irhs);
                 return air_status_next;
               }
 
