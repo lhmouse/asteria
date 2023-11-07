@@ -239,9 +239,19 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           if(qrhsc) {
             const auto& rhs = *qrhsc;
 
+            if((altr.xop == xop_pos) && !altr.assign)
+              return;
+
             if((rhs.type() == type_string) && (altr.xop == xop_index)) {
               // Encode a pre-hashed object key.
               AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
+              code.mut_back() = ::std::move(xnode);
+              return;
+            }
+
+            if((rhs.type() == type_integer) && (altr.xop == xop_notb)) {
+              // Encode the result directly, as the result will never overflow.
+              AIR_Node::S_push_constant xnode = { rhs.as_integer() ^ -1 };
               code.mut_back() = ::std::move(xnode);
               return;
             }
