@@ -3193,56 +3193,6 @@ solidify(AVMC_Queue& queue) const
             );
             return;
 
-          case xop_fma:
-            // ternary
-            queue.append(
-              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
-              {
-                const bool assign = head->uparam.b0;
-                const uint8_t uxop = head->uparam.u1;
-                const auto& rhs = ctx.stack().top().dereference_readonly();
-                ctx.stack().pop();
-                const auto& mid = ctx.stack().top().dereference_readonly();
-                ctx.stack().pop();
-                auto& top = ctx.stack().mut_top();
-                auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
-
-                switch(uxop) {
-                  case xop_fma: {
-                    // Perform floating-point fused multiply-add.
-                    if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
-                      V_real& val = lhs.mut_real();
-                      V_real y_mul = mid.as_real();
-                      V_real z_add = rhs.as_real();
-
-                      val = ::std::fma(val, y_mul, z_add);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
-                               lhs, mid, rhs);
-                  }
-
-                  default:
-                    ROCKET_UNREACHABLE();
-                }
-              }
-
-              // Uparam
-              , up2
-
-              // Sparam
-              , 0, nullptr, nullptr, nullptr
-
-              // Collector
-              , nullptr
-
-              // Symbols
-              , &(altr.sloc)
-            );
-            return;
-
           case xop_sll:
           case xop_srl:
           case xop_sla:
@@ -3267,6 +3217,48 @@ solidify(AVMC_Queue& queue) const
                 throw Runtime_Error(Runtime_Error::M_format(),
                          "Invalid shift count (operands were `$1` and `$2`)",
                          lhs, rhs);
+              }
+
+              // Uparam
+              , up2
+
+              // Sparam
+              , 0, nullptr, nullptr, nullptr
+
+              // Collector
+              , nullptr
+
+              // Symbols
+              , &(altr.sloc)
+            );
+            return;
+
+          case xop_fma:
+            // fused multiply-add; ternary
+            queue.append(
+              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              {
+                const bool assign = head->uparam.b0;
+                const auto& rhs = ctx.stack().top().dereference_readonly();
+                ctx.stack().pop();
+                const auto& mid = ctx.stack().top().dereference_readonly();
+                ctx.stack().pop();
+                auto& top = ctx.stack().mut_top();
+                auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                // Perform floating-point fused multiply-add.
+                if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
+                  V_real& val = lhs.mut_real();
+                  V_real y_mul = mid.as_real();
+                  V_real z_add = rhs.as_real();
+
+                  val = ::std::fma(val, y_mul, z_add);
+                  return air_status_next;
+                }
+                else
+                  throw Runtime_Error(Runtime_Error::M_format(),
+                           "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
+                           lhs, mid, rhs);
               }
 
               // Uparam
