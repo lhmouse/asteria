@@ -23,7 +23,7 @@ class atomic
   public:
     atomic() noexcept
       :
-        m_val(value_type())
+        m_val()
       { }
 
     explicit
@@ -40,7 +40,7 @@ class atomic
     memory_order
     do_order_acquire() noexcept
       {
-        switch((int)memorderT) {
+        switch((int) memorderT) {
           case memory_order_consume:
             return memory_order_consume;
 
@@ -58,7 +58,7 @@ class atomic
     memory_order
     do_order_release() noexcept
       {
-        switch((int)memorderT) {
+        switch((int) memorderT) {
           case memory_order_consume:
           case memory_order_acquire:
           case memory_order_release:
@@ -74,7 +74,7 @@ class atomic
     memory_order
     do_order_acq_rel() noexcept
       {
-        switch((int)memorderT) {
+        switch((int) memorderT) {
           case memory_order_consume:
           case memory_order_acquire:
           case memory_order_release:
