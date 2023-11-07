@@ -352,10 +352,9 @@ class Value
     compare_total(const Value& other) const
       {
         auto cmp = this->compare_partial(other);
-        if(cmp != compare_unordered)
-          return cmp;
-
-        this->do_throw_uncomparable_with(other);
+        if(cmp == compare_unordered)
+          this->do_throw_uncomparable_with(other);
+        return cmp;
       }
 
     // These are miscellaneous interfaces for debugging.
