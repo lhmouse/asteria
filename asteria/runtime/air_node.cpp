@@ -210,14 +210,14 @@ do_duplicate_sequence_common(ContainerT& container, int64_t count)
   }
 
 void
-do_apply_shift_operator_common(Uparam up, Value& lhs, V_integer rhs)
+do_apply_shift_operator_common(uint8_t uxop, Value& lhs, V_integer rhs)
   {
     if(rhs < 0)
       throw Runtime_Error(Runtime_Error::M_format(),
                "Negative shift count (operands were `$1` and `$2`)",
                lhs, rhs);
 
-    switch(up.u1) {
+    switch(uxop) {
       case xop_sll: {
         // Shift the operand to the left. Elements that get shifted out are
         // discarded. Vacuum elements are filled with default values. The
@@ -954,7 +954,7 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool immutable = head->uparam.b0;
 
             // Read the value of the initializer. The initializer must not have
             // been empty for this function.
@@ -968,7 +968,7 @@ solidify(AVMC_Queue& queue) const
 
             // Initialize it with this value.
             var->initialize(val);
-            var->set_immutable(up.b0);
+            var->set_immutable(immutable);
             return air_status_next;
           }
 
@@ -1006,11 +1006,11 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool negative = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Read the condition and execute the corresponding branch as a block.
-            return (ctx.stack().top().dereference_readonly().test() != up.b0)
+            return (ctx.stack().top().dereference_readonly().test() != negative)
                       ? do_execute_block(sp.queue_true, ctx)
                       : do_execute_block(sp.queue_false, ctx);
           }
@@ -1159,7 +1159,7 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool negative = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // This is identical to C.
@@ -1178,7 +1178,7 @@ solidify(AVMC_Queue& queue) const
               // Check the condition.
               status = sp.queues_cond.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
-              if(ctx.stack().top().dereference_readonly().test() == up.b0)
+              if(ctx.stack().top().dereference_readonly().test() == negative)
                 break;
             }
             return status;
@@ -1223,7 +1223,7 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool negative = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // This is identical to C.
@@ -1232,7 +1232,7 @@ solidify(AVMC_Queue& queue) const
               // Check the condition.
               status = sp.queues_cond.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
-              if(ctx.stack().top().dereference_readonly().test() == up.b0)
+              if(ctx.stack().top().dereference_readonly().test() == negative)
                 break;
 
               // Execute the body.
@@ -1698,9 +1698,9 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool by_ref = head->uparam.b0;
 
-            if(up.b0) {
+            if(by_ref) {
               // The argument is passed by reference, so check whether it is
               // dereferenceable.
               ctx.stack().top().dereference_readonly();
@@ -1791,12 +1791,12 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const uint32_t depth = head->uparam.u2345;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Locate the target context.
             const Executive_Context* qctx = &ctx;
-            for(uint32_t k = 0;  k != up.u2345;  ++k)
+            for(uint32_t k = 0;  k != depth;  ++k)
               qctx = qctx->get_parent_opt();
 
             // Look for the name in the target context.
@@ -1937,13 +1937,13 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool assign = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Read the condition and evaluate the corresponding subexpression.
             return ctx.stack().top().dereference_readonly().test()
-                     ? do_evaluate_subexpression(ctx, up.b0, sp.queue_true)
-                     : do_evaluate_subexpression(ctx, up.b0, sp.queue_false);
+                     ? do_evaluate_subexpression(ctx, assign, sp.queue_true)
+                     : do_evaluate_subexpression(ctx, assign, sp.queue_false);
           }
 
           // Uparam
@@ -1976,14 +1976,14 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
+            const uint32_t nargs = head->uparam.u2345;
             const auto& sloc = head->pv_meta->sloc;
-
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
-            do_pop_arguments(ctx.alt_stack(), ctx.stack(), up.u2345);
-            return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
+            do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs);
+            return do_function_call_common(ctx, ptc, sloc);
           }
 
           // Uparam
@@ -2010,11 +2010,11 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const uint32_t nelems = head->uparam.u2345;
 
             // Pop elements from the stack and fill them from right to left.
             V_array arr;
-            arr.resize(up.u2345);
+            arr.resize(nelems);
             for(auto it = arr.mut_rbegin();  it != arr.rend();  ++it) {
               *it = ctx.stack().top().dereference_readonly();
               ctx.stack().pop();
@@ -2103,10 +2103,11 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const bool assign = head->uparam.b0;
+                const uint8_t uxop = head->uparam.u1;
                 auto& top = ctx.stack().mut_top();
 
-                switch(up.u1) {
+                switch(uxop) {
                   case xop_inc: {
                     // `assign` is `true` for the postfix variant and `false` for
                     // the prefix variant.
@@ -2121,7 +2122,7 @@ solidify(AVMC_Queue& queue) const
                         throw Runtime_Error(Runtime_Error::M_format(),
                                  "Integer increment overflow (operand was `$1`)", val);
 
-                      if(up.b0)
+                      if(assign)
                         top.set_temporary(val);
 
                       val = result;
@@ -2133,7 +2134,7 @@ solidify(AVMC_Queue& queue) const
                       // Overflow will result in an infinity, so this is safe.
                       double result = val + 1;
 
-                      if(up.b0)
+                      if(assign)
                         top.set_temporary(val);
 
                       val = result;
@@ -2158,7 +2159,7 @@ solidify(AVMC_Queue& queue) const
                         throw Runtime_Error(Runtime_Error::M_format(),
                                  "Integer decrement overflow (operand was `$1`)", val);
 
-                      if(up.b0)
+                      if(assign)
                         top.set_temporary(val);
 
                       val = result;
@@ -2170,7 +2171,7 @@ solidify(AVMC_Queue& queue) const
                       // Overflow will result in an infinity, so this is safe.
                       double result = val - 1;
 
-                      if(up.b0)
+                      if(assign)
                         top.set_temporary(val);
 
                       val = result;
@@ -2239,12 +2240,12 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const uint8_t uxop = head->uparam.u1;
                 auto& rhs = ctx.stack().mut_top().dereference_copy();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
 
-                switch(up.u1) {
+                switch(uxop) {
                   case xop_assign: {
                     // `assign` is ignored.
                     top.dereference_mutable() = ::std::move(rhs);
@@ -2315,11 +2316,12 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const bool assign = head->uparam.b0;
+                const uint8_t uxop = head->uparam.u1;
                 auto& top = ctx.stack().mut_top();
-                auto& rhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
+                auto& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                switch(up.u1) {
+                switch(uxop) {
                   case xop_pos: {
                     // This operator does nothing.
                     return air_status_next;
@@ -2693,13 +2695,14 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const bool assign = head->uparam.b0;
+                const uint8_t uxop = head->uparam.u1;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
-                auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
+                auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                switch(up.u1) {
+                switch(uxop) {
                   case xop_cmp_eq: {
                     // Check whether the two operands are equal. Unordered values are
                     // considered to be unequal.
@@ -3194,15 +3197,16 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const bool assign = head->uparam.b0;
+                const uint8_t uxop = head->uparam.u1;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 const auto& mid = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
-                auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
+                auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                switch(up.u1) {
+                switch(uxop) {
                   case xop_fma: {
                     // Perform floating-point fused multiply-add.
                     if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
@@ -3246,15 +3250,16 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const bool assign = head->uparam.b0;
+                const uint8_t uxop = head->uparam.u1;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
                 auto& top = ctx.stack().mut_top();
-                auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
+                auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                 if(rhs.type() == type_integer) {
                   // Share this.
-                  do_apply_shift_operator_common(up, lhs, rhs.as_integer());
+                  do_apply_shift_operator_common(uxop, lhs, rhs.as_integer());
                   return air_status_next;
                 }
 
@@ -3292,7 +3297,8 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool immutable = head->uparam.b0;
+            const uint32_t nelems = head->uparam.u2345;
 
             // Read the value of the initializer.
             const auto& init = ctx.stack().top().dereference_readonly();
@@ -3303,7 +3309,7 @@ solidify(AVMC_Queue& queue) const
               throw Runtime_Error(Runtime_Error::M_format(),
                        "Initializer was not an array (value was `$1`)", init);
 
-            for(uint32_t i = up.u2345 - 1;  i != UINT32_MAX;  --i) {
+            for(uint32_t i = nelems - 1;  i != UINT32_MAX;  --i) {
               // Pop variables from from right to left.
               auto var = ctx.stack().top().unphase_variable_opt();
               ctx.stack().pop();
@@ -3316,7 +3322,7 @@ solidify(AVMC_Queue& queue) const
               if(ROCKET_UNEXPECT(!var->is_initialized()))
                 var->initialize(nullopt);
 
-              var->set_immutable(up.b0);
+              var->set_immutable(immutable);
             }
             return air_status_next;
           }
@@ -3353,7 +3359,7 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool immutable = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Read the value of the initializer.
@@ -3378,7 +3384,7 @@ solidify(AVMC_Queue& queue) const
               if(ROCKET_UNEXPECT(!var->is_initialized()))
                 var->initialize(nullopt);
 
-              var->set_immutable(up.b0);
+              var->set_immutable(immutable);
             }
             return air_status_next;
           }
@@ -3415,7 +3421,7 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool immutable = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
 
@@ -3427,7 +3433,7 @@ solidify(AVMC_Queue& queue) const
 
             // Initialize it to null.
             var->initialize(nullopt);
-            var->set_immutable(up.b0);
+            var->set_immutable(immutable);
             return air_status_next;
           }
 
@@ -3482,9 +3488,8 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
-
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
@@ -3493,14 +3498,14 @@ solidify(AVMC_Queue& queue) const
             if(va_gen.type() == type_null) {
               // There is no argument.
               ctx.stack().pop();
-              return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
+              return do_function_call_common(ctx, ptc, sloc);
             }
             else if(va_gen.type() == type_array) {
               // Arguments are temporary values.
               ctx.stack().pop();
               for(const auto& val : va_gen.as_array())
                 ctx.alt_stack().push().set_temporary(val);
-              return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
+              return do_function_call_common(ctx, ptc, sloc);
             }
             else if(va_gen.type() == type_function) {
               // Invoke the generator with no argument to get the number of
@@ -3532,7 +3537,7 @@ solidify(AVMC_Queue& queue) const
               }
 
               do_pop_arguments(ctx.alt_stack(), ctx.stack(), static_cast<uint32_t>(va_num.as_integer()));
-              return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
+              return do_function_call_common(ctx, ptc, sloc);
             }
             else
               throw Runtime_Error(Runtime_Error::M_format(),
@@ -3619,15 +3624,14 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const uint32_t nargs = head->uparam.u2345;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
-
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
-            ROCKET_ASSERT(up.u2345 != 0);
-            do_pop_arguments(ctx.alt_stack(), ctx.stack(), up.u2345 - 1U);
+            ROCKET_ASSERT(nargs != 0);
+            do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs - 1);
 
             // Get the path to import.
             const auto& path_val = ctx.stack().top().dereference_readonly();
@@ -3833,13 +3837,14 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool by_ref = head->uparam.b0;
+            const bool is_void = head->uparam.b1;
 
-            if(up.b1 || ctx.stack().top().is_void()) {
+            if(is_void || ctx.stack().top().is_void()) {
               // Discard the result.
               return air_status_return_void;
             }
-            else if(up.b0) {
+            else if(by_ref) {
               // The result is passed by reference, so check whether it is
               // dereferenceable.
               ctx.stack().top().dereference_readonly();
@@ -3942,14 +3947,13 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
-
             const auto sentry = ctx.global().copy_recursion_sentry();
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
             ctx.stack().swap(ctx.alt_stack());
-            return do_function_call_common(ctx, static_cast<PTC_Aware>(up.u0), sloc);
+            return do_function_call_common(ctx, ptc, sloc);
           }
 
           // Uparam
@@ -3984,12 +3988,12 @@ solidify(AVMC_Queue& queue) const
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            const auto& up = head->uparam;
+            const bool assign = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Read the condition and evaluate the corresponding subexpression.
             return ctx.stack().top().dereference_readonly().is_null()
-                     ? do_evaluate_subexpression(ctx, up.b0, sp.queue_null)
+                     ? do_evaluate_subexpression(ctx, assign, sp.queue_null)
                      : air_status_next;
           }
 
@@ -4118,19 +4122,20 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const uint8_t uxop = head->uparam.u1;
+                const int32_t rhs_i32 = head->uparam.i2345;
                 auto& top = ctx.stack().mut_top();
 
-                switch(up.u1) {
+                switch(uxop) {
                   case xop_assign: {
                     // `assign` is ignored.
-                    top.dereference_mutable() = up.i2345;
+                    top.dereference_mutable() = rhs_i32;
                     return air_status_next;
                   }
 
                   case xop_index: {
                     // Push a subscript.
-                    Reference_Modifier::S_array_index xmod = { up.i2345 };
+                    Reference_Modifier::S_array_index xmod = { rhs_i32 };
                     top.push_modifier(::std::move(xmod));
                     top.dereference_readonly();
                     return air_status_next;
@@ -4163,12 +4168,14 @@ solidify(AVMC_Queue& queue) const
             queue.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
-                const auto& up = head->uparam;
+                const bool assign = head->uparam.b0;
+                const uint8_t uxop = head->uparam.u1;
+                const int32_t rhs_i32 = head->uparam.i2345;
                 auto& top = ctx.stack().mut_top();
-                auto& lhs = up.b0 ? top.dereference_mutable() : top.dereference_copy();
+                auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                 // Share this.
-                do_apply_shift_operator_common(up, lhs, up.i2345);
+                do_apply_shift_operator_common(uxop, lhs, rhs_i32);
                 return air_status_next;
               }
 
