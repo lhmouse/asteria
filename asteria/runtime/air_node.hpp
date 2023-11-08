@@ -404,6 +404,11 @@ class AIR_Node
     opt<Value>
     get_constant_opt() const noexcept;
 
+    // Checks whether this node terminates the control flow, which renders all
+    // subsequent nodes unreachable.
+    bool
+    is_terminator() const noexcept;
+
     // If this node denotes a local reference which is allocated in an executive
     // context, replace it with a copy of the reference.
     opt<AIR_Node>

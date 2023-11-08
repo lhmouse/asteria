@@ -816,6 +816,83 @@ get_constant_opt() const noexcept
     }
   }
 
+bool
+AIR_Node::
+is_terminator() const noexcept
+  {
+    switch(static_cast<Index>(this->m_stor.index())) {
+      case index_clear_stack:
+      case index_declare_variable:
+      case index_initialize_variable:
+      case index_switch_statement:
+      case index_do_while_statement:
+      case index_while_statement:
+      case index_for_each_statement:
+      case index_for_statement:
+      case index_try_statement:
+      case index_assert_statement:
+      case index_check_argument:
+      case index_push_global_reference:
+      case index_push_local_reference:
+      case index_push_bound_reference:
+      case index_define_function:
+      case index_push_unnamed_array:
+      case index_push_unnamed_object:
+      case index_apply_operator:
+      case index_unpack_struct_array:
+      case index_unpack_struct_object:
+      case index_define_null_variable:
+      case index_single_step_trap:
+      case index_defer_expression:
+      case index_import_call:
+      case index_declare_reference:
+      case index_initialize_reference:
+      case index_catch_expression:
+      case index_push_constant:
+      case index_alt_clear_stack:
+      case index_coalesce_expression:
+      case index_member_access:
+      case index_apply_operator_bi32:
+        return false;
+
+      case index_throw_statement:
+      case index_return_statement:
+        return true;
+
+      case index_simple_status:
+        return this->m_stor.as<S_simple_status>().status != air_status_next;
+
+      case index_function_call:
+        return this->m_stor.as<S_function_call>().ptc != ptc_aware_none;
+
+      case index_variadic_call:
+        return this->m_stor.as<S_variadic_call>().ptc != ptc_aware_none;
+
+      case index_alt_function_call:
+        return this->m_stor.as<S_alt_function_call>().ptc != ptc_aware_none;
+
+      case index_execute_block: {
+        const auto& altr = this->m_stor.as<S_execute_block>();
+        return !altr.code_body.empty() && altr.code_body.back().is_terminator();
+      }
+
+      case index_if_statement: {
+        const auto& altr = this->m_stor.as<S_if_statement>();
+        return !altr.code_true.empty() && altr.code_true.back().is_terminator()
+               && !altr.code_false.empty() && altr.code_false.back().is_terminator();
+      }
+
+      case index_branch_expression: {
+        const auto& altr = this->m_stor.as<S_branch_expression>();
+        return !altr.code_true.empty() && altr.code_true.back().is_terminator()
+               && !altr.code_false.empty() && altr.code_false.back().is_terminator();
+      }
+
+      default:
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
+    }
+  }
+
 opt<AIR_Node>
 AIR_Node::
 rebind_opt(Abstract_Context& ctx) const

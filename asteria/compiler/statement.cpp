@@ -119,6 +119,9 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               cow_vector<phsh_string>* names_opt, const Global_Context& global,
               const Compiler_Options& opts, PTC_Aware ptc) const
   {
+    if(!code.empty() && code.back().is_terminator())
+      return;
+
     switch(static_cast<Index>(this->m_stor.index())) {
       case index_expression: {
         const auto& altr = this->m_stor.as<S_expression>();
