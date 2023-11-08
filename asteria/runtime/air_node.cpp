@@ -801,9 +801,9 @@ get_constant_opt() const noexcept
     switch(this->m_stor.index()) {
       case index_push_bound_reference:
         try {
-          const auto& ref = this->m_stor.as<S_push_bound_reference>().ref;
-          if(ref.is_temporary())
-            return ref.dereference_readonly();
+          const auto& altr = this->m_stor.as<S_push_bound_reference>();
+          if(altr.ref.is_temporary())
+            return altr.ref.dereference_readonly();
         }
         catch(...) { }
         return nullopt;
