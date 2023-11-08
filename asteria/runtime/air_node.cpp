@@ -798,20 +798,22 @@ opt<Value>
 AIR_Node::
 get_constant_opt() const noexcept
   {
-    if(this->m_stor.index() == index_push_bound_reference) {
-      try {
-        const auto& ref = this->m_stor.as<S_push_bound_reference>().ref;
-        if(ref.is_temporary())
-          return ref.dereference_readonly();
-      }
-      catch(...) { }
-      return nullopt;
+    switch(this->m_stor.index()) {
+      case index_push_bound_reference:
+        try {
+          const auto& ref = this->m_stor.as<S_push_bound_reference>().ref;
+          if(ref.is_temporary())
+            return ref.dereference_readonly();
+        }
+        catch(...) { }
+        return nullopt;
+
+      case index_push_constant:
+        return this->m_stor.as<S_push_constant>().val;
+
+      default:
+        return nullopt;
     }
-
-    if(this->m_stor.index() == index_push_constant)
-      return this->m_stor.as<S_push_constant>().val;
-
-    return nullopt;
   }
 
 opt<AIR_Node>
