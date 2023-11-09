@@ -42,11 +42,9 @@ class Executive_Context
     ASTERIA_INCOMPLET(AVMC_Queue)
     explicit
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
-                      Reference_Stack& alt_stack,
-                      cow_bivector<Source_Location, AVMC_Queue>&& defer)
+                      Reference_Stack& alt_stack)
       :
-        m_parent_opt(nullptr), m_global(&global), m_stack(&stack),
-        m_alt_stack(&alt_stack), m_defer(::std::move(defer))
+        m_parent_opt(nullptr), m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack)
       { }
 
     // A function context has no parent.
@@ -94,10 +92,14 @@ class Executive_Context
     alt_stack() const noexcept
       { return *(this->m_alt_stack);  }
 
-    // Defer an expression which will be evaluated at scope exit.
-    // The result of such expressions are discarded.
-    void
-    defer_expression(const Source_Location& sloc, AVMC_Queue&& queue);
+    // Get the defer expression list.
+    const cow_bivector<Source_Location, AVMC_Queue>&
+    defer() const noexcept
+      { return this->m_defer;  }
+
+    cow_bivector<Source_Location, AVMC_Queue>&
+    mut_defer() noexcept
+      { return this->m_defer;  }
 
     // These functions must be called before exiting a scope.
     // Note that these functions may throw arbitrary exceptions, which

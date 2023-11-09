@@ -199,7 +199,8 @@ do_use_function_result_slow(Global_Context& global)
     refcnt_ptr<PTC_Arguments> ptcg;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
     opt<Value> result_value;
-    Reference_Stack alt_stack;
+    Reference_Stack defer_stack, defer_alt_stack;
+    Executive_Context defer_ctx(Executive_Context::M_defer(), global, defer_stack, defer_alt_stack);
 
     try {
       // Unpack frames until a non-PTC result is encountered.
@@ -211,7 +212,7 @@ do_use_function_result_slow(Global_Context& global)
         // Perform a non-tail call.
         frames.emplace_back(ptcg);
         *this = ::std::move(ptcg->self());
-        ptcg->target().invoke_ptc_aware(*this, global, ::std::move(ptcg->stack()));
+        ptcg->target().invoke_ptc_aware(*this, global, ::std::move(ptcg->mut_stack()));
       }
 
       // Check the result.
@@ -226,19 +227,19 @@ do_use_function_result_slow(Global_Context& global)
         frames.pop_back();
 
         // Evaluate deferred expressions.
-        if(ptcg->defer().size())
-          Executive_Context(Executive_Context::M_defer(),
-                 global, ptcg->stack(), alt_stack, ::std::move(ptcg->defer()))
-            .on_scope_exit_normal(air_status_next);
+        defer_ctx.stack() = ::std::move(ptcg->mut_stack());
+        defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
+        defer_ctx.on_scope_exit_normal(air_status_next);
 
-        // Convert the result.
         if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
+          // Convert the result.
           this->m_value = ::std::move(*result_value);
           result_value.reset();
           this->m_mods.clear();
           this->m_xref = xref_temporary;
         }
 
+        // Leave this frame.
         ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptcg->sloc(), ptcg->target(), *this);
       }
     }
@@ -257,11 +258,11 @@ do_use_function_result_slow(Global_Context& global)
           except.push_frame_function(qcall->sloc(), qcall->func());
 
         // Evaluate deferred expressions.
-        if(ptcg->defer().size())
-          Executive_Context(Executive_Context::M_defer(),
-                 global, ptcg->stack(), alt_stack, ::std::move(ptcg->defer()))
-            .on_scope_exit_exceptional(except);
+        defer_ctx.stack() = ::std::move(ptcg->mut_stack());
+        defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
+        defer_ctx.on_scope_exit_exceptional(except);
 
+        // Leave this frame.
         ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptcg->sloc(), ptcg->target(), except);
       }
 

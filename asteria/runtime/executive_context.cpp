@@ -102,13 +102,6 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
 
 void
 Executive_Context::
-defer_expression(const Source_Location& sloc, AVMC_Queue&& queue)
-  {
-    this->m_defer.emplace_back(sloc, ::std::move(queue));
-  }
-
-void
-Executive_Context::
 do_on_scope_exit_normal_slow(AIR_Status status)
   {
     // Stash the result reference, if any.
@@ -119,7 +112,7 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       if(this->m_stack->top().is_ptc()) {
         const auto ptc = this->m_stack->top().unphase_ptc_opt();
         ROCKET_ASSERT(ptc);
-        ptc->defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
+        ptc->mut_defer().append(this->m_defer.move_begin(), this->m_defer.move_end());
         return;
       }
 

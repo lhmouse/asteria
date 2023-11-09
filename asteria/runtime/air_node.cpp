@@ -2040,8 +2040,7 @@ solidify(AVMC_Queue& queue) const
               Executive_Context ctx_catch(Executive_Context::M_plain(), ctx);
               try {
                 // Set the exception reference.
-                ctx_catch.insert_named_reference(sp.name_except)
-                    .set_temporary(except.value());
+                ctx_catch.insert_named_reference(sp.name_except).set_temporary(except.value());
 
                 // Set backtrace frames.
                 V_array backtrace;
@@ -2054,9 +2053,7 @@ solidify(AVMC_Queue& queue) const
                   r.try_emplace(sref("value"), except.frame(k).value);
                   backtrace.emplace_back(::std::move(r));
                 }
-
-                ctx_catch.insert_named_reference(sref("__backtrace"))
-                    .set_temporary(::std::move(backtrace));
+                ctx_catch.insert_named_reference(sref("__backtrace")).set_temporary(::std::move(backtrace));
 
                 // Execute the `catch` clause.
                 status = sp.queue_catch.execute(ctx_catch);
@@ -4085,7 +4082,7 @@ solidify(AVMC_Queue& queue) const
             // Instantiate the expression and push it to the current context.
             AVMC_Queue queue_body;
             do_solidify_nodes(queue_body, bound_body);
-            ctx.defer_expression(sloc, ::std::move(queue_body));
+            ctx.mut_defer().emplace_back(sloc, ::std::move(queue_body));
             return air_status_next;
           }
 

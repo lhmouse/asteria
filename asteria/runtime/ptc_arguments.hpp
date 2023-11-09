@@ -56,7 +56,7 @@ class PTC_Arguments final
       { return this->m_stack;  }
 
     Reference_Stack&
-    stack() noexcept
+    mut_stack() noexcept
       { return this->m_stack;  }
 
     const Reference&
@@ -64,7 +64,7 @@ class PTC_Arguments final
       { return this->m_self;  }
 
     Reference&
-    self() noexcept
+    mut_self() noexcept
       { return this->m_self;  }
 
     ASTERIA_INCOMPLET(Variadic_Arguer)
@@ -82,7 +82,7 @@ class PTC_Arguments final
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVMC_Queue>&
-    defer() noexcept
+    mut_defer() noexcept
       { return this->m_defer;  }
   };
 
