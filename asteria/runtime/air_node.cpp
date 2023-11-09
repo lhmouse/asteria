@@ -99,6 +99,7 @@ do_execute_block(const AVMC_Queue& queue, const Executive_Context& ctx)
     return status;
   }
 
+ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
 do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
   {
@@ -162,8 +163,9 @@ do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
     }
   }
 
+ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
-do_function_call_common(const Executive_Context& ctx, PTC_Aware ptc, const Source_Location& sloc)
+do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Location& sloc)
   {
     const auto& target_val = ctx.stack().top().dereference_readonly();
     if(target_val.is_null())
@@ -227,7 +229,7 @@ do_compare_with_integer_total(const Value& lhs, V_integer irhs)
 
 template<typename ContainerT>
 void
-do_duplicate_sequence_common(ContainerT& container, int64_t count)
+do_duplicate_sequence(ContainerT& container, int64_t count)
   {
     if(count < 0)
       throw Runtime_Error(Runtime_Error::M_format(),
@@ -404,14 +406,14 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           V_string& val = lhs.mut_string();
           V_integer count = irhs;
 
-          do_duplicate_sequence_common(val, count);
+          do_duplicate_sequence(val, count);
           return air_status_next;
         }
         else if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
           V_integer count = irhs;
 
-          do_duplicate_sequence_common(val, count);
+          do_duplicate_sequence(val, count);
           return air_status_next;
         }
         else
@@ -2487,7 +2489,7 @@ solidify(AVMC_Queue& queue) const
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
             do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs);
-            return do_function_call_common(ctx, ptc, sloc);
+            return do_function_call(ctx, ptc, sloc);
           }
 
           // Uparam
@@ -3377,7 +3379,7 @@ solidify(AVMC_Queue& queue) const
                       V_string& val = lhs.mut_string();
                       V_integer count = rhs.as_integer();
 
-                      do_duplicate_sequence_common(val, count);
+                      do_duplicate_sequence(val, count);
                       return air_status_next;
                     }
                     else if(lhs.is_integer() && rhs.is_string()) {
@@ -3385,14 +3387,14 @@ solidify(AVMC_Queue& queue) const
                       lhs = rhs.as_string();
                       V_string& val = lhs.mut_string();
 
-                      do_duplicate_sequence_common(val, count);
+                      do_duplicate_sequence(val, count);
                       return air_status_next;
                     }
                     else if(lhs.is_array() && rhs.is_integer()) {
                       V_array& val = lhs.mut_array();
                       V_integer count = rhs.as_integer();
 
-                      do_duplicate_sequence_common(val, count);
+                      do_duplicate_sequence(val, count);
                       return air_status_next;
                     }
                     else if(lhs.is_integer() && rhs.is_array()) {
@@ -3400,7 +3402,7 @@ solidify(AVMC_Queue& queue) const
                       lhs = rhs.as_array();
                       V_array& val = lhs.mut_array();
 
-                      do_duplicate_sequence_common(val, count);
+                      do_duplicate_sequence(val, count);
                       return air_status_next;
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -3996,14 +3998,14 @@ solidify(AVMC_Queue& queue) const
             if(va_gen.type() == type_null) {
               // There is no argument.
               ctx.stack().pop();
-              return do_function_call_common(ctx, ptc, sloc);
+              return do_function_call(ctx, ptc, sloc);
             }
             else if(va_gen.type() == type_array) {
               // Arguments are temporary values.
               ctx.stack().pop();
               for(const auto& val : va_gen.as_array())
                 ctx.alt_stack().push().set_temporary(val);
-              return do_function_call_common(ctx, ptc, sloc);
+              return do_function_call(ctx, ptc, sloc);
             }
             else if(va_gen.type() == type_function) {
               // Invoke the generator with no argument to get the number of
@@ -4035,7 +4037,7 @@ solidify(AVMC_Queue& queue) const
               }
 
               do_pop_arguments(ctx.alt_stack(), ctx.stack(), static_cast<uint32_t>(va_num.as_integer()));
-              return do_function_call_common(ctx, ptc, sloc);
+              return do_function_call(ctx, ptc, sloc);
             }
             else
               throw Runtime_Error(Runtime_Error::M_format(),
@@ -4451,7 +4453,7 @@ solidify(AVMC_Queue& queue) const
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
 
             ctx.stack().swap(ctx.alt_stack());
-            return do_function_call_common(ctx, ptc, sloc);
+            return do_function_call(ctx, ptc, sloc);
           }
 
           // Uparam
