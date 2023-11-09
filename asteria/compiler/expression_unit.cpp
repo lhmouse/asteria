@@ -197,29 +197,25 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         // Check whether PTC is disabled.
         auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
-        if(opts.optimization_level >= 1) {
-          // Try optimizing.
+        if((opts.optimization_level >= 1)
+           && ::rocket::none_of(altr.args,  // read: none of `args` clobbers `alt_stack`
+                  [](const argument& arg) {
+                    return ::rocket::any_of(arg.units,
+                        [](const Expression_Unit& unit) { return unit.clobbers_alt_stack();  });
+                  })) {
+          // Evaluate argumetns on `alt_stack` directly.
           // https://github.com/lhmouse/asteria/issues/136
-          bool alt_stack_clobbered = false;;
+          AIR_Node::S_alt_clear_stack xstart = { };
+          code.emplace_back(::std::move(xstart));
 
           for(const auto& arg : altr.args)
             for(const auto& unit : arg.units)
-              alt_stack_clobbered |= unit.clobbers_alt_stack();
+              unit.generate_code(code, opts, global, ctx, ptc_aware_none);
 
-          if(!alt_stack_clobbered) {
-            // Evaluate argumetns on `alt_stack` directly.
-            AIR_Node::S_alt_clear_stack xstart = { };
-            code.emplace_back(::std::move(xstart));
-
-            for(const auto& arg : altr.args)
-              for(const auto& unit : arg.units)
-                unit.generate_code(code, opts, global, ctx, ptc_aware_none);
-
-            // Take alternative approach.
-            AIR_Node::S_alt_function_call xnode = { altr.sloc, rptc };
-            code.emplace_back(::std::move(xnode));
-            return;
-          }
+          // Take alternative approach.
+          AIR_Node::S_alt_function_call xnode = { altr.sloc, rptc };
+          code.emplace_back(::std::move(xnode));
+          return;
         }
 
         // Arguments can be evaluated directly on the stack.
