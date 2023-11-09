@@ -1589,10 +1589,11 @@ solidify(AVMC_Queue& queue) const
               }
             }
 
+            // Skip this statement if no matching clause has been found.
             if(target_index >= sp.clauses.size())
               return air_status_next;
 
-            // Skip this statement if no matching clause has been found.
+            // Jump to the target clause.
             Executive_Context ctx_body(Executive_Context::M_plain(), ctx);
             AIR_Status status = air_status_next;
             try {
