@@ -245,9 +245,14 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       // Accept a list of identifiers wrapped in a pair of brackets and separated by commas.
       // There must be at least one identifier.
       for(;;) {
+        auto name_sloc = tstrm.next_sloc();
         qname = do_accept_identifier_opt(tstrm, true);
         if(!qname)
           break;
+
+        if(::rocket::find(names, *qname))
+          throw Compiler_Error(Compiler_Error::M_status(),
+                    compiler_status_duplicate_name_in_structured_binding, name_sloc);
 
         names.emplace_back(::std::move(*qname));
 
@@ -281,9 +286,14 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       // Accept a list of identifiers wrapped in a pair of braces and separated by commas.
       // There must be at least one identifier.
       for(;;) {
+        auto name_sloc = tstrm.next_sloc();
         qname = do_accept_identifier_opt(tstrm, true);
         if(!qname)
           break;
+
+        if(::rocket::find(names, *qname))
+          throw Compiler_Error(Compiler_Error::M_status(),
+                    compiler_status_duplicate_name_in_structured_binding, name_sloc);
 
         names.emplace_back(::std::move(*qname));
 
@@ -615,9 +625,14 @@ do_accept_parameter_list_opt(Token_Stream& tstrm)
         break;
       }
 
+      auto name_sloc = tstrm.next_sloc();
       auto qname = do_accept_identifier_opt(tstrm, true);
       if(!qname)
         break;
+
+      if(::rocket::find(params, *qname))
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_duplicate_name_in_parameter_list, name_sloc);
 
       params.emplace_back(::std::move(*qname));
 
@@ -1759,7 +1774,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
       if(!qkey)
         break;
 
-      if(find(keys, *qkey))
+      if(::rocket::find(keys, *qkey))
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_duplicate_key_in_object, op_sloc);
 

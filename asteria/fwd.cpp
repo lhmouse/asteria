@@ -358,6 +358,12 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_multiple_default:
         return "multiple `default` clauses not allowed";
 
+      case compiler_status_duplicate_name_in_structured_binding:
+        return "duplicate name in structured binding";
+
+      case compiler_status_duplicate_name_in_parameter_list:
+        return "duplicate name in parameter list";
+
       default:
         return "[unknown compiler status]";
     }

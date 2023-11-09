@@ -799,6 +799,8 @@ enum Compiler_Status : uint32_t
     compiler_status_closing_brace_or_identifier_expected       = 2036,
     compiler_status_invalid_expression                         = 2037,
     compiler_status_multiple_default                           = 2038,
+    compiler_status_duplicate_name_in_structured_binding       = 2039,
+    compiler_status_duplicate_name_in_parameter_list           = 2040,
 
     // semantic errors
     compiler_status_undeclared_identifier                      = 3001,
