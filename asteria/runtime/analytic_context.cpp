@@ -20,9 +20,9 @@ Analytic_Context(M_function, const Abstract_Context* parent_opt,
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update
     // 'executive_context.cpp' as well.
-    this->do_mut_named_reference(nullptr, sref("__varg"));
     this->do_mut_named_reference(nullptr, sref("__this"));
     this->do_mut_named_reference(nullptr, sref("__func"));
+    this->do_mut_named_reference(nullptr, sref("__varg"));
   }
 
 Analytic_Context::

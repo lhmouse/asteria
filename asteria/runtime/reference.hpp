@@ -201,14 +201,12 @@ class Reference
         if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
           this->do_throw_not_dereferenceable();
 
-        if(count <= this->m_mods.size()) {
-          this->m_mods.pop_back(count);
+        if(count > this->m_mods.size()) {
+          this->m_xref = xref_invalid;
           return *this;
         }
 
-        this->m_value = nullopt;
-        this->m_mods.clear();
-        this->m_xref = xref_temporary;
+        this->m_mods.pop_back(count);
         return *this;
       }
 

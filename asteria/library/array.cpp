@@ -70,7 +70,6 @@ do_find_opt(Global_Context& global, Reference_Stack& stack,
         stack.push().set_temporary(*it);
 
         Reference self;
-        self.set_temporary(nullopt);
         target.as_function().invoke(self, global, ::std::move(stack));
         result = self.dereference_readonly().test();
       }
@@ -99,7 +98,6 @@ do_compare_total(Global_Context& global, Reference_Stack& stack,
 
     // Call the predictor function and compare the result with `0`.
     Reference self;
-    self.set_temporary(nullopt);
     kcomp.invoke(self, global, ::std::move(stack));
     return self.dereference_readonly().compare_total(V_integer(0));
   }

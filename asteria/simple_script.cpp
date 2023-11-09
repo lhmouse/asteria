@@ -140,7 +140,6 @@ Simple_Script::
 execute(Reference_Stack&& stack)
   {
     Reference self;
-    self.set_temporary(nullopt);
     this->m_global.set_recursion_base(&self);
     auto func = this->m_func;
     func.invoke(self, this->m_global, ::std::move(stack));

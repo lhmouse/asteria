@@ -25,7 +25,7 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
     // Set the `this` reference, but only if it is a variable or non-null. When
     // `this` is null, it is likely that it is never referenced in the function,
     // so lazy initialization is performed to avoid the overhead here.
-    if(self.is_variable() || !self.dereference_readonly().is_null())
+    if(!self.is_invalid())
       this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
 
     // Set arguments. Because arguments are evaluated from left to right, the
@@ -35,11 +35,11 @@ Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
 
     for(const auto& name : params)
       if(name != sref("...")) {
+        // Try popping an argument and assign it.
         auto& param = this->do_mut_named_reference(nullptr, name);
-        param.set_temporary(nullopt);
-
-        // Try popping an argument and assign it to this parameter.
-        if(nargs != 0)
+        if(nargs == 0)
+          param.set_temporary(nullopt);
+        else
           param = ::std::move(stack.mut_top(--nargs));
       }
       else
@@ -66,20 +66,14 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update
     // 'analytic_context.cpp' as well.
+    if(name == sref("__this"))
+      return &(this->do_mut_named_reference(hint_opt, name));
+
     if(name == sref("__func")) {
       auto& ref = this->do_mut_named_reference(hint_opt, name);
 
       // Note: This can only happen inside a function context.
       ref.set_temporary(this->m_zvarg->func());
-      return &ref;
-    }
-
-    if(name == sref("__this")) {
-      auto& ref = this->do_mut_named_reference(hint_opt, name);
-
-      // Note: This can only happen inside a function context and the `this`
-      // argument is null.
-      ref.set_temporary(nullopt);
       return &ref;
     }
 
