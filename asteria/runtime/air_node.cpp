@@ -66,6 +66,14 @@ do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
     queue.finalize();
   }
 
+template<typename XModT>
+void
+do_push_modifier_and_check(Reference& ref, XModT&& xmod)
+  {
+    ref.push_modifier(::std::forward<XModT>(xmod));
+    ref.dereference_readonly();
+  }
+
 using Uparam  = AVMC_Queue::Uparam;
 using Header  = AVMC_Queue::Header;
 
@@ -1838,8 +1846,7 @@ solidify(AVMC_Queue& queue) const
                 // Set the mapped reference.
                 mapped_ref.pop_modifier();
                 Reference_Modifier::S_array_index xmod = { i };
-                mapped_ref.push_modifier(::std::move(xmod));
-                mapped_ref.dereference_readonly();
+                do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
 
                 // Execute the loop body.
                 status = do_execute_block(sp.queue_body, ctx_for);
@@ -1872,8 +1879,7 @@ solidify(AVMC_Queue& queue) const
                 // Set the mapped reference.
                 mapped_ref.pop_modifier();
                 Reference_Modifier::S_object_key xmod = { it->first };
-                mapped_ref.push_modifier(::std::move(xmod));
-                mapped_ref.dereference_readonly();
+                do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
 
                 // Execute the loop body.
                 status = do_execute_block(sp.queue_body, ctx_for);
@@ -2699,16 +2705,14 @@ solidify(AVMC_Queue& queue) const
                   case xop_head: {
                     // Push an array head modifier. `assign` is ignored.
                     Reference_Modifier::S_array_head xmod = { };
-                    top.push_modifier(::std::move(xmod));
-                    top.dereference_readonly();
+                    do_push_modifier_and_check(top, ::std::move(xmod));
                     return air_status_next;
                   }
 
                   case xop_tail: {
                     // Push an array tail modifier. `assign` is ignored.
                     Reference_Modifier::S_array_tail xmod = { };
-                    top.push_modifier(::std::move(xmod));
-                    top.dereference_readonly();
+                    do_push_modifier_and_check(top, ::std::move(xmod));
                     return air_status_next;
                   }
 
@@ -2716,8 +2720,7 @@ solidify(AVMC_Queue& queue) const
                     // Push a random subscript.
                     uint32_t seed = ctx.global().random_engine()->bump();
                     Reference_Modifier::S_array_random xmod = { seed };
-                    top.push_modifier(::std::move(xmod));
-                    top.dereference_readonly();
+                    do_push_modifier_and_check(top, ::std::move(xmod));
                     return air_status_next;
                   }
 
@@ -2762,14 +2765,12 @@ solidify(AVMC_Queue& queue) const
                     // Push a subscript.
                     if(rhs.type() == type_integer) {
                       Reference_Modifier::S_array_index xmod = { rhs.as_integer() };
-                      top.push_modifier(::std::move(xmod));
-                      top.dereference_readonly();
+                      do_push_modifier_and_check(top, ::std::move(xmod));
                       return air_status_next;
                     }
                     else if(rhs.type() == type_string) {
                       Reference_Modifier::S_object_key xmod = { rhs.as_string() };
-                      top.push_modifier(::std::move(xmod));
-                      top.dereference_readonly();
+                      do_push_modifier_and_check(top, ::std::move(xmod));
                       return air_status_next;
                     }
                     else
@@ -4534,8 +4535,7 @@ solidify(AVMC_Queue& queue) const
 
             // Push a modifier.
             Reference_Modifier::S_object_key xmod = { sp.key };
-            ctx.stack().mut_top().push_modifier(::std::move(xmod));
-            ctx.stack().top().dereference_readonly();
+            do_push_modifier_and_check(ctx.stack().mut_top(), ::std::move(xmod));
             return air_status_next;
           }
 
@@ -4614,8 +4614,7 @@ solidify(AVMC_Queue& queue) const
                   case xop_index: {
                     // Push a subscript.
                     Reference_Modifier::S_array_index xmod = { irhs };
-                    top.push_modifier(::std::move(xmod));
-                    top.dereference_readonly();
+                    do_push_modifier_and_check(top, ::std::move(xmod));
                     return air_status_next;
                   }
 
