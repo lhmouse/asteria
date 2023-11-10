@@ -346,6 +346,30 @@ class Value
 
     // These perform the builtin comparison.
     Compare
+    compare_numeric_partial(V_integer other) const noexcept;
+
+    Compare
+    compare_numeric_total(V_integer other) const
+      {
+        auto cmp = this->compare_numeric_partial(other);
+        if(cmp == compare_unordered)
+          this->do_throw_uncomparable_with(other);
+        return cmp;
+      }
+
+    Compare
+    compare_numeric_partial(V_real other) const noexcept;
+
+    Compare
+    compare_numeric_total(V_real other) const
+      {
+        auto cmp = this->compare_numeric_partial(other);
+        if(cmp == compare_unordered)
+          this->do_throw_uncomparable_with(other);
+        return cmp;
+      }
+
+    Compare
     compare_partial(const Value& other) const;
 
     Compare

@@ -25,6 +25,28 @@ struct Rbr_object
 
 using Rbr_Element = ::rocket::variant<Rbr_array, Rbr_object>;
 
+char
+do_compare_real_integer(V_real xreal, V_integer yint)
+  {
+    // Cast `yint` to a real number. The result is exact if `yint` contains
+    // no more than significant 53 bits. If that is not the case, it will
+    // have to be rounded towards negative infinity.
+    ::fesetround(FE_DOWNWARD);
+    V_real yreal = static_cast<V_real>(yint);
+    V_integer ytest = static_cast<V_integer>(yreal);
+    ::fesetround(FE_TONEAREST);
+
+    // Perform plain comparison now.
+    if(::std::isunordered(xreal, yreal))
+      return '?';
+    else if(::std::isgreater(xreal, yreal))
+      return '>';
+    else if(::std::isless(xreal, yreal) || (yint != ytest))  // imprecise
+      return '<';
+    else
+      return '=';
+  }
+
 }  // namespace
 
 ROCKET_NEVER_INLINE void
@@ -205,6 +227,72 @@ do_throw_uncomparable_with(const Value& other) const
 
 Compare
 Value::
+compare_numeric_partial(V_integer other) const noexcept
+  {
+    switch(this->m_stor.index()) {
+      case type_integer: {
+        V_integer value = this->m_stor.as<V_integer>();
+        if(value < other)
+          return compare_less;
+        else if(value > other)
+          return compare_greater;
+        else
+          return compare_equal;
+      }
+
+      case type_real: {
+        char r = do_compare_real_integer(this->m_stor.as<V_real>(), other);
+        if(r == '<')
+          return compare_less;
+        else if(r == '>')
+          return compare_greater;
+        else if(r == '?')
+          return compare_unordered;
+        else
+          return compare_equal;
+      }
+
+      default:
+        return compare_unordered;
+    }
+  }
+
+Compare
+Value::
+compare_numeric_partial(V_real other) const noexcept
+  {
+    switch(this->m_stor.index()) {
+      case type_integer: {
+        char r = do_compare_real_integer(other, this->m_stor.as<V_integer>());
+        if(r == '>')
+          return compare_less;
+        else if(r == '<')
+          return compare_greater;
+        else if(r == '?')
+          return compare_unordered;
+        else
+          return compare_equal;
+      }
+
+      case type_real: {
+        V_real value = this->m_stor.as<V_real>();
+        if(::std::isless(value, other))
+          return compare_less;
+        else if(::std::isgreater(value, other))
+          return compare_greater;
+        else if(::std::isunordered(value, other))
+          return compare_unordered;
+        else
+          return compare_equal;
+      }
+
+      default:
+        return compare_unordered;
+    }
+  }
+
+Compare
+Value::
 compare_partial(const Value& other) const
   {
     // Expand recursion by hand with a stack.
@@ -212,75 +300,61 @@ compare_partial(const Value& other) const
     auto qoth = &other;
     cow_bivector<Rbr_array, Rbr_array> stack;
 
-#define do_compare_3way_(xx, yy)  \
-    if((xx) < (yy))  \
-      return compare_less;  \
-    else if((xx) > (yy))  \
-      return compare_greater;  \
-    else  \
-      ((void) 0)  // no semicolon
-
-#define do_check_unordered_(xx, yy)  \
-    if(::std::isunordered((xx), (yy)))  \
-      return compare_unordered;  \
-    else  \
-      ((void) 0)  // no semicolon
-
   r:
-    if((qval->m_stor.index() == type_integer) && (qoth->m_stor.index() == type_real)) {
-      // integer <=> real
-      do_check_unordered_(qoth->m_stor.as<V_real>(), 0.0);
-      do_compare_3way_(static_cast<V_real>(qval->m_stor.as<V_integer>()), qoth->m_stor.as<V_real>());
+    if(qoth->m_stor.index() == type_integer) {
+      // specialized
+      auto cmp = qval->compare_numeric_partial(qoth->m_stor.as<V_integer>());
+      if(cmp != compare_equal)
+        return cmp;
     }
-    else if((qval->m_stor.index() == type_real) && (qoth->m_stor.index() == type_integer)) {
-      // real <=> integer
-      do_check_unordered_(qval->m_stor.as<V_real>(), 0.0);
-      do_compare_3way_(qval->m_stor.as<V_real>(), static_cast<V_real>(qoth->m_stor.as<V_integer>()));
+    else if(qoth->m_stor.index() == type_real) {
+      // specialized
+      auto cmp = qval->compare_numeric_partial(qoth->m_stor.as<V_real>());
+      if(cmp != compare_equal)
+        return cmp;
     }
     else if(qval->m_stor.index() != qoth->m_stor.index()) {
       // incomparable
       return compare_unordered;
     }
-    else
-      switch(qval->m_stor.index()) {
-        case type_null:
-          break;
-
-        case type_boolean:
-          do_compare_3way_(qval->m_stor.as<V_boolean>(), qoth->m_stor.as<V_boolean>());
-          break;
-
-        case type_integer:
-          do_compare_3way_(qval->m_stor.as<V_integer>(), qoth->m_stor.as<V_integer>());
-          break;
-
-        case type_real:
-          do_check_unordered_(qval->m_stor.as<V_real>(), qoth->m_stor.as<V_real>());
-          do_compare_3way_(qval->m_stor.as<V_real>(), qoth->m_stor.as<V_real>());
-          break;
-
-        case type_string:
-          do_compare_3way_(qval->m_stor.as<V_string>().compare(qoth->m_stor.as<V_string>()), 0);
-          break;
-
-        case type_array: {
-          const auto& altr_val = qval->m_stor.as<V_array>();
-          const auto& altr_oth = qoth->m_stor.as<V_array>();
-          if(!altr_val.empty() && !altr_oth.empty()) {
-            Rbr_array elem_val = { &altr_val, altr_val.begin() };
-            Rbr_array elem_oth = { &altr_oth, altr_oth.begin() };
-            qval = &*(elem_val.curp);
-            qoth = &*(elem_oth.curp);
-            stack.emplace_back(::std::move(elem_val), ::std::move(elem_oth));
-            goto r;
-          }
-          do_compare_3way_(altr_val.size(), altr_oth.size());
-          break;
-        }
-
-        default:
-          return compare_unordered;
+    else if(qval->m_stor.index() == type_boolean) {
+      // specialied
+      if(qval->m_stor.as<V_boolean>() < qoth->m_stor.as<V_boolean>())
+        return compare_less;
+      else if(qval->m_stor.as<V_boolean>() > qoth->m_stor.as<V_boolean>())
+        return compare_greater;
+    }
+    else if(qval->m_stor.index() == type_string) {
+      // specialied
+      int r = qval->m_stor.as<V_string>().compare(qoth->m_stor.as<V_string>());
+      if(r < 0)
+        return compare_less;
+      else if(r > 0)
+        return compare_greater;
+    }
+    else if(qval->m_stor.index() == type_array) {
+      // recursive
+      const auto& altr_val = qval->m_stor.as<V_array>();
+      const auto& altr_oth = qoth->m_stor.as<V_array>();
+      if(!altr_val.empty() && !altr_oth.empty()) {
+        Rbr_array elem_val = { &altr_val, altr_val.begin() };
+        Rbr_array elem_oth = { &altr_oth, altr_oth.begin() };
+        qval = &*(elem_val.curp);
+        qoth = &*(elem_oth.curp);
+        stack.emplace_back(::std::move(elem_val), ::std::move(elem_oth));
+        goto r;
       }
+
+      // longer one wins.
+      if(altr_val.size() < altr_oth.size())
+        return compare_less;
+      else if(altr_val.size() > altr_oth.size())
+        return compare_greater;
+    }
+    else if(qval->m_stor.index() != type_null) {
+      // functions, opaques, objects etc. are not comparable.
+      return compare_unordered;
+    }
 
     while(stack.size()) {
       Rbr_array& elem_val = stack.mut_back().first;
@@ -292,7 +366,12 @@ compare_partial(const Value& other) const
         qoth = &*(elem_oth.curp);
         goto r;
       }
-      do_compare_3way_(elem_val.refa->size(), elem_oth.refa->size());
+
+      if(elem_val.refa->size() < elem_oth.refa->size())
+        return compare_less;
+      else if(elem_val.refa->size() > elem_oth.refa->size())
+        return compare_greater;
+
       stack.pop_back();
     }
 

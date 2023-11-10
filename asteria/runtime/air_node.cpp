@@ -199,42 +199,6 @@ do_set_compare_result(Value& out, Compare cmp)
       out = (int64_t) cmp - compare_equal;
   }
 
-Compare
-do_compare_with_integer_partial(const Value& lhs, V_integer irhs)
-  {
-    if(lhs.type() == type_integer) {
-      // total order
-      if(lhs.as_integer() < irhs)
-        return compare_less;
-      else if(lhs.as_integer() > irhs)
-        return compare_greater;
-      else
-        return compare_equal;
-    }
-
-    if(lhs.type() == type_real) {
-      // partial order
-      if(::std::isless(lhs.as_real(), static_cast<V_real>(irhs)))
-        return compare_less;
-      else if(::std::isgreater(lhs.as_real(), static_cast<V_real>(irhs)))
-        return compare_greater;
-      else if(lhs.as_real() == static_cast<V_real>(irhs))
-        return compare_equal;
-    }
-
-    // fallback
-    return compare_unordered;
-  }
-
-Compare
-do_compare_with_integer_total(const Value& lhs, V_integer irhs)
-  {
-    auto cmp = do_compare_with_integer_partial(lhs, irhs);
-    if(cmp == compare_unordered)
-      cmp = lhs.compare_total(Value(irhs));
-    return cmp;
-  }
-
 template<typename ContainerT>
 void
 do_duplicate_sequence(ContainerT& container, int64_t count)
@@ -273,48 +237,48 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
       case xop_cmp_eq: {
         // Check whether the two operands are equal. Unordered values are
         // considered to be unequal.
-        lhs = do_compare_with_integer_partial(lhs, irhs) == compare_equal;
+        lhs = lhs.compare_numeric_partial(irhs) == compare_equal;
         return air_status_next;
       }
 
       case xop_cmp_ne: {
         // Check whether the two operands are not equal. Unordered values are
         // considered to be unequal.
-        lhs = do_compare_with_integer_partial(lhs, irhs) != compare_equal;
+        lhs = lhs.compare_numeric_partial(irhs) != compare_equal;
         return air_status_next;
       }
 
       case xop_cmp_un: {
         // Check whether the two operands are unordered.
-        lhs = do_compare_with_integer_partial(lhs, irhs) == compare_unordered;
+        lhs = lhs.compare_numeric_partial(irhs) == compare_unordered;
         return air_status_next;
       }
 
       case xop_cmp_lt: {
         // Check whether the LHS operand is less than the RHS operand. If
         // they are unordered, an exception shall be thrown.
-        lhs = do_compare_with_integer_total(lhs, irhs) == compare_less;
+        lhs = lhs.compare_numeric_total(irhs) == compare_less;
         return air_status_next;
       }
 
       case xop_cmp_gt: {
         // Check whether the LHS operand is greater than the RHS operand. If
         // they are unordered, an exception shall be thrown.
-        lhs = do_compare_with_integer_total(lhs, irhs) == compare_greater;
+        lhs = lhs.compare_numeric_total(irhs) == compare_greater;
         return air_status_next;
       }
 
       case xop_cmp_lte: {
         // Check whether the LHS operand is less than or equal to the RHS
         // operand. If they are unordered, an exception shall be thrown.
-        lhs = do_compare_with_integer_total(lhs, irhs) != compare_greater;
+        lhs = lhs.compare_numeric_total(irhs) != compare_greater;
         return air_status_next;
       }
 
       case xop_cmp_gte: {
         // Check whether the LHS operand is greater than or equal to the RHS
         // operand. If they are unordered, an exception shall be thrown.
-        lhs = do_compare_with_integer_total(lhs, irhs) != compare_less;
+        lhs = lhs.compare_numeric_total(irhs) != compare_less;
         return air_status_next;
       }
 
@@ -322,7 +286,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         // Defines a partial ordering on all values. For unordered operands,
         // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
         // the same result.
-        do_set_compare_result(lhs, do_compare_with_integer_partial(lhs, irhs));
+        do_set_compare_result(lhs, lhs.compare_numeric_partial(irhs));
         return air_status_next;
       }
 
