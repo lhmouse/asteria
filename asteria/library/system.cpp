@@ -17,7 +17,7 @@
 #include <sys/utsname.h>  // ::uname()
 #include <sys/socket.h>  // ::socket()
 #include <time.h>  // ::clock_gettime()
-extern char **environ;
+extern "C" char **environ;
 namespace asteria {
 namespace {
 
