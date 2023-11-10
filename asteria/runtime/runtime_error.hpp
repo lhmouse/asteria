@@ -66,7 +66,7 @@ class Runtime_Error
       }
 
     template<typename... ParamsT>
-    explicit
+    explicit ROCKET_NEVER_INLINE
     Runtime_Error(M_format, const char* templ, const ParamsT&... params)
       :
         m_value()

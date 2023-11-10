@@ -61,15 +61,10 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       if(auto ptr = this->m_sptr.get())
         return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
     }
-    catch(Runtime_Error& except) {
-      // Forward the exception.
-      throw;
-    }
-    catch(exception& stdex) {
-      // Replace the active exception.
-      Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-      throw except;
-    }
+    catch(Runtime_Error& except)
+    { throw;  }  // forward
+    catch(exception& stdex)
+    { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
 
     throw Runtime_Error(Runtime_Error::M_format(),
               "cow_function: attempt to call a null function");

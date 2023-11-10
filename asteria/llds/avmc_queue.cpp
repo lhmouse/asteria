@@ -166,21 +166,21 @@ execute(Executive_Context& ctx) const
 
         default:
           try {
-            // There is metadata and symbols.
-            status = head->pv_meta->exec(ctx, head);
-            break;
+            try {
+              // There is metadata and symbols.
+              status = head->pv_meta->exec(ctx, head);
+            }
+            catch(Runtime_Error& except)
+            { throw;  }  // forward
+            catch(exception& stdex)
+            { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
           }
           catch(Runtime_Error& except) {
             // Modify and rethrow the exception in place without copying it.
             except.push_frame_plain(head->pv_meta->sloc);
             throw;
           }
-          catch(exception& stdex) {
-            // Replace the active exception.
-            Runtime_Error except(Runtime_Error::M_format(), "$1", stdex);
-            except.push_frame_plain(head->pv_meta->sloc);
-            throw except;
-          }
+          break;
       }
 
       if(ROCKET_UNEXPECT(status != air_status_next))
