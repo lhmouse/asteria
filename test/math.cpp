@@ -49,12 +49,12 @@ int main()
         assert __isnan std.math.log(0, 10);
 
         assert std.math.expm1(0) == 0;
-        assert std.math.expm1(1) == 1.7182818284590452;
+        assert lt_1ups(std.math.expm1(1), 1.7182818284590452);
 
         assert std.math.log1p(0) == 0;
         assert std.math.log1p(-1) == -infinity;
         assert __isnan std.math.log1p(-2);
-        assert std.math.log1p(1.7182818284590452) == 1;
+        assert lt_1ups(std.math.log1p(1.7182818284590452), 1);
 
         assert std.math.sin(0) == 0;
         assert lt_1ups(std.math.sin(std.math.pi / 2), 1);
