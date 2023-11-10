@@ -62,6 +62,7 @@ class Runtime_Error
         m_value()
       {
         format(this->m_fmt, templ, params...);
+        ROCKET_ASSERT(this->m_value.type() == type_null);
         this->m_value = this->m_fmt.extract_string();
 
         this->do_backtrace();

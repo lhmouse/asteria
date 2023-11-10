@@ -123,7 +123,7 @@ class basic_tinyfmt_str
         return *this;
       }
 
-    string_type
+    string_type&&
     extract_string()
       {
         return this->m_buf.extract_string();

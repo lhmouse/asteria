@@ -174,13 +174,11 @@ class basic_tinybuf_str
         return *this;
       }
 
-    string_type
+    string_type&&
     extract_string()
       {
-        string_type r;
-        this->m_str.swap(r);
         this->m_off = 0;
-        return r;
+        return ::std::move(this->m_str);
       }
 
     // Does nothing. Strings need not be flushed.
