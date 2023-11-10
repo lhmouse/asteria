@@ -106,7 +106,7 @@ repl_vprintf(const char* fmt, ::va_list ap) noexcept
   {
     ::flockfile(stderr);
     ::vfprintf(stderr, fmt, ap);
-    ::fputc_unlocked('\n', stderr);
+    putc_unlocked('\n', stderr);
     ::funlockfile(stderr);
   }
 

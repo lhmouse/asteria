@@ -38,7 +38,7 @@ do_xfgetn_common(::FILE* fp, xmbrtowcT&& xmbrtowc, ::mbstate_t& mbst, xwcharT* w
       char mbc = 0;
       if(wants_more_input) {
         // Try getting the next byte if the previous character has completed.
-        int ch = ::fgetc_unlocked(fp);
+        int ch = getc_unlocked(fp);
         if(ch == -1) {
           do_throw_if_error(fp);
           break;
@@ -103,7 +103,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
         case -1:
           // input invalid
           mbst = { };
-          if(::fputc_unlocked('?', fp) == EOF)
+          if(putc_unlocked('?', fp) == EOF)
             do_throw_if_error(fp);
 
           nbytes ++;
@@ -118,7 +118,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
         default:
           // `mblen` bytes written; input consumed
           for(unsigned k = 0;  k < static_cast<unsigned>(mblen);  ++k)
-            if(::fputc_unlocked(mbcs[k], fp) == EOF)
+            if(putc_unlocked(mbcs[k], fp) == EOF)
               do_throw_if_error(fp);
 
           nbytes += static_cast<unsigned>(mblen);
@@ -141,7 +141,7 @@ xfgetn(::FILE* fp, ::mbstate_t& /*mbst*/, char* s, size_t n)
     while(sptr != s + n) {
       // Try getting one byte from the file. If the operation fails, an
       // exception will be thrown.
-      int ch = ::fgetc_unlocked(fp);
+      int ch = getc_unlocked(fp);
       if(ch == -1) {
         do_throw_if_error(fp);
         break;
@@ -196,7 +196,7 @@ xfgetc(::FILE* fp, ::mbstate_t& /*mbst*/, char& c)
     ::flockfile(fp);
     const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
 
-    int ch = ::fgetc_unlocked(fp);
+    int ch = getc_unlocked(fp);
     if(ch == EOF)
       do_throw_if_error(fp);
     c = static_cast<char>(ch);
@@ -283,7 +283,7 @@ xfputc(::FILE* fp, ::mbstate_t& /*mbst*/, char c)
     ::flockfile(fp);
     const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
 
-    int ch = ::fputc_unlocked(static_cast<unsigned char>(c), fp);
+    int ch = putc_unlocked(static_cast<unsigned char>(c), fp);
     if(ch == EOF)
       do_throw_if_error(fp);
     return ch;
