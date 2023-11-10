@@ -24,9 +24,6 @@ std_math_exp(V_real base, V_real y)
     if(base == 2)
       return ::exp2(y);
 
-    if(base == 10)
-      return ::exp10(y);
-
     return ::pow(base, y);
   }
 
@@ -75,14 +72,6 @@ V_real
 std_math_cos(V_real x)
   {
     return ::cos(x);
-  }
-
-pair<V_real, V_real>
-std_math_sincos(V_real x)
-  {
-    double sin, cos;
-    ::sincos(x, &sin, &cos);
-    return ::std::make_pair(sin, cos);
   }
 
 V_real
@@ -331,21 +320,6 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.required(x);
         if(reader.end_overload())
           return (Value) std_math_cos(x);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("sincos"),
-      ASTERIA_BINDING(
-        "std.math.sincos", "x",
-        Argument_Reader&& reader)
-      {
-        V_real x;
-
-        reader.start_overload();
-        reader.required(x);
-        if(reader.end_overload())
-          return (Value) std_math_sincos(x);
 
         reader.throw_no_matching_function_call();
       });

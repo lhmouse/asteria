@@ -285,7 +285,11 @@ V_integer
 std_chrono_steady_now()
   {
     ::timespec ts;
+#ifdef CLOCK_MONOTONIC_COARSE
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
+#else
+    ::clock_gettime(CLOCK_MONOTONIC, &ts);
+#endif
     return (int64_t) ts.tv_sec * 1000 + (uint32_t) ts.tv_nsec / 1000000 + 987654321;
   }
 

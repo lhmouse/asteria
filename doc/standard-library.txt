@@ -1675,13 +1675,6 @@
 
 	* Returns the result as a real.
 
-`std.math.sincos(x)`
-
-	* Calculates the sine and cosine of `x` in radians.
-
-	* Returns an array of two reals. The first element is the sine
-	  and the other is the cosine.
-
 `std.math.tan(x)`
 
 	* Calculates the tangent of `x` in radians.

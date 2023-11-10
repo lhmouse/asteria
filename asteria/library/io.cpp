@@ -82,10 +82,10 @@ do_write_utf8_common(const IOF_Sentry& sentry, stringR text)
             text, off);
 
       // Insert it into the output stream.
-      if(::fputwc_unlocked((wchar_t)cp, sentry) == WEOF)
+      if(::fputwc((wchar_t)cp, sentry) == WEOF)
         ASTERIA_THROW((
             "Error writing standard output",
-            "[`fputwc_unlocked()` failed: ${errno:full}]"));
+            "[`fputwc()` failed: ${errno:full}]"));
 
       // The return value is the number of code points rather than bytes.
       ncps += 1;
@@ -125,11 +125,11 @@ std_io_getc()
     wint_t wch;
     const IOF_Sentry sentry(stdin, iof_mode_input_wide);
 
-    wch = ::fgetwc_unlocked(sentry);
+    wch = ::fgetwc(sentry);
     if((wch == WEOF) && ::ferror_unlocked(sentry))
       ASTERIA_THROW((
           "Error reading standard input",
-          "[`fgetwc_unlocked()` failed: ${errno:full}]"));
+          "[`fgetwc()` failed: ${errno:full}]"));
 
     if(wch == WEOF)
       return nullopt;
@@ -145,11 +145,11 @@ std_io_getln()
     const IOF_Sentry sentry(stdin, iof_mode_input_wide);
 
     for(;;) {
-      wch = ::fgetwc_unlocked(sentry);
+      wch = ::fgetwc(sentry);
       if((wch == WEOF) && ::ferror_unlocked(sentry))
         ASTERIA_THROW((
             "Error reading standard input",
-            "[`fgetwc_unlocked()` failed: ${errno:full}]"));
+            "[`fgetwc()` failed: ${errno:full}]"));
 
       if((wch == L'\n') || (wch == WEOF))
         break;
@@ -183,10 +183,10 @@ std_io_putc(V_integer value)
           "Invalid UTF code point (value `$1`)"),
           value);
 
-    if(::fputwc_unlocked((wchar_t) value, sentry) == WEOF)
+    if(::fputwc((wchar_t) value, sentry) == WEOF)
       ASTERIA_THROW((
           "Error writing standard output",
-          "[`fputwc_unlocked()` failed: ${errno:full}]"));
+          "[`fputwc()` failed: ${errno:full}]"));
 
     return 1;
   }
@@ -209,10 +209,10 @@ std_io_putln(V_string value)
 
     ncps = do_write_utf8_common(sentry, value);
 
-    if(::fputwc_unlocked(L'\n', sentry) == WEOF)
+    if(::fputwc(L'\n', sentry) == WEOF)
       ASTERIA_THROW((
           "Error writing standard output",
-          "[`fputwc_unlocked()` failed: ${errno:full}]"));
+          "[`fputwc()` failed: ${errno:full}]"));
 
     return (int64_t) ncps + 1;
   }
@@ -235,10 +235,10 @@ std_io_putfln(V_string templ, cow_vector<Value> values)
 
     ncps = do_format_write_utf8_common(sentry, templ, values);
 
-    if(::fputwc_unlocked(L'\n', sentry) == WEOF)
+    if(::fputwc(L'\n', sentry) == WEOF)
       ASTERIA_THROW((
           "Error writing standard output",
-          "[`fputwc_unlocked()` failed: ${errno:full}]"));
+          "[`fputwc()` failed: ${errno:full}]"));
 
     return (int64_t) ncps;
   }
@@ -262,7 +262,7 @@ std_io_read(optV_integer limit)
       if((nread != nbatch) && ::ferror_unlocked(sentry))
         ASTERIA_THROW((
             "Error reading standard input",
-            "[`fgetwc_unlocked()` failed: ${errno:full}]"));
+            "[`fgetwc()` failed: ${errno:full}]"));
 
       if(nread != nbatch) {
         data.erase(batch_pos + (ptrdiff_t) nread, data.end());
