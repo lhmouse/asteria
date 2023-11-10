@@ -17,6 +17,7 @@
 #include <sys/utsname.h>  // ::uname()
 #include <sys/socket.h>  // ::socket()
 #include <time.h>  // ::clock_gettime()
+extern char **environ;
 namespace asteria {
 namespace {
 
@@ -302,15 +303,20 @@ std_system_env_get_variable(V_string name)
 V_object
 std_system_env_get_variables()
   {
-    const char* const* vpos = ::environ;
     V_object vars;
-    while(const char* str = *(vpos++)) {
-      // The key is terminated by an equals sign.
-      const char* equ = ::std::strchr(str, '=');
-      if(ROCKET_UNEXPECT(!equ))
-        vars.insert_or_assign(cow_string(str), sref(""));  // no equals sign?
-      else
-        vars.insert_or_assign(cow_string(str, equ), cow_string(equ + 1));
+    for(char** envp = ::environ;  *envp;  envp ++) {
+      cow_string key, val;
+      bool in_key = true;
+
+      for(char* sp = *envp;  *sp;  sp ++)
+        if(!in_key)
+          val += *sp;
+        else if(*sp == '=')
+          in_key = false;
+        else
+          key += *sp;
+
+      vars.insert_or_assign(::std::move(key), ::std::move(val));
     }
     return vars;
   }
