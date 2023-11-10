@@ -252,7 +252,7 @@ struct Handler_source final
           // so it becomes an absolute path, like in BASH.
           // I am too lazy to add support for `~+` or `~-` here.
           args.mut(0).erase(0, 1);
-          const char* home = ::secure_getenv("HOME");
+          const char* home = ::getenv("HOME");
           if(home)
             args.mut(0).insert(0, home);
         }

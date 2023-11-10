@@ -103,7 +103,7 @@ do_init_once()
     ::el_set(s_editor, EL_BIND, R"(\e\e[D)", "ed-prev-word", nullptr);
 
     // Load `~/.editrc`. Errors are ignored.
-    const char* home = ::secure_getenv("HOME");
+    const char* home = ::getenv("HOME");
     if(home) {
       auto path = cow_string(home) + "/.editrc";
       repl_printf("* loading settings from `%s`...", path.c_str());
