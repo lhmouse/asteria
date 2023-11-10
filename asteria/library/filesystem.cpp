@@ -168,7 +168,7 @@ std_filesystem_remove_recursive(V_string path)
     if(errno == ENOENT)
       return 0;
 
-    if(errno != EISDIR)
+    if((errno != EISDIR) && (errno != EPERM))
       ASTERIA_THROW((
           "Could not remove file '$1'",
           "[`unlink()` failed: ${errno:full}]"),

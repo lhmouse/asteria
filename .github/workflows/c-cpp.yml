@@ -48,3 +48,18 @@ jobs:
 
     - name: Run tests
       run: ./ci/build.sh
+
+  macos:
+    name: macOS native build (x86_64)
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: >-
+           brew install autoconf automake libtool gcc@10 gettext make libedit
+           pcre2 openssl@3 zlib
+
+    - name: Run tests
+      run: CXX='g++-10 -I/usr/local/include -L/usr/local/lib' ./ci/build.sh
