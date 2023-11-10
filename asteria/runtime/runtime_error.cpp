@@ -22,22 +22,26 @@ Runtime_Error::
 void
 Runtime_Error::
 do_backtrace()
-  try {
-    if(auto eptr = ::std::current_exception())
-      ::std::rethrow_exception(eptr);
-  }
-  catch(Runtime_Error& nested) {
-    this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());
-  }
-  catch(...) {
-    // Ignore foreign exceptions.
+  {
+    try {
+      if(auto eptr = ::std::current_exception())
+        ::std::rethrow_exception(eptr);
+    }
+    catch(Runtime_Error& nested)
+    { this->m_frames.append(nested.m_frames.begin(), nested.m_frames.end());  }
+    catch(...) { }  // ignore
   }
 
 void
 Runtime_Error::
-do_insert_backtrace_frame(Frame&& frm)
+do_insert_frame(Frame_Type type, const Source_Location* sloc_opt, const Value& val)
   {
-    this->m_frames.insert(this->m_frame_ins, ::std::move(frm));
+    Frame xfrm;
+    xfrm.type = type;
+    if(sloc_opt)
+      xfrm.sloc = *sloc_opt;
+    xfrm.value = val;
+    this->m_frames.insert(this->m_frame_ins, ::std::move(xfrm));
     this->m_frame_ins ++;
 
     // Rebuild the message using new frames. The storage may be reused.
@@ -73,6 +77,7 @@ do_insert_backtrace_frame(Frame&& frm)
       const auto& vstr = this->m_tempf.get_string();
 
       if(vstr.size() > 100) {
+        // Trim the message.
         constexpr size_t trunc_to = 80;
         this->m_fmt.putn(vstr.data(), trunc_to);
         this->m_fmt << " ... (" << (vstr.size() - trunc_to) << " characters omitted)";

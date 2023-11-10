@@ -37,7 +37,7 @@ class Compiler_Error
       }
 
     template<typename... ParamsT>
-    explicit ROCKET_NEVER_INLINE
+    explicit
     Compiler_Error(M_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :
