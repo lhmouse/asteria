@@ -55,7 +55,7 @@ Report bugs to <%s>.
       PACKAGE_URL,
       PACKAGE_BUGREPORT);
 
-    ::quick_exit(0);
+    quick_exit();
   }
 
 [[noreturn]]
@@ -77,7 +77,7 @@ Report bugs to <%s>.
       PACKAGE_URL,
       PACKAGE_BUGREPORT);
 
-    ::quick_exit(0);
+    quick_exit();
   }
 
 void

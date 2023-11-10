@@ -48,7 +48,11 @@ repl_printf(const char* fmt, ...) noexcept;
 
 [[noreturn]]
 void
-exit_printf(Exit_Status stat, const char* fmt = "", ...) noexcept;
+quick_exit(Exit_Status stat = exit_success) noexcept;
+
+[[noreturn]]
+void
+exit_printf(Exit_Status stat, const char* fmt, ...) noexcept;
 
 void
 initialize_global_context(const void* stack_base);

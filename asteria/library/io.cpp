@@ -51,7 +51,7 @@ class IOF_Sentry
         }
 
         // Check for earlier errors.
-        if(::ferror_unlocked(sentry))
+        if(::ferror(sentry))
           ASTERIA_THROW((
               "Standard stream error (mode `$2`, error bit set)"),
               mode_req);
@@ -126,7 +126,7 @@ std_io_getc()
     const IOF_Sentry sentry(stdin, iof_mode_input_wide);
 
     wch = ::fgetwc(sentry);
-    if((wch == WEOF) && ::ferror_unlocked(sentry))
+    if((wch == WEOF) && ::ferror(sentry))
       ASTERIA_THROW((
           "Error reading standard input",
           "[`fgetwc()` failed: ${errno:full}]"));
@@ -146,7 +146,7 @@ std_io_getln()
 
     for(;;) {
       wch = ::fgetwc(sentry);
-      if((wch == WEOF) && ::ferror_unlocked(sentry))
+      if((wch == WEOF) && ::ferror(sentry))
         ASTERIA_THROW((
             "Error reading standard input",
             "[`fgetwc()` failed: ${errno:full}]"));
@@ -258,8 +258,8 @@ std_io_read(optV_integer limit)
         break;
 
       auto batch_pos = data.insert(data.end(), nbatch, '*');
-      nread = ::fread_unlocked(&*batch_pos, 1, nbatch, sentry);
-      if((nread != nbatch) && ::ferror_unlocked(sentry))
+      nread = ::fread(&*batch_pos, 1, nbatch, sentry);
+      if((nread != nbatch) && ::ferror(sentry))
         ASTERIA_THROW((
             "Error reading standard input",
             "[`fgetwc()` failed: ${errno:full}]"));
@@ -270,7 +270,7 @@ std_io_read(optV_integer limit)
       }
     }
 
-    if(((nbatch != 0) || ::feof_unlocked(sentry)) && data.empty())
+    if(((nbatch != 0) || ::feof(sentry)) && data.empty())
       return nullopt;
 
     return ::std::move(data);
@@ -281,10 +281,10 @@ std_io_write(V_string data)
   {
     const IOF_Sentry sentry(stdout, iof_mode_output_narrow);
 
-    if(::fwrite_unlocked(data.data(), 1, data.size(), sentry) != data.size())
+    if(::fwrite(data.data(), 1, data.size(), sentry) != data.size())
       ASTERIA_THROW((
           "Error writing standard output",
-          "[`fwrite_unlocked()` failed: ${errno:full}]"));
+          "[`fwrite()` failed: ${errno:full}]"));
 
     return (int64_t) data.size();
   }

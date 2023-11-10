@@ -28,14 +28,14 @@ do_getcfn(::EditLine* el, wchar_t* out)
 
   r:
     repl_signal.store(0);
-    ::clearerr_unlocked(fp);
+    ::clearerr(fp);
     ::wint_t wch = ::fgetwc(fp);
     *out = (wchar_t) wch;
 
     if(wch != WEOF)
       return 1;  // success
 
-    if(::feof_unlocked(fp))
+    if(::feof(fp))
       return 0;  // EOF
 
     if(errno != EINTR)

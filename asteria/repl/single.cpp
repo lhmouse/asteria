@@ -26,15 +26,13 @@ load_and_execute_single_noreturn()
     // script exits without returning a value, success is assumed.
     auto ref = repl_script.execute(::std::move(repl_args));
     if(ref.is_void())
-      ::quick_exit(exit_success);
+      quick_exit();
 
-    // Check whether the result is an integer.
     const auto& val = ref.dereference_readonly();
     if(val.is_integer())
-      ::quick_exit((int) val.as_integer());
+      quick_exit(static_cast<Exit_Status>(val.as_integer()));
 
-    // Exit with this code.
-    ::quick_exit(exit_non_integer);
+    quick_exit(exit_non_integer);
   }
 
 }  // namespace asteria

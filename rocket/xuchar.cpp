@@ -17,12 +17,12 @@ namespace {
 
 inline
 void
-do_throw_if_error_unlocked(::FILE* fp)
+do_throw_if_error(::FILE* fp)
   {
-    if(::ferror_unlocked(fp))
+    if(::ferror(fp))
       noadl::sprintf_and_throw<runtime_error>(
           "uchar_io: I/O error (fileno `%d`, errno `%d`)",
-          ::fileno_unlocked(fp), errno);
+          ::fileno(fp), errno);
   }
 
 template<typename xwcharT, typename xmbrtowcT>
@@ -40,7 +40,7 @@ do_xfgetn_common(::FILE* fp, xmbrtowcT&& xmbrtowc, ::mbstate_t& mbst, xwcharT* w
         // Try getting the next byte if the previous character has completed.
         int ch = ::fgetc_unlocked(fp);
         if(ch == -1) {
-          do_throw_if_error_unlocked(fp);
+          do_throw_if_error(fp);
           break;
         }
         mbc = static_cast<char>(ch);
@@ -104,7 +104,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
           // input invalid
           mbst = { };
           if(::fputc_unlocked('?', fp) == EOF)
-            do_throw_if_error_unlocked(fp);
+            do_throw_if_error(fp);
 
           nbytes ++;
           wptr ++;
@@ -119,7 +119,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
           // `mblen` bytes written; input consumed
           for(unsigned k = 0;  k < static_cast<unsigned>(mblen);  ++k)
             if(::fputc_unlocked(mbcs[k], fp) == EOF)
-              do_throw_if_error_unlocked(fp);
+              do_throw_if_error(fp);
 
           nbytes += static_cast<unsigned>(mblen);
           wptr ++;
@@ -143,7 +143,7 @@ xfgetn(::FILE* fp, ::mbstate_t& /*mbst*/, char* s, size_t n)
       // exception will be thrown.
       int ch = ::fgetc_unlocked(fp);
       if(ch == -1) {
-        do_throw_if_error_unlocked(fp);
+        do_throw_if_error(fp);
         break;
       }
 
@@ -198,7 +198,7 @@ xfgetc(::FILE* fp, ::mbstate_t& /*mbst*/, char& c)
 
     int ch = ::fgetc_unlocked(fp);
     if(ch == EOF)
-      do_throw_if_error_unlocked(fp);
+      do_throw_if_error(fp);
     c = static_cast<char>(ch);
     return (ch == EOF) ? -1 : ch;
   }
@@ -240,9 +240,9 @@ xfputn(::FILE* fp, ::mbstate_t& /*mbst*/, const char* s, size_t n)
     ::flockfile(fp);
     const unique_ptr<::FILE, void (::FILE*)> lock(fp, ::funlockfile);
 
-    size_t r = ::fwrite_unlocked(s, 1, n, fp);
+    size_t r = ::fwrite(s, 1, n, fp);
     if(r != n)
-      do_throw_if_error_unlocked(fp);
+      do_throw_if_error(fp);
     return r;
   }
 
@@ -285,7 +285,7 @@ xfputc(::FILE* fp, ::mbstate_t& /*mbst*/, char c)
 
     int ch = ::fputc_unlocked(static_cast<unsigned char>(c), fp);
     if(ch == EOF)
-      do_throw_if_error_unlocked(fp);
+      do_throw_if_error(fp);
     return ch;
   }
 

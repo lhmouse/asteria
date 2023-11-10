@@ -8,7 +8,7 @@
 #include "../runtime/abstract_hooks.hpp"
 #include "../utils.hpp"
 #include <stdarg.h>  // va_list, va_start(), va_end()
-#include <stdlib.h>  // exit(), quick_exit()
+#include <stdlib.h>  // exit(), _Exit()
 #include <stdio.h>  // fflush(), fprintf(), stderr
 #include <signal.h>  // sys_siglist
 namespace asteria {
@@ -120,6 +120,14 @@ repl_printf(const char* fmt, ...) noexcept
     va_end(ap);
   }
 
+[[noreturn]]
+void
+quick_exit(Exit_Status stat) noexcept
+  {
+    ::fflush(nullptr);
+    ::_Exit(stat);
+  }
+
 void
 exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
   {
@@ -129,14 +137,12 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
     repl_vprintf(fmt, ap);
     va_end(ap);
 
-    // Perform normal exit if verbose mode is on.
-    // This helps catching memory leaks upon exit.
+    // Perform normal exit if verbose mode is on. This will help
+    // catching memory leaks upon exit.
     if(repl_verbose)
-      ::exit((int) stat);
-
-    // Perform fast exit by default.
-    ::fflush(nullptr);
-    ::quick_exit((int) stat);
+      ::exit(stat);
+    else
+      quick_exit(stat);
   }
 
 void
