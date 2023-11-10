@@ -428,7 +428,7 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
       if(rlimit <= 0)
         break;
 
-      nbatch = ::std::min(nbatch * 2, ::rocket::clamp_cast<size_t>(rlimit, 0, INT_MAX));
+      nbatch = ::rocket::min(nbatch * 2, ::rocket::clamp_cast<size_t>(rlimit, 0, INT_MAX));
       auto insert_pos = data.insert(data.end(), nbatch, '/');
       ::ssize_t nread;
 
@@ -489,7 +489,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
       if(rlimit <= 0)
         break;
 
-      nbatch = ::std::min(nbatch * 2, ::rocket::clamp_cast<size_t>(rlimit, 0, INT_MAX));
+      nbatch = ::rocket::min(nbatch * 2, ::rocket::clamp_cast<size_t>(rlimit, 0, INT_MAX));
       data.resize(nbatch, '/');
       ::ssize_t nread;
 

@@ -259,7 +259,7 @@ do_get_small_decimal(const char*& str_out, uint32_t& len_out, uint32_t value)
     str_out = s_small_decimals[value] + 1;
     uint32_t bytes;
     ::memcpy(&bytes, str_out, sizeof(bytes));
-    bytes = le32toh(bytes);
+    bytes = ROCKET_LETOH32(bytes);
 
     // Now see whether `bytes` contains a zero byte. The condition
     // is that there shall be a byte whose MSB becomes one after the

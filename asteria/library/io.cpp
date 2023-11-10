@@ -253,7 +253,7 @@ std_io_read(optV_integer limit)
 
     for(;;) {
       ROCKET_ASSERT(data.size() <= ntotal);
-      nbatch = ::std::min(ntotal - data.size(), data.size() / 2 + 127);
+      nbatch = ::rocket::min(ntotal - data.size(), data.size() / 2 + 127);
       if(nbatch == 0)
         break;
 

@@ -15,7 +15,6 @@
 #include <spawn.h>  // ::posix_spawnp()
 #include <sys/wait.h>  // ::waitpid()
 #include <sys/utsname.h>  // ::uname()
-#include <sys/sysinfo.h>  // ::get_nprocs()
 #include <sys/socket.h>  // ::socket()
 #include <time.h>  // ::clock_gettime()
 namespace asteria {
@@ -343,7 +342,7 @@ std_system_get_properties()
 
     names.try_emplace(sref("nprocs"),
       V_integer(
-        (unsigned) ::get_nprocs()  // number of active CPU cores
+        ::sysconf(_SC_NPROCESSORS_ONLN)  // number of active CPU cores
       ));
 
     return names;

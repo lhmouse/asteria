@@ -35,6 +35,20 @@
 #define ROCKET_SUB_OVERFLOW(x,y,r)          `not implemented`
 #define ROCKET_MUL_OVERFLOW(x,y,r)          `not implemented`
 
+// MSVC does not support any big-endian platforms.
+#define ROCKET_HTOBE16(x)                   (_byteswap_ushort(x))
+#define ROCKET_HTOBE32(x)                   (_byteswap_ulong(x))
+#define ROCKET_HTOBE64(x)                   (_byteswap_uint64(x))
+#define ROCKET_HTOLE16(x)                   (x)
+#define ROCKET_HTOLE32(x)                   (x)
+#define ROCKET_HTOLE64(x)                   (x)
+#define ROCKET_BETOH16(x)                   (_byteswap_ushort(x))
+#define ROCKET_BETOH32(x)                   (_byteswap_ulong(x))
+#define ROCKET_BETOH64(x)                   (_byteswap_uint64(x))
+#define ROCKET_LETOH16(x)                   (x)
+#define ROCKET_LETOH32(x)                   (x)
+#define ROCKET_LETOH64(x)                   (x)
+
 // Check for project configuration.
 #if defined(_DEBUG)
 #  define ROCKET_DEBUG                      1

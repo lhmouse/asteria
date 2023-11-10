@@ -35,6 +35,29 @@
 #define ROCKET_SUB_OVERFLOW(x,y,r)          __builtin_sub_overflow(x,y,r)
 #define ROCKET_MUL_OVERFLOW(x,y,r)          __builtin_mul_overflow(x,y,r)
 
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#  define ROCKET_BSWAP_TO_BE(w,x)           (x)
+#  define ROCKET_BSWAP_TO_LE(w,x)           (__builtin_bswap##w(x))
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#  define ROCKET_BSWAP_TO_BE(w,x)           (__builtin_bswap##w(x))
+#  define ROCKET_BSWAP_TO_LE(w,x)           (x)
+#else
+#  error unknown byte order
+#endif
+
+#define ROCKET_HTOBE16(x)                   ROCKET_BSWAP_TO_BE(16,x)
+#define ROCKET_HTOBE32(x)                   ROCKET_BSWAP_TO_BE(32,x)
+#define ROCKET_HTOBE64(x)                   ROCKET_BSWAP_TO_BE(64,x)
+#define ROCKET_HTOLE16(x)                   ROCKET_BSWAP_TO_LE(16,x)
+#define ROCKET_HTOLE32(x)                   ROCKET_BSWAP_TO_LE(32,x)
+#define ROCKET_HTOLE64(x)                   ROCKET_BSWAP_TO_LE(64,x)
+#define ROCKET_BETOH16(x)                   ROCKET_BSWAP_TO_BE(16,x)
+#define ROCKET_BETOH32(x)                   ROCKET_BSWAP_TO_BE(32,x)
+#define ROCKET_BETOH64(x)                   ROCKET_BSWAP_TO_BE(64,x)
+#define ROCKET_LETOH16(x)                   ROCKET_BSWAP_TO_LE(16,x)
+#define ROCKET_LETOH32(x)                   ROCKET_BSWAP_TO_LE(32,x)
+#define ROCKET_LETOH64(x)                   ROCKET_BSWAP_TO_LE(64,x)
+
 // Check for either libc++ or libstdc++.
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
 #  define ROCKET_DEBUG                      1

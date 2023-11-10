@@ -188,12 +188,12 @@ struct Wrapped_Index
 
         if(sindex >= 0) {
           ptrdiff_t last_sindex = ssize - 1;
-          this->nappend = (uint64_t) (::std::max(last_sindex, sindex) - last_sindex);
+          this->nappend = (uint64_t) (::rocket::max(last_sindex, sindex) - last_sindex);
           this->rindex = (size_t) sindex;
         }
         else {
           ptrdiff_t first_sindex = 0 - ssize;
-          this->nprepend = (uint64_t) (first_sindex - ::std::min(sindex, first_sindex));
+          this->nprepend = (uint64_t) (first_sindex - ::rocket::min(sindex, first_sindex));
           this->rindex = (size_t) (sindex + ssize) + (size_t) this->nprepend;
         }
       }

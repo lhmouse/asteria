@@ -444,7 +444,7 @@ class PCRE2_Matcher final
         //   offset values for the match are 2 and 0.
         const size_t* ovec = ::pcre2_get_ovector_pointer(this->m_match);
         size_t off = *sub_off + ovec[0];
-        size_t len = ::std::max(ovec[0], ovec[1]) - ovec[0];
+        size_t len = ::rocket::max(ovec[0], ovec[1]) - ovec[0];
         return {{ static_cast<ptrdiff_t>(off), static_cast<ptrdiff_t>(len) }};
       }
 
@@ -469,7 +469,7 @@ class PCRE2_Matcher final
             continue;
 
           size_t off = *sub_off + opair[0];
-          size_t len = ::std::max(opair[0], opair[1]) - opair[0];
+          size_t len = ::rocket::max(opair[0], opair[1]) - opair[0];
           matches.mut(k) = cow_string(text, off, len);
         }
         return ::std::move(matches);
@@ -503,7 +503,7 @@ class PCRE2_Matcher final
             continue;
 
           size_t off = *sub_off + opair[0];
-          size_t len = ::std::max(opair[0], opair[1]) - opair[0];
+          size_t len = ::rocket::max(opair[0], opair[1]) - opair[0];
           ins.first->second = cow_string(text, off, len);
         }
         return ::std::move(matches);

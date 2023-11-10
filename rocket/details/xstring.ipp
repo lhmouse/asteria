@@ -293,21 +293,21 @@ inline
 char*
 ymempcpy(char* out, const char* str, size_t len) noexcept
   {
-    return (char*) ::mempcpy(out, str, len);
+    return (char*) ::memcpy(out, str, len) + len;
   }
 
 inline
 unsigned char*
 ymempcpy(unsigned char* out, const unsigned char* str, size_t len) noexcept
   {
-    return (unsigned char*) ::mempcpy(out, str, len);
+    return (unsigned char*) ::memcpy(out, str, len) + len;
   }
 
 inline
 wchar_t*
 ymempcpy(wchar_t* out, const wchar_t* str, size_t len) noexcept
   {
-    return ::wmempcpy(out, str, len);
+    return (wchar_t*) ::memcpy(out, str, len * sizeof(wchar_t)) + len;
   }
 
 }  // namespace details_xstring

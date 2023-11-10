@@ -67,7 +67,7 @@ read_execute_print_single()
 
       // Auto-indent it.
       pos = linestr.find_not_of(" \t");
-      linestr.erase(::std::min(pos, linestr.size()));
+      linestr.erase(::rocket::min(pos, linestr.size()));
 
       if(!linestr.empty())
         editline_puts(linestr);
