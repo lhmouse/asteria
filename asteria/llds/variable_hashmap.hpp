@@ -51,6 +51,9 @@ class Variable_HashMap
     void
     do_deallocate() noexcept;
 
+    void
+    do_erase_range(uint32_t tpos, uint32_t tn) noexcept;
+
   public:
     ~Variable_HashMap()
       {
@@ -67,7 +70,10 @@ class Variable_HashMap
       { return this->m_size;  }
 
     void
-    clear() noexcept;
+    clear() noexcept
+      {
+        this->do_erase_range(0, this->m_nbkt);
+      }
 
     const refcnt_ptr<Variable>*
     find_opt(const void* key) const noexcept

@@ -50,6 +50,9 @@ class Reference_Dictionary
     void
     do_deallocate() noexcept;
 
+    void
+    do_erase_range(uint32_t tpos, uint32_t tn) noexcept;
+
   public:
     ~Reference_Dictionary()
       {
@@ -66,7 +69,10 @@ class Reference_Dictionary
       { return this->m_size;  }
 
     void
-    clear() noexcept;
+    clear() noexcept
+      {
+        this->do_erase_range(0, this->m_nbkt);
+      }
 
     const Reference*
     find_opt(phsh_stringR key) const noexcept

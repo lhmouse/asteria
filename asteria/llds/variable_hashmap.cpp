@@ -24,7 +24,7 @@ do_reallocate(uint32_t nbkt)
           // Look for a new bucket for this element. Uniqueness is implied.
           size_t orel = ::rocket::probe_origin(nbkt, (uintptr_t) this->m_bptr[t].key_opt);
           auto qrel = ::rocket::linear_probe(bptr, orel, orel, nbkt,
-                  [&](const Bucket&) { return false;  });
+                          [&](const Bucket&) { return false;  });
 
           // Relocate the value into the new bucket.
           ::memcpy((void*) qrel, (const void*) (this->m_bptr + t), sizeof(Bucket));
@@ -61,17 +61,35 @@ do_deallocate() noexcept
 
 void
 Variable_HashMap::
-clear() noexcept
+do_erase_range(uint32_t tpos, uint32_t tn) noexcept
   {
-    if(this->m_size != 0)
-      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
-        if(this->m_bptr[t]) {
-          ::rocket::destroy(this->m_bptr[t].vstor);
-          this->m_bptr[t].key_opt = nullptr;
-          this->m_size --;
-        }
+    for(uint32_t t = tpos;  t != tpos + tn;  ++t)
+      if(this->m_bptr[t]) {
+        this->m_size --;
+        this->m_bptr[t].key_opt = nullptr;
+        ::rocket::destroy(this->m_bptr[t].vstor);
+      }
 
-    ROCKET_ASSERT(this->m_size == 0);
+    // Relocate elements that are not placed in their immediate locations.
+    ::rocket::linear_probe(
+      this->m_bptr, tpos, tpos + tn, this->m_nbkt,
+      [&](Bucket& r) {
+        // Clear this bucket temporarily.
+        ROCKET_ASSERT(r.key_opt);
+        const void* saved_key = r.key_opt;
+        r.key_opt = nullptr;
+
+        // Look for a new bucket for this element. Uniqueness is implied.
+        size_t orel = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) saved_key);
+        auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
+                        [&](const Bucket&) { return false;  });
+
+        // Relocate the value into the new bucket.
+        ::memcpy((void*) qrel, (const void*) &r, sizeof(Bucket));
+        ::std::atomic_signal_fence(::std::memory_order_release);
+        qrel->key_opt = saved_key;
+        return false;
+      });
   }
 
 bool
@@ -98,7 +116,6 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
     qbkt->key_opt = key;
     ::rocket::construct(qbkt->vstor, var);
     this->m_size ++;
-
     return true;
   }
 
@@ -121,34 +138,7 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
     if(varp_opt)
       *varp_opt = ::std::move(qbkt->vstor[0]);
 
-    this->m_size --;
-    qbkt->key_opt = nullptr;
-    ::rocket::destroy(qbkt->vstor);
-
-    // Relocate elements that are not placed in their immediate locations.
-    ::rocket::linear_probe(
-      this->m_bptr,
-      (size_t) (qbkt - this->m_bptr),
-      (size_t) (qbkt - this->m_bptr) + 1,
-      this->m_nbkt,
-      [&](Bucket& r) {
-        // Clear this bucket temporarily.
-        ROCKET_ASSERT(r.key_opt);
-        const void* saved_key = r.key_opt;
-        r.key_opt = nullptr;
-
-        // Look for a new bucket for this element. Uniqueness is implied.
-        size_t orel = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) saved_key);
-        auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
-                [&](const Bucket&) { return false;  });
-
-        // Relocate the value into the new bucket.
-        ::memcpy((void*) qrel, (const void*) &r, sizeof(Bucket));
-        ::std::atomic_signal_fence(::std::memory_order_release);
-        qrel->key_opt = saved_key;
-        return false;
-      });
-
+    this->do_erase_range((uint32_t) (qbkt - this->m_bptr), 1);
     return true;
   }
 
