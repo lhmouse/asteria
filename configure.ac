@@ -34,7 +34,6 @@ AS_VAR_SET([abi_suffix], [beta.0])
 
 ## Check for required libraries
 AC_CHECK_HEADERS([uchar.h])
-AC_CHECK_LIB([rt], [clock_gettime], [], [AC_MSG_WARN([librt not found; proceeding without it])])
 AC_CHECK_LIB([z], [crc32_z], [], [AC_MSG_ERROR([zlib >= 1.2.9 required])])
 AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR([PCRE2 not found])])
 AC_CHECK_LIB([crypto], [MD5_Init], [], [AC_MSG_ERROR([OpenSSL not found])])
@@ -71,6 +70,16 @@ AM_COND_IF([enable_thread_sanitizer], [
   AC_DEFINE([POSEIDON_ENABLE_THREAD_SANITIZER], [1], [Define to 1 to enable thread sanitizer.])
   AS_VAR_APPEND([sanitizer_flags], [" -fsanitize=thread"])
 ])
+
+AC_CHECK_DECL([__APPLE__], [
+  # macOS...
+  AC_MSG_WARN([Apple systems are nonsense and receive no standard support.])
+], [
+  # Set host-specific options
+  AC_CHECK_DECL([__i386__], AS_VAR_SET([host_asm_opt], ["-masm=intel -mavx -mfpmath=sse"]))
+  AC_CHECK_DECL([__amd64__], AS_VAR_SET([host_asm_opt], ["-masm=intel -mavx"]))
+])
+
 ## Finish
 AC_SUBST([abi_major])
 AC_SUBST([abi_minor])
