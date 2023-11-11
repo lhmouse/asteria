@@ -98,7 +98,7 @@ insert(const void* key, const refcnt_ptr<Variable>& var)
   {
     if(!key)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-          "Variable_HashMap: null key not valid");
+            "Variable_HashMap: null key not valid");
 
     // Reserve storage for the new element. The load factor is always <= 0.5.
     if(this->m_size >= this->m_nbkt / 2)
@@ -134,10 +134,10 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
     if(!*qbkt)
       return false;
 
-    // Destroy the bucket.
     if(varp_opt)
       *varp_opt = ::std::move(qbkt->vstor[0]);
 
+    // Destroy the bucket.
     this->do_erase_range((uint32_t) (qbkt - this->m_bptr), 1);
     return true;
   }

@@ -99,7 +99,7 @@ insert(phsh_stringR key, bool* newly_opt)
   {
     if(key.empty())
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-          "Reference_Dictionary: empty key not valid");
+            "Reference_Dictionary: empty key not valid");
 
     // Reserve storage for the new element. The load factor is always <= 0.5.
     if(this->m_size >= this->m_nbkt / 2)
@@ -140,10 +140,10 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
     if(!*qbkt)
       return false;
 
-    // Destroy the bucket.
     if(refp_opt)
       *refp_opt = ::std::move(qbkt->vstor[0]);
 
+    // Destroy the bucket.
     this->do_erase_range((uint32_t) (qbkt - this->m_bptr), 1);
     return true;
   }
