@@ -72,18 +72,18 @@ class Deflator final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.zlib.Deflator` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     Deflator*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new Deflator(*this, 42);
         out.reset(ptr);
@@ -264,18 +264,18 @@ class Inflator final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.zlib.Inflator` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     Inflator*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new Inflator(*this, 42);
         out.reset(ptr);

@@ -16,14 +16,14 @@ int main()
 
         virtual
         void
-        on_function_call(const Source_Location& sloc, const cow_function&) override
+        on_function_call(const Source_Location& sloc, const cow_function&) final
           {
             this->fmt << "call " << sloc.line() << "; ";
           }
 
         virtual
         void
-        on_function_return(const Source_Location& sloc, const cow_function&, const Reference&) override
+        on_function_return(const Source_Location& sloc, const cow_function&, const Reference&) final
           {
             this->fmt << "return " << sloc.line() << "; ";
           }

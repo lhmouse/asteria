@@ -50,22 +50,22 @@ class Indenter_none final
 
   public:
     void
-    break_line(tinyfmt& /*fmt*/) const override
+    break_line(tinyfmt& /*fmt*/) const final
       {
       }
 
     void
-    increment_level() override
+    increment_level() final
       {
       }
 
     void
-    decrement_level() override
+    decrement_level() final
       {
       }
 
     bool
-    has_indention() const noexcept override
+    has_indention() const noexcept final
       {
         return false;
       }
@@ -89,25 +89,25 @@ class Indenter_string final
 
   public:
     void
-    break_line(tinyfmt& fmt) const override
+    break_line(tinyfmt& fmt) const final
       {
         fmt << this->m_cur;
       }
 
     void
-    increment_level() override
+    increment_level() final
       {
         this->m_cur.append(this->m_add);
       }
 
     void
-    decrement_level() override
+    decrement_level() final
       {
         this->m_cur.pop_back(this->m_add.size());
       }
 
     bool
-    has_indention() const noexcept override
+    has_indention() const noexcept final
       {
         return this->m_add.size() != 0;
       }
@@ -131,7 +131,7 @@ class Indenter_spaces final
 
   public:
     void
-    break_line(tinyfmt& fmt) const override
+    break_line(tinyfmt& fmt) const final
       {
         static constexpr char spaces[] = "                       ";
         static constexpr size_t nspaces = ::rocket::xstrlen(spaces);
@@ -153,19 +153,19 @@ class Indenter_spaces final
       }
 
     void
-    increment_level() override
+    increment_level() final
       {
         this->m_cur += this->m_add;
       }
 
     void
-    decrement_level() override
+    decrement_level() final
       {
         this->m_cur -= this->m_add;
       }
 
     bool
-    has_indention() const noexcept override
+    has_indention() const noexcept final
       {
         return this->m_add != 0;
       }

@@ -42,7 +42,7 @@ struct Verbose_Hooks final
       }
 
     void
-    on_single_step_trap(const Source_Location& sloc) override
+    on_single_step_trap(const Source_Location& sloc) final
       {
         int sig = repl_signal.xchg(0);
         if(sig == 0)
@@ -59,27 +59,27 @@ struct Verbose_Hooks final
       }
 
     void
-    on_variable_declare(const Source_Location& sloc, phsh_stringR name) override
+    on_variable_declare(const Source_Location& sloc, phsh_stringR name) final
       {
         this->do_verbose_trace(sloc, "Declaring variable `$1`", name);
       }
 
     void
-    on_function_call(const Source_Location& sloc, const cow_function& target) override
+    on_function_call(const Source_Location& sloc, const cow_function& target) final
       {
         this->do_verbose_trace(sloc, "Initiating function call: $1", target);
       }
 
     void
     on_function_return(const Source_Location& sloc, const cow_function& target,
-                       const Reference&) override
+                       const Reference&) final
       {
         this->do_verbose_trace(sloc, "Returned from function call: $1", target);
       }
 
     void
     on_function_except(const Source_Location& sloc, const cow_function& target,
-                       const Runtime_Error&) override
+                       const Runtime_Error&) final
       {
         this->do_verbose_trace(sloc, "Caught an exception inside function call: $1", target);
       }

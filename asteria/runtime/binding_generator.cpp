@@ -29,19 +29,19 @@ operator->*(target_R_gsa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             self = this->m_target(global, ::std::move(self), ::std::move(reader));
@@ -73,19 +73,19 @@ operator->*(target_R_ga& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             self = this->m_target(global, ::std::move(reader));
@@ -117,19 +117,19 @@ operator->*(target_R_sa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             self = this->m_target(::std::move(self), ::std::move(reader));
@@ -161,19 +161,19 @@ operator->*(target_R_a& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             self = this->m_target(::std::move(reader));
@@ -205,19 +205,19 @@ operator->*(target_V_gsa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             auto result = this->m_target(global, ::std::move(self), ::std::move(reader));
@@ -249,19 +249,19 @@ operator->*(target_V_ga& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             auto result = this->m_target(global, ::std::move(reader));
@@ -293,19 +293,19 @@ operator->*(target_V_sa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             auto result = this->m_target(::std::move(self), ::std::move(reader));
@@ -337,19 +337,19 @@ operator->*(target_V_a& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             auto result = this->m_target(::std::move(reader));
@@ -381,19 +381,19 @@ operator->*(target_Z_gsa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             this->m_target(global, ::std::move(self), ::std::move(reader));
@@ -425,19 +425,19 @@ operator->*(target_Z_ga& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             this->m_target(global, ::std::move(reader));
@@ -469,19 +469,19 @@ operator->*(target_Z_sa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             this->m_target(::std::move(self), ::std::move(reader));
@@ -513,19 +513,19 @@ operator->*(target_Z_a& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt) const final
           {
             return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
                        << this->m_file << ":" << this->m_line << "'";
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&) const final
           {
           }
 
         Reference&
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const final
           {
             Argument_Reader reader(this->m_name, ::std::move(stack));
             this->m_target(::std::move(reader));

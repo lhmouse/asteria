@@ -411,18 +411,18 @@ class PCRE2_Matcher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.string.PCRE` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     PCRE2_Matcher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new PCRE2_Matcher(*this, 42);
         out.reset(ptr);

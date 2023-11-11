@@ -31,18 +31,18 @@ class CRC32_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.CRC32` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     CRC32_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -140,18 +140,18 @@ class FNV1a32_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.FNV1a32` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     FNV1a32_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -268,18 +268,18 @@ class MD5_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.MD5` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     MD5_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -378,18 +378,18 @@ class SHA1_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.SHA1` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     SHA1_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -488,18 +488,18 @@ class SHA224_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.SHA224` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     SHA224_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -598,18 +598,18 @@ class SHA256_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.SHA256` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     SHA256_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -708,18 +708,18 @@ class SHA384_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.SHA384` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     SHA384_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -818,18 +818,18 @@ class SHA512_Hasher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt) const final
       {
         return format(fmt, "instance of `std.checksum.SHA512` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
       {
       }
 
     SHA512_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
