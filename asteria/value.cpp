@@ -67,7 +67,7 @@ do_destroy_variant_slow() noexcept
 #endif
 
     // Expand arrays and objects by hand. Don't play with this at home!
-    ::rocket::cow_vector<bytes_type> stack;
+    cow_vector<bytes_type> stack;
 
   r:
     if(this->m_stor.index() >= type_string)
@@ -90,7 +90,7 @@ do_destroy_variant_slow() noexcept
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
               // Move raw bytes into `stack`.
               stack.push_back(it->m_bytes);
-              ::memset(&(it->m_bytes), 0, sizeof(bytes_type));
+              bfill(it->m_bytes, 0);
             }
           }
           altr.~V_array();
@@ -103,7 +103,7 @@ do_destroy_variant_slow() noexcept
             for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
               // Move raw bytes into `stack`.
               stack.push_back(it->second.m_bytes);
-              ::memset(&(it->second.m_bytes), 0, sizeof(bytes_type));
+              bfill(it->second.m_bytes, 0);
             }
           }
           altr.~V_object();
@@ -121,7 +121,7 @@ do_destroy_variant_slow() noexcept
     }
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(&(this->m_bytes), 0xEB, sizeof(bytes_type));
+    bfill(it->second.m_bytes, 0xEB);
 #endif
   }
   catch(exception& stdex) {

@@ -83,9 +83,9 @@ void
 bswap_be(int16_t& value) noexcept
   {
     uint16_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_BETOH16(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -93,9 +93,9 @@ void
 bswap_le(int16_t& value) noexcept
   {
     uint16_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_LETOH16(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -103,9 +103,9 @@ void
 bswap_be(int32_t& value) noexcept
   {
     uint32_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_BETOH32(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -113,9 +113,9 @@ void
 bswap_le(int32_t& value) noexcept
   {
     uint32_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_LETOH32(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -123,9 +123,9 @@ void
 bswap_be(int64_t& value) noexcept
   {
     uint64_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_BETOH64(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -133,9 +133,9 @@ void
 bswap_le(int64_t& value) noexcept
   {
     uint64_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_LETOH64(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -143,9 +143,9 @@ void
 bswap_be(float& value) noexcept
   {
     uint32_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_BETOH32(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -153,9 +153,9 @@ void
 bswap_le(float& value) noexcept
   {
     uint32_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_LETOH32(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -163,9 +163,9 @@ void
 bswap_be(double& value) noexcept
   {
     uint64_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_BETOH64(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 inline
@@ -173,9 +173,9 @@ void
 bswap_le(double& value) noexcept
   {
     uint64_t buf;
-    ::std::memcpy(&buf, &value, sizeof(value));
+    bcopy(buf, value);
     buf = ROCKET_LETOH64(buf);
-    ::std::memcpy(&value, &buf, sizeof(value));
+    bcopy(value, buf);
   }
 
 template<typename WordT, typename ValueT>

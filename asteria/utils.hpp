@@ -106,6 +106,27 @@ weaken_enum(enumT value) noexcept
     return static_cast<typename ::std::underlying_type<enumT>::type>(value);
   }
 
+// Raw memory management
+template<typename objectT, typename sourceT>
+ROCKET_ALWAYS_INLINE
+void
+bcopy(objectT& __restrict dst, const sourceT& __restrict src) noexcept
+  {
+    static_assert(sizeof(objectT) == sizeof(sourceT), "size mismatch");
+    using bytes = char [sizeof(objectT)];
+    ::std::memcpy(reinterpret_cast<bytes&>(dst), reinterpret_cast<const bytes&>(src),
+                  sizeof(objectT));
+  }
+
+template<typename objectT>
+ROCKET_ALWAYS_INLINE
+void
+bfill(objectT& dst, unsigned char value) noexcept
+  {
+    using bytes = char [sizeof(objectT)];
+    ::std::memset(reinterpret_cast<bytes&>(dst), value, sizeof(objectT));
+  }
+
 // C character types
 enum : uint8_t
   {

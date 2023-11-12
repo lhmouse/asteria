@@ -2812,10 +2812,10 @@ solidify(AVMC_Queue& queue) const
                       V_real& val = rhs.mut_real();
 
                       int64_t bits;
-                      ::memcpy(&bits, &val, sizeof(val));
+                      bcopy(bits, val);
                       bits ^= INT64_MIN;
 
-                      ::memcpy(&val, &bits, sizeof(val));
+                      bcopy(val, bits);
                       return air_status_next;
                     }
                     else
