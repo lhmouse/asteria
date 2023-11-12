@@ -88,7 +88,7 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
       // Put the block into the cache.
       lock.lock(p.m);
       b->next = p.head.load();
-      if(b->next)
+      if(b->next != nullptr)
         b->count = b->next->count + 1;
       p.head.store(b);
       b = nullptr;
@@ -104,7 +104,7 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
     lock.unlock();
 
     // Return all blocks to the system.
-    while(b)
+    while(b != nullptr)
       ::operator delete(exchange(b, b->next));
   }
 
@@ -121,7 +121,7 @@ xmemflush() noexcept
       lock.unlock();
 
       // Return all blocks to the system.
-      while(b)
+      while(b != nullptr)
         ::operator delete(exchange(b, b->next));
     }
   }
