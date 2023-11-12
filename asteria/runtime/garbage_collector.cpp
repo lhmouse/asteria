@@ -92,9 +92,8 @@ do_collect_generation(uint32_t gen)
 
     this->m_temp_2.clear();
 
-    // Collect all variables from `m_unreach`.
     while(this->m_unreach.extract_variable(var)) {
-      // Foreign variables must not be collected.
+      // This variable is unreachable now, so collect it.
       if(!tracked.erase(var.get()))
         continue;
 
