@@ -16,7 +16,7 @@ do_reallocate(uint32_t nbkt)
     ROCKET_ASSERT(nbkt >= this->m_size * 2);
     ::rocket::xmeminfo minfo;
     minfo.element_size = sizeof(Bucket);
-    minfo.count = nbkt;
+    minfo.count = nbkt + 1;
     ::rocket::xmemalloc(minfo);
 
     ::rocket::xmemzero(minfo);
