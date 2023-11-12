@@ -9,28 +9,37 @@ namespace details_reference_dictionary {
 
 struct Bucket
   {
-    uint32_t flags;
-    uint32_t khash;
-    union { cow_string kstor[1];  };
-    union { Reference vstor[1];  };
+    Bucket* prev;
+    Bucket* next;
+    union { phsh_string key;  };
+    union { Reference ref;  };
 
     Bucket() noexcept { }
     ~Bucket() noexcept { }
     Bucket(const Bucket&) = delete;
     Bucket& operator=(const Bucket&) = delete;
 
+    void
+    attach(Bucket& after) noexcept
+      {
+        this->prev = &after;
+        this->next = after.next;
+        this->prev->next = this;
+        this->next->prev = this;
+      }
+
+    void
+    detach() noexcept
+      {
+        this->prev->next = this->next;
+        this->next->prev = this->prev;
+        this->prev = nullptr;
+        this->next = nullptr;
+      }
+
     explicit operator
     bool() const noexcept
-      { return this->flags != 0;  }
-
-    bool
-    key_equals(phsh_stringR ykey) const noexcept
-      {
-        return ROCKET_EXPECT((this->khash == (uint32_t) ykey.rdhash())
-                &&  (this->kstor[0].size() == ykey.size())
-                && ((this->kstor[0].data() == ykey.data())
-                    || ::rocket::xmemeq(this->kstor[0].data(), ykey.data(), ykey.size())));
-      }
+      { return this->next != nullptr;  }
   };
 
 }  // namespace details_reference_dictionary
