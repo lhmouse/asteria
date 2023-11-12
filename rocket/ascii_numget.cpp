@@ -1554,7 +1554,7 @@ cast_F(float& value, float min, float max) noexcept
         int sh = ROCKET_LZCNT64(this->m_mant);
         uint32_t bits = (uint32_t) (this->m_mant << sh);  // lower
         this->m_inxct |= bits != 0;
-        bits = (uint32_t) ((this->m_mant << sh) >> 32) | (bits >> 31); // upper
+        bits = (uint32_t) ((this->m_mant << sh) >> 32) | (bits >> 31);  // upper
 
         if(this->m_base == 10) {
           // Convert the base-10 exponent to a base-2 exponent.
