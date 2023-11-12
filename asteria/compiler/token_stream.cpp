@@ -81,7 +81,7 @@ class Text_Reader
     bool
     starts_with(const char* str, size_t len) const noexcept
       {
-        return (this->navail() >= len) && (::std::memcmp(this->data(), str, len) == 0);
+        return (this->navail() >= len) && (::memcmp(this->data(), str, len) == 0);
       }
 
     void
@@ -247,7 +247,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
 
         // `infinity` or `Infinity`
         const char* sptr = reader.data() + tlen - 8;
-        if(::std::memcmp(sptr + 1, "nfinity", 7) != 0)
+        if(::memcmp(sptr + 1, "nfinity", 7) != 0)
           return false;
 
         Token::S_real_literal xtoken;
@@ -472,11 +472,11 @@ do_accept_punctuator(cow_vector<Token>& tokens, Text_Reader& reader)
     while(r.first != r.second) {
       const auto& cur = *--(r.second);
 
-      size_t tlen = ::std::strlen(cur.str);
+      size_t tlen = ::strlen(cur.str);
       if(reader.navail() < tlen)
         continue;
 
-      if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
+      if(::memcmp(reader.data(), cur.str, tlen) != 0)
         continue;
 
       Token::S_punctuator xtoken = { cur.punct };
@@ -724,10 +724,10 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
       while(r.first != r.second) {
         const auto& cur = *(r.first++);
 
-        if(::std::strlen(cur.str) != tlen)
+        if(::strlen(cur.str) != tlen)
           continue;
 
-        if(::std::memcmp(reader.data(), cur.str, tlen) != 0)
+        if(::memcmp(reader.data(), cur.str, tlen) != 0)
           continue;
 
         Token::S_keyword xtoken = { cur.kwrd };
@@ -809,7 +809,7 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
         // Are we inside a block comment?
         if(bcomm) {
           // Search for the terminator of this block comment.
-          auto tptr = ::std::strstr(reader.data(), "*/");
+          auto tptr = ::strstr(reader.data(), "*/");
           if(!tptr)
             break;
 

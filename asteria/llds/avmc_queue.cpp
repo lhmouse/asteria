@@ -66,7 +66,7 @@ clear() noexcept
     }
 
 #ifdef ROCKET_DEBUG
-    ::std::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
+    ::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
 #endif
     this->m_einit = 0;
   }
@@ -124,7 +124,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     if(ctor_opt)
       ctor_opt(head, ctor_arg);
     else if(sparam_size != 0)
-      ::std::memset(head->sparam, 0, sparam_size);
+      ::memset(head->sparam, 0, sparam_size);
 
     if(!meta)
       head->pv_exec = exec;

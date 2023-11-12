@@ -114,7 +114,7 @@ bcopy(objectT& __restrict dst, const sourceT& __restrict src) noexcept
   {
     static_assert(sizeof(objectT) == sizeof(sourceT), "size mismatch");
     using bytes = char [sizeof(objectT)];
-    ::std::memcpy(reinterpret_cast<bytes&>(dst), reinterpret_cast<const bytes&>(src),
+    ::memcpy(reinterpret_cast<bytes&>(dst), reinterpret_cast<const bytes&>(src),
                   sizeof(objectT));
   }
 
@@ -124,7 +124,7 @@ void
 bfill(objectT& dst, unsigned char value) noexcept
   {
     using bytes = char [sizeof(objectT)];
-    ::std::memset(reinterpret_cast<bytes&>(dst), value, sizeof(objectT));
+    ::memset(reinterpret_cast<bytes&>(dst), value, sizeof(objectT));
   }
 
 // C character types

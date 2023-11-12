@@ -89,7 +89,7 @@ class BMH_Searcher
     do_xload_word(cow_string::const_iterator tcur) noexcept
       {
         uintptr_t btext;
-        ::std::memcpy(&btext, &*tcur, sizeof(btext));
+        ::memcpy(&btext, &*tcur, sizeof(btext));
         return btext;
       }
 
@@ -98,7 +98,7 @@ class BMH_Searcher
     do_xload_word(cow_string::const_reverse_iterator tcur) noexcept
       {
         uintptr_t btext;
-        ::std::memcpy(&btext, &*tcur + 1 - sizeof(btext), sizeof(btext));
+        ::memcpy(&btext, &*tcur + 1 - sizeof(btext), sizeof(btext));
         return btext;
       }
 

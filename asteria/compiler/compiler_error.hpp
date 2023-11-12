@@ -60,7 +60,7 @@ class Compiler_Error
         this->m_desc = this->m_fmt.extract_string();
 
         const char* stat_str = describe_compiler_status(xstat);
-        size_t stat_len = ::std::strlen(stat_str);
+        size_t stat_len = ::strlen(stat_str);
         this->m_desc.insert(0, stat_str, stat_len + 1);
         this->m_desc.mut(stat_len) = '\n';
 
