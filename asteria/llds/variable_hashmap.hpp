@@ -13,9 +13,9 @@ class Variable_HashMap
   {
   private:
     using Bucket = details_variable_hashmap::Bucket;
-    Bucket* m_bptr = nullptr;  // beginning of bucket storage
-    uint32_t m_size = 0;  // number of initialized buckets
-    uint32_t m_nbkt = 0;  // number of allocated buckets
+    Bucket* m_bptr = nullptr;
+    uint32_t m_size = 0;
+    uint32_t m_nbkt = 0;
 
   public:
     explicit constexpr
