@@ -76,7 +76,7 @@ xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len))
                           ? (details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len) == 0)
-                          : (::memcmp(lhs, rhs, sizeof(charT) * len) == 0);
+                          : ((lhs == rhs) || (::memcmp(lhs, rhs, sizeof(charT) * len) == 0));
   }
 
 template<typename charT>
