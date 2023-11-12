@@ -30,15 +30,13 @@ void
 Reference_Stack::
 do_deallocate() noexcept
   {
-    if(this->m_bptr) {
-      this->clear();
-      this->clear_red_zone();
+    this->clear();
+    this->clear_red_zone();
 
 #ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
+    ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
 #endif
-      ::free(this->m_bptr);
-    }
+    ::free(this->m_bptr);
 
     this->m_bptr = nullptr;
     this->m_estor = 0;

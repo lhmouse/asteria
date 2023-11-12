@@ -33,14 +33,12 @@ void
 AVMC_Queue::
 do_deallocate() noexcept
   {
-    if(this->m_bptr) {
-      this->clear();
+    this->clear();
 
 #ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
+    ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Header));
 #endif
-      ::free(this->m_bptr);
-    }
+    ::free(this->m_bptr);
 
     this->m_bptr = nullptr;
     this->m_estor = 0;
