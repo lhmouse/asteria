@@ -142,10 +142,10 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
     // Expand recursion by hand with a stack.
     auto qval = this;
     cow_vector<Rbr_Element> stack;
-    const refcnt_ptr<Variable> null_variable_ptr;
+    const refcnt_ptr<Variable> null_var_ptr;
 
   r:
-    if(staged.insert(qval, null_variable_ptr))  // mark once
+    if(staged.insert(qval, null_var_ptr))  // mark once
       switch(qval->m_stor.index()) {
         case type_opaque:
           qval->m_stor.as<V_opaque>().collect_variables(staged, temp);
