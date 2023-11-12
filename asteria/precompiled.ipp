@@ -42,6 +42,11 @@
 #include "../rocket/ascii_numget.hpp"
 #include "../rocket/ascii_numput.hpp"
 #include "../rocket/atomic.hpp"
+#include "../rocket/xascii.hpp"
+#include "../rocket/xhashtable.hpp"
+#include "../rocket/xmemory.hpp"
+#include "../rocket/xstring.hpp"
+#include "../rocket/xuchar.hpp"
 
 #include <iterator>
 #include <utility>

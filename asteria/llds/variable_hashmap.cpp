@@ -8,17 +8,20 @@ namespace asteria {
 
 void
 Variable_HashMap::
-do_reallocate(uint32_t new_nbkt)
+do_reallocate(uint32_t nbkt)
   {
-    if(new_nbkt >= 0x7FFE0000U / sizeof(Bucket))
+    if(nbkt >= 0x7FFE0000U / sizeof(Bucket))
       throw ::std::bad_alloc();
 
-    ROCKET_ASSERT(new_nbkt >= this->m_size * 2);
-    auto new_bptr = (Bucket*) ::calloc(new_nbkt + 1, sizeof(Bucket));
-    if(!new_bptr)
-      throw ::std::bad_alloc();
+    ROCKET_ASSERT(nbkt >= this->m_size * 2);
+    ::rocket::xmeminfo minfo;
+    minfo.element_size = sizeof(Bucket);
+    minfo.count = nbkt + 1;
+    ::rocket::xmemalloc(minfo);
 
-    auto new_eptr = new_bptr + new_nbkt;
+    ::rocket::xmemzero(minfo);
+    minfo.count --;
+    auto new_eptr = (Bucket*) minfo.data + minfo.count;
     new_eptr->prev = new_eptr;
     new_eptr->next = new_eptr;
 
@@ -26,8 +29,8 @@ do_reallocate(uint32_t new_nbkt)
       auto eptr = this->m_bptr + this->m_nbkt;
       while(eptr->next != eptr) {
         // Look for a new bucket for this element. Uniqueness is implied.
-        size_t orel = ::rocket::probe_origin(new_nbkt, (uintptr_t) eptr->next->key);
-        auto qrel = ::rocket::linear_probe(new_bptr, orel, orel, new_nbkt,
+        size_t orel = ::rocket::probe_origin(minfo.count, (uintptr_t) eptr->next->key);
+        auto qrel = ::rocket::linear_probe((Bucket*) minfo.data, orel, orel, minfo.count,
                         [&](const Bucket&) { return false;  });
 
         // Relocate the value into the new bucket.
@@ -37,14 +40,15 @@ do_reallocate(uint32_t new_nbkt)
         eptr->next->detach();
       }
 
-#ifdef ROCKET_DEBUG
-      ::memset((void*) this->m_bptr, 0xD9, this->m_nbkt * sizeof(Bucket));
-#endif
-      ::free(this->m_bptr);
+      ::rocket::xmeminfo rinfo;
+      rinfo.element_size = sizeof(Bucket);
+      rinfo.data = this->m_bptr;
+      rinfo.count = this->m_nbkt;
+      ::rocket::xmemfree(rinfo);
     }
 
-    this->m_bptr = new_bptr;
-    this->m_nbkt = new_nbkt;
+    this->m_bptr = (Bucket*) minfo.data;
+    this->m_nbkt = (uint32_t) minfo.count;
   }
 
 void
@@ -59,10 +63,11 @@ do_deallocate() noexcept
       eptr->next->detach();
     }
 
-#ifdef ROCKET_DEBUG
-    ::memset((void*) this->m_bptr, 0xE7, this->m_nbkt * sizeof(Bucket));
-#endif
-    ::free(this->m_bptr);
+    ::rocket::xmeminfo rinfo;
+    rinfo.element_size = sizeof(Bucket);
+    rinfo.data = this->m_bptr;
+    rinfo.count = this->m_nbkt;
+    ::rocket::xmemfree(rinfo);
 
     this->m_bptr = nullptr;
     this->m_nbkt = 0;

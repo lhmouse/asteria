@@ -5,6 +5,7 @@
 #include "../asteria/simple_script.hpp"
 #include "../asteria/runtime/garbage_collector.hpp"
 #include "../asteria/runtime/variable.hpp"
+#include "../rocket/xmemory.hpp"
 #include <algorithm>
 using namespace ::asteria;
 
@@ -80,8 +81,9 @@ int main()
     ASTERIA_TEST_CHECK(foreign->get_value().type() == type_string);
     foreign = nullptr;
 
-    std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
-    std::sort(free_list.mut_begin(), free_list.mut_end());
+    ::rocket::xmemflush();
+    ::std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
+    ::std::sort(free_list.mut_begin(), free_list.mut_end());
     ASTERIA_TEST_CHECK(::std::equal(
            alloc_list.begin(), alloc_list.end(), free_list.begin(), free_list.end()));
   }

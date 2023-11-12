@@ -14,16 +14,24 @@ do_reallocate(uint32_t estor)
       throw ::std::bad_alloc();
 
     ROCKET_ASSERT(estor >= this->m_einit);
-    auto bptr = (Reference*) ::realloc((void*) this->m_bptr, estor * sizeof(Reference));
-    if(!bptr)
-      throw ::std::bad_alloc();
+    ::rocket::xmeminfo minfo;
+    minfo.element_size = sizeof(Reference);
+    minfo.count = estor;
+    ::rocket::xmemalloc(minfo);
 
-#ifdef ROCKET_DEBUG
-    ::memset((void*) (bptr + this->m_einit), 0xC3, (estor - this->m_einit) * sizeof(Reference));
-#endif
+    if(this->m_bptr) {
+      ::rocket::xmeminfo rinfo;
+      rinfo.element_size = sizeof(Reference);
+      rinfo.data = this->m_bptr;
+      rinfo.count = this->m_einit;
+      ::rocket::xmemcopy(minfo, rinfo);
 
-    this->m_bptr = bptr;
-    this->m_estor = estor;
+      rinfo.count = this->m_estor;
+      ::rocket::xmemfree(rinfo);
+    }
+
+    this->m_bptr = (Reference*) minfo.data;
+    this->m_estor = (uint32_t) minfo.count;
   }
 
 void
@@ -33,10 +41,11 @@ do_deallocate() noexcept
     this->clear();
     this->clear_red_zone();
 
-#ifdef ROCKET_DEBUG
-    ::memset((void*) this->m_bptr, 0xD9, this->m_estor * sizeof(Reference));
-#endif
-    ::free(this->m_bptr);
+    ::rocket::xmeminfo rinfo;
+    rinfo.element_size = sizeof(Reference);
+    rinfo.data = this->m_bptr;
+    rinfo.count = this->m_estor;
+    ::rocket::xmemfree(rinfo);
 
     this->m_bptr = nullptr;
     this->m_estor = 0;

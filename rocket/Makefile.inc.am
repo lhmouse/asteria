@@ -28,6 +28,7 @@ nobase_include_HEADERS +=  \
   %reldir%/xhashtable.hpp  \
   %reldir%/xuchar.hpp  \
   %reldir%/xascii.hpp  \
+  %reldir%/xmemory.hpp  \
   %reldir%/variant.hpp  \
   %reldir%/unique_handle.hpp  \
   %reldir%/unique_posix_file.hpp  \
@@ -68,6 +69,7 @@ lib_librocket_la_SOURCES =  \
   %reldir%/xassert.cpp  \
   %reldir%/xthrow.cpp  \
   %reldir%/xuchar.cpp  \
+  %reldir%/xmemory.cpp  \
   %reldir%/cow_string.cpp  \
   %reldir%/linear_buffer.cpp  \
   %reldir%/tinybuf.cpp  \

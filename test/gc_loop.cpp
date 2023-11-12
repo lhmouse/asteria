@@ -5,6 +5,7 @@
 #include "../asteria/simple_script.hpp"
 #include "../asteria/runtime/garbage_collector.hpp"
 #include "../asteria/runtime/variable.hpp"
+#include "../rocket/xmemory.hpp"
 using namespace ::asteria;
 
 atomic_relaxed<long> bcnt;
@@ -62,5 +63,7 @@ int main()
         )__"));
       code.execute();
     }
+
+    ::rocket::xmemflush();
     ASTERIA_TEST_CHECK(bcnt.load() == 0);
   }

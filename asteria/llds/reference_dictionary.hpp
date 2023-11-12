@@ -45,7 +45,7 @@ class Reference_Dictionary
 
   private:
     void
-    do_reallocate(uint32_t new_nbkt);
+    do_reallocate(uint32_t nbkt);
 
     void
     do_deallocate() noexcept;
