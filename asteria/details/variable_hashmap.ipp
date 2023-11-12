@@ -9,17 +9,37 @@ namespace details_variable_hashmap {
 
 struct Bucket
   {
-    const void* key_opt;
-    union { refcnt_ptr<Variable> vstor[1];  };
+    Bucket* prev;
+    Bucket* next;
+    const void* key;
+    union { refcnt_ptr<Variable> var_opt;  };
 
     Bucket() noexcept { }
     ~Bucket() noexcept { }
     Bucket(const Bucket&) = delete;
     Bucket& operator=(const Bucket&) = delete;
 
+    void
+    attach(Bucket& after) noexcept
+      {
+        this->prev = &after;
+        this->next = after.next;
+        this->prev->next = this;
+        this->next->prev = this;
+      }
+
+    void
+    detach() noexcept
+      {
+        this->prev->next = this->next;
+        this->next->prev = this->prev;
+        this->prev = nullptr;
+        this->next = nullptr;
+      }
+
     explicit operator
     bool() const noexcept
-      { return this->key_opt != nullptr;  }
+      { return this->next != nullptr;  }
   };
 
 }  // namespace details_variable_hashmap

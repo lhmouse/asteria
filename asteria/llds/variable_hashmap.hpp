@@ -16,7 +16,6 @@ class Variable_HashMap
     Bucket* m_bptr = nullptr;  // beginning of bucket storage
     uint32_t m_size = 0;  // number of initialized buckets
     uint32_t m_nbkt = 0;  // number of allocated buckets
-    uint32_t m_random = 0;  // used by `extract_variable()`
 
   public:
     explicit constexpr
@@ -46,7 +45,7 @@ class Variable_HashMap
 
   private:
     void
-    do_reallocate(uint32_t nbkt);
+    do_reallocate(uint32_t new_nbkt);
 
     void
     do_deallocate() noexcept;
@@ -75,27 +74,8 @@ class Variable_HashMap
         this->do_erase_range(0, this->m_nbkt);
       }
 
-    const refcnt_ptr<Variable>*
-    find_opt(const void* key) const noexcept
-      {
-        if(this->m_nbkt == 0)
-          return nullptr;
-
-        // Find a bucket using linear probing.
-        size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-              [&](const details_variable_hashmap::Bucket& r) { return r.key_opt == key;  });
-
-        // The load factor is kept <= 0.5 so a bucket is always returned. If
-        // probing has stopped on an empty bucket, then there is no match.
-        if(!*qbkt)
-          return nullptr;
-
-        return qbkt->vstor;
-      }
-
     bool
-    insert(const void* key, const refcnt_ptr<Variable>& var);
+    insert(const void* key, const refcnt_ptr<Variable>& var_opt);
 
     bool
     erase(const void* key, refcnt_ptr<Variable>* varp_opt = nullptr) noexcept;
