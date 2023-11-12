@@ -47,7 +47,7 @@ xmemalloc(xmeminfo& info, xmemopt opt)
     mutex::unique_lock lock;
 
     if(opt == xmemopt_use_cache) {
-      // Try getting a block from the cache.
+      // Get a block from the cache.
       if(ROCKET_EXPECT(p.head.load() != nullptr)) {
         lock.lock(p.m);
         b = p.head.load();
@@ -95,9 +95,11 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
     }
     else if(opt == xmemopt_clear_cache) {
       // Append all blocks from the cache to `b`.
-      lock.lock(p.m);
-      b->next = p.head.load();
-      p.head.store(nullptr);
+      if(ROCKET_EXPECT(p.head.load() != nullptr)) {
+        lock.lock(p.m);
+        b->next = p.head.load();
+        p.head.store(nullptr);
+      }
     }
     lock.unlock();
 
