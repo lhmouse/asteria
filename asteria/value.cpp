@@ -121,7 +121,7 @@ do_destroy_variant_slow() noexcept
     }
 
 #ifdef ROCKET_DEBUG
-    bfill(it->second.m_bytes, 0xEB);
+    bfill(this->m_bytes, 0xEB);
 #endif
   }
   catch(exception& stdex) {
