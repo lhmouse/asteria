@@ -62,10 +62,10 @@ xmemalloc(xmeminfo& info, xmemopt opt)
       b = (block*) ::operator new(rsize);
 
     info.data = b;
-    info.count = (info.element_size > 1) ? (rsize / info.element_size) : rsize;
 #ifdef ROCKET_DEBUG
     ::memset(info.data, 0xB5, rsize);
 #endif
+    info.count = (info.element_size > 1) ? (rsize / info.element_size) : rsize;
   }
 
 void
@@ -109,8 +109,8 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 void
 xmemflush() noexcept
   {
-    mutex::unique_lock lock;
     block* b = nullptr;
+    mutex::unique_lock lock;
 
     for(auto& p : s_pools) {
       lock.lock(p.m);
