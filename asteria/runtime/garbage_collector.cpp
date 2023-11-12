@@ -26,6 +26,7 @@ do_collect_generation(uint32_t gen)
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     size_t nvars = 0;
+    refcnt_ptr<Variable> var;
     auto& tracked = this->m_tracked.at(gMax - gen);
     const auto next_opt = (gen >= gMax) ? nullptr : &(this->m_tracked.at(gMax - gen - 1));
     const auto count_opt = (gen >= gMax) ? nullptr : &(this->m_counts.at(gMax - gen - 1));
@@ -34,12 +35,11 @@ do_collect_generation(uint32_t gen)
     this->m_temp_1.clear();
     this->m_temp_2.clear();
     this->m_unreach.clear();
+    tracked.merge_into(this->m_temp_1);
 
-    this->m_temp_1.merge(tracked);
-
-    while(auto var = this->m_temp_1.extract_variable_opt()) {
+    while(this->m_temp_1.extract_variable(var)) {
       // Each variable that is encountered here shall have a direct reference
-      // from either `tracked` or `m_staged`, so its `gc_ref` counter is
+      // from either `tracked` or `m_staged`, so its `gc_ref` counter shall be
       // initialized to one.
       var->set_gc_ref(1);
       ROCKET_ASSERT(var->get_gc_ref() <= var->use_count() - 1);
@@ -48,7 +48,7 @@ do_collect_generation(uint32_t gen)
 
     this->m_temp_1.clear();
 
-    while(auto var = this->m_staged.extract_variable_opt()) {
+    while(this->m_staged.extract_variable(var)) {
       // Each key in `m_staged` denotes an internal reference, so its `gc_ref`
       // counter shall be incremented.
       var->set_gc_ref(var->get_gc_ref() + 1);
@@ -57,9 +57,9 @@ do_collect_generation(uint32_t gen)
     }
 
     this->m_staged.clear();
-    this->m_temp_1.merge(tracked);
+    tracked.merge_into(this->m_temp_1);
 
-    while(auto var = this->m_temp_1.extract_variable_opt()) {
+    while(this->m_temp_1.extract_variable(var)) {
       // Each variable whose `gc_ref` counter equals its reference count is
       // marked as possibly unreachable. Note `var` here owns a reference
       // which must be excluded.
@@ -71,7 +71,7 @@ do_collect_generation(uint32_t gen)
 
     this->m_temp_1.clear();
 
-    while(auto var = this->m_temp_2.extract_variable_opt()) {
+    while(this->m_temp_2.extract_variable(var)) {
       // Mark this indirectly reachable variable, too.
       var->set_gc_ref(0);
       this->m_temp_1.erase(var.get());
@@ -93,7 +93,7 @@ do_collect_generation(uint32_t gen)
     this->m_temp_2.clear();
 
     // Collect all variables from `m_unreach`.
-    while(auto var = this->m_unreach.extract_variable_opt()) {
+    while(this->m_unreach.extract_variable(var)) {
       // Foreign variables must not be collected.
       if(!tracked.erase(var.get()))
         continue;
@@ -140,7 +140,8 @@ create_variable(GC_Generation gen_hint)
         this->do_collect_generation(gen);
 
     // Get a cached variable.
-    auto var = this->m_pool.extract_variable_opt();
+    refcnt_ptr<Variable> var;
+    this->m_pool.extract_variable(var);
     if(!var)
       var = ::rocket::make_refcnt<Variable>();
 
@@ -175,6 +176,8 @@ finalize() noexcept
       ASTERIA_TERMINATE(("Garbage collector not finalizable while in use"));
 
     size_t nvars = 0;
+    refcnt_ptr<Variable> var;
+
     this->m_staged.clear();
     this->m_temp_1.clear();
     this->m_temp_2.clear();
@@ -186,7 +189,7 @@ finalize() noexcept
     // Wipe out all tracked variables. Indirect ones may be foreign so they
     // must not be wiped.
     for(size_t gen = 0;  gen <= gMax;  ++gen)
-      while(auto var = this->m_tracked.at(gMax-gen).extract_variable_opt())
+      while(this->m_tracked.at(gMax-gen).extract_variable(var))
         var->uninitialize();
 
     // Clear cached variables.

@@ -144,20 +144,20 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
 
 void
 Variable_HashMap::
-merge(const Variable_HashMap& other)
+merge_into(Variable_HashMap& other) const
   {
     if(this == &other)
       return;
 
-    if(other.m_size != 0)
-      for(uint32_t t = 0;  t != other.m_nbkt;  ++t)
-        if(other.m_bptr[t])
-          this->insert(other.m_bptr[t].key_opt, other.m_bptr[t].vstor[0]);
+    if(this->m_bptr)
+      for(uint32_t t = 0;  t != this->m_nbkt;  ++t)
+        if(this->m_bptr[t])
+          other.insert(this->m_bptr[t].key_opt, this->m_bptr[t].vstor[0]);
   }
 
-refcnt_ptr<Variable>
+bool
 Variable_HashMap::
-extract_variable_opt() noexcept
+extract_variable(refcnt_ptr<Variable>& var) noexcept
   {
     if(ROCKET_UNEXPECT(this->m_random > this->m_nbkt))
       this->m_random = this->m_nbkt;
@@ -167,16 +167,18 @@ extract_variable_opt() noexcept
     for(uint32_t t = this->m_random;  t != this->m_nbkt;  ++t)
       if(ROCKET_UNEXPECT(this->m_bptr[t] && this->m_bptr[t].vstor[0])) {
         this->m_random = t;
-        return ::std::move(this->m_bptr[t].vstor[0]);
+        var = ::std::move(this->m_bptr[t].vstor[0]);
+        return true;
       }
 
     for(uint32_t t = 0;  t != this->m_random;  ++t)
       if(ROCKET_UNEXPECT(this->m_bptr[t] && this->m_bptr[t].vstor[0])) {
         this->m_random = t;
-        return ::std::move(this->m_bptr[t].vstor[0]);
+        var = ::std::move(this->m_bptr[t].vstor[0]);
+        return true;
       }
 
-    return nullptr;
+    return false;
   }
 
 }  // namespace asteria

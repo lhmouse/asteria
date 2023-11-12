@@ -16,7 +16,7 @@ class Variable_HashMap
     Bucket* m_bptr = nullptr;  // beginning of bucket storage
     uint32_t m_size = 0;  // number of initialized buckets
     uint32_t m_nbkt = 0;  // number of allocated buckets
-    uint32_t m_random = 0;  // used by `extract_variable_opt()`
+    uint32_t m_random = 0;  // used by `extract_variable()`
 
   public:
     explicit constexpr
@@ -101,10 +101,10 @@ class Variable_HashMap
     erase(const void* key, refcnt_ptr<Variable>* varp_opt = nullptr) noexcept;
 
     void
-    merge(const Variable_HashMap& other);
+    merge_into(Variable_HashMap& other) const;
 
-    refcnt_ptr<Variable>
-    extract_variable_opt() noexcept;
+    bool
+    extract_variable(refcnt_ptr<Variable>& var) noexcept;
   };
 
 inline
