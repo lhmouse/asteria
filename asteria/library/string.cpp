@@ -80,7 +80,7 @@ class BMH_Searcher
           this->m_bcr_offsets[k] = plen;
 
         for(ptrdiff_t k = 0;  k != plen - 1;  ++k)
-          this->m_bcr_offsets[uint8_t(this->m_pbegin[k])] = plen - 1U - k;
+          this->m_bcr_offsets[uint8_t(this->m_pbegin[k])] = plen - 1 - k;
       }
 
   private:

@@ -232,9 +232,9 @@ apply_open(Value& parent) const
         auto& arr = parent.mut_array();
         auto w = wrap_array_index(arr.ssize(), altr.index);
         if(w.nprepend)
-          arr.insert(arr.begin(), w.nprepend);
+          arr.insert(arr.begin(), ::rocket::clamp_cast<size_t>(w.nprepend, 0U, SIZE_MAX));
         else if(w.nappend)
-          arr.append(w.nappend);
+          arr.append(::rocket::clamp_cast<size_t>(w.nappend, 0U, SIZE_MAX));
 
         return arr.mut(w.rindex);
       }
