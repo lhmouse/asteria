@@ -63,8 +63,8 @@ void
 Reference_Stack::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    for(uint32_t refi = 0;  refi != this->m_einit;  ++ refi)
-      this->m_bptr[refi].collect_variables(staged, temp);
+    for(uint32_t k = 0;  k != this->m_einit;  ++ k)
+      this->m_bptr[k].collect_variables(staged, temp);
   }
 
 }  // namespace asteria
