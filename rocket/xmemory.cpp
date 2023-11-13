@@ -42,8 +42,8 @@ xmemalloc(xmeminfo& info, xmemopt opt)
     if(ROCKET_MUL_OVERFLOW(info.element_size, info.count, &rsize))
       throw ::std::bad_alloc();
 
-    auto& p = do_get_pool_for_size(rsize);
     block* b = nullptr;
+    auto& p = do_get_pool_for_size(rsize);
     mutex::unique_lock lock;
 
     if(opt == xmemopt_use_cache) {
@@ -61,10 +61,10 @@ xmemalloc(xmeminfo& info, xmemopt opt)
     if(b == nullptr)
       b = (block*) ::operator new(rsize);
 
-    info.data = b;
 #ifdef ROCKET_DEBUG
-    ::memset(info.data, 0xB5, rsize);
+    ::memset(b, 0xB5, rsize);
 #endif
+    info.data = b;
     info.count = (info.element_size > 1) ? (rsize / info.element_size) : rsize;
   }
 
@@ -74,15 +74,16 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
     if(!info.data)
       return;
 
+    block* b = (block*) info.data;
     size_t rsize = info.element_size * info.count;
     auto& p = do_get_pool_for_size(rsize);
+    mutex::unique_lock lock;
+
 #ifdef ROCKET_DEBUG
-    ::memset(info.data, 0xCB, rsize);
+    ::memset(b, 0xCB, rsize);
 #endif
-    block* b = (block*) info.data;
     b->next = nullptr;
     b->count = 1;
-    mutex::unique_lock lock;
 
     if(opt == xmemopt_use_cache) {
       // Put the block into the cache.
