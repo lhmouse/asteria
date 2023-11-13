@@ -3,7 +3,6 @@
 
 #include "xmemory.hpp"
 #include "mutex.hpp"
-#include "atomic.hpp"
 namespace rocket {
 namespace {
 
@@ -16,7 +15,7 @@ struct block
 struct pool
   {
     alignas(64) mutex m;
-    atomic_relaxed<block*> head;
+    block* head;
   };
 
 pool s_pools[64];
@@ -48,12 +47,9 @@ xmemalloc(xmeminfo& info, xmemopt opt)
 
     if(opt == xmemopt_use_cache) {
       // Get a block from the cache.
-      if(ROCKET_EXPECT(p.head.load() != nullptr)) {
-        lock.lock(p.m);
-        b = p.head.load();
-        if(ROCKET_EXPECT(b != nullptr))
-          p.head.store(b->next);
-      }
+      lock.lock(p.m);
+      if(p.head != nullptr)
+        b = exchange(p.head, p.head->next);
     }
     lock.unlock();
 
@@ -83,24 +79,18 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
     ::memset(b, 0xCB, rsize);
 #endif
     b->next = nullptr;
-    b->count = 1;
 
     if(opt == xmemopt_use_cache) {
       // Put the block into the cache.
       lock.lock(p.m);
-      b->next = p.head.load();
-      if(b->next != nullptr)
-        b->count = b->next->count + 1;
-      p.head.store(b);
+      b->next = exchange(p.head, b);
+      b->count = (b->next ? b->next->count : 0U) + 1U;
       b = nullptr;
     }
     else if(opt == xmemopt_clear_cache) {
       // Append all blocks from the cache to `b`.
-      if(ROCKET_EXPECT(p.head.load() != nullptr)) {
-        lock.lock(p.m);
-        b->next = p.head.load();
-        p.head.store(nullptr);
-      }
+      lock.lock(p.m);
+      b->next = exchange(p.head, nullptr);
     }
     lock.unlock();
 
@@ -112,16 +102,10 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 void
 xmemflush() noexcept
   {
-    block* b = nullptr;
-    mutex::unique_lock lock;
-
     for(auto& p : s_pools) {
-      // Move all blocks into `b`.
-      if(ROCKET_EXPECT(p.head.load() != nullptr)) {
-        lock.lock(p.m);
-        b = p.head.load();
-        p.head.store(nullptr);
-      }
+      // Extract all blocks.
+      mutex::unique_lock lock(p.m);
+      block* b = exchange(p.head, nullptr);
       lock.unlock();
 
       // Return all blocks to the system.
