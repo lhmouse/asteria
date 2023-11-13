@@ -626,7 +626,7 @@ all_of(containerT&& cont, predictorT&& pred)
 template<typename elementT, typename predictorT>
 constexpr
 bool
-all_of(initializer_list<elementT> init, predictorT&& call)
+all_of(initializer_list<elementT> init, predictorT&& pred)
   {
     for(const auto& elem : init)
       if(!(bool) pred(elem))
