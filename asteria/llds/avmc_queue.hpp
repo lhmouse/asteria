@@ -21,9 +21,9 @@ class AVMC_Queue
     using Variable_Collector  = details_avmc_queue::Variable_Collector;
 
   private:
-    Header* m_bptr = nullptr;  // beginning of storage
-    uint32_t m_einit = 0;  // used storage in number of `Header`s [!]
-    uint32_t m_estor = 0;  // allocated storage in number of `Header`s [!]
+    Header* m_bptr = nullptr;
+    uint32_t m_einit = 0;
+    uint32_t m_estor = 0;
 
   public:
     explicit constexpr

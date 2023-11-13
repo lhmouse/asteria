@@ -11,10 +11,10 @@ namespace asteria {
 class Reference_Stack
   {
   private:
-    Reference* m_bptr = nullptr;  // beginning of raw storage
-    uint32_t m_etop = 0;   // offset past the top (must be within [0,einit])
-    uint32_t m_einit = 0;  // offset to the last initialized reference
-    uint32_t m_estor = 0;  // end of reserved storage
+    Reference* m_bptr = nullptr;
+    uint32_t m_etop = 0;
+    uint32_t m_einit = 0;
+    uint32_t m_estor = 0;
 
   public:
     explicit constexpr
