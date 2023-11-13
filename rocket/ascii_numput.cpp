@@ -1324,8 +1324,6 @@ void
 do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, const char* rdxpp_opt)
   {
     uint64_t reg = mant;
-    uint32_t len = 0;
-
     while(reg != 0) {
       // Pop a digit from `reg` and write it.
       uint64_t digit = reg / divisor;
@@ -1335,12 +1333,10 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       if(wptr == rdxpp_opt) {
         // Skip the radix point which is set by the caller.
         wptr ++;
-        len ++;
       }
 
       *wptr = (char) ('0' + digit + ((9U - digit) >> 61));
       wptr ++;
-      len ++;
     }
 
     while(rdxpp_opt && (wptr < rdxpp_opt)) {
@@ -1348,7 +1344,6 @@ do_write_mantissa(char*& wptr, uint64_t mant, uint64_t divisor, uint32_t base, c
       // don't write a radix point.
       *wptr = '0';
       wptr ++;
-      len ++;
     }
   }
 
@@ -1357,17 +1352,14 @@ void
 do_write_exp(char*& wptr, int exp)
   {
     uint32_t abs_exp = (uint32_t) ::std::abs(exp);
-    uint32_t len = 0;
+    const char* digits;
+    uint32_t ndigits;
 
     // The exponent always has a sign symbol.
     *wptr = (exp == (int) abs_exp) ? '+' : '-';
     wptr ++;
-    len ++;
 
     // Get the static string.
-    const char* digits;
-    uint32_t ndigits;
-
     if(abs_exp < 100U) {
       // Ensure at least two significant digits, like POSIX.
       do_get_small_decimal(digits, ndigits, 100U + abs_exp);
@@ -1383,7 +1375,6 @@ do_write_exp(char*& wptr, int exp)
       digits ++;
       ndigits --;
       wptr ++;
-      len ++;
     }
   }
 
