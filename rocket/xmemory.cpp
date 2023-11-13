@@ -115,9 +115,12 @@ xmemflush() noexcept
     mutex::unique_lock lock;
 
     for(auto& p : s_pools) {
-      lock.lock(p.m);
-      b = p.head.load();
-      p.head.store(nullptr);
+      // Move all blocks into `b`.
+      if(ROCKET_EXPECT(p.head.load() != nullptr)) {
+        lock.lock(p.m);
+        b = p.head.load();
+        p.head.store(nullptr);
+      }
       lock.unlock();
 
       // Return all blocks to the system.
