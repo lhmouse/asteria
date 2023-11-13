@@ -5,6 +5,7 @@
 #include "utils.hpp"
 #include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #include <unistd.h>  // ::write
+#include <openssl/rand.h>
 namespace asteria {
 namespace {
 
@@ -175,6 +176,25 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
 
     // Throw it.
     throw ::std::runtime_error(data.c_str());
+  }
+
+uint64_t
+generate_random_seed() noexcept
+  {
+    unsigned long long val;
+
+#if defined(__x86_64__) && defined(__RDSEED__)
+    if(::_rdseed64_step(&val))
+      return val;
+#endif  // 64-bit RDSEED
+
+#if defined(__x86_64__) && defined(__RDRND__)  // sic
+    if(::_rdrand64_step(&val))
+      return val;
+#endif  // 64-bit RDRAND
+
+    ::RAND_priv_bytes((uint8_t*) &val, sizeof(val));
+    return val;
   }
 
 int64_t

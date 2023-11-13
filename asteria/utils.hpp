@@ -173,23 +173,6 @@ is_cmask(char ch, uint8_t mask) noexcept
     return noadl::get_cmask(ch) & mask;
   }
 
-// Gets a random number from hardware.
-inline
-uint64_t
-generate_random_seed() noexcept
-  {
-    int hw_ok = 0;
-    uint64_t val = 0;
-#if defined(__RDSEED__)
-#  ifdef __x86_64__
-    hw_ok = ::_rdseed64_step((unsigned long long*) &val);
-#  else
-    hw_ok = ::_rdseed32_step((unsigned int*) &val);
-#  endif
-#endif
-    return ROCKET_EXPECT(hw_ok) ? val : ::__rdtsc();
-  }
-
 // Negative array index wrapper
 struct Wrapped_Index
   {
@@ -226,6 +209,10 @@ wrap_array_index(ptrdiff_t ssize, int64_t sindex) noexcept
   {
     return Wrapped_Index(ssize, sindex);
   }
+
+// Gets a random number from hardware.
+uint64_t
+generate_random_seed() noexcept;
 
 // Numeric conversion
 int64_t
