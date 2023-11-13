@@ -71,10 +71,10 @@ xmemalloc(xmeminfo& info, xmemopt opt)
 void
 xmemfree(xmeminfo& info, xmemopt opt) noexcept
   {
-    if(!info.data)
+    block* b = (block*) info.data;
+    if(b == nullptr)
       return;
 
-    block* b = (block*) info.data;
     size_t rsize = info.element_size * info.count;
     auto& p = do_get_pool_for_size(rsize);
     mutex::unique_lock lock;
