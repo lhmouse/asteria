@@ -32,7 +32,7 @@ AM_CPPFLAGS = -pipe -Wall -Wextra @host_asm_opt@ -Iasteria \
 AM_CXXFLAGS = -std=c++17 @sanitizer_flags@  \
   -f{visibility-inlines-hidden,nothrow-opt,no-enforce-eh-specs}  \
   -Wno-redundant-move -Werror=zero-as-null-pointer-constant  \
-  -Werror={non-virtual-dtor,missing-declarations}
+  -Werror=non-virtual-dtor
 
 AM_LDFLAGS = -no-undefined
 
