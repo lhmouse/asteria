@@ -186,7 +186,7 @@ prefix-operator ::=
 primary-expression ::=
 	identifier | extern-identifier | literal | "this" | closure-function |
 	unnamed-array | unnamed-object | nested-expression | fused-multiply-add |
-	prefix-binary-expression |catch-expression | variadic-function-call |
+	prefix-binary-expression | catch-expression | variadic-function-call |
 	import-function-call
 
 extern-identifier ::=
