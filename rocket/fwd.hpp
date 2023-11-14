@@ -722,6 +722,54 @@ find_if(initializer_list<elementT> init, predictorT&& pred)
     return nullptr;
   }
 
+template<typename containerT, typename targetT>
+constexpr
+size_t
+count(containerT&& cont, targetT&& targ)
+  {
+    size_t n = 0;
+    for(auto& elem : cont)
+      if(elem == targ)
+        ++n;
+    return n;
+  }
+
+template<typename elementT, typename targetT>
+constexpr
+size_t
+count(initializer_list<elementT> init, targetT&& targ)
+  {
+    size_t n = 0;
+    for(const auto& elem : init)
+      if(elem == targ)
+        ++n;
+    return n;
+  }
+
+template<typename containerT, typename predictorT>
+constexpr
+size_t
+count_if(containerT&& cont, predictorT&& pred)
+  {
+    size_t n = 0;
+    for(auto& elem : cont)
+      if(pred(elem))
+        ++n;
+    return n;
+  }
+
+template<typename elementT, typename predictorT>
+constexpr
+size_t
+count_if(initializer_list<elementT> init, predictorT&& pred)
+  {
+    size_t n = 0;
+    for(const auto& elem : init)
+      if(pred(elem))
+        ++n;
+    return n;
+  }
+
 template<typename xvalueT>
 constexpr
 details_fwd::binder_eq<typename decay<xvalueT>::type>
