@@ -17,17 +17,13 @@ Argument_Reader::
 do_prepare_parameter(const char* param)
   {
     // Ensure `end_overload()` has not been called for this overload.
-    if(this->m_state.ended)
+    if(this->m_state.finish)
       throw Runtime_Error(Runtime_Error::M_format(),
                "Current overload marked ended");
 
     // Append the parameter.
-    // If it is not the first one, insert a comma before it.
-    if(this->m_state.nparams)
-      this->m_state.params += ", ";
-
-    this->m_state.params += param;
-    this->m_state.nparams += 1;
+    this->m_state.params << param << ", ";
+    this->m_state.nparams ++;
   }
 
 void
@@ -35,32 +31,31 @@ Argument_Reader::
 do_terminate_parameter_list()
   {
     // Ensure `end_overload()` has not been called for this overload.
-    if(this->m_state.ended)
+    if(this->m_state.finish)
       throw Runtime_Error(Runtime_Error::M_format(),
                "Current overload marked ended");
 
-    // Mark this overload ended.
-    this->m_state.ended = true;
-
-    this->m_overloads.append(this->m_state.params.data(),
-            this->m_state.params.size() + 1);  // null terminator included
+    // Mark this overload complete. The terminating ", " shall be dropped.
+    this->m_state.finish = true;
+    this->m_overloads.append(this->m_state.params, 0, this->m_state.params.size() - 2);
+    this->m_overloads.push_back('|');
   }
 
 void
 Argument_Reader::
 do_mark_match_failure() noexcept
   {
-    // Set the current overload as unmatched.
-    this->m_state.matched = false;
+    // Set the current overload as a non-match.
+    this->m_state.match = false;
   }
 
 const Reference*
 Argument_Reader::
 do_peek_argument() const
   {
-    // Try getting an argument for the next parameter.
-    // Prior to this function, `do_prepare_parameter()` shall have been called.
-    if(!this->m_state.matched)
+    // Try getting an argument for the next parameter. Before calling this
+    // function, `do_prepare_parameter()` shall have been called.
+    if(!this->m_state.match)
       return nullptr;
 
     uint32_t rindex = this->m_stack.size() - this->m_state.nparams;
@@ -94,8 +89,8 @@ start_overload() noexcept
   {
     this->m_state.params.clear();
     this->m_state.nparams = 0;
-    this->m_state.ended = false;
-    this->m_state.matched = true;
+    this->m_state.finish = false;
+    this->m_state.match = true;
   }
 
 void
@@ -462,7 +457,7 @@ end_overload()
   {
     this->do_terminate_parameter_list();
 
-    if(!this->m_state.matched)
+    if(!this->m_state.match)
       return false;
 
     // Ensure no more arguments follow. Note there may be fewer.
@@ -484,7 +479,7 @@ end_overload(cow_vector<Reference>& vargs)
     this->do_prepare_parameter("...");
     this->do_terminate_parameter_list();
 
-    if(!this->m_state.matched)
+    if(!this->m_state.match)
       return false;
 
     // Check for variadic arguments. Note the `...` is not a parameter.
@@ -508,7 +503,7 @@ end_overload(cow_vector<Value>& vargs)
     this->do_prepare_parameter("...");
     this->do_terminate_parameter_list();
 
-    if(!this->m_state.matched)
+    if(!this->m_state.match)
       return false;
 
     // Check for variadic arguments. Note the `...` is not a parameter.
@@ -544,15 +539,28 @@ throw_no_matching_function_call() const
     }
     caller << ")";
 
+    // Get the width of the overload number colomn.
+    ::rocket::ascii_numput nump;
+    uint32_t overload_count = (uint32_t) ::rocket::count(this->m_overloads, '|');
+    nump.put_DU(overload_count);
+    static_vector<char, 24> sbuf(nump.size(), ' ');
+    sbuf.emplace_back();
+
     // Compose the list of overloads.
     cow_string overloads;
     overloads << "[list of overloads:";
     offset = 0;
-    while(offset != this->m_overloads.size()) {
-      overloads << "\n  * ";
-      cow_string::shallow_type ovld(this->m_overloads.c_str() + offset);
-      overloads << this->m_name << "(" << ovld << ")";
-      offset += (uint32_t) ovld.length() + 1;
+    for(size_t k = 0;  k < overload_count;  ++k) {
+      nump.put_DU(k + 1);
+      ::std::copy_backward(nump.begin(), nump.end(), sbuf.mut_end() - 1);
+      overloads << "\n  " << sbuf.data() << ") `" << this->m_name << "(";
+
+      size_t epos = this->m_overloads.find(offset, '|');
+      ROCKET_ASSERT(epos != cow_string::npos);
+      overloads.append(this->m_overloads, offset, epos - offset);
+
+      overloads << ")`";
+      offset = (uint32_t) epos + 1;
     }
     overloads << "\n  -- end of list of overloads]";
 

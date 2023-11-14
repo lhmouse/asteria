@@ -19,8 +19,8 @@ class Argument_Reader
       {
         cow_string params;
         uint32_t nparams = 0;
-        bool ended = false;
-        bool matched = false;
+        bool finish = false;
+        bool match = false;
       };
 
     State m_state;
