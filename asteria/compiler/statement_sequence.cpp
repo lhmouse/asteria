@@ -355,12 +355,12 @@ operator|(scope_flags x, scope_flags y) noexcept
 
 // Accept a statement; a blockt is converted to a single statement.
 opt<Statement>
-do_accept_statement_opt(Token_Stream& tstrm, scope_flags scfl);
+do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope);
 
 // Accept a statement; a non-block statement is converted to a block consisting of
 // a single statement.
 opt<Statement::S_block>
-do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scfl);
+do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope);
 
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
@@ -405,7 +405,7 @@ do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
   }
 
 opt<Statement::S_block>
-do_accept_block_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // block ::=
     //   "{" statement * "}"
@@ -417,7 +417,7 @@ do_accept_block_opt(Token_Stream& tstrm, scope_flags scfl)
       return nullopt;
 
     cow_vector<Statement> body;
-    while(auto qstmt = do_accept_statement_opt(tstrm, scfl))
+    while(auto qstmt = do_accept_statement_opt(tstrm, scope))
       body.emplace_back(::std::move(*qstmt));
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -704,7 +704,7 @@ do_accept_expression_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // if-statement ::=
     //   "if" negation ? "(" expression ")" statement ( "else" statement ) ?
@@ -733,7 +733,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scfl)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbtrue = do_accept_statement_as_block_opt(tstrm, scfl);
+    auto qbtrue = do_accept_statement_as_block_opt(tstrm, scope);
     if(!qbtrue)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -741,7 +741,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     decltype(qbtrue) qbfalse;
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
     if(qkwrd)
-      qbfalse = do_accept_statement_as_block_opt(tstrm, scfl);
+      qbfalse = do_accept_statement_as_block_opt(tstrm, scope);
 
     if(qkwrd && !qbfalse)
       throw Compiler_Error(Compiler_Error::M_status(),
@@ -756,7 +756,7 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scfl)
   }
 
 opt<Statement>
-do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // switch-statement ::=
     //   "switch" "(" expression ")" switch-block
@@ -826,7 +826,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scfl)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_colon_expected, tstrm.next_sloc());
 
-      while(auto qstmt = do_accept_statement_opt(tstrm, scfl | scope_flags_switch))
+      while(auto qstmt = do_accept_statement_opt(tstrm, scope | scope_flags_switch))
         clause.body.stmts.emplace_back(::std::move(*qstmt));
     }
 
@@ -841,7 +841,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scfl)
   }
 
 opt<Statement>
-do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // do-while-statement ::=
     //   "do" statement "while" negation ? "(" expression ")" ";"
@@ -849,7 +849,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     if(!qkwrd)
       return nullopt;
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_flags_while);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_while);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -890,7 +890,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scfl)
   }
 
 opt<Statement>
-do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // while-statement ::=
     //   "while" negation ? "(" expression ")" statement
@@ -919,7 +919,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scfl)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_flags_while);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_while);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -930,7 +930,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scfl)
 
 opt<Statement>
 do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& op_sloc,
-                                   scope_flags scfl)
+                                   scope_flags scope)
   {
     // for-complement-range ::=
     //   "each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")" statement
@@ -972,7 +972,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_flags_for);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_for);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -1027,7 +1027,7 @@ do_set_empty_expression(opt<Statement::S_expression>& qexpr, const Token_Stream&
 
 opt<Statement>
 do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location& op_sloc,
-                                     scope_flags scfl)
+                                     scope_flags scope)
   {
     // for-complement-triplet ::=
     //   for-initializer expression ? ";" expression ? ")" statement
@@ -1054,7 +1054,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scfl | scope_flags_for);
+    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_for);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -1066,21 +1066,21 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
 
 opt<Statement>
 do_accept_for_complement_opt(Token_Stream& tstrm, const Source_Location& op_sloc,
-                             scope_flags scfl)
+                             scope_flags scope)
   {
     // for-complement ::=
     //   for-complement-range | for-complement-triplet
-    if(auto qcompl = do_accept_for_complement_range_opt(tstrm, op_sloc, scfl))
+    if(auto qcompl = do_accept_for_complement_range_opt(tstrm, op_sloc, scope))
       return qcompl;
 
-    if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm, op_sloc, scfl))
+    if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm, op_sloc, scope))
       return qcompl;
 
     return nullopt;
   }
 
 opt<Statement>
-do_accept_for_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_for_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // for-statement ::=
     //   "for" "(" for-complement
@@ -1094,7 +1094,7 @@ do_accept_for_statement_opt(Token_Stream& tstrm, scope_flags scfl)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    auto qcompl = do_accept_for_complement_opt(tstrm, op_sloc, scfl);
+    auto qcompl = do_accept_for_complement_opt(tstrm, op_sloc, scope);
     if(!qcompl)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_for_statement_initializer_expected, tstrm.next_sloc());
@@ -1125,7 +1125,7 @@ do_accept_jump_target_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
   }
 
 opt<Statement>
-do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // break-statement ::=
     //   "break" break-target ? ";"
@@ -1141,7 +1141,7 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     if(!ktarg)
       ktarg.emplace(jump_target_unspec, scope_flags_xbreak);
 
-    if(!(scfl & ktarg->second))
+    if(!(scope & ktarg->second))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_break_no_matching_scope, tstrm.next_sloc());
 
@@ -1155,7 +1155,7 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scfl)
   }
 
 opt<Statement>
-do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // continue-statement ::=
     //   "continue" continue-target ? ";"
@@ -1170,7 +1170,7 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     if(!ktarg)
       ktarg.emplace(jump_target_unspec, scope_flags_xcontinue);
 
-    if(!(scfl & ktarg->second))
+    if(!(scope & ktarg->second))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_continue_no_matching_scope, tstrm.next_sloc());
 
@@ -1291,7 +1291,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // try-statement ::=
     //   "try" statement "catch" "(" identifier ")" statement
@@ -1300,7 +1300,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     if(!qkwrd)
       return nullopt;
 
-    auto qbtry = do_accept_statement_as_block_opt(tstrm, scfl);
+    auto qbtry = do_accept_statement_as_block_opt(tstrm, scope);
     if(!qbtry)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -1329,7 +1329,7 @@ do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scfl)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbcatch = do_accept_statement_as_block_opt(tstrm, scfl);
+    auto qbcatch = do_accept_statement_as_block_opt(tstrm, scope);
     if(!qbcatch)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_statement_expected, tstrm.next_sloc());
@@ -1364,7 +1364,7 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_nonblock_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_nonblock_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // nonblock-statement ::=
     //   null-statement |
@@ -1391,25 +1391,25 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     if(auto qstmt = do_accept_expression_statement_opt(tstrm))
       return qstmt;
 
-    if(auto qstmt = do_accept_if_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
       return qstmt;
 
-    if(auto qstmt = do_accept_switch_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_switch_statement_opt(tstrm, scope))
       return qstmt;
 
-    if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scope))
       return qstmt;
 
-    if(auto qstmt = do_accept_while_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_while_statement_opt(tstrm, scope))
       return qstmt;
 
-    if(auto qstmt = do_accept_for_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_for_statement_opt(tstrm, scope))
       return qstmt;
 
-    if(auto qstmt = do_accept_break_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_break_statement_opt(tstrm, scope))
       return qstmt;
 
-    if(auto qstmt = do_accept_continue_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_continue_statement_opt(tstrm, scope))
       return qstmt;
 
     if(auto qstmt = do_accept_throw_statement_opt(tstrm))
@@ -1421,7 +1421,7 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm, scope_flags scfl)
     if(auto qstmt = do_accept_assert_statement_opt(tstrm))
       return qstmt;
 
-    if(auto qstmt = do_accept_try_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_try_statement_opt(tstrm, scope))
       return qstmt;
 
     if(auto qstmt = do_accept_defer_statement_opt(tstrm))
@@ -1431,33 +1431,33 @@ do_accept_nonblock_statement_opt(Token_Stream& tstrm, scope_flags scfl)
   }
 
 opt<Statement>
-do_accept_statement_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
     //   block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    if(auto qblock = do_accept_block_opt(tstrm, scfl))
+    if(auto qblock = do_accept_block_opt(tstrm, scope))
       return ::std::move(*qblock);
 
-    if(auto qstmt = do_accept_nonblock_statement_opt(tstrm, scfl))
+    if(auto qstmt = do_accept_nonblock_statement_opt(tstrm, scope))
       return qstmt;
 
     return nullopt;
   }
 
 opt<Statement::S_block>
-do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scfl)
+do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
     //   block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    auto qblock = do_accept_block_opt(tstrm, scfl);
+    auto qblock = do_accept_block_opt(tstrm, scope);
     if(qblock)
       return qblock;
 
-    auto qstmt = do_accept_nonblock_statement_opt(tstrm, scfl);
+    auto qstmt = do_accept_nonblock_statement_opt(tstrm, scope);
     if(qstmt)
       return do_blockify_statement(::std::move(*qstmt));
 
