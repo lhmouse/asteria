@@ -6,16 +6,16 @@
 namespace rocket {
 namespace {
 
-struct block
+struct free_block
   {
-    block* next;
+    free_block* next;
     size_t count;
   };
 
-struct pool
+struct alignas(64) pool
   {
-    alignas(64) mutex m;
-    block* head;
+    mutex m;
+    free_block* head;
   };
 
 pool s_pools[64];
@@ -24,7 +24,7 @@ inline
 pool&
 do_get_pool_for_size(size_t& rsize)
   {
-    uint64_t si64 = ::std::max(sizeof(block), rsize);
+    uint64_t si64 = ::std::max(sizeof(free_block), rsize);
     uint32_t i = 64U - (uint32_t) ROCKET_LZCNT64(si64 - 1ULL);
     si64 = 1ULL << i;
     ROCKET_ASSERT(si64 >= rsize);
@@ -41,7 +41,7 @@ xmemalloc(xmeminfo& info, xmemopt opt)
     if(ROCKET_MUL_OVERFLOW(info.element_size, info.count, &rsize))
       throw ::std::bad_alloc();
 
-    block* b = nullptr;
+    free_block* b = nullptr;
     auto& p = do_get_pool_for_size(rsize);
     mutex::unique_lock lock;
 
@@ -55,7 +55,7 @@ xmemalloc(xmeminfo& info, xmemopt opt)
 
     // If the cache was empty, allocate a block from the system.
     if(b == nullptr)
-      b = (block*) ::operator new(rsize);
+      b = (free_block*) ::operator new(rsize);
 
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xB5, rsize);
@@ -67,7 +67,7 @@ xmemalloc(xmeminfo& info, xmemopt opt)
 void
 xmemfree(xmeminfo& info, xmemopt opt) noexcept
   {
-    block* b = (block*) info.data;
+    free_block* b = (free_block*) info.data;
     if(b == nullptr)
       return;
 
@@ -105,7 +105,7 @@ xmemflush() noexcept
     for(auto& p : s_pools) {
       // Extract all blocks.
       mutex::unique_lock lock(p.m);
-      block* b = exchange(p.head, nullptr);
+      free_block* b = exchange(p.head, nullptr);
       lock.unlock();
 
       // Return all blocks to the system.
