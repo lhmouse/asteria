@@ -802,6 +802,7 @@ enum Compiler_Status : uint32_t
     compiler_status_multiple_default                           = 2038,
     compiler_status_duplicate_name_in_structured_binding       = 2039,
     compiler_status_duplicate_name_in_parameter_list           = 2040,
+    compiler_status_nondeclaration_statement_expected          = 2041,
 
     // semantic errors
     compiler_status_undeclared_identifier                      = 3001,

@@ -26,8 +26,7 @@ int main()
         var f = func() = a;  // return by value
         try
           f() = 4;
-        catch(e)
-          ;
+        catch(e) { }
         assert a == 3;
 
         f = func() -> a;  // return by ref

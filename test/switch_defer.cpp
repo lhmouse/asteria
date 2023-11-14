@@ -70,8 +70,7 @@ int main()
               defer str += '0a';
               defer str += '0b';
           }
-        catch(e)
-          ;
+        catch(e) { }
         assert str =='+1a';
 
         str = '+';
@@ -88,8 +87,7 @@ int main()
               throw 42;
               defer str += '0b';
           }
-        catch(e)
-          ;
+        catch(e) { }
         assert str == '+0a1b1a';
 
         str = '+';

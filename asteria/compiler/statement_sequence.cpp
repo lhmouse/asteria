@@ -353,14 +353,11 @@ operator|(scope_flags x, scope_flags y) noexcept
     return (scope_flags) ((uint32_t) x | (uint32_t) y);
   }
 
-// Accept a statement; a blockt is converted to a single statement.
 opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope);
 
-// Accept a statement; a non-block statement is converted to a block consisting of
-// a single statement.
 opt<Statement::S_block>
-do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope);
+do_accept_nondeclaration_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope);
 
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
@@ -426,7 +423,20 @@ do_accept_statement_block_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_brace_or_statement_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", op_sloc);
 
-    Statement::S_block xstmt = {  ::std::move(body) };
+    Statement::S_block xstmt = { ::std::move(body) };
+    return ::std::move(xstmt);
+  }
+
+opt<Statement::S_block>
+do_accept_null_statement_opt(Token_Stream& tstrm)
+  {
+    // null-statement ::=
+    //   ";"
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
+    if(!kpunct)
+      return nullopt;
+
+    Statement::S_block xstmt = { };
     return ::std::move(xstmt);
   }
 
@@ -462,20 +472,6 @@ do_accept_ref_initializer_opt(Token_Stream& tstrm)
                 compiler_status_expression_expected, tstrm.next_sloc());
 
     return ::std::move(*kexpr);
-  }
-
-opt<Statement>
-do_accept_null_statement_opt(Token_Stream& tstrm)
-  {
-    // null-statement ::=
-    //   ";"
-    auto sloc = tstrm.next_sloc();
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
-    if(!kpunct)
-      return nullopt;
-
-    Statement::S_expression xstmt = { ::std::move(sloc), { } };
-    return ::std::move(xstmt);
   }
 
 opt<Statement>
@@ -707,7 +703,8 @@ opt<Statement>
 do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // if-statement ::=
-    //   "if" negation ? "(" expression ")" statement ( "else" statement ) ?
+    //   "if" negation ? "(" expression ")" nondeclaration-statement ( "else"
+    //   nondeclaration-statement ) ?
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_if });
     if(!qkwrd)
       return nullopt;
@@ -733,19 +730,19 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbtrue = do_accept_statement_as_block_opt(tstrm, scope);
+    auto qbtrue = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
     if(!qbtrue)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     decltype(qbtrue) qbfalse;
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
     if(qkwrd)
-      qbfalse = do_accept_statement_as_block_opt(tstrm, scope);
+      qbfalse = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
 
     if(qkwrd && !qbfalse)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     if(!qbfalse)
       qbfalse.emplace();  // empty `else` block
@@ -759,9 +756,7 @@ opt<Statement>
 do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // switch-statement ::=
-    //   "switch" "(" expression ")" switch-block
-    // switch-block ::=
-    //   "{" swtich-clause * "}"
+    //   "switch" "(" expression ")" "{" swtich-clause * "}"
     // switch-clause ::=
     //   ( "case" expression | "default" ) ":" statement *
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
@@ -844,15 +839,15 @@ opt<Statement>
 do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // do-while-statement ::=
-    //   "do" statement "while" negation ? "(" expression ")" ";"
+    //   "do" nondeclaration-statement "while" negation ? "(" expression ")" ";"
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_do });
     if(!qkwrd)
       return nullopt;
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_while);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_while);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
@@ -893,7 +888,7 @@ opt<Statement>
 do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // while-statement ::=
-    //   "while" negation ? "(" expression ")" statement
+    //   "while" negation ? "(" expression ")" nondeclaration-statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
       return nullopt;
@@ -919,10 +914,10 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_while);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_while);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     Statement::S_while xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qblock) };
     return ::std::move(xstmt);
@@ -933,7 +928,8 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                                    scope_flags scope)
   {
     // for-complement-range ::=
-    //   "each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")" statement
+    //   "each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")"
+    //   nondeclaration-statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
     if(!qkwrd)
       return nullopt;
@@ -972,10 +968,10 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_for);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_for);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     Statement::S_for_each xstmt = { ::std::move(key), ::std::move(*qmapped), ::std::move(sloc_init),
                                     ::std::move(*qinit), ::std::move(*qblock) };
@@ -998,20 +994,16 @@ do_accept_for_initializer_opt(Token_Stream& tstrm)
     // for-initializer ::=
     //   null-statement | variable-definition | immutable-variable-definition |
     //   expression-statement
-    auto qinit = do_accept_null_statement_opt(tstrm);
-    if(qinit)
+    if(auto qblock = do_accept_null_statement_opt(tstrm))
+      return ::std::move(*qblock);
+
+    if(auto qinit = do_accept_variable_definition_opt(tstrm))
       return do_blockify_statement(::std::move(*qinit));
 
-    qinit = do_accept_variable_definition_opt(tstrm);
-    if(qinit)
+    if(auto qinit = do_accept_immutable_variable_definition_opt(tstrm))
       return do_blockify_statement(::std::move(*qinit));
 
-    qinit = do_accept_immutable_variable_definition_opt(tstrm);
-    if(qinit)
-      return do_blockify_statement(::std::move(*qinit));
-
-    qinit = do_accept_expression_statement_opt(tstrm);
-    if(qinit)
+    if(auto qinit = do_accept_expression_statement_opt(tstrm))
       return do_blockify_statement(::std::move(*qinit));
 
     return nullopt;
@@ -1030,7 +1022,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
                                      scope_flags scope)
   {
     // for-complement-triplet ::=
-    //   for-initializer expression ? ";" expression ? ")" statement
+    //   for-initializer expression ? ";" expression ? ")" nondeclaration-statement
     auto qinit = do_accept_for_initializer_opt(tstrm);
     if(!qinit)
       return nullopt;
@@ -1054,10 +1046,10 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_statement_as_block_opt(tstrm, scope | scope_flags_for);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_for);
     if(!qblock)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond),
                                ::std::move(*kstep), ::std::move(*qblock) };
@@ -1071,10 +1063,10 @@ do_accept_for_complement_opt(Token_Stream& tstrm, const Source_Location& op_sloc
     // for-complement ::=
     //   for-complement-range | for-complement-triplet
     if(auto qcompl = do_accept_for_complement_range_opt(tstrm, op_sloc, scope))
-      return qcompl;
+      return ::std::move(*qcompl);
 
     if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm, op_sloc, scope))
-      return qcompl;
+      return ::std::move(*qcompl);
 
     return nullopt;
   }
@@ -1294,16 +1286,17 @@ opt<Statement>
 do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // try-statement ::=
-    //   "try" statement "catch" "(" identifier ")" statement
+    //   "try" nondeclaration-statement "catch" "(" identifier ")"
+    //   nondeclaration-statement
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_try });
     if(!qkwrd)
       return nullopt;
 
-    auto qbtry = do_accept_statement_as_block_opt(tstrm, scope);
+    auto qbtry = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
     if(!qbtry)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     // Note that this is the location of the `catch` block.
     auto sloc_catch = tstrm.next_sloc();
@@ -1329,10 +1322,10 @@ do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbcatch = do_accept_statement_as_block_opt(tstrm, scope);
+    auto qbcatch = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
     if(!qbcatch)
       throw Compiler_Error(Compiler_Error::M_status(),
-                compiler_status_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
     Statement::S_try xstmt = { ::std::move(sloc), ::std::move(*qbtry), ::std::move(sloc_catch),
                                ::std::move(*kexcept), ::std::move(*qbcatch) };
@@ -1364,101 +1357,124 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_nonblock_statement_opt(Token_Stream& tstrm, scope_flags scope)
-  {
-    // nonblock-statement ::=
-    //   null-statement |
-    //   variable-definition | immutable-variable-definition | reference-definition |
-    //   function-definition | expression-statement |
-    //   if-statement | switch-statement | do-while-statement | while-statement | for-statement |
-    //   break-statement | continue-statement | throw-statement | return-statement |
-    //   assert-statement | try-statement | defer-statement
-    if(auto qstmt = do_accept_null_statement_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_variable_definition_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_immutable_variable_definition_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_reference_definition_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_function_definition_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_expression_statement_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_switch_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_while_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_for_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_break_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_continue_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_throw_statement_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_return_statement_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_assert_statement_opt(tstrm))
-      return qstmt;
-
-    if(auto qstmt = do_accept_try_statement_opt(tstrm, scope))
-      return qstmt;
-
-    if(auto qstmt = do_accept_defer_statement_opt(tstrm))
-      return qstmt;
-
-    return nullopt;
-  }
-
-opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
-    //   statement-block | nonblock-statement
+    //   variable-definition | immutable-variable-definition | reference-definition |
+    //   function-definition | defer-statement | null-statement |
+    //   nondeclaration-statement
+    // nondeclaration-statement ::=
+    //   if-statement | switch-statement | do-while-statement | while-statement |
+    //   for-statement | break-statement | continue-statement | throw-statement |
+    //   return-statement | assert-statement | try-statement | statement-block |
+    //   expression-statement
     const auto sentry = tstrm.copy_recursion_sentry();
+
+    if(auto qstmt = do_accept_variable_definition_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_immutable_variable_definition_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_reference_definition_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_function_definition_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_defer_statement_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qblock = do_accept_null_statement_opt(tstrm))
+      return ::std::move(*qblock);
+
+    if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_switch_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_while_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_for_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_break_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_continue_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_throw_statement_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_return_statement_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_assert_statement_opt(tstrm))
+      return ::std::move(*qstmt);
+
+    if(auto qstmt = do_accept_try_statement_opt(tstrm, scope))
+      return ::std::move(*qstmt);
 
     if(auto qblock = do_accept_statement_block_opt(tstrm, scope))
       return ::std::move(*qblock);
 
-    if(auto qstmt = do_accept_nonblock_statement_opt(tstrm, scope))
-      return qstmt;
+    if(auto qstmt = do_accept_expression_statement_opt(tstrm))
+      return ::std::move(*qstmt);
 
     return nullopt;
   }
 
 opt<Statement::S_block>
-do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope)
+do_accept_nondeclaration_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
-    // statement ::=
-    //   statement-block | nonblock-statement
-    const auto sentry = tstrm.copy_recursion_sentry();
+    // nondeclaration-statement ::=
+    //   if-statement | switch-statement | do-while-statement | while-statement |
+    //   for-statement | break-statement | continue-statement | throw-statement |
+    //   return-statement | assert-statement | try-statement | statement-block |
+    //   expression-statement
+    if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
 
-    auto qblock = do_accept_statement_block_opt(tstrm, scope);
-    if(qblock)
-      return qblock;
+    if(auto qstmt = do_accept_switch_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
 
-    auto qstmt = do_accept_nonblock_statement_opt(tstrm, scope);
-    if(qstmt)
+    if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_while_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_for_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_break_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_continue_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_throw_statement_opt(tstrm))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_return_statement_opt(tstrm))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_assert_statement_opt(tstrm))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qstmt = do_accept_try_statement_opt(tstrm, scope))
+      return do_blockify_statement(::std::move(*qstmt));
+
+    if(auto qblock = do_accept_statement_block_opt(tstrm, scope))
+      return ::std::move(*qblock);
+
+    if(auto qstmt = do_accept_expression_statement_opt(tstrm))
       return do_blockify_statement(::std::move(*qstmt));
 
     return nullopt;
@@ -2084,9 +2100,10 @@ bool
 do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
-    //   identifier | extern-identifier | literal | "this" | closure-function | unnamed-array |
-    //   unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
-    //   catch-expression | variadic-function-call | import-function-call
+    //   identifier | extern-identifier | literal | "this" | closure-function |
+    //   unnamed-array | unnamed-object | nested-expression | fused-multiply-add |
+    //   prefix-binary-expression | catch-expression | variadic-function-call |
+    //   import-function-call
     if(do_accept_local_reference(units, tstrm))
       return true;
 
@@ -2154,8 +2171,8 @@ bool
 do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-operator ::=
-    //   "++" | "--" | "[^]" | "[$]" | "[?]" |
-    //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
+    //   "++" | "--" | "[^]" | "[$]" | "[?]" | postfix-function-call |
+    //   postfix-subscript | postfix-member-access | postfix-operator
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;
@@ -2320,9 +2337,9 @@ do_accept_infix_element_opt(Token_Stream& tstrm)
   }
 
 opt<Infix_Element>
-do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
+do_accept_infix_ternary_opt(Token_Stream& tstrm)
   {
-    // infix-operator-ternary ::=
+    // infix-ternary ::=
     //   ( "?" | "?=" ) expression ":"
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
@@ -2346,9 +2363,9 @@ do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
   }
 
 opt<Infix_Element>
-do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
+do_accept_infix_logical_and_opt(Token_Stream& tstrm)
   {
-    // infix-operator-logical-and ::=
+    // infix-logical-and ::=
     //   "&&" | "&&=" | "and"
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andl, punctuator_andl_eq });
@@ -2367,9 +2384,9 @@ do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
   }
 
 opt<Infix_Element>
-do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
+do_accept_infix_logical_or_opt(Token_Stream& tstrm)
   {
-    // infix-operator-logical-or ::=
+    // infix-logical-or ::=
     //   "||" | "||=" | "or"
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_orl, punctuator_orl_eq });
@@ -2388,9 +2405,9 @@ do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
   }
 
 opt<Infix_Element>
-do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
+do_accept_infix_coalescence_opt(Token_Stream& tstrm)
   {
-    // infix-operator-coalescence ::=
+    // infix-coalescence ::=
     //   "??" | "??="
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
@@ -2456,9 +2473,10 @@ opt<Infix_Element>
 do_accept_infix_operator_general_opt(Token_Stream& tstrm)
   {
     // infix-operator-general ::=
-    //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
-    //   "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
-    //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  | "</>"
+    //   "+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "<<<" | ">>>" | "&" | "|" |
+    //   "^" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" |
+    //   "&=" | "|=" | "^=" | "=" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "<=>" |
+    //   "</>"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
@@ -2481,22 +2499,22 @@ opt<Infix_Element>
 do_accept_infix_operator_opt(Token_Stream& tstrm)
   {
     // infix-operator ::=
-    //   infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
-    //   infix-operator-coalescence | infix-operator-general
-    if(auto qelem = do_accept_infix_operator_ternary_opt(tstrm))
-      return qelem;
+    //   infix-ternary | infix-logical-and | infix-logical-or | infix-coalescence |
+    //   infix-operator-general
+    if(auto qelem = do_accept_infix_ternary_opt(tstrm))
+      return ::std::move(*qelem);
 
-    if(auto qelem = do_accept_infix_operator_logical_and_opt(tstrm))
-      return qelem;
+    if(auto qelem = do_accept_infix_logical_and_opt(tstrm))
+      return ::std::move(*qelem);
 
-    if(auto qelem = do_accept_infix_operator_logical_or_opt(tstrm))
-      return qelem;
+    if(auto qelem = do_accept_infix_logical_or_opt(tstrm))
+      return ::std::move(*qelem);
 
-    if(auto qelem = do_accept_infix_operator_coalescence_opt(tstrm))
-      return qelem;
+    if(auto qelem = do_accept_infix_coalescence_opt(tstrm))
+      return ::std::move(*qelem);
 
     if(auto qelem = do_accept_infix_operator_general_opt(tstrm))
-      return qelem;
+      return ::std::move(*qelem);
 
     return nullopt;
   }

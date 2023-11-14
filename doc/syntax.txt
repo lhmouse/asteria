@@ -52,25 +52,22 @@ document ::=
 	statement *
 
 statement ::=
-	block | nonblock-statement
-
-block ::=
-	"{" statement * "}"
-
-nonblock-statement ::=
-	null-statement |
 	variable-definition | immutable-variable-definition | reference-definition |
-	function-definition | expression-statement |
-	if-statement | switch-statement | do-while-statement | while-statement | for-statement |
-	break-statement | continue-statement | throw-statement | return-statement |
-	assert-statement | try-statement | defer-statement
+	function-definition | defer-statement | null-statement |
+	nondeclaration-statement
 
 null-statement ::=
 	";"
 
+nondeclaration-statement ::=
+	if-statement | switch-statement | do-while-statement | while-statement |
+	for-statement | break-statement | continue-statement | throw-statement |
+	return-statement | assert-statement | try-statement | statement-block |
+	expression-statement
+
 variable-definition ::=
 	"var" variable-declarator equal-initailizer ? ( "," variable-declarator
-	equal-initializer ? ) ?  ";"
+	equal-initializer ? ) ? ";"
 
 variable-declarator ::=
 	identifier | structured-binding-array | structured-binding-object
@@ -92,34 +89,35 @@ reference-definition ::=
 	"ref" identifier ref-initailizer ( "," identifier ref-initializer ) ? ";"
 
 function-definition ::=
-	"func" identifier "(" parameter-list ? ")" block
+	"func" identifier "(" parameter-list ? ")" statement-block
 
 parameter-list ::=
 	"..." | identifier ( "," parameter-list ? ) ?
 
-expression-statement ::=
-	expression ";"
+statement-block ::=
+	"{" statement * "}"
+
+defer-statement ::=
+	"defer" expression ";"
 
 if-statement ::=
-	"if" negation ? "(" expression ")" statement ( "else" statement ) ?
+	"if" negation ? "(" expression ")" nondeclaration-statement ( "else"
+	nondeclaration-statement ) ?
 
 negation ::=
 	"!" | "not"
 
 switch-statement ::=
-	"switch" "(" expression ")" switch-block
-
-switch-block ::=
-	"{" swtich-clause * "}"
+	"switch" "(" expression ")" "{" swtich-clause * "}"
 
 switch-clause ::=
 	( "case" expression | "default" ) ":" statement *
 
 do-while-statement ::=
-	"do" statement "while" negation ? "(" expression ")" ";"
+	"do" nondeclaration-statement "while" negation ? "(" expression ")" ";"
 
 while-statement ::=
-	"while" negation ? "(" expression ")" statement
+	"while" negation ? "(" expression ")" nondeclaration-statement
 
 for-statement ::=
 	"for" "(" for-complement
@@ -128,13 +126,15 @@ for-complement ::=
 	for-complement-range | for-complement-triplet
 
 for-complement-range ::=
-	"each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")" statement
+	"each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")"
+	nondeclaration-statement
 
 for-complement-triplet ::=
-	for-initializer expression ? ";" expression ? ")" statement
+	for-initializer expression ? ";" expression ? ")" nondeclaration-statement
 
 for-initializer ::=
-	null-statement | variable-definition | immutable-variable-definition | expression-statement
+	null-statement | variable-definition | immutable-variable-definition |
+	expression-statement
 
 break-statement ::=
 	"break" break-target ? ";"
@@ -164,10 +164,11 @@ assert-statement ::=
 	"assert" expression ( ":" string-literal ) ? ";"
 
 try-statement ::=
-	"try" statement "catch" "(" identifier ")" statement
+	"try" nondeclaration-statement "catch" "(" identifier ")"
+	nondeclaration-statement
 
-defer-statement ::=
-	"defer" expression ";"
+expression-statement ::=
+	expression ";"
 
 expression ::=
 	infix-element infix-carriage *
@@ -183,9 +184,10 @@ prefix-operator ::=
 	"__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" | "__popcnt"
 
 primary-expression ::=
-	identifier | extern-identifier | literal | "this" | closure-function | unnamed-array |
-	unnamed-object | nested-expression | fused-multiply-add | prefix-binary-expression |
-	catch-expression | variadic-function-call | import-function-call
+	identifier | extern-identifier | literal | "this" | closure-function |
+	unnamed-array | unnamed-object | nested-expression | fused-multiply-add |
+	prefix-binary-expression |catch-expression | variadic-function-call |
+	import-function-call
 
 extern-identifier ::=
 	"extern" identifier
@@ -194,7 +196,7 @@ closure-function ::=
 	"func" "(" parameter-list ? ")" closure-body
 
 closure-body ::=
-	block | equal-initializer | ref-initializer
+	statement-block | equal-initializer | ref-initializer
 
 ref-initializer ::=
 	"->" expression
@@ -234,8 +236,8 @@ import-function-call ::=
 	"import" "(" argument-list ")"
 
 postfix-operator ::=
-	"++" | "--" | "[^]" | "[$]" | "[?]" |
-	postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
+	"++" | "--" | "[^]" | "[$]" | "[?]" | postfix-function-call |
+	postfix-subscript | postfix-member-access | postfix-operator
 
 postfix-function-call ::=
 	"(" argument-list ? ")"
@@ -253,8 +255,8 @@ infix-carriage ::=
 	infix-operator infix-element
 
 infix-operator ::=
-	infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
-	infix-operator-coalescence | infix-operator-general
+	infix-ternary | infix-logical-and | infix-logical-or | infix-coalescence |
+	infix-operator-general
 
 infix-operator-ternary ::=
 	( "?" | "?=" ) expression ":"
@@ -269,6 +271,7 @@ infix-operator-coalescence ::=
 	"??" | "??="
 
 infix-operator-general ::=
-	"+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
-	"+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
-	"="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  | "</>"
+	"+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "<<<" | ">>>" | "&" | "|" |
+	"^" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" |
+	"&=" | "|=" | "^=" | "=" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "<=>" |
+	"</>"
