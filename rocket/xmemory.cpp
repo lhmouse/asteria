@@ -8,8 +8,8 @@ namespace {
 
 struct free_block
   {
+    size_t size;
     free_block* next;
-    size_t count;
   };
 
 struct alignas(64) pool
@@ -78,13 +78,13 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xCB, rsize);
 #endif
+    b->size = rsize;
     b->next = nullptr;
 
     if(opt == xmemopt_use_cache) {
       // Put the block into the cache.
       lock.lock(p.m);
       b->next = exchange(p.head, b);
-      b->count = (b->next ? b->next->count : 0U) + 1U;
       b = nullptr;
     }
     else if(opt == xmemopt_clear_cache) {
