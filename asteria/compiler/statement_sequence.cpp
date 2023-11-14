@@ -405,9 +405,9 @@ do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
   }
 
 opt<Statement::S_block>
-do_accept_block_opt(Token_Stream& tstrm, scope_flags scope)
+do_accept_statement_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
-    // block ::=
+    // statement-block ::=
     //   "{" statement * "}"
     // statement-list ::=
     //   statement *
@@ -648,7 +648,7 @@ opt<Statement>
 do_accept_function_definition_opt(Token_Stream& tstrm)
   {
     // function-definition ::=
-    //   "func" identifier "(" parameter-list ? ")" block
+    //   "func" identifier "(" parameter-list ? ")" statement-block
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd)
@@ -675,7 +675,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbody = do_accept_block_opt(tstrm, scope_flags_plain);
+    auto qbody = do_accept_statement_block_opt(tstrm, scope_flags_plain);
     if(!qbody)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_brace_expected, tstrm.next_sloc());
@@ -1434,10 +1434,10 @@ opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
-    //   block | nonblock-statement
+    //   statement-block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    if(auto qblock = do_accept_block_opt(tstrm, scope))
+    if(auto qblock = do_accept_statement_block_opt(tstrm, scope))
       return ::std::move(*qblock);
 
     if(auto qstmt = do_accept_nonblock_statement_opt(tstrm, scope))
@@ -1450,10 +1450,10 @@ opt<Statement::S_block>
 do_accept_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
-    //   block | nonblock-statement
+    //   statement-block | nonblock-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
-    auto qblock = do_accept_block_opt(tstrm, scope);
+    auto qblock = do_accept_statement_block_opt(tstrm, scope);
     if(qblock)
       return qblock;
 
@@ -1658,7 +1658,7 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
                 "[unmatched `(` at '$1']", op_sloc);
 
     op_sloc = tstrm.next_sloc();
-    auto qblock = do_accept_block_opt(tstrm, scope_flags_plain);
+    auto qblock = do_accept_statement_block_opt(tstrm, scope_flags_plain);
 
     if(!qblock) {
       // Try `equal-initializer`.
@@ -1698,7 +1698,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
     // closure-function ::=
     //   "func" "(" parameter-list ? ")" closure-body
     // closure-body ::=
-    //   block | equal-initializer | ref-initializer
+    //   statement-block | equal-initializer | ref-initializer
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd)
