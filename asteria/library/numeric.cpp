@@ -71,164 +71,6 @@ do_append_exponent(V_string& text, ::rocket::ascii_numput& nump, char delim, int
     return text;
   }
 
-inline
-void
-bswap_nop(int8_t& value) noexcept
-  {
-    (void) value;
-  }
-
-inline
-void
-bswap_be(int16_t& value) noexcept
-  {
-    uint16_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_BETOH16(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_le(int16_t& value) noexcept
-  {
-    uint16_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_LETOH16(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_be(int32_t& value) noexcept
-  {
-    uint32_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_BETOH32(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_le(int32_t& value) noexcept
-  {
-    uint32_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_LETOH32(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_be(int64_t& value) noexcept
-  {
-    uint64_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_BETOH64(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_le(int64_t& value) noexcept
-  {
-    uint64_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_LETOH64(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_be(float& value) noexcept
-  {
-    uint32_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_BETOH32(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_le(float& value) noexcept
-  {
-    uint32_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_LETOH32(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_be(double& value) noexcept
-  {
-    uint64_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_BETOH64(buf);
-    bcopy(value, buf);
-  }
-
-inline
-void
-bswap_le(double& value) noexcept
-  {
-    uint64_t buf;
-    bcopy(buf, value);
-    buf = ROCKET_LETOH64(buf);
-    bcopy(value, buf);
-  }
-
-template<typename WordT, typename ValueT>
-V_string
-do_pack(void bswap(WordT&), const ValueT& value)
-  {
-    union { WordT word;  char bytes[1];  } un;
-    V_string text;
-
-    un.word = static_cast<WordT>(value);
-    (*bswap)(un.word);
-    text.append(un.bytes, sizeof(un));
-    return text;
-  }
-
-template<typename WordT, typename ValueT>
-V_string
-do_pack(void bswap(WordT&), ValueT (Value::*access)() const, const V_array& values)
-  {
-    union { WordT word;  char bytes[1];  } un;
-    V_string text;
-
-    text.reserve(values.size() * sizeof(un));
-    for(const auto& val : values) {
-      un.word = static_cast<WordT>((val.*access)());
-      (*bswap)(un.word);
-      text.append(un.bytes, sizeof(un));
-    }
-    return text;
-  }
-
-template<typename WordT, typename ValueT>
-V_array
-do_unpack(void bswap(WordT&), const V_string& text)
-  {
-    union { WordT word;  char bytes[1];  } un;
-    V_array values;
-
-    if(text.size() / sizeof(un) * sizeof(un) != text.size())
-      ASTERIA_THROW((
-            "String length `$1` not divisible by `$2`"),
-            text.size(), sizeof(un));
-
-    values.reserve(text.size() / sizeof(un));
-    size_t offset = 0;
-    while(text.copy(offset, un.bytes, sizeof(un)) != 0) {
-      offset += sizeof(un);
-      (*bswap)(un.word);
-      values.emplace_back(static_cast<ValueT>(un.word));
-    }
-    return values;
-  }
-
 }  // namespace
 
 V_integer
@@ -697,199 +539,449 @@ std_numeric_parse(V_string text)
 V_string
 std_numeric_pack_i8(V_integer value)
   {
-    return do_pack<int8_t, V_integer>(bswap_nop, value);
+    return V_string(1, static_cast<char>(value));
   }
 
 V_string
 std_numeric_pack_i8(V_array values)
   {
-    return do_pack<int8_t, V_integer>(bswap_nop, &Value::as_integer, values);
+    V_string text;
+    text.reserve(values.size());
+    for(const auto& r : values) {
+      V_integer value = r.as_integer();
+      text.push_back(static_cast<char>(value));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i8(V_string text)
   {
-    return do_unpack<int8_t, V_integer>(bswap_nop, text);
+    V_array values;
+    values.reserve(text.size());
+    for(size_t off = 0;  off != text.size();  off ++) {
+      V_integer value = static_cast<int8_t>(*(text.data() + off));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_i16be(V_integer value)
   {
-    return do_pack<int16_t, V_integer>(bswap_be, value);
+    uint16_t piece = static_cast<uint16_t>(value);
+    piece = ROCKET_HTOBE16(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_i16be(V_array values)
   {
-    return do_pack<int16_t, V_integer>(bswap_be, &Value::as_integer, values);
+    uint16_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      piece = static_cast<uint16_t>(r.as_integer());
+      piece = ROCKET_HTOBE16(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i16be(V_string text)
   {
-    return do_unpack<int16_t, V_integer>(bswap_be, text);
+    uint16_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      V_integer value = static_cast<int16_t>(ROCKET_BETOH16(piece));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_i16le(V_integer value)
   {
-    return do_pack<int16_t, V_integer>(bswap_le, value);
+    uint16_t piece = static_cast<uint16_t>(value);
+    piece = ROCKET_HTOLE16(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_i16le(V_array values)
   {
-    return do_pack<int16_t, V_integer>(bswap_le, &Value::as_integer, values);
+    uint16_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      piece = static_cast<uint16_t>(r.as_integer());
+      piece = ROCKET_HTOLE16(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i16le(V_string text)
   {
-    return do_unpack<int16_t, V_integer>(bswap_le, text);
+    uint16_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      V_integer value = static_cast<int16_t>(ROCKET_LETOH16(piece));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_i32be(V_integer value)
   {
-    return do_pack<int32_t, V_integer>(bswap_be, value);
+    uint32_t piece = static_cast<uint32_t>(value);
+    piece = ROCKET_HTOBE32(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_i32be(V_array values)
   {
-    return do_pack<int32_t, V_integer>(bswap_be, &Value::as_integer, values);
+    uint32_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      piece = static_cast<uint32_t>(r.as_integer());
+      piece = ROCKET_HTOBE32(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i32be(V_string text)
   {
-    return do_unpack<int32_t, V_integer>(bswap_be, text);
+    uint32_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      V_integer value = static_cast<int32_t>(ROCKET_BETOH32(piece));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_i32le(V_integer value)
   {
-    return do_pack<int32_t, V_integer>(bswap_le, value);
+    uint32_t piece = static_cast<uint32_t>(value);
+    piece = ROCKET_HTOLE32(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_i32le(V_array values)
   {
-    return do_pack<int32_t, V_integer>(bswap_le, &Value::as_integer, values);
+    uint32_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      piece = static_cast<uint32_t>(r.as_integer());
+      piece = ROCKET_HTOLE32(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i32le(V_string text)
   {
-    return do_unpack<int32_t, V_integer>(bswap_le, text);
+    uint32_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      V_integer value = static_cast<int32_t>(ROCKET_LETOH32(piece));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_i64be(V_integer value)
   {
-    return do_pack<int64_t, V_integer>(bswap_be, value);
+    uint64_t piece = static_cast<uint64_t>(value);
+    piece = ROCKET_HTOBE64(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_i64be(V_array values)
   {
-    return do_pack<int64_t, V_integer>(bswap_be, &Value::as_integer, values);
+    uint64_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      piece = static_cast<uint64_t>(r.as_integer());
+      piece = ROCKET_HTOBE64(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i64be(V_string text)
   {
-    return do_unpack<int64_t, V_integer>(bswap_be, text);
+    uint64_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      V_integer value = static_cast<int64_t>(ROCKET_BETOH64(piece));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_i64le(V_integer value)
   {
-    return do_pack<int64_t, V_integer>(bswap_le, value);
+    uint64_t piece = static_cast<uint64_t>(value);
+    piece = ROCKET_HTOLE64(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_i64le(V_array values)
   {
-    return do_pack<int64_t, V_integer>(bswap_le, &Value::as_integer, values);
+    uint64_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      piece = static_cast<uint64_t>(r.as_integer());
+      piece = ROCKET_HTOLE64(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_i64le(V_string text)
   {
-    return do_unpack<int64_t, V_integer>(bswap_le, text);
+    uint64_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      V_integer value = static_cast<int64_t>(ROCKET_LETOH64(piece));
+      values.emplace_back(value);
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_f32be(V_real value)
   {
-    return do_pack<float, V_real>(bswap_be, value);
+    uint32_t piece;
+    bcopy(piece, static_cast<float>(value));
+    piece = ROCKET_HTOBE32(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_f32be(V_array values)
   {
-    return do_pack<float, V_real>(bswap_be, &Value::as_real, values);
+    uint32_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      bcopy(piece, static_cast<float>(r.as_real()));
+      piece = ROCKET_HTOBE32(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_f32be(V_string text)
   {
-    return do_unpack<float, V_real>(bswap_be, text);
+    uint32_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      float value;
+      bcopy(value, ROCKET_BETOH32(piece));
+      values.emplace_back(static_cast<V_real>(value));
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_f32le(V_real value)
   {
-    return do_pack<float, V_real>(bswap_le, value);
+    uint32_t piece;
+    bcopy(piece, static_cast<float>(value));
+    piece = ROCKET_HTOLE32(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_f32le(V_array values)
   {
-    return do_pack<float, V_real>(bswap_le, &Value::as_real, values);
+    uint32_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      bcopy(piece, static_cast<float>(r.as_real()));
+      piece = ROCKET_HTOLE32(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_f32le(V_string text)
   {
-    return do_unpack<float, V_real>(bswap_le, text);
+    uint32_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      float value;
+      bcopy(value, ROCKET_LETOH32(piece));
+      values.emplace_back(static_cast<V_real>(value));
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_f64be(V_real value)
   {
-    return do_pack<double, V_real>(bswap_be, value);
+    uint64_t piece;
+    bcopy(piece, static_cast<double>(value));
+    piece = ROCKET_HTOBE64(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_f64be(V_array values)
   {
-    return do_pack<double, V_real>(bswap_be, &Value::as_real, values);
+    uint64_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      bcopy(piece, static_cast<double>(r.as_real()));
+      piece = ROCKET_HTOBE64(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_f64be(V_string text)
   {
-    return do_unpack<double, V_real>(bswap_be, text);
+    uint64_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      double value;
+      bcopy(value, ROCKET_BETOH64(piece));
+      values.emplace_back(static_cast<V_real>(value));
+    }
+    return values;
   }
 
 V_string
 std_numeric_pack_f64le(V_real value)
   {
-    return do_pack<double, V_real>(bswap_le, value);
+    uint64_t piece;
+    bcopy(piece, static_cast<double>(value));
+    piece = ROCKET_HTOLE64(piece);
+    return V_string(reinterpret_cast<char*>(&piece), sizeof(piece));
   }
 
 V_string
 std_numeric_pack_f64le(V_array values)
   {
-    return do_pack<double, V_real>(bswap_le, &Value::as_real, values);
+    uint64_t piece;
+    V_string text;
+    text.reserve(values.size() * sizeof(piece));
+    for(const auto& r : values) {
+      bcopy(piece, static_cast<double>(r.as_real()));
+      piece = ROCKET_HTOLE64(piece);
+      text.append(reinterpret_cast<char*>(&piece), sizeof(piece));
+    }
+    return text;
   }
 
 V_array
 std_numeric_unpack_f64le(V_string text)
   {
-    return do_unpack<double, V_real>(bswap_le, text);
+    uint64_t piece;
+    if(text.size() % sizeof(piece) != 0)
+      ASTERIA_THROW((
+          "String length `$1` not divisible by `$2`"),
+          text.size(), sizeof(piece));
+
+    V_array values;
+    values.reserve(text.size() / sizeof(piece));
+    for(size_t off = 0;  off != text.size();  off += sizeof(piece)) {
+      ::memcpy(&piece, text.data() + off, sizeof(piece));
+      double value;
+      bcopy(value, ROCKET_LETOH64(piece));
+      values.emplace_back(static_cast<V_real>(value));
+    }
+    return values;
   }
 
 void

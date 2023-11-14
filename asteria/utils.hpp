@@ -115,7 +115,7 @@ bcopy(objectT& __restrict dst, const sourceT& __restrict src) noexcept
     static_assert(sizeof(objectT) == sizeof(sourceT), "size mismatch");
     using bytes = char [sizeof(objectT)];
     ::memcpy(reinterpret_cast<bytes&>(dst), reinterpret_cast<const bytes&>(src),
-                  sizeof(objectT));
+             sizeof(objectT));
   }
 
 template<typename objectT>
