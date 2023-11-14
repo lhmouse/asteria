@@ -52,9 +52,9 @@ Reference&
 cow_function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
-    stack.clear_red_zone();
-
     try {
+      stack.clear_red_zone();
+
       if(auto fptr = this->m_fptr)
         return fptr(self, global, ::std::move(stack));  // static
 
