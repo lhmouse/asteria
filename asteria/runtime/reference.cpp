@@ -10,7 +10,7 @@
 #include "variable.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
-#include "../llds/avmc_queue.hpp"
+#include "../llds/avm_rod.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../llds/variable_hashmap.hpp"
 #include "../utils.hpp"

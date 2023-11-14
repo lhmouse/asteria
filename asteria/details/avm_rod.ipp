@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LLDS_AVMC_QUEUE_
-#  error Please include <asteria/llds/avmc_queue.hpp> instead.
+#ifndef ASTERIA_LLDS_AVM_ROD_
+#  error Please include <asteria/llds/avm_rod.hpp> instead.
 #endif
 namespace asteria {
-namespace details_avmc_queue {
+namespace details_avm_rod {
 
 // This union can be used to encapsulate trivial information in solidified
 // nodes. Each field is assigned a unique suffix. At most 48 bits can be
@@ -66,8 +66,8 @@ struct Metadata
     Source_Location sloc;  // symbols
   };
 
-// This is the header of each variable-length element that is stored in an AVMC
-// queue. User-defined data (the `sparam`) may follow this struct, so the size
+// This is the header of each variable-length element that is stored in an AVM
+// rod. User-defined data (the `sparam`) may follow this struct, so the size
 // of this struct has to be a multiple of `alignof(max_align_t)`.
 struct Header
   {
@@ -87,5 +87,5 @@ struct Header
     alignas(max_align_t) char sparam[];
   };
 
-}  // namespace details_avmc_queue
+}  // namespace details_avm_rod
 }  // namespace asteria

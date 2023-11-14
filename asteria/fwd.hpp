@@ -156,7 +156,7 @@ class Simple_Script;
 class Variable_HashMap;
 class Reference_Dictionary;
 class Reference_Stack;
-class AVMC_Queue;
+class AVM_Rod;
 
 // Runtime
 enum Xop : uint8_t;

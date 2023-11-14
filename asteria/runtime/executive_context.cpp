@@ -8,7 +8,7 @@
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "variable.hpp"
-#include "../llds/avmc_queue.hpp"
+#include "../llds/avm_rod.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
 namespace asteria {

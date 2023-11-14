@@ -1,24 +1,24 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LLDS_AVMC_QUEUE_
-#define ASTERIA_LLDS_AVMC_QUEUE_
+#ifndef ASTERIA_LLDS_AVM_ROD_
+#define ASTERIA_LLDS_AVM_ROD_
 
 #include "../fwd.hpp"
 #include "../source_location.hpp"
-#include "../details/avmc_queue.ipp"
+#include "../details/avm_rod.ipp"
 namespace asteria {
 
-class AVMC_Queue
+class AVM_Rod
   {
   public:
-    using Uparam              = details_avmc_queue::Uparam;
-    using Header              = details_avmc_queue::Header;
-    using Metadata            = details_avmc_queue::Metadata;
-    using Executor            = details_avmc_queue::Executor;
-    using Constructor         = details_avmc_queue::Sparam_Constructor;
-    using Destructor          = details_avmc_queue::Sparam_Destructor;
-    using Variable_Collector  = details_avmc_queue::Variable_Collector;
+    using Uparam              = details_avm_rod::Uparam;
+    using Header              = details_avm_rod::Header;
+    using Metadata            = details_avm_rod::Metadata;
+    using Executor            = details_avm_rod::Executor;
+    using Constructor         = details_avm_rod::Sparam_Constructor;
+    using Destructor          = details_avm_rod::Sparam_Destructor;
+    using Variable_Collector  = details_avm_rod::Variable_Collector;
 
   private:
     Header* m_bptr = nullptr;
@@ -27,23 +27,23 @@ class AVMC_Queue
 
   public:
     explicit constexpr
-    AVMC_Queue() noexcept
+    AVM_Rod() noexcept
       { }
 
-    AVMC_Queue(AVMC_Queue&& other) noexcept
+    AVM_Rod(AVM_Rod&& other) noexcept
       {
         this->swap(other);
       }
 
-    AVMC_Queue&
-    operator=(AVMC_Queue&& other) & noexcept
+    AVM_Rod&
+    operator=(AVM_Rod&& other) & noexcept
       {
         this->swap(other);
         return *this;
       }
 
-    AVMC_Queue&
-    swap(AVMC_Queue& other) noexcept
+    AVM_Rod&
+    swap(AVM_Rod& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_einit, other.m_einit);
@@ -59,7 +59,7 @@ class AVMC_Queue
     do_deallocate() noexcept;
 
   public:
-    ~AVMC_Queue()
+    ~AVM_Rod()
       {
         if(this->m_bptr)
           this->do_deallocate();
@@ -97,7 +97,7 @@ class AVMC_Queue
 
 inline
 void
-swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
+swap(AVM_Rod& lhs, AVM_Rod& rhs) noexcept
   {
     lhs.swap(rhs);
   }

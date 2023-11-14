@@ -22,7 +22,7 @@ class Executive_Context
     Reference_Stack* m_stack;
     Reference_Stack* m_alt_stack;  // for nested calls
 
-    cow_bivector<Source_Location, AVMC_Queue> m_defer;
+    cow_bivector<Source_Location, AVM_Rod> m_defer;
     refcnt_ptr<Variadic_Arguer> m_zvarg;
     cow_vector<Reference> m_lazy_args;
 
@@ -39,7 +39,7 @@ class Executive_Context
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
-    ASTERIA_INCOMPLET(AVMC_Queue)
+    ASTERIA_INCOMPLET(AVM_Rod)
     explicit
     Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
                       Reference_Stack& alt_stack)
@@ -93,11 +93,11 @@ class Executive_Context
       { return *(this->m_alt_stack);  }
 
     // Get the defer expression list.
-    const cow_bivector<Source_Location, AVMC_Queue>&
+    const cow_bivector<Source_Location, AVM_Rod>&
     defer() const noexcept
       { return this->m_defer;  }
 
-    cow_bivector<Source_Location, AVMC_Queue>&
+    cow_bivector<Source_Location, AVM_Rod>&
     mut_defer() noexcept
       { return this->m_defer;  }
 

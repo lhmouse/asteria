@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.ipp"
-#include "avmc_queue.hpp"
+#include "avm_rod.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/enums.hpp"
@@ -10,7 +10,7 @@
 namespace asteria {
 
 void
-AVMC_Queue::
+AVM_Rod::
 do_reallocate(uint32_t estor)
   {
     if(estor >= 0x7FFE0000U / sizeof(Header))
@@ -38,7 +38,7 @@ do_reallocate(uint32_t estor)
   }
 
 void
-AVMC_Queue::
+AVM_Rod::
 do_deallocate() noexcept
   {
     this->clear();
@@ -54,7 +54,7 @@ do_deallocate() noexcept
   }
 
 void
-AVMC_Queue::
+AVM_Rod::
 clear() noexcept
   {
     ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
@@ -78,8 +78,8 @@ clear() noexcept
     this->m_einit = 0;
   }
 
-details_avmc_queue::Header*
-AVMC_Queue::
+details_avm_rod::Header*
+AVM_Rod::
 append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
        void* ctor_arg, Destructor* dtor_opt, Variable_Collector* vcoll_opt,
        const Source_Location* sloc_opt)
@@ -87,7 +87,7 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     constexpr size_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
     if(sparam_size > max_sparam_size)
        ::rocket::sprintf_and_throw<::std::invalid_argument>(
-             "asteria::AVMC_Queue: `sparam_size` too large (`%zd` > `%zd`)",
+             "asteria::AVM_Rod: `sparam_size` too large (`%zd` > `%zd`)",
              sparam_size, max_sparam_size);
 
     unique_ptr<Metadata> meta;
@@ -144,14 +144,14 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
   }
 
 void
-AVMC_Queue::
+AVM_Rod::
 finalize()
   {
     // TODO: Add JIT support.
   }
 
 AIR_Status
-AVMC_Queue::
+AVM_Rod::
 execute(Executive_Context& ctx) const
   {
     AIR_Status status = air_status_next;
@@ -197,7 +197,7 @@ execute(Executive_Context& ctx) const
   }
 
 void
-AVMC_Queue::
+AVM_Rod::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     ptrdiff_t offset = -(ptrdiff_t) this->m_einit;

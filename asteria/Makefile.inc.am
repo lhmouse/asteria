@@ -5,7 +5,7 @@ nobase_include_HEADERS +=  \
   %reldir%/details/value.ipp  \
   %reldir%/details/variable_hashmap.ipp  \
   %reldir%/details/reference_dictionary.ipp  \
-  %reldir%/details/avmc_queue.ipp  \
+  %reldir%/details/avm_rod.ipp  \
   %reldir%/version.h  \
   %reldir%/fwd.hpp  \
   %reldir%/utils.hpp  \
@@ -16,7 +16,7 @@ nobase_include_HEADERS +=  \
   %reldir%/llds/variable_hashmap.hpp  \
   %reldir%/llds/reference_dictionary.hpp  \
   %reldir%/llds/reference_stack.hpp  \
-  %reldir%/llds/avmc_queue.hpp  \
+  %reldir%/llds/avm_rod.hpp  \
   %reldir%/runtime/enums.hpp  \
   %reldir%/runtime/abstract_hooks.hpp  \
   %reldir%/runtime/reference.hpp  \
@@ -74,7 +74,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/llds/variable_hashmap.cpp  \
   %reldir%/llds/reference_dictionary.cpp  \
   %reldir%/llds/reference_stack.cpp  \
-  %reldir%/llds/avmc_queue.cpp  \
+  %reldir%/llds/avm_rod.cpp  \
   %reldir%/runtime/enums.cpp  \
   %reldir%/runtime/abstract_hooks.cpp  \
   %reldir%/runtime/reference.cpp  \

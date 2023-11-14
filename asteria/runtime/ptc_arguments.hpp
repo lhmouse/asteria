@@ -25,7 +25,7 @@ class PTC_Arguments final
 
     // These are captured data.
     rcfwd_ptr<const Variadic_Arguer> m_caller_opt;
-    cow_bivector<Source_Location, AVMC_Queue> m_defer;
+    cow_bivector<Source_Location, AVM_Rod> m_defer;
 
   public:
     explicit
@@ -77,11 +77,11 @@ class PTC_Arguments final
     set_caller(const refcnt_ptr<Variadic_Arguer>& caller) noexcept
       { this->m_caller_opt = ::std::move(caller);  }
 
-    const cow_bivector<Source_Location, AVMC_Queue>&
+    const cow_bivector<Source_Location, AVM_Rod>&
     defer() const noexcept
       { return this->m_defer;  }
 
-    cow_bivector<Source_Location, AVMC_Queue>&
+    cow_bivector<Source_Location, AVM_Rod>&
     mut_defer() noexcept
       { return this->m_defer;  }
   };

@@ -9,7 +9,7 @@
 #include "../asteria/runtime/executive_context.hpp"
 #include "../asteria/runtime/reference.hpp"
 #include "../asteria/runtime/variadic_arguer.hpp"
-#include "../asteria/llds/avmc_queue.hpp"
+#include "../asteria/llds/avm_rod.hpp"
 using namespace ::asteria;
 
 int main()

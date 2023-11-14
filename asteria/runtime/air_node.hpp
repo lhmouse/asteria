@@ -421,7 +421,7 @@ class AIR_Node
 
     // Compress this IR node into `queue` for execution.
     void
-    solidify(AVMC_Queue& queue) const;
+    solidify(AVM_Rod& queue) const;
   };
 
 inline

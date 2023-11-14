@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "variadic_arguer.hpp"
-#include "../llds/avmc_queue.hpp"
+#include "../llds/avm_rod.hpp"
 namespace asteria {
 
 class Instantiated_Function final
@@ -16,7 +16,7 @@ class Instantiated_Function final
   private:
     cow_vector<phsh_string> m_params;
     refcnt_ptr<Variadic_Arguer> m_zvarg;
-    AVMC_Queue m_queue;
+    AVM_Rod m_queue;
 
   public:
     explicit

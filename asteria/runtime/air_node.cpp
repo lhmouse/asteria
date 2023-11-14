@@ -19,7 +19,7 @@
 #include "../compiler/statement_sequence.hpp"
 #include "../compiler/statement.hpp"
 #include "../compiler/expression_unit.hpp"
-#include "../llds/avmc_queue.hpp"
+#include "../llds/avm_rod.hpp"
 #include "../utils.hpp"
 namespace asteria {
 namespace {
@@ -58,7 +58,7 @@ do_collect_variables_for_each(Variable_HashMap& staged, Variable_HashMap& temp,
   }
 
 void
-do_solidify_nodes(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+do_solidify_nodes(AVM_Rod& queue, const cow_vector<AIR_Node>& code)
   {
     queue.clear();
     for(size_t i = 0;  i < code.size();  ++i)
@@ -74,25 +74,25 @@ do_push_modifier_and_check(Reference& ref, XModT&& xmod)
     ref.dereference_readonly();
   }
 
-using Uparam  = AVMC_Queue::Uparam;
-using Header  = AVMC_Queue::Header;
+using Uparam  = AVM_Rod::Uparam;
+using Header  = AVM_Rod::Header;
 
 template<typename SparamT>
 void
-do_avmc_ctor(Header* head, void* arg)
+do_sparam_ctor(Header* head, void* arg)
   {
     ::rocket::details_variant::wrapped_move_construct<SparamT>(head->sparam, arg);
   }
 
 template<typename SparamT>
 void
-do_avmc_dtor(Header* head)
+do_sparam_dtor(Header* head)
   {
     ::rocket::details_variant::wrapped_destroy<SparamT>(head->sparam);
   }
 
 AIR_Status
-do_execute_block(const AVMC_Queue& queue, const Executive_Context& ctx)
+do_execute_block(const AVM_Rod& queue, const Executive_Context& ctx)
   {
     Executive_Context ctx_next(Executive_Context::M_plain(), ctx);
     AIR_Status status;
@@ -109,7 +109,7 @@ do_execute_block(const AVMC_Queue& queue, const Executive_Context& ctx)
 
 ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
-do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVMC_Queue& queue)
+do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& queue)
   {
     if(queue.empty()) {
       // If the queue is empty, leave the condition on the top of the stack.
@@ -1308,7 +1308,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
 void
 AIR_Node::
-solidify(AVMC_Queue& queue) const
+solidify(AVM_Rod& queue) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
       case index_clear_stack: {
@@ -1343,11 +1343,11 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_body;
+            AVM_Rod rod_body;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_body, altr.code_body);
+        do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -1356,20 +1356,20 @@ solidify(AVMC_Queue& queue) const
 
             // Execute the block on a new context. The block may contain control
             // statements, so the status shall be forwarded verbatim.
-            return do_execute_block(sp.queue_body, ctx);
+            return do_execute_block(sp.rod_body, ctx);
           }
 
           // Uparam
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_body.collect_variables(staged, temp);
+            sp.rod_body.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -1411,7 +1411,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -1472,13 +1472,13 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_true;
-            AVMC_Queue queue_false;
+            AVM_Rod rod_true;
+            AVM_Rod rod_false;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_true, altr.code_true);
-        do_solidify_nodes(sp2.queue_false, altr.code_false);
+        do_solidify_nodes(sp2.rod_true, altr.code_true);
+        do_solidify_nodes(sp2.rod_false, altr.code_false);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -1488,22 +1488,22 @@ solidify(AVMC_Queue& queue) const
 
             // Read the condition and execute the corresponding branch as a block.
             return (ctx.stack().top().dereference_readonly().test() != negative)
-                      ? do_execute_block(sp.queue_true, ctx)
-                      : do_execute_block(sp.queue_false, ctx);
+                      ? do_execute_block(sp.rod_true, ctx)
+                      : do_execute_block(sp.rod_false, ctx);
           }
 
           // Uparam
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_true.collect_variables(staged, temp);
-            sp.queue_false.collect_variables(staged, temp);
+            sp.rod_true.collect_variables(staged, temp);
+            sp.rod_false.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -1517,8 +1517,8 @@ solidify(AVMC_Queue& queue) const
 
         struct Clause
           {
-            AVMC_Queue queue_label;
-            AVMC_Queue queue_body;
+            AVM_Rod rod_label;
+            AVM_Rod rod_body;
             cow_vector<phsh_string> names_added;
           };
 
@@ -1530,8 +1530,8 @@ solidify(AVMC_Queue& queue) const
         Sparam sp2;
         for(const auto& clause : altr.clauses) {
           auto& r = sp2.clauses.emplace_back();
-          do_solidify_nodes(r.queue_label, clause.code_label);
-          do_solidify_nodes(r.queue_body, clause.code_body);
+          do_solidify_nodes(r.rod_label, clause.code_label);
+          do_solidify_nodes(r.rod_body, clause.code_body);
           r.names_added = clause.names_added;
         }
 
@@ -1549,13 +1549,13 @@ solidify(AVMC_Queue& queue) const
             for(uint32_t i = 0;  i < sp.clauses.size();  ++i) {
               // This is a `default` clause if the condition is empty, and a `case` clause
               // otherwise.
-              if(sp.clauses.at(i).queue_label.empty()) {
+              if(sp.clauses.at(i).rod_label.empty()) {
                 target_index = i;
                 continue;
               }
 
               // Evaluate the operand and check whether it equals `cond`.
-              AIR_Status status = sp.clauses.at(i).queue_label.execute(ctx);
+              AIR_Status status = sp.clauses.at(i).rod_label.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
               if(ctx.stack().top().dereference_readonly().compare_partial(cond) == compare_equal) {
                 target_index = i;
@@ -1579,7 +1579,7 @@ solidify(AVMC_Queue& queue) const
                 }
                 else {
                   // Execute the body of this clause.
-                  status = sp.clauses.at(i).queue_body.execute(ctx_body);
+                  status = sp.clauses.at(i).rod_body.execute(ctx_body);
                   if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
                     status = air_status_next;
                     break;
@@ -1600,15 +1600,15 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             for(const auto& r : sp.clauses) {
-              r.queue_label.collect_variables(staged, temp);
-              r.queue_body.collect_variables(staged, temp);
+              r.rod_label.collect_variables(staged, temp);
+              r.rod_body.collect_variables(staged, temp);
             }
           }
 
@@ -1626,8 +1626,8 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queues_body;
-            AVMC_Queue queues_cond;
+            AVM_Rod queues_body;
+            AVM_Rod queues_cond;
           };
 
         Sparam sp2;
@@ -1666,7 +1666,7 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
@@ -1690,8 +1690,8 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queues_cond;
-            AVMC_Queue queues_body;
+            AVM_Rod queues_cond;
+            AVM_Rod queues_body;
           };
 
         Sparam sp2;
@@ -1730,7 +1730,7 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
@@ -1754,16 +1754,16 @@ solidify(AVMC_Queue& queue) const
             phsh_string name_key;
             phsh_string name_mapped;
             Source_Location sloc_init;
-            AVMC_Queue queue_init;
-            AVMC_Queue queue_body;
+            AVM_Rod rod_init;
+            AVM_Rod rod_body;
           };
 
         Sparam sp2;
         sp2.name_key = altr.name_key;
         sp2.name_mapped = altr.name_mapped;
         sp2.sloc_init = altr.sloc_init;
-        do_solidify_nodes(sp2.queue_init, altr.code_init);
-        do_solidify_nodes(sp2.queue_body, altr.code_body);
+        do_solidify_nodes(sp2.rod_init, altr.code_init);
+        do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -1782,7 +1782,7 @@ solidify(AVMC_Queue& queue) const
 
             // Evaluate the range initializer and set the range up, which isn't
             // going to change for all loops.
-            AIR_Status status = sp.queue_init.execute(ctx_for);
+            AIR_Status status = sp.rod_init.execute(ctx_for);
             ROCKET_ASSERT(status == air_status_next);
             mapped_ref = ::std::move(ctx_for.stack().mut_top());
 
@@ -1813,7 +1813,7 @@ solidify(AVMC_Queue& queue) const
                 do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
 
                 // Execute the loop body.
-                status = do_execute_block(sp.queue_body, ctx_for);
+                status = do_execute_block(sp.rod_body, ctx_for);
                 if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
                   status = air_status_next;
                   break;
@@ -1846,7 +1846,7 @@ solidify(AVMC_Queue& queue) const
                 do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
 
                 // Execute the loop body.
-                status = do_execute_block(sp.queue_body, ctx_for);
+                status = do_execute_block(sp.rod_body, ctx_for);
                 if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
                   status = air_status_next;
                   break;
@@ -1866,14 +1866,14 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_init.collect_variables(staged, temp);
-            sp.queue_body.collect_variables(staged, temp);
+            sp.rod_init.collect_variables(staged, temp);
+            sp.rod_body.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -1887,17 +1887,17 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_init;
-            AVMC_Queue queue_cond;
-            AVMC_Queue queue_step;
-            AVMC_Queue queue_body;
+            AVM_Rod rod_init;
+            AVM_Rod rod_cond;
+            AVM_Rod rod_step;
+            AVM_Rod rod_body;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_init, altr.code_init);
-        do_solidify_nodes(sp2.queue_cond, altr.code_cond);
-        do_solidify_nodes(sp2.queue_step, altr.code_step);
-        do_solidify_nodes(sp2.queue_body, altr.code_body);
+        do_solidify_nodes(sp2.rod_init, altr.code_init);
+        do_solidify_nodes(sp2.rod_cond, altr.code_cond);
+        do_solidify_nodes(sp2.rod_step, altr.code_step);
+        do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -1911,18 +1911,18 @@ solidify(AVMC_Queue& queue) const
 
             // Execute the loop initializer, which shall only be a definition or
             // an expression statement.
-            AIR_Status status = sp.queue_init.execute(ctx_for);
+            AIR_Status status = sp.rod_init.execute(ctx_for);
             ROCKET_ASSERT(status == air_status_next);
             for(;;) {
               // Check the condition. There is a special case: If the condition
               // is empty then the loop is infinite.
-              status = sp.queue_cond.execute(ctx_for);
+              status = sp.rod_cond.execute(ctx_for);
               ROCKET_ASSERT(status == air_status_next);
               if(!ctx_for.stack().empty() && !ctx_for.stack().top().dereference_readonly().test())
                 break;
 
               // Execute the body.
-              status = do_execute_block(sp.queue_body, ctx_for);
+              status = do_execute_block(sp.rod_body, ctx_for);
               if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
                 status = air_status_next;
                 break;
@@ -1932,7 +1932,7 @@ solidify(AVMC_Queue& queue) const
                 break;
 
               // Execute the increment.
-              status = sp.queue_step.execute(ctx_for);
+              status = sp.rod_step.execute(ctx_for);
               ROCKET_ASSERT(status == air_status_next);
             }
             return status;
@@ -1942,16 +1942,16 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_init.collect_variables(staged, temp);
-            sp.queue_cond.collect_variables(staged, temp);
-            sp.queue_step.collect_variables(staged, temp);
-            sp.queue_body.collect_variables(staged, temp);
+            sp.rod_init.collect_variables(staged, temp);
+            sp.rod_cond.collect_variables(staged, temp);
+            sp.rod_step.collect_variables(staged, temp);
+            sp.rod_body.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -1965,17 +1965,17 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_try;
+            AVM_Rod rod_try;
             Source_Location sloc_catch;
             phsh_string name_except;
-            AVMC_Queue queue_catch;
+            AVM_Rod rod_catch;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_try, altr.code_try);
+        do_solidify_nodes(sp2.rod_try, altr.code_try);
         sp2.sloc_catch = altr.sloc_catch;
         sp2.name_except = altr.name_except;
-        do_solidify_nodes(sp2.queue_catch, altr.code_catch);
+        do_solidify_nodes(sp2.rod_catch, altr.code_catch);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -1988,7 +1988,7 @@ solidify(AVMC_Queue& queue) const
             try {
               // Execute the `try` block. If no exception is thrown, this will
               // have little overhead.
-              status = do_execute_block(sp.queue_try, ctx);
+              status = do_execute_block(sp.rod_try, ctx);
               if(status == air_status_return_ref)
                 ctx.stack().mut_top().check_function_result(ctx.global());
               return status;
@@ -2020,7 +2020,7 @@ solidify(AVMC_Queue& queue) const
                 ctx_catch.insert_named_reference(sref("__backtrace")).set_temporary(::std::move(backtrace));
 
                 // Execute the `catch` clause.
-                status = sp.queue_catch.execute(ctx_catch);
+                status = sp.rod_catch.execute(ctx_catch);
               }
               catch(Runtime_Error& nested) {
                 ctx_catch.on_scope_exit_exceptional(nested);
@@ -2036,14 +2036,14 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_try.collect_variables(staged, temp);
-            sp.queue_catch.collect_variables(staged, temp);
+            sp.rod_try.collect_variables(staged, temp);
+            sp.rod_catch.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -2080,7 +2080,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -2124,7 +2124,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -2236,7 +2236,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -2291,7 +2291,7 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -2325,7 +2325,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
@@ -2376,7 +2376,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
@@ -2399,13 +2399,13 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_true;
-            AVMC_Queue queue_false;
+            AVM_Rod rod_true;
+            AVM_Rod rod_false;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_true, altr.code_true);
-        do_solidify_nodes(sp2.queue_false, altr.code_false);
+        do_solidify_nodes(sp2.rod_true, altr.code_true);
+        do_solidify_nodes(sp2.rod_false, altr.code_false);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -2415,22 +2415,22 @@ solidify(AVMC_Queue& queue) const
 
             // Read the condition and evaluate the corresponding subexpression.
             return ctx.stack().top().dereference_readonly().test()
-                     ? do_evaluate_subexpression(ctx, assign, sp.queue_true)
-                     : do_evaluate_subexpression(ctx, assign, sp.queue_false);
+                     ? do_evaluate_subexpression(ctx, assign, sp.rod_true)
+                     : do_evaluate_subexpression(ctx, assign, sp.rod_false);
           }
 
           // Uparam
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_true.collect_variables(staged, temp);
-            sp.queue_false.collect_variables(staged, temp);
+            sp.rod_true.collect_variables(staged, temp);
+            sp.rod_false.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -2547,7 +2547,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -3855,7 +3855,7 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -3903,7 +3903,7 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -4044,9 +4044,9 @@ solidify(AVMC_Queue& queue) const
             do_rebind_nodes(dirty, bound_body, ctx);
 
             // Instantiate the expression and push it to the current context.
-            AVMC_Queue queue_body;
-            do_solidify_nodes(queue_body, bound_body);
-            ctx.mut_defer().emplace_back(sloc, ::std::move(queue_body));
+            AVM_Rod rod_body;
+            do_solidify_nodes(rod_body, bound_body);
+            ctx.mut_defer().emplace_back(sloc, ::std::move(rod_body));
             return air_status_next;
           }
 
@@ -4054,7 +4054,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
@@ -4146,7 +4146,7 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -4182,7 +4182,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -4219,7 +4219,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
@@ -4235,11 +4235,11 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_body;
+            AVM_Rod rod_body;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_body, altr.code_body);
+        do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -4254,7 +4254,7 @@ solidify(AVMC_Queue& queue) const
             // Evaluate the expression in a `try` block.
             Value exval;
             try {
-              AIR_Status status = sp.queue_body.execute(ctx);
+              AIR_Status status = sp.rod_body.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
             }
             catch(Runtime_Error& except) {
@@ -4274,13 +4274,13 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_body.collect_variables(staged, temp);
+            sp.rod_body.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -4357,7 +4357,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
@@ -4441,11 +4441,11 @@ solidify(AVMC_Queue& queue) const
 
         struct Sparam
           {
-            AVMC_Queue queue_null;
+            AVM_Rod rod_null;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queue_null, altr.code_null);
+        do_solidify_nodes(sp2.rod_null, altr.code_null);
 
         queue.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -4455,7 +4455,7 @@ solidify(AVMC_Queue& queue) const
 
             // Read the condition and evaluate the corresponding subexpression.
             return ctx.stack().top().dereference_readonly().is_null()
-                     ? do_evaluate_subexpression(ctx, assign, sp.queue_null)
+                     ? do_evaluate_subexpression(ctx, assign, sp.rod_null)
                      : air_status_next;
           }
 
@@ -4463,13 +4463,13 @@ solidify(AVMC_Queue& queue) const
           , up2
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queue_null.collect_variables(staged, temp);
+            sp.rod_null.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -4504,7 +4504,7 @@ solidify(AVMC_Queue& queue) const
           , Uparam()
 
           // Sparam
-          , sizeof(sp2), do_avmc_ctor<Sparam>, &sp2, do_avmc_dtor<Sparam>
+          , sizeof(sp2), do_sparam_ctor<Sparam>, &sp2, do_sparam_dtor<Sparam>
 
           // Collector
           , nullptr
