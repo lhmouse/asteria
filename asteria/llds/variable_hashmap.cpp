@@ -176,11 +176,11 @@ extract_variable(refcnt_ptr<Variable>& var) noexcept
       return false;
 
     auto eptr = this->m_bptr + this->m_nbkt;
-    while((eptr->next != eptr) && !eptr->next->var_opt)
-      this->do_erase_range((uint32_t) (eptr->next - this->m_bptr), 1);
-
-    if(eptr->next == eptr)
-      return false;
+    while(eptr->next->var_opt == nullptr)
+      if(eptr->next == eptr)
+        return false;
+      else
+        this->do_erase_range((uint32_t) (eptr->next - this->m_bptr), 1);
 
     var.swap(eptr->next->var_opt);
     this->do_erase_range((uint32_t) (eptr->next - this->m_bptr), 1);
