@@ -16,7 +16,7 @@ class Reference
     cow_vector<Reference_Modifier> m_mods;
     union {
       Xref m_xref;
-      int* m_xref_st;
+      void* m_xref_st;
     };
     rcfwd_ptr<Variable> m_var;
     rcfwd_ptr<PTC_Arguments> m_ptc;
@@ -87,7 +87,7 @@ class Reference
         this->m_var.swap(other.m_var);
         this->m_ptc.swap(other.m_ptc);
         this->m_mods.swap(other.m_mods);
-        ::std::swap(this->m_xref, other.m_xref);
+        ::std::swap(this->m_xref_st, other.m_xref_st);
         return *this;
       }
 
