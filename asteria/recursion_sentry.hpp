@@ -61,7 +61,7 @@ class Recursion_Sentry
     // Make this class non-trivial.
     ~Recursion_Sentry()
       {
-        this->do_validate_stack_usage();
+        __asm__ volatile ("" :);
       }
 
     const void*
