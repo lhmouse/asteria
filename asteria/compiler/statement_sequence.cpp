@@ -1010,9 +1010,9 @@ do_accept_for_initializer_opt(Token_Stream& tstrm)
   }
 
 Statement::S_expression&
-do_set_empty_expression(opt<Statement::S_expression>& qexpr, const Token_Stream& tstrm)
+do_set_empty_expression(opt<Statement::S_expression>& kexpr, const Token_Stream& tstrm)
   {
-    auto& expr = qexpr.emplace();
+    auto& expr = kexpr.emplace();
     expr.sloc = tstrm.next_sloc();
     return expr;
   }
@@ -2616,10 +2616,9 @@ reload_oneline(Token_Stream&& tstrm)
     this->m_stmts.clear();
     stmts.swap(this->m_stmts);
 
-    // Parse an expression. This is not optional.
-    auto sloc = tstrm.next_sloc();
-    Statement::S_expression xexpr;
-    if(!do_accept_expression(xexpr.units, tstrm))
+    // Parse an expression. This is required.
+    auto kexpr = do_accept_expression_opt(tstrm);
+    if(!kexpr)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
 
@@ -2629,8 +2628,7 @@ reload_oneline(Token_Stream&& tstrm)
                 compiler_status_invalid_expression, tstrm.next_sloc());
 
     // Build a return-statement that forwards the result by reference.
-    xexpr.sloc = sloc;
-    Statement::S_return xstmt = { ::std::move(sloc), true, ::std::move(xexpr) };
+    Statement::S_return xstmt = { kexpr->sloc, true, ::std::move(*kexpr) };
     stmts.emplace_back(::std::move(xstmt));
 
     // Succeed.
