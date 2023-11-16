@@ -1359,6 +1359,8 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
 opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
+    const auto sentry = tstrm.copy_recursion_sentry();
+
     // statement ::=
     //   variable-definition | immutable-variable-definition | reference-definition |
     //   function-definition | defer-statement | null-statement |
@@ -1368,8 +1370,6 @@ do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
     //   for-statement | break-statement | continue-statement | throw-statement |
     //   return-statement | assert-statement | try-statement | statement-block |
     //   expression-statement
-    const auto sentry = tstrm.copy_recursion_sentry();
-
     if(auto qstmt = do_accept_variable_definition_opt(tstrm))
       return ::std::move(*qstmt);
 
@@ -2522,7 +2522,6 @@ do_accept_infix_operator_opt(Token_Stream& tstrm)
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    // Check for stack overflows.
     const auto sentry = tstrm.copy_recursion_sentry();
 
     // expression ::=
@@ -2545,13 +2544,14 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
         throw Compiler_Error(Compiler_Error::M_status(),
                   compiler_status_expression_expected, tstrm.next_sloc());
 
-      // Assignment operations have the lowest precedence and group from right to left.
-      auto preced_limit = qnext->tell_precedence();
-      if(preced_limit == precedence_assignment)
-        preced_limit = static_cast<Precedence>(precedence_assignment - 1);
+      // Assignment operators have the lowest precedence and group from right to
+      // left, so they are a special case.
+      auto next_precedence = qnext->tell_precedence();
+      if(next_precedence == precedence_assignment)
+        next_precedence = static_cast<Precedence>(precedence_assignment - 1);
 
-      // Collapse elements that have no lower precedence.
-      while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_limit)) {
+      while((stack.size() >= 2) && (stack.back().tell_precedence() <= next_precedence)) {
+        // Collapse elements that have no lower precedence.
         qelem = ::std::move(stack.mut_back());
         stack.pop_back();
         qelem->extract(stack.mut_back().mut_junction());
@@ -2559,12 +2559,13 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       stack.emplace_back(::std::move(*qnext));
     }
 
-    // Collapse all elements so we eventually have a single node in the stack.
     while(stack.size() >= 2) {
+      // Collapse all elements so we eventually have a single node in the stack.
       qelem = ::std::move(stack.mut_back());
       stack.pop_back();
       qelem->extract(stack.mut_back().mut_junction());
     }
+
     stack.mut_back().extract(units);
     return true;
   }
