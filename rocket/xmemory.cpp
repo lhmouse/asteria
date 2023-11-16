@@ -103,9 +103,11 @@ void
 xmemflush() noexcept
   {
     for(auto& p : s_pools) {
-      // Extract all blocks.
+      free_block* b = nullptr;
+
+      // Append all blocks from the cache to `b`.
       mutex::unique_lock lock(p.m);
-      free_block* b = exchange(p.head, nullptr);
+      b = p.head;
       lock.unlock();
 
       // Return all blocks to the system.
