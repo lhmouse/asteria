@@ -155,16 +155,17 @@ enum Jump_Target : uint8_t
 // Infix operator precedences
 enum Precedence : uint8_t
   {
-    precedence_multiplicative  =  1,
-    precedence_additive        =  2,
-    precedence_shift           =  3,
-    precedence_bitwise_and     =  4,
-    precedence_bitwise_or      =  5,
-    precedence_relational      =  6,
-    precedence_equality        =  7,
-    precedence_logical_and     =  8,
-    precedence_logical_or      =  9,
-    precedence_coalescence     = 10,
+    precedence_highest         =  0,
+    precedence_coalescence     =  1,
+    precedence_multiplicative  =  2,
+    precedence_additive        =  3,
+    precedence_shift           =  4,
+    precedence_bitwise_and     =  5,
+    precedence_bitwise_or      =  6,
+    precedence_relational      =  7,
+    precedence_equality        =  8,
+    precedence_logical_and     =  9,
+    precedence_logical_or      = 10,
     precedence_assignment      = 11,
     precedence_lowest          = 99,
   };
