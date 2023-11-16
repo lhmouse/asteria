@@ -70,11 +70,14 @@ namespace noadl = asteria;
     template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
 
 // `using`-directives
-using ::std::initializer_list;
-using ::std::integer_sequence;
-using ::std::index_sequence;
 using ::std::nullptr_t;
 using ::std::max_align_t;
+using ::std::ptrdiff_t;
+using ::std::size_t;
+using ::std::intptr_t;
+using ::std::uintptr_t;
+using ::std::intmax_t;
+using ::std::uintmax_t;
 using ::std::int8_t;
 using ::std::uint8_t;
 using ::std::int16_t;
@@ -83,16 +86,18 @@ using ::std::int32_t;
 using ::std::uint32_t;
 using ::std::int64_t;
 using ::std::uint64_t;
-using ::std::intptr_t;
-using ::std::uintptr_t;
-using ::std::intmax_t;
-using ::std::uintmax_t;
-using ::std::ptrdiff_t;
-using ::std::size_t;
-using ::std::wint_t;
-using ::std::exception;
+using ::std::initializer_list;
+using ::std::numeric_limits;
 using ::std::type_info;
+using ::std::nothrow_t;
+using ::std::integer_sequence;
+using ::std::index_sequence;
+using ::std::initializer_list;
+using ::std::integer_sequence;
+using ::std::index_sequence;
 using ::std::pair;
+using ::std::exception;
+using ::std::exception_ptr;
 
 using ::rocket::nullopt_t;
 using ::rocket::cow_string;
