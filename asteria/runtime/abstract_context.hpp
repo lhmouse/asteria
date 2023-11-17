@@ -13,9 +13,9 @@ class Abstract_Context
     public rcfwd<Abstract_Context>
   {
   public:
-    struct M_plain     { };
-    struct M_defer     { };
-    struct M_function  { };
+    enum class M_plain;
+    enum class M_defer;
+    enum class M_function;
 
   private:
     // This stores all named references (variables, parameters, etc.) of
