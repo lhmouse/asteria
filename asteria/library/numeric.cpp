@@ -14,23 +14,23 @@ namespace {
 int64_t
 do_verify_bounds(int64_t lower, int64_t upper)
   {
-    if(!(lower <= upper))
-      ASTERIA_THROW((
-          "Bounds not valid (`$1` is not less than or equal to `$2`)"),
-          lower, upper);
+    if(lower <= upper)
+      return upper;
 
-    return upper;
+    ASTERIA_THROW((
+        "Bounds not valid (`$1` is not less than or equal to `$2`)"),
+        lower, upper);
   }
 
 double
 do_verify_bounds(double lower, double upper)
   {
-    if(!::std::islessequal(lower, upper))
-      ASTERIA_THROW((
-          "Bounds not valid (`$1` is not less than or equal to `$2`)"),
-          lower, upper);
+    if(::std::islessequal(lower, upper))
+      return upper;
 
-    return upper;
+    ASTERIA_THROW((
+        "Bounds not valid (`$1` is not less than or equal to `$2`)"),
+        lower, upper);
   }
 
 pair<V_integer, int>
