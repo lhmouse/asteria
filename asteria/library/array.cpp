@@ -59,7 +59,7 @@ do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
 
 template<typename IterT>
 opt<IterT>
-do_find_opt(Global_Context& global, Reference_Stack& stack,
+do_find_opt(Reference& self, Reference_Stack& stack, Global_Context& global,
             IterT begin, IterT end, const Value& target, bool match)
   {
     for(auto it = ::std::move(begin);  it != end;  ++it) {
@@ -68,8 +68,7 @@ do_find_opt(Global_Context& global, Reference_Stack& stack,
         // `target` is a unary predictor.
         stack.clear();
         stack.push().set_temporary(*it);
-
-        Reference self;
+        self.clear();
         target.as_function().invoke(self, global, ::std::move(stack));
         result = self.dereference_readonly().test();
       }
@@ -84,7 +83,7 @@ do_find_opt(Global_Context& global, Reference_Stack& stack,
   }
 
 Compare
-do_compare_total(Global_Context& global, Reference_Stack& stack,
+do_compare_total(Reference& self, Reference_Stack& stack, Global_Context& global,
                  const optV_function& kcomp, const Value& lhs, const Value& rhs)
   {
     // Use the builtin 3-way comparison operator if no comparator is provided.
@@ -95,17 +94,15 @@ do_compare_total(Global_Context& global, Reference_Stack& stack,
     stack.clear();
     stack.push().set_temporary(lhs);
     stack.push().set_temporary(rhs);
-
-    // Call the predictor function and compare the result with `0`.
-    Reference self;
+    self.clear();
     kcomp.invoke(self, global, ::std::move(stack));
     return self.dereference_readonly().compare_total(V_integer(0));
   }
 
 template<typename IterT>
 pair<IterT, bool>
-do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
-           const optV_function& kcomp, const Value& target)
+do_bsearch(Reference& self, Reference_Stack& stack, Global_Context& global,
+           IterT begin, IterT end, const optV_function& kcomp, const Value& target)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -117,7 +114,7 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + (dist >> 1);
-      auto cmp = do_compare_total(global, stack, kcomp, target, *mpos);
+      auto cmp = do_compare_total(self, stack, global, kcomp, target, *mpos);
 
       if(cmp == compare_equal)
         return { ::std::move(mpos), true };
@@ -131,8 +128,9 @@ do_bsearch(Global_Context& global, Reference_Stack& stack, IterT begin, IterT en
 
 template<typename IterT, typename PredT>
 IterT
-do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
-         const optV_function& kcomp, const Value& target, PredT&& pred)
+do_bound(Reference& self, Reference_Stack& stack, Global_Context& global,
+         IterT begin, IterT end, const optV_function& kcomp, const Value& target,
+         PredT&& pred)
   {
     auto bpos = ::std::move(begin);
     auto epos = ::std::move(end);
@@ -144,7 +142,7 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + dist / 2;
-      auto cmp = do_compare_total(global, stack, kcomp, target, *mpos);
+      auto cmp = do_compare_total(self, stack, global, kcomp, target, *mpos);
 
       if(pred(cmp))
         epos = mpos;
@@ -155,7 +153,8 @@ do_bound(Global_Context& global, Reference_Stack& stack, IterT begin, IterT end,
 
 template<typename ComparatorT>
 V_array&
-do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& compare, ptrdiff_t bsize)
+do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& compare,
+                ptrdiff_t bsize)
   {
     ROCKET_ASSERT(output.size() >= input.size());
     ROCKET_ASSERT(bsize > 0);
@@ -289,8 +288,9 @@ optV_integer
 std_array_find(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
+    Reference self;
     Reference_Stack stack;
-    auto qit = do_find_opt(global, stack, range.first, range.second, target, true);
+    auto qit = do_find_opt(self, stack, global, range.first, range.second, target, true);
     return qit ? (*qit - data.begin()) : optV_integer();
   }
 
@@ -298,8 +298,9 @@ optV_integer
 std_array_find_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
+    Reference self;
     Reference_Stack stack;
-    auto qit = do_find_opt(global, stack, range.first, range.second, target, false);
+    auto qit = do_find_opt(self, stack, global, range.first, range.second, target, false);
     return qit ? (*qit - data.begin()) : optV_integer();
   }
 
@@ -307,11 +308,10 @@ optV_integer
 std_array_rfind(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
+    Reference self;
     Reference_Stack stack;
-    auto qit = do_find_opt(global, stack,
-                           ::std::make_reverse_iterator(range.second),
-                           ::std::make_reverse_iterator(range.first),
-                           target, true);
+    auto qit = do_find_opt(self, stack, global, ::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first), target, true);
     return qit ? (data.rend() - *qit - 1) : optV_integer();
   }
 
@@ -319,11 +319,10 @@ optV_integer
 std_array_rfind_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
+    Reference self;
     Reference_Stack stack;
-    auto qit = do_find_opt(global, stack,
-                           ::std::make_reverse_iterator(range.second),
-                           ::std::make_reverse_iterator(range.first),
-                           target, false);
+    auto qit = do_find_opt(self, stack, global, ::std::make_reverse_iterator(range.second),
+                           ::std::make_reverse_iterator(range.first), target, false);
     return qit ? (data.rend() - *qit - 1) : optV_integer();
   }
 
@@ -332,8 +331,9 @@ std_array_count(Global_Context& global, V_array data, V_integer from, optV_integ
   {
     auto range = do_slice(data, from, length);
     V_integer count = 0;
+    Reference self;
     Reference_Stack stack;
-    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, true)) {
+    while(auto qit = do_find_opt(self, stack, global, range.first, range.second, target, true)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -345,8 +345,9 @@ std_array_count_not(Global_Context& global, V_array data, V_integer from, optV_i
   {
     auto range = do_slice(data, from, length);
     V_integer count = 0;
+    Reference self;
     Reference_Stack stack;
-    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, false)) {
+    while(auto qit = do_find_opt(self, stack, global, range.first, range.second, target, false)) {
       ++count;
       range.first = ::std::move(++*qit);
     }
@@ -358,8 +359,9 @@ std_array_exclude(Global_Context& global, V_array data, V_integer from, optV_int
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
+    Reference self;
     Reference_Stack stack;
-    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, true)) {
+    while(auto qit = do_find_opt(self, stack, global, range.first, range.second, target, true)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -371,8 +373,9 @@ std_array_exclude_not(Global_Context& global, V_array data, V_integer from, optV
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
+    Reference self;
     Reference_Stack stack;
-    while(auto qit = do_find_opt(global, stack, range.first, range.second, target, false)) {
+    while(auto qit = do_find_opt(self, stack, global, range.first, range.second, target, false)) {
       range.first = data.erase(*qit);
       range.second = data.end() - dist;
     }
@@ -387,12 +390,13 @@ std_array_is_sorted(Global_Context& global, V_array data, optV_function comparat
       return true;
 
     // The first element shall not be unordered with itself.
+    Reference self;
     Reference_Stack stack;
-    if(do_compare_total(global, stack, comparator, *pos, *pos) != compare_equal)
+    if(do_compare_total(self, stack, global, comparator, *pos, *pos) != compare_equal)
       return false;
 
     while(++pos != data.end())
-      if(do_compare_total(global, stack, comparator, pos[-1], pos[0]) == compare_greater)
+      if(do_compare_total(self, stack, global, comparator, pos[-1], pos[0]) == compare_greater)
         return false;
 
     return true;
@@ -401,16 +405,18 @@ std_array_is_sorted(Global_Context& global, V_array data, optV_function comparat
 optV_integer
 std_array_binary_search(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
+    Reference self;
     Reference_Stack stack;
-    auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
+    auto pair = do_bsearch(self, stack, global, data.begin(), data.end(), comparator, target);
     return pair.second ? (pair.first - data.begin()) : optV_integer();
   }
 
 V_integer
 std_array_lower_bound(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
+    Reference self;
     Reference_Stack stack;
-    auto lpos = do_bound(global, stack, data.begin(), data.end(), comparator, target,
+    auto lpos = do_bound(self, stack, global, data.begin(), data.end(), comparator, target,
                          [](Compare cmp) { return cmp != compare_greater;  });
     return lpos - data.begin();
   }
@@ -418,8 +424,9 @@ std_array_lower_bound(Global_Context& global, V_array data, Value target, optV_f
 V_integer
 std_array_upper_bound(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
+    Reference self;
     Reference_Stack stack;
-    auto upos = do_bound(global, stack, data.begin(), data.end(), comparator, target,
+    auto upos = do_bound(self, stack, global, data.begin(), data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
     return upos - data.begin();
   }
@@ -427,11 +434,12 @@ std_array_upper_bound(Global_Context& global, V_array data, Value target, optV_f
 pair<V_integer, V_integer>
 std_array_equal_range(Global_Context& global, V_array data, Value target, optV_function comparator)
   {
+    Reference self;
     Reference_Stack stack;
-    auto pair = do_bsearch(global, stack, data.begin(), data.end(), comparator, target);
-    auto lpos = do_bound(global, stack, data.begin(), pair.first, comparator, target,
+    auto pair = do_bsearch(self, stack, global, data.begin(), data.end(), comparator, target);
+    auto lpos = do_bound(self, stack, global, data.begin(), pair.first, comparator, target,
                          [](Compare cmp) { return cmp != compare_greater;  });
-    auto upos = do_bound(global, stack, pair.first, data.end(), comparator, target,
+    auto upos = do_bound(self, stack, global, pair.first, data.end(), comparator, target,
                          [](Compare cmp) { return cmp == compare_less;  });
     return ::std::make_pair(lpos - data.begin(), upos - lpos);
   }
@@ -444,9 +452,10 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
       return data;
 
     // Merge blocks of exponential sizes.
+    Reference self;
     Reference_Stack stack;
     auto compare = [&](const Value& lhs, const Value& rhs)
-      { return do_compare_total(global, stack, comparator, lhs, rhs);  };
+                   { return do_compare_total(self, stack, global, comparator, lhs, rhs);  };
 
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
@@ -466,9 +475,10 @@ std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
       return data;
 
     // Merge blocks of exponential sizes.
+    Reference self;
     Reference_Stack stack;
     auto compare = [&](const Value& lhs, const Value& rhs)
-      { return do_compare_total(global, stack, comparator, lhs, rhs);  };
+                   { return do_compare_total(self, stack, global, comparator, lhs, rhs);  };
 
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
@@ -500,9 +510,11 @@ std_array_ksort(Global_Context& global, V_object object, optV_function comparato
       return data;
 
     // Merge blocks of exponential sizes. Keys are known to be unique.
+    Reference self;
     Reference_Stack stack;
     auto compare = [&](const Value& lhs, const Value& rhs)
-      { return do_compare_total(global, stack, comparator, lhs.as_array().at(0), rhs.as_array().at(0));  };
+                   { return do_compare_total(self, stack, global, comparator,
+                                             lhs.as_array().at(0), rhs.as_array().at(0));  };
 
     V_array temp(data.size());
     ptrdiff_t bsize = 1;
@@ -518,9 +530,11 @@ Value
 std_array_max_of(Global_Context& global, V_array data, optV_function comparator)
   {
     Value result;
+    Reference self;
     Reference_Stack stack;
     for(const auto& r : data)
-      if(result.is_null() || (!r.is_null() && do_compare_total(global, stack, comparator, result, r) == compare_less))
+      if(result.is_null() || (!r.is_null() && do_compare_total(self, stack, global, comparator,
+                                                               result, r) == compare_less))
         result = r;
     return result;
   }
@@ -529,9 +543,11 @@ Value
 std_array_min_of(Global_Context& global, V_array data, optV_function comparator)
   {
     Value result;
+    Reference self;
     Reference_Stack stack;
     for(const auto& r : data)
-      if(result.is_null() || (!r.is_null() && do_compare_total(global, stack, comparator, result, r) == compare_greater))
+      if(result.is_null() || (!r.is_null() && do_compare_total(self, stack, global, comparator,
+                                                               result, r) == compare_greater))
         result = r;
     return result;
   }
@@ -559,7 +575,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
         stack.push().set_temporary(data.back());
 
       // Call the generator function and push the return value.
-      self.set_temporary(nullopt);
+      self.clear();
       generator.invoke(self, global, ::std::move(stack));
       data.emplace_back(self.dereference_readonly());
     }
