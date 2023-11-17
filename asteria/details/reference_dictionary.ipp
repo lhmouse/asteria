@@ -11,6 +11,8 @@ struct Bucket
   {
     Bucket* prev;
     Bucket* next;
+    void* padding_1;
+    void* padding_2;
     union { phsh_string key;  };
     union { Reference ref;  };
 
