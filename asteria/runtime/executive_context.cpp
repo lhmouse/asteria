@@ -13,7 +13,6 @@
 #include "../utils.hpp"
 namespace asteria {
 
-ROCKET_FLATTEN
 Executive_Context::
 Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
                   Reference_Stack& alt_stack, const refcnt_ptr<Variadic_Arguer>& zvarg,
