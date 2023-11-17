@@ -527,7 +527,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
       stack.clear();
       stack.push().set_temporary(roffset);
       stack.push().set_temporary(::std::move(data));
-      self.set_temporary(nullopt);
+      self.clear();
       callback.invoke(self, global, ::std::move(stack));
 
       roffset += nread;
