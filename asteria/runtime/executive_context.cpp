@@ -97,7 +97,6 @@ void
 Executive_Context::
 do_on_scope_exit_normal_slow(AIR_Status status)
   {
-    // Stash the result reference, if any.
     Reference self;
     if(status == air_status_return_ref) {
       // If a PTC wrapper was returned, append all deferred expressions to it.
@@ -109,6 +108,7 @@ do_on_scope_exit_normal_slow(AIR_Status status)
         return;
       }
 
+      // Stash the result reference.
       self = ::std::move(this->m_stack->mut_top());
     }
 
