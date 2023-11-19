@@ -46,6 +46,7 @@ nobase_include_HEADERS +=  \
   %reldir%/compiler/infix_element.hpp  \
   %reldir%/compiler/statement_sequence.hpp  \
   %reldir%/library/version.hpp  \
+  %reldir%/library/gc.hpp  \
   %reldir%/library/system.hpp  \
   %reldir%/library/debug.hpp  \
   %reldir%/library/chrono.hpp  \
@@ -104,6 +105,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/compiler/infix_element.cpp  \
   %reldir%/compiler/statement_sequence.cpp  \
   %reldir%/library/version.cpp  \
+  %reldir%/library/gc.cpp  \
   %reldir%/library/system.cpp  \
   %reldir%/library/debug.cpp  \
   %reldir%/library/chrono.cpp  \

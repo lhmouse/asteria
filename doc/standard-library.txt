@@ -12,9 +12,9 @@
 	  has been enabled. This member is always set, even when there is
 	  no standard library.
 
-### `std.system`
+### `std.gc`
 
-`std.system.gc_count_variables(generation)`
+`std.gc.count_variables(generation)`
 
 	* Gets the number of variables that are being tracked by the
 	  collector for `generation`. Valid values for `generation` are
@@ -25,7 +25,7 @@
 
 	* Throws an exception if `generation` is out of range.
 
-`std.system.gc_get_threshold(generation)`
+`std.gc.get_threshold(generation)`
 
 	* Gets the threshold of the collector for `generation`. Valid
 	  values for `generation` are `0`, `1` and `2`.
@@ -34,7 +34,7 @@
 
 	* Throws an exception if `generation` is out of range.
 
-`std.system.gc_set_threshold(generation, threshold)`
+`std.gc.set_threshold(generation, threshold)`
 
 	* Sets the threshold of the collector for `generation` to
 	  `threshold`. Valid values for `generation` are `0`, `1` and
@@ -48,7 +48,7 @@
 
 	* Throws an exception if `generation` is out of range.
 
-`std.system.gc_collect([generation_limit])`
+`std.gc.collect([generation_limit])`
 
 	* Performs garbage collection on all generations including and
 	  up to `generation_limit`. If it is absent, all generations are
@@ -57,7 +57,9 @@
 	* Returns the number of variables that have been collected in
 	  total.
 
-`std.system.env_get_variable(name)`
+### `std.system`
+
+`std.system.get_environment_variable(name)`
 
 	* Retrieves an environment variable with `name`.
 
@@ -66,7 +68,7 @@
 
 	* Throws an exception if `name` is not valid.
 
-`std.system.env_get_variables()`
+`std.system.get_environment_variables()`
 
 	* Retrieves all environment variables.
 
@@ -105,31 +107,31 @@
 
 	* Returns a UUID as a string of 36 characters without braces.
 
-`std.system.proc_get_pid()`
+`std.system.get_pid()`
 
 	* Gets the ID of the current process.
 
 	* Returns the process ID as an integer.
 
-`std.system.proc_get_ppid()`
+`std.system.get_ppid()`
 
 	* Gets the ID of the parent process.
 
 	* Returns the parent process ID as an integer.
 
-`std.system.proc_get_uid()`
+`std.system.get_uid()`
 
 	* Gets the real user ID of the current process.
 
 	* Returns the real user ID as an integer.
 
-`std.system.proc_get_euid()`
+`std.system.get_euid()`
 
 	* Gets the effective user ID of the current process.
 
 	* Returns the effective user ID as an integer.
 
-`std.system.proc_invoke(cmd, [argv], [envp])`
+`std.system.call(cmd, [argv], [envp])`
 
 	* Launches the program denoted by `cmd`, awaits its termination,
 	  and returns its exit status. If `argv` is provided, it shall be
@@ -145,7 +147,7 @@
 	* Throws an exception if the program could not be launched or its
 	  exit status could not be retrieved.
 
-`std.system.proc_daemonize()`
+`std.system.daemonize()`
 
 	* Detaches the current process from its controlling terminal and
 	  continues in the background. The calling process terminates on
@@ -153,7 +155,7 @@
 
 	* Throws an exception on failure.
 
-`std.system.conf_load_file(path)`
+`std.system.load_conf(path)`
 
 	* Loads the configuration file denoted by `path`. Its syntax is
 	  similar to JSON5, except that commas, semicolons and top-level

@@ -6,7 +6,6 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/binding_generator.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/garbage_collector.hpp"
 #include "../runtime/random_engine.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/compiler_error.hpp"
@@ -225,72 +224,8 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 
 }  // namespace
 
-V_integer
-std_system_gc_count_variables(Global_Context& global, V_integer generation)
-  {
-    auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
-    if(rgen != generation)
-      ASTERIA_THROW((
-          "Invalid generation `$1`"),
-          generation);
-
-    // Get the current number of variables being tracked.
-    const auto gcoll = global.garbage_collector();
-    size_t nvars = gcoll->count_tracked_variables(rgen);
-    return static_cast<int64_t>(nvars);
-  }
-
-V_integer
-std_system_gc_get_threshold(Global_Context& global, V_integer generation)
-  {
-    auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
-    if(rgen != generation)
-      ASTERIA_THROW((
-          "Invalid generation `$1`"),
-          generation);
-
-    // Get the current number of variables being tracked.
-    const auto gcoll = global.garbage_collector();
-    size_t thres = gcoll->get_threshold(rgen);
-    return static_cast<int64_t>(thres);
-  }
-
-V_integer
-std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold)
-  {
-    auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
-    if(rgen != generation)
-      ASTERIA_THROW((
-          "Invalid generation `$1`"),
-          generation);
-
-    // Set the threshold and return its old value.
-    const auto gcoll = global.garbage_collector();
-    size_t oldval = gcoll->get_threshold(rgen);
-    gcoll->set_threshold(rgen, ::rocket::clamp_cast<size_t>(threshold, 0, PTRDIFF_MAX));
-    return static_cast<int64_t>(oldval);
-  }
-
-V_integer
-std_system_gc_collect(Global_Context& global, optV_integer generation_limit)
-  {
-    auto rglimit = gc_generation_oldest;
-    if(generation_limit) {
-      rglimit = ::rocket::clamp_cast<GC_Generation>(*generation_limit, 0, 2);
-      if(rglimit != *generation_limit)
-        ASTERIA_THROW((
-            "Invalid generation limit `$1`"),
-            *generation_limit);
-    }
-
-    // Perform garbage collection up to the generation specified.
-    const auto gcoll = global.garbage_collector();
-    size_t nvars = gcoll->collect_variables(rglimit);
-    return static_cast<int64_t>(nvars);
-  }
-
 optV_string
-std_system_env_get_variable(V_string name)
+std_system_get_environment_variable(V_string name)
   {
     const char* val = ::getenv(name.safe_c_str());
     if(!val)
@@ -301,7 +236,7 @@ std_system_env_get_variable(V_string name)
   }
 
 V_object
-std_system_env_get_variables()
+std_system_get_environment_variables()
   {
     V_object vars;
     for(char** envp = ::environ;  *envp;  envp ++) {
@@ -407,31 +342,31 @@ std_system_uuid(Global_Context& global)
   }
 
 V_integer
-std_system_proc_get_pid()
+std_system_get_pid()
   {
     return ::getpid();
   }
 
 V_integer
-std_system_proc_get_ppid()
+std_system_get_ppid()
   {
     return ::getppid();
   }
 
 V_integer
-std_system_proc_get_uid()
+std_system_get_uid()
   {
     return ::getuid();
   }
 
 V_integer
-std_system_proc_get_euid()
+std_system_get_euid()
   {
     return ::geteuid();
   }
 
 V_integer
-std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
+std_system_call(V_string cmd, optV_array argv, optV_array envp)
   {
     // Append arguments.
     cow_vector<const char*> ptrs = { cmd.safe_c_str() };
@@ -479,7 +414,7 @@ std_system_proc_invoke(V_string cmd, optV_array argv, optV_array envp)
   }
 
 void
-std_system_proc_daemonize()
+std_system_daemonize()
   {
     // Create a socket for overwriting standard streams in child
     // processes later.
@@ -534,7 +469,7 @@ std_system_proc_daemonize()
   }
 
 V_object
-std_system_conf_load_file(V_string path)
+std_system_load_conf(V_string path)
   {
     // Initialize tokenizer options. Unlike JSON5, we support genuine integers
     // and single-quoted string literals.
@@ -567,70 +502,9 @@ std_system_conf_load_file(V_string path)
 void
 create_bindings_system(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("gc_count_variables"),
+    result.insert_or_assign(sref("get_environment_variable"),
       ASTERIA_BINDING(
-        "std.system.gc_count_variables", "generation",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_integer gen;
-
-        reader.start_overload();
-        reader.required(gen);
-        if(reader.end_overload())
-          return (Value) std_system_gc_count_variables(global, gen);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("gc_get_threshold"),
-      ASTERIA_BINDING(
-        "std.system.gc_get_threshold", "generation",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_integer gen;
-
-        reader.start_overload();
-        reader.required(gen);
-        if(reader.end_overload())
-          return (Value) std_system_gc_get_threshold(global, gen);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("gc_set_threshold"),
-      ASTERIA_BINDING(
-        "std.system.gc_set_threshold", "generation, threshold",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        V_integer gen, thrs;
-
-        reader.start_overload();
-        reader.required(gen);
-        reader.required(thrs);
-        if(reader.end_overload())
-          return (Value) std_system_gc_set_threshold(global, gen, thrs);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("gc_collect"),
-      ASTERIA_BINDING(
-        "std.system.gc_collect", "[generation_limit]",
-        Global_Context& global, Argument_Reader&& reader)
-      {
-        optV_integer glim;
-
-        reader.start_overload();
-        reader.optional(glim);
-        if(reader.end_overload())
-          return (Value) std_system_gc_collect(global, glim);
-
-        reader.throw_no_matching_function_call();
-      });
-
-    result.insert_or_assign(sref("env_get_variable"),
-      ASTERIA_BINDING(
-        "std.system.env_get_variable", "name",
+        "std.system.get_environment_variable", "name",
         Argument_Reader&& reader)
       {
         V_string name;
@@ -638,19 +512,19 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(name);
         if(reader.end_overload())
-          return (Value) std_system_env_get_variable(name);
+          return (Value) std_system_get_environment_variable(name);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("env_get_variables"),
+    result.insert_or_assign(sref("get_environment_variables"),
       ASTERIA_BINDING(
-        "std.system.env_get_variables", "",
+        "std.system.get_environment_variables", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_env_get_variables();
+          return (Value) std_system_get_environment_variables();
 
         reader.throw_no_matching_function_call();
       });
@@ -679,57 +553,57 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("proc_get_pid"),
+    result.insert_or_assign(sref("get_pid"),
       ASTERIA_BINDING(
-        "std.system.proc_get_pid", "",
+        "std.system.get_pid", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_proc_get_pid();
+          return (Value) std_system_get_pid();
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("proc_get_ppid"),
+    result.insert_or_assign(sref("get_ppid"),
       ASTERIA_BINDING(
-        "std.system.proc_get_ppid", "",
+        "std.system.get_ppid", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_proc_get_ppid();
+          return (Value) std_system_get_ppid();
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("proc_get_uid"),
+    result.insert_or_assign(sref("get_uid"),
       ASTERIA_BINDING(
-        "std.system.proc_get_uid", "",
+        "std.system.get_uid", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_proc_get_uid();
+          return (Value) std_system_get_uid();
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("proc_get_euid"),
+    result.insert_or_assign(sref("get_euid"),
       ASTERIA_BINDING(
-        "std.system.proc_get_euid", "",
+        "std.system.get_euid", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_proc_get_euid();
+          return (Value) std_system_get_euid();
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("proc_invoke"),
+    result.insert_or_assign(sref("call"),
       ASTERIA_BINDING(
-        "std.system.proc_invoke", "cmd, [argv], [envp]",
+        "std.system.call", "cmd, [argv], [envp]",
         Argument_Reader&& reader)
       {
         V_string cmd;
@@ -740,26 +614,26 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.optional(argv);
         reader.optional(envp);
         if(reader.end_overload())
-          return (Value) std_system_proc_invoke(cmd, argv, envp);
+          return (Value) std_system_call(cmd, argv, envp);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("proc_daemonize"),
+    result.insert_or_assign(sref("daemonize"),
       ASTERIA_BINDING(
-        "std.system.proc_daemonize", "",
+        "std.system.daemonize", "",
         Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_system_proc_daemonize();
+          return (void) std_system_daemonize();
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("conf_load_file"),
+    result.insert_or_assign(sref("load_conf"),
       ASTERIA_BINDING(
-        "std.system.conf_load_file", "path",
+        "std.system.load_conf", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -767,7 +641,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value) std_system_conf_load_file(path);
+          return (Value) std_system_load_conf(path);
 
         reader.throw_no_matching_function_call();
       });

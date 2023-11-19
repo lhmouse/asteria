@@ -19,9 +19,9 @@ int main()
         std.io.putln("meow");
         std.io.flush();
 
-        std.system.gc_collect();
+        std.gc.collect();
         a = null;
-        std.system.gc_collect();
+        std.gc.collect();
 
         std.io.putln("bark");
         std.io.flush();

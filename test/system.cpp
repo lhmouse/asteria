@@ -12,28 +12,28 @@ int main()
       sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
-        assert std.system.proc_invoke('true') == 0;
-        assert std.system.proc_invoke('false') != 0;
+        assert std.system.call('true') == 0;
+        assert std.system.call('false') != 0;
 
         try {
           // note this may or may not throw
-          var status = std.system.proc_invoke('./nonexistent-command');
+          var status = std.system.call('./nonexistent-command');
           assert status != 0;
         }
         catch(e)
           assert std.string.find(e, "assertion failure") == null;
 
-        assert std.system.proc_invoke('bash',
+        assert std.system.call('bash',
           [ '-c', 'kill -1 $$' ]) == 129;
-        assert std.system.proc_invoke('bash',
+        assert std.system.call('bash',
           [ '-c', 'kill -9 $$' ]) == 137;
 
-        assert std.system.proc_invoke('bash',
+        assert std.system.call('bash',
           [ '-c', 'test $VAR == yes' ], [ 'VAR=yes' ]) == 0;
-        assert std.system.proc_invoke('bash',
+        assert std.system.call('bash',
           [ '-c', 'test $VAR == yes' ], [ 'VAR=no' ]) != 0;
 
-        var o = std.system.conf_load_file(std.string.pcre_replace(__file, '/[^/]*$', '/sample.conf'));
+        var o = std.system.load_conf(std.string.pcre_replace(__file, '/[^/]*$', '/sample.conf'));
         assert o.key == "value";
         assert o["keys may be quoted"] == "equals signs are allowed";
         assert o.values.may == "be";

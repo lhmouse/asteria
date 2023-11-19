@@ -68,9 +68,9 @@ int main()
             }());
           }());
 
-          assert std.system.gc_collect() == 2;  // foo,bar
+          assert std.gc.collect() == 2;  // foo,bar
           gr = "meow";
-          assert std.system.gc_collect() == 3;  // x,y,z
+          assert std.gc.collect() == 3;  // x,y,z
 
 ///////////////////////////////////////////////////////////////////////////////
         )__"));

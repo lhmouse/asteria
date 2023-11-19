@@ -7,29 +7,13 @@
 #include "../fwd.hpp"
 namespace asteria {
 
-// `std.system.gc_count_variables`
-V_integer
-std_system_gc_count_variables(Global_Context& global, V_integer generation);
-
-// `std.system.gc_get_threshold`
-V_integer
-std_system_gc_get_threshold(Global_Context& global, V_integer generation);
-
-// `std.system.gc_set_threshold`
-V_integer
-std_system_gc_set_threshold(Global_Context& global, V_integer generation, V_integer threshold);
-
-// `std.system.gc_collect`
-V_integer
-std_system_gc_collect(Global_Context& global, optV_integer generation_limit);
-
-// `std.system.env_get_variable`
+// `std.system.get_environment_variable`
 optV_string
-std_system_env_get_variable(V_string name);
+std_system_get_environment_variable(V_string name);
 
-// `std.system.env_get_variables`
+// `std.system.get_environment_variables`
 V_object
-std_system_env_get_variables();
+std_system_get_environment_variables();
 
 // `std.system.get_properties`
 V_object
@@ -39,33 +23,33 @@ std_system_get_properties();
 V_string
 std_system_uuid(Global_Context& global);
 
-// `std.system.proc_get_pid()`
+// `std.system.get_pid()`
 V_integer
-std_system_proc_get_pid();
+std_system_get_pid();
 
-// `std.system.proc_get_ppid()`
+// `std.system.get_ppid()`
 V_integer
-std_system_proc_get_ppid();
+std_system_get_ppid();
 
-// `std.system.proc_get_uid()`
+// `std.system.get_uid()`
 V_integer
-std_system_proc_get_uid();
+std_system_get_uid();
 
-// `std.system.proc_get_euid()`
+// `std.system.get_euid()`
 V_integer
-std_system_proc_get_euid();
+std_system_get_euid();
 
-// `std.system.proc_invoke`
+// `std.system.call`
 V_integer
-std_system_proc_invoke(V_string path, optV_array argv, optV_array envp);
+std_system_call(V_string path, optV_array argv, optV_array envp);
 
-// `std.system.proc_daemonize`
+// `std.system.daemonize`
 void
-std_system_proc_daemonize();
+std_system_daemonize();
 
-// `std.system.conf_load_file`
+// `std.system.load_conf`
 V_object
-std_system_conf_load_file(V_string path);
+std_system_load_conf(V_string path);
 
 // Create an object that is to be referenced as `std.system`.
 void
