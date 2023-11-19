@@ -2072,7 +2072,6 @@ solidify(AVM_Rod& queue) const
             // been empty fof this function.
             const auto& val = ctx.stack().top().dereference_readonly();
             ctx.stack().pop();
-
             throw Runtime_Error(Runtime_Error::M_throw(), val, sp.sloc);
           }
 
@@ -2109,14 +2108,11 @@ solidify(AVM_Rod& queue) const
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-            // Check the operand.
+            // Throw an exception if the assertion fails. This cannot be disabled.
             const auto& val = ctx.stack().top().dereference_readonly();
             ctx.stack().pop();
-
-            // Throw an exception if the assertion fails. This cannot be disabled.
             if(!val.test())
               throw Runtime_Error(Runtime_Error::M_assert(), sp.sloc, sp.msg);
-
             return air_status_next;
           }
 
