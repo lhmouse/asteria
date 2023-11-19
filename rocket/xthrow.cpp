@@ -13,7 +13,7 @@ sprintf_and_throw(const char* fmt, ...)
     // Compose the error message in temporary storage.
     ::va_list ap;
     va_start(ap, fmt);
-    char strbuf[4096];
+    char strbuf[1024];
     int ret = ::vsnprintf(strbuf, sizeof(strbuf), fmt, ap);
     va_end(ap);
 
