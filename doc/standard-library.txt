@@ -155,6 +155,15 @@
 
 	* Throws an exception on failure.
 
+`std.system.sleep(duration)`
+
+	* Suspends the current thread for `duration` milliseconds, which
+	  may be either an integer or real number. If `duration` is not a
+	  non-negative number, this function returns immediately.
+
+	* Returns the remaining time in milliseconds as a real number,
+	  which will be positive if the sleep has been interrupted.
+
 `std.system.load_conf(path)`
 
 	* Loads the configuration file denoted by `path`. Its syntax is

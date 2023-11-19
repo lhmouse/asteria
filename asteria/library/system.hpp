@@ -47,6 +47,10 @@ std_system_call(V_string path, optV_array argv, optV_array envp);
 void
 std_system_daemonize();
 
+// `std.system.sleep`
+V_real
+std_system_sleep(V_real duration);
+
 // `std.system.load_conf`
 V_object
 std_system_load_conf(V_string path);

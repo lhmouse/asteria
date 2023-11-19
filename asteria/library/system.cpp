@@ -468,6 +468,37 @@ std_system_daemonize()
     (void)! ::dup2(tfd, STDERR_FILENO);
   }
 
+V_real
+std_system_sleep(V_real duration)
+  {
+    // Take care of NaNs.
+    if(!::std::isgreaterequal(duration, 0))
+      return 0;
+
+    V_real secs = duration * 0.001;
+    ::timespec ts, rem;
+
+    if(secs > 0x7FFFFFFFFFFFFC00) {
+      ts.tv_sec = 0x7FFFFFFFFFFFFC00;
+      ts.tv_nsec = 0;
+    }
+    else if(secs > 0) {
+      secs += 0.000000000999;
+      ts.tv_sec = (time_t) secs;
+      ts.tv_nsec = (long) ((secs - (double) ts.tv_sec) * 1000000000);
+    }
+    else {
+      ts.tv_sec = 0;
+      ts.tv_nsec = 0;
+    }
+
+    if(::nanosleep(&ts, &rem) == 0)
+      return 0;
+
+    // Return the remaining time.
+    return (double) rem.tv_sec * 1000 + (double) rem.tv_nsec * 0.000001;
+  }
+
 V_object
 std_system_load_conf(V_string path)
   {
@@ -627,6 +658,21 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.start_overload();
         if(reader.end_overload())
           return (void) std_system_daemonize();
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("sleep"),
+      ASTERIA_BINDING(
+        "std.system.sleep", "duration",
+        Argument_Reader&& reader)
+      {
+        V_real duration;
+
+        reader.start_overload();
+        reader.required(duration);
+        if(reader.end_overload())
+          return (Value) std_system_sleep(duration);
 
         reader.throw_no_matching_function_call();
       });
