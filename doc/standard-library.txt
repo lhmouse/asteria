@@ -1816,7 +1816,7 @@
 
 	  On failure, `null` is returned.
 
-`std.filesystem.move_from(path_new, path_old)`
+`std.filesystem.move(path_new, path_old)`
 
 	* Moves (renames) the file or directory at `path_old` to
 	  `path_new`.
@@ -1845,9 +1845,9 @@
 
 	* Throws an exception in case of a system error.
 
-`std.filesystem.dir_list(path)`
+`std.filesystem.list(path)`
 
-	* Lists the contents of the directory at `path`.
+	* Lists the contents of the directory denoted by `path`.
 
 	* Returns an object containing all entries of the directory at
 	  `path`, excluding the special subdirectories '.' and '..'. For
@@ -1861,7 +1861,7 @@
 	* Throws an exception if `path` does not designate a directory,
 	  or some other errors occur.
 
-`std.filesystem.dir_create(path)`
+`std.filesystem.create_directory(path)`
 
 	* Creates a directory at `path`. Its parent directory must exist
 	  and must be accessible. This function does not fail if either a
@@ -1874,7 +1874,7 @@
 	* Throws an exception if `path` designates a non-directory, or
 	  some other errors occur.
 
-`std.filesystem.dir_remove(path)`
+`std.filesystem.remove_directory(path)`
 
 	* Removes the directory at `path`. The directory must be empty.
 	  This function fails if `path` does not designate a directory.
@@ -1885,7 +1885,7 @@
 	* Throws an exception if `path` designates a non-directory, or
 	  some other errors occur.
 
-`std.filesystem.file_read(path, [offset, [limit]])`
+`std.filesystem.read(path, [offset, [limit]])`
 
 	* Reads the file at `path` in binary mode. The read operation
 	  starts from the byte offset that is denoted by `offset` if it
@@ -1898,7 +1898,7 @@
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
 
-`std.filesystem.file_stream(path, callback, [offset, [limit]])`
+`std.filesystem.stream(path, callback, [offset, [limit]])`
 
 	* Reads the file at `path` in binary mode and invokes `callback`
 	  with the data read repeatedly. `callback` shall be a binary
@@ -1919,7 +1919,7 @@
 	* Throws an exception if `offset` is negative, or a read error
 	  occurs.
 
-`std.filesystem.file_write(path, [offset], data)`
+`std.filesystem.write(path, [offset], data)`
 
 	* Writes the file at `path` in binary mode. The write operation
 	  starts from the byte offset that is denoted by `offset` if it
@@ -1931,7 +1931,7 @@
 	* Throws an exception if `offset` is negative, or a write error
 	  occurs.
 
-`std.filesystem.file_append(path, data, [exclusive])`
+`std.filesystem.append(path, data, [exclusive])`
 
 	* Writes the file at `path` in binary mode. The write operation
 	  starts from the end of the file; existent contents of the file
@@ -1942,7 +1942,7 @@
 	* Throws an exception if `offset` is negative, or a write error
 	  occurs.
 
-`std.filesystem.file_copy_from(path_new, path_old)`
+`std.filesystem.copy_file(path_new, path_old)`
 
 	* Copies the file `path_old` to `path_new`. If `path_old` is a
 	  symbolic link, it is the target that will be copied, rather
@@ -1951,7 +1951,7 @@
 
 	* Throws an exception on failure.
 
-`std.filesystem.file_remove(path)`
+`std.filesystem.remove_file(path)`
 
 	* Removes the file at `path`. This function fails if `path`
 	  designates a directory.
@@ -2011,7 +2011,7 @@
 	  ```
 	  std.checksum.crc32_file = func(path) {
 	    var h = this.CRC32();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2072,7 +2072,7 @@
 	  ```
 	  std.checksum.fnv1a32_file = func(path) {
 	    var h = this.FNV1a32();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2131,7 +2131,7 @@
 	  ```
 	  std.checksum.md5_file = func(path) {
 	    var h = this.MD5();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2190,7 +2190,7 @@
 	  ```
 	  std.checksum.sha1_file = func(path) {
 	    var h = this.SHA1();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2249,7 +2249,7 @@
 	  ```
 	  std.checksum.sha224_file = func(path) {
 	    var h = this.SHA224();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2308,7 +2308,7 @@
 	  ```
 	  std.checksum.sha256_file = func(path) {
 	    var h = this.SHA256();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2367,7 +2367,7 @@
 	  ```
 	  std.checksum.sha384_file = func(path) {
 	    var h = this.SHA384();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```
@@ -2426,7 +2426,7 @@
 	  ```
 	  std.checksum.sha512_file = func(path) {
 	    var h = this.SHA512();
-	    this.file_stream(path, func(off, data) = h.update(data));
+	    this.stream(path, func(off, data) = h.update(data));
 	    return h.finish();
 	  };
 	  ```

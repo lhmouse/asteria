@@ -19,9 +19,9 @@ std_filesystem_get_real_path(V_string path);
 optV_object
 std_filesystem_get_properties(V_string path);
 
-// `std.filesystem.move_from`
+// `std.filesystem.move`
 void
-std_filesystem_move_from(V_string path_new, V_string path_old);
+std_filesystem_move(V_string path_new, V_string path_old);
 
 // `std.filesystem.remove_recursive`
 V_integer
@@ -33,39 +33,39 @@ std_filesystem_glob(V_string pattern);
 
 // `std.filesystem.directory_list`
 V_object
-std_filesystem_dir_list(V_string path);
+std_filesystem_list(V_string path);
 
 // `std.filesystem.directory_create`
 V_integer
-std_filesystem_dir_create(V_string path);
+std_filesystem_create_directory(V_string path);
 
 // `std.filesystem.directory_remove`
 V_integer
-std_filesystem_dir_remove(V_string path);
+std_filesystem_remove_directory(V_string path);
 
-// `std.filesystem.file_read`
+// `std.filesystem.read`
 V_string
-std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit);
+std_filesystem_read(V_string path, optV_integer offset, optV_integer limit);
 
-// `std.filesystem.file_stream`
+// `std.filesystem.stream`
 V_integer
-std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback, optV_integer offset, optV_integer limit);
+std_filesystem_stream(Global_Context& global, V_string path, V_function callback, optV_integer offset, optV_integer limit);
 
-// `std.filesystem.file_write`
+// `std.filesystem.write`
 void
-std_filesystem_file_write(V_string path, optV_integer offset, V_string data);
+std_filesystem_write(V_string path, optV_integer offset, V_string data);
 
-// `std.filesystem.file_append`
+// `std.filesystem.append`
 void
-std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive);
+std_filesystem_append(V_string path, V_string data, optV_boolean exclusive);
 
-// `std.filesystem.file_copy_from`
+// `std.filesystem.copy_file`
 void
-std_filesystem_file_copy_from(V_string path_new, V_string path_old);
+std_filesystem_copy_file(V_string path_new, V_string path_old);
 
-// `std.filesystem.file_remove`
+// `std.filesystem.remove_file`
 V_integer
-std_filesystem_file_remove(V_string path);
+std_filesystem_remove_file(V_string path);
 
 // Create an object that is to be referenced as `std.filesystem`.
 void

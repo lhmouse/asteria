@@ -139,9 +139,9 @@ std_filesystem_get_properties(V_string path)
     stat.try_emplace(sref("time_modified"),
       V_integer(
 #ifdef __USE_XOPEN2K8
-        (int64_t) stb.st_mtim.tv_sec * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification
+        (int64_t) stb.st_mtim.tv_sec * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of modification
 #else
-        (int64_t) stb.st_mtime * 1000  // timestamp of last modification
+        (int64_t) stb.st_mtime * 1000  // timestamp of modification
 #endif
       ));
 
@@ -149,7 +149,7 @@ std_filesystem_get_properties(V_string path)
   }
 
 void
-std_filesystem_move_from(V_string path_new, V_string path_old)
+std_filesystem_move(V_string path_new, V_string path_old)
   {
     if(::rename(path_old.safe_c_str(), path_new.safe_c_str()) != 0)
       ASTERIA_THROW((
@@ -226,9 +226,9 @@ std_filesystem_remove_recursive(V_string path)
 
         case rm_disp_expand: {
           // This is a subdirectory that has not been expanded.
-          // Push the directory itself.
-          // Since elements are maintained in LIFO order, only when this element is encountered
-          // for a second time, will all of its children have been removed.
+          // Push the directory itself. Since elements are maintained in LIFO order,
+          // only when this element is encountered for a second time, will all of its
+          // children have been removed.
           stack.push_back({ rm_disp_rmdir, elem.path });
 
           // Open the directory for listing.
@@ -309,7 +309,7 @@ std_filesystem_glob(V_string pattern)
   }
 
 V_object
-std_filesystem_dir_list(V_string path)
+std_filesystem_list(V_string path)
   {
     // Try opening the directory.
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()));
@@ -380,7 +380,7 @@ std_filesystem_dir_list(V_string path)
   }
 
 V_integer
-std_filesystem_dir_create(V_string path)
+std_filesystem_create_directory(V_string path)
   {
     if(::mkdir(path.safe_c_str(), 0777) == 0)
       return 1;
@@ -396,7 +396,7 @@ std_filesystem_dir_create(V_string path)
   }
 
 V_integer
-std_filesystem_dir_remove(V_string path)
+std_filesystem_remove_directory(V_string path)
   {
     if(::rmdir(path.safe_c_str()) == 0)
       return 1;
@@ -411,7 +411,7 @@ std_filesystem_dir_remove(V_string path)
   }
 
 V_string
-std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
+std_filesystem_read(V_string path, optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW((
@@ -469,8 +469,8 @@ std_filesystem_file_read(V_string path, optV_integer offset, optV_integer limit)
   }
 
 V_integer
-std_filesystem_file_stream(Global_Context& global, V_string path, V_function callback,
-                           optV_integer offset, optV_integer limit)
+std_filesystem_stream(Global_Context& global, V_string path, V_function callback,
+                      optV_integer offset, optV_integer limit)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW((
@@ -537,7 +537,7 @@ std_filesystem_file_stream(Global_Context& global, V_string path, V_function cal
   }
 
 void
-std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
+std_filesystem_write(V_string path, optV_integer offset, V_string data)
   {
     if(offset && (*offset < 0))
       ASTERIA_THROW((
@@ -573,7 +573,7 @@ std_filesystem_file_write(V_string path, optV_integer offset, V_string data)
   }
 
 void
-std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
+std_filesystem_append(V_string path, V_string data, optV_boolean exclusive)
   {
     // Calculate the `flags` argument.
     int flags = O_WRONLY | O_CREAT | O_APPEND;
@@ -595,7 +595,7 @@ std_filesystem_file_append(V_string path, V_string data, optV_boolean exclusive)
   }
 
 void
-std_filesystem_file_copy_from(V_string path_new, V_string path_old)
+std_filesystem_copy_file(V_string path_new, V_string path_old)
   {
     // Open the old file.
     ::rocket::unique_posix_fd fd_old(::open(path_old.safe_c_str(), O_RDONLY));
@@ -653,7 +653,7 @@ std_filesystem_file_copy_from(V_string path_new, V_string path_old)
   }
 
 V_integer
-std_filesystem_file_remove(V_string path)
+std_filesystem_remove_file(V_string path)
   {
     if(::unlink(path.safe_c_str()) == 0)
       return 1;
@@ -712,9 +712,9 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("move_from"),
+    result.insert_or_assign(sref("move"),
       ASTERIA_BINDING(
-        "std.filesystem.move_from", "path_new, path_old",
+        "std.filesystem.move", "path_new, path_old",
         Argument_Reader&& reader)
       {
         V_string to, from;
@@ -723,7 +723,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(to);
         reader.required(from);
         if(reader.end_overload())
-          return (void) std_filesystem_move_from(to, from);
+          return (void) std_filesystem_move(to, from);
 
         reader.throw_no_matching_function_call();
       });
@@ -758,9 +758,9 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("dir_list"),
+    result.insert_or_assign(sref("list"),
       ASTERIA_BINDING(
-        "std.filesystem.dir_list", "path",
+        "std.filesystem.list", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -768,14 +768,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value) std_filesystem_dir_list(path);
+          return (Value) std_filesystem_list(path);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("dir_create"),
+    result.insert_or_assign(sref("create_directory"),
       ASTERIA_BINDING(
-        "std.filesystem.dir_create", "path",
+        "std.filesystem.create_directory", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -783,14 +783,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value) std_filesystem_dir_create(path);
+          return (Value) std_filesystem_create_directory(path);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("dir_remove"),
+    result.insert_or_assign(sref("remove_directory"),
       ASTERIA_BINDING(
-        "std.filesystem.dir_remove", "path",
+        "std.filesystem.remove_directory", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -798,14 +798,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value) std_filesystem_dir_remove(path);
+          return (Value) std_filesystem_remove_directory(path);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("file_read"),
+    result.insert_or_assign(sref("read"),
       ASTERIA_BINDING(
-        "std.filesystem.file_read", "path, [offset, [limit]]",
+        "std.filesystem.read", "path, [offset, [limit]]",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -816,14 +816,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.optional(off);
         reader.optional(lim);
         if(reader.end_overload())
-          return (Value) std_filesystem_file_read(path, off, lim);
+          return (Value) std_filesystem_read(path, off, lim);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("file_stream"),
+    result.insert_or_assign(sref("stream"),
       ASTERIA_BINDING(
-        "std.filesystem.file_stream", "path, callback, [offset, [limit]]",
+        "std.filesystem.stream", "path, callback, [offset, [limit]]",
         Global_Context& global, Argument_Reader&& reader)
       {
         V_string path;
@@ -836,14 +836,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.optional(off);
         reader.optional(lim);
         if(reader.end_overload())
-          return (Value) std_filesystem_file_stream(global, path, func, off, lim);
+          return (Value) std_filesystem_stream(global, path, func, off, lim);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("file_write"),
+    result.insert_or_assign(sref("write"),
       ASTERIA_BINDING(
-        "std.filesystem.file_write", "path, data",
+        "std.filesystem.write", "path, data",
         Argument_Reader&& reader)
       {
         V_string path, data;
@@ -854,20 +854,20 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.save_state(0);
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_filesystem_file_write(path, nullopt, data);
+          return (void) std_filesystem_write(path, nullopt, data);
 
         reader.load_state(0);
         reader.optional(off);
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_filesystem_file_write(path, off, data);
+          return (void) std_filesystem_write(path, off, data);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("file_append"),
+    result.insert_or_assign(sref("append"),
       ASTERIA_BINDING(
-        "std.filesystem.file_append", "path, data, [exclusive]",
+        "std.filesystem.append", "path, data, [exclusive]",
         Argument_Reader&& reader)
       {
         V_string path, data;
@@ -878,14 +878,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(excl);
         if(reader.end_overload())
-          return (void) std_filesystem_file_append(path, data, excl);
+          return (void) std_filesystem_append(path, data, excl);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("file_copy_from"),
+    result.insert_or_assign(sref("copy_file"),
       ASTERIA_BINDING(
-        "std.filesystem.file_copy_from", "path_new, path_old",
+        "std.filesystem.copy_file", "path_new, path_old",
         Argument_Reader&& reader)
       {
         V_string to, from;
@@ -894,14 +894,14 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.required(to);
         reader.required(from);
         if(reader.end_overload())
-          return (void) std_filesystem_file_copy_from(to, from);
+          return (void) std_filesystem_copy_file(to, from);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("file_remove"),
+    result.insert_or_assign(sref("remove_file"),
       ASTERIA_BINDING(
-        "std.filesystem.file_remove", "path",
+        "std.filesystem.remove_file", "path",
         Argument_Reader&& reader)
       {
         V_string path;
@@ -909,7 +909,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(path);
         if(reader.end_overload())
-          return (Value) std_filesystem_file_remove(path);
+          return (Value) std_filesystem_remove_file(path);
 
         reader.throw_no_matching_function_call();
       });
