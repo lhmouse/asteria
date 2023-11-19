@@ -14,16 +14,16 @@ sprintf_and_throw(const char* fmt, ...)
     ::va_list ap;
     va_start(ap, fmt);
     char strbuf[4096];
-    char* eptr = strbuf + (uint32_t) max(0, ::vsnprintf(strbuf, sizeof(strbuf), fmt, ap));
+    long t = ::vsnprintf(strbuf, sizeof(strbuf), fmt, ap) - 1;
     va_end(ap);
 
     // Remove trailing line breaks.
-    while((eptr != strbuf) && (eptr[-1] == '\n'))
-      *--eptr = 0;
+    while((t >= 0) && (strbuf[t] == '\n'))
+      strbuf[--t] = 0;
 
     // Throw an exception with a copy of the formatted message...
-    // Can we make use of the reference-counting string in standard exceptions
-    // directly?
+    // Can we make use of the reference-counting string in standard
+    // exceptions directly?
     throw exceptT(strbuf);
   }
 
