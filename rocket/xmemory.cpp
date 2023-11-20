@@ -49,6 +49,10 @@ xmemalloc(xmeminfo& info, xmemopt opt)
       if(ROCKET_EXPECT(b != nullptr) && (b->next != nullptr))
         b->next = p.head.xchg(b->next);
     }
+    else if(opt == xmemopt_clear_cache) {
+      // Extract all blocks.
+      b = p.head.xchg(nullptr);
+    }
 
     // If the cache was empty, allocate a block from the system.
     if(b == nullptr)
