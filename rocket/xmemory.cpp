@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
 #include "xmemory.hpp"
-#include "mutex.hpp"
+#include "atomic.hpp"
 namespace rocket {
 namespace {
 
@@ -14,8 +14,7 @@ struct free_block
 
 struct alignas(64) pool
   {
-    mutex m;
-    free_block* head;
+    atomic_acq_rel<free_block*> head;
   };
 
 pool s_pools[64];
@@ -43,19 +42,20 @@ xmemalloc(xmeminfo& info, xmemopt opt)
 
     free_block* b = nullptr;
     auto& p = do_get_pool_for_size(rsize);
-    mutex::unique_lock lock;
 
     if(opt == xmemopt_use_cache) {
       // Get a block from the cache.
-      lock.lock(p.m);
-      if(p.head != nullptr)
-        b = exchange(p.head, p.head->next);
+      b = p.head.xchg(nullptr);
+      if(ROCKET_EXPECT(b != nullptr) && (b->next != nullptr))
+        b->next = p.head.xchg(b->next);
     }
-    lock.unlock();
 
     // If the cache was empty, allocate a block from the system.
     if(b == nullptr)
       b = (free_block*) ::operator new(rsize);
+    else
+      while(b->next != nullptr)
+        ::operator delete(exchange(b->next, b->next->next));
 
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xB5, rsize);
@@ -73,7 +73,6 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 
     size_t rsize = info.element_size * info.count;
     auto& p = do_get_pool_for_size(rsize);
-    mutex::unique_lock lock;
 
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xCB, rsize);
@@ -83,16 +82,14 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 
     if(opt == xmemopt_use_cache) {
       // Put the block into the cache.
-      lock.lock(p.m);
-      b->next = exchange(p.head, b);
+      b->next = p.head.load();
+      while(!p.head.cmpxchg_weak(b->next, b));
       b = nullptr;
     }
     else if(opt == xmemopt_clear_cache) {
       // Append all blocks from the cache to `b`.
-      lock.lock(p.m);
-      b->next = exchange(p.head, nullptr);
+      b->next = p.head.xchg(nullptr);
     }
-    lock.unlock();
 
     // Return all blocks to the system.
     while(b != nullptr)
@@ -103,12 +100,8 @@ void
 xmemflush() noexcept
   {
     for(auto& p : s_pools) {
-      free_block* b = nullptr;
-
-      // Append all blocks from the cache to `b`.
-      mutex::unique_lock lock(p.m);
-      b = p.head;
-      lock.unlock();
+      // Extract all blocks.
+      free_block* b = p.head.xchg(nullptr);
 
       // Return all blocks to the system.
       while(b != nullptr)
