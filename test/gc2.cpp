@@ -63,7 +63,8 @@ int main()
       code.execute();
     }
 
-    ::rocket::xmemflush();
+    ::rocket::xmemclean();
+    ::rocket::xmemclean();
     ::std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
     ::std::sort(free_list.mut_begin(), free_list.mut_end());
     ASTERIA_TEST_CHECK(::std::equal(

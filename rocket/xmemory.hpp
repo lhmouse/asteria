@@ -38,7 +38,7 @@ xmemfree(xmeminfo& info, xmemopt opt = xmemopt_use_cache) noexcept;
 
 // Clears the global cache.
 void
-xmemflush() noexcept;
+xmemclean() noexcept;
 
 // Copies a block into another, with some checking.
 inline

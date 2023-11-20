@@ -81,7 +81,7 @@ int main()
     ASTERIA_TEST_CHECK(foreign->get_value().type() == type_string);
     foreign = nullptr;
 
-    ::rocket::xmemflush();
+    ::rocket::xmemclean();
     ::std::sort(alloc_list.mut_begin(), alloc_list.mut_end());
     ::std::sort(free_list.mut_begin(), free_list.mut_end());
     ASTERIA_TEST_CHECK(::std::equal(

@@ -97,7 +97,7 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
   }
 
 void
-xmemflush() noexcept
+xmemclean() noexcept
   {
     for(auto& p : s_pools) {
       // Extract all blocks.

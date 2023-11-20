@@ -64,6 +64,7 @@ int main()
       code.execute();
     }
 
-    ::rocket::xmemflush();
+    ::rocket::xmemclean();
+    ::rocket::xmemclean();
     ASTERIA_TEST_CHECK(bcnt.load() == 0);
   }
