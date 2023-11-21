@@ -23,7 +23,7 @@ inline
 pool&
 do_get_pool_for_size(size_t& rsize)
   {
-    uint64_t si64 = ::std::max(sizeof(free_block), rsize);
+    uint64_t si64 = ::std::max(rsize, sizeof(free_block));
     uint32_t i = 64U - (uint32_t) ROCKET_LZCNT64(si64 - 1ULL);
     si64 = 1ULL << i;
     ROCKET_ASSERT(si64 >= rsize);
