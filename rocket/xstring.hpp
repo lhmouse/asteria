@@ -75,7 +75,7 @@ int
 xmemcmp(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
   {
     if(llen < rlen)
-      return (noadl::xmemcmp(lhs, rhs, llen) > 0) ? 1 : -1;
+      return (noadl::xmemcmp(rhs, lhs, llen) < 0) ? 1 : -1;
     else if(llen > rlen)
       return (noadl::xmemcmp(lhs, rhs, rlen) < 0) ? -1 : 1;
     else
