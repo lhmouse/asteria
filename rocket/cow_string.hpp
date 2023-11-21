@@ -2153,9 +2153,7 @@ class basic_cow_string
     int
     compare(const value_type* s, size_type n) const noexcept
       {
-        return (this->size() >= n)
-                 ? (noadl::xmemcmp(this->data(), s, n) | (this->size() > n))
-                 : ~(noadl::xmemcmp(s, this->data(), this->size()) | 1);
+        return noadl::xmemcmp(this->data(), this->size(), s, n);
       }
 
     constexpr
@@ -2218,10 +2216,7 @@ class basic_cow_string
     int
     substr_compare(size_type tpos, size_type tn, const value_type* s, size_type n) const
       {
-        size_type tlen = this->do_clamp_substr(tpos, tn);
-        return (tlen >= n)
-                 ? (noadl::xmemcmp(this->data() + tpos, s, n) | (tlen > n))
-                 : ~(noadl::xmemcmp(s, this->data() + tpos, tlen) | 1);
+        return noadl::xmemcmp(this->data() + tpos, this->do_clamp_substr(tpos, tn), s, n);
       }
 
     constexpr
