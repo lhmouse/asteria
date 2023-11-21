@@ -62,9 +62,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
     }
     catch(Runtime_Error& except)
-      { throw;  }  // forward
+    { throw;  }  // forward
     catch(exception& stdex)
-      { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
+    { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
 
     throw Runtime_Error(Runtime_Error::M_format(),
               "cow_function: attempt to call a null function");

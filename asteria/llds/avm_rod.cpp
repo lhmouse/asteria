@@ -178,9 +178,9 @@ execute(Executive_Context& ctx) const
               status = head->pv_meta->exec(ctx, head);
             }
             catch(Runtime_Error& except)
-              { throw;  }  // forward
+            { throw;  }  // forward
             catch(exception& stdex)
-              { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
+            { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
           }
           catch(Runtime_Error& except) {
             // Modify and rethrow the exception in place without copying it.
