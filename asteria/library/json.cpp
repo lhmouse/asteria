@@ -298,87 +298,61 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
     // Format a value. `qval` must always point to a valid value here.
   format_next:
-    switch(weaken_enum(qval->type())) {
-      case type_boolean:
-        // Write `true` or `false`.
-        fmt << qval->as_boolean();
-        break;
-
-      case type_integer:
-        // Write the integer in decimal.
-        fmt << (double) qval->as_integer();
-        break;
-
-      case type_real: {
-        double real = qval->as_real();
-        if(::std::isfinite(real)) {
-          // Write the real in decimal.
-          fmt << real;
-        }
-        else if(!json5) {
-          // Censor the value.
-          fmt << "null";
-        }
-        else if(!::std::isnan(real)) {
-          // JSON5 allows infinities in ECMAScript form.
-          fmt << "Infinity";
-        }
-        else {
-          // JSON5 allows NaNs in ECMAScript form.
-          fmt << "NaN";
-        }
-        break;
-      }
-
-      case type_string:
-        // Write the quoted string.
-        do_quote_string(fmt, qval->as_string());
-        break;
-
-      case type_array: {
-        const auto& array = qval->as_array();
-        fmt << '[';
-
-        Xformat_array ctxa = { &array, array.begin() };
-        if(ctxa.curp != array.end()) {
-          // Open an array.
-          indent.increment_level();
-          indent.break_line(fmt);
-
-          qval = &*(ctxa.curp);
-          stack.emplace_back(::std::move(ctxa));
-          goto format_next;
-        }
-
-        fmt << ']';
-        break;
-      }
-
-      case type_object: {
-        const auto& object = qval->as_object();
-        fmt << '{';
-
-        Xformat_object ctxo = { &object, object.begin() };
-        if(do_find_uncensored(ctxo.curp, object)) {
-          // Open an object.
-          indent.increment_level();
-          indent.break_line(fmt);
-          do_format_object_key(fmt, json5, indent, ctxo.curp->first);
-
-          qval = &(ctxo.curp->second);
-          stack.emplace_back(::std::move(ctxo));
-          goto format_next;
-        }
-
-        fmt << '}';
-        break;
-      }
-
-      default:
-        // Anything else is censored to `null`.
-        fmt << "null";
-        break;
+    if(qval->is_boolean()) {
+      // Write `true` or `false`.
+      fmt << qval->as_boolean();
     }
+    else if(qval->is_real()) {
+      // Write the real number in decimal. JSON5 allows infinities and NaN;
+      // otherwise they are replaced with nulls.
+      double rval = qval->as_real();
+      int cls = ::std::fpclassify(rval);
+      if((cls == FP_ZERO) || (cls == FP_NORMAL) || (cls == FP_SUBNORMAL))
+        fmt << rval;
+      else if((cls == FP_NAN) && json5)
+        fmt << "NaN";
+      else if((cls == FP_INFINITE) && json5)
+        fmt << ("-Infinity" + !::std::signbit(rval));
+      else
+        fmt << "null";
+    }
+    else if(qval->is_string()) {
+      // Write the string in double quotes.
+      do_quote_string(fmt, qval->as_string());
+    }
+    else if(qval->is_array()) {
+      const auto& array = qval->as_array();
+      Xformat_array ctxa = { &array, array.begin() };
+      if(ctxa.curp != array.end()) {
+        // Open an array.
+        fmt << '[';
+        indent.increment_level();
+        indent.break_line(fmt);
+
+        qval = &*(ctxa.curp);
+        stack.emplace_back(::std::move(ctxa));
+        goto format_next;
+      }
+      fmt << "[]";
+    }
+    else if(qval->is_object()) {
+      const auto& object = qval->as_object();
+      Xformat_object ctxo = { &object, object.begin() };
+      if(do_find_uncensored(ctxo.curp, object)) {
+        // Open an object.
+        fmt << '{';
+        indent.increment_level();
+        indent.break_line(fmt);
+        do_format_object_key(fmt, json5, indent, ctxo.curp->first);
+
+        qval = &(ctxo.curp->second);
+        stack.emplace_back(::std::move(ctxo));
+        goto format_next;
+      }
+      fmt << "{}";
+    }
+    else
+      fmt << "null";
 
     while(stack.size()) {
       // Advance to the next element.

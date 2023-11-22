@@ -97,15 +97,6 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
        ),  \
      ROCKET_UNREACHABLE())
 
-// Type conversion
-template<typename enumT>
-ROCKET_CONST constexpr
-typename ::std::underlying_type<enumT>::type
-weaken_enum(enumT value) noexcept
-  {
-    return static_cast<typename ::std::underlying_type<enumT>::type>(value);
-  }
-
 // Raw memory management
 template<typename objectT, typename sourceT>
 ROCKET_ALWAYS_INLINE

@@ -21,67 +21,76 @@ tell_precedence() const noexcept
       case index_ternary:
         return precedence_assignment;
 
-      case index_logical_and:
-        return this->m_stor.as<S_logical_and>().assign
-                 ? precedence_assignment
-                 : precedence_logical_and;
+      case index_logical_and: {
+        const auto& altr = this->m_stor.as<S_logical_and>();
+        if(altr.assign)
+          return precedence_assignment;
+        else
+          return precedence_logical_and;
+      }
 
-      case index_logical_or:
-        return this->m_stor.as<S_logical_or>().assign
-                 ? precedence_assignment
-                 : precedence_logical_or;
+      case index_logical_or: {
+        const auto& altr = this->m_stor.as<S_logical_or>();
+        if(altr.assign)
+          return precedence_assignment;
+        else
+          return precedence_logical_or;
+      }
 
-      case index_coalescence:
-        return this->m_stor.as<S_coalescence>().assign
-                 ? precedence_assignment
-                 : precedence_coalescence;
+      case index_coalescence: {
+        const auto& altr = this->m_stor.as<S_coalescence>();
+        if(altr.assign)
+          return precedence_assignment;
+        else
+          return precedence_coalescence;
+      }
 
       case index_general: {
         const auto& altr = this->m_stor.as<S_general>();
         if(altr.assign)
           return precedence_assignment;
+        else
+          switch((uint32_t) altr.xop) {
+            case xop_mul:
+            case xop_div:
+            case xop_mod:
+              return precedence_multiplicative;
 
-        switch(weaken_enum(altr.xop)) {
-          case xop_mul:
-          case xop_div:
-          case xop_mod:
-            return precedence_multiplicative;
+            case xop_add:
+            case xop_sub:
+              return precedence_additive;
 
-          case xop_add:
-          case xop_sub:
-            return precedence_additive;
+            case xop_sla:
+            case xop_sra:
+            case xop_sll:
+            case xop_srl:
+              return precedence_shift;
 
-          case xop_sla:
-          case xop_sra:
-          case xop_sll:
-          case xop_srl:
-            return precedence_shift;
+            case xop_cmp_lt:
+            case xop_cmp_lte:
+            case xop_cmp_gt:
+            case xop_cmp_gte:
+              return precedence_relational;
 
-          case xop_cmp_lt:
-          case xop_cmp_lte:
-          case xop_cmp_gt:
-          case xop_cmp_gte:
-            return precedence_relational;
+            case xop_cmp_eq:
+            case xop_cmp_ne:
+            case xop_cmp_3way:
+            case xop_cmp_un:
+              return precedence_equality;
 
-          case xop_cmp_eq:
-          case xop_cmp_ne:
-          case xop_cmp_3way:
-          case xop_cmp_un:
-            return precedence_equality;
+            case xop_andb:
+              return precedence_bitwise_and;
 
-          case xop_andb:
-            return precedence_bitwise_and;
+            case xop_xorb:
+            case xop_orb:
+              return precedence_bitwise_or;
 
-          case xop_xorb:
-          case xop_orb:
-            return precedence_bitwise_or;
+            case xop_assign:
+              return precedence_assignment;
 
-          case xop_assign:
-            return precedence_assignment;
-
-          default:
-            ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.xop);
-        }
+            default:
+              ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.xop);
+          }
       }
 
       default:

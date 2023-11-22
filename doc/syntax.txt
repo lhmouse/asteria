@@ -4,10 +4,7 @@ identifier ::=
 	PCRE([A-Za-z_][A-Za-z_0-9]*)
 
 literal ::=
-	keyword-literal | string-literal | numeric-literal
-
-keyword-literal ::=
-	"null" | "false" | "true"
+	"null" | "false" | "true" | string-literal | numeric-literal
 
 string-literal ::=
 	( escape-string-literal | noescape-string-literal ) string-literal ?

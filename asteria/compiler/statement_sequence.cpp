@@ -150,52 +150,46 @@ opt<Value>
 do_accept_literal_opt(Token_Stream& tstrm)
   {
     // literal ::=
-    //   keyword-literal | string-literal | numeric-literal
-    // keyword-literal ::=
-    //   "null" | "false" | "true"
+    //   "null" | "false" | "true" | string-literal | numeric-literal
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
 
-    if(qtok->is_keyword()) {
-      switch(weaken_enum(qtok->as_keyword())) {
-        case keyword_null:
-          // Discard this token and create a `null`.
-          tstrm.shift();
-          return null_value;
+    if(qtok->is_keyword() && (qtok->as_keyword() == keyword_null)) {
+      // Discard this token and create a `null`.
+      tstrm.shift();
+      return null_value;
+    }
 
-        case keyword_true:
-          // Discard this token and create a `true`.
-          tstrm.shift();
-          return true;
+    if(qtok->is_keyword() && (qtok->as_keyword() == keyword_false)) {
+      // Discard this token and create a `false`.
+      tstrm.shift();
+      return false;
+    }
 
-        case keyword_false:
-          // Discard this token and create a `false`.
-          tstrm.shift();
-          return false;
-
-        default:
-          return nullopt;
-      }
+    if(qtok->is_keyword() && (qtok->as_keyword() == keyword_true)) {
+      // Discard this token and create a `true`.
+      tstrm.shift();
+      return true;
     }
 
     if(qtok->is_integer_literal()) {
       // Copy the value and discard this token.
-      auto val = qtok->as_integer_literal();
+      int64_t val = qtok->as_integer_literal();
       tstrm.shift();
       return val;
     }
 
     if(qtok->is_real_literal()) {
       // Copy the value and discard this token.
-      auto val = qtok->as_real_literal();
+      double val = qtok->as_real_literal();
       tstrm.shift();
       return val;
     }
 
     if(qtok->is_string_literal()) {
       // Copy the value and discard this token.
-      auto val = qtok->as_string_literal();
+      cow_string val = qtok->as_string_literal();
       tstrm.shift();
       do_concatenate_string_literal_sequence(val, tstrm);
       return val;
@@ -334,9 +328,6 @@ enum scope_flags : uint32_t
     scope_flags_switch     = 0b00000001,
     scope_flags_while      = 0b00000010,
     scope_flags_for        = 0b00000100,
-
-    scope_flags_xbreak     = 0b00000111,
-    scope_flags_xcontinue  = 0b00000110,
   };
 
 constexpr
@@ -1094,28 +1085,6 @@ do_accept_for_statement_opt(Token_Stream& tstrm, scope_flags scope)
     return ::std::move(*qcompl);
   }
 
-opt<pair<Jump_Target, scope_flags>>
-do_accept_jump_target_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
-  {
-    auto qkwrd = do_accept_keyword_opt(tstrm, accept);
-    if(!qkwrd)
-      return nullopt;
-
-    switch(weaken_enum(*qkwrd)) {
-      case keyword_switch:
-        return ::std::make_pair(jump_target_switch, scope_flags_switch);
-
-      case keyword_while:
-        return ::std::make_pair(jump_target_while, scope_flags_while);
-
-      case keyword_for:
-        return ::std::make_pair(jump_target_for, scope_flags_for);
-
-      default:
-        ROCKET_ASSERT(false);
-    }
-  }
-
 opt<Statement>
 do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
@@ -1128,12 +1097,27 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
     if(!qkwrd)
       return nullopt;
 
-    auto ktarg = do_accept_jump_target_opt(tstrm, { keyword_switch,
-                                                    keyword_while, keyword_for });
-    if(!ktarg)
-      ktarg.emplace(jump_target_unspec, scope_flags_xbreak);
+    scope_flags scope_check = scope_flags_switch | scope_flags_while | scope_flags_for;
+    Jump_Target target = jump_target_unspec;
 
-    if(!(scope & ktarg->second))
+    qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch, keyword_while, keyword_for });
+    if(qkwrd && (*qkwrd == keyword_switch)) {
+      // `switch`
+      scope_check = scope_flags_switch;
+      target = jump_target_switch;
+    }
+    else if(qkwrd && (*qkwrd == keyword_while)) {
+     // `do`...`while` and `while`
+      scope_check = scope_flags_while;
+      target = jump_target_while;
+    }
+    else if(qkwrd && (*qkwrd == keyword_for)) {
+     // `for` and `for`...`each`
+      scope_check = scope_flags_for;
+      target = jump_target_for;
+    }
+
+    if(!(scope & scope_check))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_break_no_matching_scope, tstrm.next_sloc());
 
@@ -1142,7 +1126,7 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_break xstmt = { ::std::move(sloc), ktarg->first };
+    Statement::S_break xstmt = { ::std::move(sloc), target };
     return ::std::move(xstmt);
   }
 
@@ -1158,11 +1142,22 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
     if(!qkwrd)
       return nullopt;
 
-    auto ktarg = do_accept_jump_target_opt(tstrm, { keyword_while, keyword_for });
-    if(!ktarg)
-      ktarg.emplace(jump_target_unspec, scope_flags_xcontinue);
+    scope_flags scope_check = scope_flags_while | scope_flags_for;
+    Jump_Target target = jump_target_unspec;
 
-    if(!(scope & ktarg->second))
+    qkwrd = do_accept_keyword_opt(tstrm, { keyword_while, keyword_for });
+    if(qkwrd && (*qkwrd == keyword_while)) {
+     // `do`...`while` and `while`
+      scope_check = scope_flags_while;
+      target = jump_target_while;
+    }
+    else if(qkwrd && (*qkwrd == keyword_for)) {
+     // `for` and `for`...`each`
+      scope_check = scope_flags_for;
+      target = jump_target_for;
+    }
+
+    if(!(scope & scope_check))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_continue_no_matching_scope, tstrm.next_sloc());
 
@@ -1171,7 +1166,7 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_continue xstmt = { ::std::move(sloc), ktarg->first };
+    Statement::S_continue xstmt = { ::std::move(sloc), target };
     return ::std::move(xstmt);
   }
 
