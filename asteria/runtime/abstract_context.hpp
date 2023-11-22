@@ -45,10 +45,16 @@ class Abstract_Context
     // This function is called by `do_create_lazy_reference_opt()` to avoid
     // infinite recursion.
     Reference&
-    do_mut_named_reference(Reference* hint_opt, phsh_stringR name) const;
+    do_mut_named_reference(Reference* hint_opt, phsh_stringR name) const
+      {
+        return hint_opt ? *hint_opt : this->m_named_refs.insert(name);
+      }
 
     void
-    do_clear_named_references() noexcept;
+    do_clear_named_references() noexcept
+      {
+        this->m_named_refs.clear();
+      }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Abstract_Context);
@@ -62,13 +68,37 @@ class Abstract_Context
       { return this->do_get_parent_opt();  }
 
     const Reference*
-    get_named_reference_opt(phsh_stringR name) const;
+    get_named_reference_opt(phsh_stringR name) const
+      {
+        auto qref = this->m_named_refs.find_opt(name);
+        if(!qref && name.rdstr().starts_with("__")) {
+          // Create a lazy reference. Built-in references such as `__func`
+          // are only created when they are mentioned.
+          qref = this->do_create_lazy_reference_opt(nullptr, name);
+        }
+        return qref;
+      }
 
     Reference&
-    insert_named_reference(phsh_stringR name);
+    insert_named_reference(phsh_stringR name)
+      {
+        bool newly = false;
+        auto& ref = this->m_named_refs.insert(name, &newly);
+        if(newly && name.rdstr().starts_with("__")) {
+          // If a built-in reference has been inserted, it may have a default
+          // value, so initialize it. DO NOT CALL THIS FUNCTION INSIDE
+          // `do_create_lazy_reference_opt()`, as it will result in infinite
+          // recursion; call `do_mut_named_reference()` instead.
+          this->do_create_lazy_reference_opt(&ref, name);
+        }
+        return ref;
+      }
 
     bool
-    erase_named_reference(phsh_stringR name, Reference* refp_opt = nullptr) noexcept;
+    erase_named_reference(phsh_stringR name, Reference* refp_opt) noexcept
+      {
+        return this->m_named_refs.erase(name, refp_opt);
+      }
   };
 
 }  // namespace asteria

@@ -44,7 +44,7 @@ bool
 Simple_Script::
 erase_global_variable(phsh_stringR name) noexcept
   {
-    return this->m_global.erase_named_reference(name);
+    return this->m_global.erase_named_reference(name, nullptr);
   }
 
 void
