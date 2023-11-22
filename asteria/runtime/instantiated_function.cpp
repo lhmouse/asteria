@@ -65,8 +65,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_next:
       case air_status_return_void:
         // Return void if the control flow reached the end of the function.
-        self.set_void();
-        break;
+        return self.set_void();
 
       case air_status_return_ref: {
         // In case of PTCs, set up source location. This cannot be set at the
@@ -75,8 +74,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
           ptc->set_caller(this->m_zvarg);
 
         // Return the reference at the top of `stack`.
-        self = ::std::move(stack.mut_top());
-        break;
+        return self = ::std::move(stack.mut_top());
       }
 
       case air_status_break_unspec:
@@ -93,7 +91,6 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
     }
-    return self;
   }
 
 }  // namespace asteria
