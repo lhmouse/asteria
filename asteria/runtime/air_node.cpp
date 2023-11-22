@@ -58,12 +58,12 @@ do_collect_variables_for_each(Variable_HashMap& staged, Variable_HashMap& temp,
   }
 
 void
-do_solidify_nodes(AVM_Rod& queue, const cow_vector<AIR_Node>& code)
+do_solidify_nodes(AVM_Rod& rod, const cow_vector<AIR_Node>& code)
   {
-    queue.clear();
+    rod.clear();
     for(size_t i = 0;  i < code.size();  ++i)
-      code.at(i).solidify(queue);
-    queue.finalize();
+      code.at(i).solidify(rod);
+    rod.finalize();
   }
 
 template<typename XModT>
@@ -92,12 +92,12 @@ do_sparam_dtor(Header* head)
   }
 
 AIR_Status
-do_execute_block(const AVM_Rod& queue, const Executive_Context& ctx)
+do_execute_block(const AVM_Rod& rod, const Executive_Context& ctx)
   {
     Executive_Context ctx_next(Executive_Context::M_plain(), ctx);
     AIR_Status status;
     try {
-      status = queue.execute(ctx_next);
+      status = rod.execute(ctx_next);
     }
     catch(Runtime_Error& except) {
       ctx_next.on_scope_exit_exceptional(except);
@@ -109,17 +109,17 @@ do_execute_block(const AVM_Rod& queue, const Executive_Context& ctx)
 
 ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
-do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& queue)
+do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& rod)
   {
-    if(queue.empty()) {
-      // If the queue is empty, leave the condition on the top of the stack.
+    if(rod.empty()) {
+      // If the rod is empty, leave the condition on the top of the stack.
       return air_status_next;
     }
     else if(assign) {
       // Evaluate the subexpression and assign the result to the first operand.
       // The result value has to be copied, in case that a reference to an element
       // of the LHS operand is returned.
-      queue.execute(ctx);
+      rod.execute(ctx);
       auto& val = ctx.stack().mut_top().dereference_copy();
       ctx.stack().pop();
       ctx.stack().top().dereference_mutable() = ::std::move(val);
@@ -130,7 +130,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& qu
       // subexpression. The status code must be forwarded, as PTCs may return
       // `air_status_return_ref`.
       ctx.stack().pop();
-      return queue.execute(ctx);
+      return rod.execute(ctx);
     }
   }
 
@@ -1308,7 +1308,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
 void
 AIR_Node::
-solidify(AVM_Rod& queue) const
+solidify(AVM_Rod& rod) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
       case index_clear_stack: {
@@ -1316,7 +1316,7 @@ solidify(AVM_Rod& queue) const
 
         (void) altr;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* /*head*/) ROCKET_FLATTEN -> AIR_Status
           {
             ctx.stack().clear();
@@ -1349,7 +1349,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1389,7 +1389,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.name = altr.name;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1428,7 +1428,7 @@ solidify(AVM_Rod& queue) const
         Uparam up2;
         up2.b0 = altr.immutable;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
@@ -1480,7 +1480,7 @@ solidify(AVM_Rod& queue) const
         do_solidify_nodes(sp2.rod_true, altr.code_true);
         do_solidify_nodes(sp2.rod_false, altr.code_false);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool negative = head->uparam.b0;
@@ -1535,7 +1535,7 @@ solidify(AVM_Rod& queue) const
           r.names_added = clause.names_added;
         }
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1626,15 +1626,15 @@ solidify(AVM_Rod& queue) const
 
         struct Sparam
           {
-            AVM_Rod queues_body;
-            AVM_Rod queues_cond;
+            AVM_Rod rods_body;
+            AVM_Rod rods_cond;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queues_body, altr.code_body);
-        do_solidify_nodes(sp2.queues_cond, altr.code_cond);
+        do_solidify_nodes(sp2.rods_body, altr.code_body);
+        do_solidify_nodes(sp2.rods_cond, altr.code_cond);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool negative = head->uparam.b0;
@@ -1644,7 +1644,7 @@ solidify(AVM_Rod& queue) const
             AIR_Status status = air_status_next;
             for(;;) {
               // Execute the body.
-              status = do_execute_block(sp.queues_body, ctx);
+              status = do_execute_block(sp.rods_body, ctx);
               if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
                 status = air_status_next;
                 break;
@@ -1654,7 +1654,7 @@ solidify(AVM_Rod& queue) const
                 break;
 
               // Check the condition.
-              status = sp.queues_cond.execute(ctx);
+              status = sp.rods_cond.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
               if(ctx.stack().top().dereference_readonly().test() == negative)
                 break;
@@ -1672,8 +1672,8 @@ solidify(AVM_Rod& queue) const
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queues_body.collect_variables(staged, temp);
-            sp.queues_cond.collect_variables(staged, temp);
+            sp.rods_body.collect_variables(staged, temp);
+            sp.rods_cond.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -1690,15 +1690,15 @@ solidify(AVM_Rod& queue) const
 
         struct Sparam
           {
-            AVM_Rod queues_cond;
-            AVM_Rod queues_body;
+            AVM_Rod rods_cond;
+            AVM_Rod rods_body;
           };
 
         Sparam sp2;
-        do_solidify_nodes(sp2.queues_cond, altr.code_cond);
-        do_solidify_nodes(sp2.queues_body, altr.code_body);
+        do_solidify_nodes(sp2.rods_cond, altr.code_cond);
+        do_solidify_nodes(sp2.rods_body, altr.code_body);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool negative = head->uparam.b0;
@@ -1708,13 +1708,13 @@ solidify(AVM_Rod& queue) const
             AIR_Status status = air_status_next;
             for(;;) {
               // Check the condition.
-              status = sp.queues_cond.execute(ctx);
+              status = sp.rods_cond.execute(ctx);
               ROCKET_ASSERT(status == air_status_next);
               if(ctx.stack().top().dereference_readonly().test() == negative)
                 break;
 
               // Execute the body.
-              status = do_execute_block(sp.queues_body, ctx);
+              status = do_execute_block(sp.rods_body, ctx);
               if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
                 status = air_status_next;
                 break;
@@ -1736,8 +1736,8 @@ solidify(AVM_Rod& queue) const
           , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-            sp.queues_cond.collect_variables(staged, temp);
-            sp.queues_body.collect_variables(staged, temp);
+            sp.rods_cond.collect_variables(staged, temp);
+            sp.rods_body.collect_variables(staged, temp);
           }
 
           // Symbols
@@ -1765,7 +1765,7 @@ solidify(AVM_Rod& queue) const
         do_solidify_nodes(sp2.rod_init, altr.code_init);
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1899,7 +1899,7 @@ solidify(AVM_Rod& queue) const
         do_solidify_nodes(sp2.rod_step, altr.code_step);
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1977,7 +1977,7 @@ solidify(AVM_Rod& queue) const
         sp2.name_except = altr.name_except;
         do_solidify_nodes(sp2.rod_catch, altr.code_catch);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2063,7 +2063,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.sloc = altr.sloc;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2103,7 +2103,7 @@ solidify(AVM_Rod& queue) const
         sp2.sloc = altr.sloc;
         sp2.msg = altr.msg;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2137,7 +2137,7 @@ solidify(AVM_Rod& queue) const
         Uparam up2;
         up2.u0 = altr.status;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& /*ctx*/, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             return static_cast<AIR_Status>(head->uparam.u0);
@@ -2164,7 +2164,7 @@ solidify(AVM_Rod& queue) const
         Uparam up2;
         up2.b0 = altr.by_ref;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool by_ref = head->uparam.b0;
@@ -2208,7 +2208,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.name = altr.name;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2257,7 +2257,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.name = altr.name;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const uint32_t depth = head->uparam.u2345;
@@ -2309,7 +2309,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.ref = altr.ref;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2353,7 +2353,7 @@ solidify(AVM_Rod& queue) const
         sp2.params = altr.params;
         sp2.code_body = altr.code_body;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2403,7 +2403,7 @@ solidify(AVM_Rod& queue) const
         do_solidify_nodes(sp2.rod_true, altr.code_true);
         do_solidify_nodes(sp2.rod_false, altr.code_false);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool assign = head->uparam.b0;
@@ -2442,7 +2442,7 @@ solidify(AVM_Rod& queue) const
         up2.u0 = altr.ptc;
         up2.u2345 = altr.nargs;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
@@ -2476,7 +2476,7 @@ solidify(AVM_Rod& queue) const
         Uparam up2;
         up2.u2345 = altr.nelems;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const uint32_t nelems = head->uparam.u2345;
@@ -2520,7 +2520,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.keys = altr.keys;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2569,7 +2569,7 @@ solidify(AVM_Rod& queue) const
           case xop_tail:
           case xop_random:
             // unary
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
@@ -2703,7 +2703,7 @@ solidify(AVM_Rod& queue) const
           case xop_assign:
           case xop_index:
             // binary
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const uint8_t uxop = head->uparam.u1;
@@ -2777,7 +2777,7 @@ solidify(AVM_Rod& queue) const
           case xop_tzcnt:
           case xop_popcnt:
             // unary
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
@@ -3156,7 +3156,7 @@ solidify(AVM_Rod& queue) const
           case xop_subs:
           case xop_muls:
             // binary
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
@@ -3665,7 +3665,7 @@ solidify(AVM_Rod& queue) const
           case xop_sla:
           case xop_sra:
             // shift
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
@@ -3700,7 +3700,7 @@ solidify(AVM_Rod& queue) const
 
           case xop_fma:
             // fused multiply-add; ternary
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
@@ -3752,7 +3752,7 @@ solidify(AVM_Rod& queue) const
         up2.b0 = altr.immutable;
         up2.u2345 = altr.nelems;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
@@ -3814,7 +3814,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.keys = altr.keys;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
@@ -3876,7 +3876,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.name = altr.name;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
@@ -3915,7 +3915,7 @@ solidify(AVM_Rod& queue) const
 
         (void) altr;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, head->pv_meta->sloc);
@@ -3943,7 +3943,7 @@ solidify(AVM_Rod& queue) const
         Uparam up2;
         up2.u0 = altr.ptc;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
@@ -4028,7 +4028,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.code_body = altr.code_body;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4079,7 +4079,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.opts = altr.opts;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const uint32_t nargs = head->uparam.u2345;
@@ -4164,7 +4164,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.name = altr.name;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4200,7 +4200,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.name = altr.name;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4237,7 +4237,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4292,7 +4292,7 @@ solidify(AVM_Rod& queue) const
         up2.b0 = altr.by_ref;
         up2.b1 = altr.is_void;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool by_ref = head->uparam.b0;
@@ -4341,7 +4341,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.val = altr.val;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4373,7 +4373,7 @@ solidify(AVM_Rod& queue) const
 
         (void) altr;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* /*head*/) ROCKET_FLATTEN -> AIR_Status
           {
             ctx.stack().swap(ctx.alt_stack());
@@ -4402,7 +4402,7 @@ solidify(AVM_Rod& queue) const
         Uparam up2;
         up2.u0 = altr.ptc;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
@@ -4443,7 +4443,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         do_solidify_nodes(sp2.rod_null, altr.code_null);
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool assign = head->uparam.b0;
@@ -4485,7 +4485,7 @@ solidify(AVM_Rod& queue) const
         Sparam sp2;
         sp2.key = altr.key;
 
-        queue.append(
+        rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4554,7 +4554,7 @@ solidify(AVM_Rod& queue) const
           case xop_assign:
           case xop_index:
             // binary
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const uint8_t uxop = head->uparam.u1;
@@ -4621,7 +4621,7 @@ solidify(AVM_Rod& queue) const
           case xop_sla:
           case xop_sra:
             // binary, shift
-            queue.append(
+            rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
               {
                 const bool assign = head->uparam.b0;

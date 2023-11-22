@@ -16,7 +16,7 @@ class Instantiated_Function final
   private:
     cow_vector<phsh_string> m_params;
     refcnt_ptr<Variadic_Arguer> m_zvarg;
-    AVM_Rod m_queue;
+    AVM_Rod m_rod;
 
   public:
     explicit

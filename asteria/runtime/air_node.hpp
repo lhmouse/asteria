@@ -419,9 +419,9 @@ class AIR_Node
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
 
-    // Compress this IR node into `queue` for execution.
+    // Compress this IR node into `rod` for execution.
     void
-    solidify(AVM_Rod& queue) const;
+    solidify(AVM_Rod& rod) const;
   };
 
 inline

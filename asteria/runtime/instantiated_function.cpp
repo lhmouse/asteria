@@ -19,8 +19,8 @@ Instantiated_Function(const cow_vector<phsh_string>& params, refcnt_ptr<Variadic
   :
     m_params(params), m_zvarg(::std::move(zvarg))
   {
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue);  });
-    this->m_queue.finalize();
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_rod);  });
+    this->m_rod.finalize();
   }
 
 Instantiated_Function::
@@ -39,7 +39,7 @@ void
 Instantiated_Function::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    this->m_queue.collect_variables(staged, temp);
+    this->m_rod.collect_variables(staged, temp);
   }
 
 Reference&
@@ -50,9 +50,11 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     Reference_Stack alt_stack;
     Executive_Context ctx_func(Executive_Context::M_function(), global, stack, alt_stack,
                                this->m_zvarg, this->m_params, ::std::move(self));
+
+    // Execute the function body, using `stack` for evaluation.
     AIR_Status status;
     try {
-      status = this->m_queue.execute(ctx_func);
+      status = this->m_rod.execute(ctx_func);
     }
     catch(Runtime_Error& except) {
       ctx_func.on_scope_exit_exceptional(except);

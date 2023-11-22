@@ -82,7 +82,7 @@ class AVM_Rod
            void* ctor_arg, Destructor* dtor_opt, Variable_Collector* vcoll_opt,
            const Source_Location* sloc_opt);
 
-    // Marks this queue ready for execution. No nodes may be appended hereafter.
+    // Marks this rod ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.
     void
     finalize();
