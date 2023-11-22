@@ -74,12 +74,9 @@ ROCKET_PURE constexpr
 int
 xmemcmp(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
   {
-    if(llen < rlen)
-      return (noadl::xmemcmp(rhs, lhs, llen) < 0) ? 1 : -1;
-    else if(llen > rlen)
-      return (noadl::xmemcmp(lhs, rhs, rlen) < 0) ? -1 : 1;
-    else
-      return noadl::xmemcmp(lhs, rhs, llen);
+    return (llen < rlen) ? ((noadl::xmemcmp(rhs, lhs, llen) < 0) ? 1 : -1)
+         : (llen > rlen) ? ((noadl::xmemcmp(lhs, rhs, rlen) < 0) ? -1 : 1)
+                         :   noadl::xmemcmp(lhs, rhs, llen);
   }
 
 template<typename charT>
