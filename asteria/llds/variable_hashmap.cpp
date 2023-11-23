@@ -21,6 +21,7 @@ do_reallocate(uint32_t nbkt)
 
     ::rocket::xmemzero(minfo);
     minfo.count --;
+
     auto new_eptr = (Bucket*) minfo.data + minfo.count;
     new_eptr->prev = new_eptr;
     new_eptr->next = new_eptr;
