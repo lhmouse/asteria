@@ -140,9 +140,7 @@ class ascii_numget
     cast_D(double& value, double min, double max) noexcept;
 
     // These functions delegate to those above. These are designed to
-    // take strings in any format, and return the number of characters
-    // that have been parsed successfully. Zero is returned if an input
-    // string doesn't contain a number.
+    // take strings in any format.
     void
     get(bool& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
