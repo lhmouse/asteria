@@ -47,7 +47,7 @@ class Abstract_Context
     Reference&
     do_mut_named_reference(Reference* hint_opt, phsh_stringR name) const
       {
-        return hint_opt ? *hint_opt : this->m_named_refs.insert(name);
+        return hint_opt ? *hint_opt : this->m_named_refs.insert(name, nullptr);
       }
 
     void

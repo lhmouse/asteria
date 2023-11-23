@@ -108,10 +108,10 @@ class Reference_Dictionary
       }
 
     Reference&
-    insert(phsh_stringR key, bool* newly_opt = nullptr);
+    insert(phsh_stringR key, bool* newly_opt);
 
     bool
-    erase(phsh_stringR key, Reference* refp_opt = nullptr) noexcept;
+    erase(phsh_stringR key, Reference* refp_opt) noexcept;
   };
 
 inline

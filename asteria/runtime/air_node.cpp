@@ -2004,7 +2004,8 @@ solidify(AVM_Rod& rod) const
               Executive_Context ctx_catch(Executive_Context::M_plain(), ctx);
               try {
                 // Set the exception reference.
-                ctx_catch.insert_named_reference(sp.name_except).set_temporary(except.value());
+                auto& except_ref = ctx_catch.insert_named_reference(sp.name_except);
+                except_ref.set_temporary(except.value());
 
                 // Set backtrace frames.
                 V_array backtrace;
@@ -2017,7 +2018,8 @@ solidify(AVM_Rod& rod) const
                   r.try_emplace(sref("value"), except.frame(k).value);
                   backtrace.emplace_back(::std::move(r));
                 }
-                ctx_catch.insert_named_reference(sref("__backtrace")).set_temporary(::std::move(backtrace));
+                auto& backtrace_ref = ctx_catch.insert_named_reference(sref("__backtrace"));
+                backtrace_ref.set_temporary(::std::move(backtrace));
 
                 // Execute the `catch` clause.
                 status = sp.rod_catch.execute(ctx_catch);
