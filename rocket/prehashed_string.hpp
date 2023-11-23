@@ -188,7 +188,8 @@ class basic_prehashed_string
       noexcept(noexcept(::std::declval<const key_equal&>()(
             ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
       {
-        return (this->m_sth.hval() == other.m_sth.hval())
+        return (this->m_sth.str().size() == other.m_sth.str().size())
+               && (this->m_sth.hval() == other.m_sth.hval())
                && this->m_sth.as_key_equal()(this->m_sth.str(), other.m_sth.str());
       }
 

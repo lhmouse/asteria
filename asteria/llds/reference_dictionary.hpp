@@ -62,12 +62,7 @@ class Reference_Dictionary
         // Find a bucket using linear probing.
         size_t orig = ::rocket::probe_origin(this->m_nbkt, key.rdhash());
         auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-              [&](const Bucket& r) {
-                return (r.key.rdhash() == key.rdhash())
-                       && (r.key.size() == key.size())
-                       && ((r.key.data() == key.data())
-                           || (::memcmp(r.key.data(), key.data(), key.size()) == 0));
-              });
+                    [&](const Bucket& r) { return r.key == key;  });
 
         // The load factor is kept <= 0.5 so a bucket is always returned. If
         // probing has stopped on an empty bucket, then there is no match.
