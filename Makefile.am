@@ -29,7 +29,7 @@ AM_CPPFLAGS = -pipe -Wall -Wextra @host_asm_opt@ -Iasteria \
   -W{switch-enum,unused-{function,label,local-typedefs}}  \
   -Wunused-but-set-{variable,parameter}
 
-AM_CXXFLAGS = -std=c++17 @sanitizer_flags@  \
+AM_CXXFLAGS = -std=c++17 @sanitizer_flags@ -fno-elide-constructors  \
   -f{visibility-inlines-hidden,nothrow-opt,no-enforce-eh-specs}  \
   -Wno-redundant-move -Werror=zero-as-null-pointer-constant  \
   -Werror=non-virtual-dtor
