@@ -175,7 +175,7 @@ ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
 do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Location& sloc)
   {
-    const auto& target_val = ctx.stack().top().dereference_readonly();
+    auto target_val = ctx.stack().top().dereference_readonly();
     if(target_val.is_null())
       throw Runtime_Error(Runtime_Error::M_format(),
                "Function not found");
@@ -184,8 +184,8 @@ do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Locat
       throw Runtime_Error(Runtime_Error::M_format(),
                "Attempt to call a non-function (value `$1`)", target_val);
 
-    auto target = target_val.as_function();
-    auto& self = ctx.stack().mut_top().pop_modifier();  // invalidates `target_val`
+    const auto& target = target_val.as_function();
+    auto& self = ctx.stack().mut_top().pop_modifier();
     ctx.stack().clear_red_zone();
     return do_invoke_maybe_tail(self, ctx.global(), ptc, sloc, target, ::std::move(ctx.alt_stack()));
   }
