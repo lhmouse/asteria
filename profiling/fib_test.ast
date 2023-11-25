@@ -4,4 +4,5 @@ func fib(x) {
   return x <= 1 ? x : fib(x-1) + fib(x-2);
 }
 
-std.io.putfln("$1", fib(__varg(0) ?? 34));
+var n = std.numeric.parse(__varg(0) ?? "34");
+std.io.putfln("fib($1) = $2", n, fib(n));
