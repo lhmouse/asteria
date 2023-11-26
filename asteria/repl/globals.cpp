@@ -146,12 +146,6 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
   }
 
 void
-initialize_global_context(const void* stack_base)
-  {
-    repl_script.global().set_recursion_base(stack_base);
-  }
-
-void
 install_verbose_hooks()
   {
     repl_script.global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());

@@ -194,22 +194,18 @@ main(int argc, char** argv)
     // Note that this function shall not return in case of errors.
     do_parse_command_line(argc, argv);
 
-    // Initialize the global context.
-    // The argument is used to check for stack overflows.
-    initialize_global_context(&argc);
-
     // Set up signal handlers and runtime hooks.
     // In non-interactive mode, we would like to run as fast as possible,
     // unless verbosity is requested. In interactive mode, hooks are always
     // installed.
     if(repl_verbose || repl_interactive) {
+      install_verbose_hooks();
+
       struct ::sigaction sigact = { };
       sigact.sa_handler = +[](int sig) { repl_signal.store(sig);  };
       ::sigaction(SIGINT, &sigact, nullptr);
       ::sigaction(SIGWINCH, &sigact, nullptr);
       ::sigaction(SIGCONT, &sigact, nullptr);
-
-      install_verbose_hooks();
     }
 
     // In non-interactive mode, read the script, execute it, then exit.

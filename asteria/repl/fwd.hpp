@@ -55,9 +55,6 @@ void
 exit_printf(Exit_Status stat, const char* fmt, ...) noexcept;
 
 void
-initialize_global_context(const void* stack_base);
-
-void
 install_verbose_hooks();
 
 // This function is defined in 'single.cpp'.
