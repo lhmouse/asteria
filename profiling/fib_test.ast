@@ -12,4 +12,4 @@ res = fib(n);
 t2 = std.chrono.hires_now();
 
 std.io.putfln("fib($1) = $2", n, res);
-std.io.putfln("   time = $1 ms", t2 - t1);
+std.io.putfln("  time  = $1 ms", t2 - t1);
