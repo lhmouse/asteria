@@ -10,14 +10,9 @@ void
 assert_fail(const char* expr, const char* file, long line, const char* msg) noexcept
   {
     ::fprintf(stderr,
-      "=========================\n"
-      "*** ASSERTION FAILURE ***\n"
-      "=========================\n"
-      "Expression: %s\n"
-      "Location:   %s:%ld\n"
-      "Message:    %s\n"
-      "=========================\n",
-      expr, file, line, msg);
+        "FATAL: Assertion `%s` at '%s:%ld' failed: %s\n"
+        "The program cannot continue. Please file a bug report.\n",
+        expr, file, line, msg);
 
     ::fflush(nullptr);
     ::std::terminate();
