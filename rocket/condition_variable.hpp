@@ -51,19 +51,20 @@ class condition_variable
 
         using hires_secs = ::std::chrono::duration<double>;
         secs += ::std::chrono::duration_cast<hires_secs>(timeout).count();
+        constexpr int64_t tm_max = 0x7FFFFFFFFFFFFC00;
 
-        if(secs > 0x7FFFFFFFFFFFFC00) {
-          ts.tv_sec = 0x7FFFFFFFFFFFFC00;
+        if(secs > tm_max) {
+          ts.tv_sec = tm_max;
           ts.tv_nsec = 0;
         }
-        else if(secs > 0) {
+        else if(secs <= 0) {
+          ts.tv_sec = 0;
+          ts.tv_nsec = 0;
+        }
+        else {
           secs += 0.000000000999;
           ts.tv_sec = (::time_t) secs;
           ts.tv_nsec = (long) ((secs - (double) ts.tv_sec) * 1000000000);
-        }
-        else {
-          ts.tv_sec = 0;
-          ts.tv_nsec = 0;
         }
 
         // Release `lock.m_mtx` before the wait operation, as it might get
