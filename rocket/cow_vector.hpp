@@ -365,7 +365,7 @@ class cow_vector
       { return this->m_sth.unique();  }
 
     // N.B. This is a non-standard extension.
-    long
+    int
     use_count() const noexcept
       { return this->m_sth.use_count();  }
 

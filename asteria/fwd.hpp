@@ -414,7 +414,7 @@ class cow_opaque
     unique() const noexcept
       { return this->m_sptr.unique();  }
 
-    long
+    int
     use_count() const noexcept
       { return this->m_sptr.use_count();  }
 
@@ -588,7 +588,7 @@ class cow_function
     unique() const noexcept
       { return this->m_sptr.unique();  }
 
-    long
+    int
     use_count() const noexcept
       { return this->m_sptr.use_count();  }
 

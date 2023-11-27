@@ -9,22 +9,22 @@ namespace details_refcnt_ptr {
 class refcnt_cJveMKH5bI7L
   {
   private:
-    mutable reference_counter<long> m_nref;
+    mutable reference_counter<int> m_nref;
 
   public:
     bool
     unique() const noexcept
       { return this->m_nref == 1;  }
 
-    long
+    int
     use_count() const noexcept
       { return this->m_nref;  }
 
-    long
+    int
     add_reference() const noexcept
       { return ++(this->m_nref);  }
 
-    long
+    int
     drop_reference() const noexcept
       { return --(this->m_nref);  }
   };
@@ -76,7 +76,7 @@ class stored_pointer
         return ptr->refcnt_cJveMKH5bI7L::unique();
       }
 
-    long
+    int
     use_count() const noexcept
       {
         auto ptr = this->m_ptr;

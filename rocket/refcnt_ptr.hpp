@@ -59,15 +59,15 @@ class refcnt_base
     unique() const noexcept
       { return this->refcnt_cJveMKH5bI7L::unique();  }
 
-    long
+    int
     use_count() const noexcept
       { return this->refcnt_cJveMKH5bI7L::use_count();  }
 
-    long
+    int
     add_reference() const noexcept
       { return this->refcnt_cJveMKH5bI7L::add_reference();  }
 
-    long
+    int
     drop_reference() const noexcept
       { return this->refcnt_cJveMKH5bI7L::drop_reference();  }
 
@@ -203,7 +203,7 @@ class refcnt_ptr
     unique() const noexcept
       { return this->m_sth.unique();  }
 
-    long
+    int
     use_count() const noexcept
       { return this->m_sth.use_count();  }
 

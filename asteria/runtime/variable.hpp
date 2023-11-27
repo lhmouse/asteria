@@ -16,8 +16,7 @@ class Variable final
     Value m_value;
     bool m_init = false;
     bool m_immut = false;
-
-    long m_gc_ref;  // uninitialized by default
+    int m_gc_ref;  // uninitialized by default
 
   public:
     explicit
@@ -65,12 +64,12 @@ class Variable final
       { this->m_immut = immut;  }
 
     // GC interfaces
-    long
+    int
     get_gc_ref() const noexcept
       { return this->m_gc_ref;  }
 
     void
-    set_gc_ref(long ref) noexcept
+    set_gc_ref(int ref) noexcept
       { this->m_gc_ref = ref;  }
   };
 

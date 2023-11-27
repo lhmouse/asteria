@@ -8,7 +8,7 @@
 #include "../rocket/xmemory.hpp"
 using namespace ::asteria;
 
-atomic_relaxed<long> bcnt;
+atomic_relaxed<int> bcnt;
 
 void* operator new(size_t cb)
   {

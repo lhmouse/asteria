@@ -10,7 +10,7 @@
 #include <exception>  // std::terminate()
 namespace rocket {
 
-template<typename valueT = long>
+template<typename valueT = int>
 class reference_counter
   {
     static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,
@@ -62,7 +62,7 @@ class reference_counter
       { return this->m_nref.load(memory_order_relaxed);  }
 
     // Increment the counter only if it is non-zero, and return its new value.
-    long
+    value_type
     try_increment() noexcept
       {
         auto old = this->m_nref.load(memory_order_relaxed);

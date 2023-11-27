@@ -10,7 +10,7 @@ using unknown_function  = void (...);
 
 struct storage_header
   {
-    mutable reference_counter<long> nref = { };
+    mutable reference_counter<int> nref = { };
 
     unknown_function* dtor;
     size_t nelem;
@@ -285,7 +285,7 @@ class storage_handle
         return qstor->nref.unique();
       }
 
-    long
+    int
     use_count() const noexcept
       {
         auto qstor = this->m_qstor;

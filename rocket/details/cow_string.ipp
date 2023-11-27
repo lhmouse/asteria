@@ -8,7 +8,7 @@ namespace details_cow_string {
 
 struct storage_header
   {
-    mutable reference_counter<long> nref = { };
+    mutable reference_counter<int> nref = { };
   };
 
 template<typename allocT>
@@ -161,7 +161,7 @@ class storage_handle
         return qstor->nref.unique();
       }
 
-    long
+    int
     use_count() const noexcept
       {
         auto qstor = this->m_qstor;
