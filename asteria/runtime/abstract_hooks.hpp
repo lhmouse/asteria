@@ -16,8 +16,8 @@ struct Abstract_Hooks
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Hooks);
 
-    // This hook is called when a variable (mutable or immutable) or function is declared,
-    // and before its initializer is evaluated.
+    // This hook is called when a variable (mutable or immutable) or function is
+    // declared, and before its initializer is evaluated.
     virtual
     void
     on_variable_declare(const Source_Location& sloc, phsh_stringR name)
@@ -26,7 +26,7 @@ struct Abstract_Hooks
         (void)name;
       }
 
-    // This hook is called before every function call (whether native or not) from Asteria.
+    // This hook is called before every function call, whether native or not.
     virtual
     void
     on_function_call(const Source_Location& sloc, const cow_function& target)
@@ -35,7 +35,8 @@ struct Abstract_Hooks
         (void)target;
       }
 
-    // This hook is called after every function call that completes by returning normally.
+    // This hook is called after every function call that completes by returning
+    // normally.
     virtual
     void
     on_function_return(const Source_Location& sloc, const cow_function& target,
