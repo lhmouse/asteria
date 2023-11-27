@@ -2504,73 +2504,73 @@
 
 `std.ini.format(object)`
 
-       * Converts `object` to a string in the INI format. Unlike JSON,
-         the INI format is too primitive to support complex structures,
-         which limits the domain of convertible values. `object` shall be
-         an object of objects where up to two nesting levels are allowed.
-         Boolean, integer, real and string values are written in their
-         string forms; the others are ignored silently.
+	* Converts `object` to a string in the INI format. Unlike JSON,
+	  the INI format is too primitive to support complex structures,
+	  which limits the domain of convertible values. `object` shall be
+	  an object of objects where up to two nesting levels are allowed.
+	  Boolean, integer, real and string values are written in their
+	  string forms; the others are ignored silently.
 
-       * Returns the formatted text as a string.
+	* Returns the formatted text as a string.
 
 `std.ini.parse(text)`
 
-       * Parses a string containing data encoded in the INI format and
-         converts it to an object.
+	* Parses a string containing data encoded in the INI format and
+	  converts it to an object.
 
-       * Returns the parsed value as an object. Each section in the INI
-         string corresponds to a subobject, and each key in this section
-         corresponds to a string in this subobject. No type conversion is
-         performed. Comments may start with either `;` or `#`.
+	* Returns the parsed value as an object. Each section in the INI
+	  string corresponds to a subobject, and each key in this section
+	  corresponds to a string in this subobject. No type conversion is
+	  performed. Comments may start with either `;` or `#`.
 
-       * Throws an exception if the string is invalid.
+	* Throws an exception if the string is invalid.
 
 `std.ini.parse_file(path)`
 
-       * Parses the contents of the file denoted by `path` as an INI
-         string for an object. This function behaves identically to
-         `parse()` otherwise.
+	* Parses the contents of the file denoted by `path` as an INI
+	  string for an object. This function behaves identically to
+	  `parse()` otherwise.
 
-       * Returns the parsed value as an object.
+	* Returns the parsed value as an object.
 
-       * Throws an exception if a read error occurs, or if the string is
-         invalid.
+	* Throws an exception if a read error occurs, or if the string is
+	  invalid.
 
 ### `std.csv`
 
 `std.csv.format(array)`
 
-       * Converts `array` to a string in the CSV format. Unlike JSON,
-         the CSV format is too primitive to support complex structures,
-         which limits the domain of convertible values. `array` shall be
-         an array of arrays, where up to two nesting levels are allowed.
-         Boolean, integer, real and string values are written in their
-         string forms; the others are ignored silently.
+	* Converts `array` to a string in the CSV format. Unlike JSON,
+	  the CSV format is too primitive to support complex structures,
+	  which limits the domain of convertible values. `array` shall be
+	  an array of arrays, where up to two nesting levels are allowed.
+	  Boolean, integer, real and string values are written in their
+	  string forms; the others are ignored silently.
 
-       * Returns the formatted text as a string.
+	* Returns the formatted text as a string.
 
 `std.csv.parse(text)`
 
-       * Parses a string containing data encoded in the CSV format and
-         converts it to an array.
+	* Parses a string containing data encoded in the CSV format and
+	  converts it to an array.
 
-       * Returns the parsed value as an array. Each section in the CSV
-         string corresponds to a subarray, and each key in this section
-         corresponds to a string in this subarray. No type conversion is
-         performed.
+	* Returns the parsed value as an array. Each section in the CSV
+	  string corresponds to a subarray, and each key in this section
+	  corresponds to a string in this subarray. No type conversion is
+	  performed.
 
-       * Throws an exception if the string is invalid.
+	* Throws an exception if the string is invalid.
 
 `std.csv.parse_file(path)`
 
-       * Parses the contents of the file denoted by `path` as an CSV
-         string for an array. This function behaves identically to
-         `parse()` otherwise.
+	* Parses the contents of the file denoted by `path` as an CSV
+	  string for an array. This function behaves identically to
+	  `parse()` otherwise.
 
-       * Returns the parsed value as an array.
+	* Returns the parsed value as an array.
 
-       * Throws an exception if a read error occurs, or if the string is
-         invalid.
+	* Throws an exception if a read error occurs, or if the string is
+	  invalid.
 
 ### `std.io`
 
