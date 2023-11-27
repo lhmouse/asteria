@@ -36,10 +36,11 @@ do_generate_clear_stack(cow_vector<AIR_Node>& code)
 
 void
 do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                          const Global_Context& global, Analytic_Context& ctx,
+                          const Global_Context& global, const Analytic_Context& ctx,
                           PTC_Aware ptc, const Statement::S_expression& expr)
   {
-    // Generate a single-step trap if it is not disabled.
+    // Generate a single-step trap if it is requested. This happens at translation
+    // time, so if it's not requested at all, there will be no runtime overhead.
     if(opts.verbose_single_step_traps) {
       AIR_Node::S_single_step_trap xnode = { expr.sloc };
       code.emplace_back(::std::move(xnode));
@@ -56,7 +57,7 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
 
 void
 do_generate_expression(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                       const Global_Context& global, Analytic_Context& ctx,
+                       const Global_Context& global, const Analytic_Context& ctx,
                        PTC_Aware ptc, const Statement::S_expression& expr)
   {
     do_generate_clear_stack(code);
