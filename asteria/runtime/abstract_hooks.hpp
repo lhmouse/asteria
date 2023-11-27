@@ -65,8 +65,9 @@ struct Abstract_Hooks
     // enabled by setting `verbose_single_step_traps` in `Compiler_Options`.
     virtual
     void
-    on_single_step_trap(const Source_Location& sloc)
+    on_single_step_trap(Executive_Context& ctx, const Source_Location& sloc)
       {
+        (void)ctx;
         (void)sloc;
       }
   };

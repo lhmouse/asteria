@@ -42,7 +42,7 @@ struct Verbose_Hooks final
       }
 
     void
-    on_single_step_trap(const Source_Location& sloc) final
+    on_single_step_trap(Executive_Context& /*ctx*/, const Source_Location& sloc) final
       {
         int sig = repl_signal.xchg(0);
         if(sig == 0)
@@ -50,7 +50,6 @@ struct Verbose_Hooks final
 
         // Does the REPL have to be thread-safe anyway?
         const char* sigstr = ::strsignal(sig);
-
         this->do_verbose_trace(sloc, "Received signal $1: $2", sig, sigstr);
 
         ::rocket::sprintf_and_throw<::std::runtime_error>(

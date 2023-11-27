@@ -2451,7 +2451,7 @@ solidify(AVM_Rod& rod) const
             const uint32_t nargs = head->uparam.u2345;
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
+            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
 
             do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs);
             return do_function_call(ctx, ptc, sloc);
@@ -3920,7 +3920,7 @@ solidify(AVM_Rod& rod) const
         rod.append(
           +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, head->pv_meta->sloc);
+            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, head->pv_meta->sloc);
             return air_status_next;
           }
 
@@ -3951,7 +3951,7 @@ solidify(AVM_Rod& rod) const
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
+            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
 
             ctx.alt_stack().clear();
             auto va_gen = ctx.stack().top().dereference_readonly();
@@ -4088,7 +4088,7 @@ solidify(AVM_Rod& rod) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
+            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
 
             ROCKET_ASSERT(nargs != 0);
             do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs - 1);
@@ -4410,7 +4410,7 @@ solidify(AVM_Rod& rod) const
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, sloc);
+            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
 
             ctx.stack().swap(ctx.alt_stack());
             return do_function_call(ctx, ptc, sloc);
