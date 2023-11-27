@@ -278,7 +278,7 @@ std_chrono_hires_now()
   {
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (double) ts.tv_sec * 1000 + (double) ts.tv_nsec / 1000000 + 123456789;
+    return (double) ts.tv_sec * 1000 + (double) ts.tv_nsec * 0.000001 + 123456789;
   }
 
 V_integer
