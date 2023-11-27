@@ -53,7 +53,7 @@ class condition_variable
         secs += ::std::chrono::duration_cast<hires_secs>(timeout).count();
         constexpr int64_t tm_max = 0x7FFFFFFFFFFFFC00;
 
-        if(secs > tm_max) {
+        if(secs >= tm_max) {
           ts.tv_sec = tm_max;
           ts.tv_nsec = 0;
         }
