@@ -40,8 +40,8 @@ class static_vector
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator          = details_static_vector::vector_iterator<static_vector, const value_type>;
-    using iterator                = details_static_vector::vector_iterator<static_vector, value_type>;
+    using const_iterator          = details_static_vector::iterator<static_vector, const value_type>;
+    using iterator                = details_static_vector::iterator<static_vector, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 

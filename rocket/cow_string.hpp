@@ -127,8 +127,8 @@ class basic_cow_string
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator          = details_cow_string::string_iterator<basic_cow_string, const value_type>;
-    using iterator                = details_cow_string::string_iterator<basic_cow_string, value_type>;
+    using const_iterator          = details_cow_string::iterator<basic_cow_string, const value_type>;
+    using iterator                = details_cow_string::iterator<basic_cow_string, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 

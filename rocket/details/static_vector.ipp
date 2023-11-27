@@ -270,10 +270,10 @@ class storage_handle
   };
 
 template<typename vectorT, typename valueT>
-class vector_iterator
+class iterator
   {
     friend vectorT;
-    template<typename, typename> friend class vector_iterator;
+    template<typename, typename> friend class iterator;
 
   public:
     using iterator_category  = ::std::random_access_iterator_tag;
@@ -290,14 +290,14 @@ class vector_iterator
   private:
     // This constructor is called by the container.
     constexpr
-    vector_iterator(valueT* begin, size_t ncur, size_t nend) noexcept
+    iterator(valueT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
     constexpr
-    vector_iterator() noexcept
+    iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
@@ -305,7 +305,7 @@ class vector_iterator
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     constexpr
-    vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
+    iterator(const iterator<vectorT, yvalueT>& other) noexcept
       :
         m_begin(other.m_begin),
         m_cur(other.m_cur),
@@ -314,8 +314,8 @@ class vector_iterator
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
-    vector_iterator&
-    operator=(const vector_iterator<vectorT, yvalueT>& other) & noexcept
+    iterator&
+    operator=(const iterator<vectorT, yvalueT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -346,21 +346,21 @@ class vector_iterator
     operator->() const noexcept
       { return ::std::addressof(**this);  }
 
-    vector_iterator&
+    iterator&
     operator+=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
       }
 
-    vector_iterator&
+    iterator&
     operator-=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
       }
 
-    vector_iterator
+    iterator
     operator+(difference_type off) const noexcept
       {
         auto res = *this;
@@ -368,7 +368,7 @@ class vector_iterator
         return res;
       }
 
-    vector_iterator
+    iterator
     operator-(difference_type off) const noexcept
       {
         auto res = *this;
@@ -376,30 +376,30 @@ class vector_iterator
         return res;
       }
 
-    vector_iterator&
+    iterator&
     operator++() noexcept
       { return *this += 1;  }
 
-    vector_iterator&
+    iterator&
     operator--() noexcept
       { return *this -= 1;  }
 
-    vector_iterator
+    iterator
     operator++(int) noexcept
       { return ::std::exchange(*this, *this + 1);  }
 
-    vector_iterator
+    iterator
     operator--(int) noexcept
       { return ::std::exchange(*this, *this - 1);  }
 
     friend
-    vector_iterator
-    operator+(difference_type off, const vector_iterator& other) noexcept
+    iterator
+    operator+(difference_type off, const iterator& other) noexcept
       { return other + off;  }
 
     template<typename yvalueT>
     difference_type
-    operator-(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator-(const iterator<vectorT, yvalueT>& other) const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
@@ -410,33 +410,33 @@ class vector_iterator
     template<typename yvalueT>
     constexpr
     bool
-    operator==(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator==(const iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename yvalueT>
     constexpr
     bool
-    operator!=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator!=(const iterator<vectorT, yvalueT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 
     template<typename yvalueT>
     bool
-    operator<(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator<(const iterator<vectorT, yvalueT>& other) const noexcept
       { return *this - other < 0;  }
 
     template<typename yvalueT>
     bool
-    operator>(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator>(const iterator<vectorT, yvalueT>& other) const noexcept
       { return *this - other > 0;  }
 
     template<typename yvalueT>
     bool
-    operator<=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator<=(const iterator<vectorT, yvalueT>& other) const noexcept
       { return *this - other <= 0;  }
 
     template<typename yvalueT>
     bool
-    operator>=(const vector_iterator<vectorT, yvalueT>& other) const noexcept
+    operator>=(const iterator<vectorT, yvalueT>& other) const noexcept
       { return *this - other >= 0;  }
   };
 

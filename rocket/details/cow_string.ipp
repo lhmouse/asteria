@@ -281,10 +281,10 @@ class storage_handle
   };
 
 template<typename stringT, typename charT>
-class string_iterator
+class iterator
   {
     friend stringT;
-    template<typename, typename> friend class string_iterator;
+    template<typename, typename> friend class iterator;
 
   public:
     using iterator_category  = ::std::random_access_iterator_tag;
@@ -301,14 +301,14 @@ class string_iterator
   private:
     // This constructor is called by the container.
     constexpr
-    string_iterator(charT* begin, size_t ncur, size_t nend) noexcept
+    iterator(charT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
     constexpr
-    string_iterator() noexcept
+    iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
@@ -316,7 +316,7 @@ class string_iterator
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     constexpr
-    string_iterator(const string_iterator<stringT, ycharT>& other) noexcept
+    iterator(const iterator<stringT, ycharT>& other) noexcept
       :
         m_begin(other.m_begin),
         m_cur(other.m_cur),
@@ -325,8 +325,8 @@ class string_iterator
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
-    string_iterator&
-    operator=(const string_iterator<stringT, ycharT>& other) & noexcept
+    iterator&
+    operator=(const iterator<stringT, ycharT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -357,21 +357,21 @@ class string_iterator
     operator->() const noexcept
       { return ::std::addressof(**this);  }
 
-    string_iterator&
+    iterator&
     operator+=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
       }
 
-    string_iterator&
+    iterator&
     operator-=(difference_type off) & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
       }
 
-    string_iterator
+    iterator
     operator+(difference_type off) const noexcept
       {
         auto res = *this;
@@ -379,7 +379,7 @@ class string_iterator
         return res;
       }
 
-    string_iterator
+    iterator
     operator-(difference_type off) const noexcept
       {
         auto res = *this;
@@ -387,30 +387,30 @@ class string_iterator
         return res;
       }
 
-    string_iterator&
+    iterator&
     operator++() noexcept
       { return *this += 1;  }
 
-    string_iterator&
+    iterator&
     operator--() noexcept
       { return *this -= 1;  }
 
-    string_iterator
+    iterator
     operator++(int) noexcept
       { return ::std::exchange(*this, *this + 1);  }
 
-    string_iterator
+    iterator
     operator--(int) noexcept
       { return ::std::exchange(*this, *this - 1);  }
 
     friend
-    string_iterator
-    operator+(difference_type off, const string_iterator& other) noexcept
+    iterator
+    operator+(difference_type off, const iterator& other) noexcept
       { return other + off;  }
 
     template<typename ycharT>
     difference_type
-    operator-(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator-(const iterator<stringT, ycharT>& other) const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
@@ -421,33 +421,33 @@ class string_iterator
     template<typename ycharT>
     constexpr
     bool
-    operator==(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator==(const iterator<stringT, ycharT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ycharT>
     constexpr
     bool
-    operator!=(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator!=(const iterator<stringT, ycharT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
 
     template<typename ycharT>
     bool
-    operator<(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator<(const iterator<stringT, ycharT>& other) const noexcept
       { return *this - other < 0;  }
 
     template<typename ycharT>
     bool
-    operator>(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator>(const iterator<stringT, ycharT>& other) const noexcept
       { return *this - other > 0;  }
 
     template<typename ycharT>
     bool
-    operator<=(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator<=(const iterator<stringT, ycharT>& other) const noexcept
       { return *this - other <= 0;  }
 
     template<typename ycharT>
     bool
-    operator>=(const string_iterator<stringT, ycharT>& other) const noexcept
+    operator>=(const iterator<stringT, ycharT>& other) const noexcept
       { return *this - other >= 0;  }
   };
 

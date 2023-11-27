@@ -800,10 +800,10 @@ class stringified_key
 template<typename hashmapT, typename valueT,
          typename bucketT = typename copy_cv<basic_bucket<
                                 typename hashmapT::allocator_type>, valueT>::type>
-class hashmap_iterator
+class iterator
   {
     template<typename, typename, typename>
-    friend class hashmap_iterator;
+    friend class iterator;
 
     friend hashmapT;
 
@@ -821,7 +821,7 @@ class hashmap_iterator
 
   private:
     // This constructor is called by the container.
-    hashmap_iterator(bucketT* begin, size_t ncur, size_t nend) noexcept
+    iterator(bucketT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       {
@@ -832,7 +832,7 @@ class hashmap_iterator
 
   public:
     constexpr
-    hashmap_iterator() noexcept
+    iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
@@ -840,7 +840,7 @@ class hashmap_iterator
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
     constexpr
-    hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
+    iterator(const iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
       :
         m_begin(other.m_begin),
         m_cur(other.m_cur),
@@ -849,8 +849,8 @@ class hashmap_iterator
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
-    hashmap_iterator&
-    operator=(const hashmap_iterator<hashmapT, yvalueT, ybucketT>& other) & noexcept
+    iterator&
+    operator=(const iterator<hashmapT, yvalueT, ybucketT>& other) & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -878,7 +878,7 @@ class hashmap_iterator
       }
 
     difference_type
-    do_this_len(const hashmap_iterator& other) const noexcept
+    do_this_len(const iterator& other) const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
@@ -886,7 +886,7 @@ class hashmap_iterator
         return this->do_validate(this->m_cur, false) - other.m_cur;
       }
 
-    hashmap_iterator
+    iterator
     do_next() const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
@@ -899,7 +899,7 @@ class hashmap_iterator
         return res;
       }
 
-    hashmap_iterator
+    iterator
     do_prev() const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
@@ -921,32 +921,32 @@ class hashmap_iterator
     operator->() const noexcept
       { return ::std::addressof(**this);  }
 
-    hashmap_iterator&
+    iterator&
     operator++() noexcept
       { return *this = this->do_next();  }
 
-    hashmap_iterator&
+    iterator&
     operator--() noexcept
       { return *this = this->do_prev();  }
 
-    hashmap_iterator
+    iterator
     operator++(int) noexcept
       { return ::std::exchange(*this, this->do_next());  }
 
-    hashmap_iterator
+    iterator
     operator--(int) noexcept
       { return ::std::exchange(*this, this->do_prev());  }
 
     template<typename ybucketT>
     constexpr
     bool
-    operator==(const hashmap_iterator<hashmapT, ybucketT>& other) const noexcept
+    operator==(const iterator<hashmapT, ybucketT>& other) const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ybucketT>
     constexpr
     bool
-    operator!=(const hashmap_iterator<hashmapT, ybucketT>& other) const noexcept
+    operator!=(const iterator<hashmapT, ybucketT>& other) const noexcept
       { return this->m_cur != other.m_cur;  }
   };
 

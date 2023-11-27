@@ -63,8 +63,8 @@ class cow_hashmap
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator          = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
-    using iterator                = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
+    using const_iterator          = details_cow_hashmap::iterator<cow_hashmap, const value_type>;
+    using iterator                = details_cow_hashmap::iterator<cow_hashmap, value_type>;
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
