@@ -129,12 +129,14 @@ do_may_infix_operators_follow(cow_vector<Token>& tokens)
     // Infix operators may follow if the keyword denotes a value or reference.
     const auto& p = tokens.back();
     if(p.is_keyword())
-      return ::rocket::is_any_of(p.as_keyword(), { keyword_null, keyword_true, keyword_false, keyword_this });
+      return ::rocket::is_any_of(p.as_keyword(),
+                   { keyword_null, keyword_true, keyword_false, keyword_this });
 
     // Infix operators may follow if the punctuator can terminate an expression.
     if(p.is_punctuator())
-      return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_head,
-                        punctuator_tail, punctuator_parenth_cl, punctuator_bracket_cl, punctuator_brace_cl });
+      return ::rocket::is_any_of(p.as_punctuator(),
+                   { punctuator_inc, punctuator_dec, punctuator_head, punctuator_tail,
+                     punctuator_parenth_cl, punctuator_bracket_cl, punctuator_brace_cl });
 
     // Infix operators can follow.
     return true;
