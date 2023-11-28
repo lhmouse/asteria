@@ -70,9 +70,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     if((status == air_status_return_ref) && stack.top().is_ptc()) {
       // Proper tail call arguments shall be expanded outside this function;
       // only by then will the hooks be called.
-      const auto ptc = stack.top().unphase_ptc_opt();
-      ROCKET_ASSERT(ptc);
-      self.set_ptc(ptc);
+      self = ::std::move(stack.mut_top());
       return self;
     }
 
