@@ -52,8 +52,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     Executive_Context ctx_func(Executive_Context::M_function(), global, stack, alt_stack,
                                this->m_zvarg, this->m_params, ::std::move(self));
 
-    // Execute the function body, using `stack` for evaluation.
     ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_zvarg->sloc());
+
+    // Execute the function body, using `stack` for evaluation.
     AIR_Status status;
     try {
       status = this->m_rod.execute(ctx_func);
