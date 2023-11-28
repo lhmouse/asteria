@@ -22,8 +22,8 @@ struct Abstract_Hooks
     void
     on_variable_declare(const Source_Location& sloc, phsh_stringR name)
       {
-        (void)sloc;
-        (void)name;
+        (void) sloc;
+        (void) name;
       }
 
     // This hook is called before every function call, whether native or not.
@@ -31,33 +31,8 @@ struct Abstract_Hooks
     void
     on_function_call(const Source_Location& sloc, const cow_function& target)
       {
-        (void)sloc;
-        (void)target;
-      }
-
-    // This hook is called after every function call that completes by returning
-    // normally.
-    virtual
-    void
-    on_function_return(const Source_Location& sloc, const cow_function& target,
-                       const Reference& result)
-      {
-        (void)sloc;
-        (void)target;
-        (void)result;
-      }
-
-    // This hook is called after every function call that completes by throwing an
-    // exception. The original exception will be rethrown after the hook returns.
-    // N.B. It is suggested that you should not throw exceptions from this hook.
-    virtual
-    void
-    on_function_except(const Source_Location& sloc, const cow_function& target,
-                       const Runtime_Error& except)
-      {
-        (void)sloc;
-        (void)target;
-        (void)except;
+        (void) sloc;
+        (void) target;
       }
 
     // This hook is called before every statement, condition, etc.
@@ -67,8 +42,45 @@ struct Abstract_Hooks
     void
     on_single_step_trap(Executive_Context& ctx, const Source_Location& sloc)
       {
-        (void)ctx;
-        (void)sloc;
+        (void) ctx;
+        (void) sloc;
+      }
+
+    // This hook is called just after entering a function body.
+    virtual
+    void
+    on_function_enter(Executive_Context& func_ctx, const Instantiated_Function& target,
+                      const Source_Location& func_sloc)
+      {
+        (void) func_ctx;
+        (void) target;
+        (void) func_sloc;
+      }
+
+    // This hook is called just before returning from a function body.
+    virtual
+    void
+    on_function_return(Executive_Context& func_ctx, const Instantiated_Function& target,
+                       const Source_Location& func_sloc, Reference& result)
+      {
+        (void) func_ctx;
+        (void) target;
+        (void) func_sloc;
+        (void) result;
+      }
+
+    // This hook is called just before leaving from a function body because of an
+    // exception. The original exception will be rethrown after the hook returns.
+    // N.B. It is suggested that you should not throw exceptions from this hook.
+    virtual
+    void
+    on_function_except(Executive_Context& func_ctx, const Instantiated_Function& target,
+                       const Source_Location& func_sloc, Runtime_Error& except)
+      {
+        (void) func_ctx;
+        (void) target;
+        (void) func_sloc;
+        (void) except;
       }
   };
 

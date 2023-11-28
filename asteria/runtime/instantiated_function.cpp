@@ -6,6 +6,7 @@
 #include "air_node.hpp"
 #include "executive_context.hpp"
 #include "global_context.hpp"
+#include "abstract_hooks.hpp"
 #include "runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
@@ -52,6 +53,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
                                this->m_zvarg, this->m_params, ::std::move(self));
 
     // Execute the function body, using `stack` for evaluation.
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_zvarg->sloc());
     AIR_Status status;
     try {
       status = this->m_rod.execute(ctx_func);
@@ -59,20 +61,29 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     catch(Runtime_Error& except) {
       ctx_func.on_scope_exit_exceptional(except);
       except.push_frame_function(this->m_zvarg->sloc(), this->m_zvarg->func());
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ctx_func, *this, this->m_zvarg->sloc(), except);
       throw;
     }
     ctx_func.on_scope_exit_normal(status);
 
+    if((status == air_status_return_ref) && stack.top().is_ptc()) {
+      // Proper tail call arguments shall be expanded outside this function;
+      // only by then will the hooks be called.
+      const auto ptc = stack.top().unphase_ptc_opt();
+      ROCKET_ASSERT(ptc);
+      self.set_ptc(ptc);
+      return self;
+    }
+
     switch(status) {
       case air_status_next:
       case air_status_return_void:
-        // Return void if the control flow reached the end of the function.
-        return self.set_void();
+        self.set_void();
+        break;
 
-      case air_status_return_ref: {
-        // Return the reference at the top of `stack`.
-        return self = ::std::move(stack.mut_top());
-      }
+      case air_status_return_ref:
+        self = ::std::move(stack.mut_top());
+        break;
 
       case air_status_break_unspec:
       case air_status_break_switch:
@@ -88,6 +99,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
     }
+
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ctx_func, *this, this->m_zvarg->sloc(), self);
+    return self;
   }
 
 }  // namespace asteria

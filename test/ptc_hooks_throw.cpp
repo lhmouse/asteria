@@ -16,16 +16,18 @@ int main()
 
         virtual
         void
-        on_function_call(const Source_Location& sloc, const cow_function&) final
+        on_function_enter(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
+                          const Source_Location& func_sloc) final
           {
-            this->fmt << "call " << sloc.line() << "; ";
+            this->fmt << "call " << func_sloc.line() << "; ";
           }
 
         virtual
         void
-        on_function_except(const Source_Location& sloc, const cow_function&, const Runtime_Error&) final
+        on_function_except(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
+                           const Source_Location& func_sloc, Runtime_Error& /*except*/) final
           {
-            this->fmt << "except " << sloc.line() << "; ";
+            this->fmt << "except " << func_sloc.line() << "; ";
           }
       };
 
@@ -61,7 +63,7 @@ int main()
     ASTERIA_TEST_CHECK_CATCH(code.execute());
     ::fprintf(stderr, "no_ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 56; call 53; call 49; call 45; except 45; except 49; except 53; except 56; ");
+        "call 0; call 54; call 50; call 46; call 42; except 42; except 46; except 50; except 54; except 0; ");
 
     code.reload_string(
       sref(__FILE__), __LINE__, sref(R"__(
@@ -91,5 +93,5 @@ int main()
     ASTERIA_TEST_CHECK_CATCH(code.execute());
     ::fprintf(stderr, "ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 86; call 83; call 79; call 75; except 75; except 79; except 83; except 86; ");
+        "call 0; call 84; call 80; call 76; call 72; except 72; except 76; except 80; except 84; except 0; ");
   }

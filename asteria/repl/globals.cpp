@@ -6,6 +6,8 @@
 #include "../simple_script.hpp"
 #include "../source_location.hpp"
 #include "../runtime/abstract_hooks.hpp"
+#include "../runtime/instantiated_function.hpp"
+#include "../runtime/runtime_error.hpp"
 #include "../utils.hpp"
 #include <stdarg.h>  // va_list, va_start(), va_end()
 #include <stdlib.h>  // exit(), _Exit()
@@ -66,21 +68,28 @@ struct Verbose_Hooks final
     void
     on_function_call(const Source_Location& sloc, const cow_function& target) final
       {
-        this->do_verbose_trace(sloc, "Initiating function call: $1", target);
+        this->do_verbose_trace(sloc, "Calling function: $1", target);
       }
 
     void
-    on_function_return(const Source_Location& sloc, const cow_function& target,
-                       const Reference&) final
+    on_function_enter(Executive_Context& /*func_ctx*/, const Instantiated_Function& target,
+                      const Source_Location& func_sloc) final
       {
-        this->do_verbose_trace(sloc, "Returned from function call: $1", target);
+        this->do_verbose_trace(func_sloc, "Entering function: $1", target);
       }
 
     void
-    on_function_except(const Source_Location& sloc, const cow_function& target,
-                       const Runtime_Error&) final
+    on_function_return(Executive_Context& /*func_ctx*/, const Instantiated_Function& target,
+                       const Source_Location& func_sloc, Reference& /*result*/) final
       {
-        this->do_verbose_trace(sloc, "Caught an exception inside function call: $1", target);
+        this->do_verbose_trace(func_sloc, "Leaving function: $1", target);
+      }
+
+    void
+    on_function_except(Executive_Context& /*func_ctx*/, const Instantiated_Function& target,
+                       const Source_Location& func_sloc, Runtime_Error& except) final
+      {
+        this->do_verbose_trace(func_sloc, "Throwing from function: $1\n$2", target, except);
       }
   };
 

@@ -16,16 +16,18 @@ int main()
 
         virtual
         void
-        on_function_call(const Source_Location& sloc, const cow_function&) final
+        on_function_enter(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
+                          const Source_Location& func_sloc) final
           {
-            this->fmt << "call " << sloc.line() << "; ";
+            this->fmt << "call " << func_sloc.line() << "; ";
           }
 
         virtual
         void
-        on_function_return(const Source_Location& sloc, const cow_function&, const Reference&) final
+        on_function_return(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
+                           const Source_Location& func_sloc, Reference& /*result*/) final
           {
-            this->fmt << "return " << sloc.line() << "; ";
+            this->fmt << "return " << func_sloc.line() << "; ";
           }
       };
 
@@ -61,7 +63,7 @@ int main()
     code.execute();
     ::fprintf(stderr, "no_ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 56; call 53; call 49; call 45; return 45; return 49; return 53; return 56; ");
+        "call 0; call 54; call 50; call 46; call 42; return 42; return 46; return 50; return 54; return 0; ");
 
     code.reload_string(
       sref(__FILE__), __LINE__, sref(R"__(
@@ -91,5 +93,5 @@ int main()
     code.execute();
     ::fprintf(stderr, "ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 86; call 83; call 79; call 75; return 75; return 79; return 83; return 86; ");
+        "call 0; call 84; call 80; call 76; call 72; return 72; return 76; return 80; return 84; return 0; ");
   }

@@ -225,22 +225,25 @@ do_use_function_result_slow(Global_Context& global)
       while(!frames.empty()) {
         ptcg = ::std::move(frames.mut_back());
         frames.pop_back();
+        const auto caller = ptcg->caller_opt();
 
-        // Evaluate deferred expressions.
-        defer_ctx.stack() = ::std::move(ptcg->mut_stack());
-        defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
-        defer_ctx.on_scope_exit_normal(air_status_next);
-
+        // Convert the result.
         if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
-          // Convert the result.
           this->m_value = ::std::move(*result_value);
           result_value.reset();
           this->m_mods.clear();
           this->m_xref = xref_temporary;
         }
 
+        // Evaluate deferred expressions.
+        defer_ctx.stack() = ::std::move(ptcg->mut_stack());
+        defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
+        defer_ctx.on_scope_exit_normal(air_status_next);
+
         // Leave this frame.
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ptcg->sloc(), ptcg->target(), *this);
+        if(caller)
+          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, defer_ctx, *caller,
+                                   caller->zvarg()->sloc(), *this);
       }
     }
     catch(Runtime_Error& except) {
@@ -248,14 +251,15 @@ do_use_function_result_slow(Global_Context& global)
       while(!frames.empty()) {
         ptcg = ::std::move(frames.mut_back());
         frames.pop_back();
+        const auto caller = ptcg->caller_opt();
 
         // Note that if we arrive here, there must have been an exception thrown
         // when unpacking the last frame (i.e. the last call did not return), so
         // the last frame does not have its enclosing function set.
         except.push_frame_plain(ptcg->sloc(), sref("[proper tail call]"));
 
-        if(auto qcall = ptcg->caller_opt())
-          except.push_frame_function(qcall->zvarg()->sloc(), qcall->zvarg()->func());
+        if(caller)
+          except.push_frame_function(caller->zvarg()->sloc(), caller->zvarg()->func());
 
         // Evaluate deferred expressions.
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());
@@ -263,7 +267,9 @@ do_use_function_result_slow(Global_Context& global)
         defer_ctx.on_scope_exit_exceptional(except);
 
         // Leave this frame.
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ptcg->sloc(), ptcg->target(), except);
+        if(caller)
+          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, defer_ctx, *caller,
+                                   caller->zvarg()->sloc(), except);
       }
 
       // The exception object has been updated, so rethrow it.

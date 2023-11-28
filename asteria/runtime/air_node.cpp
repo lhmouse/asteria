@@ -159,14 +159,7 @@ do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
     else {
       // Perform a normal function call.
       ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
-      try {
-        target.invoke(self, global, ::std::move(stack));
-      }
-      catch(Runtime_Error& except) {
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, sloc, target, except);
-        throw;
-      }
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, sloc, target, self);
+      target.invoke(self, global, ::std::move(stack));
       return air_status_next;
     }
   }
