@@ -255,7 +255,7 @@ do_use_function_result_slow(Global_Context& global)
         except.push_frame_plain(ptcg->sloc(), sref("[proper tail call]"));
 
         if(auto qcall = ptcg->caller_opt())
-          except.push_frame_function(qcall->sloc(), qcall->func());
+          except.push_frame_function(qcall->zvarg()->sloc(), qcall->zvarg()->func());
 
         // Evaluate deferred expressions.
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());

@@ -5,6 +5,7 @@
 #define ASTERIA_RUNTIME_PTC_ARGUMENTS_
 
 #include "../fwd.hpp"
+#include "instantiated_function.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../source_location.hpp"
 namespace asteria {
@@ -24,7 +25,7 @@ class PTC_Arguments final
     Reference_Stack m_stack;
 
     // These are captured data.
-    rcfwd_ptr<const Variadic_Arguer> m_caller_opt;
+    refcnt_ptr<const Instantiated_Function> m_caller_opt;
     cow_bivector<Source_Location, AVM_Rod> m_defer;
 
   public:
@@ -67,15 +68,13 @@ class PTC_Arguments final
     mut_self() noexcept
       { return this->m_self;  }
 
-    ASTERIA_INCOMPLET(Variadic_Arguer)
-    refcnt_ptr<const Variadic_Arguer>
+    refcnt_ptr<const Instantiated_Function>
     caller_opt() const noexcept
-      { return unerase_pointer_cast<const Variadic_Arguer>(this->m_caller_opt);  }
+      { return this->m_caller_opt;  }
 
-    ASTERIA_INCOMPLET(Variadic_Arguer)
     void
-    set_caller(const refcnt_ptr<Variadic_Arguer>& caller) noexcept
-      { this->m_caller_opt = ::std::move(caller);  }
+    set_caller(const refcnt_ptr<const Instantiated_Function>& caller) noexcept
+      { this->m_caller_opt = caller;  }
 
     const cow_bivector<Source_Location, AVM_Rod>&
     defer() const noexcept

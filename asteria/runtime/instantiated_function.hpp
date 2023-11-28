@@ -26,6 +26,10 @@ class Instantiated_Function final
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);
 
+    const refcnt_ptr<Variadic_Arguer>&
+    zvarg() const noexcept
+      { return this->m_zvarg;  }
+
     tinyfmt&
     describe(tinyfmt& fmt) const override;
 

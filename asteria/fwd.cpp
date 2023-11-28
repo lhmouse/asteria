@@ -5,6 +5,8 @@
 #include "fwd.hpp"
 #include "runtime/reference.hpp"
 #include "runtime/runtime_error.hpp"
+#include "runtime/ptc_arguments.hpp"
+#include "runtime/instantiated_function.hpp"
 #include "llds/reference_stack.hpp"
 #include "utils.hpp"
 namespace asteria {
@@ -29,10 +31,10 @@ tinyfmt&
 cow_opaque::
 describe(tinyfmt& fmt) const
   {
-    if(auto ptr = this->m_sptr.get())
-      return ptr->describe(fmt);
+    if(this->m_sptr)
+      return this->m_sptr->describe(fmt);
 
-    return fmt << "[null opaque pointer]";
+    return fmt << "[null opaque]";
   }
 
 tinyfmt&
@@ -42,8 +44,8 @@ describe(tinyfmt& fmt) const
     if(this->m_fptr)
       return fmt << "native function " << this->m_desc;  // static
 
-    if(auto ptr = this->m_sptr.get())
-      return ptr->describe(fmt);  // dynamic
+    if(this->m_sptr)
+      return this->m_sptr->describe(fmt);  // dynamic
 
     return fmt << "[null function pointer]";
   }
@@ -55,11 +57,22 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     try {
       stack.clear_red_zone();
 
-      if(auto fptr = this->m_fptr)
-        return fptr(self, global, ::std::move(stack));  // static
+      if(this->m_fptr) {
+        // static
+        this->m_fptr(self, global, ::std::move(stack));
+        return self;
+      }
 
-      if(auto ptr = this->m_sptr.get())
-        return ptr->invoke_ptc_aware(self, global, ::std::move(stack));  // dynamic
+      if(this->m_sptr) {
+        // dynamic
+        this->m_sptr->invoke_ptc_aware(self, global, ::std::move(stack));
+        if(self.is_ptc()) {
+          const auto ptc = self.unphase_ptc_opt();
+          ROCKET_ASSERT(ptc);
+          ptc->set_caller(dynamic_pointer_cast<const Instantiated_Function>(this->m_sptr));
+        }
+        return self;
+      }
     }
     catch(Runtime_Error& except)
     { throw;  }  // forward
