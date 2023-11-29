@@ -10,9 +10,9 @@ as other scripting languages. However there are some fundamental differences:
    reference. Whenever the assignment operator `=` occurs, it makes a deep
    copy of a value.
 
-2. There is a 64-bit integer type. The conversion from integers to real
-   numbers is implicit, but there is no implicit conversion from real numbers
-   to integers. Instead, it is required to use one of `__itrunc`, `__ifloor`,
+2. There is a 64-bit integer type. Integers can be converted to real numbers
+   implicitly. However there is no implicit conversion from real numbers to
+   integers; it is always required to use one of the `__itrunc`, `__ifloor`,
    `__iceil` or `__iround` operators to cast them, with an explicit rounding
    direction.
 
