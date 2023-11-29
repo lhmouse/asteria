@@ -143,11 +143,13 @@ struct Handler_help final
     void
     list_all_commands() const
       {
+        repl_printf("* list of commands:");
+
         int max_len = 8;
         for(const auto& ptr : s_handlers)
           max_len = ::rocket::max(max_len, (int)::strlen(ptr->cmd()));
 
-        repl_printf("* list of commands:");
+        // short
         for(const auto& ptr : s_handlers)
           repl_printf("  %-*s  %s", max_len, ptr->cmd(), ptr->oneline());
       }
@@ -157,9 +159,10 @@ struct Handler_help final
       {
         auto qhand = do_find_handler_opt(::std::move(cmd));
         if(!qhand)
-          repl_printf("! unknown command `%s`", cmd.c_str());
-        else
-          repl_printf("* %s", qhand->help());
+          return repl_printf("! unknown command `%s`", cmd.c_str());
+
+        // long
+        repl_printf("* %s", qhand->help());
       }
 
     void
@@ -191,11 +194,11 @@ struct Handler_heredoc final
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""" R"'''''''''''''''(
-  heredoc DELIM
+  heredoc DELIMITER
 
   Enter heredoc mode. This prevents the interpreter from submitting scripts
   on line breaks. Instead, a script is terminated by a line that matches
-  DELIM, without any leading or trailing spaces.
+  DELIMITER, without any leading or trailing spaces.
 )'''''''''''''''" """"""""""""""""""""""""""""""""""""""""""""""""""""""""+3;
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
@@ -368,8 +371,7 @@ struct Handler_again final
 void
 prepare_repl_commands()
   {
-    if(s_handlers.size())
-      return;
+    s_handlers.clear();
 
     // Create command interfaces. Note the list of commands is printed
     // according to this vector, so please ensure elements are sorted
@@ -384,18 +386,17 @@ prepare_repl_commands()
 void
 handle_repl_command(cow_string&& cmdline)
   {
-    // Tokenize the command line.
     cow_string cmd;
     cow_vector<cow_string> args;
 
+    // Tokenize the command line.
     char quote = 0;
+    char ch;
     bool has_token = false;
     size_t pos = 0;
 
     for(;;) {
-      char ch;
-
-      if(quote) {
+      if(quote != 0) {
         if(pos >= cmdline.size())
           ::rocket::sprintf_and_throw<::std::invalid_argument>(
                 "Unmatched %c", quote);
