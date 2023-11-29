@@ -51,11 +51,8 @@ Value
 std_numeric_min(cow_vector<Value> values);
 
 // `std.numeric.clamp`
-V_integer
-std_numeric_clamp(V_integer value, V_integer lower, V_integer upper);
-
-V_real
-std_numeric_clamp(V_real value, V_real lower, V_real upper);
+Value
+std_numeric_clamp(Value value, Value lower, Value upper);
 
 // `std.numeric.round`
 V_integer

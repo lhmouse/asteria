@@ -11,28 +11,6 @@
 namespace asteria {
 namespace {
 
-int64_t
-do_verify_bounds(int64_t lower, int64_t upper)
-  {
-    if(lower <= upper)
-      return upper;
-
-    ASTERIA_THROW((
-        "Bounds not valid (`$1` is not less than or equal to `$2`)"),
-        lower, upper);
-  }
-
-double
-do_verify_bounds(double lower, double upper)
-  {
-    if(::std::islessequal(lower, upper))
-      return upper;
-
-    ASTERIA_THROW((
-        "Bounds not valid (`$1` is not less than or equal to `$2`)"),
-        lower, upper);
-  }
-
 pair<V_integer, int>
 do_decompose_integer(uint8_t ebase, int64_t value)
   {
@@ -158,16 +136,16 @@ std_numeric_min(cow_vector<Value> values)
     return result;
   }
 
-V_integer
-std_numeric_clamp(V_integer value, V_integer lower, V_integer upper)
+Value
+std_numeric_clamp(Value value, Value lower, Value upper)
   {
-    return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
-  }
+    if(value.compare_total(lower) == compare_less)
+      return lower;
 
-V_real
-std_numeric_clamp(V_real value, V_real lower, V_real upper)
-  {
-    return ::rocket::clamp(value, lower, do_verify_bounds(lower, upper));
+    if(value.compare_total(upper) == compare_greater)
+      return upper;
+
+    return value;
   }
 
 V_integer
@@ -1155,22 +1133,14 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         "std.numeric.clamp", "value, lower, upper",
         Argument_Reader&& reader)
       {
-        V_integer ival, ilo, iup;
-        V_real fval, flo, fup;
+        Value value, lower, upper;
 
         reader.start_overload();
-        reader.required(ival);
-        reader.required(ilo);
-        reader.required(iup);
+        reader.optional(value);
+        reader.optional(lower);
+        reader.optional(upper);
         if(reader.end_overload())
-          return (Value) std_numeric_clamp(ival, ilo, iup);
-
-        reader.start_overload();
-        reader.required(fval);
-        reader.required(flo);
-        reader.required(fup);
-        if(reader.end_overload())
-          return (Value) std_numeric_clamp(fval, flo, fup);
+          return (Value) std_numeric_clamp(value, lower, upper);
 
         reader.throw_no_matching_function_call();
       });
