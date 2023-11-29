@@ -259,12 +259,9 @@ std_system_get_environment_variables()
 V_object
 std_system_get_properties()
   {
-    struct ::utsname uts;
-    if(::uname(&uts) != 0)
-      return { };
-
-    // Convert the result to an `object`.
     V_object names;
+    struct ::utsname uts;
+    ::uname(&uts);
 
     names.try_emplace(sref("os"),
       V_string(
