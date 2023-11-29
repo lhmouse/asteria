@@ -12,7 +12,7 @@
 * Manuals
     * [Quick guide](doc/quick-guide.md)
     * [Standard library reference](doc/standard-library.md)
-    * [Highlight rules for GNU nano](doc/asteria.nanorc)
+    * [Highlighting rules for GNU nano](doc/asteria.nanorc)
 
 * Formal grammar
     * [Production rules](doc/grammar.txt)
