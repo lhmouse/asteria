@@ -87,7 +87,10 @@ std_filesystem_get_properties(V_string path)
   {
     struct ::stat stb;
     if(::lstat(path.safe_c_str(), &stb) != 0)
-      return nullopt;
+      ASTERIA_THROW((
+          "Could not get properties of file '$1'",
+          "[`lstat()` failed: ${errno:full}]"),
+          path);
 
     // Convert the result to an `object`.
     V_object stat;

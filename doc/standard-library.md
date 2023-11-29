@@ -1667,7 +1667,7 @@ variable. Individual components are categorized into sub-objects.
   * `time_accessed`  integer: timestamp of last access
   * `time_modified`  integer: timestamp of last modification
 
-  On failure, `null` is returned.
+* Throws an exception in case of an error.
 
 ### `std.filesystem.move(path_new, path_old)`
 

@@ -17,8 +17,8 @@ int main()
         var dname = ".filesystem-test_dir_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
         var fname = ".filesystem-test_file_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
 
-        assert std.filesystem.get_properties(dname) == null;
-        assert std.filesystem.get_properties(fname) == null;
+        assert catch( std.filesystem.get_properties(dname) ) != null;
+        assert catch( std.filesystem.get_properties(fname) ) != null;
 
         assert std.filesystem.create_directory(dname) == 1;
         assert std.filesystem.get_properties(dname).is_directory == true;
