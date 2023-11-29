@@ -202,13 +202,13 @@ int main()
         assert std.array.sort(["abb","baa","aaa","bbb","aba","bab","aab","bba"], func(x, y) = std.string.compare(x, y, 2))
                            == ["aaa","aab","abb","aba","baa","bab","bbb","bba"];
 
-        assert std.array.sortu([17,13,14,11,16,18,10,15,12,19])
+        assert std.array.usort([17,13,14,11,16,18,10,15,12,19])
                             == [10,11,12,13,14,15,16,17,18,19];
-        assert std.array.sortu([32,14,11,22,21,34,31,13,23,24,12,33], func(x, y) = (x % 10 <=> y % 10))
+        assert std.array.usort([32,14,11,22,21,34,31,13,23,24,12,33], func(x, y) = (x % 10 <=> y % 10))
                             == [11,32,13,14];
-        assert std.array.sortu(["abb","baa","aaa","bbb","aba","bab","aab","bba"])
+        assert std.array.usort(["abb","baa","aaa","bbb","aba","bab","aab","bba"])
                             == ["aaa","aab","aba","abb","baa","bab","bba","bbb"];
-        assert std.array.sortu(["abb","baa","aaa","bbb","aba","bab","aab","bba"], func(x, y) = std.string.compare(x, y, 2))
+        assert std.array.usort(["abb","baa","aaa","bbb","aba","bab","aab","bba"], func(x, y) = std.string.compare(x, y, 2))
                             == ["aaa","abb","baa","bbb"];
 
         assert std.array.max_of([ ]) == null;

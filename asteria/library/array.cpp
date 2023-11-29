@@ -468,7 +468,7 @@ std_array_sort(Global_Context& global, V_array data, optV_function comparator)
   }
 
 V_array
-std_array_sortu(Global_Context& global, V_array data, optV_function comparator)
+std_array_usort(Global_Context& global, V_array data, optV_function comparator)
   {
     // Use reference counting as our advantage.
     if(data.size() <= 1)
@@ -1071,9 +1071,9 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sortu"),
+    result.insert_or_assign(sref("usort"),
       ASTERIA_BINDING(
-        "std.array.sortu", "data, [comparator]",
+        "std.array.usort", "data, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
@@ -1083,7 +1083,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(comp);
         if(reader.end_overload())
-          return (Value) std_array_sortu(global, data, comp);
+          return (Value) std_array_usort(global, data, comp);
 
         reader.throw_no_matching_function_call();
       });

@@ -71,9 +71,9 @@ std_array_equal_range(Global_Context& global, V_array data, Value target, optV_f
 V_array
 std_array_sort(Global_Context& global, V_array data, optV_function comparator);
 
-// `std.array.sortu`
+// `std.array.usort`
 V_array
-std_array_sortu(Global_Context& global, V_array data, optV_function comparator);
+std_array_usort(Global_Context& global, V_array data, optV_function comparator);
 
 // `std.array.ksort`
 V_array
