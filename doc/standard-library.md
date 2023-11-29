@@ -131,7 +131,7 @@ variable. Individual components are categorized into sub-objects.
 * Launches the program denoted by `cmd`, awaits its termination, and returns
   its exit status. If `argv` is provided, it shall be an array of strings,
   which specifies additional arguments to pass to the program. If `envp` is
-  specified, it shall also be an array of strings, which specify environment
+  given, it shall also be an array of strings, which specifies environment
   variables to the program.
 
 * Returns the exit status of the new process as an integer. If the process
@@ -671,7 +671,7 @@ variable. Individual components are categorized into sub-objects.
 ### `std.string.pcre_named_match(text, [from, [length]], pattern, [options])`
 
 * Searches `text` for the first match of `pattern`. The search operation is
-  performed on the same subrange that would have been returned by 
+  performed on the same subrange that would have been returned by
   `slice(text, from, length)`. `options` specifies options to pass to
   `PCRE(pattern, options)`.
 
