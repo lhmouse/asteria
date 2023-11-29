@@ -1,4 +1,6 @@
-### Lexicology
+# Asteria Grammar
+
+## Lexicology
 
 identifier ::=
 	PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -43,7 +45,7 @@ decimal-exponent-suffix ::=
 binary-exponent-suffix ::=
 	PCRE([pP][-+]?([0-9]`?)+)
 
-### Syntax
+## Syntax
 
 document ::=
 	statement *

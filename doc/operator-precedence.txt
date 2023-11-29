@@ -1,3 +1,11 @@
+# Asteria Operator Precedence
+
+Bitwise, equality and coalescence operators have different precedence from
+other languages. The consideration was based on estimation about their usual
+occurrences. More common use should deserve higher precedence and fewer
+parentheses.
+
+==============================#===============================#===============
 Precedence (descending)       | Operators                     | Associativity
 ==============================#===============================#===============
                               | ++    --                      |
@@ -23,8 +31,8 @@ Additive operators            | +     -                       |
 Shift operators               | <<<   >>>   <<    >>          |
 ------------------------------+-------------------------------+
 Bitwise AND operator          | &                             |
-------------------------------+-------------------------------+
-Bitwise OR and XOR operators  | |     ^                       | Left-to-right
+------------------------------+-------------------------------+ Left-to-right
+Bitwise OR and XOR operators  | |     ^                       |
 ------------------------------+-------------------------------+
 Relational operators          | <     >     <=    >=          |
 ------------------------------+-------------------------------+
@@ -39,7 +47,7 @@ Conditional operator          | *=    /=    %=    +=    -=    |
                               | <<<=  >>>=  <<=   >>=         | Right-to-left
 Assignment operators          | &=    ^=    |=                |
                               | &&=   ||=   ??=   =           |
-==============================#===============================#===============
+------------------------------+-------------------------------+---------------
                               | catch     __addm    __subm    |
 Special operators             | __mulm    __adds    __subs    | N/A
                               | __muls    __fma               |
