@@ -259,7 +259,7 @@ after try, `i` is unknown
 ```
 
 This looks like JavaScript, except that the `{` and `}` are not required when
-there is a single statement that follows `try` or `catch`.
+there is only a single statement that follows `try` or `catch`.
 
 The other form is that `catch` is also an operator. `catch` evaluates its
 operand, and if an exception is thrown during evaluation, it evaluates to a
@@ -282,3 +282,45 @@ after catch, `i` is unknown
 
 In this example `1 / 0` throws an exception, so the assignment operator isn't
 evaluated, leaving the value of `i` intact.
+
+## Object-oriented Programming and the `this` Parameter
+
+In many other programming languages, there is a concept about (non-static)
+member functions. A member function receives an implicit `this` parameter
+that references the object which is 'intuitively' used to call the function.
+
+Our definition of the argument for `this` is based on this 'intuitive' idea:
+The _argument_ for `this` is the reference that denotes the target function
+with the final subscript removed. For example, in
+
+```
+#4:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#5:1> var my_obj = {
+   2>   value = 1;
+   3>   get = func() { return this.value; };
+   4>   set = func(x) { this.value = x; };
+   5> };
+   6> 
+   7> std.io.putfln("my_obj.value = $1", my_obj.value);
+   8> std.io.putfln("my_obj.get() = $1", my_obj.get());
+   9> 
+  10> my_obj.set(42);
+  11> std.io.putfln("after set(), my_obj.value = $1", my_obj.value);
+  12> std.io.putfln("and my_obj.get() = $1", my_obj.get());
+  13> @@
+* running 'snippet #5'...
+my_obj.value = 1
+my_obj.get() = 1
+after set(), my_obj.value = 42
+and my_obj.get() = 42
+* result #5: void
+```
+
+The argument for `this` is determined by the expression before the function
+call operator `()`, and it is always passed by reference. Although `this`
+references mostly objects, when a call to a function within an array is made,
+`this` will reference the enclosing array. For a non-member function call,
+`this` is uninitialized, and any attempt to reference `this` will cause an
+error.
