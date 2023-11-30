@@ -1,13 +1,14 @@
 # The Asteria Programming Language
 
-|Compiler     |Category                   |Remarks          |
-|:------------|:--------------------------|:----------------|
-|**GCC 9**    |:1st_place_medal:Primary   |                 |
-|**Clang 11** |:2nd_place_medal:Secondary |A number of meaningless warnings.  |
+|Compiler     |Category                   |
+|:------------|:--------------------------|
+|**GCC 9**    |:1st_place_medal:Primary   |
+|**Clang 11** |:2nd_place_medal:Secondary |
 
 ![asteria](asteria.png)
 
-**Asteria** is a procedural, dynamically typed programming language that is highly inspired by JavaScript but has been designed to address its issues.
+**Asteria** is a procedural, dynamically typed programming language that is
+highly inspired by JavaScript but has been designed to address its issues.
 
 * Manuals
     * [Quick guide](doc/quick-guide.md)
