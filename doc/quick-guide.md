@@ -59,8 +59,7 @@ of a single snippet. In this example we use `@@`, so our program looks like:
    4>   sum += i;
    5>   
    6> std.io.putfln("sum = $1", sum);
-   7> 
-   8> @@
+   7> @@
 * running 'snippet #3'...
 sum = 5050
 * result #3: void
@@ -97,8 +96,7 @@ and checks whether it is correct:
   20> } 
   21> 
   22> std.io.putfln("my number was $1. have a nice day.", num);
-  23> 
-  24> @@
+  23> @@
 * running 'snippet #5'...
 number generated; guess now!
 50
@@ -207,3 +205,80 @@ form. For example, `func(x, y) { return x + y; }` can be abbreviated as just
 `func(x, y) = x + y`, without `{ return` or `; }`. Likewise, `func(x, y) {
 return ref x.foo(y); }` can be abbreviated as `func(x, y) -> x.foo(y)`, also
 without `{ return ref` or `; }`.
+
+## Exceptions and Error Handling
+
+Exceptions are used extensively in the runtime and standard library for error
+handling, as in
+
+```
+#1:1> 1 / 0
+* running 'expression #1'...
+! exception: runtime error: Zero as divisor (operands were `1` and `0`)
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Zero as divisor (operands were `1` and `0`)"
+  2)   expression at 'expression #1:1:3': ""
+  3)   function at 'expression #1:0:0': "[file scope]"
+  -- end of backtrace frames]
+
+#2:1> std.numeric.parse("not a valid number")
+* running 'expression #2'...
+! exception: runtime error: String not convertible to a number (text `not a valid number`)
+[thrown from `std_numeric_parse(...)` at 'asteria/library/numeric.cpp:500']
+[exception class `St13runtime_error`]
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "String not convertible to a number (text `not a valid number`)\n[thrown from `s ... (102 characters omitted)
+  2)   expression at 'expression #2:1:18': "[proper tail call]"
+  3)   function at 'expression #2:0:0': "[file scope]"
+  -- end of backtrace frames]
+```
+
+Throwing an exception transfers execution to the nearest enclosing `catch`.
+There are two forms of `catch`. One is the well-known _try-catch statement_:
+
+```
+#5:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#6:1> var i = "unknown";
+   2> try {
+   3>   std.io.putln("try");
+   4>   i = 1 / 0;
+   5>   std.io.putln("should never arrive here");
+   6> } 
+   7> catch(e) {
+   8>   std.io.putfln("caught exception: $1", e);
+   9> } 
+  10> std.io.putfln("after try, `i` is $1", i);
+  11> @@
+* running 'snippet #6'...
+try
+caught exception: Zero as divisor (operands were `1` and `0`)
+after try, `i` is unknown
+* result #6: void
+```
+
+This looks like JavaScript, except that the `{` and `}` are not required when
+there is a single statement that follows `try` or `catch`.
+
+The other form is that `catch` is also an operator. `catch` evaluates its
+operand, and if an exception is thrown during evaluation, it evaluates to a
+copy of the exception, otherwise it evaluates to `null`, as in
+
+```
+#7:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#8:1> var i = "unknown";
+   2> var e = catch(i = 1 / 0);
+   3> std.io.putfln("caught exception: $1", e);
+   4> std.io.putfln("after catch, `i` is $1", i);
+   5> @@
+* running 'snippet #8'...
+caught exception: Zero as divisor (operands were `1` and `0`)
+after catch, `i` is unknown
+* result #8: void
+```
+
+In this example `1 / 0` throws an exception, so the assignment operator isn't
+evaluated, leaving the value of `i` intact.
