@@ -107,11 +107,12 @@ class unique_ptr
 
   public:
     // 23.11.1.2.4, observers
-    constexpr
+    ROCKET_PURE constexpr
     pointer
     get() const noexcept
       { return this->m_sth.get();  }
 
+    ROCKET_PURE
     typename add_lvalue_reference<element_type>::type
     operator*() const
       {
@@ -120,6 +121,7 @@ class unique_ptr
         return *ptr;
       }
 
+    ROCKET_PURE
     pointer
     operator->() const noexcept
       {
@@ -128,11 +130,11 @@ class unique_ptr
         return ptr;
       }
 
-    explicit constexpr operator
+    ROCKET_PURE explicit constexpr operator
     bool() const noexcept
       { return static_cast<bool>(this->get());  }
 
-    constexpr operator
+    ROCKET_PURE constexpr operator
     pointer() const noexcept
       { return this->get();  }
 

@@ -207,11 +207,12 @@ class refcnt_ptr
     use_count() const noexcept
       { return this->m_sth.use_count();  }
 
-    constexpr
+    ROCKET_PURE constexpr
     pointer
     get() const noexcept
       { return this->m_sth.get();  }
 
+    ROCKET_PURE
     typename add_lvalue_reference<element_type>::type
     operator*() const
       {
@@ -220,6 +221,7 @@ class refcnt_ptr
         return *ptr;
       }
 
+    ROCKET_PURE
     pointer
     operator->() const noexcept
       {
@@ -228,11 +230,11 @@ class refcnt_ptr
         return ptr;
       }
 
-    explicit constexpr operator
+    ROCKET_PURE explicit constexpr operator
     bool() const noexcept
       { return static_cast<bool>(this->get());  }
 
-    constexpr operator
+    ROCKET_PURE constexpr operator
     pointer() const noexcept
       { return this->get();  }
 
