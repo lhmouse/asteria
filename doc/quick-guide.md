@@ -408,8 +408,66 @@ treat their operands as 64-bit signed integers; and `<<<` and `>>>` aka. the
 * result #9: integer -9223372036854775808;
 ```
 
-The shift and bitwise operators also work on strings. Shifting strings to the
-left has the effect to fill zero bytes in the right, and shifting strings to
-the right has the effect to remove characters from the right. Logical shift
-operators also fill zero bytes in the other side, so the lengths of their
-operands are unchanged.
+## Bit-wise Operators on Strings
+
+The shift and bitwise operators also apply to strings, where they perform
+byte-wise operations.
+
+Shifting strings to the left has the effect to fill zero bytes in the right,
+and shifting strings to the right has the effect to remove characters from
+the right. Logical shift operators also fill zero bytes in the other side, so
+the lengths of their operands are unchanged.
+
+Byte-wise AND, OR and XOR operations are intuitively defined on two strings
+of the same length. If one string is longer than the other, the longer part
+corresponds to the 'missing information' of the other string. The byte-wise
+AND operator trims the longer string, and produces a result of the same
+length as the shorter one; while the byte-wise OR and XOR operators treat
+'missing information' as zeroes (which means to copy from the longer string),
+and produce a result of the same length as the longer one.
+
+## Structured Bindings
+
+Sometimes it makes sense for a function to return multiple values, such as
+`std.numeric.frexp()`. Although it is impossible to have multiple expressions
+in a _return-statement_, it is fairly possible to return an array or object
+of values. We take `std.numeric.frexp()` as an example, which decomposes a
+real number into fractional and exponential parts, such as
+
+```
+#1:1> std.numeric.frexp(6.375)
+* running 'expression #1'...
+* result #1: array(2) [
+  0 = real 0.796875;
+  1 = integer 3;
+];
+```
+
+This gives the equation `6.375 = 0.796875 * 10 ^ 3`. As a good habit, we may
+wish to have names for its two results, so we can do
+
+```
+#2:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#3:1> var [ frac, exp ] = std.numeric.frexp(6.375);
+   2> std.io.putfln("fraction = $1", frac);
+   3> std.io.putfln("exponent = $1", exp);
+   4> @@
+* running 'snippet #3'...
+fraction = 0.796875
+exponent = 3
+* result #3: void
+```
+
+The `var [ ... ] = ...` syntax is called _structured binding for arrays_. The
+declared variables at the first ellipsis are initialized by the elements of
+the initializer at the second ellipsis in ascending order. The initializer
+must yield an array or `null`. Variables that correspond to no element are
+initialized to `null`.
+
+Similarly, the `var { ... } = ...` syntax is called _structure binding for
+objects_. The declared variables at the first ellipsis are initialized by the
+elements of the initializer at the second ellipsis according to their names.
+The initializer must yield an object or `null`. Variables that correspond to
+no element are initialized to `null`.
