@@ -325,6 +325,44 @@ references mostly objects, when a call to a function within an array is made,
 `this` is uninitialized, and any attempt to reference `this` will cause an
 error.
 
+## Passing Arguments by Reference
+
+Some people consider passing by reference to be a source of issues about
+maintainability, and in addition, in many languages there is absolutely no
+way to pass variables or scalar values (boolean values, integers or strings
+for example) by reference.
+
+We deem passing by reference an important feature; however the uniform syntax
+about arguments, by reference and those by value, causes a huge amount of
+confusion. Therefore, references have to passed with special syntax.
+
+Let's take the `exchange(slot, new_value)` function as an example. It writes
+`new_value` to `slot` and returns its old value. It is implemented as
+
+```
+#3:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#4:1> func exchange(slot, new_value) {
+   2>   var old_value = slot;
+   3>   slot = new_value;
+   4>   return old_value;
+   5> }
+   6> 
+   7> var foo = 42;
+   8> var old_foo = exchange(ref foo, "meow");
+   9> std.io.putfln("`foo` has been changed from $1 to $2", old_foo, foo);
+  10> @@
+* running 'snippet #4'...
+`foo` has been changed from 42 to meow
+* result #4: void
+```
+
+Likewise, a function can return a result by reference with `return ref ...`.
+These `ref` keywords can also be written equivalently as the arrow specifier
+`->`. The reference specifiers are parts of the function call expressions and
+return statements and shall not be specified arbitrarily elsewhere.
+
 ## Integer Overflows
 
 The integer type is 64-bit and signed, capable of representing values from
