@@ -228,6 +228,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     cow_vector<phsh_string> names;
     bool comma_allowed = false;
 
+    auto op_sloc = tstrm.next_sloc();
     auto qname = do_accept_identifier_opt(tstrm, true);
     if(qname) {
       // Accept a single identifier.
@@ -235,7 +236,6 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       return ::std::move(names);
     }
 
-    auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(kpunct) {
       // Make the list different from a plain, sole one.
