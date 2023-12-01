@@ -1171,7 +1171,7 @@ variable. Individual components are categorized into sub-objects.
 
 ### `std.numeric.frexp(x)`
 
-* Decomposes `x` into normalized fractional and exponent parts such that
+* Decomposes `x` into normalized fractional and exponential parts such that
   `x = frac * exp2(exp)`, where `frac` and `exp` denote the fraction and
   exponent respectively, and `frac` is always within the range `[0.5,1.0)`.
   If `x` is non-finite, `exp` is unspecified.
