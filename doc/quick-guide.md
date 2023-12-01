@@ -512,8 +512,8 @@ and produce a result of the same length as the longer one.
 Sometimes it makes sense for a function to return multiple values, such as
 `std.numeric.frexp()`. Although it is impossible to have multiple expressions
 in a _return statement_, it is fairly possible to return an array or object
-of values. We take `std.numeric.frexp()` as an example, which decomposes a
-real number into fractional and exponential parts, such as
+of multiple values. Here we take `std.numeric.frexp()` as an example, which
+decomposes a real number into fractional and exponential parts, such as
 
 ```
 #1:1> std.numeric.frexp(6.375)
