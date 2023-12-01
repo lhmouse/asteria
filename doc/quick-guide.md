@@ -326,7 +326,7 @@ references mostly objects, when a call to a function within an array is made,
 `this` is uninitialized, and any attempt to reference `this` will cause an
 error.
 
-## Passing Arguments by Reference
+## Arguments and Results by Reference
 
 Some people consider passing by reference to be a source of issues about
 maintainability, and in addition, in many languages there is absolutely no
