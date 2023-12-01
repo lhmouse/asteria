@@ -2009,8 +2009,11 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
+    // The first argument is the target function. The second argument is the
+    // argument generator.
     cow_vector<Expression_Unit::argument> args;
     args.append(2);
+
     if(!do_accept_expression(args.mut(0).units, tstrm))
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_expression_expected, tstrm.next_sloc());
