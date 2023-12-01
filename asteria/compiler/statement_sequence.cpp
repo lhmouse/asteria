@@ -219,10 +219,12 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
   {
     // variable-declarator ::=
     //   identifier | structured-binding-array | structured-binding-object
-    // structured-binding-array ::=
-    //   "[" identifier * "]"
-    // structured-binding-object ::=
-    //   "{" identifier * "}"
+    //  structured-binding-identifier-list ::=
+    //    identifier ( "," structured-binding-identifier-list ) ?
+    //  structured-binding-array ::=
+    //    "[" structured-binding-identifier-list "]"
+    //  structured-binding-object ::=
+    //    "{" structured-binding-identifier-list "}"
     cow_vector<phsh_string> names;
     bool comma_allowed = false;
 
