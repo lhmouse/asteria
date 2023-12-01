@@ -359,9 +359,9 @@ Let's take the `exchange(slot, new_value)` function as an example. It writes
 ```
 
 Likewise, a function can return a result by reference with `return ref ...`.
-These `ref` keywords can also be written equivalently as the arrow specifier
-`->`. The reference specifiers are parts of the function call expressions and
-return statements and shall not be specified arbitrarily elsewhere.
+These `ref` keywords may also be written equivalently as arrow specifiers
+`->`. They are parts of the function call expressions and return statements,
+and shall not be specified arbitrarily elsewhere.
 
 ## Integer Overflows
 
