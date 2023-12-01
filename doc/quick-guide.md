@@ -391,11 +391,11 @@ be represented as an integer, an exception is thrown, as in
   -- end of backtrace frames]
 ```
 
-In some other programming languages, there can be two right-shift operators:
-`>>` aka. the 'arithmetic right-shift operator', which duplicates the sign
-bit in the left; and `>>>` aka. the 'logical right-shift operator', which
-fills zeroes instead. There is usually only one left-shift operator, `<<`,
-which always fills zeroes in the right.
+In some other programming languages, there can be two kinds of right-shift
+operators: `>>` aka. the 'arithmetic right-shift operator', which duplicates
+the sign bit in the left; and `>>>` aka. the 'logical right-shift operator',
+which fills zeroes instead. There is usually only one left-shift operator,
+`<<`, which always fills zeroes in the right.
 
 Given the fact that integer overflows shall not go unnoticed, we have four
 shift operators: `<<` and `>>` aka. the 'arithmetic shift operators', which
