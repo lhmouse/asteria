@@ -587,9 +587,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         if(lhs.is_integer()) {
           V_integer& val = lhs.mut_integer();
           V_integer other = irhs;
+          V_integer sign = val ^ other;
 
           if(ROCKET_MUL_OVERFLOW(val, other, &val))
-            val = (val >> 63) ^ (other >> 63) ^ INT64_MAX;
+            val = (sign >> 63) ^ INT64_MAX;
           return air_status_next;
         }
         else
@@ -3625,9 +3626,10 @@ solidify(AVM_Rod& rod) const
                     if(lhs.is_integer() && rhs.is_integer()) {
                       V_integer& val = lhs.mut_integer();
                       V_integer other = rhs.as_integer();
+                      V_integer sign = val ^ other;
 
                       if(ROCKET_MUL_OVERFLOW(val, other, &val))
-                        val = (val >> 63) ^ (other >> 63) ^ INT64_MAX;
+                        val = (sign >> 63) ^ INT64_MAX;
                       return air_status_next;
                     }
                     else
