@@ -28,7 +28,7 @@ as other scripting languages. However there are some fundamental differences:
 
 In the first class of every programming language, we are taught to output the
 magic string `"hello world!"`. This can be done by calling the `putln()`
-function in `std.io`:
+function in `std.io`, as in
 
 ```
 #1:1> std.io.putln("hello world!");
@@ -47,7 +47,7 @@ placeholder `$1` is to be replaced with the 1st argument that follows it, and
 
 As our program no longer first into one line, we need to enable the _heredoc_
 mode. The `:heredoc` command takes an arbitrary string that will mark the end
-of a single snippet. In this example we use `@@`, so our program looks like:
+of a single snippet. In this example we use `@@`, so our program looks like
 
 ```
 #2:1> :heredoc @@
@@ -68,7 +68,7 @@ sum = 5050
 The last example in this section is a classical 'guess my number' game. Our
 program generates a random number from 1 to 100, which we will have to guess.
 Our program uses `getln()` to read our input, then converts it to an integer,
-and checks whether it is correct:
+and checks whether it is correct, like
 
 ```
 #4:1> :heredoc @@
@@ -118,7 +118,7 @@ my number was 30. have a nice day.
 ## Lambdas
 
 The most common scenario where lambdas are useful is probably sorting. For
-example, this sorts an array of integers in ascending order:
+example, in order to sort an array of integers in ascending order, we do
 
 ```
 #1:1> std.array.sort([8,4,6,9,2,5,3,0,1,7])
@@ -138,7 +138,7 @@ example, this sorts an array of integers in ascending order:
 ```
 
 But what if we want to sort it in descending order instead? First, let's take
-a look at the prototype of `std.array.sort`:
+a look at the prototype of `std.array.sort`, like
 
 ```
 #2:1> std.array.sort
@@ -234,7 +234,8 @@ handling, as in
 ```
 
 Throwing an exception transfers execution to the nearest enclosing `catch`.
-There are two forms of `catch`. One is the well-known _try-catch statement_:
+There are two forms of `catch`. One is the well-known _try-catch statement_
+like in JavaScript. We do
 
 ```
 #5:1> :heredoc @@
@@ -258,8 +259,8 @@ after try, `i` is unknown
 * result #6: void
 ```
 
-This looks like JavaScript, except that the `{` and `}` are not required when
-there is only a single statement that follows `try` or `catch`.
+The `{` and `}` are not required when there is only a single statement that
+follows `try` or `catch`.
 
 The other form is that `catch` is also an operator. `catch` evaluates its
 operand, and if an exception is thrown during evaluation, it evaluates to a
@@ -289,7 +290,7 @@ In many other programming languages, there is a concept about (non-static)
 member functions. A member function receives an implicit `this` parameter
 that references the object which is 'intuitively' used to call the function.
 
-Our definition of the argument for `this` is based on this 'intuitive' idea:
+Our definition of the argument for `this` is based on this 'intuitive' idea.
 The _argument_ for `this` is the reference that denotes the target function
 with the final subscript removed. For example, in
 
