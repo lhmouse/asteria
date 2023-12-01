@@ -238,8 +238,11 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(kpunct) {
-      // Accept a list of identifiers wrapped in a pair of brackets and separated by commas.
-      // There must be at least one identifier.
+      // Make the list different from a plain, sole one.
+      names.emplace_back(sref("["));
+
+      // Accept a list of identifiers wrapped in a pair of brackets and separated
+      // by commas. There must be at least one identifier.
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
         qname = do_accept_identifier_opt(tstrm, true);
@@ -271,16 +274,17 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                   tstrm.next_sloc(),
                   "[unmatched `[` at '$1']", op_sloc);
 
-      // Make the list different from a plain, sole one.
-      names.insert(0, sref("["));
       names.emplace_back(sref("]"));
       return ::std::move(names);
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(kpunct) {
-      // Accept a list of identifiers wrapped in a pair of braces and separated by commas.
-      // There must be at least one identifier.
+      // Make the list different from a plain, sole one.
+      names.emplace_back(sref("{"));
+
+      // Accept a list of identifiers wrapped in a pair of braces and separated
+      // by commas. There must be at least one identifier.
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
         qname = do_accept_identifier_opt(tstrm, true);
@@ -312,8 +316,6 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                   tstrm.next_sloc(),
                   "[unmatched `{` at '$1']", op_sloc);
 
-      // Make the list different from a plain, sole one.
-      names.insert(0, sref("{"));
       names.emplace_back(sref("}"));
       return ::std::move(names);
     }
@@ -321,9 +323,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-// Scope flags
 // Each type of scope is assigned a unique bit. This determines whether `break`
-// or `continue` is allowed inside it. Blocks may be nested, so flags may be OR'd.
+// or `continue` is allowed. Blocks may be nested, so flags may be OR'd.
 enum scope_flags : uint32_t
   {
     scope_flags_plain      = 0b00000000,
@@ -481,7 +482,8 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
     cow_vector<Statement::variable_declaration> decls;
 
     for(;;) {
-      // Accept a declarator, which may denote a single variable or a structured binding.
+      // Accept a declarator, which may denote a single variable or a structured
+      // binding.
       auto sloc = tstrm.next_sloc();
       auto qdecl = do_accept_variable_declarator_opt(tstrm);
       if(!qdecl)
@@ -525,7 +527,8 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
     cow_vector<Statement::variable_declaration> decls;
 
     for(;;) {
-      // Accept a declarator, which may denote a single variable or a structured binding.
+      // Accept a declarator, which may denote a single variable or a structured
+      // binding.
       auto sloc = tstrm.next_sloc();
       auto qdecl = do_accept_variable_declarator_opt(tstrm);
       if(!qdecl)
