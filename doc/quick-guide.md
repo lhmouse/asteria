@@ -447,6 +447,48 @@ treat their operands as 64-bit signed integers; and `<<<` and `>>>` aka. the
 * result #9: integer -9223372036854775808;
 ```
 
+There are additional addition, subtraction and multiplication operators that
+do not effect exceptions on overflows:
+
+1. `__addm`, `__subm` and `__mulm` are called the _modular arithmetic
+   operators_. They perform calculations with infinite precision, and then
+   truncate ('wrap') their results to 64 bits, producing the same values as
+   reinterpreting the results of their corresponding unsigned operations in
+   two's complement.
+
+2. `__adds`, `__subs` and `__muls` are called the _saturating arithmetic
+   operators_. If their results are greater than the maximum integer value,
+   they produce the maximum integer value; and if their results are less than
+   the minimum integer value, they produce the minimum integer value.
+
+These are not infix operators, but look like function calls, as in
+
+```
+#10:1> __addm(2, 9223372036854775807)
+* running 'expression #10'...
+* result #10: integer -9223372036854775807;
+
+#11:1> __subm(2, -9223372036854775808)
+* running 'expression #11'...
+* result #11: integer -9223372036854775806;
+
+#12:1> __mulm(2, 9223372036854775807)
+* running 'expression #12'...
+* result #12: integer -2;
+
+#13:1> __adds(2, 9223372036854775807)
+* running 'expression #13'...
+* result #13: integer 9223372036854775807;
+
+#14:1> __subs(2, -9223372036854775808)
+* running 'expression #14'...
+* result #14: integer 9223372036854775807;
+
+#15:1> __muls(2, 9223372036854775807)
+* running 'expression #15'...
+* result #15: integer 9223372036854775807;
+```
+
 ## Bit-wise Operators on Strings
 
 The shift and bitwise operators also apply to strings, where they perform
