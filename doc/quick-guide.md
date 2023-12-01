@@ -469,7 +469,7 @@ and produce a result of the same length as the longer one.
 
 Sometimes it makes sense for a function to return multiple values, such as
 `std.numeric.frexp()`. Although it is impossible to have multiple expressions
-in a _return-statement_, it is fairly possible to return an array or object
+in a _return statement_, it is fairly possible to return an array or object
 of values. We take `std.numeric.frexp()` as an example, which decomposes a
 real number into fractional and exponential parts, such as
 
@@ -482,8 +482,8 @@ real number into fractional and exponential parts, such as
 ];
 ```
 
-This gives the equation `6.375 = 0.796875 * 10 ^ 3`. As a good habit, we may
-wish to have names for its two results, so we can do
+This gives the equation `6.375 = 0.796875 × 2³`. As a good habit, we may wish
+to have names for its two results, so we can do
 
 ```
 #2:1> :heredoc @@
