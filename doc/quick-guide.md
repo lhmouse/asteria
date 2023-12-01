@@ -324,3 +324,92 @@ references mostly objects, when a call to a function within an array is made,
 `this` will reference the enclosing array. For a non-member function call,
 `this` is uninitialized, and any attempt to reference `this` will cause an
 error.
+
+## Integer Overflows
+
+The integer type is 64-bit and signed, capable of representing values from
+`-9223372036854775808` to `+9223372036854775807`. The elementary arithmetic
+operators on integers also produce integer results. If such a result cannot
+be represented as an integer, an exception is thrown, as in
+
+```
+#1:1> 100 / 0
+* running 'expression #1'...
+! exception: runtime error: Zero as divisor (operands were `100` and `0`)
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Zero as divisor (operands were `100` and `0`)"
+  2)   expression at 'expression #1:1:5': ""
+  3)   function at 'expression #1:0:0': "[file scope]"
+  -- end of backtrace frames]
+
+#2:1> 1000000000000 * 1000000000000
+* running 'expression #2'...
+! exception: runtime error: Integer multiplication overflow (operands were `1000000000000` and `1000000000000`)
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Integer multiplication overflow (operands were `1000000000000` and `1000000000000`)"
+  2)   expression at 'expression #2:1:15': ""
+  3)   function at 'expression #2:0:0': "[file scope]"
+  -- end of backtrace frames]
+```
+
+In some other programming languages, there can be two right-shift operators:
+`>>` aka. the 'arithmetic right-shift operator', which duplicates the sign
+bit in the left; and `>>>` aka. the 'logical right-shift operator', which
+fills zeroes instead. There is usually only one left-shift operator, `<<`,
+which always fills zeroes in the right.
+
+Given the fact that integer overflows shall not go unnoticed, we have four
+shift operators: `<<` and `>>` aka. the 'arithmetic shift operators', which
+treat their operands as 64-bit signed integers; and `<<<` and `>>>` aka. the
+'logical shift operators', which treat their operands as series of bits:
+
+```
+#3:1> 1 << 63
+* running 'expression #3'...
+! exception: runtime error: Arithmetic left shift overflow (operands were `1` and `63`)
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Arithmetic left shift overflow (operands were `1` and `63`)"
+  2)   expression at 'expression #3:1:3': ""
+  3)   function at 'expression #3:0:0': "[file scope]"
+  -- end of backtrace frames]
+
+#4:1> 1 <<< 63
+* running 'expression #4'...
+* result #4: integer -9223372036854775808;
+
+#5:1> 5 << 62
+* running 'expression #5'...
+! exception: runtime error: Arithmetic left shift overflow (operands were `5` and `62`)
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Arithmetic left shift overflow (operands were `5` and `62`)"
+  2)   expression at 'expression #5:1:3': ""
+  3)   function at 'expression #5:0:0': "[file scope]"
+  -- end of backtrace frames]
+
+#6:1> 5 <<< 62
+* running 'expression #6'...
+* result #6: integer 4611686018427387904;
+
+#7:1> -1 << 63
+* running 'expression #7'...
+* result #7: integer -9223372036854775808;
+
+#8:1> -3 << 63
+* running 'expression #8'...
+! exception: runtime error: Arithmetic left shift overflow (operands were `-3` and `63`)
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Arithmetic left shift overflow (operands were `-3` and `63`)"
+  2)   expression at 'expression #8:1:4': ""
+  3)   function at 'expression #8:0:0': "[file scope]"
+  -- end of backtrace frames]
+
+#9:1> -3 <<< 63
+* running 'expression #9'...
+* result #9: integer -9223372036854775808;
+```
+
+The shift and bitwise operators also work on strings. Shifting strings to the
+left has the effect to fill zero bytes in the right, and shifting strings to
+the right has the effect to remove characters from the right. Logical shift
+operators also fill zero bytes in the other side, so the lengths of their
+operands are unchanged.
