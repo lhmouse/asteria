@@ -601,44 +601,13 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
     return ::std::move(xstmt);
   }
 
-opt<cow_vector<phsh_string>>
-do_accept_parameter_list_opt(Token_Stream& tstrm)
-  {
-    // parameter-list ::=
-    //   "..." | identifier ( "," parameter-list ? ) ?
-    cow_vector<phsh_string> params;
-
-    for(;;) {
-      auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
-      if(kpunct) {
-        params.emplace_back(sref("..."));
-        break;
-      }
-
-      auto name_sloc = tstrm.next_sloc();
-      auto qname = do_accept_identifier_opt(tstrm, true);
-      if(!qname)
-        break;
-
-      if(::rocket::find(params, *qname))
-        throw Compiler_Error(Compiler_Error::M_status(),
-                  compiler_status_duplicate_name_in_parameter_list, name_sloc);
-
-      params.emplace_back(::std::move(*qname));
-
-      // Look for the separator.
-      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      if(!kpunct)
-        break;
-    }
-    return ::std::move(params);
-  }
-
 opt<Statement>
 do_accept_function_definition_opt(Token_Stream& tstrm)
   {
     // function-definition ::=
     //   "func" identifier "(" parameter-list ? ")" statement-block
+    // parameter-list ::=
+    //   "..." | identifier ( "," parameter-list ? ) ?
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd)
@@ -655,14 +624,40 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    auto kparams = do_accept_parameter_list_opt(tstrm);
-    if(!kparams)
-      kparams.emplace();
+    cow_vector<phsh_string> params;
+    bool comma_allowed = false;
+
+    for(;;) {
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
+      if(kpunct) {
+        params.emplace_back(sref("..."));
+        break;
+      }
+
+      auto param_sloc = tstrm.next_sloc();
+      auto kparam = do_accept_identifier_opt(tstrm, true);
+      if(!kparam)
+        break;
+
+      if(::rocket::find(params, *kparam))
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_duplicate_name_in_parameter_list, param_sloc);
+
+      params.emplace_back(::std::move(*kparam));
+
+      // Look for the separator.
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      comma_allowed = !kpunct;
+      if(!kpunct)
+        break;
+    }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
+                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
+                              : compiler_status_closing_parenthesis_or_parameter_expected,
+                tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     auto qbody = do_accept_statement_block_opt(tstrm, scope_flags_plain);
@@ -671,7 +666,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 compiler_status_open_brace_expected, tstrm.next_sloc());
 
     Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname),
-                                    ::std::move(*kparams), ::std::move(*qbody) };
+                                    ::std::move(params), ::std::move(*qbody) };
     return ::std::move(xstmt);
   }
 
@@ -1651,24 +1646,58 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     return true;
   }
 
-void
-do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Stream& tstrm,
-                                   Source_Location&& sloc)
+bool
+do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
+    // closure-function ::=
+    //   "func" "(" parameter-list ? ")" closure-body
+    // closure-body ::=
+    //   statement-block | equal-initializer | ref-initializer
+    auto sloc = tstrm.next_sloc();
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
+    if(!qkwrd)
+      return false;
+
     auto op_sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_status(),
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    auto kparams = do_accept_parameter_list_opt(tstrm);
-    if(!kparams)
-      kparams.emplace();
+    cow_vector<phsh_string> params;
+    bool comma_allowed = false;
+
+    for(;;) {
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
+      if(kpunct) {
+        params.emplace_back(sref("..."));
+        break;
+      }
+
+      auto param_sloc = tstrm.next_sloc();
+      auto kparam = do_accept_identifier_opt(tstrm, true);
+      if(!kparam)
+        break;
+
+      if(::rocket::find(params, *kparam))
+        throw Compiler_Error(Compiler_Error::M_status(),
+                  compiler_status_duplicate_name_in_parameter_list, param_sloc);
+
+      params.emplace_back(::std::move(*kparam));
+
+      // Look for the separator.
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+      comma_allowed = !kpunct;
+      if(!kpunct)
+        break;
+    }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(Compiler_Error::M_add_format(),
-                compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
+                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
+                              : compiler_status_closing_parenthesis_or_parameter_expected,
+                tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     op_sloc = tstrm.next_sloc();
@@ -1701,24 +1730,8 @@ do_accept_closure_function_no_name(cow_vector<Expression_Unit>& units, Token_Str
     auto unique_name = format_string("__closure:$1:$2", sloc.line(), sloc.column());
 
     Expression_Unit::S_closure_function xunit = { ::std::move(sloc), ::std::move(unique_name),
-                                                  ::std::move(*kparams),
-                                                  ::std::move(qblock->stmts) };
+                                                  ::std::move(params), ::std::move(qblock->stmts) };
     units.emplace_back(::std::move(xunit));
-  }
-
-bool
-do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
-  {
-    // closure-function ::=
-    //   "func" "(" parameter-list ? ")" closure-body
-    // closure-body ::=
-    //   statement-block | equal-initializer | ref-initializer
-    auto sloc = tstrm.next_sloc();
-    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
-    if(!qkwrd)
-      return false;
-
-    do_accept_closure_function_no_name(units, tstrm, ::std::move(sloc));
     return true;
   }
 

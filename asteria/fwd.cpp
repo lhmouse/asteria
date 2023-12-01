@@ -375,6 +375,9 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_nondeclaration_statement_expected:
         return "non-declaration statement expected";
 
+      case compiler_status_closing_parenthesis_or_parameter_expected:
+        return "`)` or parameter expected";
+
       default:
         return "[unknown compiler status]";
     }
