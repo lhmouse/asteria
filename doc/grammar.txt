@@ -71,14 +71,14 @@ variable-definition ::=
 variable-declarator ::=
 	identifier | structured-binding-array | structured-binding-object
 
-structured-binding-identifier-list ::=
-	identifier ( "," structured-binding-identifier-list ? ) ?
+identifier-list ::=
+	identifier ( "," identifier-list ? ) ?
 
 structured-binding-array ::=
-	"[" structured-binding-identifier-list "]"
+	"[" identifier-list "]"
 
 structured-binding-object ::=
-	"{" structured-binding-identifier-list "}"
+	"{" identifier-list "}"
 
 equal-initializer ::=
 	"=" expression
