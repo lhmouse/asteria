@@ -259,19 +259,19 @@ int main()
 
         assert i <<< 3 == 96;
         assert -10 <<< 1 == -20;
-        assert 'abc' <<< 1 == 'bc ';
+        assert 'abc' <<< 1 == "bc\0";
 
         assert i >>> 3 == 1;
         assert -10 >>> 1 == 9223372036854775803;
-        assert 'abc' >>> 1 == ' ab';
+        assert 'abc' >>> 1 == "\0ab";
 
         assert i << 3 == 96;
         assert -10 << 1 == -20;
-        assert 'abc' << 1 == 'abc ';
+        assert 'abc' << 1 == "abc\0";
 
         assert i >> 3 == 1;
         assert -10 >> 1 == -5;
-        assert 'abc' >> 1 == 'ab';
+        assert 'abc' >> 1 == "ab";
 
         assert false < true;
         assert 1 < 2;

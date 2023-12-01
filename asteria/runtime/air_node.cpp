@@ -620,7 +620,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
           val.erase(0, tlen);
-          val.append(tlen, ' ');
+          val.append(tlen, '\0');
           return air_status_next;
         }
         else if(lhs.is_array()) {
@@ -659,7 +659,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
           val.pop_back(tlen);
-          val.insert(0, tlen, ' ');
+          val.insert(0, tlen, '\0');
           return air_status_next;
         }
         else if(lhs.is_array()) {
@@ -702,14 +702,14 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         else if(lhs.is_string()) {
           V_string& val = lhs.mut_string();
 
-          size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
-          val.append(tlen, ' ');
+          size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.max_size());
+          val.append(tlen, '\0');
           return air_status_next;
         }
         else if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
 
-          size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
+          size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.max_size());
           val.append(tlen);
           return air_status_next;
         }
