@@ -27,8 +27,8 @@ as other scripting languages. However there are some fundamental differences:
 ## Course 101
 
 In the first class of every programming language, we are taught to output the
-magic string `"hello world!"`. This can be done by calling the `putln()`
-function in `std.io`, as in
+magical string `"hello world!"`. This is achieved by calling the `putln()`
+function from `std.io`, as in
 
 ```
 #1:1> std.io.putln("hello world!");
