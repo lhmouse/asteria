@@ -65,7 +65,7 @@ nondeclaration-statement ::=
 	expression-statement
 
 variable-definition ::=
-	"var" variable-declarator equal-initailizer ? ( "," variable-declarator
+	"var" variable-declarator equal-initializer ? ( "," variable-declarator
 	equal-initializer ? ) ? ";"
 
 variable-declarator ::=
@@ -84,11 +84,11 @@ equal-initializer ::=
 	"=" expression
 
 immutable-variable-definition ::=
-	"const" variable-declarator equal-initailizer ( "," variable-declarator
+	"const" variable-declarator equal-initializer ( "," variable-declarator
 	equal-initializer ) ? ";"
 
 reference-definition ::=
-	"ref" identifier ref-initailizer ( "," identifier ref-initializer ) ? ";"
+	"ref" identifier ref-initializer ( "," identifier ref-initializer ) ? ";"
 
 function-definition ::=
 	"func" identifier "(" parameter-list ? ")" statement-block
@@ -110,7 +110,7 @@ negation ::=
 	"!" | "not"
 
 switch-statement ::=
-	"switch" "(" expression ")" "{" swtich-clause * "}"
+	"switch" "(" expression ")" "{" switch-clause * "}"
 
 switch-clause ::=
 	( "case" expression | "default" ) ":" statement *
