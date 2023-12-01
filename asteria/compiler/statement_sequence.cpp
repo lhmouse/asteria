@@ -238,11 +238,10 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(kpunct) {
-      // Make the list different from a plain, sole one.
-      names.emplace_back(sref("["));
-
       // Accept a list of identifiers wrapped in a pair of brackets and separated
       // by commas. There must be at least one identifier.
+      names.emplace_back(sref("["));
+
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
         qname = do_accept_identifier_opt(tstrm, true);
@@ -280,11 +279,10 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(kpunct) {
-      // Make the list different from a plain, sole one.
-      names.emplace_back(sref("{"));
-
       // Accept a list of identifiers wrapped in a pair of braces and separated
       // by commas. There must be at least one identifier.
+      names.emplace_back(sref("{"));
+
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
         qname = do_accept_identifier_opt(tstrm, true);
