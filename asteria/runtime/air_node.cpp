@@ -3436,13 +3436,40 @@ solidify(AVM_Rod& rod) const
                   }
 
                   case xop_addm:
+                    // This should have been redirected to the fast path.
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Modular addition not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+
                   case xop_subm:
+                    // This should have been redirected to the fast path.
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+
                   case xop_mulm:
+                    // This should have been redirected to the fast path.
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+
                   case xop_adds:
+                    // This should have been redirected to the fast path.
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Saturating addition not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+
                   case xop_subs:
+                    // This should have been redirected to the fast path.
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Saturating subtraction not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+
                   case xop_muls:
-                    // These should already be redirected to the fast path.
-                    ROCKET_ASSERT(false);
+                    // This should have been redirected to the fast path.
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Saturating multiplication not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
 
                   default:
                     ROCKET_UNREACHABLE();
