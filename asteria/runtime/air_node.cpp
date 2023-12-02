@@ -299,17 +299,18 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val = result;
           return air_status_next;
         }
-        else if(lhs.is_real()) {
+
+        if(lhs.is_real()) {
           V_real& val = lhs.mut_real();
           V_real other = static_cast<V_real>(irhs);
 
           val += other;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Addition not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Addition not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_sub: {
@@ -329,7 +330,8 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val = result;
           return air_status_next;
         }
-        else if(lhs.is_real()) {
+
+        if(lhs.is_real()) {
           V_real& val = lhs.mut_real();
           V_real other = static_cast<V_real>(irhs);
 
@@ -337,10 +339,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val -= other;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Subtraction not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Subtraction not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_mul: {
@@ -360,31 +362,34 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val = result;
           return air_status_next;
         }
-        else if(lhs.is_real()) {
+
+        if(lhs.is_real()) {
           V_real& val = lhs.mut_real();
           V_real other = static_cast<V_real>(irhs);
 
           val *= other;
           return air_status_next;
         }
-        else if(lhs.is_string()) {
+
+        if(lhs.is_string()) {
           V_string& val = lhs.mut_string();
           V_integer count = irhs;
 
           do_duplicate_sequence(val, count);
           return air_status_next;
         }
-        else if(lhs.is_array()) {
+
+        if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
           V_integer count = irhs;
 
           do_duplicate_sequence(val, count);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Multiplication not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Multiplication not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_div: {
@@ -407,17 +412,18 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val /= other;
           return air_status_next;
         }
-        else if(lhs.is_real()) {
+
+        if(lhs.is_real()) {
           V_real& val = lhs.mut_real();
           V_real other = static_cast<V_real>(irhs);
 
           val /= other;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Division not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Division not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_mod: {
@@ -441,17 +447,18 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val %= other;
           return air_status_next;
         }
-        else if(lhs.is_real()) {
+
+        if(lhs.is_real()) {
           V_real& val = lhs.mut_real();
           V_real other = static_cast<V_real>(irhs);
 
           val = ::std::fmod(val, other);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Modulo not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Modulo not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_andb: {
@@ -465,10 +472,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val &= other;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Bitwise AND not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_orb: {
@@ -482,10 +489,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val |= other;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Bitwise OR not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_xorb: {
@@ -499,10 +506,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val ^= other;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Bitwise XOR not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_addm: {
@@ -514,10 +521,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           ROCKET_ADD_OVERFLOW(val, other, &val);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Modular addition not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Modular addition not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_subm: {
@@ -529,10 +536,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           ROCKET_SUB_OVERFLOW(val, other, &val);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Modular subtraction not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_mulm: {
@@ -544,10 +551,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           ROCKET_MUL_OVERFLOW(val, other, &val);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Modular multiplication not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_adds: {
@@ -560,10 +567,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
             val = (other >> 63) ^ INT64_MAX;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Saturating addition not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Saturating addition not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_subs: {
@@ -576,10 +583,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
             val = (other >> 63) ^ INT64_MIN;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Saturating subtraction not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Saturating subtraction not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_muls: {
@@ -593,10 +600,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
             val = (sign >> 63) ^ INT64_MAX;
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Saturating multiplication not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Saturating multiplication not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_sll: {
@@ -616,7 +623,8 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val &= ((count - 64) >> 63);
           return air_status_next;
         }
-        else if(lhs.is_string()) {
+
+        if(lhs.is_string()) {
           V_string& val = lhs.mut_string();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
@@ -624,7 +632,8 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val.append(tlen, '\0');
           return air_status_next;
         }
-        else if(lhs.is_array()) {
+
+        if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
@@ -632,10 +641,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val.append(tlen);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Logical left shift not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Logical left shift not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_srl: {
@@ -655,7 +664,8 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val &= ((count - 64) >> 63);
           return air_status_next;
         }
-        else if(lhs.is_string()) {
+
+        if(lhs.is_string()) {
           V_string& val = lhs.mut_string();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
@@ -663,7 +673,8 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val.insert(0, tlen, '\0');
           return air_status_next;
         }
-        else if(lhs.is_array()) {
+
+        if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
@@ -671,10 +682,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val.insert(0, tlen);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Logical right shift not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Logical right shift not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_sla: {
@@ -700,24 +711,26 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val <<= count;
           return air_status_next;
         }
-        else if(lhs.is_string()) {
+
+        if(lhs.is_string()) {
           V_string& val = lhs.mut_string();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.max_size());
           val.append(tlen, '\0');
           return air_status_next;
         }
-        else if(lhs.is_array()) {
+
+        if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.max_size());
           val.append(tlen);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       case xop_sra: {
@@ -735,24 +748,26 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           val >>= count;
           return air_status_next;
         }
-        else if(lhs.is_string()) {
+
+        if(lhs.is_string()) {
           V_string& val = lhs.mut_string();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
           val.pop_back(tlen);
           return air_status_next;
         }
-        else if(lhs.is_array()) {
+
+        if(lhs.is_array()) {
           V_array& val = lhs.mut_array();
 
           size_t tlen = (size_t) ::rocket::min((uint64_t) irhs, val.size());
           val.pop_back(tlen);
           return air_status_next;
         }
-        else
-          throw Runtime_Error(Runtime_Error::M_format(),
-                   "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
-                   lhs, irhs);
+
+        throw Runtime_Error(Runtime_Error::M_format(),
+                 "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                 lhs, irhs);
       }
 
       default:
@@ -2593,7 +2608,8 @@ solidify(AVM_Rod& rod) const
                       val = result;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       V_real& val = rhs.mut_real();
 
                       // Overflow will result in an infinity, so this is safe.
@@ -2605,9 +2621,9 @@ solidify(AVM_Rod& rod) const
                       val = result;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Increment not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Increment not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_dec: {
@@ -2630,7 +2646,8 @@ solidify(AVM_Rod& rod) const
                       val = result;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       V_real& val = rhs.mut_real();
 
                       // Overflow will result in an infinity, so this is safe.
@@ -2642,9 +2659,9 @@ solidify(AVM_Rod& rod) const
                       val = result;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Decrement not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_unset: {
@@ -2800,7 +2817,8 @@ solidify(AVM_Rod& rod) const
                       val = result;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       V_real& val = rhs.mut_real();
 
                       int64_t bits;
@@ -2810,9 +2828,9 @@ solidify(AVM_Rod& rod) const
                       bcopy(val, bits);
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Arithmetic negation not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_notb: {
@@ -2822,20 +2840,22 @@ solidify(AVM_Rod& rod) const
                       val = !val;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_integer) {
+
+                    if(rhs.type() == type_integer) {
                       V_integer& val = rhs.mut_integer();
                       val = ~val;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_string) {
+
+                    if(rhs.type() == type_string) {
                       V_string& val = rhs.mut_string();
                       for(auto it = val.mut_begin();  it != val.end();  ++it)
                         *it = static_cast<char>(*it ^ -1);
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Bitwise NOT not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_notl: {
@@ -2850,21 +2870,24 @@ solidify(AVM_Rod& rod) const
                       rhs = V_integer(0);
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_string) {
+
+                    if(rhs.type() == type_string) {
                       rhs = V_integer(rhs.as_string().size());
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_array) {
+
+                    if(rhs.type() == type_array) {
                       rhs = V_integer(rhs.as_array().size());
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_object) {
+
+                    if(rhs.type() == type_object) {
                       rhs = V_integer(rhs.as_object().size());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`countof` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_typeof: {
@@ -2879,9 +2902,9 @@ solidify(AVM_Rod& rod) const
                       rhs = ::std::sqrt(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__sqrt` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_isnan: {
@@ -2891,13 +2914,14 @@ solidify(AVM_Rod& rod) const
                       rhs = false;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = ::std::isnan(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__isnan` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_isinf: {
@@ -2907,13 +2931,14 @@ solidify(AVM_Rod& rod) const
                       rhs = false;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = ::std::isinf(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__isinf` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_abs: {
@@ -2929,7 +2954,8 @@ solidify(AVM_Rod& rod) const
                       val ^= (val ^ neg_val) & (val >> 63);
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       V_real& val = rhs.mut_real();
 
                       double result = ::std::fabs(val);
@@ -2937,9 +2963,9 @@ solidify(AVM_Rod& rod) const
                       val = result;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__abs` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_sign: {
@@ -2948,13 +2974,14 @@ solidify(AVM_Rod& rod) const
                       rhs = rhs.as_integer() < 0;
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = ::std::signbit(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__sign` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_round: {
@@ -2962,13 +2989,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::round(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__round` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_floor: {
@@ -2977,13 +3005,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::floor(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__floor` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_ceil: {
@@ -2992,13 +3021,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::ceil(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__ceil` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_trunc: {
@@ -3006,13 +3036,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::trunc(rhs.as_real());
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__trunc` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_iround: {
@@ -3020,13 +3051,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::round(rhs.as_real()));
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__iround` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_ifloor: {
@@ -3034,13 +3066,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__ifloor` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_iceil: {
@@ -3048,13 +3081,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__iceil` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_itrunc: {
@@ -3062,13 +3096,14 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_integer) {
                       return air_status_next;
                     }
-                    else if(rhs.type() == type_real) {
+
+                    if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__itrunc` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_lzcnt: {
@@ -3079,9 +3114,9 @@ solidify(AVM_Rod& rod) const
                       val = (int64_t) ROCKET_LZCNT64((uint64_t) val);
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__lzcnt` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_tzcnt: {
@@ -3092,9 +3127,9 @@ solidify(AVM_Rod& rod) const
                       val = (int64_t) ROCKET_TZCNT64((uint64_t) val);
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__tzcnt` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                   case xop_popcnt: {
@@ -3105,9 +3140,9 @@ solidify(AVM_Rod& rod) const
                       val = (int64_t) ROCKET_POPCNT64((uint64_t) val);
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "`__popcnt` not applicable (operand was `$1`)", rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                   default:
@@ -3233,24 +3268,26 @@ solidify(AVM_Rod& rod) const
                       val += other;
                       return air_status_next;
                     }
-                    else if(lhs.is_string() && rhs.is_string()) {
+
+                    if(lhs.is_string() && rhs.is_string()) {
                       V_string& val = lhs.mut_string();
                       const V_string& other = rhs.as_string();
 
                       val.append(other);
                       return air_status_next;
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
                       V_boolean& val = lhs.mut_boolean();
                       V_boolean other = rhs.as_boolean();
 
                       val |= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Addition not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Addition not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_sub: {
@@ -3264,7 +3301,8 @@ solidify(AVM_Rod& rod) const
                       val -= other;
                       return air_status_next;
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
                       V_boolean& val = lhs.mut_boolean();
                       V_boolean other = rhs.as_boolean();
 
@@ -3272,10 +3310,10 @@ solidify(AVM_Rod& rod) const
                       val ^= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Subtraction not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Subtraction not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_mul: {
@@ -3289,7 +3327,8 @@ solidify(AVM_Rod& rod) const
                       val *= other;
                       return air_status_next;
                     }
-                    else if(lhs.is_integer() && rhs.is_string()) {
+
+                    if(lhs.is_integer() && rhs.is_string()) {
                       V_integer count = lhs.as_integer();
                       lhs = rhs.as_string();
                       V_string& val = lhs.mut_string();
@@ -3297,7 +3336,8 @@ solidify(AVM_Rod& rod) const
                       do_duplicate_sequence(val, count);
                       return air_status_next;
                     }
-                    else if(lhs.is_integer() && rhs.is_array()) {
+
+                    if(lhs.is_integer() && rhs.is_array()) {
                       V_integer count = lhs.as_integer();
                       lhs = rhs.as_array();
                       V_array& val = lhs.mut_array();
@@ -3305,17 +3345,18 @@ solidify(AVM_Rod& rod) const
                       do_duplicate_sequence(val, count);
                       return air_status_next;
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
                       V_boolean& val = lhs.mut_boolean();
                       V_boolean other = rhs.as_boolean();
 
                       val &= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Multiplication not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Multiplication not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_div: {
@@ -3328,10 +3369,10 @@ solidify(AVM_Rod& rod) const
                       val /= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Division not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Division not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_mod: {
@@ -3345,10 +3386,10 @@ solidify(AVM_Rod& rod) const
                       val = ::std::fmod(val, other);
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Modulo not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Modulo not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_andb: {
@@ -3366,17 +3407,18 @@ solidify(AVM_Rod& rod) const
                         *it = static_cast<char>(*it & *maskp);
                       return air_status_next;
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
                       V_boolean& val = lhs.mut_boolean();
                       V_boolean other = rhs.as_boolean();
 
                       val &= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Bitwise AND not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_orb: {
@@ -3394,17 +3436,18 @@ solidify(AVM_Rod& rod) const
                         *valp = static_cast<char>(*valp | *it);
                       return air_status_next;
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
                       V_boolean& val = lhs.mut_boolean();
                       V_boolean other = rhs.as_boolean();
 
                       val |= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Bitwise OR not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_xorb: {
@@ -3422,17 +3465,18 @@ solidify(AVM_Rod& rod) const
                         *valp = static_cast<char>(*valp ^ *it);
                       return air_status_next;
                     }
-                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
                       V_boolean& val = lhs.mut_boolean();
                       V_boolean other = rhs.as_boolean();
 
                       val ^= other;
                       return air_status_next;
                     }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Bitwise XOR not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
+
+                    throw Runtime_Error(Runtime_Error::M_format(),
+                             "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                   case xop_addm:
@@ -3549,10 +3593,10 @@ solidify(AVM_Rod& rod) const
                   val = ::std::fma(val, y_mul, z_add);
                   return air_status_next;
                 }
-                else
-                  throw Runtime_Error(Runtime_Error::M_format(),
-                           "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
-                           lhs, mid, rhs);
+
+                throw Runtime_Error(Runtime_Error::M_format(),
+                         "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
+                         lhs, mid, rhs);
               }
 
               // Uparam
