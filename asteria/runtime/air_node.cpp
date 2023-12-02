@@ -3162,11 +3162,9 @@ solidify(AVM_Rod& rod) const
                 auto& top = ctx.stack().mut_top();
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-#if defined(__OPTIMIZE__) && !defined(ROCKET_DEBUG)
                 // The fast path should be a proper tail call.
                 if(rhs.type() == type_integer)
                   return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
-#endif  // fast path
 
                 switch(uxop) {
                   case xop_cmp_eq: {
@@ -3228,20 +3226,7 @@ solidify(AVM_Rod& rod) const
                   case xop_add: {
                     // Perform logical OR on two boolean values, or get the sum of two
                     // arithmetic values, or concatenate two strings.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      int64_t result;
-                      if(ROCKET_ADD_OVERFLOW(val, other, &result))
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Integer addition overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val = result;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_real() && rhs.is_real()) {
+                    if(lhs.is_real() && rhs.is_real()) {
                       V_real& val = lhs.mut_real();
                       V_real other = rhs.as_real();
 
@@ -3271,21 +3256,7 @@ solidify(AVM_Rod& rod) const
                   case xop_sub: {
                     // Perform logical XOR on two boolean values, or get the difference
                     // of two arithmetic values.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      // Perform arithmetic subtraction with overflow checking.
-                      int64_t result;
-                      if(ROCKET_SUB_OVERFLOW(val, other, &result))
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Integer subtraction overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val = result;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_real() && rhs.is_real()) {
+                    if(lhs.is_real() && rhs.is_real()) {
                       V_real& val = lhs.mut_real();
                       V_real other = rhs.as_real();
 
@@ -3311,44 +3282,17 @@ solidify(AVM_Rod& rod) const
                      // Perform logical AND on two boolean values, or get the product of
                      // two arithmetic values, or duplicate a string or array by a given
                      // times.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      int64_t result;
-                      if(ROCKET_MUL_OVERFLOW(val, other, &result))
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Integer multiplication overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val = result;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_real() && rhs.is_real()) {
+                    if(lhs.is_real() && rhs.is_real()) {
                       V_real& val = lhs.mut_real();
                       V_real other = rhs.as_real();
 
                       val *= other;
                       return air_status_next;
                     }
-                    else if(lhs.is_string() && rhs.is_integer()) {
-                      V_string& val = lhs.mut_string();
-                      V_integer count = rhs.as_integer();
-
-                      do_duplicate_sequence(val, count);
-                      return air_status_next;
-                    }
                     else if(lhs.is_integer() && rhs.is_string()) {
                       V_integer count = lhs.as_integer();
                       lhs = rhs.as_string();
                       V_string& val = lhs.mut_string();
-
-                      do_duplicate_sequence(val, count);
-                      return air_status_next;
-                    }
-                    else if(lhs.is_array() && rhs.is_integer()) {
-                      V_array& val = lhs.mut_array();
-                      V_integer count = rhs.as_integer();
 
                       do_duplicate_sequence(val, count);
                       return air_status_next;
@@ -3377,24 +3321,7 @@ solidify(AVM_Rod& rod) const
                   case xop_div: {
                     // Get the quotient of two arithmetic values. If both operands are
                     // integers, the result is also an integer, truncated towards zero.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(other == 0)
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Zero as divisor (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      if((val == INT64_MIN) && (other == -1))
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Integer division overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val /= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_real() && rhs.is_real()) {
+                    if(lhs.is_real() && rhs.is_real()) {
                       V_real& val = lhs.mut_real();
                       V_real other = rhs.as_real();
 
@@ -3411,24 +3338,7 @@ solidify(AVM_Rod& rod) const
                     // Get the remainder of two arithmetic values. The quotient is
                     // truncated towards zero. If both operands are integers, the result
                     // is also an integer.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(other == 0)
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Zero as divisor (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      if((val == INT64_MIN) && (other == -1))
-                        throw Runtime_Error(Runtime_Error::M_format(),
-                                 "Integer division overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val %= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_real() && rhs.is_real()) {
+                    if(lhs.is_real() && rhs.is_real()) {
                       V_real& val = lhs.mut_real();
                       V_real other = rhs.as_real();
 
@@ -3445,14 +3355,7 @@ solidify(AVM_Rod& rod) const
                     // Perform the bitwise AND operation on all bits of the operands. If
                     // the two operands have different lengths, the result is truncated
                     // to the same length as the shorter one.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      val &= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string() && rhs.is_string()) {
+                    if(lhs.is_string() && rhs.is_string()) {
                       V_string& val = lhs.mut_string();
                       const V_string& mask = rhs.as_string();
 
@@ -3480,14 +3383,7 @@ solidify(AVM_Rod& rod) const
                     // Perform the bitwise OR operation on all bits of the operands. If
                     // the two operands have different lengths, the result is padded to
                     // the same length as the longer one, with zeroes.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      val |= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string() && rhs.is_string()) {
+                    if(lhs.is_string() && rhs.is_string()) {
                       V_string& val = lhs.mut_string();
                       const V_string& mask = rhs.as_string();
 
@@ -3515,14 +3411,7 @@ solidify(AVM_Rod& rod) const
                     // Perform the bitwise XOR operation on all bits of the operands. If
                     // the two operands have different lengths, the result is padded to
                     // the same length as the longer one, with zeroes.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      val ^= other;
-                      return air_status_next;
-                    }
-                    else if(lhs.is_string() && rhs.is_string()) {
+                    if(lhs.is_string() && rhs.is_string()) {
                       V_string& val = lhs.mut_string();
                       const V_string& mask = rhs.as_string();
 
@@ -3546,99 +3435,14 @@ solidify(AVM_Rod& rod) const
                                lhs, rhs);
                   }
 
-                  case xop_addm: {
-                    // Perform modular addition on two integers.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      ROCKET_ADD_OVERFLOW(val, other, &val);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Modular addition not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_subm: {
-                    // Perform modular subtraction on two integers.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      ROCKET_SUB_OVERFLOW(val, other, &val);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Modular subtraction not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_mulm: {
-                    // Perform modular multiplication on two integers.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      ROCKET_MUL_OVERFLOW(val, other, &val);
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Modular multiplication not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_adds: {
-                    // Perform saturating addition on two integers.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(ROCKET_ADD_OVERFLOW(val, other, &val))
-                        val = (other >> 63) ^ INT64_MAX;
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Saturating addition not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_subs: {
-                    // Perform saturating subtraction on two integers.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(ROCKET_SUB_OVERFLOW(val, other, &val))
-                        val = (other >> 63) ^ INT64_MIN;
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Saturating subtraction not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
-
-                  case xop_muls: {
-                    // Perform saturating multiplication on two integers.
-                    if(lhs.is_integer() && rhs.is_integer()) {
-                      V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-                      V_integer sign = val ^ other;
-
-                      if(ROCKET_MUL_OVERFLOW(val, other, &val))
-                        val = (sign >> 63) ^ INT64_MAX;
-                      return air_status_next;
-                    }
-                    else
-                      throw Runtime_Error(Runtime_Error::M_format(),
-                               "Saturating multiplication not applicable (operands were `$1` and `$2`)",
-                               lhs, rhs);
-                  }
+                  case xop_addm:
+                  case xop_subm:
+                  case xop_mulm:
+                  case xop_adds:
+                  case xop_subs:
+                  case xop_muls:
+                    // These should already be redirected to the fast path.
+                    ROCKET_ASSERT(false);
 
                   default:
                     ROCKET_UNREACHABLE();
