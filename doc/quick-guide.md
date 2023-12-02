@@ -24,6 +24,17 @@ as other scripting languages. However there are some fundamental differences:
    attempting to modify temporary values will effect runtime errors. This
    applies similarly to function results.
 
+## Index
+
+1. [Course 101](#course-101)
+2. [Lambdas](#lambdas)
+3. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
+4. [Arguments and Results by Reference](#arguments-and-results-by-reference)
+5. [Exceptions and Error Handling](#exceptions-and-error-handling)
+6. [Integer Overflows](#integer-overflows)
+7. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
+8. [Structured Bindings](#structured-bindings)
+
 ## Course 101
 
 In the first class of every programming language, we are taught to output the
@@ -114,6 +125,8 @@ you got it!
 my number was 30. have a nice day.
 * result #5: void
 ```
+
+[back to index](#index)
 
 ## Lambdas
 
@@ -206,6 +219,8 @@ form. For example, `func(x, y) { return x + y; }` can be abbreviated as just
 return ref x.foo(y); }` can be abbreviated as `func(x, y) -> x.foo(y)`, also
 without `{ return ref` or `; }`.
 
+[back to index](#index)
+
 ## Object-oriented Programming and the `this` Parameter
 
 In many other programming languages, there is a concept about (non-static)
@@ -248,6 +263,8 @@ references mostly objects, when a call to a function within an array is made,
 `this` is uninitialized, and any attempt to reference `this` will cause an
 error.
 
+[back to index](#index)
+
 ## Arguments and Results by Reference
 
 Some people consider passing by reference to be a source of issues about
@@ -285,6 +302,8 @@ Likewise, a function can return a result by reference with `return ref ...`.
 These `ref` keywords may also be written equivalently as arrow specifiers
 `->`. They are parts of the function call expressions and return statements,
 and shall not be specified arbitrarily elsewhere.
+
+[back to index](#index)
 
 ## Exceptions and Error Handling
 
@@ -363,6 +382,8 @@ after catch, `i` is unknown
 
 In this example `1 / 0` throws an exception, so the assignment operator isn't
 evaluated, leaving the value of `i` intact.
+
+[back to index](#index)
 
 ## Integer Overflows
 
@@ -489,6 +510,8 @@ These are not infix operators, but look like function calls, as in
 * result #15: integer 9223372036854775807;
 ```
 
+[back to index](#index)
+
 ## Bit-wise Operators on Strings
 
 The shift and bitwise operators also apply to strings, where they perform
@@ -506,6 +529,8 @@ AND operator trims the longer string, and produces a result of the same
 length as the shorter one; while the byte-wise OR and XOR operators treat
 'missing information' as zeroes (which means to copy from the longer string),
 and produce a result of the same length as the longer one.
+
+[back to index](#index)
 
 ## Structured Bindings
 
@@ -552,3 +577,5 @@ objects_. The declared variables at the first ellipsis are initialized by the
 elements of the initializer at the second ellipsis according to their names.
 The initializer must yield an object or `null`. Variables that correspond to
 no element are initialized to `null`.
+
+[back to index](#index)
