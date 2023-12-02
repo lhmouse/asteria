@@ -130,8 +130,9 @@ my number was 30. have a nice day.
 
 ## Lambdas
 
-The most common scenario where lambdas are useful is probably sorting. For
-example, in order to sort an array of integers in ascending order, we do
+Lambdas are anonymous functions. The most common scenario where lambdas are
+useful is probably sorting and searching. For example, in order to sort an
+array of integers in ascending order, we do
 
 ```
 #1:1> std.array.sort([8,4,6,9,2,5,3,0,1,7])
@@ -170,10 +171,10 @@ which takes a `comparator` function has the same requirement on it, which is
 Other results usually indicate that `x` and `y` are unordered, and are likely
 to cause exceptions to be thrown. This specification matches the built-in
 _spaceship_ operator_ `<=>`. Therefore, in order to sort an array in reverse
-order, we need to define a lambda, i.e. an anonymous function, which returns
-the opposite of the default comparison result. There are actually two ways to
-achieve this, either `func(x, y) { return -(x <=> y); }` or `func(x, y) {
-return y <=> x; }`. We use the second form, and it looks like
+order, we need to define a lambda which returns the opposite of the default
+comparison result. There are actually two ways to achieve this, either
+`func(x, y) { return -(x <=> y); }` or `func(x, y) { return y <=> x; }`. We
+use the second form, and it looks like
 
 ```
 #3:1> std.array.sort([8,4,6,9,2,5,3,0,1,7], \
