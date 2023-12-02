@@ -27,13 +27,14 @@ as other scripting languages. However there are some fundamental differences:
 ## Index
 
 1. [Course 101](#course-101)
-2. [Lambdas](#lambdas)
-3. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
-4. [Arguments and Results by Reference](#arguments-and-results-by-reference)
-5. [Exceptions and Error Handling](#exceptions-and-error-handling)
-6. [Integer Overflows](#integer-overflows)
-7. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
-8. [Structured Bindings](#structured-bindings)
+2. [Variables and Functions](#variables-and-functions)
+3. [Lambdas](#lambdas)
+4. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
+5. [Arguments and Results by Reference](#arguments-and-results-by-reference)
+6. [Exceptions and Error Handling](#exceptions-and-error-handling)
+7. [Integer Overflows](#integer-overflows)
+8. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
+9. [Structured Bindings](#structured-bindings)
 
 ## Course 101
 
@@ -124,6 +125,64 @@ your answer was greater; try again.
 you got it!
 my number was 30. have a nice day.
 * result #5: void
+```
+
+[back to index](#index)
+
+## Variables and Functions
+
+By definition, a _variable_ is a named box that is capable of storing a value.
+Usually we declare variables with `var`, however that's not the only way.
+Sometimes, people find it helpful to prevent unintentional modification to a
+variable. A variable that can't be modified is called an _immutable variable_
+and can be declared with `const`, as in
+
+```
+#1:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#2:1> const temp_value = 42;
+   2> temp_value = 100;
+   3> @@
+* running 'snippet #2'...
+! exception: runtime error: Attempt to modify a `const` variable
+[backtrace frames:
+  1) native code at '[unknown]:-1:-1': "Attempt to modify a `const` variable"
+  2)   expression at 'snippet #2:2:12': ""
+  3)   function at 'snippet #2:0:0': "[file scope]"
+  -- end of backtrace frames]
+```
+
+Plain variables can be declared without initialization, in which case they
+are initialized to `null`. Immutable variables are required to be initialized
+as soon as they are defined; otherwise syntax errors are raised.
+
+A _function_ can be defined with `func`, and by its nature, it is also an
+immutable variable, whose value is a function.
+
+Each variable has a _scope_, and can only be referenced in its scope. If a
+variable is declared in a scope, where another variable with the same name is
+visible, the other variable will be shadowed and become invisible, as in
+
+```
+#3:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#4:1> var a = 42;
+   2> {
+   3>   func a() { std.io.putln("the first `a` is shadowed"); }
+   4>   var b = a;  // another reference to `a()`
+   5>   var a = "shadow-it-again";
+   6>   
+   7>   std.io.putfln("`a` denotes $1", a);
+   8>   std.io.putfln("`b` denotes $1", b);  // access function via `b`
+   9> } 
+  10> std.io.putfln("left scope; `a` now denotes $1", a);
+  11> @@
+* running 'snippet #4'...
+`a` denotes shadow-it-again
+`b` denotes (function) [[`a()` at 'snippet #4:3:3']]
+left scope; `a` now denotes 42
 ```
 
 [back to index](#index)
