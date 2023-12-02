@@ -156,11 +156,11 @@ which takes a `comparator` function has the same requirement on it, which is
 
 Other results usually indicate that `x` and `y` are unordered, and are likely
 to cause exceptions to be thrown. This specification matches the built-in
-'spaceship' operator `<=>`. Therefore, in order to sort an array in reverse
-order, we need to define a lambda, i.e. an anonymous function, that returns
+_spaceship_ operator_ `<=>`. Therefore, in order to sort an array in reverse
+order, we need to define a lambda, i.e. an anonymous function, which returns
 the opposite of the default comparison result. There are actually two ways to
-do this, either `func(x, y) { return -(x <=> y); }` or `func(x, y) { return y
-<=> x; }`. We use the second form, and it looks like
+achieve this, either `func(x, y) { return -(x <=> y); }` or `func(x, y) {
+return y <=> x; }`. We use the second form, and it looks like
 
 ```
 #3:1> std.array.sort([8,4,6,9,2,5,3,0,1,7], \
@@ -208,8 +208,8 @@ without `{ return ref` or `; }`.
 
 ## Exceptions and Error Handling
 
-Exceptions are used extensively in the runtime and standard library for error
-handling, as in
+Exceptions are used extensively in the runtime and the standard library for
+error handling, as in
 
 ```
 #1:1> 1 / 0
