@@ -3162,9 +3162,11 @@ solidify(AVM_Rod& rod) const
                 auto& top = ctx.stack().mut_top();
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
+#if defined(__OPTIMIZE__) && !defined(ROCKET_DEBUG)
                 // The fast path should be a proper tail call.
                 if(rhs.type() == type_integer)
                   return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
+#endif  // fast path
 
                 switch(uxop) {
                   case xop_cmp_eq: {
@@ -3677,7 +3679,6 @@ solidify(AVM_Rod& rod) const
                            "Invalid shift count (operands were `$1` and `$2`)",
                            lhs, rhs);
 
-                // The fast path should be a proper tail call.
                 return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
               }
 
@@ -4627,7 +4628,6 @@ solidify(AVM_Rod& rod) const
                 auto& top = ctx.stack().mut_top();
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                // The fast path should be a proper tail call.
                 return do_apply_binary_operator_with_integer(uxop, lhs, irhs);
               }
 
