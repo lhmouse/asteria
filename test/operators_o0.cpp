@@ -8,7 +8,11 @@ using namespace ::asteria;
 int main()
   {
     Simple_Script code;
+#ifdef ASTERIA_TEST_OPERATORS_O_
+    code.mut_options().optimization_level = ASTERIA_TEST_OPERATORS_O_;
+#else
     code.mut_options().optimization_level = 0;
+#endif
     code.reload_string(
       sref(__FILE__), __LINE__, sref(R"__(
 ///////////////////////////////////////////////////////////////////////////////
