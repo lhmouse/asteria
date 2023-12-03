@@ -318,14 +318,14 @@ compare_partial(const Value& other) const
       return compare_unordered;
     }
     else if(qval->m_stor.index() == type_boolean) {
-      // specialied
+      // specialized
       if(qval->m_stor.as<V_boolean>() < qoth->m_stor.as<V_boolean>())
         return compare_less;
       else if(qval->m_stor.as<V_boolean>() > qoth->m_stor.as<V_boolean>())
         return compare_greater;
     }
     else if(qval->m_stor.index() == type_string) {
-      // specialied
+      // specialized
       int r = qval->m_stor.as<V_string>().compare(qoth->m_stor.as<V_string>());
       if(r < 0)
         return compare_less;

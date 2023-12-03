@@ -2080,7 +2080,7 @@ solidify(AVM_Rod& rod) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Read a value and throw it. The operand expression must not have
-            // been empty fof this function.
+            // been empty for this function.
             const auto& val = ctx.stack().top().dereference_readonly();
             ctx.stack().pop();
             throw Runtime_Error(Runtime_Error::M_throw(), val, sp.sloc);

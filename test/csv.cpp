@@ -20,7 +20,7 @@ int main()
         assert rows[0] == [ '1', '2', '3' ];
         assert rows[1] == [ 'value', 'has', 'a"double', 'quote' ];
         assert rows[2] == [ 'and', 'escaped"' ];
-        assert rows[3] == [ 'a', 'nested', "line\nbreak", 'is', 'acceptible' ];
+        assert rows[3] == [ 'a', 'nested', "line\nbreak", 'is', 'acceptable' ];
         assert rows[4] == [ 'a bc"d e"', '4' ];
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -539,7 +539,7 @@ throw_no_matching_function_call() const
     }
     caller << ")";
 
-    // Get the width of the overload number colomn.
+    // Get the width of the overload number column.
     ::rocket::ascii_numput nump;
     uint32_t overload_count = (uint32_t) ::rocket::count(this->m_overloads, '|');
     nump.put_DU(overload_count);

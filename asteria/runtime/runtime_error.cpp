@@ -54,7 +54,7 @@ do_insert_frame(Frame_Type type, const Source_Location* sloc_opt, const Value& v
     else
       this->m_fmt << this->m_value;
 
-    // Get the width of the frame number colomn.
+    // Get the width of the frame number column.
     ::rocket::ascii_numput nump;
     nump.put_DU(this->m_frames.size());
     static_vector<char, 24> sbuf(nump.size(), ' ');

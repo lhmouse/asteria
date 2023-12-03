@@ -366,7 +366,7 @@ struct Handler_again final
       }
   };
 
-}  // namesapce
+}  // namespace
 
 void
 prepare_repl_commands()
