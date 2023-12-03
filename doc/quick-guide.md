@@ -629,13 +629,13 @@ exponent = 3
 The `var [ ... ] = ...` syntax is called _structured binding for arrays_. The
 declared variables at the first ellipsis are initialized by the elements of
 the initializer at the second ellipsis in ascending order. The initializer
-must yield an array or `null`. Variables that correspond to no element are
+must yield an array or `null`. Variables that correspond to no elements are
 initialized to `null`.
 
 Similarly, the `var { ... } = ...` syntax is called _structure binding for
 objects_. The declared variables at the first ellipsis are initialized by the
 elements of the initializer at the second ellipsis according to their names.
 The initializer must yield an object or `null`. Variables that correspond to
-no element are initialized to `null`.
+no elements are initialized to `null`.
 
 [back to index](#index)
