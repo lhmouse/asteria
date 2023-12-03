@@ -56,17 +56,14 @@ constexpr s_modules[] =
 
 struct Module_Comparator
   {
-    constexpr
     bool
     operator()(const Module& lhs, const Module& rhs) const noexcept
       { return lhs.api_version < rhs.api_version;  }
 
-    constexpr
     bool
     operator()(API_Version lhs, const Module& rhs) const noexcept
       { return lhs < rhs.api_version;  }
 
-    constexpr
     bool
     operator()(const Module& lhs, API_Version rhs) const noexcept
       { return lhs.api_version < rhs;  }
@@ -106,13 +103,10 @@ Global_Context(API_Version api_version_req)
 Global_Context::
 ~Global_Context()
   {
-    this->do_clear_named_references();
-
     // Perform the final garbage collection. Note if there are still cyclic
     // references afterwards, they are left uncollected!
-    const auto gcoll = unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    gcoll->finalize();
+    this->do_clear_named_references();
+    unerase_pointer_cast<Garbage_Collector>(this->m_gcoll)->finalize();
   }
 
 API_Version
