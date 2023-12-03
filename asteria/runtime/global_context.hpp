@@ -15,17 +15,15 @@ class Global_Context
   {
   private:
     Recursion_Sentry m_sentry;
-
     rcfwd_ptr<Abstract_Hooks> m_qhooks;
     rcfwd_ptr<Garbage_Collector> m_gcoll;
     rcfwd_ptr<Random_Engine> m_prng;
     rcfwd_ptr<Module_Loader> m_ldrlk;
-    rcfwd_ptr<Variable> m_vstd;
 
   public:
     // A global context has no parent.
     explicit
-    Global_Context(API_Version version = api_version_latest);
+    Global_Context(API_Version api_version_req = api_version_latest);
 
   protected:
     bool
@@ -56,6 +54,12 @@ class Global_Context
     set_recursion_base(const void* base) noexcept
       { this->m_sentry.set_base(base);  }
 
+    // Get the maximum API version that is supported when this library is built.
+    // N.B. This function must not be inlined for this reason.
+    ROCKET_CONST
+    API_Version
+    max_api_version() const noexcept;
+
     // This helps debugging and profiling.
     ASTERIA_INCOMPLET(Abstract_Hooks)
     refcnt_ptr<Abstract_Hooks>
@@ -82,16 +86,6 @@ class Global_Context
     refcnt_ptr<Module_Loader>
     module_loader() const noexcept
       { return unerase_pointer_cast<Module_Loader>(this->m_ldrlk);  }
-
-    ASTERIA_INCOMPLET(Variable)
-    refcnt_ptr<Variable>
-    std_variable() const noexcept
-      { return unerase_pointer_cast<Variable>(this->m_vstd);  }
-
-    // Get the maximum API version that is supported when this library is built.
-    // N.B. This function must not be inlined for this reason.
-    API_Version
-    max_api_version() const noexcept;
   };
 
 #define ASTERIA_CALL_GLOBAL_HOOK(global, target, ...)  \

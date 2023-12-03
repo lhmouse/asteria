@@ -6,7 +6,6 @@
 #include "garbage_collector.hpp"
 #include "random_engine.hpp"
 #include "module_loader.hpp"
-#include "variable.hpp"
 #include "abstract_hooks.hpp"
 #include "../library/version.hpp"
 #include "../library/gc.hpp"
@@ -31,7 +30,7 @@ namespace {
 // N.B. Please keep this list sorted by the `version` member.
 struct Module
   {
-    API_Version version;
+    API_Version api_version;
     const char* name;
     decltype(create_bindings_version)& init;
   }
@@ -60,23 +59,23 @@ struct Module_Comparator
     constexpr
     bool
     operator()(const Module& lhs, const Module& rhs) const noexcept
-      { return lhs.version < rhs.version;  }
+      { return lhs.api_version < rhs.api_version;  }
 
     constexpr
     bool
     operator()(API_Version lhs, const Module& rhs) const noexcept
-      { return lhs < rhs.version;  }
+      { return lhs < rhs.api_version;  }
 
     constexpr
     bool
     operator()(const Module& lhs, API_Version rhs) const noexcept
-      { return lhs.version < rhs;  }
+      { return lhs.api_version < rhs;  }
   };
 
 }  // namespace
 
 Global_Context::
-Global_Context(API_Version version)
+Global_Context(API_Version api_version_req)
   :
     m_gcoll(::rocket::make_refcnt<Garbage_Collector>()),
     m_prng(::rocket::make_refcnt<Random_Engine>()),
@@ -90,7 +89,7 @@ Global_Context(API_Version version)
     ROCKET_ASSERT(::std::is_sorted(begin(s_modules), end(s_modules), comp));
 #endif
     auto bptr = begin(s_modules);
-    auto eptr = ::std::upper_bound(bptr, end(s_modules), version, comp);
+    auto eptr = ::std::upper_bound(bptr, end(s_modules), api_version_req, comp);
 
     V_object ostd;
     ::std::for_each(bptr, eptr,
@@ -98,19 +97,10 @@ Global_Context(API_Version version)
         auto r = ostd.try_emplace(sref(mod.name));
         if(r.second)
           r.first->second = V_object();
-        mod.init(r.first->second.mut_object(), eptr[-1].version);
+        mod.init(r.first->second.mut_object(), eptr[-1].api_version);
       });
 
-    // Allocate the global variable `std`.
-    const auto gcoll = unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    auto vstd = gcoll->create_variable(gc_generation_oldest);
-
-    vstd->initialize(::std::move(ostd));
-    vstd->set_immutable();
-
-    this->do_mut_named_reference(nullptr, sref("std")).set_variable(vstd);
-    this->m_vstd = ::std::move(vstd);
+    this->do_mut_named_reference(nullptr, sref("std")).set_temporary(::std::move(ostd));
   }
 
 Global_Context::
@@ -129,7 +119,7 @@ API_Version
 Global_Context::
 max_api_version() const noexcept
   {
-    return static_cast<API_Version>(api_version_sentinel - 1);
+    return end(s_modules)[-1].api_version;
   }
 
 }  // namespace asteria

@@ -832,7 +832,6 @@ enum API_Version : uint32_t
   {
     api_version_none       = 0x00000000,  // no standard library
     api_version_0001_0000  = 0x00010000,  // version 1.0
-    api_version_sentinel   /* auto */,    // (max version + 1)
     api_version_latest     = 0xFFFFFFFF,  // everything
   };
 
