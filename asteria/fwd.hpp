@@ -308,7 +308,7 @@ struct Abstract_Opaque
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
 
-    // This function is called to convert this object to a human-readble string.
+    // This function is called to convert this object to a human-readable string.
     virtual
     tinyfmt&
     describe(tinyfmt& fmt) const = 0;
@@ -347,7 +347,7 @@ struct Abstract_Function
 
     ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
 
-    // This function is called to convert this object to a human-readble string.
+    // This function is called to convert this object to a human-readable string.
     virtual
     tinyfmt&
     describe(tinyfmt& fmt) const = 0;
@@ -877,7 +877,7 @@ struct Compiler_Options_template<versionT, 0>
 template<>
 struct Compiler_Options_fragment<1>
   {
-    // Make single quotes behave similiar to double quotes.
+    // Make single quotes behave similar to double quotes.
     // [useful when parsing JSON5 text]
     bool escapable_single_quotes = false;
 

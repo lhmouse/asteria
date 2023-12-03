@@ -443,7 +443,7 @@ std_system_daemonize()
 
     // The CHILD shall create a new session and become its leader. This
     // ensures that a later GRANDCHILD will not be a session leader and
-    // will not unintentially gain a controlling terminal.
+    // will not unintentionally gain a controlling terminal.
     ::setsid();
 
     // Create the GRANDCHILD process.

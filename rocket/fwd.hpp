@@ -8,7 +8,7 @@
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()
-#include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>, std::unqiue_ptr, std::shared_ptr
+#include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>, std::unique_ptr, std::shared_ptr
 #include <new>  // placement new
 #include <atomic>  // std::atomic<>
 #include <initializer_list>  // std::initializer_list<>
@@ -373,7 +373,7 @@ struct is_input_iterator
   {
   };
 
-template<typename targetT, typename... candiatesT>
+template<typename targetT, typename... candidatesT>
 struct is_any_type_of
   :
     false_type

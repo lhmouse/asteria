@@ -203,7 +203,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                     return ::rocket::any_of(arg.units,
                         [](const Expression_Unit& unit) { return unit.clobbers_alt_stack();  });
                   })) {
-          // Evaluate argumetns on `alt_stack` directly.
+          // Evaluate arguments on `alt_stack` directly.
           // https://github.com/lhmouse/asteria/issues/136
           AIR_Node::S_alt_clear_stack xstart = { };
           code.emplace_back(::std::move(xstart));

@@ -166,7 +166,7 @@ class basic_tinybuf_file
 
         if(mode & tinybuf_base::open_write) {
           // These flags make sense only when writing to a file. Should
-          // we throw exceptions if they are specified qith read-only
+          // we throw exceptions if they are specified with read-only
           // access? Maybe.
           if(mode & tinybuf_base::open_append) {
             flags |= O_APPEND;

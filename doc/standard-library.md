@@ -1688,7 +1688,7 @@ variable. Individual components are categorized into sub-objects.
 ### `std.filesystem.glob(pattern)`
 
 * Finds all paths that match `pattern`. If a string ends with '/', it should
-  designate a direcory; otherwise, it should designate a file.
+  designate a directory; otherwise, it should designate a file.
 
 * Returns matches as an array of strings. If no such path exists, an empty
   array is returned.

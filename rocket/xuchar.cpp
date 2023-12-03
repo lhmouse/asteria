@@ -95,7 +95,7 @@ do_xfputn_common(::FILE* fp, xwcrtombT&& xwcrtomb, ::mbstate_t& mbst, const xwch
     size_t nbytes = 0;
     const xwcharT* wptr = ws;
     while(wptr != ws + n) {
-      // Encode one multi-byte chracter.
+      // Encode one multi-byte character.
       char mbcs[MB_LEN_MAX];
       int mblen = static_cast<int>(xwcrtomb(mbcs, *wptr, &mbst));
 
