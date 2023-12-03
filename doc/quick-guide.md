@@ -626,13 +626,13 @@ exponent = 3
 * result #3: void
 ```
 
-The `var [ ... ] = ...` syntax is called _structured binding for arrays_. The
-declared variables at the first ellipsis are initialized by the elements of
-the initializer at the second ellipsis in ascending order. The initializer
+The `var [ ... ] = ...` syntax is called a _structured binding for arrays_.
+The declared variables at the first ellipsis are initialized by the elements
+of the initializer at the second ellipsis in ascending order. The initializer
 must yield an array or `null`. Variables that correspond to no elements are
 initialized to `null`.
 
-Similarly, the `var { ... } = ...` syntax is called _structure binding for
+Similarly, the `var { ... } = ...` syntax is called a _structure binding for
 objects_. The declared variables at the first ellipsis are initialized by the
 elements of the initializer at the second ellipsis according to their names.
 The initializer must yield an object or `null`. Variables that correspond to
