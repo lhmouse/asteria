@@ -24,7 +24,7 @@ as other scripting languages. However there are some fundamental differences:
    attempting to modify temporary values will effect runtime errors. This
    applies similarly to function results.
 
-## Index
+# Table of Contents
 
 1. [Course 101](#course-101)
 2. [Variables and Functions](#variables-and-functions)
@@ -127,7 +127,7 @@ my number was 30. have a nice day.
 * result #5: void
 ```
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Variables and Functions
 
@@ -185,7 +185,7 @@ visible, the other variable will be shadowed and become invisible, as in
 left scope; `a` now denotes 42
 ```
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Lambdas
 
@@ -279,7 +279,7 @@ form. For example, `func(x, y) { return x + y; }` can be abbreviated as just
 return ref x.foo(y); }` can be abbreviated as `func(x, y) -> x.foo(y)`, also
 without `{ return ref` or `; }`.
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Object-oriented Programming and the `this` Parameter
 
@@ -323,7 +323,7 @@ references mostly objects, when a call to a function within an array is made,
 `this` is uninitialized, and any attempt to reference `this` will cause an
 error.
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Arguments and Results by Reference
 
@@ -363,7 +363,7 @@ These `ref` keywords may also be written equivalently as arrow specifiers
 `->`. They are parts of the function call expressions and return statements,
 and shall not be specified arbitrarily elsewhere.
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Exceptions and Error Handling
 
@@ -443,7 +443,7 @@ after catch, `i` is unknown
 In this example `1 / 0` throws an exception, so the assignment operator isn't
 evaluated, leaving the value of `i` intact.
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Integer Overflows
 
@@ -570,7 +570,7 @@ These are not infix operators, but look like function calls, as in
 * result #15: integer 9223372036854775807;
 ```
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Bit-wise Operators on Strings
 
@@ -590,7 +590,7 @@ length as the shorter one; while the byte-wise OR and XOR operators treat
 'missing information' as zeroes (which means to copy from the longer string),
 and produce a result of the same length as the longer one.
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
 
 ## Structured Bindings
 
@@ -638,4 +638,4 @@ elements of the initializer at the second ellipsis according to their names.
 The initializer must yield an object or `null`. Variables that correspond to
 no elements are initialized to `null`.
 
-[back to index](#index)
+[back to table of contents](#table-of-contents)
