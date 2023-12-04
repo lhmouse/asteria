@@ -30,11 +30,12 @@ as other scripting languages. However there are some fundamental differences:
 2. [Variables and Functions](#variables-and-functions)
 3. [Lambdas](#lambdas)
 4. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
-5. [Arguments and Results by Reference](#arguments-and-results-by-reference)
-6. [Exceptions and Error Handling](#exceptions-and-error-handling)
-7. [Integer Overflows](#integer-overflows)
-8. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
-9. [Structured Bindings](#structured-bindings)
+5. [Ordering and Comparison](#ordering-and-comparison)
+6. [Arguments and Results by Reference](#arguments-and-results-by-reference)
+7. [Exceptions and Error Handling](#exceptions-and-error-handling)
+8. [Integer Overflows](#integer-overflows)
+9. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
+10. [Structured Bindings](#structured-bindings)
 
 ## Course 101
 
@@ -322,6 +323,49 @@ references mostly objects, when a call to a function within an array is made,
 `this` will reference the enclosing array. For a non-member function call,
 `this` is uninitialized, and any attempt to reference `this` will cause an
 error.
+
+[back to table of contents](#table-of-contents)
+
+## Ordering and Comparison
+
+Values can be compared and form a _partial order_. Ordering of two values is
+specified in the following table, where the first column denotes the type of
+the first operand, and the first row denotes the type of the second operand.
+Blank cells indicate that the operands are always unordered; types not listed
+in this table (function, opaque and object) are unordered with everything,
+including themselves:
+
+|        |null      |boolean |integer |real    |string |array   |
+|:-------|:---------|:-------|:-------|:-------|:------|:-------|
+|null    |identical |        |        |        |       |        |
+|boolean |          |total   |        |        |       |        |
+|integer |          |        |total   |partial |       |        |
+|real    |          |        |partial |partial |       |        |
+|string  |          |        |        |        |total  |        |
+|array   |          |        |        |        |       |partial |
+
+Real numbers may be unordered due to special values called not-a-number (NaN)
+which can be produced by an invalid arithmetic operation, such as `0.0 / 0.0`
+or `__sqrt -1`. A NaN does not equal anything, even with itself.
+
+There are eight operators about comparison, categorized as two ranks: the
+_comparison operators_, `<`, `<=`, `>`, `>=`; and the _equality operators_,
+`==`, `!=`, `<=>`, `</>`. Their results are:
+
+|      |if less    |if equal   |if greater |if unordered        |
+|:-----|:----------|:----------|:----------|:-------------------|
+|`<`   |`true`     |`false`    |`false`    |throws an exception |
+|`<=`  |`true`     |`true`     |`false`    |throws an exception |
+|`>`   |`false`    |`false`    |`true`     |throws an exception |
+|`>=`  |`false`    |`true`     |`true`     |throws an exception |
+|`==`  |`false`    |`true`     |`false`    |`false`             |
+|`!=`  |`true`     |`false`    |`true`     |`true`              |
+|`<=>` |`-1`       |`0`        |`+1`       |`"[unordered]"`     |
+|`</>` |`false`    |`false`    |`false`    |`true`              |
+
+Comparison operators have higher precedence than equality operators, so `a <
+b == c < d` is interpreted as `(a < b) == (c < d)`, instead of `((a < b) ==
+c) < d`.
 
 [back to table of contents](#table-of-contents)
 
