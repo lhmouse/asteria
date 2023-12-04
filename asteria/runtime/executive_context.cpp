@@ -67,12 +67,14 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
       return &(this->do_mut_named_reference(hint_opt, name));
 
     if(name == sref("__func")) {
+      ROCKET_ASSERT(this->m_func);
       auto& ref = this->do_mut_named_reference(hint_opt, name);
       ref.set_temporary(this->m_func->func());
       return &ref;
     }
 
     if(name == sref("__varg")) {
+      ROCKET_ASSERT(this->m_func);
       auto& ref = this->do_mut_named_reference(hint_opt, name);
       ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(*(this->m_func), this->m_lazy_args));
       return &ref;
