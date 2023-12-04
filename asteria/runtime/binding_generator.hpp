@@ -27,16 +27,16 @@ class Binding_Generator
 
   private:
     cow_string::shallow_type m_name;
-    const char* m_params;
+    const char* m_func;
     const char* m_file;
     int m_line;
 
   public:
     constexpr
-    Binding_Generator(cow_string::shallow_type name, const char* params,
+    Binding_Generator(cow_string::shallow_type name, const char* func,
                       const char* file, int line) noexcept
       :
-        m_name(name), m_params(params), m_file(file), m_line(line)
+        m_name(name), m_func(func), m_file(file), m_line(line)
       { }
 
   public:
@@ -81,7 +81,7 @@ class Binding_Generator
 // See 'library/string.cpp' for examples about how to use this macro.
 #define ASTERIA_BINDING(name, params, ...)  \
     (::asteria::Binding_Generator(::rocket::sref("" name ""),  \
-        ("" params ""), __FILE__, __LINE__))->**[](__VA_ARGS__)
+        ("" name "(" params ")"), __FILE__, __LINE__))->**[](__VA_ARGS__)
 
 }  // namespace asteria
 #endif

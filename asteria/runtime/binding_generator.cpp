@@ -15,7 +15,7 @@ operator->*(target_R_gsa& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_R_gsa* m_target;
@@ -23,7 +23,7 @@ operator->*(target_R_gsa& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_R_gsa* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -31,8 +31,7 @@ operator->*(target_R_gsa& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -59,7 +58,7 @@ operator->*(target_R_ga& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_R_ga* m_target;
@@ -67,7 +66,7 @@ operator->*(target_R_ga& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_R_ga* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -75,8 +74,7 @@ operator->*(target_R_ga& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -103,7 +101,7 @@ operator->*(target_R_sa& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_R_sa* m_target;
@@ -111,7 +109,7 @@ operator->*(target_R_sa& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_R_sa* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -119,8 +117,7 @@ operator->*(target_R_sa& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -147,7 +144,7 @@ operator->*(target_R_a& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_R_a* m_target;
@@ -155,7 +152,7 @@ operator->*(target_R_a& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_R_a* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -163,8 +160,7 @@ operator->*(target_R_a& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -191,7 +187,7 @@ operator->*(target_V_gsa& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_V_gsa* m_target;
@@ -199,7 +195,7 @@ operator->*(target_V_gsa& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_V_gsa* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -207,8 +203,7 @@ operator->*(target_V_gsa& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -235,7 +230,7 @@ operator->*(target_V_ga& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_V_ga* m_target;
@@ -243,7 +238,7 @@ operator->*(target_V_ga& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_V_ga* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -251,8 +246,7 @@ operator->*(target_V_ga& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -279,7 +273,7 @@ operator->*(target_V_sa& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_V_sa* m_target;
@@ -287,7 +281,7 @@ operator->*(target_V_sa& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_V_sa* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -295,8 +289,7 @@ operator->*(target_V_sa& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -323,7 +316,7 @@ operator->*(target_V_a& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_V_a* m_target;
@@ -331,7 +324,7 @@ operator->*(target_V_a& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_V_a* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -339,8 +332,7 @@ operator->*(target_V_a& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -367,7 +359,7 @@ operator->*(target_Z_gsa& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_Z_gsa* m_target;
@@ -375,7 +367,7 @@ operator->*(target_Z_gsa& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_Z_gsa* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -383,8 +375,7 @@ operator->*(target_Z_gsa& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -411,7 +402,7 @@ operator->*(target_Z_ga& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_Z_ga* m_target;
@@ -419,7 +410,7 @@ operator->*(target_Z_ga& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_Z_ga* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -427,8 +418,7 @@ operator->*(target_Z_ga& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -455,7 +445,7 @@ operator->*(target_Z_sa& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_Z_sa* m_target;
@@ -463,7 +453,7 @@ operator->*(target_Z_sa& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_Z_sa* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -471,8 +461,7 @@ operator->*(target_Z_sa& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
@@ -499,7 +488,7 @@ operator->*(target_Z_a& target) const
     struct Thunk final : Abstract_Function
       {
         cow_string::shallow_type m_name;
-        const char* m_params;
+        const char* m_func;
         const char* m_file;
         int m_line;
         target_Z_a* m_target;
@@ -507,7 +496,7 @@ operator->*(target_Z_a& target) const
         explicit
         Thunk(const Binding_Generator* gen, target_Z_a* target)
           :
-            m_name(gen->m_name), m_params(gen->m_params), m_file(gen->m_file),
+            m_name(gen->m_name), m_func(gen->m_func), m_file(gen->m_file),
             m_line(gen->m_line), m_target(target)
           {
           }
@@ -515,8 +504,7 @@ operator->*(target_Z_a& target) const
         tinyfmt&
         describe(tinyfmt& fmt) const final
           {
-            return fmt << "`" << this->m_name << "(" << this->m_params << ")` at '"
-                       << this->m_file << ":" << this->m_line << "'";
+            return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
