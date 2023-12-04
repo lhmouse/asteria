@@ -30,12 +30,12 @@ as other scripting languages. However there are some fundamental differences:
 2. [Variables and Functions](#variables-and-functions)
 3. [Lambdas](#lambdas)
 4. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
-5. [Ordering and Comparison](#ordering-and-comparison)
-6. [Arguments and Results by Reference](#arguments-and-results-by-reference)
-7. [Exceptions and Error Handling](#exceptions-and-error-handling)
-8. [Integer Overflows](#integer-overflows)
-9. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
-10. [Structured Bindings](#structured-bindings)
+5. [Ordering of Values](#ordering-of-values)
+6. [Structured Bindings](#structured-bindings)
+7. [Arguments and Results by Reference](#arguments-and-results-by-reference)
+8. [Throwing and Catching Exceptions](#throwing-and-catching-exceptions)
+9. [Integer Overflows](#integer-overflows)
+10. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
 
 ## Course 101
 
@@ -326,7 +326,7 @@ error.
 
 [back to table of contents](#table-of-contents)
 
-## Ordering and Comparison
+## Ordering of Values
 
 Values can be compared and form a _partial order_. Ordering of two values is
 specified in the following table, where the first column denotes the type of
@@ -366,6 +366,54 @@ _comparison operators_, `<`, `<=`, `>`, `>=`; and the _equality operators_,
 Comparison operators have higher precedence than equality operators, so `a <
 b == c < d` is interpreted as `(a < b) == (c < d)`, instead of `((a < b) ==
 c) < d`.
+
+[back to table of contents](#table-of-contents)
+
+## Structured Bindings
+
+Sometimes it makes sense for a function to return multiple values, such as
+`std.numeric.frexp()`. Although it is impossible to have multiple expressions
+in a _return statement_, it is fairly possible to return an array or object
+of multiple values. Here we take `std.numeric.frexp()` as an example, which
+decomposes a real number into fractional and exponential parts, such as
+
+```
+#1:1> std.numeric.frexp(6.375)
+* running 'expression #1'...
+* result #1: array(2) [
+  0 = real 0.796875;
+  1 = integer 3;
+];
+```
+
+This gives the equation `6.375 = 0.796875 × 2³`. As a good habit, we may wish
+to have names for its two results, so we can do
+
+```
+#2:1> :heredoc @@
+* the next snippet will be terminated by `@@`
+
+#3:1> var [ frac, exp ] = std.numeric.frexp(6.375);
+   2> std.io.putfln("fraction = $1", frac);
+   3> std.io.putfln("exponent = $1", exp);
+   4> @@
+* running 'snippet #3'...
+fraction = 0.796875
+exponent = 3
+* result #3: void
+```
+
+The `var [ ... ] = ...` syntax is called a _structured binding for arrays_.
+The declared variables at the first ellipsis are initialized by the elements
+of the initializer at the second ellipsis in ascending order. The initializer
+must yield an array or `null`. Variables that correspond to no elements are
+initialized to `null`.
+
+Similarly, the `var { ... } = ...` syntax is called a _structure binding for
+objects_. The declared variables at the first ellipsis are initialized by the
+elements of the initializer at the second ellipsis according to their names.
+The initializer must yield an object or `null`. Variables that correspond to
+no elements are initialized to `null`.
 
 [back to table of contents](#table-of-contents)
 
@@ -409,7 +457,7 @@ and shall not be specified arbitrarily elsewhere.
 
 [back to table of contents](#table-of-contents)
 
-## Exceptions and Error Handling
+## Throwing and Catching Exceptions
 
 Exceptions are used extensively in the runtime and the standard library for
 error handling, as in
@@ -633,53 +681,5 @@ AND operator trims the longer string, and produces a result of the same
 length as the shorter one; while the byte-wise OR and XOR operators treat
 'missing information' as zeroes (which means to copy from the longer string),
 and produce a result of the same length as the longer one.
-
-[back to table of contents](#table-of-contents)
-
-## Structured Bindings
-
-Sometimes it makes sense for a function to return multiple values, such as
-`std.numeric.frexp()`. Although it is impossible to have multiple expressions
-in a _return statement_, it is fairly possible to return an array or object
-of multiple values. Here we take `std.numeric.frexp()` as an example, which
-decomposes a real number into fractional and exponential parts, such as
-
-```
-#1:1> std.numeric.frexp(6.375)
-* running 'expression #1'...
-* result #1: array(2) [
-  0 = real 0.796875;
-  1 = integer 3;
-];
-```
-
-This gives the equation `6.375 = 0.796875 × 2³`. As a good habit, we may wish
-to have names for its two results, so we can do
-
-```
-#2:1> :heredoc @@
-* the next snippet will be terminated by `@@`
-
-#3:1> var [ frac, exp ] = std.numeric.frexp(6.375);
-   2> std.io.putfln("fraction = $1", frac);
-   3> std.io.putfln("exponent = $1", exp);
-   4> @@
-* running 'snippet #3'...
-fraction = 0.796875
-exponent = 3
-* result #3: void
-```
-
-The `var [ ... ] = ...` syntax is called a _structured binding for arrays_.
-The declared variables at the first ellipsis are initialized by the elements
-of the initializer at the second ellipsis in ascending order. The initializer
-must yield an array or `null`. Variables that correspond to no elements are
-initialized to `null`.
-
-Similarly, the `var { ... } = ...` syntax is called a _structure binding for
-objects_. The declared variables at the first ellipsis are initialized by the
-elements of the initializer at the second ellipsis according to their names.
-The initializer must yield an object or `null`. Variables that correspond to
-no elements are initialized to `null`.
 
 [back to table of contents](#table-of-contents)
