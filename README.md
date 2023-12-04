@@ -2,7 +2,7 @@
 
 |Compiler     |Category                   |
 |:------------|:--------------------------|
-|**GCC 9**    |:1st_place_medal:Primary   |
+|**GCC 7**    |:1st_place_medal:Primary   |
 |**Clang 11** |:2nd_place_medal:Secondary |
 
 ![asteria](asteria.png)

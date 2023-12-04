@@ -57,7 +57,7 @@ class basic_shallow_string
     explicit constexpr
     basic_shallow_string(const charT* ptr) noexcept
       :
-        m_ptr(ptr), m_len(noadl::xstrlen(ptr))
+        m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
       { }
 
   public:

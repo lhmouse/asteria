@@ -107,7 +107,6 @@ do_execute_block(const AVM_Rod& rod, const Executive_Context& ctx)
     return status;
   }
 
-ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
 do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& rod)
   {
@@ -164,7 +163,6 @@ do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
     }
   }
 
-ROCKET_FLATTEN ROCKET_NEVER_INLINE
 AIR_Status
 do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Location& sloc)
   {
@@ -1326,7 +1324,7 @@ solidify(AVM_Rod& rod) const
         (void) altr;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* /*head*/) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* /*head*/) -> AIR_Status
           {
             ctx.stack().clear();
             return air_status_next;
@@ -1359,7 +1357,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1399,7 +1397,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
@@ -1438,7 +1436,7 @@ solidify(AVM_Rod& rod) const
         up2.b0 = altr.immutable;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
 
@@ -1490,7 +1488,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_false, altr.code_false);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool negative = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1545,7 +1543,7 @@ solidify(AVM_Rod& rod) const
         }
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1644,7 +1642,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rods_cond, altr.code_cond);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool negative = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1708,7 +1706,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rods_body, altr.code_body);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool negative = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1775,7 +1773,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1909,7 +1907,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1987,7 +1985,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_catch, altr.code_catch);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2075,7 +2073,7 @@ solidify(AVM_Rod& rod) const
         sp2.sloc = altr.sloc;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2115,7 +2113,7 @@ solidify(AVM_Rod& rod) const
         sp2.msg = altr.msg;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2149,7 +2147,7 @@ solidify(AVM_Rod& rod) const
         up2.u0 = altr.status;
 
         rod.append(
-          +[](Executive_Context& /*ctx*/, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& /*ctx*/, const Header* head) -> AIR_Status
           {
             return static_cast<AIR_Status>(head->uparam.u0);
           }
@@ -2176,7 +2174,7 @@ solidify(AVM_Rod& rod) const
         up2.b0 = altr.by_ref;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool by_ref = head->uparam.b0;
 
@@ -2220,7 +2218,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2269,7 +2267,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const uint32_t depth = head->uparam.u2345;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2321,7 +2319,7 @@ solidify(AVM_Rod& rod) const
         sp2.ref = altr.ref;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             ctx.stack().push() = sp.ref;
@@ -2365,7 +2363,7 @@ solidify(AVM_Rod& rod) const
         sp2.code_body = altr.code_body;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
@@ -2415,7 +2413,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_false, altr.code_false);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool assign = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2454,7 +2452,7 @@ solidify(AVM_Rod& rod) const
         up2.u2345 = altr.nargs;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const uint32_t nargs = head->uparam.u2345;
@@ -2488,7 +2486,7 @@ solidify(AVM_Rod& rod) const
         up2.u2345 = altr.nelems;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const uint32_t nelems = head->uparam.u2345;
 
@@ -2532,7 +2530,7 @@ solidify(AVM_Rod& rod) const
         sp2.keys = altr.keys;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2717,7 +2715,7 @@ solidify(AVM_Rod& rod) const
           case xop_index:
             // binary
             rod.append(
-              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              +[](Executive_Context& ctx, const Header* head) -> AIR_Status
               {
                 const uint8_t uxop = head->uparam.u1;
                 auto& rhs = ctx.stack().mut_top().dereference_copy();
@@ -2791,7 +2789,7 @@ solidify(AVM_Rod& rod) const
           case xop_popcnt:
             // unary
             rod.append(
-              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              +[](Executive_Context& ctx, const Header* head) -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
                 const uint8_t uxop = head->uparam.u1;
@@ -3479,41 +3477,47 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                  case xop_addm:
+                  case xop_addm: {
                     // This should have been redirected to the fast path.
                     throw Runtime_Error(Runtime_Error::M_format(),
                              "Modular addition not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
+                  }
 
-                  case xop_subm:
+                  case xop_subm: {
                     // This should have been redirected to the fast path.
                     throw Runtime_Error(Runtime_Error::M_format(),
                              "Modular subtraction not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
+                  }
 
-                  case xop_mulm:
+                  case xop_mulm: {
                     // This should have been redirected to the fast path.
                     throw Runtime_Error(Runtime_Error::M_format(),
                              "Modular multiplication not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
+                  }
 
-                  case xop_adds:
+                  case xop_adds: {
                     // This should have been redirected to the fast path.
                     throw Runtime_Error(Runtime_Error::M_format(),
                              "Saturating addition not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
+                  }
 
-                  case xop_subs:
+                  case xop_subs: {
                     // This should have been redirected to the fast path.
                     throw Runtime_Error(Runtime_Error::M_format(),
                              "Saturating subtraction not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
+                  }
 
-                  case xop_muls:
+                  case xop_muls: {
                     // This should have been redirected to the fast path.
                     throw Runtime_Error(Runtime_Error::M_format(),
                              "Saturating multiplication not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
+                  }
 
                   default:
                     ROCKET_UNREACHABLE();
@@ -3574,7 +3578,7 @@ solidify(AVM_Rod& rod) const
           case xop_fma:
             // fused multiply-add; ternary
             rod.append(
-              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              +[](Executive_Context& ctx, const Header* head) -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
                 const auto& rhs = ctx.stack().top().dereference_readonly();
@@ -3626,7 +3630,7 @@ solidify(AVM_Rod& rod) const
         up2.u2345 = altr.nelems;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
             const uint32_t nelems = head->uparam.u2345;
@@ -3688,7 +3692,7 @@ solidify(AVM_Rod& rod) const
         sp2.keys = altr.keys;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -3750,7 +3754,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool immutable = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -3789,7 +3793,7 @@ solidify(AVM_Rod& rod) const
         (void) altr;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, head->pv_meta->sloc);
             return air_status_next;
@@ -3817,7 +3821,7 @@ solidify(AVM_Rod& rod) const
         up2.u0 = altr.ptc;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
@@ -3902,7 +3906,7 @@ solidify(AVM_Rod& rod) const
         sp2.code_body = altr.code_body;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
@@ -3953,7 +3957,7 @@ solidify(AVM_Rod& rod) const
         sp2.opts = altr.opts;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const uint32_t nargs = head->uparam.u2345;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4038,7 +4042,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4074,7 +4078,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4111,7 +4115,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_body, altr.code_body);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4166,7 +4170,7 @@ solidify(AVM_Rod& rod) const
         up2.b1 = altr.is_void;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool by_ref = head->uparam.b0;
             const bool is_void = head->uparam.b1;
@@ -4215,7 +4219,7 @@ solidify(AVM_Rod& rod) const
         sp2.val = altr.val;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             ctx.stack().push().set_temporary(sp.val);
@@ -4247,7 +4251,7 @@ solidify(AVM_Rod& rod) const
         (void) altr;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* /*head*/) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* /*head*/) -> AIR_Status
           {
             ctx.stack().swap(ctx.alt_stack());
             ctx.stack().clear();
@@ -4276,7 +4280,7 @@ solidify(AVM_Rod& rod) const
         up2.u0 = altr.ptc;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
@@ -4317,7 +4321,7 @@ solidify(AVM_Rod& rod) const
         do_solidify_nodes(sp2.rod_null, altr.code_null);
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const bool assign = head->uparam.b0;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4359,7 +4363,7 @@ solidify(AVM_Rod& rod) const
         sp2.key = altr.key;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -4428,7 +4432,7 @@ solidify(AVM_Rod& rod) const
           case xop_index:
             // binary
             rod.append(
-              +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+              +[](Executive_Context& ctx, const Header* head) -> AIR_Status
               {
                 const uint8_t uxop = head->uparam.u1;
                 const V_integer irhs = head->uparam.i2345;

@@ -133,23 +133,28 @@ class Indenter_spaces final
     void
     break_line(tinyfmt& fmt) const final
       {
-        static constexpr char spaces[] = "                       ";
-        static constexpr size_t nspaces = ::rocket::xstrlen(spaces);
+        static constexpr char s_spaces[] =
+          {
+#define do_spaces_8_   ' ',' ',' ',' ',' ',' ',' ',' ',
+#define do_spaces_32_  do_spaces_8_ do_spaces_8_ do_spaces_8_ do_spaces_8_
+            do_spaces_32_ do_spaces_32_ do_spaces_32_ do_spaces_32_
+            do_spaces_32_ do_spaces_32_ do_spaces_32_ do_spaces_32_
+          };
 
         // When `step` is zero, separate fields with a single space.
         if(ROCKET_EXPECT(this->m_add == 0)) {
-          fmt << spaces[0];
+          fmt << s_spaces[0];
           return;
         }
 
         // Otherwise, terminate the current line, and indent the next.
-        size_t nrem = this->m_cur;
         fmt << '\n';
-        while(ROCKET_UNEXPECT(nrem > nspaces)) {
-          nrem -= nspaces;
-          fmt.putn(spaces, nspaces);
+        size_t nrem = this->m_cur;
+        while(nrem != 0) {
+          size_t nslen = ::rocket::min(nrem, sizeof(s_spaces));
+          nrem -= nslen;
+          fmt.putn(s_spaces, nslen);
         }
-        fmt.putn(spaces, nrem);
       }
 
     void
@@ -174,15 +179,14 @@ class Indenter_spaces final
 void
 do_quote_string(tinyfmt& fmt, stringR str)
   {
-    // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification
-    // adopts UTF-16.
+    // Although JavaScript uses UCS-2 rather than UTF-16, the JSON
+    // specification adopts UTF-16.
     fmt << '\"';
     size_t offset = 0;
     while(offset < str.size()) {
       // Convert UTF-8 to UTF-16.
       char32_t cp;
       if(!utf8_decode(cp, str, offset))
-        // Invalid UTF-8 code units are replaced with the replacement character.
         cp = 0xFFFD;
 
       // Escape double quotes, backslashes, and control characters.
