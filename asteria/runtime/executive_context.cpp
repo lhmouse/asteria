@@ -14,9 +14,8 @@
 namespace asteria {
 
 Executive_Context::
-Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack,
-                  Reference_Stack& ystack, const Instantiated_Function& xfunc,
-                  Reference&& xself)
+Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack,
+                  const Instantiated_Function& xfunc, Reference&& xself)
   :
     m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack), m_func(&xfunc)
   {

@@ -41,8 +41,7 @@ class Executive_Context
     // contexts of enclosing function will have been destroyed.
     ASTERIA_INCOMPLET(AVM_Rod)
     explicit
-    Executive_Context(M_defer, Global_Context& xglobal, Reference_Stack& xstack,
-                      Reference_Stack& ystack)
+    Executive_Context(M_defer, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack)
       :
         m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack)
       { }
@@ -51,9 +50,8 @@ class Executive_Context
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
     explicit
-    Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack,
-                      Reference_Stack& ystack, const Instantiated_Function& xfunc,
-                      Reference&& xself);
+    Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack,
+                      const Instantiated_Function& xfunc, Reference&& xself);
 
   private:
     bool
