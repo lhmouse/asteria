@@ -335,14 +335,14 @@ Blank cells indicate that the operands are always unordered; types not listed
 in this table (function, opaque and object) are unordered with everything,
 including themselves:
 
-|        |null      |boolean |integer |real    |string |array   |
-|:-------|:---------|:-------|:-------|:-------|:------|:-------|
-|null    |identical |        |        |        |       |        |
-|boolean |          |total   |        |        |       |        |
-|integer |          |        |total   |partial |       |        |
-|real    |          |        |partial |partial |       |        |
-|string  |          |        |        |        |total  |        |
-|array   |          |        |        |        |       |partial |
+|            |null      |boolean |integer |real    |string |array   |
+|:-----------|:---------|:-------|:-------|:-------|:------|:-------|
+|**null**    |identical |        |        |        |       |        |
+|**boolean** |          |total   |        |        |       |        |
+|**integer** |          |        |total   |partial |       |        |
+|**real**    |          |        |partial |partial |       |        |
+|**string**  |          |        |        |        |total  |        |
+|**array**   |          |        |        |        |       |partial |
 
 Real numbers may be unordered due to special values called not-a-number (NaN)
 which can be produced by an invalid arithmetic operation, such as `0.0 / 0.0`
@@ -352,16 +352,16 @@ There are eight operators about comparison, categorized as two ranks: the
 _comparison operators_, `<`, `<=`, `>`, `>=`; and the _equality operators_,
 `==`, `!=`, `<=>`, `</>`. Their results are:
 
-|      |if less    |if equal   |if greater |if unordered        |
-|:-----|:----------|:----------|:----------|:-------------------|
-|`<`   |`true`     |`false`    |`false`    |throws an exception |
-|`<=`  |`true`     |`true`     |`false`    |throws an exception |
-|`>`   |`false`    |`false`    |`true`     |throws an exception |
-|`>=`  |`false`    |`true`     |`true`     |throws an exception |
-|`==`  |`false`    |`true`     |`false`    |`false`             |
-|`!=`  |`true`     |`false`    |`true`     |`true`              |
-|`<=>` |`-1`       |`0`        |`+1`       |`"[unordered]"`     |
-|`</>` |`false`    |`false`    |`false`    |`true`              |
+|          |if less    |if equal   |if greater |if unordered        |
+|:---------|:----------|:----------|:----------|:-------------------|
+|**`<`**   |`true`     |`false`    |`false`    |throws an exception |
+|**`<=`**  |`true`     |`true`     |`false`    |throws an exception |
+|**`>`**   |`false`    |`false`    |`true`     |throws an exception |
+|**`>=`**  |`false`    |`true`     |`true`     |throws an exception |
+|**`==`**  |`false`    |`true`     |`false`    |`false`             |
+|**`!=`**  |`true`     |`false`    |`true`     |`true`              |
+|**`<=>`** |`-1`       |`0`        |`+1`       |`"[unordered]"`     |
+|**`</>`** |`false`    |`false`    |`false`    |`true`              |
 
 Comparison operators have higher precedence than equality operators, so `a <
 b == c < d` is interpreted as `(a < b) == (c < d)`, instead of `((a < b) ==
