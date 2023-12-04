@@ -499,13 +499,39 @@ like in JavaScript. We do
    5>   std.io.putln("should never arrive here");
    6> } 
    7> catch(e) {
-   8>   std.io.putfln("caught exception: $1", e);
-   9> } 
-  10> std.io.putfln("after try, `i` is $1", i);
-  11> @@
+   8>   std.io.putfln(
+   9>     "caught exception: $1\nwith backtrace:\n$2",
+  10>     e, std.json.format(__backtrace, 2));
+  11> }
+  12> std.io.putfln("after try, `i` is $1", i);
+  13> @@
 * running 'snippet #6'...
 try
 caught exception: Zero as divisor (operands were `1` and `0`)
+with backtrace:
+[
+  {
+    "file": "[unknown]",
+    "column": -1,
+    "frame": "native code",
+    "line": -1,
+    "value": "Zero as divisor (operands were `1` and `0`)"
+  },
+  {
+    "file": "snippet #6",
+    "column": 9,
+    "frame": "  expression",
+    "line": 4,
+    "value": ""
+  },
+  {
+    "file": "snippet #6",
+    "column": 1,
+    "frame": "  try clause",
+    "line": 2,
+    "value": "Zero as divisor (operands were `1` and `0`)"
+  }
+]
 after try, `i` is unknown
 * result #6: void
 ```
