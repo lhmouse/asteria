@@ -49,7 +49,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
   {
     // Create the stack and context for this function.
     Reference_Stack alt_stack;
-    Executive_Context ctx_func(Executive_Context::M_function(), global, stack, alt_stack, *this, ::std::move(self));
+    Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, ::std::move(self));
     ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_sloc);
 
     // Execute the function body, using `stack` for evaluation.
@@ -86,12 +86,12 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_break_switch:
       case air_status_break_while:
       case air_status_break_for:
-        throw Runtime_Error(Runtime_Error::M_format(), "Stray `break` statement");
+        throw Runtime_Error(xtc_format, "Stray `break` statement");
 
       case air_status_continue_unspec:
       case air_status_continue_while:
       case air_status_continue_for:
-        throw Runtime_Error(Runtime_Error::M_format(), "Stray `continue` statement");
+        throw Runtime_Error(xtc_format, "Stray `continue` statement");
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);

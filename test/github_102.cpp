@@ -45,7 +45,7 @@ int main()
     ASTERIA_TEST_CHECK(stmts.size() == 4);
 
     Global_Context global;
-    Analytic_Context ctx(Analytic_Context::M_plain(), global);
+    Analytic_Context ctx(xtc_plain, global);
 
     cow_vector<AIR_Node> code;
     cow_vector<phsh_string> names;

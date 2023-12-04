@@ -57,7 +57,7 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Compiler_Error(Compiler_Error::M_status(),
+      throw Compiler_Error(xtc_status,
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
     if(qtok->is_identifier())
@@ -65,7 +65,7 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
     else if(qtok->is_string_literal())
       ctxo.key = qtok->as_string_literal();
     else
-      throw Compiler_Error(Compiler_Error::M_status(),
+      throw Compiler_Error(xtc_status,
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
     ctxo.key_sloc = qtok->sloc();
@@ -86,7 +86,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
   parse_next:
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Compiler_Error(Compiler_Error::M_format(),
+      throw Compiler_Error(xtc_format,
                 compiler_status_expression_expected, tstrm.next_sloc(),
                 "Value expected");
 
@@ -118,7 +118,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
         value = V_object();
       }
       else
-        throw Compiler_Error(Compiler_Error::M_format(),
+        throw Compiler_Error(xtc_format,
                   compiler_status_expression_expected, tstrm.next_sloc(),
                   "Value expected");
     }
@@ -145,7 +145,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
         value = ::std::numeric_limits<double>::quiet_NaN();
       }
       else
-        throw Compiler_Error(Compiler_Error::M_format(),
+        throw Compiler_Error(xtc_format,
                   compiler_status_expression_expected, tstrm.next_sloc(),
                   "Value expected");
     }
@@ -165,7 +165,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
       tstrm.shift();
     }
     else
-      throw Compiler_Error(Compiler_Error::M_format(),
+      throw Compiler_Error(xtc_format,
                 compiler_status_expression_expected, tstrm.next_sloc(),
                 "Value expected");
 
@@ -194,7 +194,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           auto& ctxo = ctx.mut<Xparse_object>();
           auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
           if(!pair.second)
-            throw Compiler_Error(Compiler_Error::M_status(),
+            throw Compiler_Error(xtc_status,
                       compiler_status_duplicate_key_in_object, ctxo.key_sloc);
 
           // A comma or semicolon may follow, but it has no meaning whatsoever.
@@ -517,7 +517,7 @@ std_system_load_conf(V_string path)
 
       auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
       if(!pair.second)
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_duplicate_key_in_object, ctxo.key_sloc);
 
       // A comma or semicolon may follow, but it has no meaning whatsoever.

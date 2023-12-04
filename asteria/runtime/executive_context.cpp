@@ -14,7 +14,7 @@
 namespace asteria {
 
 Executive_Context::
-Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack,
+Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack,
                   const Instantiated_Function& xfunc, Reference&& xself)
   :
     m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack), m_func(&xfunc)
@@ -43,7 +43,7 @@ Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack, 
         has_ellipsis = true;
 
     if(!has_ellipsis && (nargs != 0))
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Too many arguments passed to `$1`", this->m_func->func());
 
     // Move all arguments into the variadic argument getter.

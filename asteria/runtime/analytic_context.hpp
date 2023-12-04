@@ -19,7 +19,7 @@ class Analytic_Context
     // A plain context must have a parent context.
     // Its parent context shall outlast itself.
     explicit
-    Analytic_Context(M_plain, const Abstract_Context& parent)
+    Analytic_Context(Uxtc_plain, const Abstract_Context& parent)
       :
         m_parent_opt(&parent)
       { }
@@ -28,7 +28,7 @@ class Analytic_Context
     // Names found in ancestor contexts will be bound into the
     // instantiated function object.
     explicit
-    Analytic_Context(M_function, const Abstract_Context* parent_opt,
+    Analytic_Context(Uxtc_function, const Abstract_Context* parent_opt,
                      const cow_vector<phsh_string>& params);
 
   protected:

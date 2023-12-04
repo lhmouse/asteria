@@ -18,7 +18,7 @@ do_prepare_parameter(const char* param)
   {
     // Ensure `end_overload()` has not been called for this overload.
     if(this->m_state.finish)
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Current overload marked ended");
 
     // Append the parameter.
@@ -32,7 +32,7 @@ do_terminate_parameter_list()
   {
     // Ensure `end_overload()` has not been called for this overload.
     if(this->m_state.finish)
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Current overload marked ended");
 
     // Mark this overload complete. The terminating ", " shall be dropped.
@@ -565,7 +565,7 @@ throw_no_matching_function_call() const
     overloads << "\n  -- end of list of overloads]";
 
     // Compose the message and throw it.
-    throw Runtime_Error(Runtime_Error::M_format(),
+    throw Runtime_Error(xtc_format,
              "No matching function call for `$1`\n$2", caller, overloads);
   }
 

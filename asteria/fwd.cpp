@@ -77,9 +77,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     catch(Runtime_Error& except)
     { throw;  }  // forward
     catch(exception& stdex)
-    { throw Runtime_Error(Runtime_Error::M_format(), "$1", stdex);  }  // replace
+    { throw Runtime_Error(xtc_format, "$1", stdex);  }  // replace
 
-    throw Runtime_Error(Runtime_Error::M_format(),
+    throw Runtime_Error(xtc_format,
               "cow_function: attempt to call a null function");
   }
 

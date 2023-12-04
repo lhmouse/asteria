@@ -14,11 +14,6 @@ class Compiler_Error
   :
     public virtual exception
   {
-  public:
-    enum class M_status;
-    enum class M_format;
-    enum class M_add_format;
-
   private:
     Compiler_Status m_stat;
     Source_Location m_sloc;
@@ -28,7 +23,7 @@ class Compiler_Error
 
   public:
     explicit
-    Compiler_Error(M_status, Compiler_Status xstat, const Source_Location& xsloc)
+    Compiler_Error(Uxtc_status, Compiler_Status xstat, const Source_Location& xsloc)
       :
         m_stat(xstat), m_sloc(xsloc),
         m_desc(::rocket::sref(describe_compiler_status(xstat)))
@@ -38,7 +33,7 @@ class Compiler_Error
 
     template<typename... ParamsT>
     explicit
-    Compiler_Error(M_format, Compiler_Status xstat, const Source_Location& xsloc,
+    Compiler_Error(Uxtc_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :
         m_stat(xstat), m_sloc(xsloc)
@@ -51,7 +46,7 @@ class Compiler_Error
 
     template<typename... ParamsT>
     explicit
-    Compiler_Error(M_add_format, Compiler_Status xstat, const Source_Location& xsloc,
+    Compiler_Error(Uxtc_status_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :
         m_stat(xstat), m_sloc(xsloc)

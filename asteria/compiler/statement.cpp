@@ -107,7 +107,7 @@ do_generate_block(const Compiler_Options& opts, const Global_Context& global,
                   const Analytic_Context& ctx, PTC_Aware ptc, const Statement::S_block& block)
   {
     cow_vector<AIR_Node> code;
-    Analytic_Context ctx_stmts(Analytic_Context::M_plain(), ctx);
+    Analytic_Context ctx_stmts(xtc_plain, ctx);
     do_generate_statement_list(code, ctx_stmts, nullptr, global, opts, ptc, block);
     return code;
   }
@@ -309,7 +309,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Create a fresh context for the `switch` body.
         // Be advised that all clauses inside a `switch` statement share the same context.
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_body(xtc_plain, ctx);
         cow_vector<AIR_Node::switch_clause> clauses;
         for(const auto& clause : altr.clauses) {
           auto& r = clauses.emplace_back();
@@ -371,7 +371,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Note that the key and value references outlasts every iteration, so we
         // have to create an outer contexts here.
-        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_for(xtc_plain, ctx);
         do_user_declare(ctx_for, names_opt, altr.name_key);
         do_user_declare(ctx_for, names_opt, altr.name_mapped);
 
@@ -395,7 +395,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Note that names declared in the first segment of a for-statement outlasts
         // every iteration, so we have to create an outer contexts here.
-        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_for(xtc_plain, ctx);
 
         // Generate code for the initializer, the condition and the loop increment.
         auto code_init = do_generate_statement_list(ctx_for, nullptr, global, opts, ptc_aware_none, altr.init);
@@ -420,7 +420,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         auto code_try = do_generate_block(opts, global, ctx, ptc, altr.body_try);
 
         // Create a fresh context for the `catch` clause.
-        Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_catch(xtc_plain, ctx);
         do_user_declare(ctx_catch, names_opt, altr.name_except);
         ctx_catch.insert_named_reference(sref("__backtrace"));
 

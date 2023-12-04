@@ -94,7 +94,7 @@ do_sparam_dtor(Header* head)
 AIR_Status
 do_execute_block(const AVM_Rod& rod, const Executive_Context& ctx)
   {
-    Executive_Context ctx_next(Executive_Context::M_plain(), ctx);
+    Executive_Context ctx_next(xtc_plain, ctx);
     AIR_Status status;
     try {
       status = rod.execute(ctx_next);
@@ -168,11 +168,11 @@ do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Locat
   {
     auto val = ctx.stack().top().dereference_readonly();
     if(val.is_null())
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Function not found");
 
     if(!val.is_function())
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Attempt to call a non-function (value `$1`)", val);
 
     const auto& target = val.as_function();
@@ -195,7 +195,7 @@ void
 do_duplicate_sequence(ContainerT& container, int64_t count)
   {
     if(count < 0)
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Negative duplication count (value was `$2`)", count);
 
     if(container.empty() || (count == 1))
@@ -209,7 +209,7 @@ do_duplicate_sequence(ContainerT& container, int64_t count)
     // Calculate the result length with overflow checking.
     int64_t rlen;
     if(ROCKET_MUL_OVERFLOW((int64_t) container.size(), count, &rlen) || (rlen > PTRDIFF_MAX))
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Data length overflow (`$1` * `$2` > `$3`)",
                container.size(), count, PTRDIFF_MAX);
 
@@ -290,7 +290,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
 
           int64_t result;
           if(ROCKET_ADD_OVERFLOW(val, other, &result))
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Integer addition overflow (operands were `$1` and `$2`)",
                      val, other);
 
@@ -306,7 +306,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Addition not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -321,7 +321,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           // Perform arithmetic subtraction with overflow checking.
           int64_t result;
           if(ROCKET_SUB_OVERFLOW(val, other, &result))
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Integer subtraction overflow (operands were `$1` and `$2`)",
                      val, other);
 
@@ -338,7 +338,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Subtraction not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -353,7 +353,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
 
           int64_t result;
           if(ROCKET_MUL_OVERFLOW(val, other, &result))
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Integer multiplication overflow (operands were `$1` and `$2`)",
                      val, other);
 
@@ -385,7 +385,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Multiplication not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -398,12 +398,12 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           V_integer other = irhs;
 
           if(other == 0)
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Zero as divisor (operands were `$1` and `$2`)",
                      val, other);
 
           if((val == INT64_MIN) && (other == -1))
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Integer division overflow (operands were `$1` and `$2`)",
                      val, other);
 
@@ -419,7 +419,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Division not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -433,12 +433,12 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           V_integer other = irhs;
 
           if(other == 0)
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Zero as divisor (operands were `$1` and `$2`)",
                      val, other);
 
           if((val == INT64_MIN) && (other == -1))
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Integer division overflow (operands were `$1` and `$2`)",
                      val, other);
 
@@ -454,7 +454,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Modulo not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -471,7 +471,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Bitwise AND not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -488,7 +488,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Bitwise OR not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -505,7 +505,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Bitwise XOR not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -520,7 +520,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Modular addition not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -535,7 +535,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Modular subtraction not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -550,7 +550,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Modular multiplication not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -566,7 +566,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Saturating addition not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -582,7 +582,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Saturating subtraction not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -599,7 +599,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Saturating multiplication not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -609,7 +609,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         // discarded. Vacuum elements are filled with default values. The
         // width of the operand is unchanged.
         if(irhs < 0)
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Negative shift count (operands were `$1` and `$2`)",
                    lhs, irhs);
 
@@ -640,7 +640,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Logical left shift not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -650,7 +650,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         // discarded. Vacuum elements are filled with default values. The
         // width of the operand is unchanged.
         if(irhs < 0)
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Negative shift count (operands were `$1` and `$2`)",
                    lhs, irhs);
 
@@ -681,7 +681,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Logical right shift not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -692,7 +692,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         // shall all be the same with the sign bit). Vacuum elements are
         // filled with default values.
         if(irhs < 0)
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Negative shift count (operands were `$1` and `$2`)",
                    lhs, irhs);
 
@@ -702,7 +702,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           int64_t count = ::rocket::min(irhs, 63);
           if((val != 0) && ((count != irhs)
                             || (((val >> 63) ^ val) >> (63 - count) != 0)))
-            throw Runtime_Error(Runtime_Error::M_format(),
+            throw Runtime_Error(xtc_format,
                      "Arithmetic left shift overflow (operands were `$1` and `$2`)",
                      lhs, irhs);
 
@@ -726,7 +726,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -735,7 +735,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         // Shift the operand to the right. Elements that get shifted out are
         // discarded. No element is filled in the left.
         if(irhs < 0)
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Negative shift count (operands were `$1` and `$2`)",
                    lhs, irhs);
 
@@ -763,7 +763,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
           return air_status_next;
         }
 
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
                  lhs, irhs);
       }
@@ -915,7 +915,7 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_execute_block bound = altr;
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -928,7 +928,7 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_if_statement bound = altr;
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_true, ctx_body);
         do_rebind_nodes(dirty, bound.code_false, ctx_body);
 
@@ -942,7 +942,7 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_switch_statement bound = altr;
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_body(xtc_plain, ctx);
         for(size_t k = 0;  k < bound.clauses.size();  ++k) {
           // Labels are to be evaluated in the same scope as the condition
           // expression, and are not parts of the body.
@@ -966,7 +966,7 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_do_while_statement bound = altr;
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         do_rebind_nodes(dirty, bound.code_cond, ctx);
@@ -984,7 +984,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_cond, ctx);
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -1000,13 +1000,13 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_for_each_statement bound = altr;
 
-        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_for(xtc_plain, ctx);
         if(!altr.name_key.empty())
           ctx_for.insert_named_reference(altr.name_key);
         ctx_for.insert_named_reference(altr.name_mapped);
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx_for);
+        Analytic_Context ctx_body(xtc_plain, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -1022,12 +1022,12 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_for_statement bound = altr;
 
-        Analytic_Context ctx_for(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_for(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
         do_rebind_nodes(dirty, bound.code_cond, ctx_for);
         do_rebind_nodes(dirty, bound.code_step, ctx_for);
 
-        Analytic_Context ctx_body(Analytic_Context::M_plain(), ctx_for);
+        Analytic_Context ctx_body(xtc_plain, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -1040,10 +1040,10 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_try_statement bound = altr;
 
-        Analytic_Context ctx_try(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_try(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_try, ctx_try);
 
-        Analytic_Context ctx_catch(Analytic_Context::M_plain(), ctx);
+        Analytic_Context ctx_catch(xtc_plain, ctx);
         ctx_catch.insert_named_reference(altr.name_except);
         do_rebind_nodes(dirty, bound.code_catch, ctx_catch);
 
@@ -1066,7 +1066,7 @@ rebind_opt(Abstract_Context& ctx) const
         if(!qref)
           return nullopt;
         else if(qref->is_invalid())
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Initialization of variable or reference `$1` bypassed", altr.name);
 
         // Bind this reference.
@@ -1083,7 +1083,7 @@ rebind_opt(Abstract_Context& ctx) const
         bool dirty = false;
         S_define_function bound = altr;
 
-        Analytic_Context ctx_func(Analytic_Context::M_function(), &ctx, altr.params);
+        Analytic_Context ctx_func(xtc_function, &ctx, altr.params);
         do_rebind_nodes(dirty, bound.code_body, ctx_func);
 
         return do_return_rebound_opt(dirty, ::std::move(bound));
@@ -1575,7 +1575,7 @@ solidify(AVM_Rod& rod) const
               return air_status_next;
 
             // Jump to the target clause.
-            Executive_Context ctx_body(Executive_Context::M_plain(), ctx);
+            Executive_Context ctx_body(xtc_plain, ctx);
             AIR_Status status = air_status_next;
             try {
               for(size_t i = 0;  i < sp.clauses.size();  ++i)
@@ -1779,7 +1779,7 @@ solidify(AVM_Rod& rod) const
 
             // We have to create an outer context due to the fact that the key
             // and mapped references outlast every iteration.
-            Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
+            Executive_Context ctx_for(xtc_plain, ctx);
 
             // Create key and mapped references.
             Reference* qkey_ref = nullptr;
@@ -1865,7 +1865,7 @@ solidify(AVM_Rod& rod) const
               return status;
             }
             else
-              throw Runtime_Error(Runtime_Error::M_assert(), sp.sloc_init,
+              throw Runtime_Error(xtc_assert, sp.sloc_init,
                         format_string("Range value not iterable (value `$1`)", range));
           }
 
@@ -1914,7 +1914,7 @@ solidify(AVM_Rod& rod) const
             // This is the same as the `for` statement in C. We have to create
             // an outer context due to the fact that names declared in the first
             // segment outlast every iteration.
-            Executive_Context ctx_for(Executive_Context::M_plain(), ctx);
+            Executive_Context ctx_for(xtc_plain, ctx);
 
             // Execute the loop initializer, which shall only be a definition or
             // an expression statement.
@@ -2008,7 +2008,7 @@ solidify(AVM_Rod& rod) const
               // This branch must be executed inside this `catch` block.
               // User-provided bindings may obtain the current exception using
               // `::std::current_exception`.
-              Executive_Context ctx_catch(Executive_Context::M_plain(), ctx);
+              Executive_Context ctx_catch(xtc_plain, ctx);
               try {
                 // Set the exception reference.
                 auto& except_ref = ctx_catch.insert_named_reference(sp.name_except);
@@ -2081,7 +2081,7 @@ solidify(AVM_Rod& rod) const
             // been empty for this function.
             const auto& val = ctx.stack().top().dereference_readonly();
             ctx.stack().pop();
-            throw Runtime_Error(Runtime_Error::M_throw(), val, sp.sloc);
+            throw Runtime_Error(xtc_throw, val, sp.sloc);
           }
 
           // Uparam
@@ -2121,7 +2121,7 @@ solidify(AVM_Rod& rod) const
             const auto& val = ctx.stack().top().dereference_readonly();
             ctx.stack().pop();
             if(!val.test())
-              throw Runtime_Error(Runtime_Error::M_assert(), sp.sloc, sp.msg);
+              throw Runtime_Error(xtc_assert, sp.sloc, sp.msg);
             return air_status_next;
           }
 
@@ -2225,11 +2225,11 @@ solidify(AVM_Rod& rod) const
             // Look for the name in the global context.
             auto qref = ctx.global().get_named_reference_opt(sp.name);
             if(!qref)
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Undeclared identifier `$1`", sp.name);
 
             if(qref->is_invalid())
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Reference `$1` not initialized", sp.name);
 
             // Push a copy of the reference onto the stack.
@@ -2280,11 +2280,11 @@ solidify(AVM_Rod& rod) const
             // Look for the name in the target context.
             auto qref = qctx->get_named_reference_opt(sp.name);
             if(!qref)
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Undeclared identifier `$1`", sp.name);
 
             if(qref->is_invalid())
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Initialization of `$1` was bypassed", sp.name);
 
             // Push a copy of the reference onto the stack.
@@ -2597,7 +2597,7 @@ solidify(AVM_Rod& rod) const
                       // Increment the value with overflow checking.
                       int64_t result;
                       if(ROCKET_ADD_OVERFLOW(val, 1, &result))
-                        throw Runtime_Error(Runtime_Error::M_format(),
+                        throw Runtime_Error(xtc_format,
                                  "Integer increment overflow (operand was `$1`)", val);
 
                       if(assign)
@@ -2620,7 +2620,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Increment not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2635,7 +2635,7 @@ solidify(AVM_Rod& rod) const
                       // Decrement the value with overflow checking.
                       int64_t result;
                       if(ROCKET_SUB_OVERFLOW(val, 1, &result))
-                        throw Runtime_Error(Runtime_Error::M_format(),
+                        throw Runtime_Error(xtc_format,
                                  "Integer decrement overflow (operand was `$1`)", val);
 
                       if(assign)
@@ -2658,7 +2658,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2742,7 +2742,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
                     else
-                      throw Runtime_Error(Runtime_Error::M_format(),
+                      throw Runtime_Error(xtc_format,
                                "Subscript value not valid (operand was `$1`)", rhs);
                   }
 
@@ -2809,7 +2809,7 @@ solidify(AVM_Rod& rod) const
 
                       int64_t result;
                       if(ROCKET_SUB_OVERFLOW(0, val, &result))
-                        throw Runtime_Error(Runtime_Error::M_format(),
+                        throw Runtime_Error(xtc_format,
                                  "Integer negation overflow (operand was `$1`)", val);
 
                       val = result;
@@ -2827,7 +2827,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2852,7 +2852,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2884,7 +2884,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2901,7 +2901,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2918,7 +2918,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2935,7 +2935,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2946,7 +2946,7 @@ solidify(AVM_Rod& rod) const
 
                       V_integer neg_val;
                       if(ROCKET_SUB_OVERFLOW(0, val, &neg_val))
-                        throw Runtime_Error(Runtime_Error::M_format(),
+                        throw Runtime_Error(xtc_format,
                                  "Integer negation overflow (operand was `$1`)", val);
 
                       val ^= (val ^ neg_val) & (val >> 63);
@@ -2962,7 +2962,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2978,7 +2978,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -2993,7 +2993,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3009,7 +3009,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3025,7 +3025,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3040,7 +3040,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3055,7 +3055,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3070,7 +3070,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3085,7 +3085,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3100,7 +3100,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3113,7 +3113,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3126,7 +3126,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3139,7 +3139,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
@@ -3283,7 +3283,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Addition not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3309,7 +3309,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Subtraction not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3352,7 +3352,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Multiplication not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3368,7 +3368,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Division not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3385,7 +3385,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Modulo not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3414,7 +3414,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Bitwise AND not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3443,7 +3443,7 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Bitwise OR not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3472,49 +3472,49 @@ solidify(AVM_Rod& rod) const
                       return air_status_next;
                     }
 
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Bitwise XOR not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
 
                   case xop_addm: {
                     // This should have been redirected to the fast path.
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Modular addition not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
 
                   case xop_subm: {
                     // This should have been redirected to the fast path.
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Modular subtraction not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
 
                   case xop_mulm: {
                     // This should have been redirected to the fast path.
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Modular multiplication not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
 
                   case xop_adds: {
                     // This should have been redirected to the fast path.
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Saturating addition not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
 
                   case xop_subs: {
                     // This should have been redirected to the fast path.
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Saturating subtraction not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
 
                   case xop_muls: {
                     // This should have been redirected to the fast path.
-                    throw Runtime_Error(Runtime_Error::M_format(),
+                    throw Runtime_Error(xtc_format,
                              "Saturating multiplication not applicable (operands were `$1` and `$2`)",
                              lhs, rhs);
                   }
@@ -3554,7 +3554,7 @@ solidify(AVM_Rod& rod) const
                 auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                 if(rhs.type() != type_integer)
-                  throw Runtime_Error(Runtime_Error::M_format(),
+                  throw Runtime_Error(xtc_format,
                            "Invalid shift count (operands were `$1` and `$2`)",
                            lhs, rhs);
 
@@ -3598,7 +3598,7 @@ solidify(AVM_Rod& rod) const
                   return air_status_next;
                 }
 
-                throw Runtime_Error(Runtime_Error::M_format(),
+                throw Runtime_Error(xtc_format,
                          "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
                          lhs, mid, rhs);
               }
@@ -3641,7 +3641,7 @@ solidify(AVM_Rod& rod) const
 
             // Make sure it is really an array.
             if(!init.is_null() && !init.is_array())
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Initializer was not an array (value was `$1`)", init);
 
             for(uint32_t i = nelems - 1;  i != UINT32_MAX;  --i) {
@@ -3703,7 +3703,7 @@ solidify(AVM_Rod& rod) const
 
             // Make sure it is really an object.
             if(!init.is_null() && !init.is_object())
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Initializer was not an object (value was `$1`)", init);
 
             for(auto it = sp.keys.rbegin();  it != sp.keys.rend();  ++it) {
@@ -3853,11 +3853,11 @@ solidify(AVM_Rod& rod) const
               ctx.stack().pop();
 
               if(va_num.type() != type_integer)
-                throw Runtime_Error(Runtime_Error::M_format(),
+                throw Runtime_Error(xtc_format,
                          "Variadic argument count was not an integer (value `$1`)", va_num);
 
               if((va_num.as_integer() < 0) || (va_num.as_integer() > INT_MAX))
-                throw Runtime_Error(Runtime_Error::M_format(),
+                throw Runtime_Error(xtc_format,
                          "Variadic argument count was not valid (value `$1`)", va_num);
 
               // Generate arguments into `stack`.
@@ -3875,7 +3875,7 @@ solidify(AVM_Rod& rod) const
               return do_function_call(ctx, ptc, sloc);
             }
             else
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Invalid variadic argument generator (value `$1`)", va_gen);
           }
 
@@ -3971,11 +3971,11 @@ solidify(AVM_Rod& rod) const
             // Get the path to import.
             const auto& path_val = ctx.stack().top().dereference_readonly();
             if(path_val.type() != type_string)
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Path was not a string (value `$1`)", path_val);
 
             if(path_val.as_string() == "")
-              throw Runtime_Error(Runtime_Error::M_format(), "Path was empty");
+              throw Runtime_Error(xtc_format, "Path was empty");
 
             // If the path is relative, resolve it to an absolute one.
             cow_string abs_path = path_val.as_string();
@@ -3985,7 +3985,7 @@ solidify(AVM_Rod& rod) const
 
             unique_ptr<char, void (void*)> realpathp(::free);
             if(!realpathp.reset(::realpath(abs_path.safe_c_str(), nullptr)))
-              throw Runtime_Error(Runtime_Error::M_format(),
+              throw Runtime_Error(xtc_format,
                        "Could not open script file '$1': ${errno:full}", path_val);
 
             // Load and parse the file.

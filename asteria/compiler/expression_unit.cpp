@@ -126,7 +126,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
               // If implicit global names are not allowed, it must be resolved now.
               qref = global.get_named_reference_opt(altr.name);
               if(!qref)
-                throw Compiler_Error(Compiler_Error::M_format(),
+                throw Compiler_Error(xtc_format,
                           compiler_status_undeclared_identifier, altr.sloc,
                           "Undeclared identifier `$1`", altr.name);
             }

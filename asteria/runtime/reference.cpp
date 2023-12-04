@@ -20,7 +20,7 @@ void
 Reference::
 do_throw_not_dereferenceable() const
   {
-    throw Runtime_Error(Runtime_Error::M_format(),
+    throw Runtime_Error(xtc_format,
              "Reference type `$1` not dereferenceable",
              describe_xref(this->m_xref));
   }
@@ -45,11 +45,11 @@ do_dereference_readonly_slow() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Reference not initialized");
 
       case xref_void:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Void reference not dereferenceable");
 
       case xref_temporary:
@@ -61,7 +61,7 @@ do_dereference_readonly_slow() const
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Reference not initialized");
 
         valp = &(var->get_value());
@@ -69,7 +69,7 @@ do_dereference_readonly_slow() const
       }
 
       case xref_ptc:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Proper tail call not expanded");
 
       default:
@@ -94,15 +94,15 @@ dereference_mutable() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Reference not initialized");
 
       case xref_void:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Void reference not dereferenceable");
 
       case xref_temporary:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Attempt to modify a temporary value");
 
       case xref_variable: {
@@ -110,11 +110,11 @@ dereference_mutable() const
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Reference not initialized");
 
         if(var->is_immutable())
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Attempt to modify a `const` variable");
 
         valp = &(var->mut_value());
@@ -122,7 +122,7 @@ dereference_mutable() const
       }
 
       case xref_ptc:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Proper tail call not expanded");
 
       default:
@@ -144,15 +144,15 @@ dereference_unset() const
 
     switch(this->m_xref) {
       case xref_invalid:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Reference not initialized");
 
       case xref_void:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Void reference not dereferenceable");
 
       case xref_temporary:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Attempt to modify a temporary value");
 
       case xref_variable: {
@@ -160,11 +160,11 @@ dereference_unset() const
         ROCKET_ASSERT(var);
 
         if(!var->is_initialized())
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Reference not initialized");
 
         if(var->is_immutable())
-          throw Runtime_Error(Runtime_Error::M_format(),
+          throw Runtime_Error(xtc_format,
                    "Attempt to modify a `const` variable");
 
         valp = &(var->mut_value());
@@ -172,7 +172,7 @@ dereference_unset() const
       }
 
       case xref_ptc:
-        throw Runtime_Error(Runtime_Error::M_format(),
+        throw Runtime_Error(xtc_format,
                  "Proper tail call not expanded");
 
       default:
@@ -180,7 +180,7 @@ dereference_unset() const
     }
 
     if(this->m_mods.size() == 0)
-      throw Runtime_Error(Runtime_Error::M_format(),
+      throw Runtime_Error(xtc_format,
                "Only elements of an array or object may be unset");
 
     while(valp && (mi != this->m_mods.size() - 1))
@@ -200,7 +200,7 @@ do_use_function_result_slow(Global_Context& global)
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
     opt<Value> result_value;
     Reference_Stack defer_stack, defer_alt_stack;
-    Executive_Context defer_ctx(Executive_Context::M_defer(), global, defer_stack, defer_alt_stack);
+    Executive_Context defer_ctx(xtc_defer, global, defer_stack, defer_alt_stack);
 
     try {
       // Unpack frames until a non-PTC result is encountered.

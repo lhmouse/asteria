@@ -7,7 +7,7 @@
 namespace asteria {
 
 Analytic_Context::
-Analytic_Context(M_function, const Abstract_Context* parent_opt,
+Analytic_Context(Uxtc_function, const Abstract_Context* parent_opt,
                  const cow_vector<phsh_string>& params)
   :
     m_parent_opt(parent_opt)

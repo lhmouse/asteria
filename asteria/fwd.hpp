@@ -202,11 +202,24 @@ class Infix_Element;
 class Statement_Sequence;
 class AIR_Optimizer;
 
-// This typedef is for native bindings.
+// Native binding prototype
 using simple_function =
     Reference& (Reference& self,           // `this` (in) / return (out)
                 Global_Context& global,    // global scope
                 Reference_Stack&& stack);  // positional arguments
+
+// Tags for constructors
+#define ASTERIA_DEFINE_TAG_(name)  \
+    union U##name final { } constexpr name = { }  // no semicolon
+
+ASTERIA_DEFINE_TAG_(xtc_format);
+ASTERIA_DEFINE_TAG_(xtc_status);
+ASTERIA_DEFINE_TAG_(xtc_status_format);
+ASTERIA_DEFINE_TAG_(xtc_plain);
+ASTERIA_DEFINE_TAG_(xtc_defer);
+ASTERIA_DEFINE_TAG_(xtc_function);
+ASTERIA_DEFINE_TAG_(xtc_assert);
+ASTERIA_DEFINE_TAG_(xtc_throw);
 
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>

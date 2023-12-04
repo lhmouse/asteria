@@ -23,10 +23,6 @@ class Runtime_Error
         Value value;
       };
 
-    enum class M_throw;
-    enum class M_assert;
-    enum class M_format;
-
   private:
     Value m_value;
     cow_vector<Frame> m_frames;
@@ -38,7 +34,7 @@ class Runtime_Error
   public:
     template<typename XValT>
     explicit
-    Runtime_Error(M_throw, XValT&& xval, const Source_Location& xsloc)
+    Runtime_Error(Uxtc_throw, XValT&& xval, const Source_Location& xsloc)
       :
         m_value(::std::forward<XValT>(xval))
       {
@@ -47,7 +43,7 @@ class Runtime_Error
       }
 
     explicit
-    Runtime_Error(M_assert, const Source_Location& xsloc, stringR msg)
+    Runtime_Error(Uxtc_assert, const Source_Location& xsloc, stringR msg)
       :
         m_value("assertion failure: " + msg)
       {
@@ -57,7 +53,7 @@ class Runtime_Error
 
     template<typename... ParamsT>
     explicit
-    Runtime_Error(M_format, const char* templ, const ParamsT&... params)
+    Runtime_Error(Uxtc_format, const char* templ, const ParamsT&... params)
       :
         m_value()
       {

@@ -326,7 +326,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     // We always parse the literal as a floating-point number.
     ::rocket::ascii_numget numg;
     if(numg.parse_D(tstr.data(), tstr.size()) != tstr.size())
-      throw Compiler_Error(Compiler_Error::M_status(),
+      throw Compiler_Error(xtc_status,
                 compiler_status_numeric_literal_suffix_invalid, reader.tell());
 
     // It is cast to an integer only when `integers_as_reals` is `false` and
@@ -337,11 +337,11 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       numg.cast_I(xtoken.val, INT64_MIN, INT64_MAX);
 
       if(numg.overflowed())
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_integer_literal_overflow, reader.tell());
 
       if(numg.inexact())
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_integer_literal_inexact, reader.tell());
 
       // Accept the integral value.
@@ -353,11 +353,11 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       numg.cast_D(xtoken.val, -DBL_MAX, DBL_MAX);
 
       if(numg.overflowed())
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_real_literal_overflow, reader.tell());
 
       if(numg.underflowed())
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_real_literal_underflow, reader.tell());
 
       // Accept the real value.
@@ -511,7 +511,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
       // Read a character.
       char next = reader.peek(tlen);
       if(next == 0)
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_string_literal_unclosed, reader.tell());
 
       tlen += 1;
@@ -531,7 +531,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
       // Read the next charactter.
       next = reader.peek(tlen);
       if(next == 0)
-        throw Compiler_Error(Compiler_Error::M_status(),
+        throw Compiler_Error(xtc_status,
                   compiler_status_escape_sequence_incomplete, reader.tell());
 
       tlen += 1;
@@ -603,11 +603,11 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
             // Read a hex digit.
             char c = reader.peek(tlen);
             if(c == 0)
-              throw Compiler_Error(Compiler_Error::M_status(),
+              throw Compiler_Error(xtc_status,
                         compiler_status_escape_sequence_incomplete, reader.tell());
 
             if(!is_cmask(c, cmask_xdigit))
-              throw Compiler_Error(Compiler_Error::M_status(),
+              throw Compiler_Error(xtc_status,
                         compiler_status_escape_sequence_invalid_hex, reader.tell());
 
             // Accumulate this digit.
@@ -626,14 +626,14 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
           else {
             // Write a Unicode code point.
             if(!utf8_encode(val, cp))
-              throw Compiler_Error(Compiler_Error::M_status(),
+              throw Compiler_Error(xtc_status,
                         compiler_status_escape_utf_code_point_invalid, reader.tell());
           }
           break;
         }
 
         default:
-          throw Compiler_Error(Compiler_Error::M_status(),
+          throw Compiler_Error(xtc_status,
                     compiler_status_escape_sequence_unknown, reader.tell());
       }
     }
@@ -782,7 +782,7 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
       // Check for conflict markers.
       for(const char* marker : { "<<<<<<<", "|||||||", "=======", ">>>>>>>" })
         if(reader.starts_with(marker, 7))
-          throw Compiler_Error(Compiler_Error::M_status(),
+          throw Compiler_Error(xtc_status,
                     compiler_status_conflict_marker_detected, reader.tell());
 
       // Ensure this line is a valid UTF-8 string.
@@ -791,12 +791,12 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
         char32_t cp;
         auto tptr = reader.data();
         if(!utf8_decode(cp, tptr, reader.navail()))
-          throw Compiler_Error(Compiler_Error::M_status(),
+          throw Compiler_Error(xtc_status,
                     compiler_status_utf8_sequence_invalid, reader.tell());
 
         // Disallow plain null characters in source data.
         if(cp == 0)
-          throw Compiler_Error(Compiler_Error::M_status(),
+          throw Compiler_Error(xtc_status,
                     compiler_status_null_character_disallowed, reader.tell());
 
         // Accept this code point.
@@ -850,7 +850,7 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
                      do_accept_identifier_or_keyword(tokens, reader,
                                    this->m_opts.keywords_as_identifiers);
         if(!found)
-          throw Compiler_Error(Compiler_Error::M_status(),
+          throw Compiler_Error(xtc_status,
                     compiler_status_token_character_unrecognized, reader.tell());
       }
     }
@@ -859,7 +859,7 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
     // A block comment may straddle multiple lines. We just mark the
     // first line here.
     if(bcomm)
-      throw Compiler_Error(Compiler_Error::M_format(),
+      throw Compiler_Error(xtc_format,
                 compiler_status_block_comment_unclosed, reader.tell(),
                 "Block comment unclosed\n[unmatched `/*` at '$1']", *bcomm);
 
