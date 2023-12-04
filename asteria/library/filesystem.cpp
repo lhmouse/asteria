@@ -51,22 +51,6 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
 }  // namespace
 
 V_string
-std_filesystem_get_working_directory()
-  {
-    // Pass a null pointer to request dynamic allocation.
-    // Note this behavior is an extension that exists almost everywhere.
-    unique_ptr<char, void (void*)> cwd(::free);
-    cwd.reset(::getcwd(nullptr, 0));
-    if(!cwd)
-      ASTERIA_THROW((
-          "Could not get current working directory",
-          "[`getcwd()` failed: ${errno:full}]"));
-
-    V_string str(cwd.get());
-    return str;
-  }
-
-V_string
 std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
@@ -673,18 +657,6 @@ std_filesystem_remove_file(V_string path)
 void
 create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("get_working_directory"),
-      ASTERIA_BINDING(
-        "std.filesystem.get_working_directory", "",
-        Argument_Reader&& reader)
-      {
-        reader.start_overload();
-        if(reader.end_overload())
-          return (Value) std_filesystem_get_working_directory();
-
-        reader.throw_no_matching_function_call();
-      });
-
     result.insert_or_assign(sref("get_real_path"),
       ASTERIA_BINDING(
         "std.filesystem.get_real_path", "path",

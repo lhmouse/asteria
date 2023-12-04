@@ -7,10 +7,6 @@
 #include "../fwd.hpp"
 namespace asteria {
 
-// `std.filesystem.get_working_directory`
-V_string
-std_filesystem_get_working_directory();
-
 // `std.filesystem.get_real_path`
 V_string
 std_filesystem_get_real_path(V_string path);

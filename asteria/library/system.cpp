@@ -224,6 +224,22 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
 
 }  // namespace
 
+V_string
+std_system_get_working_directory()
+  {
+    // Pass a null pointer to request dynamic allocation.
+    // Note this behavior is an extension that exists almost everywhere.
+    unique_ptr<char, void (void*)> cwd(::free);
+    cwd.reset(::getcwd(nullptr, 0));
+    if(!cwd)
+      ASTERIA_THROW((
+          "Could not get current working directory",
+          "[`getcwd()` failed: ${errno:full}]"));
+
+    V_string str(cwd.get());
+    return str;
+  }
+
 optV_string
 std_system_get_environment_variable(V_string name)
   {
@@ -287,7 +303,7 @@ std_system_get_properties()
   }
 
 V_string
-std_system_uuid(Global_Context& global)
+std_system_generate_uuid(Global_Context& global)
   {
     // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
     //  * x: number of 1/30518 seconds since UNIX Epoch
@@ -531,6 +547,18 @@ std_system_load_conf(V_string path)
 void
 create_bindings_system(V_object& result, API_Version /*version*/)
   {
+    result.insert_or_assign(sref("get_working_directory"),
+      ASTERIA_BINDING(
+        "std.system.get_working_directory", "",
+        Argument_Reader&& reader)
+      {
+        reader.start_overload();
+        if(reader.end_overload())
+          return (Value) std_system_get_working_directory();
+
+        reader.throw_no_matching_function_call();
+      });
+
     result.insert_or_assign(sref("get_environment_variable"),
       ASTERIA_BINDING(
         "std.system.get_environment_variable", "name",
@@ -570,14 +598,14 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("uuid"),
+    result.insert_or_assign(sref("generate_uuid"),
       ASTERIA_BINDING(
-        "std.system.uuid", "",
+        "std.system.generate_uuid", "",
         Global_Context& global, Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_uuid(global);
+          return (Value) std_system_generate_uuid(global);
 
         reader.throw_no_matching_function_call();
       });

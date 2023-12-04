@@ -60,6 +60,12 @@ variable. Individual components are categorized into sub-objects.
 
 ## `std.system`
 
+### `std.system.get_working_directory()`
+
+* Gets the absolute path of the current working directory.
+
+* Returns the path as a string.
+
 ### `std.system.get_environment_variable(name)`
 
 * Retrieves an environment variable with `name`.
@@ -84,7 +90,7 @@ variable. Individual components are categorized into sub-objects.
   * `arch`     string: name of the CPU architecture
   * `nprocs`   integer: number of active CPU cores
 
-### `std.system.uuid()`
+### `std.system.generate_uuid()`
 
 * Generates a UUID of the form `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`, where
 
@@ -1635,12 +1641,6 @@ variable. Individual components are categorized into sub-objects.
 * Returns the result as a real number.
 
 ## `std.filesystem`
-
-### `std.filesystem.get_working_directory()`
-
-* Gets the absolute path of the current working directory.
-
-* Returns the path as a string.
 
 ### `std.filesystem.get_real_path(path)`
 

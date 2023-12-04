@@ -7,6 +7,10 @@
 #include "../fwd.hpp"
 namespace asteria {
 
+// `std.system.get_working_directory`
+V_string
+std_system_get_working_directory();
+
 // `std.system.get_environment_variable`
 optV_string
 std_system_get_environment_variable(V_string name);
@@ -19,9 +23,9 @@ std_system_get_environment_variables();
 V_object
 std_system_get_properties();
 
-// `std.system.uuid`
+// `std.system.generate_uuid`
 V_string
-std_system_uuid(Global_Context& global);
+std_system_generate_uuid(Global_Context& global);
 
 // `std.system.get_pid()`
 V_integer
