@@ -333,6 +333,15 @@ int main()
         assert (nan </> 1.0) == true;
         assert (nan </> 1) == true;
 
+        assert 0x7ffffffffffffc00 == 0x7ffffffffffffc00.0;
+        assert 0x7ffffffffffffc00 == 0x7ffffffffffffc01.0;
+        assert 0x7ffffffffffffc01 > 0x7ffffffffffffc00.0;
+        assert 0x7ffffffffffffc01 * 1.0 == 0x7ffffffffffffc00.0;  // precision lost
+        assert 0x7ffffffffffffc00.0 == 0x7ffffffffffffc00;
+        assert 0x7ffffffffffffc01.0 == 0x7ffffffffffffc00;
+        assert 0x7ffffffffffffc00.0 < 0x7ffffffffffffc01;
+        assert 0x7ffffffffffffc00.0 == 0x7ffffffffffffc01 * 1.0;  // precision lost
+
         assert (true & true) == true;
         assert (false & true) == false;
         assert (true & false) == false;

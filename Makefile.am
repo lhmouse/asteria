@@ -19,7 +19,7 @@ END =
 AM_CPPFLAGS = -pipe -Wall -Wextra @host_asm_opt@ -Iasteria \
   -U_FORTIFY_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809  \
   -D_BSD_SOURCE -D_SVID_SOURCE -D_DEFAULT_SOURCE -D_DARWIN_C_SOURCE  \
-  -f{strict-{aliasing,overflow},merge-all-constants}  \
+  -f{strict-{aliasing,overflow},merge-all-constants,rounding-math}  \
   -fno-{stack-protector,align-{functions,jumps,loops}}  \
   -fno-{math-errno,trapping-math}  \
   -fno-{devirtualize-speculatively,semantic-interposition,ident}  \

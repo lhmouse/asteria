@@ -25,28 +25,6 @@ struct Rbr_object
 
 using Rbr_Element = ::rocket::variant<Rbr_array, Rbr_object>;
 
-char
-do_compare_real_integer(V_real xreal, V_integer yint)
-  {
-    // Cast `yint` to a real number. The result is exact if `yint` contains
-    // no more than significant 53 bits. If that is not the case, it will
-    // have to be rounded towards negative infinity.
-    ::fesetround(FE_DOWNWARD);
-    V_real yreal = static_cast<V_real>(yint);
-    V_integer ytest = static_cast<V_integer>(yreal);
-    ::fesetround(FE_TONEAREST);
-
-    // Perform plain comparison now.
-    if(::std::isunordered(xreal, yreal))
-      return '?';
-    else if(::std::isgreater(xreal, yreal))
-      return '>';
-    else if(::std::isless(xreal, yreal) || (yint != ytest))  // imprecise
-      return '<';
-    else
-      return '=';
-  }
-
 }  // namespace
 
 ROCKET_NEVER_INLINE void
@@ -229,66 +207,86 @@ Compare
 Value::
 compare_numeric_partial(V_integer other) const noexcept
   {
-    switch(this->m_stor.index()) {
-      case type_integer: {
-        V_integer value = this->m_stor.as<V_integer>();
-        if(value < other)
-          return compare_less;
-        else if(value > other)
-          return compare_greater;
-        else
-          return compare_equal;
-      }
+    if(this->m_stor.index() == type_integer) {
+      // total
+      V_integer value = this->m_stor.as<V_integer>();
 
-      case type_real: {
-        char r = do_compare_real_integer(this->m_stor.as<V_real>(), other);
-        if(r == '<')
-          return compare_less;
-        else if(r == '>')
-          return compare_greater;
-        else if(r == '?')
-          return compare_unordered;
-        else
-          return compare_equal;
-      }
-
-      default:
-        return compare_unordered;
+      if(value < other)
+        return compare_less;
+      else if(value > other)
+        return compare_greater;
+      else
+        return compare_equal;
     }
+
+    if(this->m_stor.index() == type_real) {
+      // partial
+      V_real value = this->m_stor.as<V_real>();
+
+      // assert `otest <= oreal <= other`
+      ::std::fesetround(FE_DOWNWARD);
+      V_real oreal = static_cast<V_real>(other);
+      V_integer otest = static_cast<V_integer>(oreal);
+      ::std::fesetround(FE_TONEAREST);
+
+      if(::std::isless(value, oreal))
+        return compare_less;
+      else if(::std::isgreater(value, oreal))
+        return compare_greater;
+      else if(::std::isunordered(value, oreal))
+        return compare_unordered;
+      else if(otest != other)
+        return compare_less;
+      else
+        return compare_equal;
+    }
+
+    // incomparable
+    return compare_unordered;
   }
 
 Compare
 Value::
 compare_numeric_partial(V_real other) const noexcept
   {
-    switch(this->m_stor.index()) {
-      case type_integer: {
-        char r = do_compare_real_integer(other, this->m_stor.as<V_integer>());
-        if(r == '>')
-          return compare_less;
-        else if(r == '<')
-          return compare_greater;
-        else if(r == '?')
-          return compare_unordered;
-        else
-          return compare_equal;
-      }
+    if(this->m_stor.index() == type_integer) {
+      // partial
+      V_integer value = this->m_stor.as<V_integer>();
 
-      case type_real: {
-        V_real value = this->m_stor.as<V_real>();
-        if(::std::isless(value, other))
-          return compare_less;
-        else if(::std::isgreater(value, other))
-          return compare_greater;
-        else if(::std::isunordered(value, other))
-          return compare_unordered;
-        else
-          return compare_equal;
-      }
+      // assert `vtest <= vreal <= value`
+      ::std::fesetround(FE_DOWNWARD);
+      V_real vreal = static_cast<V_real>(value);
+      V_integer vtest = static_cast<V_integer>(vreal);
+      ::std::fesetround(FE_TONEAREST);
 
-      default:
+      if(::std::isless(vreal, other))
+        return compare_less;
+      else if(::std::isgreater(vreal, other))
+        return compare_greater;
+      else if(::std::isunordered(vreal, other))
         return compare_unordered;
+      else if(vtest != value)
+        return compare_greater;
+      else
+        return compare_equal;
     }
+
+    if(this->m_stor.index() == type_real) {
+      // partial
+      V_real value = this->m_stor.as<V_real>();
+
+      if(::std::isless(value, other))
+        return compare_less;
+      else if(::std::isgreater(value, other))
+        return compare_greater;
+      else if(::std::isunordered(value, other))
+        return compare_unordered;
+      else
+        return compare_equal;
+    }
+
+    // incomparable
+    return compare_unordered;
   }
 
 Compare
