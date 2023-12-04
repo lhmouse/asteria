@@ -23,7 +23,7 @@ class Executive_Context
     Reference_Stack* m_alt_stack;  // for nested calls
 
     cow_bivector<Source_Location, AVM_Rod> m_defer;
-    refcnt_ptr<Variadic_Arguer> m_zvarg;
+    const Instantiated_Function* m_func = nullptr;
     cow_vector<Reference> m_lazy_args;
 
   public:
@@ -41,19 +41,19 @@ class Executive_Context
     // contexts of enclosing function will have been destroyed.
     ASTERIA_INCOMPLET(AVM_Rod)
     explicit
-    Executive_Context(M_defer, Global_Context& global, Reference_Stack& stack,
-                      Reference_Stack& alt_stack)
+    Executive_Context(M_defer, Global_Context& xglobal, Reference_Stack& xstack,
+                      Reference_Stack& ystack)
       :
-        m_parent_opt(nullptr), m_global(&global), m_stack(&stack), m_alt_stack(&alt_stack)
+        m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack)
       { }
 
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
     explicit
-    Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
-                      Reference_Stack& alt_stack, const refcnt_ptr<Variadic_Arguer>& zvarg,
-                      const cow_vector<phsh_string>& params, Reference&& self);
+    Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack,
+                      Reference_Stack& ystack, const Instantiated_Function& xfunc,
+                      Reference&& xself);
 
   private:
     bool

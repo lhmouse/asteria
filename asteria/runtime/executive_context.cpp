@@ -4,53 +4,52 @@
 #include "../precompiled.ipp"
 #include "executive_context.hpp"
 #include "runtime_error.hpp"
-#include "../runtime/runtime_error.hpp"
 #include "ptc_arguments.hpp"
 #include "enums.hpp"
 #include "variable.hpp"
+#include "instantiated_function.hpp"
 #include "../llds/avm_rod.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
 namespace asteria {
 
 Executive_Context::
-Executive_Context(M_function, Global_Context& global, Reference_Stack& stack,
-                  Reference_Stack& alt_stack, const refcnt_ptr<Variadic_Arguer>& zvarg,
-                  const cow_vector<phsh_string>& params, Reference&& self)
+Executive_Context(M_function, Global_Context& xglobal, Reference_Stack& xstack,
+                  Reference_Stack& ystack, const Instantiated_Function& xfunc,
+                  Reference&& xself)
   :
-    m_parent_opt(nullptr), m_global(&global), m_stack(&stack),
-    m_alt_stack(&alt_stack), m_zvarg(zvarg)
+    m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack), m_func(&xfunc)
   {
     // Set the `this` reference, but only if it is a variable or non-null. When
     // `this` is null, it is likely that it is never referenced in the function,
     // so lazy initialization is performed to avoid the overhead here.
-    if(!self.is_invalid())
-      this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(self);
+    if(!xself.is_invalid())
+      this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(xself);
 
     // Set arguments. Because arguments are evaluated from left to right, the
     // reference at the top is the last argument.
-    uint32_t nargs = stack.size();
+    uint32_t nargs = this->m_stack->size();
     bool has_ellipsis = false;
 
-    for(const auto& name : params)
+    for(const auto& name : this->m_func->params())
       if(name != sref("...")) {
         // Try popping an argument and assign it.
         auto& param = this->do_mut_named_reference(nullptr, name);
         if(nargs == 0)
           param.set_temporary(nullopt);
         else
-          param = ::std::move(stack.mut_top(--nargs));
+          param = ::std::move(this->m_stack->mut_top(--nargs));
       }
       else
         has_ellipsis = true;
 
     if(!has_ellipsis && (nargs != 0))
       throw Runtime_Error(Runtime_Error::M_format(),
-               "Too many arguments passed to `$1`", zvarg->func());
+               "Too many arguments passed to `$1`", this->m_func->func());
 
     // Move all arguments into the variadic argument getter.
     while(nargs != 0)
-      this->m_lazy_args.emplace_back(::std::move(stack.mut_top(--nargs)));
+      this->m_lazy_args.emplace_back(::std::move(this->m_stack->mut_top(--nargs)));
   }
 
 Executive_Context::
@@ -70,23 +69,13 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
 
     if(name == sref("__func")) {
       auto& ref = this->do_mut_named_reference(hint_opt, name);
-
-      // Note: This can only happen inside a function context.
-      ref.set_temporary(this->m_zvarg->func());
+      ref.set_temporary(this->m_func->func());
       return &ref;
     }
 
     if(name == sref("__varg")) {
       auto& ref = this->do_mut_named_reference(hint_opt, name);
-
-      // Use the zero-ary argument getter if there is variadic argument.
-      // Create a new one otherwise.
-      auto varg = this->m_zvarg;
-      if(!this->m_lazy_args.empty())
-        varg = ::rocket::make_refcnt<Variadic_Arguer>(*varg, this->m_lazy_args);
-
-      // Note: This can only happen inside a function context.
-      ref.set_temporary(::std::move(varg));
+      ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(*(this->m_func), this->m_lazy_args));
       return &ref;
     }
 

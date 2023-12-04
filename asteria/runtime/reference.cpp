@@ -243,7 +243,7 @@ do_use_function_result_slow(Global_Context& global)
         // Leave this frame.
         if(caller)
           ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, defer_ctx, *caller,
-                                   caller->zvarg()->sloc(), *this);
+                                   caller->sloc(), *this);
       }
     }
     catch(Runtime_Error& except) {
@@ -259,7 +259,7 @@ do_use_function_result_slow(Global_Context& global)
         except.push_frame_plain(ptcg->sloc(), sref("[proper tail call]"));
 
         if(caller)
-          except.push_frame_function(caller->zvarg()->sloc(), caller->zvarg()->func());
+          except.push_frame_function(caller->sloc(), caller->func());
 
         // Evaluate deferred expressions.
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());
@@ -269,7 +269,7 @@ do_use_function_result_slow(Global_Context& global)
         // Leave this frame.
         if(caller)
           ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, defer_ctx, *caller,
-                                   caller->zvarg()->sloc(), except);
+                                   caller->sloc(), except);
       }
 
       // The exception object has been updated, so rethrow it.

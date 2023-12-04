@@ -15,10 +15,10 @@
 namespace asteria {
 
 Instantiated_Function::
-Instantiated_Function(const cow_vector<phsh_string>& params, refcnt_ptr<Variadic_Arguer>&& zvarg,
-                      const cow_vector<AIR_Node>& code)
+Instantiated_Function(const Source_Location& xsloc, const cow_string& xfunc,
+                      const cow_vector<phsh_string>& xparams, const cow_vector<AIR_Node>& code)
   :
-    m_params(params), m_zvarg(::std::move(zvarg))
+    m_sloc(xsloc), m_func(xfunc), m_params(xparams)
   {
     ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_rod);  });
     this->m_rod.finalize();
@@ -33,7 +33,7 @@ tinyfmt&
 Instantiated_Function::
 describe(tinyfmt& fmt) const
   {
-    return fmt << "`" << this->m_zvarg->func() << "` at '" << this->m_zvarg->sloc() << "'";
+    return format(fmt, "`$1` at '$2'", this->m_func, this->m_sloc);
   }
 
 void
@@ -49,10 +49,8 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
   {
     // Create the stack and context for this function.
     Reference_Stack alt_stack;
-    Executive_Context ctx_func(Executive_Context::M_function(), global, stack, alt_stack,
-                               this->m_zvarg, this->m_params, ::std::move(self));
-
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_zvarg->sloc());
+    Executive_Context ctx_func(Executive_Context::M_function(), global, stack, alt_stack, *this, ::std::move(self));
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_sloc);
 
     // Execute the function body, using `stack` for evaluation.
     AIR_Status status;
@@ -61,8 +59,8 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     }
     catch(Runtime_Error& except) {
       ctx_func.on_scope_exit_exceptional(except);
-      except.push_frame_function(this->m_zvarg->sloc(), this->m_zvarg->func());
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ctx_func, *this, this->m_zvarg->sloc(), except);
+      except.push_frame_function(this->m_sloc, this->m_func);
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ctx_func, *this, this->m_sloc, except);
       throw;
     }
     ctx_func.on_scope_exit_normal(status);
@@ -99,7 +97,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
     }
 
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ctx_func, *this, this->m_zvarg->sloc(), self);
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ctx_func, *this, this->m_sloc, self);
     return self;
   }
 
