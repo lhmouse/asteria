@@ -587,14 +587,12 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
           val.push_back('\x1B');
           break;
 
-        case 'U':
+        {
+        case 'U':     // "\U123456"
           xcnt += 2;
-          // Fallthrough
-        case 'u':
+        case 'u':     // "\u1234"
           xcnt += 2;
-          // Fallthrough
-        case 'x': {
-          // How many hex digits are there?
+        case 'x':     // "\x12"
           xcnt += 2;
 
           // Read hex digits.
