@@ -174,7 +174,7 @@ values that they 'literally' look like:
    7) If the literal denotes an integer, it shall be exact. If the literal
       denotes a real number, it shall not overflow to infinity or underflow
       to zero.
-   8) The digit separator `` ` `` can be inserted freely with in a literal
+   8) The digit separator `` ` `` can be inserted freely within a literal
       (except in the beginning, of course) without changing its value. For
       example, both ``123`456e1`0`` and `123456e10` produce the integer
       `1234560000000000`.
