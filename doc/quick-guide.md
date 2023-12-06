@@ -221,7 +221,7 @@ a look at the prototype of `std.array.sort`, like
 ```
 
 So it can take an optional `comparator` function. Every standard function
-which takes a `comparator` function has the same requirement on it, which is
+which takes a `comparator` function has the same requirement:
 
 1. It takes two arguments, namely `x` and `y`.
 2. If `x` is less than `y`, `comparator(x, y)` returns a negative number.
