@@ -193,13 +193,13 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "operation succeeded";
 
       case compiler_status_utf8_sequence_invalid:
-        return "UTF-8 sequence invalid";
+        return "invalid UTF-8 sequence";
 
       case compiler_status_utf8_sequence_incomplete:
-        return "UTF-8 sequence incomplete";
+        return "incomplete UTF-8 sequence";
 
       case compiler_status_utf_code_point_invalid:
-        return "UTF code point invalid";
+        return "invalid UTF code point";
 
       case compiler_status_null_character_disallowed:
         return "null character disallowed";
@@ -214,7 +214,7 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "string literal unclosed";
 
       case compiler_status_escape_sequence_unknown:
-        return "escape sequence invalid";
+        return "invalid escape sequence";
 
       case compiler_status_escape_sequence_incomplete:
         return "escape sequence incomplete";
@@ -223,7 +223,7 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "hexadecimal digit expected";
 
       case compiler_status_escape_utf_code_point_invalid:
-        return "UTF code point value invalid";
+        return "invalid UTF code point value";
 
       case compiler_status_reserved_1012:
         return "";
@@ -241,7 +241,7 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "real literal truncated to zero";
 
       case compiler_status_numeric_literal_suffix_invalid:
-        return "numeric literal suffix invalid";
+        return "invalid numeric literal";
 
       case compiler_status_block_comment_unclosed:
         return "block comment unclosed";
