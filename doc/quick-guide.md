@@ -318,16 +318,16 @@ a look at the prototype of `std.array.sort`, like
 ```
 
 So it can take an optional `comparator` function. Every standard function
-which takes a `comparator` function has the same requirement:
+which takes a `comparator` has the same requirement:
 
-1. It takes two arguments, namely `x` and `y`.
+1. `comparator` takes two arguments, namely `x` and `y`.
 2. If `x` is less than `y`, `comparator(x, y)` returns a negative number.
 3. If `x` is greater than `y`, `comparator(x, y)` returns a positive number.
 4. If `x` is equivalent to `y`, `comparator(x, y)` returns zero.
 
 Other results usually indicate that `x` and `y` are unordered, and are likely
 to cause exceptions to be thrown. This specification matches the built-in
-_spaceship_ operator_ `<=>`. Therefore, in order to sort an array in reverse
+_spaceship operator_ `<=>`. Therefore, in order to sort an array in reverse
 order, we need to define a lambda which returns the opposite of the default
 comparison result. There are actually two ways to achieve this, either
 `func(x, y) { return -(x <=> y); }` or `func(x, y) { return y <=> x; }`. We
