@@ -27,15 +27,16 @@ as other scripting languages. However there are some fundamental differences:
 # Table of Contents
 
 1. [Course 101](#course-101)
-2. [Variables and Functions](#variables-and-functions)
-3. [Lambdas](#lambdas)
-4. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
-5. [Ordering of Values](#ordering-of-values)
-6. [Structured Bindings](#structured-bindings)
-7. [Arguments and Results by Reference](#arguments-and-results-by-reference)
-8. [Throwing and Catching Exceptions](#throwing-and-catching-exceptions)
-9. [Integer Overflows](#integer-overflows)
-10. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
+2. [Literals, Not To Be Confused with Constants](#literals-not-to-be-confused-with-constants)
+3. [Variables and Functions](#variables-and-functions)
+4. [Lambdas](#lambdas)
+5. [Object-oriented Programming and the `this` Parameter](#object-oriented-programming-and-the-this-parameter)
+6. [Ordering of Values](#ordering-of-values)
+7. [Structured Bindings](#structured-bindings)
+8. [Arguments and Results by Reference](#arguments-and-results-by-reference)
+9. [Throwing and Catching Exceptions](#throwing-and-catching-exceptions)
+10. [Integer Overflows](#integer-overflows)
+11. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
 
 ## Course 101
 
@@ -130,13 +131,109 @@ my number was 30. have a nice day.
 
 [back to table of contents](#table-of-contents)
 
+## Literals, Not To Be Confused with Constants
+
+A literal, such as the numeric literal `-42.5`, produces a single value. Some
+people reference a literal as a 'constant', some people also consider an
+immutable variable as a 'constant', and some others also think that anything
+unmodifiable is a 'constant', such as a lambda. Due to potential confusion,
+we tend to avoid the word 'constant' throughout this document.
+
+Informally, literals are particular syntactical constructions, which produce
+values that they 'literally' look like:
+
+1. `null` denotes the unique null value.
+
+2. `true` and `false` denote the two boolean values.
+
+3. `infinity`/`Infinity` and `nan`/`NaN` denote the two special real numbers,
+   positive infinity and (quiet) NaN, as their names suggest.
+
+4. A _numeric literal_, which denotes a number, comprises an optional sign,
+   an optional radix specifier, a non-empty series of significant figures,
+   and an optional exponent. All components are case-insensitive, specified
+   as follows:
+
+   1) There shall be no space between individual components.
+   2) The explicit sign is part of the literal, and is not to be interpreted
+      as the unary negation operator.
+   3) The radix specifier shall be either `0b` or `0x`, which denotes a
+      binary literal or a hexadecimal literal, respectively. If there is no
+      radix specifier, the literal is decimal, and significant figures shall
+      start with a digit.
+   4) Valid digits for a binary literal are either `0` or `1`. Valid digits
+      for a hexadecimal literal are any of `0123456789abcdef`. Valid digits
+      for a decimal literal are any of `0123456789`.
+   5) If no radix point `.` exists amongst significant figures, the literal
+      denotes an integer. If there is a radix point, the literal denotes a
+      real number.
+   6) The exponent for a binary or hexadecimal literal shall start with `p`,
+      followed by the index in decimal which 2 is raised to. The exponent for
+      a decimal literal shall start with `e`, followed by the index which 10
+      is raised to.
+   7) If the literal denotes an integer, it shall be exact. If the literal
+      denotes a real number, it shall not overflow to infinity or underflow
+      to zero.
+   8) The digit separator `` ` `` can be inserted freely with in a literal
+      (except in the beginning, of course) without changing its value. For
+      example, both ``123`456e1`0`` and `123456e10` produce the integer
+      `1234560000000000`.
+
+5. A _string literal_ denotes a string of bytes. There are two variants of
+   string literals: A literal that starts and ends with a pair of single
+   quotation marks `''` produces a verbatim copy of the UTF-8 string between
+   them, which however prevents embedded single quotation marks; a literal
+   that starts and ends with a pair of double quotation marks `""` is capable
+   of encoding arbitrary bytes. Other than the above, all string literals are
+   semantically equivalent. Consecutive string literals are concatenated to
+   form a single, longer one before further processing. The following _escape
+   sequences_ may be used within double-quotation literals:
+
+   1) `\'`, `\"`, `\\`, `\?` and `\/` produce the character that follows the
+      slash, respectively.
+   2) `\0` produces the ASCII null character `U+0000`.
+   3) `\a` produces the ASCII bell character `U+0007`.
+   4) `\b` produces the ASCII backspace character `U+0008`.
+   5) `\e` produces the ASCII escape character `U+001B`.
+   6) `\f` produces the ASCII form feed character `U+000C`.
+   7) `\n` produces the ASCII line feed character `U+000A`.
+   8) `\r` produces the ASCII carriage return character `U+000D`.
+   9) `\t` produces the ASCII horizontal tab character `U+0009`.
+   10) `\U` which shall be followed by six hexadecimal digits, and `\u` which
+       shall be followed by four hexadecimal digits, produce the UTF-8 byte
+       sequence of their operand, which must be a valid UTF code point.
+   11) `\v` produces the ASCII vertical tab character `U+000B`.
+   12) `\x` which shall be followed by two hexadecimal digits, produces a
+       single byte with that value.
+   13) `\Z` produces the ASCII substitute character `U+001A`, which can be
+       generated in a terminal by pressing **Ctrl-Z**.
+
+6. An _array literal_ starts with an open bracket `[`, followed by a sequence
+   of expressions, and ends with a closing bracket `]`. Expressions may be
+   separated by a comma `,` or a semicolon `;`. A trailing separator between
+   the last expression and the closing bracket is allowed. All expressions
+   are evaluated from left to right, and the literal produces a temporary
+   array of those values.
+
+7. An _object literal_ starts with an open brace `{`, followed by a sequence
+   of key-expression pairs, and ends with a closing brace `}`. As with JSON5,
+   a key may be an identifier, keyword or string literal. A key and its
+   corresponding expression may be separated by a colon `:` or an equals sign
+   `=`. Key-expression pairs may be separated by a comma `,` or a semicolon
+   `;`. A trailing separator between the last expression and the closing
+   brace is allowed. There shall be no duplicate keys. All expressions are
+   evaluated from left to right, and the literal produces a temporary object
+   of those key-value pairs.
+
+[back to table of contents](#table-of-contents)
+
 ## Variables and Functions
 
-By definition, a _variable_ is a named box that is capable of storing a value.
-Usually we declare variables with `var`, however that's not the only way.
-Sometimes, people find it helpful to prevent unintentional modification to a
-variable. A variable that can't be modified is called an _immutable variable_
-and can be declared with `const`, as in
+By definition, a _variable_ is a named container that is capable of storing a
+value. Usually we declare variables with `var`, however that's not the only
+way. Sometimes, people find it helpful to forbid unintentional modification
+to a variable. A variable can be declared with `const` to prevent itself from
+being modified; such a variable is called an _immutable variable_, as in
 
 ```
 #1:1> :heredoc @@
