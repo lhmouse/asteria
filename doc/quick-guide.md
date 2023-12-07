@@ -206,7 +206,7 @@ values that they 'literally' look like:
    12) `\x` which shall be followed by two hexadecimal digits, produces a
        single byte with that value.
    13) `\Z` produces the ASCII substitute character `U+001A`, which can be
-       generated in a terminal by pressing **Ctrl-Z**.
+       generated in a terminal by pressing Ctrl-V Ctrl-Z.
 
 6. An _array literal_ starts with an open bracket `[`, followed by a sequence
    of expressions, and ends with a closing bracket `]`. Expressions may be
@@ -433,7 +433,7 @@ in this table (function, opaque and object) are unordered with everything,
 including themselves:
 
 |            |null      |boolean |integer |real    |string |array   |
-|:-----------|:---------|:-------|:-------|:-------|:------|:-------|
+|:----------:|:--------:|:------:|:------:|:------:|:-----:|:------:|
 |**null**    |identical |        |        |        |       |        |
 |**boolean** |          |total   |        |        |       |        |
 |**integer** |          |        |total   |partial |       |        |
@@ -450,7 +450,7 @@ _comparison operators_, `<`, `<=`, `>`, `>=`; and the _equality operators_,
 `==`, `!=`, `<=>`, `</>`. Their results are:
 
 |          |if less    |if equal   |if greater |if unordered        |
-|:---------|:----------|:----------|:----------|:-------------------|
+|:--------:|:---------:|:---------:|:---------:|:------------------:|
 |**`<`**   |`true`     |`false`    |`false`    |throws an exception |
 |**`<=`**  |`true`     |`true`     |`false`    |throws an exception |
 |**`>`**   |`false`    |`false`    |`true`     |throws an exception |
