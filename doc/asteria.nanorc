@@ -1,4 +1,5 @@
-## Here is an example for Asteria.
+## Highlighting Rules for Asteria
+## https://github.com/lhmouse/asteria
 
 syntax asteria "\.ast$"
 comment "//"

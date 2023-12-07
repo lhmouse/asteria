@@ -11,23 +11,13 @@
 highly inspired by JavaScript but has been designed to address its issues.
 
 * Manuals
-    * [Quick guide](doc/quick-guide.md)
-    * [Standard library reference](doc/standard-library.md)
-    * [Highlighting rules for GNU nano](doc/asteria.nanorc)
+    * [Quick Guide](doc/quick-guide.md)
+    * [Standard Library Reference](doc/standard-library.md)
+    * [Highlighting Rules for GNU nano](doc/asteria.nanorc)
 
 * Formal grammar
-    * [Production rules](doc/grammar.txt)
-    * [Operator precedence](doc/operator-precedence.txt)
-
-# Characteristics
-
-1. First-class functions and closures.
-2. Exceptions.
-3. Flexible syntax, similar to JavaScript.
-4. Copy-on-write values.
-5. Garbage collection, similar to Python.
-6. Structured binding.
-7. Native exception handling, able to catch C++ exceptions as strings.
+    * [Production Rules](doc/grammar.txt)
+    * [Operator Precedence](doc/operator-precedence.txt)
 
 # How to Build
 
