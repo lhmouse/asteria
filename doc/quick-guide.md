@@ -189,7 +189,7 @@ values that they 'literally' look like:
    form a single, longer one before further processing. The following _escape
    sequences_ may be used within double-quotation literals:
 
-   1) `\'`, `\"`, `\\`, `\?` and `\/` produce the character that follows the
+   1) `\'`, `\"`, `\\`, `\?` and `\/` produce each character that follows the
       slash, respectively.
    2) `\0` produces the ASCII null character `U+0000`.
    3) `\a` produces the ASCII bell character `U+0007`.
