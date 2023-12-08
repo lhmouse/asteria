@@ -21,6 +21,8 @@ highly inspired by JavaScript but has been designed to address its issues.
 
 # How to Build
 
+Install `libedit-dev` by yourself.
+
 ```text
 $ autoreconf -i    # requires autoconf, automake and libtool.
 $ ./configure
