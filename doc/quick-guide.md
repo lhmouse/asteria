@@ -258,9 +258,10 @@ as soon as they are defined; otherwise syntax errors are raised.
 A _function_ can be defined with `func`, and by its nature, it is also an
 immutable variable, whose value is a function.
 
-Each variable has a _scope_, and can only be referenced in its scope. If a
-variable is declared in a scope, where another variable with the same name is
-visible, the other variable will be shadowed and become invisible, as in
+Each variable has a _scope_ where it is declared, and can only be referenced
+within its scope. Multiple variables with the same name can be declared, in
+the same scope or nested scopes; in this way earlier variables are _shadowed_
+by the latest one, and become invisible, as in
 
 ```
 #3:1> :heredoc @@
