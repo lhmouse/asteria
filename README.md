@@ -31,14 +31,16 @@ which can be done with
 sudo apt-get install  \
     autoconf automake libtool g++ gettext make  \
     libpcre2-dev libssl-dev zlib1g-dev libedit-dev
-
+```
+```sh
 # For MSYS2 on Windows:
 # The `iconv_open()` etc. functions are provided by libiconv. Only the MSYS
 # shell is supported. Do not try building in the MINGW64 or UCRT64 shell.
 pacman -S  \
   autoconf automake libtool gcc gettext make  \
   pcre2-devel openssl-devel zlib-devel libiconv-devel libedit-devel
-
+```
+```sh
 # For macOS:
 # The `gcc` command actually denotes Clang, so you need to ask for a specific
 # version of GCC explicitly.
