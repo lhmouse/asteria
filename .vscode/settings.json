@@ -1,0 +1,6 @@
+{
+  "too-long-line-limit.hardLimit": 124,
+  "too-long-line-limit.softLimit": 77,
+  "too-long-line-limit.rulersEnabled": true,
+  "too-long-line-limit.softLimitSeverity": "3"
+}
