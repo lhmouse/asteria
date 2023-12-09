@@ -99,6 +99,9 @@ describe_xop(Xop xop) noexcept
       case xop_cmp_3way:
         return "<=>";
 
+      case xop_cmp_un:
+        return "</>";
+
       case xop_add:
         return "+";
 
@@ -177,8 +180,8 @@ describe_xop(Xop xop) noexcept
       case xop_random:
         return "[?]";
 
-      case xop_cmp_un:
-        return "</>";
+      case xop_isvoid:
+        return "__isvoid";
 
       default:
         return "[unknown operator]";

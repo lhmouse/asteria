@@ -2577,6 +2577,7 @@ solidify(AVM_Rod& rod) const
           case xop_head:
           case xop_tail:
           case xop_random:
+          case xop_isvoid:
             // unary
             rod.append(
               +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
@@ -2689,6 +2690,15 @@ solidify(AVM_Rod& rod) const
                     uint32_t seed = ctx.global().random_engine()->bump();
                     Reference_Modifier::S_array_random xmod = { seed };
                     do_push_modifier_and_check(top, ::std::move(xmod));
+                    return air_status_next;
+                  }
+
+                  case xop_isvoid: {
+                    // Check whether the argument is a void reference and save
+                    // the result as a temporary boolean.
+                    // `assign` is ignored.
+                    bool val = top.is_void();
+                    top.set_temporary(val);
                     return air_status_next;
                   }
 
@@ -4403,6 +4413,7 @@ solidify(AVM_Rod& rod) const
           case xop_head:
           case xop_tail:
           case xop_random:
+          case xop_isvoid:
           case xop_pos:
           case xop_neg:
           case xop_notb:

@@ -1489,6 +1489,7 @@ constexpr s_prefix_keyword_xop[] =
     { keyword_sqrt,     xop_sqrt     },
     { keyword_isnan,    xop_isnan    },
     { keyword_isinf,    xop_isinf    },
+    { keyword_isvoid,   xop_isvoid   },
     { keyword_round,    xop_round    },
     { keyword_floor,    xop_floor    },
     { keyword_ceil,     xop_ceil     },
@@ -1536,10 +1537,10 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
   {
     // prefix-operator ::=
     //   "+" | "-" | "~" | "!" | "++" | "--" |
-    //   "unset" | "countof" | "typeof" | "not" |
-    //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
-    //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" |
-    //   "__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" | "__popcnt"
+    //   "unset" | "countof" | "typeof" | "not" | "__abs" | "__sqrt" | "__sign" |
+    //   "__isnan" | "__isinf" | "__round" | "__floor" | "__ceil" | "__trunc" |
+    //   "__iround" | "__ifloor" | "__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" |
+    //   "__popcnt" | "__isvoid"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;

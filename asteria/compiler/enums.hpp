@@ -137,6 +137,7 @@ enum Keyword : uint8_t
     keyword_adds      = 54,  // __adds
     keyword_subs      = 55,  // __subs
     keyword_muls      = 56,  // __muls
+    keyword_isvoid    = 57,  // __isvoid
   };
 
 ROCKET_CONST

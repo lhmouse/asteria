@@ -180,10 +180,10 @@ infix-element ::=
 
 prefix-operator ::=
 	"+" | "-" | "~" | "!" | "++" | "--" |
-	"unset" | "countof" | "typeof" | "not" |
-	"__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
-	"__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" |
-	"__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" | "__popcnt"
+	"unset" | "countof" | "typeof" | "not" | "__abs" | "__sqrt" | "__sign" |
+	"__isnan" | "__isinf" | "__round" | "__floor" | "__ceil" | "__trunc" |
+	"__iround" | "__ifloor" | "__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" |
+	"__popcnt" | "__isvoid"
 
 primary-expression ::=
 	identifier | extern-identifier | literal | "this" | closure-function |

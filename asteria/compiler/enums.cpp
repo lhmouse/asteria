@@ -372,6 +372,9 @@ stringify_keyword(Keyword kwrd) noexcept
       case keyword_muls:
         return "__muls";
 
+      case keyword_isvoid:
+        return "__isvoid";
+
       default:
         return "[unknown keyword]";
     }

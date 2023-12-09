@@ -14,12 +14,12 @@ Postfix operators             | ( )   [ ]   .                | Left-to-right
                               | +     -     ~     !          |
                               | ++    --                     |
                               | unset     countof   typeof   |
-                              | __abs     __sign    __sqrt   |
-Prefix operators              | __isnan   __isinf            | Right-to-left
+                              | __isvoid  __abs     __sign   |
+Prefix operators              | __sqrt    __isnan   __isinf  | Right-to-left
                               | __round   __iround  __floor  |
                               | __ifloor  __ceil    __iceil  |
-                              | __trunc   __itrunc           |
-                              | __lzcnt   __tzcnt   __popcnt |
+                              | __trunc   __itrunc  __lzcnt  |
+                              | __tzcnt   __popcnt           |
 ------------------------------+------------------------------+---------------
 Coalescence operator          | ??                           |
 ------------------------------+------------------------------+

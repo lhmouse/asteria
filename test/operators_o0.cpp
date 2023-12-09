@@ -537,6 +537,10 @@ int main()
         assert __muls(iMin, -2) == iMax;
         assert __muls(-2, iMin) == iMax;
 
+        assert __isvoid func(){}() == true;
+        assert __isvoid func(){ return; }() == true;
+        assert __isvoid func(){ return 1; }() == false;
+
 ///////////////////////////////////////////////////////////////////////////////
       )__"));
     code.execute();

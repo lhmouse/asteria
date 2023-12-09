@@ -658,6 +658,7 @@ constexpr s_keywords[] =
     { "__iround",  keyword_iround    },
     { "__isinf",   keyword_isinf     },
     { "__isnan",   keyword_isnan     },
+    { "__isvoid",  keyword_isvoid    },
     { "__itrunc",  keyword_itrunc    },
     { "__lzcnt",   keyword_lzcnt     },
     { "__mulm",    keyword_mulm      },
