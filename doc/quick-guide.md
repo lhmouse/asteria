@@ -828,7 +828,7 @@ If one string is longer than the other, its longer part corresponds to the
 The bit-wise AND operator trims the longer string, and produces a string of
 the same length as the shorter one. On the other hand, the bit-wise OR and
 XOR operators treat 'missing information' as zeroes (which means to copy from
-the longer string) and produce a string of the same length as the longer one:
+the other) and produce a string of the same length as the longer one:
 
 ```
 #5:1> "12345678" & "12345678"
