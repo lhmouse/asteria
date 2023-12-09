@@ -433,14 +433,14 @@ Blank cells indicate that the operands are always unordered; types not listed
 in this table (function, opaque and object) are unordered with everything,
 including themselves:
 
-|            |null      |boolean |integer |real    |string |array   |
-|:----------:|:--------:|:------:|:------:|:------:|:-----:|:------:|
-|**null**    |identical |        |        |        |       |        |
-|**boolean** |          |total   |        |        |       |        |
-|**integer** |          |        |total   |partial |       |        |
-|**real**    |          |        |partial |partial |       |        |
-|**string**  |          |        |        |        |total  |        |
-|**array**   |          |        |        |        |       |partial |
+|             |   null    | boolean | integer |  real   | string |  array  |
+| :---------: | :-------: | :-----: | :-----: | :-----: | :----: | :-----: |
+|  **null**   | identical |         |         |         |        |         |
+| **boolean** |           |  total  |         |         |        |         |
+| **integer** |           |         |  total  | partial |        |         |
+|  **real**   |           |         | partial | partial |        |         |
+| **string**  |           |         |         |         | total  |         |
+|  **array**  |           |         |         |         |        | partial |
 
 Real numbers may be unordered due to special values called not-a-number (NaN)
 which can be produced by an invalid arithmetic operation, such as `0.0 / 0.0`
@@ -450,16 +450,16 @@ There are eight operators about comparison, categorized as two ranks: the
 _comparison operators_, `<`, `<=`, `>`, `>=`; and the _equality operators_,
 `==`, `!=`, `<=>`, `</>`. Their results are:
 
-|          |if less    |if equal   |if greater |if unordered        |
-|:--------:|:---------:|:---------:|:---------:|:------------------:|
-|**`<`**   |`true`     |`false`    |`false`    |throws an exception |
-|**`<=`**  |`true`     |`true`     |`false`    |throws an exception |
-|**`>`**   |`false`    |`false`    |`true`     |throws an exception |
-|**`>=`**  |`false`    |`true`     |`true`     |throws an exception |
-|**`==`**  |`false`    |`true`     |`false`    |`false`             |
-|**`!=`**  |`true`     |`false`    |`true`     |`true`              |
-|**`<=>`** |`-1`       |`0`        |`+1`       |`"[unordered]"`     |
-|**`</>`** |`false`    |`false`    |`false`    |`true`              |
+|           | if less | if equal | if greater |    if unordered     |
+| :-------: | :-----: | :------: | :--------: | :-----------------: |
+|  **`<`**  | `true`  | `false`  |  `false`   | throws an exception |
+| **`<=`**  | `true`  |  `true`  |  `false`   | throws an exception |
+|  **`>`**  | `false` | `false`  |   `true`   | throws an exception |
+| **`>=`**  | `false` |  `true`  |   `true`   | throws an exception |
+| **`==`**  | `false` |  `true`  |  `false`   |       `false`       |
+| **`!=`**  | `true`  | `false`  |   `true`   |       `true`        |
+| **`<=>`** |  `-1`   |   `0`    |    `+1`    |   `"[unordered]"`   |
+| **`</>`** | `false` | `false`  |  `false`   |       `true`        |
 
 Comparison operators have higher precedence than equality operators, so `a <
 b == c < d` is interpreted as `(a < b) == (c < d)`, instead of `((a < b) ==
@@ -793,17 +793,117 @@ These are not infix operators, but look like function calls, as in
 The shift and bitwise operators also apply to strings, where they perform
 byte-wise operations.
 
-Shifting strings to the left has the effect to fill zero bytes in the right,
-and shifting strings to the right has the effect to remove characters from
-the right. Logical shift operators also fill zero bytes in the other side, so
-the lengths of their operands are unchanged.
+Shifting strings to the left (`<<`) has the effect to fill zero bytes in the
+right, and shifting strings to the right (`>>`) has the effect to remove
+characters from the right:
 
-Byte-wise AND, OR and XOR operations are intuitively defined on two strings
-of the same length. If one string is longer than the other, the longer part
-corresponds to the 'missing information' of the other string. The byte-wise
-AND operator trims the longer string, and produces a result of the same
-length as the shorter one; while the byte-wise OR and XOR operators treat
-'missing information' as zeroes (which means to copy from the longer string),
-and produce a result of the same length as the longer one.
+``` node
+#2:1> "12345678" >> 1
+* running 'expression #2'...
+* result #2: string(7) "1234567";
+
+#3:1> "12345678" << 1
+* running 'expression #3'...
+* result #3: string(9) "12345678\0";
+```
+
+Logical shift operators `>>>`and `<<<` also fill zero bytes in the other
+side, so the lengths of their operands are unchanged:
+
+``` node
+#4:1> "12345678" <<< 1
+* running 'expression #4'...
+* result #4: string(8) "2345678\0";
+
+#5:1> "12345678" >>> 1
+* running 'expression #5'...
+* result #5: string(8) "\01234567";
+```
+
+Byte-wise AND (`&`), OR (`|`) and XOR (`^`) operations are intuitively
+defined on two strings of the same length. If one string is longer than the
+other, the longer part corresponds to the 'missing information' of the other
+string.
+
+The byte-wise AND operator (`&`) trims the longer string, and produces a
+result of the same length as the shorter one:
+
+``` node
+#1:1> "12345678" & "12345678"
+* running 'expression #1'...
+* result #1: string(8) "12345678";
+
+#2:1> "1234" & "12345678"
+* running 'expression #2'...
+* result #2: string(4) "1234";
+
+#3:1> "2345" & "1234"
+* running 'expression #3'...
+* result #3: string(4) "0204";
+
+#4:1> "2345" & "12345678"
+* running 'expression #4'...
+* result #4: string(4) "0204";
+```
+
+While the byte-wise OR (`|`) and XOR (`^`) operators treat 'missing
+information' as zeroes (which means to copy from the longer string), and
+produce a result of the same length as the longer one:
+
+``` node
+#1:1> "12345678" | "12345678"
+* running 'expression #1'...
+* result #1: string(8) "12345678";
+
+#2:1> "1234" | "12345678"
+* running 'expression #2'...
+* result #2: string(8) "12345678";
+
+#3:1> "2345" | "1234"
+* running 'expression #3'...
+* result #3: string(4) "3375";
+
+#4:1> "2345" | "12345678"
+* running 'expression #4'...
+* result #4: string(8) "33755678";
+
+#5:1> "23450000" | "12345678"
+* running 'expression #5'...
+* result #5: string(8) "33755678";
+
+#6:1> "02345000" | "12345678"
+* running 'expression #6'...
+* result #6: string(8) "12345678";
+```
+
+``` node
+#1:1> "12345678" ^ "12345678"
+* running 'expression #1'...
+* result #1: string(8) "\0\0\0\0\0\0\0\0";
+
+#2:1> "1234" ^ "12345678"
+* running 'expression #2'...
+* result #2: string(8) "\0\0\0\05678";
+
+#3:1> "2345" ^ "1234"
+* running 'expression #3'...
+* result #3: string(4) "\x03\x01\a\x01";
+
+#4:1> "2345" ^ "12345678"
+* running 'expression #4'...
+* result #4: string(8) "\x03\x01\a\x015678";
+
+#5:1> "2345\0\0\0\0" ^ "12345678"
+* running 'expression #5'...
+* result #5: string(8) "\x03\x01\a\x015678";
+
+#6:1> "\02345\0\0\0" ^ "12345678"
+* running 'expression #6'...
+* result #6: string(8) "1\0\0\0\0678";
+
+#7:1> "\0\0\0\0\0\0\0\0" ^ "12345678"
+* running 'expression #7'...
+* result #7: string(8) "12345678";
+```
 
 [back to table of contents](#table-of-contents)
