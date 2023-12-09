@@ -37,8 +37,15 @@ AC_CHECK_HEADERS([uchar.h])
 AC_CHECK_LIB([z], [crc32_z], [], [AC_MSG_ERROR([zlib >= 1.2.9 required])])
 AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR([PCRE2 not found])])
 AC_CHECK_LIB([crypto], [MD5_Init], [], [AC_MSG_ERROR([OpenSSL not found])])
-AC_CHECK_LIB([edit], [el_init], [], [AC_MSG_ERROR([Editline library not found])])
 AM_ICONV_LINK()
+
+## Check whether REPL is to be built
+AC_ARG_ENABLE([repl], AS_HELP_STRING([--disable-repl], [do not build the REPL]))
+AM_CONDITIONAL([enable_repl], [test "${enable_repl}" != "no"])
+AM_COND_IF([enable_repl], [
+  AC_CHECK_LIB([edit], [el_init], [],
+    [AC_MSG_ERROR([Editline library not found; if you don't need the REPL, pass `--disable-repl`])])
+])
 
 ## Check for assertions
 AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable assertions]))

@@ -146,6 +146,7 @@ endif
 clean-local:
 	-rm -rf %reldir%/precompiled.x*
 
+if enable_repl
 bin_asteria_SOURCES =  \
   %reldir%/repl/fwd.hpp  \
   %reldir%/repl/globals.cpp  \
@@ -158,3 +159,4 @@ bin_asteria_SOURCES =  \
 
 bin_asteria_CXXFLAGS = ${AM_CXXFLAGS}
 bin_asteria_LDADD = lib/libasteria.la
+endif
