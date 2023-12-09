@@ -47,6 +47,8 @@ pacman -S  \
 brew install  \
   autoconf automake libtool gcc@10 gettext make  \
   pcre2 openssl@3 zlib libedit
+
+export CXX='g++-10 -I/usr/local/include -L/usr/local/lib'
 ```
 
 Then we can configure and build, as usual
