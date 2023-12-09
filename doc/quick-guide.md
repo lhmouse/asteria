@@ -434,7 +434,7 @@ in this table (function, opaque and object) are unordered with everything,
 including themselves:
 
 |             |   null    | boolean | integer |  real   | string |  array  |
-| :---------: | :-------: | :-----: | :-----: | :-----: | :----: | :-----: |
+|:-----------:|:---------:|:-------:|:-------:|:-------:|:------:|:-------:|
 |  **null**   | identical |         |         |         |        |         |
 | **boolean** |           |  total  |         |         |        |         |
 | **integer** |           |         |  total  | partial |        |         |
@@ -451,7 +451,7 @@ _comparison operators_, `<`, `<=`, `>`, `>=`; and the _equality operators_,
 `==`, `!=`, `<=>`, `</>`. Their results are:
 
 |           | if less | if equal | if greater |    if unordered     |
-| :-------: | :-----: | :------: | :--------: | :-----------------: |
+|:---------:|:-------:|:--------:|:----------:|:-------------------:|
 |  **`<`**  | `true`  | `false`  |  `false`   | throws an exception |
 | **`<=`**  | `true`  |  `true`  |  `false`   | throws an exception |
 |  **`>`**  | `false` | `false`  |   `true`   | throws an exception |
@@ -793,117 +793,111 @@ These are not infix operators, but look like function calls, as in
 The shift and bitwise operators also apply to strings, where they perform
 byte-wise operations.
 
-Shifting strings to the left (`<<`) has the effect to fill zero bytes in the
-right, and shifting strings to the right (`>>`) has the effect to remove
-characters from the right:
+Shifting a string to the left has the effect to fill zero bytes in the right,
+and shifting a string to the right has the effect to remove characters from
+the right:
 
-``` node
-#2:1> "12345678" >> 1
-* running 'expression #2'...
-* result #2: string(7) "1234567";
-
-#3:1> "12345678" << 1
-* running 'expression #3'...
-* result #3: string(9) "12345678\0";
 ```
-
-Logical shift operators `>>>`and `<<<` also fill zero bytes in the other
-side, so the lengths of their operands are unchanged:
-
-``` node
-#4:1> "12345678" <<< 1
-* running 'expression #4'...
-* result #4: string(8) "2345678\0";
-
-#5:1> "12345678" >>> 1
-* running 'expression #5'...
-* result #5: string(8) "\01234567";
-```
-
-Byte-wise AND (`&`), OR (`|`) and XOR (`^`) operations are intuitively
-defined on two strings of the same length. If one string is longer than the
-other, the longer part corresponds to the 'missing information' of the other
-string.
-
-The byte-wise AND operator (`&`) trims the longer string, and produces a
-result of the same length as the shorter one:
-
-``` node
-#1:1> "12345678" & "12345678"
+#1:1> "12345678" >> 1
 * running 'expression #1'...
-* result #1: string(8) "12345678";
+* result #1: string(7) "1234567";
 
-#2:1> "1234" & "12345678"
+#2:1> "12345678" << 1
 * running 'expression #2'...
-* result #2: string(4) "1234";
-
-#3:1> "2345" & "1234"
-* running 'expression #3'...
-* result #3: string(4) "0204";
-
-#4:1> "2345" & "12345678"
-* running 'expression #4'...
-* result #4: string(4) "0204";
+* result #2: string(9) "12345678\0";
 ```
 
-While the byte-wise OR (`|`) and XOR (`^`) operators treat 'missing
-information' as zeroes (which means to copy from the longer string), and
-produce a result of the same length as the longer one:
+Logical shift operators `>>>` and `<<<` also fill zero bytes in the other end
+so the length of their operand is unchanged:
 
-``` node
-#1:1> "12345678" | "12345678"
-* running 'expression #1'...
-* result #1: string(8) "12345678";
-
-#2:1> "1234" | "12345678"
-* running 'expression #2'...
-* result #2: string(8) "12345678";
-
-#3:1> "2345" | "1234"
+```
+#3:1> "12345678" <<< 1
 * running 'expression #3'...
-* result #3: string(4) "3375";
+* result #3: string(8) "2345678\0";
 
-#4:1> "2345" | "12345678"
+#4:1> "12345678" >>> 1
 * running 'expression #4'...
-* result #4: string(8) "33755678";
+* result #4: string(8) "\01234567";
+```
 
-#5:1> "23450000" | "12345678"
+The bit-wise AND operator `&`, the bit-wise OR operator `|`, and the bit-wise
+XOR operator `^` are intuitively defined on two strings of the same length.
+If one string is longer than the other, its longer part corresponds to the
+'missing information' of the other string.
+
+The bit-wise AND operator trims the longer string, and produces a string of
+the same length as the shorter one. On the other hand, the bit-wise OR and
+XOR operators treat 'missing information' as zeroes (which means to copy from
+the longer string) and produce a string of the same length as the longer one:
+
+```
+#5:1> "12345678" & "12345678"
 * running 'expression #5'...
-* result #5: string(8) "33755678";
+* result #5: string(8) "12345678";
 
-#6:1> "02345000" | "12345678"
+#6:1> "1234" & "12345678"
 * running 'expression #6'...
-* result #6: string(8) "12345678";
-```
+* result #6: string(4) "1234";
 
-``` node
-#1:1> "12345678" ^ "12345678"
-* running 'expression #1'...
-* result #1: string(8) "\0\0\0\0\0\0\0\0";
-
-#2:1> "1234" ^ "12345678"
-* running 'expression #2'...
-* result #2: string(8) "\0\0\0\05678";
-
-#3:1> "2345" ^ "1234"
-* running 'expression #3'...
-* result #3: string(4) "\x03\x01\a\x01";
-
-#4:1> "2345" ^ "12345678"
-* running 'expression #4'...
-* result #4: string(8) "\x03\x01\a\x015678";
-
-#5:1> "2345\0\0\0\0" ^ "12345678"
-* running 'expression #5'...
-* result #5: string(8) "\x03\x01\a\x015678";
-
-#6:1> "\02345\0\0\0" ^ "12345678"
-* running 'expression #6'...
-* result #6: string(8) "1\0\0\0\0678";
-
-#7:1> "\0\0\0\0\0\0\0\0" ^ "12345678"
+#7:1> "2345" & "1234"
 * running 'expression #7'...
-* result #7: string(8) "12345678";
+* result #7: string(4) "0204";
+
+#8:1> "2345" & "12345678"
+* running 'expression #8'...
+* result #8: string(4) "0204";
+
+#9:1> "12345678" | "12345678"
+* running 'expression #9'...
+* result #9: string(8) "12345678";
+
+#10:1> "1234" | "12345678"
+* running 'expression #10'...
+* result #10: string(8) "12345678";
+
+#11:1> "2345" | "1234"
+* running 'expression #11'...
+* result #11: string(4) "3375";
+
+#12:1> "2345" | "12345678"
+* running 'expression #12'...
+* result #12: string(8) "33755678";
+
+#13:1> "23450000" | "12345678"
+* running 'expression #13'...
+* result #13: string(8) "33755678";
+
+#14:1> "02345000" | "12345678"
+* running 'expression #14'...
+* result #14: string(8) "12345678";
+
+#15:1> "12345678" ^ "12345678"
+* running 'expression #15'...
+* result #15: string(8) "\0\0\0\0\0\0\0\0";
+
+#16:1> "1234" ^ "12345678"
+* running 'expression #16'...
+* result #16: string(8) "\0\0\0\05678";
+
+#17:1> "2345" ^ "1234"
+* running 'expression #17'...
+* result #17: string(4) "\x03\x01\a\x01";
+
+#18:1> "2345" ^ "12345678"
+* running 'expression #18'...
+* result #18: string(8) "\x03\x01\a\x015678";
+
+#19:1> "2345\0\0\0\0" ^ "12345678"
+* running 'expression #19'...
+* result #19: string(8) "\x03\x01\a\x015678";
+
+#20:1> "\02345\0\0\0" ^ "12345678"
+* running 'expression #20'...
+* result #20: string(8) "1\0\0\0\0678";
+
+#21:1> "\0\0\0\0\0\0\0\0" ^ "12345678"
+* running 'expression #21'...
+* result #21: string(8) "12345678";
 ```
 
 [back to table of contents](#table-of-contents)
