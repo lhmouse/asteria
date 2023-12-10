@@ -830,10 +830,6 @@ information' as zeroes (which means to copy from the other) and produce a
 string of the same length as the longer one:
 
 ```
-#5:1> "12345678" & "12345678"
-* running 'expression #5'...
-* result #5: string(8) "12345678";
-
 #6:1> "1234" & "12345678"
 * running 'expression #6'...
 * result #6: string(4) "1234";
@@ -842,61 +838,25 @@ string of the same length as the longer one:
 * running 'expression #7'...
 * result #7: string(4) "0204";
 
-#8:1> "2345" & "12345678"
+#8:1> "1234" | "12345678"
 * running 'expression #8'...
-* result #8: string(4) "0204";
+* result #8: string(8) "12345678";
 
-#9:1> "12345678" | "12345678"
+#9:1> "23450000" | "12345678"
 * running 'expression #9'...
-* result #9: string(8) "12345678";
+* result #9: string(8) "33755678";
 
-#10:1> "1234" | "12345678"
+#10:1> "1234" ^ "12345678"
 * running 'expression #10'...
-* result #10: string(8) "12345678";
+* result #10: string(8) "\0\0\0\05678";
 
-#11:1> "2345" | "1234"
+#11:1> "2345" ^ "1234"
 * running 'expression #11'...
-* result #11: string(4) "3375";
+* result #11: string(4) "\x03\x01\a\x01";
 
-#12:1> "2345" | "12345678"
+#12:1> "2345" ^ "12345678"
 * running 'expression #12'...
-* result #12: string(8) "33755678";
-
-#13:1> "23450000" | "12345678"
-* running 'expression #13'...
-* result #13: string(8) "33755678";
-
-#14:1> "02345000" | "12345678"
-* running 'expression #14'...
-* result #14: string(8) "12345678";
-
-#15:1> "12345678" ^ "12345678"
-* running 'expression #15'...
-* result #15: string(8) "\0\0\0\0\0\0\0\0";
-
-#16:1> "1234" ^ "12345678"
-* running 'expression #16'...
-* result #16: string(8) "\0\0\0\05678";
-
-#17:1> "2345" ^ "1234"
-* running 'expression #17'...
-* result #17: string(4) "\x03\x01\a\x01";
-
-#18:1> "2345" ^ "12345678"
-* running 'expression #18'...
-* result #18: string(8) "\x03\x01\a\x015678";
-
-#19:1> "2345\0\0\0\0" ^ "12345678"
-* running 'expression #19'...
-* result #19: string(8) "\x03\x01\a\x015678";
-
-#20:1> "\02345\0\0\0" ^ "12345678"
-* running 'expression #20'...
-* result #20: string(8) "1\0\0\0\0678";
-
-#21:1> "\0\0\0\0\0\0\0\0" ^ "12345678"
-* running 'expression #21'...
-* result #21: string(8) "12345678";
+* result #12: string(8) "\x03\x01\a\x015678";
 ```
 
 [back to table of contents](#table-of-contents)
