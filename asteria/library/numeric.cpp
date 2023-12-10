@@ -498,7 +498,7 @@ std_numeric_parse(V_string text)
     size_t tlen = text.rfind_not_of(s_spaces) + 1 - tpos;
     if(numg.parse_D(text.data() + tpos, tlen) != tlen)
       ASTERIA_THROW((
-          "String not convertible to a number (text `$1`)"), text);
+          "String not convertible to a number (text was `$1`)"), text);
 
     if(text.find('.') == V_string::npos) {
       // Check whether the value fits in an integer. If so, return it exact.

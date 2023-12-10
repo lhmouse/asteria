@@ -572,11 +572,11 @@ error handling, as in
 
 #2:1> std.numeric.parse("not a valid number")
 * running 'expression #2'...
-! exception: runtime error: String not convertible to a number (text `not a valid number`)
+! exception: runtime error: String not convertible to a number (text was `not a valid number`)
 [thrown from `std_numeric_parse(...)` at 'asteria/library/numeric.cpp:500']
 [exception class `St13runtime_error`]
 [backtrace frames:
-  1) native code at '[unknown]:-1:-1': "String not convertible to a number (text `not a valid number`)\n[thrown from `s ... (102 characters omitted)
+  1) native code at '[unknown]:-1:-1': "String not convertible to a number (text was `not a valid number`)\n[thrown from `s ... (102 characters omitted)
   2)   expression at 'expression #2:1:18': "[proper tail call]"
   3)   function at 'expression #2:0:0': "[file scope]"
   -- end of backtrace frames]
