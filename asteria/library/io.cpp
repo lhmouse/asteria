@@ -78,7 +78,7 @@ do_write_utf8_common(const IOF_Sentry& sentry, stringR text)
       char32_t cp;
       if(!utf8_decode(cp, text, off))
         ASTERIA_THROW((
-            "Invalid UTF-8 string (text `$1`, byte offset `$2`)"),
+            "Invalid UTF-8 string (byte offset `$2` in text `$1`)"),
             text, off);
 
       // Insert it into the output stream.
