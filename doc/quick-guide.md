@@ -823,12 +823,11 @@ so the length of their operand is unchanged:
 The bit-wise AND operator `&`, the bit-wise OR operator `|`, and the bit-wise
 XOR operator `^` are intuitively defined on two strings of the same length.
 If one string is longer than the other, its longer part corresponds to the
-'missing information' of the other string.
-
-The bit-wise AND operator trims the longer string, and produces a string of
-the same length as the shorter one. On the other hand, the bit-wise OR and
-XOR operators treat 'missing information' as zeroes (which means to copy from
-the other) and produce a string of the same length as the longer one:
+'missing information' of the other. The bit-wise AND operator truncates the
+longer string, and produces a string of the same length as the shorter one.
+On the other hand, the bit-wise OR and XOR operators treat 'missing
+information' as zeroes (which means to copy from the other) and produce a
+string of the same length as the longer one:
 
 ```
 #5:1> "12345678" & "12345678"
