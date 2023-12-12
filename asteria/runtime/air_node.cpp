@@ -1586,13 +1586,12 @@ solidify(AVM_Rod& rod) const
                 }
                 else {
                   // Execute the body of this clause.
-                  status = sp.clauses.at(i).rod_body.execute(ctx_body);
-                  if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
-                    status = air_status_next;
+                  AIR_Status next_status = sp.clauses.at(i).rod_body.execute(ctx_body);
+                  if(next_status != air_status_next) {
+                    if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_switch }))
+                      status = next_status;
                     break;
                   }
-                  else if(status != air_status_next)
-                    break;
                 }
             }
             catch(Runtime_Error& except) {
@@ -1651,18 +1650,17 @@ solidify(AVM_Rod& rod) const
             AIR_Status status = air_status_next;
             for(;;) {
               // Execute the body.
-              status = do_execute_block(sp.rods_body, ctx);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
-                status = air_status_next;
+              AIR_Status next_status = do_execute_block(sp.rods_body, ctx);
+              if(::rocket::is_none_of(next_status, { air_status_next, air_status_continue_unspec,
+                                                     air_status_continue_while })) {
+                if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_while }))
+                  status = next_status;
                 break;
               }
-              else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                     air_status_continue_while }))
-                break;
 
               // Check the condition.
-              status = sp.rods_cond.execute(ctx);
-              ROCKET_ASSERT(status == air_status_next);
+              next_status = sp.rods_cond.execute(ctx);
+              ROCKET_ASSERT(next_status == air_status_next);
               if(ctx.stack().top().dereference_readonly().test() == negative)
                 break;
             }
@@ -1715,20 +1713,19 @@ solidify(AVM_Rod& rod) const
             AIR_Status status = air_status_next;
             for(;;) {
               // Check the condition.
-              status = sp.rods_cond.execute(ctx);
-              ROCKET_ASSERT(status == air_status_next);
+              AIR_Status next_status = sp.rods_cond.execute(ctx);
+              ROCKET_ASSERT(next_status == air_status_next);
               if(ctx.stack().top().dereference_readonly().test() == negative)
                 break;
 
               // Execute the body.
-              status = do_execute_block(sp.rods_body, ctx);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
-                status = air_status_next;
+              next_status = do_execute_block(sp.rods_body, ctx);
+              if(::rocket::is_none_of(next_status, { air_status_next, air_status_continue_unspec,
+                                                     air_status_continue_while })) {
+                if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_while }))
+                  status = next_status;
                 break;
               }
-              else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                     air_status_continue_while }))
-                break;
             }
             return status;
           }
@@ -1780,93 +1777,93 @@ solidify(AVM_Rod& rod) const
             // We have to create an outer context due to the fact that the key
             // and mapped references outlast every iteration.
             Executive_Context ctx_for(xtc_plain, ctx);
+            AIR_Status status = air_status_next;
+            try {
+              // Create key and mapped references.
+              Reference* qkey_ref = nullptr;
+              if(!sp.name_key.empty())
+                qkey_ref = &(ctx_for.insert_named_reference(sp.name_key));
+              auto& mapped_ref = ctx_for.insert_named_reference(sp.name_mapped);
 
-            // Create key and mapped references.
-            Reference* qkey_ref = nullptr;
-            if(!sp.name_key.empty())
-              qkey_ref = &(ctx_for.insert_named_reference(sp.name_key));
-            auto& mapped_ref = ctx_for.insert_named_reference(sp.name_mapped);
+              // Evaluate the range initializer and set the range up, which isn't
+              // going to change for all loops.
+              AIR_Status next_status = sp.rod_init.execute(ctx_for);
+              ROCKET_ASSERT(next_status == air_status_next);
+              mapped_ref = ::std::move(ctx_for.stack().mut_top());
 
-            // Evaluate the range initializer and set the range up, which isn't
-            // going to change for all loops.
-            AIR_Status status = sp.rod_init.execute(ctx_for);
-            ROCKET_ASSERT(status == air_status_next);
-            mapped_ref = ::std::move(ctx_for.stack().mut_top());
-
-            const auto range = mapped_ref.dereference_readonly();
-            if(range.is_null()) {
-              // Do nothing.
-              return air_status_next;
-            }
-            else if(range.is_array()) {
-              const auto& arr = range.as_array();
-              mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
-              for(int64_t i = 0;  i < arr.ssize();  ++i) {
-                // Set the key variable which is the subscript of the mapped
-                // element in the array.
-                if(qkey_ref) {
-                  auto key_var = qkey_ref->unphase_variable_opt();
-                  if(!key_var) {
-                    key_var = ctx.global().garbage_collector()->create_variable();
-                    qkey_ref->set_variable(key_var);
+              const auto range = mapped_ref.dereference_readonly();
+              if(range.is_array()) {
+                const auto& arr = range.as_array();
+                mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
+                for(int64_t i = 0;  i < arr.ssize();  ++i) {
+                  // Set the key variable which is the subscript of the mapped
+                  // element in the array.
+                  if(qkey_ref) {
+                    auto key_var = qkey_ref->unphase_variable_opt();
+                    if(!key_var) {
+                      key_var = ctx.global().garbage_collector()->create_variable();
+                      qkey_ref->set_variable(key_var);
+                    }
+                    key_var->initialize(i);
+                    key_var->set_immutable();
                   }
-                  key_var->initialize(i);
-                  key_var->set_immutable();
-                }
 
-                // Set the mapped reference.
-                mapped_ref.pop_modifier();
-                Reference_Modifier::S_array_index xmod = { i };
-                do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
+                  // Set the mapped reference.
+                  mapped_ref.pop_modifier();
+                  Reference_Modifier::S_array_index xmod = { i };
+                  do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
 
-                // Execute the loop body.
-                status = do_execute_block(sp.rod_body, ctx_for);
-                if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
-                  status = air_status_next;
-                  break;
-                }
-                else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                       air_status_continue_for }))
-                  break;
-              }
-              return status;
-            }
-            else if(range.is_object()) {
-              const auto& obj = range.as_object();
-              mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
-              for(auto it = obj.begin();  it != obj.end();  ++it) {
-                // Set the key variable which is the name of the mapped element
-                // in the object.
-                if(qkey_ref) {
-                  auto key_var = qkey_ref->unphase_variable_opt();
-                  if(!key_var) {
-                    key_var = ctx.global().garbage_collector()->create_variable();
-                    qkey_ref->set_variable(key_var);
+                  // Execute the loop body.
+                  next_status = do_execute_block(sp.rod_body, ctx_for);
+                  if(::rocket::is_none_of(next_status, { air_status_next, air_status_continue_unspec,
+                                                         air_status_continue_for })) {
+                    if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_for }))
+                      status = next_status;
+                    break;
                   }
-                  key_var->initialize(it->first.rdstr());
-                  key_var->set_immutable();
                 }
-
-                // Set the mapped reference.
-                mapped_ref.pop_modifier();
-                Reference_Modifier::S_object_key xmod = { it->first };
-                do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
-
-                // Execute the loop body.
-                status = do_execute_block(sp.rod_body, ctx_for);
-                if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
-                  status = air_status_next;
-                  break;
-                }
-                else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                       air_status_continue_for }))
-                  break;
               }
-              return status;
+              else if(range.is_object()) {
+                const auto& obj = range.as_object();
+                mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
+                for(auto it = obj.begin();  it != obj.end();  ++it) {
+                  // Set the key variable which is the name of the mapped element
+                  // in the object.
+                  if(qkey_ref) {
+                    auto key_var = qkey_ref->unphase_variable_opt();
+                    if(!key_var) {
+                      key_var = ctx.global().garbage_collector()->create_variable();
+                      qkey_ref->set_variable(key_var);
+                    }
+                    key_var->initialize(it->first.rdstr());
+                    key_var->set_immutable();
+                  }
+
+                  // Set the mapped reference.
+                  mapped_ref.pop_modifier();
+                  Reference_Modifier::S_object_key xmod = { it->first };
+                  do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
+
+                  // Execute the loop body.
+                  next_status = do_execute_block(sp.rod_body, ctx_for);
+                  if(::rocket::is_none_of(next_status, { air_status_next, air_status_continue_unspec,
+                                                         air_status_continue_for })) {
+                    if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_for }))
+                      status = next_status;
+                    break;
+                  }
+                }
+              }
+              else if(!range.is_null())
+                throw Runtime_Error(xtc_assert, sp.sloc_init,
+                          format_string("Range value not iterable (value `$1`)", range));
             }
-            else
-              throw Runtime_Error(xtc_assert, sp.sloc_init,
-                        format_string("Range value not iterable (value `$1`)", range));
+            catch(Runtime_Error& except) {
+              ctx_for.on_scope_exit_exceptional(except);
+              throw;
+            }
+            ctx_for.on_scope_exit_normal(status);
+            return status;
           }
 
           // Uparam
@@ -1915,33 +1912,39 @@ solidify(AVM_Rod& rod) const
             // an outer context due to the fact that names declared in the first
             // segment outlast every iteration.
             Executive_Context ctx_for(xtc_plain, ctx);
-
-            // Execute the loop initializer, which shall only be a definition or
-            // an expression statement.
-            AIR_Status status = sp.rod_init.execute(ctx_for);
-            ROCKET_ASSERT(status == air_status_next);
-            for(;;) {
-              // Check the condition. There is a special case: If the condition
-              // is empty then the loop is infinite.
-              status = sp.rod_cond.execute(ctx_for);
+            AIR_Status status = air_status_next;
+            try {
+              // Execute the loop initializer, which shall only be a definition or
+              // an expression statement.
+              status = sp.rod_init.execute(ctx_for);
               ROCKET_ASSERT(status == air_status_next);
-              if(!ctx_for.stack().empty() && !ctx_for.stack().top().dereference_readonly().test())
-                break;
+              for(;;) {
+                // Check the condition. There is a special case: If the condition
+                // is empty then the loop is infinite.
+                AIR_Status next_status = sp.rod_cond.execute(ctx_for);
+                ROCKET_ASSERT(next_status == air_status_next);
+                if(!ctx_for.stack().empty() && !ctx_for.stack().top().dereference_readonly().test())
+                  break;
 
-              // Execute the body.
-              status = do_execute_block(sp.rod_body, ctx_for);
-              if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
-                status = air_status_next;
-                break;
+                // Execute the body.
+                next_status = do_execute_block(sp.rod_body, ctx_for);
+                if(::rocket::is_none_of(next_status, { air_status_next, air_status_continue_unspec,
+                                                       air_status_continue_for })) {
+                  if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_for }))
+                    status = next_status;
+                  break;
+                }
+
+                // Execute the increment.
+                status = sp.rod_step.execute(ctx_for);
+                ROCKET_ASSERT(status == air_status_next);
               }
-              else if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec,
-                                                     air_status_continue_for }))
-                break;
-
-              // Execute the increment.
-              status = sp.rod_step.execute(ctx_for);
-              ROCKET_ASSERT(status == air_status_next);
             }
+            catch(Runtime_Error& except) {
+              ctx_for.on_scope_exit_exceptional(except);
+              throw;
+            }
+            ctx_for.on_scope_exit_normal(status);
             return status;
           }
 

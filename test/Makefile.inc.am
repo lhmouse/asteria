@@ -61,6 +61,7 @@ check_PROGRAMS +=  \
   %reldir%/switch_defer.test  \
   %reldir%/for_each.test  \
   %reldir%/github_102.test  \
+  %reldir%/github_308.test  \
   ${END}
 
 EXTRA_DIST +=  \
