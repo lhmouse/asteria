@@ -177,7 +177,7 @@ struct Valuable_impl<refcnt_ptr<FunctionT>, typename ::std::enable_if<
   };
 
 template<>
-struct Valuable_impl<cow_vector<Value>>
+struct Valuable_impl<V_array>
   {
     using direct_init  = ::std::true_type;
     using via_type     = V_array;
@@ -192,7 +192,7 @@ struct Valuable_impl<cow_vector<Value>>
   };
 
 template<>
-struct Valuable_impl<cow_dictionary<Value>>
+struct Valuable_impl<V_object>
   {
     using direct_init  = ::std::true_type;
     using via_type     = V_object;
