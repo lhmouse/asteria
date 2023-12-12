@@ -1,7 +1,0 @@
-{
-  "too-long-line-limit.hardLimit": 124,
-  "too-long-line-limit.softLimit": 77,
-  "too-long-line-limit.hardLimitSeverity": "2",
-  "too-long-line-limit.softLimitSeverity": "3",
-  "too-long-line-limit.rulersEnabled": true
-}
