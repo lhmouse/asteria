@@ -26,8 +26,8 @@ which can be done with
 # GCC 9+ is generally recommended. If you don't have it in your APT sources,
 # try <https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/ppa>.
 sudo apt-get install  \
-    autoconf automake libtool g++ gettext make  \
-    libpcre2-dev libssl-dev zlib1g-dev libedit-dev
+  autoconf automake libtool g++ gettext make  \
+  libpcre2-dev libssl-dev zlib1g-dev libedit-dev
 ```
 ```sh
 # For MSYS2 on Windows:
