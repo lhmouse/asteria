@@ -10,14 +10,11 @@
 **Asteria** is a procedural, dynamically typed programming language that is
 highly inspired by JavaScript but has been designed to address its issues.
 
-* Manuals
-    * [Quick Guide](doc/quick-guide.md)
-    * [Standard Library Reference](doc/standard-library.md)
-    * [Highlighting Rules for GNU nano](doc/asteria.nanorc)
-
-* Formal grammar
-    * [Production Rules](doc/grammar.txt)
-    * [Operator Precedence](doc/operator-precedence.txt)
+* [Quick Guide](doc/quick-guide.md)
+* [Production Rules](doc/grammar.txt)
+* [Operator Precedence](doc/operator-precedence.txt)
+* [Standard Library Reference](doc/standard-library.md)
+* [Highlighting Rules for GNU nano](doc/asteria.nanorc)
 
 # How to Build
 
