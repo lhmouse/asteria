@@ -57,27 +57,36 @@ struct Abstract_Hooks
         (void) func_sloc;
       }
 
-    // This hook is called just before returning from a function body.
+    // This hook is called just before leaving a function body. In the case of a
+    // proper tail call, this precedes entrance of the target function.
     virtual
     void
-    on_function_return(Executive_Context& func_ctx, const Instantiated_Function& target,
-                       const Source_Location& func_sloc, Reference& result)
+    on_function_leave(Executive_Context& func_ctx, const Instantiated_Function& target,
+                      const Source_Location& func_sloc)
       {
         (void) func_ctx;
+        (void) target;
+        (void) func_sloc;
+      }
+
+    // This hook is called just before a result is returned from a function body.
+    virtual
+    void
+    on_function_return(const Instantiated_Function& target, const Source_Location& func_sloc,
+                       Reference& result)
+      {
         (void) target;
         (void) func_sloc;
         (void) result;
       }
 
     // This hook is called just before leaving from a function body because of an
-    // exception. The original exception will be rethrown after the hook returns.
-    // N.B. It is suggested that you should not throw exceptions from this hook.
+    // exception. The original exception will be rethrown after this hook returns.
     virtual
     void
-    on_function_except(Executive_Context& func_ctx, const Instantiated_Function& target,
-                       const Source_Location& func_sloc, Runtime_Error& except)
+    on_function_except(const Instantiated_Function& target, const Source_Location& func_sloc,
+                       Runtime_Error& except)
       {
-        (void) func_ctx;
         (void) target;
         (void) func_sloc;
         (void) except;

@@ -50,27 +50,26 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     // Create the stack and context for this function.
     Reference_Stack alt_stack;
     Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, ::std::move(self));
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_sloc);
 
-    // Execute the function body, using `stack` for evaluation.
+    // Call instrumentation hooks.
+    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_sloc);
+    const auto on_function_leave_guard = ::rocket::make_unique_handle(this,
+      [&](const void*) {
+        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_leave, ctx_func, *this, this->m_sloc);
+      });
+
     AIR_Status status;
     try {
+      // Execute the function body.
       status = this->m_rod.execute(ctx_func);
     }
     catch(Runtime_Error& except) {
       ctx_func.on_scope_exit_exceptional(except);
       except.push_frame_function(this->m_sloc, this->m_func);
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, ctx_func, *this, this->m_sloc, except);
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, *this, this->m_sloc, except);
       throw;
     }
     ctx_func.on_scope_exit_normal(status);
-
-    if((status == air_status_return_ref) && stack.top().is_ptc()) {
-      // Proper tail call arguments shall be expanded outside this function;
-      // only by then will the hooks be called.
-      self = ::std::move(stack.mut_top());
-      return self;
-    }
 
     switch(status) {
       case air_status_next:
@@ -97,7 +96,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
     }
 
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, ctx_func, *this, this->m_sloc, self);
+    if(!self.is_ptc())
+      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, *this, this->m_sloc, self);
+
     return self;
   }
 

@@ -72,24 +72,17 @@ struct Verbose_Hooks final
       }
 
     void
-    on_function_enter(Executive_Context& /*func_ctx*/, const Instantiated_Function& target,
-                      const Source_Location& func_sloc) final
+    on_function_return(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
+                       Reference& /*result*/) final
       {
-        this->do_verbose_trace(func_sloc, "Entering function: $1", target);
+        this->do_verbose_trace(func_sloc, "Returning from function");
       }
 
     void
-    on_function_return(Executive_Context& /*func_ctx*/, const Instantiated_Function& target,
-                       const Source_Location& func_sloc, Reference& /*result*/) final
+    on_function_except(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
+                       Runtime_Error& except) final
       {
-        this->do_verbose_trace(func_sloc, "Leaving function: $1", target);
-      }
-
-    void
-    on_function_except(Executive_Context& /*func_ctx*/, const Instantiated_Function& target,
-                       const Source_Location& func_sloc, Runtime_Error& except) final
-      {
-        this->do_verbose_trace(func_sloc, "Throwing from function: $1\n$2", target, except);
+        this->do_verbose_trace(func_sloc, "Throwing exception:\n$1", except);
       }
   };
 

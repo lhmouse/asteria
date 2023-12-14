@@ -242,8 +242,7 @@ do_use_function_result_slow(Global_Context& global)
 
         // Leave this frame.
         if(caller)
-          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, defer_ctx, *caller,
-                                   caller->sloc(), *this);
+          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, *caller, caller->sloc(), *this);
       }
     }
     catch(Runtime_Error& except) {
@@ -268,8 +267,7 @@ do_use_function_result_slow(Global_Context& global)
 
         // Leave this frame.
         if(caller)
-          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, defer_ctx, *caller,
-                                   caller->sloc(), except);
+          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, *caller, caller->sloc(), except);
       }
 
       // The exception object has been updated, so rethrow it.

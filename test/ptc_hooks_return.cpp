@@ -24,8 +24,8 @@ int main()
 
         virtual
         void
-        on_function_return(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
-                           const Source_Location& func_sloc, Reference& /*result*/) final
+        on_function_return(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
+                           Reference& /*result*/) final
           {
             this->fmt << "return " << func_sloc.line() << "; ";
           }
