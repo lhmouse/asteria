@@ -27,11 +27,11 @@ class Global_Context
 
   protected:
     bool
-    do_is_analytic() const noexcept final
+    do_is_analytic() const noexcept override
       { return false;  }
 
     const Abstract_Context*
-    do_get_parent_opt() const noexcept final
+    do_get_parent_opt() const noexcept override
       { return nullptr;  }
 
     Reference*

@@ -33,7 +33,7 @@ class Analytic_Context
 
   protected:
     bool
-    do_is_analytic() const noexcept final
+    do_is_analytic() const noexcept override
       { return true;  }
 
     const Abstract_Context*

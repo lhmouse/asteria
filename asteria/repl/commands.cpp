@@ -54,20 +54,20 @@ do_add_handler()
     s_handlers.emplace_back(::rocket::make_unique<HandlerT>());
   }
 
-struct Handler_exit final
+struct Handler_exit
   :
     Handler
   {
     const char*
-    cmd() const final
+    cmd() const override
       { return "exit";  }
 
     const char*
-    oneline() const final
+    oneline() const override
       { return "exit the interpreter";  }
 
     const char*
-    help() const final
+    help() const override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -85,7 +85,7 @@ struct Handler_exit final
 
     [[noreturn]]
     void
-    handle(cow_vector<cow_string>&& args) final
+    handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
           exit_printf(exit_success, "* have a nice day :)");
@@ -112,20 +112,20 @@ struct Handler_exit final
       }
   };
 
-struct Handler_help final
+struct Handler_help
   :
     Handler
   {
     const char*
-    cmd() const final
+    cmd() const override
       { return "help";  }
 
     const char*
-    oneline() const final
+    oneline() const override
       { return "obtain information about a command";  }
 
     const char*
-    help() const final
+    help() const override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -166,7 +166,7 @@ struct Handler_help final
       }
 
     void
-    handle(cow_vector<cow_string>&& args) final
+    handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
           return this->list_all_commands();
@@ -176,20 +176,20 @@ struct Handler_help final
       }
   };
 
-struct Handler_heredoc final
+struct Handler_heredoc
   :
     Handler
   {
     const char*
-    cmd() const final
+    cmd() const override
       { return "heredoc";  }
 
     const char*
-    oneline() const final
+    oneline() const override
       { return "enter heredoc mode";  }
 
     const char*
-    help() const final
+    help() const override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -205,7 +205,7 @@ struct Handler_heredoc final
       }
 
     void
-    handle(cow_vector<cow_string>&& args) final
+    handle(cow_vector<cow_string>&& args) override
       {
         if(args.size() != 1)
           return repl_printf("! exactly one terminator string expected");
@@ -216,20 +216,20 @@ struct Handler_heredoc final
       }
   };
 
-struct Handler_source final
+struct Handler_source
   :
     Handler
   {
     const char*
-    cmd() const final
+    cmd() const override
       { return "source";  }
 
     const char*
-    oneline() const final
+    oneline() const override
       { return "load and execute a script file";  }
 
     const char*
-    help() const final
+    help() const override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -244,7 +244,7 @@ struct Handler_source final
       }
 
     void
-    handle(cow_vector<cow_string>&& args) final
+    handle(cow_vector<cow_string>&& args) override
       {
         if(args.empty())
           return repl_printf("! please specify a source file to load");
@@ -325,20 +325,20 @@ struct Handler_source final
       }
   };
 
-struct Handler_again final
+struct Handler_again
   :
     Handler
   {
     const char*
-    cmd() const final
+    cmd() const override
       { return "again";  }
 
     const char*
-    oneline() const final
+    oneline() const override
       { return "reload last snippet compiled successfully";  }
 
     const char*
-    help() const final
+    help() const override
       { return
 //       1         2         3         4         5         6         7      |
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
@@ -354,7 +354,7 @@ struct Handler_again final
       }
 
     void
-    handle(cow_vector<cow_string>&& args) final
+    handle(cow_vector<cow_string>&& args) override
       {
         if(repl_last_source.empty())
           return repl_printf("! no previous snippet");

@@ -16,7 +16,7 @@
 namespace asteria {
 namespace {
 
-struct Verbose_Hooks final
+struct Verbose_Hooks
   :
      Abstract_Hooks
   {
@@ -44,7 +44,7 @@ struct Verbose_Hooks final
       }
 
     void
-    on_single_step_trap(Executive_Context& /*ctx*/, const Source_Location& sloc) final
+    on_single_step_trap(Executive_Context& /*ctx*/, const Source_Location& sloc) override
       {
         int sig = repl_signal.xchg(0);
         if(sig == 0)
@@ -60,27 +60,27 @@ struct Verbose_Hooks final
       }
 
     void
-    on_variable_declare(const Source_Location& sloc, phsh_stringR name) final
+    on_variable_declare(const Source_Location& sloc, phsh_stringR name) override
       {
         this->do_verbose_trace(sloc, "Declaring variable `$1`", name);
       }
 
     void
-    on_function_call(const Source_Location& sloc, const cow_function& target) final
+    on_function_call(const Source_Location& sloc, const cow_function& target) override
       {
         this->do_verbose_trace(sloc, "Calling function: $1", target);
       }
 
     void
     on_function_return(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
-                       Reference& /*result*/) final
+                       Reference& /*result*/) override
       {
         this->do_verbose_trace(func_sloc, "Returning from function");
       }
 
     void
     on_function_except(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
-                       Runtime_Error& except) final
+                       Runtime_Error& except) override
       {
         this->do_verbose_trace(func_sloc, "Throwing exception:\n$1", except);
       }

@@ -55,7 +55,7 @@ class Executive_Context
 
   private:
     bool
-    do_is_analytic() const noexcept final
+    do_is_analytic() const noexcept override
       { return false;  }
 
     const Abstract_Context*

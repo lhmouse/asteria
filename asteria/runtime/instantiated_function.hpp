@@ -8,7 +8,7 @@
 #include "../llds/avm_rod.hpp"
 namespace asteria {
 
-class Instantiated_Function final
+class Instantiated_Function
   :
     public Abstract_Function
   {

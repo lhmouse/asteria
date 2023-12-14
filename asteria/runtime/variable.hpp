@@ -8,7 +8,7 @@
 #include "../value.hpp"
 namespace asteria {
 
-class Variable final
+class Variable
   :
     public rcfwd<Variable>
   {

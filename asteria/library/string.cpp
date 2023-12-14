@@ -309,7 +309,7 @@ operator<<(tinyfmt& fmt, const PCRE2_Error& err)
     return fmt << err.c_str();
   }
 
-class PCRE2_Matcher final
+class PCRE2_Matcher
   :
     public Abstract_Opaque
   {
@@ -411,18 +411,18 @@ class PCRE2_Matcher final
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const final
+    describe(tinyfmt& fmt) const override
       {
         return format(fmt, "instance of `std.string.PCRE` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const final
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
       {
       }
 
     PCRE2_Matcher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const final
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
       {
         auto ptr = new PCRE2_Matcher(*this, 42);
         out.reset(ptr);

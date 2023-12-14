@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 namespace asteria {
 
-class Random_Engine final
+class Random_Engine
   :
     public rcfwd<Random_Engine>
   {

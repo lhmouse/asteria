@@ -17,7 +17,7 @@ int main()
         virtual
         void
         on_function_enter(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
-                          const Source_Location& func_sloc) final
+                          const Source_Location& func_sloc) override
           {
             this->fmt << "call " << func_sloc.line() << "; ";
           }
@@ -25,7 +25,7 @@ int main()
         virtual
         void
         on_function_return(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
-                           Reference& /*result*/) final
+                           Reference& /*result*/) override
           {
             this->fmt << "return " << func_sloc.line() << "; ";
           }

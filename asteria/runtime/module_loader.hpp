@@ -8,7 +8,7 @@
 #include "../../rocket/tinybuf_file.hpp"
 namespace asteria {
 
-class Module_Loader final
+class Module_Loader
   :
     public rcfwd<Module_Loader>
   {

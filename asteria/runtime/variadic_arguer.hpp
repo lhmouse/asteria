@@ -10,7 +10,7 @@
 #include "../source_location.hpp"
 namespace asteria {
 
-class Variadic_Arguer final
+class Variadic_Arguer
   :
     public rcfwd<Variadic_Arguer>,
     public Abstract_Function

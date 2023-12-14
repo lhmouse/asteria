@@ -10,7 +10,7 @@
 #include "../source_location.hpp"
 namespace asteria {
 
-class PTC_Arguments final
+class PTC_Arguments
   :
     public rcfwd<PTC_Arguments>
   {

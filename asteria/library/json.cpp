@@ -40,7 +40,7 @@ Indenter::
   {
   }
 
-class Indenter_none final
+class Indenter_none
   :
     public Indenter
   {
@@ -50,28 +50,28 @@ class Indenter_none final
 
   public:
     void
-    break_line(tinyfmt& /*fmt*/) const final
+    break_line(tinyfmt& /*fmt*/) const override
       {
       }
 
     void
-    increment_level() final
+    increment_level() override
       {
       }
 
     void
-    decrement_level() final
+    decrement_level() override
       {
       }
 
     bool
-    has_indention() const noexcept final
+    has_indention() const noexcept override
       {
         return false;
       }
   };
 
-class Indenter_string final
+class Indenter_string
   :
     public Indenter
   {
@@ -89,31 +89,31 @@ class Indenter_string final
 
   public:
     void
-    break_line(tinyfmt& fmt) const final
+    break_line(tinyfmt& fmt) const override
       {
         fmt << this->m_cur;
       }
 
     void
-    increment_level() final
+    increment_level() override
       {
         this->m_cur.append(this->m_add);
       }
 
     void
-    decrement_level() final
+    decrement_level() override
       {
         this->m_cur.pop_back(this->m_add.size());
       }
 
     bool
-    has_indention() const noexcept final
+    has_indention() const noexcept override
       {
         return this->m_add.size() != 0;
       }
   };
 
-class Indenter_spaces final
+class Indenter_spaces
   :
     public Indenter
   {
@@ -131,7 +131,7 @@ class Indenter_spaces final
 
   public:
     void
-    break_line(tinyfmt& fmt) const final
+    break_line(tinyfmt& fmt) const override
       {
         static constexpr char s_spaces[] =
           {
@@ -158,19 +158,19 @@ class Indenter_spaces final
       }
 
     void
-    increment_level() final
+    increment_level() override
       {
         this->m_cur += this->m_add;
       }
 
     void
-    decrement_level() final
+    decrement_level() override
       {
         this->m_cur -= this->m_add;
       }
 
     bool
-    has_indention() const noexcept final
+    has_indention() const noexcept override
       {
         return this->m_add != 0;
       }
