@@ -294,15 +294,8 @@ unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // lik
   }
 
 // Opaque (user-defined) type support
-struct Abstract_Opaque
-  :
-    public rcfwd<Abstract_Opaque>
+struct Abstract_Opaque : rcfwd<Abstract_Opaque>
   {
-    explicit
-    Abstract_Opaque() noexcept = default;
-
-    ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Opaque);
-
     // This function is called to convert this object to a human-readable string.
     virtual
     tinyfmt&
@@ -333,15 +326,8 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
     return opaq.describe(fmt);
   }
 
-struct Abstract_Function
-  :
-    public rcfwd<Abstract_Function>
+struct Abstract_Function : rcfwd<Abstract_Function>
   {
-    explicit
-    Abstract_Function() noexcept = default;
-
-    ASTERIA_COPYABLE_DESTRUCTOR(Abstract_Function);
-
     // This function is called to convert this object to a human-readable string.
     virtual
     tinyfmt&

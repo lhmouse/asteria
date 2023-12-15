@@ -17,16 +17,6 @@ vtable_key_function_sLBHstEX() noexcept
   {
   }
 
-Abstract_Opaque::
-~Abstract_Opaque()
-  {
-  }
-
-Abstract_Function::
-~Abstract_Function()
-  {
-  }
-
 tinyfmt&
 cow_opaque::
 describe(tinyfmt& fmt) const
