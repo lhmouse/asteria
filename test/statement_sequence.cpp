@@ -33,6 +33,7 @@ int main()
         catch(e) {
           return typeof(e) + ":" + e;
         }
+
       )__"), tinybuf::open_read);
 
     Token_Stream tstrm({ });

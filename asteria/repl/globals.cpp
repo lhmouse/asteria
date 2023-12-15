@@ -44,7 +44,7 @@ struct Verbose_Hooks
       }
 
     void
-    on_single_step_trap(Executive_Context& /*ctx*/, const Source_Location& sloc) override
+    on_trap(const Source_Location& sloc, Executive_Context& /*ctx*/) override
       {
         int sig = repl_signal.xchg(0);
         if(sig == 0)
@@ -52,37 +52,29 @@ struct Verbose_Hooks
 
         // Does the REPL have to be thread-safe anyway?
         const char* sigstr = ::strsignal(sig);
-        this->do_verbose_trace(sloc, "Received signal $1: $2", sig, sigstr);
+        this->do_verbose_trace(sloc, "Received signal `$1: $2`", sig, sigstr);
 
         ::rocket::sprintf_and_throw<::std::runtime_error>(
-              "Received signal %d: %s\n[interrupted at '%s:%d']",
+              "Received signal `%d: %s`\n[interrupted at '%s:%d']",
               sig, sigstr, sloc.c_file(), sloc.line());
       }
 
     void
-    on_variable_declare(const Source_Location& sloc, phsh_stringR name) override
+    on_call(const Source_Location& sloc, const cow_function& target) override
       {
-        this->do_verbose_trace(sloc, "Declaring variable `$1`", name);
+        this->do_verbose_trace(sloc, "Calling `$1`", target);
       }
 
     void
-    on_function_call(const Source_Location& sloc, const cow_function& target) override
+    on_return(const Source_Location& sloc, Reference* /*result_opt*/) override
       {
-        this->do_verbose_trace(sloc, "Calling function: $1", target);
+        this->do_verbose_trace(sloc, "Returning");
       }
 
     void
-    on_function_return(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
-                       Reference& /*result*/) override
+    on_throw(const Source_Location& sloc, Value& except) override
       {
-        this->do_verbose_trace(func_sloc, "Returning from function");
-      }
-
-    void
-    on_function_except(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
-                       Runtime_Error& except) override
-      {
-        this->do_verbose_trace(func_sloc, "Throwing exception:\n$1", except);
+        this->do_verbose_trace(sloc, "Throwing exception:\n$1", except);
       }
   };
 

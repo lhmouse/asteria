@@ -51,22 +51,21 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     Reference_Stack alt_stack;
     Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, ::std::move(self));
 
-    // Call instrumentation hooks.
-    ASTERIA_CALL_GLOBAL_HOOK(global, on_function_enter, ctx_func, *this, this->m_sloc);
-    const auto on_function_leave_guard = ::rocket::make_unique_handle(this,
-      [&](const void*) {
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_leave, ctx_func, *this, this->m_sloc);
-      });
+    auto hook = global.get_hooks_opt();
+    if(hook)
+      hook->on_function_enter(ctx_func, *this);
 
+    auto scope_guard = ::rocket::make_unique_handle(hook.get(),
+           [&](const void*) { hook->on_function_leave(ctx_func);  });
+
+    // Execute the function body.
     AIR_Status status;
     try {
-      // Execute the function body.
       status = this->m_rod.execute(ctx_func);
     }
     catch(Runtime_Error& except) {
       ctx_func.on_scope_exit_exceptional(except);
       except.push_frame_function(this->m_sloc, this->m_func);
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, *this, this->m_sloc, except);
       throw;
     }
     ctx_func.on_scope_exit_normal(status);
@@ -75,11 +74,11 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       case air_status_next:
       case air_status_return_void:
         self.set_void();
-        break;
+        return self;
 
       case air_status_return_ref:
         self = ::std::move(stack.mut_top());
-        break;
+        return self;
 
       case air_status_break_unspec:
       case air_status_break_switch:
@@ -95,11 +94,6 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
     }
-
-    if(!self.is_ptc())
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, *this, this->m_sloc, self);
-
-    return self;
   }
 
 }  // namespace asteria

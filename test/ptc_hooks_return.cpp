@@ -14,20 +14,16 @@ int main()
       {
         ::rocket::tinyfmt_str fmt;
 
-        virtual
         void
-        on_function_enter(Executive_Context& /*func_ctx*/, const Instantiated_Function& /*target*/,
-                          const Source_Location& func_sloc) override
+        on_call(const Source_Location& sloc, const cow_function& /*target*/) override
           {
-            this->fmt << "call " << func_sloc.line() << "; ";
+            this->fmt << "call " << sloc.line() << "; ";
           }
 
-        virtual
         void
-        on_function_return(const Instantiated_Function& /*target*/, const Source_Location& func_sloc,
-                           Reference& /*result*/) override
+        on_return(const Source_Location& sloc, Reference* /*result_opt*/) override
           {
-            this->fmt << "return " << func_sloc.line() << "; ";
+            this->fmt << "return " << sloc.line() << "; ";
           }
       };
 
@@ -63,7 +59,7 @@ int main()
     code.execute();
     ::fprintf(stderr, "no_ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 0; call 54; call 50; call 46; call 42; return 42; return 46; return 50; return 54; return 0; ");
+        "call 54; call 51; call 47; call 43; return 39; return 43; return 47; return 51; return 54; ");
 
     code.reload_string(
       sref(__FILE__), __LINE__, sref(R"__(
@@ -93,5 +89,5 @@ int main()
     code.execute();
     ::fprintf(stderr, "ptc ===> %s\n", hooks->fmt.c_str());
     ASTERIA_TEST_CHECK(hooks->fmt.get_string() ==
-        "call 0; call 84; call 80; call 76; call 72; return 72; return 76; return 80; return 84; return 0; ");
+        "call 84; call 81; call 77; call 73; return 69; return 73; return 77; return 81; return 84; ");
   }

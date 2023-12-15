@@ -143,24 +143,25 @@ do_pop_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t co
     stack.pop(count);
   }
 
+#define do_call_hook_(global, expression)  \
+    if(auto joCha3Ow = (global).get_hooks_opt())  \
+      static_cast<void>(joCha3Ow->expression)  // no semicolon
+
 AIR_Status
-do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
-                     const Source_Location& sloc, const cow_function& target,
-                     Reference_Stack&& stack)
+do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc, const Source_Location& sloc,
+                     const cow_function& target, Reference_Stack&& stack)
   {
     if(ptc != ptc_aware_none) {
-      // Pack proper tail call arguments into `self`.
-      auto ptcg = ::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(self),
-                                                       ::std::move(stack));
-      self.set_ptc(ptcg);
+      // Return a tail call wrapper.
+      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(self),
+                                                        ::std::move(stack)));
       return air_status_return_ref;
     }
-    else {
-      // Perform a normal function call.
-      ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, sloc, target);
-      target.invoke(self, global, ::std::move(stack));
-      return air_status_next;
-    }
+
+    // Perform a plain call.
+    do_call_hook_(global, on_call(sloc, target));
+    target.invoke(self, global, ::std::move(stack));
+    return air_status_next;
   }
 
 AIR_Status
@@ -1406,7 +1407,7 @@ solidify(AVM_Rod& rod) const
             const auto gcoll = ctx.global().garbage_collector();
             const auto var = gcoll->create_variable();
             ctx.insert_named_reference(sp.name).set_variable(var);
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_variable_declare, sloc, sp.name);
+            do_call_hook_(ctx.global(), on_declare(sloc, sp.name));
 
             // Push a copy of the reference onto the stack, which we will get
             // back after the initializer finishes execution.
@@ -1580,7 +1581,7 @@ solidify(AVM_Rod& rod) const
             try {
               for(size_t i = 0;  i < sp.clauses.size();  ++i)
                 if(i < target_index) {
-                  // Inject bypassed variables into the scope.
+                  // Inject bypassed names into the scope.
                   for(const auto& name : sp.clauses.at(i).names_added)
                     ctx_body.insert_named_reference(name);
                 }
@@ -2082,8 +2083,9 @@ solidify(AVM_Rod& rod) const
 
             // Read a value and throw it. The operand expression must not have
             // been empty for this function.
-            const auto& val = ctx.stack().top().dereference_readonly();
+            auto& val = ctx.stack().mut_top().dereference_copy();
             ctx.stack().pop();
+            do_call_hook_(ctx.global(), on_throw(sp.sloc, val));
             throw Runtime_Error(xtc_throw, val, sp.sloc);
           }
 
@@ -2461,7 +2463,7 @@ solidify(AVM_Rod& rod) const
             const uint32_t nargs = head->uparam.u2345;
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
+            do_call_hook_(ctx.global(), on_trap(sloc, ctx));
 
             do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs);
             return do_function_call(ctx, ptc, sloc);
@@ -3777,7 +3779,7 @@ solidify(AVM_Rod& rod) const
             const auto gcoll = ctx.global().garbage_collector();
             const auto var = gcoll->create_variable();
             ctx.insert_named_reference(sp.name).set_variable(var);
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_variable_declare, sloc, sp.name);
+            do_call_hook_(ctx.global(), on_declare(sloc, sp.name));
 
             // Initialize it to null.
             var->initialize(nullopt);
@@ -3808,7 +3810,7 @@ solidify(AVM_Rod& rod) const
         rod.append(
           +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, head->pv_meta->sloc);
+            do_call_hook_(ctx.global(), on_trap(head->pv_meta->sloc, ctx));
             return air_status_next;
           }
 
@@ -3839,7 +3841,7 @@ solidify(AVM_Rod& rod) const
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
+            do_call_hook_(ctx.global(), on_trap(sloc, ctx));
 
             ctx.alt_stack().clear();
             auto va_gen = ctx.stack().top().dereference_readonly();
@@ -3976,7 +3978,7 @@ solidify(AVM_Rod& rod) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
+            do_call_hook_(ctx.global(), on_trap(sloc, ctx));
 
             ROCKET_ASSERT(nargs != 0);
             do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs - 1);
@@ -4187,20 +4189,24 @@ solidify(AVM_Rod& rod) const
           {
             const bool by_ref = head->uparam.b0;
             const bool is_void = head->uparam.b1;
+            const auto& sloc = head->pv_meta->sloc;
 
             if(is_void || ctx.stack().top().is_void()) {
               // Discard the result.
+              do_call_hook_(ctx.global(), on_return(sloc, nullptr));
               return air_status_return_void;
             }
             else if(by_ref) {
               // The result is passed by reference, so check whether it is
               // dereferenceable.
               ctx.stack().top().dereference_readonly();
+              do_call_hook_(ctx.global(), on_return(sloc, &(ctx.stack().mut_top())));
               return air_status_return_ref;
             }
             else {
               // The result is passed by copy, so convert it to a temporary.
               ctx.stack().mut_top().dereference_copy();
+              do_call_hook_(ctx.global(), on_return(sloc, &(ctx.stack().mut_top())));
               return air_status_return_ref;
             }
           }
@@ -4298,7 +4304,7 @@ solidify(AVM_Rod& rod) const
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
             const auto sentry = ctx.global().copy_recursion_sentry();
-            ASTERIA_CALL_GLOBAL_HOOK(ctx.global(), on_single_step_trap, ctx, sloc);
+            do_call_hook_(ctx.global(), on_trap(sloc, ctx));
 
             ctx.stack().swap(ctx.alt_stack());
             return do_function_call(ctx, ptc, sloc);

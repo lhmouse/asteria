@@ -207,9 +207,10 @@ do_use_function_result_slow(Global_Context& global)
       while(this->m_xref == xref_ptc) {
         ptcg.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
         ROCKET_ASSERT(ptcg.use_count() == 1);
-        ASTERIA_CALL_GLOBAL_HOOK(global, on_function_call, ptcg->sloc(), ptcg->target());
 
-        // Perform a non-tail call.
+        if(auto hook = global.get_hooks_opt())
+          hook->on_call(ptcg->sloc(), ptcg->target());
+
         frames.emplace_back(ptcg);
         *this = ::std::move(ptcg->self());
         ptcg->target().invoke_ptc_aware(*this, global, ::std::move(ptcg->mut_stack()));
@@ -227,22 +228,21 @@ do_use_function_result_slow(Global_Context& global)
         frames.pop_back();
         const auto caller = ptcg->caller_opt();
 
-        // Convert the result.
         if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
+          // Convert the result.
           this->m_value = ::std::move(*result_value);
           result_value.reset();
           this->m_mods.clear();
           this->m_xref = xref_temporary;
         }
 
+        if(auto hook = global.get_hooks_opt())
+          hook->on_return(ptcg->sloc(), (this->m_xref != xref_void) ? this : nullptr);
+
         // Evaluate deferred expressions.
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());
         defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
         defer_ctx.on_scope_exit_normal(air_status_next);
-
-        // Leave this frame.
-        if(caller)
-          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_return, *caller, caller->sloc(), *this);
       }
     }
     catch(Runtime_Error& except) {
@@ -264,10 +264,6 @@ do_use_function_result_slow(Global_Context& global)
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());
         defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
         defer_ctx.on_scope_exit_exceptional(except);
-
-        // Leave this frame.
-        if(caller)
-          ASTERIA_CALL_GLOBAL_HOOK(global, on_function_except, *caller, caller->sloc(), except);
       }
 
       // The exception object has been updated, so rethrow it.
