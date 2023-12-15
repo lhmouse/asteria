@@ -224,15 +224,6 @@ ASTERIA_DEFINE_TAG_(xtc_throw);
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
-    explicit
-    Rcbase() noexcept = default;
-
-    explicit
-    Rcbase(const Rcbase&) noexcept = default;
-
-    Rcbase&
-    operator=(const Rcbase&) & noexcept = default;
-
     virtual
     ~Rcbase() = default;
 
@@ -244,15 +235,6 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
 template<typename RealT>
 struct rcfwd : virtual Rcbase
   {
-    explicit
-    rcfwd() noexcept = default;
-
-    explicit
-    rcfwd(const rcfwd&) noexcept = default;
-
-    rcfwd&
-    operator=(const rcfwd&) & noexcept = default;
-
     virtual
     void
     vtable_key_function_GklPAslB() noexcept;
