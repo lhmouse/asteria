@@ -14,8 +14,7 @@ namespace asteria {
 namespace {
 
 void
-do_user_declare(Analytic_Context& ctx, cow_vector<phsh_string>* names_opt,
-                const phsh_string& name)
+do_user_declare(Analytic_Context& ctx, cow_vector<phsh_string>* names_opt, phsh_stringR name)
   {
     if(name.empty())
       return;

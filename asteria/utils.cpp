@@ -406,7 +406,7 @@ c_quote(tinyfmt& fmt, const char* data, size_t size)
   }
 
 tinyfmt&
-c_quote(tinyfmt& fmt, const cow_string& data)
+c_quote(tinyfmt& fmt, stringR data)
   {
     return c_quote(fmt, data.data(), data.size());
   }
@@ -428,7 +428,7 @@ c_quote(cow_string& str, const char* data, size_t size)
   }
 
 cow_string&
-c_quote(cow_string& str, const cow_string& data)
+c_quote(cow_string& str, stringR data)
   {
     return c_quote(str, data.data(), data.size());
   }

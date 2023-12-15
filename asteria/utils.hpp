@@ -240,13 +240,13 @@ tinyfmt&
 c_quote(tinyfmt& fmt, const char* data, size_t size);
 
 tinyfmt&
-c_quote(tinyfmt& fmt, const cow_string& data);
+c_quote(tinyfmt& fmt, stringR data);
 
 cow_string&
 c_quote(cow_string& str, const char* data, size_t size);
 
 cow_string&
-c_quote(cow_string& str, const cow_string& data);
+c_quote(cow_string& str, stringR data);
 
 }  // namespace asteria
 #endif
