@@ -288,7 +288,7 @@ std_filesystem_glob(V_string pattern)
           pattern);
 
     // Convert them to strings.
-    ::rocket::unique_ptr<::glob_t, void (::glob_t*)> gp(&gl, ::globfree);
+    unique_ptr<::glob_t, void (::glob_t*)> gp(&gl, ::globfree);
     paths.reserve(gl.gl_pathc);
     for(size_t k = 0;  k != gl.gl_pathc;  ++k)
       paths.emplace_back(V_string(gl.gl_pathv[k]));
