@@ -54,9 +54,7 @@ do_add_handler()
     s_handlers.emplace_back(::rocket::make_unique<HandlerT>());
   }
 
-struct Handler_exit
-  :
-    Handler
+struct Handler_exit : Handler
   {
     const char*
     cmd() const override
@@ -112,9 +110,7 @@ struct Handler_exit
       }
   };
 
-struct Handler_help
-  :
-    Handler
+struct Handler_help : Handler
   {
     const char*
     cmd() const override
@@ -176,9 +172,7 @@ struct Handler_help
       }
   };
 
-struct Handler_heredoc
-  :
-    Handler
+struct Handler_heredoc : Handler
   {
     const char*
     cmd() const override
@@ -216,9 +210,7 @@ struct Handler_heredoc
       }
   };
 
-struct Handler_source
-  :
-    Handler
+struct Handler_source : Handler
   {
     const char*
     cmd() const override
@@ -325,9 +317,7 @@ struct Handler_source
       }
   };
 
-struct Handler_again
-  :
-    Handler
+struct Handler_again : Handler
   {
     const char*
     cmd() const override

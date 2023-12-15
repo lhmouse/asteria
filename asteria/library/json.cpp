@@ -40,15 +40,13 @@ Indenter::
   {
   }
 
-class Indenter_none
-  :
-    public Indenter
+struct Indenter_none : Indenter
   {
-  public:
     explicit
-    Indenter_none() = default;
+    Indenter_none()
+      {
+      }
 
-  public:
     void
     break_line(tinyfmt& /*fmt*/) const override
       {
@@ -71,65 +69,55 @@ class Indenter_none
       }
   };
 
-class Indenter_string
-  :
-    public Indenter
+struct Indenter_string : Indenter
   {
-  private:
-    cow_string m_add;
-    cow_string m_cur;
+    cow_string add;
+    cow_string cur;
 
-  public:
     explicit
-    Indenter_string(stringR add)
-      :
-        m_add(add), m_cur(sref("\n"))
+    Indenter_string(stringR xadd)
       {
+        this->add = xadd;
+        this->cur = sref("\n");
       }
 
-  public:
     void
     break_line(tinyfmt& fmt) const override
       {
-        fmt << this->m_cur;
+        fmt << this->cur;
       }
 
     void
     increment_level() override
       {
-        this->m_cur.append(this->m_add);
+        this->cur.append(this->add);
       }
 
     void
     decrement_level() override
       {
-        this->m_cur.pop_back(this->m_add.size());
+        this->cur.pop_back(this->add.size());
       }
 
     bool
     has_indention() const noexcept override
       {
-        return this->m_add.size() != 0;
+        return this->add.size() != 0;
       }
   };
 
-class Indenter_spaces
-  :
-    public Indenter
+struct Indenter_spaces : Indenter
   {
-  private:
-    size_t m_add;
-    size_t m_cur;
+    size_t add;
+    size_t cur;
 
-  public:
     explicit
-    Indenter_spaces(int64_t add)
-      :
-        m_add(::rocket::clamp_cast<size_t>(add, 0, 10)), m_cur(0)
+    Indenter_spaces(int64_t xadd)
       {
+        this->add = ::rocket::clamp_cast<size_t>(xadd, 0, 10);
+        this->cur = 0;
       }
 
-  public:
     void
     break_line(tinyfmt& fmt) const override
       {
@@ -142,14 +130,14 @@ class Indenter_spaces
           };
 
         // When `step` is zero, separate fields with a single space.
-        if(ROCKET_EXPECT(this->m_add == 0)) {
+        if(ROCKET_EXPECT(this->add == 0)) {
           fmt << s_spaces[0];
           return;
         }
 
         // Otherwise, terminate the current line, and indent the next.
         fmt << '\n';
-        size_t nrem = this->m_cur;
+        size_t nrem = this->cur;
         while(nrem != 0) {
           size_t nslen = ::rocket::min(nrem, sizeof(s_spaces));
           nrem -= nslen;
@@ -160,19 +148,19 @@ class Indenter_spaces
     void
     increment_level() override
       {
-        this->m_cur += this->m_add;
+        this->cur += this->add;
       }
 
     void
     decrement_level() override
       {
-        this->m_cur -= this->m_add;
+        this->cur -= this->add;
       }
 
     bool
     has_indention() const noexcept override
       {
-        return this->m_add != 0;
+        return this->add != 0;
       }
   };
 
