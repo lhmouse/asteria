@@ -66,7 +66,7 @@ struct Verbose_Hooks
       }
 
     void
-    on_return(const Source_Location& sloc, Reference* /*result_opt*/) override
+    on_return(const Source_Location& sloc, PTC_Aware /*ptc*/) override
       {
         this->do_verbose_trace(sloc, "Returning");
       }

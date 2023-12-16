@@ -32,10 +32,10 @@ on_declare(const Source_Location& sloc, const phsh_string& name)
 
 void
 Abstract_Hooks::
-on_return(const Source_Location& sloc, Reference* result_opt)
+on_return(const Source_Location& sloc, PTC_Aware ptc)
   {
     (void) sloc;
-    (void) result_opt;
+    (void) ptc;
   }
 
 void

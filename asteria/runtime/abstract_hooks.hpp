@@ -31,12 +31,11 @@ struct Abstract_Hooks
     on_call(const Source_Location& sloc, const cow_function& target);
 
     // This hook is called before returning a result from a function. For proper
-    // tail calls, this is called in their 'natural' order, as if proper tail call
-    // transformation didn't happen. If the function returns nothing, `result_opt`
-    // is a null pointer.
+    // tail calls, this hook is called in their 'natural' order, as if proper tail
+    // call transformation didn't happen.
     virtual
     void
-    on_return(const Source_Location& sloc, Reference* result_opt);
+    on_return(const Source_Location& sloc, PTC_Aware ptc);
 
     // This hook is called before after an exception value has been initialized,
     // and before it is thrown.

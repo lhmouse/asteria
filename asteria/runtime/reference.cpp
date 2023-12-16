@@ -237,7 +237,7 @@ do_use_function_result_slow(Global_Context& global)
         }
 
         if(auto hooks = global.get_hooks_opt())
-          hooks->on_return(ptcg->sloc(), (this->m_xref != xref_void) ? this : nullptr);
+          hooks->on_return(ptcg->sloc(), ptcg->ptc_aware());
 
         // Evaluate deferred expressions.
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());
