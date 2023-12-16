@@ -144,8 +144,8 @@ do_pop_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t co
   }
 
 #define do_call_hook_(global, expression)  \
-    if(auto joCha3Ow = (global).get_hooks_opt())  \
-      static_cast<void>(joCha3Ow->expression)  // no semicolon
+    if(auto hooks_joCha3Ow = (global).get_hooks_opt())  \
+      static_cast<void>(hooks_joCha3Ow->expression)  // no semicolon
 
 AIR_Status
 do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc, const Source_Location& sloc,

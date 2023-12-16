@@ -208,8 +208,8 @@ do_use_function_result_slow(Global_Context& global)
         ptcg.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
         ROCKET_ASSERT(ptcg.use_count() == 1);
 
-        if(auto hook = global.get_hooks_opt())
-          hook->on_call(ptcg->sloc(), ptcg->target());
+        if(auto hooks= global.get_hooks_opt())
+          hooks->on_call(ptcg->sloc(), ptcg->target());
 
         frames.emplace_back(ptcg);
         *this = ::std::move(ptcg->self());
@@ -236,8 +236,8 @@ do_use_function_result_slow(Global_Context& global)
           this->m_xref = xref_temporary;
         }
 
-        if(auto hook = global.get_hooks_opt())
-          hook->on_return(ptcg->sloc(), (this->m_xref != xref_void) ? this : nullptr);
+        if(auto hooks = global.get_hooks_opt())
+          hooks->on_return(ptcg->sloc(), (this->m_xref != xref_void) ? this : nullptr);
 
         // Evaluate deferred expressions.
         defer_ctx.stack() = ::std::move(ptcg->mut_stack());
