@@ -42,7 +42,7 @@ int main()
     sseq.reload(::std::move(tstrm));
 
     const auto& stmts = sseq.get_statements();
-    ASTERIA_TEST_CHECK(stmts.size() == 4);
+    ASTERIA_TEST_CHECK(stmts.size() == 5);   // implicit return
 
     Global_Context global;
     Analytic_Context ctx(xtc_plain, global);

@@ -41,5 +41,5 @@ int main()
 
     Statement_Sequence stmtq({ });
     stmtq.reload(::std::move(tstrm));
-    ASTERIA_TEST_CHECK(stmtq.get_statements().size() == 4);
+    ASTERIA_TEST_CHECK(stmtq.get_statements().size() == 5);  // implicit return
   }
