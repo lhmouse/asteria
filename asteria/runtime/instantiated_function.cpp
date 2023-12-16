@@ -51,12 +51,14 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     Reference_Stack alt_stack;
     Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, ::std::move(self));
 
-    auto hook = global.get_hooks_opt();
-    if(hook)
-      hook->on_function_enter(ctx_func, *this);
+    // Set the hooks up.
+    auto scope_cleanup = [&](Abstract_Hooks* hooks) { hooks->on_function_leave(ctx_func);  };
+    unique_ptr<Abstract_Hooks, decltype(scope_cleanup)> scope_guard(scope_cleanup);
 
-    auto scope_guard = ::rocket::make_unique_handle(hook.get(),
-           [&](const void*) { hook->on_function_leave(ctx_func);  });
+    if(auto hooks = global.get_hooks_opt()) {
+      hooks->on_function_enter(ctx_func, *this);
+      scope_guard.reset(hooks.get());
+    }
 
     // Execute the function body.
     AIR_Status status;
