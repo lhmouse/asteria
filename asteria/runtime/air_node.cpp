@@ -819,8 +819,8 @@ is_terminator() const noexcept
       case index_push_unnamed_array:
       case index_push_unnamed_object:
       case index_apply_operator:
-      case index_unpack_struct_array:
-      case index_unpack_struct_object:
+      case index_unpack_array:
+      case index_unpack_object:
       case index_define_null_variable:
       case index_single_step_trap:
       case index_defer_expression:
@@ -891,8 +891,8 @@ rebind_opt(Abstract_Context& ctx) const
       case index_push_unnamed_array:
       case index_push_unnamed_object:
       case index_apply_operator:
-      case index_unpack_struct_array:
-      case index_unpack_struct_object:
+      case index_unpack_array:
+      case index_unpack_object:
       case index_define_null_variable:
       case index_single_step_trap:
       case index_variadic_call:
@@ -1160,8 +1160,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_push_unnamed_array:
       case index_push_unnamed_object:
       case index_apply_operator:
-      case index_unpack_struct_array:
-      case index_unpack_struct_object:
+      case index_unpack_array:
+      case index_unpack_object:
       case index_define_null_variable:
       case index_single_step_trap:
       case index_variadic_call:
@@ -3644,8 +3644,8 @@ solidify(AVM_Rod& rod) const
         }
       }
 
-      case index_unpack_struct_array: {
-        const auto& altr = this->m_stor.as<S_unpack_struct_array>();
+      case index_unpack_array: {
+        const auto& altr = this->m_stor.as<S_unpack_array>();
 
         Uparam up2;
         up2.b0 = altr.immutable;
@@ -3699,8 +3699,8 @@ solidify(AVM_Rod& rod) const
         return;
       }
 
-      case index_unpack_struct_object: {
-        const auto& altr = this->m_stor.as<S_unpack_struct_object>();
+      case index_unpack_object: {
+        const auto& altr = this->m_stor.as<S_unpack_object>();
 
         Uparam up2;
         up2.b0 = altr.immutable;
@@ -3899,7 +3899,7 @@ solidify(AVM_Rod& rod) const
                 va_arg_self.dereference_readonly();
               }
 
-              do_pop_arguments(ctx.alt_stack(), ctx.stack(), static_cast<uint32_t>(va_num.as_integer()));
+              do_pop_arguments(ctx.alt_stack(), ctx.stack(), (uint32_t) va_num.as_integer());
               return do_function_call(ctx, ptc, sloc);
             }
             else

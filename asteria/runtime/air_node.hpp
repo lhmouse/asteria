@@ -176,14 +176,14 @@ class AIR_Node
         bool assign;
       };
 
-    struct S_unpack_struct_array
+    struct S_unpack_array
       {
         Source_Location sloc;
         bool immutable;
         uint32_t nelems;
       };
 
-    struct S_unpack_struct_object
+    struct S_unpack_object
       {
         Source_Location sloc;
         bool immutable;
@@ -306,8 +306,8 @@ class AIR_Node
         index_push_unnamed_array     = 21,
         index_push_unnamed_object    = 22,
         index_apply_operator         = 23,
-        index_unpack_struct_array    = 24,
-        index_unpack_struct_object   = 25,
+        index_unpack_array           = 24,
+        index_unpack_object          = 25,
         index_define_null_variable   = 26,
         index_single_step_trap       = 27,
         index_variadic_call          = 28,
@@ -352,8 +352,8 @@ class AIR_Node
         , S_push_unnamed_array     // 21
         , S_push_unnamed_object    // 22
         , S_apply_operator         // 23
-        , S_unpack_struct_array    // 24
-        , S_unpack_struct_object   // 25
+        , S_unpack_array           // 24
+        , S_unpack_object          // 25
         , S_define_null_variable   // 26
         , S_single_step_trap       // 27
         , S_variadic_call          // 28

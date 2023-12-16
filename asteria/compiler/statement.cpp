@@ -38,9 +38,9 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
                           const Global_Context& global, const Analytic_Context& ctx,
                           PTC_Aware ptc, const Statement::S_expression& expr)
   {
-    // Generate a single-step trap if it is requested. This happens at translation
-    // time, so if it's not requested at all, there will be no runtime overhead.
     if(opts.verbose_single_step_traps) {
+      // Generate a single-step trap if it is requested. This happens at translation
+      // time, so if it's not requested at all, there will be no runtime overhead.
       AIR_Node::S_single_step_trap xnode = { expr.sloc };
       code.emplace_back(::std::move(xnode));
     }
@@ -213,8 +213,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, decl.init);
 
               // Initialize variables.
-              AIR_Node::S_unpack_struct_array xnode_init = { decl.sloc, altr.immutable,
-                                                             static_cast<uint32_t>(decl.names.size() - 2) };
+              AIR_Node::S_unpack_array xnode_init = { decl.sloc, altr.immutable,
+                                                      (uint32_t) (decl.names.size() - 2) };
               code.emplace_back(::std::move(xnode_init));
             }
           }
@@ -244,8 +244,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, decl.init);
 
               // Initialize variables.
-              AIR_Node::S_unpack_struct_object xnode_init = { decl.sloc, altr.immutable,
-                                                              decl.names.subvec(1, decl.names.size() - 2) };
+              AIR_Node::S_unpack_object xnode_init = { decl.sloc, altr.immutable,
+                                                       decl.names.subvec(1, decl.names.size() - 2) };
               code.emplace_back(::std::move(xnode_init));
             }
           }
