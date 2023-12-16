@@ -77,27 +77,22 @@ void
 do_generate_statement_list(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
                            cow_vector<phsh_string>* names_opt, const Global_Context& global,
                            const Compiler_Options& opts, PTC_Aware ptc,
-                           const Statement::S_block& block)
+                           const cow_vector<Statement>& stmts)
   {
-    if(block.stmts.empty())
-      return;
-
-    // Statements other than the last one cannot be the end of function.
-    for(size_t i = 0;  i < block.stmts.size();  ++i)
-      block.stmts.at(i).generate_code(code, ctx, names_opt, global, opts,
-                           (i != block.stmts.size() - 1)
-                             ? (block.stmts.at(i + 1).is_empty_return() ? ptc_aware_void
-                                                                        : ptc_aware_none)
+    for(size_t i = 0;  i < stmts.size();  ++i)
+      stmts.at(i).generate_code(code, ctx, names_opt, global, opts,
+                           (i != stmts.size() - 1)
+                             ? (stmts.at(i + 1).is_empty_return() ? ptc_aware_void : ptc_aware_none)
                              : ptc);
   }
 
 cow_vector<AIR_Node>
 do_generate_statement_list(Analytic_Context& ctx, cow_vector<phsh_string>* names_opt,
                            const Global_Context& global, const Compiler_Options& opts,
-                           PTC_Aware ptc, const Statement::S_block& block)
+                           PTC_Aware ptc, const cow_vector<Statement>& stmts)
   {
     cow_vector<AIR_Node> code;
-    do_generate_statement_list(code, ctx, names_opt, global, opts, ptc, block);
+    do_generate_statement_list(code, ctx, names_opt, global, opts, ptc, stmts);
     return code;
   }
 
@@ -107,7 +102,7 @@ do_generate_block(const Compiler_Options& opts, const Global_Context& global,
   {
     cow_vector<AIR_Node> code;
     Analytic_Context ctx_stmts(xtc_plain, ctx);
-    do_generate_statement_list(code, ctx_stmts, nullptr, global, opts, ptc, block);
+    do_generate_statement_list(code, ctx_stmts, nullptr, global, opts, ptc, block.stmts);
     return code;
   }
 
@@ -145,7 +140,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           return;
 
         if(::rocket::all_of(altr.stmts, [](const Statement& st) { return st.is_scopeless();  })) {
-          do_generate_statement_list(code, ctx, nullptr, global, opts, ptc, *qblock);
+          do_generate_statement_list(code, ctx, nullptr, global, opts, ptc, qblock->stmts);
           return;
         }
 
@@ -226,8 +221,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
             if(decl.init.units.empty()) {
               // Declare variables with default initialization.
               for(uint32_t k = 1;  k != decl.names.size() - 1;  ++k) {
-                AIR_Node::S_define_null_variable xnode_decl = { decl.sloc, altr.immutable,
-                                                                decl.names.at(k) };
+                AIR_Node::S_define_null_variable xnode_decl = { decl.sloc, altr.immutable, decl.names.at(k) };
                 code.emplace_back(::std::move(xnode_decl));
               }
             }
@@ -267,7 +261,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Generate code
         AIR_Optimizer optmz(opts);
-        optmz.reload(&ctx, altr.params, global, altr.body.stmts);
+        optmz.reload(&ctx, altr.params, global, altr.body);
 
         // Encode arguments.
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params,
@@ -416,7 +410,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         const auto& altr = this->m_stor.as<S_try>();
 
         // Generate code for the `try` body.
-        auto code_try = do_generate_block(opts, global, ctx, ptc, altr.body_try);
+        auto code_try = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body_try);
 
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(xtc_plain, ctx);
@@ -425,7 +419,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.
-        auto code_catch = do_generate_statement_list(ctx_catch, nullptr, global, opts, ptc, altr.body_catch);
+        auto code_catch = do_generate_statement_list(ctx_catch, nullptr, global, opts, ptc,
+                                                     altr.body_catch.stmts);
 
         // Encode arguments.
         AIR_Node::S_try_statement xnode = { altr.sloc_try, ::std::move(code_try), altr.sloc_catch,

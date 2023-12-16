@@ -40,7 +40,7 @@ class Statement
         Source_Location sloc;
         phsh_string name;
         cow_vector<phsh_string> params;
-        S_block body;
+        cow_vector<Statement> body;
       };
 
     struct S_if
@@ -54,7 +54,7 @@ class Statement
     struct switch_clause
       {
         S_expression label;
-        S_block body;
+        cow_vector<Statement> body;
       };
 
     struct S_switch
@@ -88,7 +88,7 @@ class Statement
 
     struct S_for
       {
-        S_block init;
+        cow_vector<Statement> init;
         S_expression cond;
         S_expression step;
         S_block body;

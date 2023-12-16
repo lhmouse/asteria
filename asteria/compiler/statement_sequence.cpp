@@ -666,7 +666,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 compiler_status_open_brace_expected, tstrm.next_sloc());
 
     Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname),
-                                    ::std::move(params), ::std::move(*qbody) };
+                                    ::std::move(params), ::std::move(qbody->stmts) };
     return ::std::move(xstmt);
   }
 
@@ -811,7 +811,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
                   compiler_status_colon_expected, tstrm.next_sloc());
 
       while(auto qstmt = do_accept_statement_opt(tstrm, scope | scope_flags_switch))
-        clause.body.stmts.emplace_back(::std::move(*qstmt));
+        clause.body.emplace_back(::std::move(*qstmt));
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -1040,7 +1040,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
-    Statement::S_for xstmt = { ::std::move(*qinit), ::std::move(*qcond),
+    Statement::S_for xstmt = { ::std::move(qinit->stmts), ::std::move(*qcond),
                                ::std::move(*kstep), ::std::move(*qblock) };
     return ::std::move(xstmt);
   }
