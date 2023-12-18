@@ -512,7 +512,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.units.empty()) {
-          AIR_Node::S_return_statement xnode = { altr.expr.sloc, false, true };
+          AIR_Node::S_return_statement xnode = { altr.sloc, false, true };
           code.emplace_back(::std::move(xnode));
         }
         else {
@@ -520,7 +520,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
                                  altr.by_ref ? ptc_aware_by_ref : ptc_aware_by_val,
                                  altr.expr);
 
-          AIR_Node::S_return_statement xnode = { altr.expr.sloc, altr.by_ref, false };
+          AIR_Node::S_return_statement xnode = { altr.sloc, altr.by_ref, false };
           code.emplace_back(::std::move(xnode));
         }
         return;
