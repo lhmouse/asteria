@@ -45,7 +45,9 @@ inline
 void
 xmemcopy(xmeminfo& info, const xmeminfo& src) noexcept
   {
-    ROCKET_ASSERT(info.count >= src.count);
+    ROCKET_ASSERT(info.element_size * info.count >= src.element_size * src.count);
+    ROCKET_ASSERT(info.data != src.data);
+
     if(src.count != 0)
       ::std::memcpy(info.data, src.data, src.element_size * src.count);
   }
