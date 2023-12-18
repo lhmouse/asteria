@@ -912,7 +912,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind the body in a nested scope.
         bool dirty = false;
-        S_execute_block bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
@@ -925,7 +925,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind both branches in a nested scope.
         bool dirty = false;
-        S_if_statement bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_true, ctx_body);
@@ -939,7 +939,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind all labels and clauses.
         bool dirty = false;
-        S_switch_statement bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_body(xtc_plain, ctx);
         for(size_t k = 0;  k < bound.clauses.size();  ++k) {
@@ -963,7 +963,7 @@ rebind_opt(Abstract_Context& ctx) const
         // Rebind the body and the condition expression.
         // The condition expression is not a part of the body.
         bool dirty = false;
-        S_do_while_statement bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
@@ -979,7 +979,7 @@ rebind_opt(Abstract_Context& ctx) const
         // Rebind the condition expression and the body.
         // The condition expression is not a part of the body.
         bool dirty = false;
-        S_while_statement bound = altr;
+        auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_cond, ctx);
 
@@ -997,7 +997,7 @@ rebind_opt(Abstract_Context& ctx) const
         // where the initializer is to be evaluated. The body is to be executed
         // in an inner scope, created and destroyed for each iteration.
         bool dirty = false;
-        S_for_each_statement bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_for(xtc_plain, ctx);
         if(!altr.name_key.empty())
@@ -1019,7 +1019,7 @@ rebind_opt(Abstract_Context& ctx) const
         // evaluated. The body is to be executed in an inner scope, created and
         // destroyed for each iteration.
         bool dirty = false;
-        S_for_statement bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_for(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_init, ctx_for);
@@ -1037,7 +1037,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind the `try` and `catch` clauses.
         bool dirty = false;
-        S_try_statement bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_try(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_try, ctx_try);
@@ -1080,7 +1080,7 @@ rebind_opt(Abstract_Context& ctx) const
         // This is the only scenario where names in the outer scope are visible
         // to the body of a function.
         bool dirty = false;
-        S_define_function bound = altr;
+        auto bound = altr;
 
         Analytic_Context ctx_func(xtc_function, &ctx, altr.params);
         do_rebind_nodes(dirty, bound.code_body, ctx_func);
@@ -1093,7 +1093,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind both branches.
         bool dirty = false;
-        S_branch_expression bound = altr;
+        auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_true, ctx);
         do_rebind_nodes(dirty, bound.code_false, ctx);
@@ -1106,7 +1106,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind the expression.
         bool dirty = false;
-        S_defer_expression bound = altr;
+        auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_body, ctx);
 
@@ -1118,7 +1118,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind the expression.
         bool dirty = false;
-        S_catch_expression bound = altr;
+        auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_body, ctx);
 
@@ -1130,7 +1130,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Rebind the null branch.
         bool dirty = false;
-        S_coalesce_expression bound = altr;
+        auto bound = altr;
 
         do_rebind_nodes(dirty, bound.code_null, ctx);
 
