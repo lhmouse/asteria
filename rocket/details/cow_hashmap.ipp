@@ -740,8 +740,9 @@ class stringified_key
     char m_temp[128];
 
   public:
+    // Hacks...
     stringified_key(bool val) noexcept
-      { ::std::strcpy(this->m_temp, val ? "true" : "false");  }
+      { ::std::memcpy(this->m_temp, "false\0__true\0__" + val * 8U, 4U);  }
 
     stringified_key(signed char val) noexcept
       { ::std::sprintf(this->m_temp, "%d", val);  }
@@ -778,17 +779,13 @@ class stringified_key
     stringified_key(valueT val) noexcept
       { ::std::sprintf(this->m_temp, "%lld", static_cast<long long>(val));  }
 
-    stringified_key(const void* val) noexcept
-      { ::std::sprintf(this->m_temp, "%p", val);  }
-
-    template<typename funcT,
-    ROCKET_ENABLE_IF(is_function<funcT>::value)>
-    stringified_key(funcT* val) noexcept
-      { ::std::sprintf(this->m_temp, "%p", reinterpret_cast<void*>(val));  }
+    template<typename somethingT>
+    stringified_key(somethingT* ptr) noexcept
+      { ::std::sprintf(this->m_temp, "%p", reinterpret_cast<const volatile void*>(ptr));  }
 
     template<typename valueT,
     ROCKET_DISABLE_IF(is_scalar<valueT>::value)>
-    stringified_key(const valueT&) noexcept
+    stringified_key(const valueT& /*val*/) noexcept
       { ::std::strcpy(this->m_temp, "[not printable]");  }
 
   public:
