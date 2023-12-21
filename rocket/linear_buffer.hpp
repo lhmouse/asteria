@@ -86,7 +86,7 @@ class basic_linear_buffer
           // If the allocators compare equal, they can deallocate memory allocated by each other.
           noadl::propagate_allocator_on_copy(this->m_stor.as_allocator(), other.m_stor.as_allocator());
           if(ROCKET_EXPECT(this != &other))
-            this->do_assign(other);
+            this->do_copy_from(other);
         }
         else if(allocator_traits<allocator_type>::propagate_on_container_copy_assignment::value) {
           // Otherwise, if the allocator in `*this` will be replaced, the old buffer must be
@@ -97,7 +97,7 @@ class basic_linear_buffer
         }
         else {
           // Otherwise, copy the contents without deallocating the old buffer.
-          this->do_assign(other);
+          this->do_copy_from(other);
         }
         return *this;
       }
@@ -122,7 +122,7 @@ class basic_linear_buffer
         }
         else {
           // Otherwise, copy the contents without deallocating the old buffer.
-          this->do_assign(other);
+          this->do_copy_from(other);
         }
         return *this;
       }
@@ -160,7 +160,7 @@ class basic_linear_buffer
       }
 
     void
-    do_assign(const basic_linear_buffer& other)
+    do_copy_from(const basic_linear_buffer& other)
       {
         ROCKET_ASSERT(this != &other);
         this->clear();
