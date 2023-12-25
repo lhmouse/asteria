@@ -72,7 +72,11 @@ class Reference_Stack
       }
 
     void
-    clear_red_zone() noexcept;
+    clear_red_zone() noexcept
+      {
+        while(this->m_einit != this->m_etop)
+          ::rocket::destroy(this->m_bptr + (-- this->m_einit));
+      }
 
     const Reference&
     top(uint32_t index = 0) const noexcept
