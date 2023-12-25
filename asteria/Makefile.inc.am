@@ -1,6 +1,3 @@
-lib_LTLIBRARIES += lib/libasteria.la
-bin_PROGRAMS += bin/asteria
-
 nobase_include_HEADERS +=  \
   %reldir%/details/value.ipp  \
   %reldir%/details/variable_hashmap.ipp  \
@@ -63,6 +60,11 @@ nobase_include_HEADERS +=  \
   %reldir%/library/csv.hpp  \
   ${END}
 
+lib_LTLIBRARIES += lib/libasteria.la
+lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
+lib_libasteria_la_LIBADD = lib/librocket.la ${LTLIBICONV}
+lib_libasteria_la_LDFLAGS = -no-undefined -version-number @abi_major@:@abi_minor@
+
 lib_libasteria_la_SOURCES =  \
   %reldir%/version.h.in  \
   %reldir%/precompiled.ipp  \
@@ -122,9 +124,21 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/library/csv.cpp  \
   ${END}
 
-lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
-lib_libasteria_la_LIBADD = lib/librocket.la ${LTLIBICONV}
-lib_libasteria_la_LDFLAGS = -no-undefined -version-number @abi_major@:@abi_minor@
+if enable_repl
+bin_PROGRAMS += bin/asteria
+bin_asteria_CXXFLAGS = ${AM_CXXFLAGS}
+bin_asteria_LDADD = lib/libasteria.la
+
+bin_asteria_SOURCES =  \
+  %reldir%/repl/fwd.hpp  \
+  %reldir%/repl/globals.cpp  \
+  %reldir%/repl/single.cpp  \
+  %reldir%/repl/interact.cpp  \
+  %reldir%/repl/commands.cpp  \
+  %reldir%/repl/main.cpp  \
+  %reldir%/repl/editline.cpp  \
+  ${END}
+endif
 
 if enable_pch
 lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
@@ -145,18 +159,3 @@ endif
 
 clean-local:
 	-rm -rf %reldir%/precompiled.x*
-
-if enable_repl
-bin_asteria_SOURCES =  \
-  %reldir%/repl/fwd.hpp  \
-  %reldir%/repl/globals.cpp  \
-  %reldir%/repl/single.cpp  \
-  %reldir%/repl/interact.cpp  \
-  %reldir%/repl/commands.cpp  \
-  %reldir%/repl/main.cpp  \
-  %reldir%/repl/editline.cpp  \
-  ${END}
-
-bin_asteria_CXXFLAGS = ${AM_CXXFLAGS}
-bin_asteria_LDADD = lib/libasteria.la
-endif
