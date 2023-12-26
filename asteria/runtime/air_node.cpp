@@ -180,43 +180,34 @@ do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Locat
     return do_invoke_maybe_tail(self, ctx.global(), ptc, sloc, target, ::std::move(ctx.alt_stack()));
   }
 
-void
-do_set_compare_result(Value& out, Compare cmp)
-  {
-    if(ROCKET_UNEXPECT(cmp == compare_unordered))
-      out = sref("[unordered]");
-    else
-      out = (int64_t) cmp - compare_equal;
-  }
-
 template<typename ContainerT>
 void
-do_duplicate_sequence(ContainerT& container, int64_t count)
+do_duplicate_sequence(ContainerT& src, int64_t count)
   {
     if(count < 0)
       throw Runtime_Error(xtc_format,
                "Negative duplication count (value was `$2`)", count);
 
-    if(container.empty() || (count == 1))
+    if(src.empty() || (count == 1))
       return;
 
     if(count == 0) {
-      container.clear();
+      src.clear();
       return;
     }
 
     // Calculate the result length with overflow checking.
     int64_t rlen;
-    if(ROCKET_MUL_OVERFLOW((int64_t) container.size(), count, &rlen) || (rlen > PTRDIFF_MAX))
+    if(ROCKET_MUL_OVERFLOW((int64_t) src.size(), count, &rlen) || (rlen > PTRDIFF_MAX))
       throw Runtime_Error(xtc_format,
                "Data length overflow (`$1` * `$2` > `$3`)",
-               container.size(), count, PTRDIFF_MAX);
+               src.size(), count, PTRDIFF_MAX);
 
     // Duplicate elements, using binary exponential backoff.
-    container.reserve((size_t) rlen);
-    while(container.ssize() < rlen)
-      container.append(container.begin(),
-            container.begin() + (ptrdiff_t) ::rocket::min(rlen - container.ssize(), container.ssize()));
+    src.reserve((size_t) rlen);
+    while(src.ssize() < rlen)
+      src.append(src.begin(),
+            src.begin() + (ptrdiff_t) ::rocket::min(rlen - src.ssize(), src.ssize()));
   }
 
 ROCKET_FLATTEN ROCKET_NEVER_INLINE
@@ -276,7 +267,10 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         // Defines a partial ordering on all values. For unordered operands,
         // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
         // the same result.
-        do_set_compare_result(lhs, lhs.compare_numeric_partial(irhs));
+        int64_t cmp = lhs.compare_numeric_partial(irhs);
+        lhs = cmp - compare_equal;
+        if(ROCKET_UNEXPECT(cmp == compare_unordered))
+          lhs = sref("[unordered]");
         return air_status_next;
       }
 
@@ -3274,7 +3268,10 @@ solidify(AVM_Rod& rod) const
                     // Defines a partial ordering on all values. For unordered operands,
                     // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
                     // the same result.
-                    do_set_compare_result(lhs, lhs.compare_partial(rhs));
+                    int64_t cmp = lhs.compare_partial(rhs);
+                    lhs = cmp - compare_equal;
+                    if(ROCKET_UNEXPECT(cmp == compare_unordered))
+                      lhs = sref("[unordered]");
                     return air_status_next;
                   }
 
