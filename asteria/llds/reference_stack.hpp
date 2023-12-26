@@ -109,13 +109,14 @@ class Reference_Stack
     Reference&
     push()
       {
-        if(ROCKET_UNEXPECT(this->m_etop >= this->m_einit)) {
 #ifdef ROCKET_DEBUG
-          this->do_reallocate(this->m_einit + 1);
-#else
+        this->do_reallocate(this->m_einit + 1);
+#endif  // debug
+
+        if(ROCKET_UNEXPECT(this->m_etop >= this->m_einit)) {
           if(this->m_einit >= this->m_estor)
             this->do_reallocate(this->m_estor / 2 * 3 | 17);
-#endif
+
           // Construct a new reference.
           ::rocket::construct(this->m_bptr + this->m_einit);
           this->m_einit ++;
