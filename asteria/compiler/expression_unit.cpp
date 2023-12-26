@@ -148,7 +148,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         AIR_Optimizer optmz(opts);
         optmz.reload(&ctx, altr.params, global, altr.body);
 
-        // Encode arguments.
         AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params,
                                               optmz.get_code() };
         code.emplace_back(::std::move(xnode));
@@ -223,7 +222,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           for(const auto& unit : arg.units)
             unit.generate_code(code, opts, global, ctx, ptc_aware_none);
 
-        // Encode arguments.
         AIR_Node::S_function_call xnode = { altr.sloc, (uint32_t) altr.args.size(), rptc };
         code.emplace_back(::std::move(xnode));
         return;
@@ -271,7 +269,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           }
         }
 
-        // Encode arguments.
         AIR_Node::S_apply_operator xnode = { altr.sloc, altr.xop, altr.assign };
         code.emplace_back(::std::move(xnode));
         return;
@@ -280,7 +277,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_unnamed_array: {
         const auto& altr = this->m_stor.as<S_unnamed_array>();
 
-        // Encode arguments.
         AIR_Node::S_push_unnamed_array xnode = { altr.sloc, altr.nelems };
         code.emplace_back(::std::move(xnode));
         return;
@@ -289,7 +285,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_unnamed_object: {
         const auto& altr = this->m_stor.as<S_unnamed_object>();
 
-        // Encode arguments.
         AIR_Node::S_push_unnamed_object xnode = { altr.sloc, altr.keys };
         code.emplace_back(::std::move(xnode));
         return;
@@ -315,7 +310,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         // Check whether PTC is disabled.
         auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
-        // Encode arguments.
         AIR_Node::S_variadic_call xnode = { altr.sloc, rptc };
         code.emplace_back(::std::move(xnode));
         return;
@@ -324,7 +318,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_check_argument: {
         const auto& altr = this->m_stor.as<S_check_argument>();
 
-        // Encode arguments.
         AIR_Node::S_check_argument xnode = { altr.sloc, altr.by_ref };
         code.emplace_back(::std::move(xnode));
         return;
@@ -338,7 +331,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           for(const auto& unit : arg.units)
             unit.generate_code(code, opts, global, ctx, ptc_aware_none);
 
-        // Encode arguments.
         AIR_Node::S_import_call xnode = { opts, altr.sloc, (uint32_t) altr.args.size() };
         code.emplace_back(::std::move(xnode));
         return;
@@ -353,7 +345,6 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         for(const auto& unit : altr.operand)
           unit.generate_code(code_op, opts, global, ctx, ptc_aware_none);
 
-        // Encode arguments.
         AIR_Node::S_catch_expression xnode = { ::std::move(code_op) };
         code.emplace_back(::std::move(xnode));
         return;
