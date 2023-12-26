@@ -1985,6 +1985,7 @@ solidify(AVM_Rod& rod) const
         rod.append(
           +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
+            const auto& try_sloc = head->pv_meta->sloc;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // This is almost identical to JavaScript but not to C++. Only one
@@ -2001,7 +2002,7 @@ solidify(AVM_Rod& rod) const
             catch(Runtime_Error& except) {
               // Append a frame due to exit of the `try` clause.
               // Reuse the exception object. Don't bother allocating a new one.
-              except.push_frame_try(head->pv_meta->sloc);
+              except.push_frame_try(try_sloc);
 
               // This branch must be executed inside this `catch` block.
               // User-provided bindings may obtain the current exception using
@@ -3816,8 +3817,10 @@ solidify(AVM_Rod& rod) const
         rod.append(
           +[](Executive_Context& ctx, const Header* head) -> AIR_Status
           {
+            const auto& sloc = head->pv_meta->sloc;
+
             if(auto hooks = ctx.global().get_hooks_opt())
-              hooks->on_trap(head->pv_meta->sloc, ctx);
+              hooks->on_trap(sloc, ctx);
 
             return air_status_next;
           }
