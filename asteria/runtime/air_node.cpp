@@ -133,51 +133,31 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
     }
   }
 
-void
-do_pop_arguments(Reference_Stack& alt_stack, Reference_Stack& stack, uint32_t count)
-  {
-    ROCKET_ASSERT(count <= stack.size());
-    alt_stack.clear();
-    for(uint32_t k = 0;  k != count;  ++k)
-      alt_stack.push() = ::std::move(stack.mut_top(count - 1U - k));
-    stack.pop(count);
-  }
-
 AIR_Status
-do_invoke_maybe_tail(Reference& self, Global_Context& global, PTC_Aware ptc,
-                     const Source_Location& sloc, const cow_function& target, Reference_Stack&& stack)
+do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location& sloc,
+                  PTC_Aware ptc, const Value& target)
   {
+    if(target.is_null())
+      throw Runtime_Error(xtc_format,
+               "Target function not found");
+
+    if(!target.is_function())
+      throw Runtime_Error(xtc_format,
+               "Non-function value not invocable (target `$1`)", target);
+
     if(ptc != ptc_aware_none) {
       // Return a tail call wrapper.
-      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target, ::std::move(self),
-                                                        ::std::move(stack)));
+      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc,
+             target.as_function(), ::std::move(self), ::std::move(ctx.alt_stack())));
       return air_status_return_ref;
     }
 
     // Perform a plain call.
-    if(auto hooks = global.get_hooks_opt())
-      hooks->on_call(sloc, target);
+    if(auto hooks = ctx.global().get_hooks_opt())
+      hooks->on_call(sloc, target.as_function());
 
-    target.invoke(self, global, ::std::move(stack));
+    target.as_function().invoke(self, ctx.global(), ::std::move(ctx.alt_stack()));
     return air_status_next;
-  }
-
-AIR_Status
-do_function_call(const Executive_Context& ctx, PTC_Aware ptc, const Source_Location& sloc)
-  {
-    auto val = ctx.stack().top().dereference_readonly();
-    if(val.is_null())
-      throw Runtime_Error(xtc_format,
-               "Function not found");
-
-    if(!val.is_function())
-      throw Runtime_Error(xtc_format,
-               "Attempt to call a non-function (value `$1`)", val);
-
-    const auto& target = val.as_function();
-    auto& self = ctx.stack().mut_top().pop_modifier();
-    ctx.stack().clear_red_zone();
-    return do_invoke_maybe_tail(self, ctx.global(), ptc, sloc, target, ::std::move(ctx.alt_stack()));
   }
 
 template<typename ContainerT>
@@ -2466,8 +2446,21 @@ solidify(AVM_Rod& rod) const
             if(auto hooks = ctx.global().get_hooks_opt())
               hooks->on_trap(sloc, ctx);
 
-            do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs);
-            return do_function_call(ctx, ptc, sloc);
+            // Collect arguments from left to right.
+            ctx.alt_stack().clear();
+            for(uint32_t k = 0;  k != nargs;  ++k)
+              ctx.alt_stack().push() = ::std::move(ctx.stack().mut_top(nargs - 1 - k));
+            ctx.stack().pop(nargs);
+
+            // Copy the target reference into the red zone, as we probably don't
+            // want to introduce a temporary object on the system stack.
+            ctx.stack().clear_red_zone();
+            ctx.stack().push();
+            ctx.stack().mut_top() = ctx.stack().top(1);
+            const auto& target = ctx.stack().top().dereference_readonly();
+            ctx.stack().pop();
+            ctx.stack().mut_top().pop_modifier();
+            return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
           }
 
           // Uparam
@@ -3855,55 +3848,78 @@ solidify(AVM_Rod& rod) const
             if(auto hooks = ctx.global().get_hooks_opt())
               hooks->on_trap(sloc, ctx);
 
-            ctx.alt_stack().clear();
-            auto va_gen = ctx.stack().top().dereference_readonly();
-            if(va_gen.type() == type_null) {
-              // There is no argument.
+            auto temp_value = ctx.stack().top().dereference_readonly();
+            if(temp_value.is_null()) {
+              // There is no argument for the target function.
+              ctx.alt_stack().clear();
               ctx.stack().pop();
-              return do_function_call(ctx, ptc, sloc);
             }
-            else if(va_gen.type() == type_array) {
-              // Arguments are temporary values.
-              ctx.stack().pop();
-              for(const auto& val : va_gen.as_array())
+            else if(temp_value.is_array()) {
+              // Push all values from left to right, as temporary values.
+              ctx.alt_stack().clear();
+              for(const auto& val : temp_value.as_array())
                 ctx.alt_stack().push().set_temporary(val);
-              return do_function_call(ctx, ptc, sloc);
+              ctx.stack().pop();
             }
-            else if(va_gen.type() == type_function) {
-              // Invoke the generator with no argument to get the number of
-              // variadic arguments to generate. This destroys its `this`
-              // reference so we have to stash it first.
-              auto va_self = ctx.stack().mut_top().pop_modifier();
-              do_invoke_maybe_tail(ctx.stack().mut_top(), ctx.global(), ptc_aware_none, sloc,
-                                   va_gen.as_function(), ::std::move(ctx.alt_stack()));
-              auto va_num = ctx.stack().top().dereference_readonly();
+            else if(temp_value.is_function()) {
+              // Invoke the generator function with no argument to get the number
+              // of variadic arguments. This destroys its self reference, so we have
+              // to stash it first.
+              auto va_gen = ::std::move(temp_value.mut_function());
+              ctx.stack().mut_top().pop_modifier();
+              ctx.stack().push();
+              ctx.stack().mut_top() = ctx.stack().mut_top(1);
+              ctx.alt_stack().clear();
+              do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, va_gen);
+              temp_value = ctx.stack().top().dereference_readonly();
               ctx.stack().pop();
 
-              if(va_num.type() != type_integer)
+              if(temp_value.type() != type_integer)
                 throw Runtime_Error(xtc_format,
-                         "Variadic argument count was not an integer (value `$1`)", va_num);
+                         "Invalid number of variadic arguments (value `$1`)", temp_value);
 
-              if((va_num.as_integer() < 0) || (va_num.as_integer() > INT_MAX))
+              if((temp_value.as_integer() < 0) || (temp_value.as_integer() > INT_MAX))
                 throw Runtime_Error(xtc_format,
-                         "Variadic argument count was not valid (value `$1`)", va_num);
+                         "Invalid number of variadic arguments (value `$1`)", temp_value);
 
-              // Generate arguments into `stack`.
-              for(V_integer va_idx = 0;  va_idx != va_num.as_integer();  ++va_idx) {
-                auto& va_arg_self = ctx.stack().push();
-                va_arg_self = va_self;
+              const uint32_t nargs = static_cast<uint32_t>(temp_value.as_integer());
+              if(nargs == 0) {
+                // There is no argument for the target function.
                 ctx.alt_stack().clear();
-                ctx.alt_stack().push().set_temporary(va_idx);
-                do_invoke_maybe_tail(va_arg_self, ctx.global(), ptc_aware_none, sloc,
-                                     va_gen.as_function(), ::std::move(ctx.alt_stack()));
-                va_arg_self.dereference_readonly();
+                ctx.stack().pop();
               }
+              else {
+                // Initialize `this` references for variadic arguments.
+                for(uint32_t k = 0;  k != nargs - 1;  ++k) {
+                  ctx.stack().push();
+                  ctx.stack().mut_top() = ctx.stack().top(1);
+                }
 
-              do_pop_arguments(ctx.alt_stack(), ctx.stack(), (uint32_t) va_num.as_integer());
-              return do_function_call(ctx, ptc, sloc);
+                // Generate varaidic arguments, and store them on `stack` from
+                // right to left for later use.
+                for(uint32_t k = 0;  k != nargs;  ++k) {
+                  ctx.alt_stack().clear();
+                  ctx.alt_stack().push().set_temporary(V_integer(k));
+                  do_invoke_partial(ctx.stack().mut_top(k), ctx, sloc, ptc_aware_none, va_gen);
+                  ctx.stack().top(k).dereference_readonly();
+                }
+
+                // Move arguments into `alt_stack` from left to right.
+                ctx.alt_stack().clear();
+                for(uint32_t k = 0;  k != nargs;  ++k)
+                  ctx.alt_stack().push() = ::std::move(ctx.stack().mut_top(k));
+                ctx.stack().pop(nargs);
+              }
             }
             else
               throw Runtime_Error(xtc_format,
-                       "Invalid variadic argument generator (value `$1`)", va_gen);
+                       "Invalid variadic argument generator (value `$1`)", temp_value);
+
+            // Invoke the target function with arguments from `alt_stack`.
+            ctx.stack().clear_red_zone();
+            temp_value = ctx.stack().top().dereference_readonly();
+            ctx.stack().mut_top().pop_modifier();
+            return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, temp_value);
           }
 
           // Uparam
@@ -3994,8 +4010,11 @@ solidify(AVM_Rod& rod) const
             if(auto hooks = ctx.global().get_hooks_opt())
               hooks->on_trap(sloc, ctx);
 
-            ROCKET_ASSERT(nargs != 0);
-            do_pop_arguments(ctx.alt_stack(), ctx.stack(), nargs - 1);
+            // Collect arguments from left to right.
+            ctx.alt_stack().clear();
+            for(uint32_t k = 0;  k != nargs - 1;  ++k)
+              ctx.alt_stack().push() = ::std::move(ctx.stack().mut_top(nargs - 2 - k));
+            ctx.stack().pop(nargs - 1);
 
             // Get the path to import.
             const auto& path_val = ctx.stack().top().dereference_readonly();
@@ -4037,11 +4056,10 @@ solidify(AVM_Rod& rod) const
             AIR_Optimizer optmz(sp.opts);
             optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
-            auto target = optmz.create_function(script_sloc, sref("[file scope]"));
-            auto& self = ctx.stack().mut_top().set_temporary(nullopt);
             ctx.stack().clear_red_zone();
-            return do_invoke_maybe_tail(self, ctx.global(), ptc_aware_none, sloc, target,
-                                        ::std::move(ctx.alt_stack()));
+            ctx.stack().mut_top().set_void();
+            return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none,
+                                     optmz.create_function(script_sloc, sref("[file scope]")));
           }
 
           // Uparam
@@ -4323,7 +4341,16 @@ solidify(AVM_Rod& rod) const
               hooks->on_trap(sloc, ctx);
 
             ctx.stack().swap(ctx.alt_stack());
-            return do_function_call(ctx, ptc, sloc);
+
+            // Copy the target reference into the red zone, as we probably don't
+            // want to introduce a temporary object on the system stack.
+            ctx.stack().clear_red_zone();
+            ctx.stack().push();
+            ctx.stack().mut_top() = ctx.stack().top(1);
+            const auto& target = ctx.stack().top().dereference_readonly();
+            ctx.stack().pop();
+            ctx.stack().mut_top().pop_modifier();
+            return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
           }
 
           // Uparam
