@@ -206,8 +206,7 @@ do_duplicate_sequence(ContainerT& src, int64_t count)
     // Duplicate elements, using binary exponential backoff.
     src.reserve((size_t) rlen);
     while(src.ssize() < rlen)
-      src.append(src.begin(),
-            src.begin() + (ptrdiff_t) ::rocket::min(rlen - src.ssize(), src.ssize()));
+      src.append(src.begin(), src.begin() + (ptrdiff_t) ::rocket::min(rlen - src.ssize(), src.ssize()));
   }
 
 ROCKET_FLATTEN ROCKET_NEVER_INLINE
