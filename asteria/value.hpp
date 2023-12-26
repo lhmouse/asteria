@@ -103,7 +103,7 @@ class Value
 
     [[noreturn]]
     void
-    do_throw_type_mismatch(const char* desc) const;
+    do_throw_type_mismatch(const char* expecting) const;
 
     [[noreturn]]
     void

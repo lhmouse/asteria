@@ -187,11 +187,11 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
 
 void
 Value::
-do_throw_type_mismatch(const char* desc) const
+do_throw_type_mismatch(const char* expecting) const
   {
     ::rocket::sprintf_and_throw<::std::invalid_argument>(
-          "asteria::Value: type mismatch (expecting `%s`, got `%s`)",
-          desc, describe_type(this->type()));
+          "asteria::Value: type mismatch (expecting %s, got `%s`)",
+          expecting, describe_type(this->type()));
   }
 
 void
