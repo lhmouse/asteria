@@ -4,12 +4,10 @@ func fib(x) {
   return x <= 1 ? x : fib(x-1) + fib(x-2);
 }
 
-var n, res, t1, t2;
+var n = std.numeric.parse(__varg(0) ?? "34");
+var t1 = std.chrono.hires_now();
+var r = fib(n);
+var t2 = std.chrono.hires_now();
 
-n = std.numeric.parse(__varg(0) ?? "34");
-t1 = std.chrono.hires_now();
-res = fib(n);
-t2 = std.chrono.hires_now();
-
-std.io.putfln("fib($1) = $2", n, res);
+std.io.putfln("fib($1) = $2", n, r);
 std.io.putfln("  time  = $1 ms", t2 - t1);
