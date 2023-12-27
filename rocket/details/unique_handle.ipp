@@ -25,8 +25,7 @@ class stored_handle
     explicit constexpr
     stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
       :
-        closer_base(),
-        m_hv(this->as_closer().null())
+        closer_base(), m_hv(this->as_closer().null())
       { }
 
     template<typename... clparamsT>
@@ -34,15 +33,11 @@ class stored_handle
     stored_handle(handle_type hv, clparamsT&&... clparams)
       noexcept(is_nothrow_constructible<closer_type, clparamsT&&...>::value)
       :
-        closer_base(forward<clparamsT>(clparams)...),
-        m_hv(move(hv))
+        closer_base(forward<clparamsT>(clparams)...), m_hv(move(hv))
       { }
 
     ~stored_handle()
-      {
-        if(!this->as_closer().is_null(this->m_hv))
-          this->reset(this->as_closer().null());
-      }
+      { this->reset(this->as_closer().null());  }
 
     stored_handle(const stored_handle&) = delete;
     stored_handle& operator=(const stored_handle&) = delete;
@@ -63,14 +58,24 @@ class stored_handle
 
     handle_type
     release() noexcept
-      { return ::std::exchange(this->m_hv, this->as_closer().null());  }
+      {
+        if(this->as_closer().is_null(this->m_hv))
+          return this->m_hv;
 
+        auto hv_old = noadl::exchange(this->m_hv, this->as_closer().null());
+        return hv_old;
+      }
+
+    ROCKET_ALWAYS_INLINE
     void
     reset(handle_type hv_new) noexcept
       {
-        auto hv_old = ::std::exchange(this->m_hv, move(hv_new));
+        if(this->as_closer().is_null(this->m_hv) && this->as_closer().is_null(hv_new))
+          return;
+
+        auto hv_old = noadl::exchange(this->m_hv, hv_new);
         if(!this->as_closer().is_null(hv_old))
-          this->as_closer().close(move(hv_old));
+          this->as_closer() (hv_old);
       }
 
     void

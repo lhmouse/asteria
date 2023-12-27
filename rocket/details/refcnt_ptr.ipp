@@ -22,19 +22,27 @@ class refcnt_cJveMKH5bI7L
 
     int
     add_reference() const noexcept
-      { return ++(this->m_nref);  }
+      { return ++ this->m_nref;  }
 
     int
     drop_reference() const noexcept
-      { return --(this->m_nref);  }
+      { return -- this->m_nref;  }
   };
 
 template<typename elementT, typename deleterT>
 constexpr
 deleterT
-copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
+move_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
   {
     return base.as_deleter();
+  }
+
+template<typename elementT, typename deleterT>
+constexpr
+deleterT
+move_deleter(refcnt_base<elementT, deleterT>& base) noexcept
+  {
+    return move(base.as_deleter());
   }
 
 template<typename elementT>
@@ -69,21 +77,11 @@ class stored_pointer
   public:
     bool
     unique() const noexcept
-      {
-        auto ptr = this->m_ptr;
-        if(!ptr)
-          return false;
-        return ptr->refcnt_cJveMKH5bI7L::unique();
-      }
+      { return this->m_ptr && this->m_ptr->refcnt_cJveMKH5bI7L::unique();  }
 
     int
     use_count() const noexcept
-      {
-        auto ptr = this->m_ptr;
-        if(!ptr)
-          return 0;
-        return ptr->refcnt_cJveMKH5bI7L::use_count();
-      }
+      { return this->m_ptr ? this->m_ptr->refcnt_cJveMKH5bI7L::use_count() : 0;  }
 
     constexpr
     pointer
@@ -92,25 +90,34 @@ class stored_pointer
 
     pointer
     release() noexcept
-      { return noadl::exchange(this->m_ptr);  }
+      {
+        if(this->m_ptr == nullptr)
+          return nullptr;
+
+        auto ptr_old = noadl::exchange(this->m_ptr);
+        return ptr_old;
+      }
 
     pointer
     fork() const noexcept
       {
-        auto ptr = this->m_ptr;
-        if(ptr)
-          ptr->refcnt_cJveMKH5bI7L::add_reference();
-        return ptr;
+        if(this->m_ptr == nullptr)
+          return nullptr;
+
+        this->m_ptr->refcnt_cJveMKH5bI7L::add_reference();
+        return this->m_ptr;
       }
 
     ROCKET_ALWAYS_INLINE
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, ptr_new);
-        if(ptr)
-          if(ROCKET_UNEXPECT(ptr->refcnt_cJveMKH5bI7L::drop_reference() == 0))
-            (copy_deleter) (*ptr)(ptr);
+        if((this->m_ptr == nullptr) && (ptr_new == nullptr))
+          return;
+
+        auto ptr_old = noadl::exchange(this->m_ptr, ptr_new);
+        if((ptr_old != nullptr) && (ptr_old->refcnt_cJveMKH5bI7L::drop_reference() == 0))
+          noadl::details_refcnt_ptr::move_deleter(*ptr_old) (ptr_old);
       }
 
     void

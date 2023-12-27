@@ -105,10 +105,7 @@ class storage_handle
     constexpr
 #endif
     ~storage_handle()
-      {
-        if(this->m_qstor)
-          this->do_reset(nullptr);
-      }
+      { this->do_reset(nullptr);  }
 
     storage_handle(const storage_handle&) = delete;
     storage_handle& operator=(const storage_handle&) = delete;
@@ -122,16 +119,12 @@ class storage_handle
       {
         // Decrement the reference count with acquire-release semantics to prevent
         // races on `*qstor`.
+        if((this->m_qstor == nullptr) && (qstor_new == nullptr))
+          return;
+
         auto qstor = ::std::exchange(this->m_qstor, qstor_new);
-        if(ROCKET_EXPECT(!qstor))
-          return;
-
-        if(ROCKET_EXPECT(qstor->nref.decrement() != 0))
-          return;
-
-        // Unlike vectors, strings require value types to be complete.
-        // This is a direct call without type erasure.
-        this->do_destroy_storage(qstor);
+        if((qstor != nullptr) && (qstor->nref.decrement() == 0))
+          this->do_destroy_storage(qstor);
       }
 
     ROCKET_NEVER_INLINE static

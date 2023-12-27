@@ -92,14 +92,24 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
 
     pointer
     release() noexcept
-      { return noadl::exchange(this->m_ptr);  }
+      {
+        if(this->m_ptr == nullptr)
+          return nullptr;
 
+        auto ptr_old = noadl::exchange(this->m_ptr);
+        return ptr_old;
+      }
+
+    ROCKET_ALWAYS_INLINE
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, move(ptr_new));
-        if(ptr)
-          (*(this->as_deleter()))(ptr);
+        if((this->m_ptr == nullptr) && (ptr_new == nullptr))
+          return;
+
+        auto ptr_old = noadl::exchange(this->m_ptr, ptr_new);
+        if(ptr_old != nullptr)
+          this->as_deleter() (ptr_old);
       }
 
     void

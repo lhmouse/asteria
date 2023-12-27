@@ -229,10 +229,7 @@ class storage_handle
     constexpr
 #endif
     ~storage_handle()
-      {
-        if(this->m_qstor)
-          this->do_reset(nullptr);
-      }
+      { this->do_reset(nullptr);  }
 
     storage_handle(const storage_handle&) = delete;
     storage_handle& operator=(const storage_handle&) = delete;
@@ -245,17 +242,14 @@ class storage_handle
     do_reset(storage_pointer qstor_new) noexcept
       {
         // Decrement the reference count with acquire-release semantics to prevent
-        // races on `qstor`.
+        // races on `*qstor`.
+        if((this->m_qstor == nullptr) && (qstor_new == nullptr))
+          return;
+
         auto qstor = ::std::exchange(this->m_qstor, qstor_new);
-        if(ROCKET_EXPECT(!qstor))
-          return;
-
         auto qhead = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
-        if(ROCKET_EXPECT(qhead->nref.decrement() != 0))
-          return;
-
-        // This indirect call is paramount for incomplete type support.
-        reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
+        if((qhead != nullptr) && (qhead->nref.decrement() == 0))
+          reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
       }
 
     ROCKET_NEVER_INLINE static
