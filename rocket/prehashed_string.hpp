@@ -16,7 +16,7 @@ template<typename stringT, typename hashT, typename eqT>
 class basic_prehashed_string
   {
 #ifndef ROCKET_NO_STRICT_HASH_NOEXCEPT
-    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const stringT&>())),
+    static_assert(noexcept(declval<const hashT&>()(declval<const stringT&>())),
                   "hash operations must not throw exceptions");
 #endif  // ROCKET_NO_STRICT_HASH_NOEXCEPT
 
@@ -185,8 +185,8 @@ class basic_prehashed_string
     constexpr
     bool
     equals(const basic_prehashed_string& other) const
-      noexcept(noexcept(::std::declval<const key_equal&>()(
-            ::std::declval<const string_type&>(), ::std::declval<const string_type&>())))
+      noexcept(noexcept(declval<const key_equal&>()(
+            declval<const string_type&>(), declval<const string_type&>())))
       {
         return (this->m_sth.str().size() == other.m_sth.str().size())
                && (this->m_sth.hval() == other.m_sth.hval())
@@ -197,8 +197,8 @@ class basic_prehashed_string
     constexpr
     bool
     equals(const otherT& other) const
-      noexcept(noexcept(::std::declval<const key_equal&>()(
-            ::std::declval<const string_type&>(), ::std::declval<const otherT&>())))
+      noexcept(noexcept(declval<const key_equal&>()(
+            declval<const string_type&>(), declval<const otherT&>())))
       {
         return this->m_sth.as_key_equal()(this->m_sth.str(), other);
       }
@@ -248,7 +248,7 @@ class basic_prehashed_string
       { return this->m_sth.str().max_size();  }
 
     basic_prehashed_string&
-    clear() noexcept(noexcept(::std::declval<string_type&>().clear()))
+    clear() noexcept(noexcept(declval<string_type&>().clear()))
       {
         this->m_sth.clear();
         return *this;

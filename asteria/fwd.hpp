@@ -110,6 +110,7 @@ using ::rocket::begin;
 using ::rocket::end;
 using ::rocket::swap;
 using ::rocket::xswap;
+using ::rocket::declval;
 using ::rocket::move;
 using ::rocket::forward;
 using ::rocket::forward_as_tuple;

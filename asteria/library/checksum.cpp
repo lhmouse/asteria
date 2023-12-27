@@ -913,7 +913,7 @@ do_construct_SHA512(V_object& result)
   }
 
 template<typename HasherT>
-decltype(::std::declval<HasherT&>().finish())
+decltype(declval<HasherT&>().finish())
 do_hash_bytes(const V_string& data)
   {
     HasherT h;
@@ -922,7 +922,7 @@ do_hash_bytes(const V_string& data)
   }
 
 template<typename HasherT>
-decltype(::std::declval<HasherT&>().finish())
+decltype(declval<HasherT&>().finish())
 do_hash_file(const V_string& path)
   {
     // Open the file for reading.

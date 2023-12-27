@@ -311,7 +311,7 @@ template<typename valueT>
 constexpr
 bool
 operator==(const optional<valueT>& lhs, const optional<valueT>& rhs)
-  noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
+  noexcept(noexcept(declval<const valueT&>() == declval<const valueT&>()))
   {
     return (lhs && rhs) ? (*lhs == *rhs) : (!lhs == !rhs);
   }
@@ -320,7 +320,7 @@ template<typename valueT>
 constexpr
 bool
 operator!=(const optional<valueT>& lhs, const optional<valueT>& rhs)
-  noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
+  noexcept(noexcept(declval<const valueT&>() != declval<const valueT&>()))
   {
     return (lhs && rhs) ? (*lhs != *rhs) : (!lhs != !rhs);
   }
@@ -361,7 +361,7 @@ template<typename valueT>
 constexpr
 bool
 operator==(const optional<valueT>& lhs, const valueT& rhs)
-  noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
+  noexcept(noexcept(declval<const valueT&>() == declval<const valueT&>()))
   {
     return !!lhs && (*lhs == rhs);
   }
@@ -370,7 +370,7 @@ template<typename valueT>
 constexpr
 bool
 operator!=(const optional<valueT>& lhs, const valueT& rhs)
-  noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
+  noexcept(noexcept(declval<const valueT&>() != declval<const valueT&>()))
   {
     return !lhs || (*lhs != rhs);
   }
@@ -379,7 +379,7 @@ template<typename valueT>
 constexpr
 bool
 operator==(const valueT& lhs, const optional<valueT>& rhs)
-  noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
+  noexcept(noexcept(declval<const valueT&>() == declval<const valueT&>()))
   {
     return !!rhs && (lhs == *rhs);
   }
@@ -388,7 +388,7 @@ template<typename valueT>
 constexpr
 bool
 operator!=(const valueT& lhs, const optional<valueT>& rhs)
-  noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
+  noexcept(noexcept(declval<const valueT&>() != declval<const valueT&>()))
   {
     return !rhs || (lhs != *rhs);
   }

@@ -135,6 +135,7 @@ using ::std::underflow_error;
 using ::std::begin;
 using ::std::end;
 using ::std::swap;
+using ::std::declval;
 using ::std::move;
 using ::std::forward;
 using ::std::forward_as_tuple;
@@ -181,7 +182,7 @@ struct remove_cvref
 
 template<typename typeT>
 struct is_nothrow_swappable
-  : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>  { };
+  : integral_constant<bool, noexcept(swap(declval<typeT&>(), declval<typeT&>()))>  { };
 
 template<typename typeT>
 struct identity
@@ -221,7 +222,7 @@ struct copy_cv<targetT, const volatile sourceT>
 
 template<typename containerT>
 constexpr
-decltype(::std::declval<const containerT&>().size())
+decltype(declval<const containerT&>().size())
 size(const containerT& cont) noexcept(noexcept(cont.size()))
   { return cont.size();  }
 
@@ -233,7 +234,7 @@ size(const elementT (&)[countT]) noexcept
 
 template<typename containerT>
 constexpr
-decltype(static_cast<ptrdiff_t>(::std::declval<const containerT&>().size()))
+decltype(static_cast<ptrdiff_t>(declval<const containerT&>().size()))
 ssize(const containerT& cont) noexcept(noexcept(static_cast<ptrdiff_t>(cont.size())))
   { return static_cast<ptrdiff_t>(cont.size());  }
 
@@ -277,7 +278,7 @@ struct select_type
 
 template<typename firstT, typename secondT>
 struct select_type<firstT, secondT>
-  : identity<decltype(true ? ::std::declval<firstT()>()() : ::std::declval<secondT()>()())>  { };
+  : identity<decltype(true ? declval<firstT()>()() : declval<secondT()>()())>  { };
 
 template<typename lhsT, typename rhsT>
 constexpr
@@ -618,7 +619,7 @@ is_none_of(const targetT& targ, initializer_list<elementT> init)
 
 template<typename containerT, typename targetT>
 constexpr
-typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+typename remove_reference<decltype(*(begin(declval<containerT>())))>::type*
 find(containerT&& cont, targetT&& targ)
   {
     for(auto& elem : cont)
@@ -640,7 +641,7 @@ find(initializer_list<elementT> init, targetT&& targ)
 
 template<typename containerT, typename predictorT>
 constexpr
-typename remove_reference<decltype(*(begin(::std::declval<containerT>())))>::type*
+typename remove_reference<decltype(*(begin(declval<containerT>())))>::type*
 find_if(containerT&& cont, predictorT&& pred)
   {
     for(auto& elem : cont)
@@ -782,7 +783,7 @@ struct lowest_unsigned
 // Fancy pointer conversion
 template<typename pointerT>
 constexpr
-typename remove_reference<decltype(*(::std::declval<pointerT&>()))>::type*
+typename remove_reference<decltype(*(declval<pointerT&>()))>::type*
 unfancy(pointerT&& ptr)
   {
     return ptr ? ::std::addressof(*ptr) : nullptr;

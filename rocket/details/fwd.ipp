@@ -66,7 +66,7 @@ struct can_static_cast
 
 template<typename targetT, typename sourceT>
 struct can_static_cast<targetT, sourceT,
-           ROCKET_VOID_DECLTYPE(static_cast<targetT>(::std::declval<sourceT>()))>
+           ROCKET_VOID_DECLTYPE(static_cast<targetT>(declval<sourceT>()))>
   :
     true_type
   {
@@ -81,7 +81,7 @@ struct can_dynamic_cast
 
 template<typename targetT, typename sourceT>
 struct can_dynamic_cast<targetT, sourceT,
-           ROCKET_VOID_DECLTYPE(dynamic_cast<targetT>(::std::declval<sourceT>()))>
+           ROCKET_VOID_DECLTYPE(dynamic_cast<targetT>(declval<sourceT>()))>
   :
     true_type
   {

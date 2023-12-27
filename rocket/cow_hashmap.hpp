@@ -45,7 +45,7 @@ class cow_hashmap
 #ifndef ROCKET_NO_STRICT_HASH_NOEXCEPT
     // If an exception is thrown during rehashing, the behavior is undefined.
     static_assert(
-        noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
+        noexcept(declval<const hashT&>()(declval<const keyT&>())),
         "hash operations must not throw exceptions");
 #endif  // ROCKET_NO_STRICT_HASH_NOEXCEPT
 
