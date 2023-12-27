@@ -47,11 +47,15 @@ class Module_Loader::Unique_Stream
 
     explicit
     Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const char* path)
-      { this->reset(loader, path);  }
+      {
+        this->reset(loader, path);
+      }
 
     explicit
     Unique_Stream(Unique_Stream&& other) noexcept
-      { this->swap(other);  }
+      {
+        this->swap(other);
+      }
 
     Unique_Stream&
     operator=(Unique_Stream&& other) & noexcept
@@ -68,21 +72,10 @@ class Module_Loader::Unique_Stream
         return *this;
       }
 
-  private:
-    void
-    do_reset(const refcnt_ptr<Module_Loader>& loader, locked_stream_pair* strm) noexcept
-      {
-        auto qloader = ::rocket::exchange(this->m_loader, loader);
-        auto qstrm = ::rocket::exchange(this->m_strm, strm);
-        if(qloader && qstrm)
-          qloader->do_unlock_stream(qstrm);
-      }
-
   public:
     ~Unique_Stream()
       {
-        if(this->m_strm)
-          this->do_reset(nullptr, nullptr);
+        this->reset();
       }
 
     explicit operator
@@ -92,25 +85,39 @@ class Module_Loader::Unique_Stream
     ::rocket::tinybuf_file&
     get() const noexcept
       {
-        auto qstrm = this->m_strm;
-        ROCKET_ASSERT_MSG(qstrm, "no stream locked");
-        return qstrm->second;
+        ROCKET_ASSERT_MSG(this->m_strm, "no stream");
+        return this->m_strm->second;
       }
 
     Unique_Stream&
     reset() noexcept
       {
-        this->do_reset(nullptr, nullptr);
+        if(this->m_strm == nullptr)
+          return *this;
+
+        auto old_loader = ::rocket::exchange(this->m_loader);
+        auto old_strm = ::rocket::exchange(this->m_strm);
+        old_loader->do_unlock_stream(old_strm);
         return *this;
       }
 
     Unique_Stream&
     reset(const refcnt_ptr<Module_Loader>& loader, const char* path)
       {
-        // Lock the stream. If an exception is thrown, there is no effect.
-        ROCKET_ASSERT(loader);
-        ROCKET_ASSERT(path);
-        this->do_reset(loader, loader->do_lock_stream(path));
+        // If an exception is thrown, there shall be no effect.
+        locked_stream_pair* strm = nullptr;
+        if(loader)
+          strm = loader->do_lock_stream(path);
+
+        if(this->m_strm == nullptr) {
+          this->m_loader = loader;
+          this->m_strm = strm;
+          return *this;
+        }
+
+        auto old_loader = ::rocket::exchange(this->m_loader, loader);
+        auto old_strm = ::rocket::exchange(this->m_strm, strm);
+        old_loader->do_unlock_stream(old_strm);
         return *this;
       }
   };
