@@ -267,41 +267,35 @@ make_unique(paramsT&&... params)
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 unique_ptr<targetT>
 static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     unique_ptr<targetT> dptr(static_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    sptr.release();
+    if(dptr)
+      sptr.release();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 unique_ptr<targetT>
 dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     unique_ptr<targetT> dptr(dynamic_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    sptr.release();
+    if(dptr)
+      sptr.release();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 unique_ptr<targetT>
 const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     unique_ptr<targetT> dptr(const_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    sptr.release();
+    if(dptr)
+      sptr.release();
     return dptr;
   }
 

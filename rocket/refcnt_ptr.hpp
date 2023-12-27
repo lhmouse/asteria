@@ -356,80 +356,68 @@ make_refcnt(paramsT&&... params)
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<targetT>
 static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
     refcnt_ptr<targetT> dptr(static_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
+    if(dptr)
+      dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<targetT>
 dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
     refcnt_ptr<targetT> dptr(dynamic_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
+    if(dptr)
+      dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<targetT>
 const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
     refcnt_ptr<targetT> dptr(const_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
+    if(dptr)
+      dptr->details_refcnt_ptr::refcnt_cJveMKH5bI7L::add_reference();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<targetT>
 static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
     refcnt_ptr<targetT> dptr(static_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    sptr.release();
+    if(dptr)
+      sptr.release();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<targetT>
 dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
     refcnt_ptr<targetT> dptr(dynamic_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    sptr.release();
+    if(dptr)
+      sptr.release();
     return dptr;
   }
 
 template<typename targetT, typename sourceT>
-inline
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<targetT>
 const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
     refcnt_ptr<targetT> dptr(const_cast<targetT*>(sptr.get()));
-    if(!dptr)
-      return dptr;
-
-    sptr.release();
+    if(dptr)
+      sptr.release();
     return dptr;
   }
 
