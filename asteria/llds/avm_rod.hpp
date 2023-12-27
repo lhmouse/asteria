@@ -78,9 +78,8 @@ class AVM_Rod
     // symbols for backtracing, which are copied and stored by these functions and
     // need not be persistent.
     Header*
-    append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
-           void* ctor_arg, Destructor* dtor_opt, Variable_Collector* vcoll_opt,
-           const Source_Location* sloc_opt);
+    append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
+           Destructor* dtor_opt, Variable_Collector* vcoll_opt, const Source_Location* sloc_opt);
 
     // Marks this rod ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.
