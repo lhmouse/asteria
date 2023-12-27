@@ -395,7 +395,10 @@ class storage_handle
     constexpr
 #endif
     ~storage_handle()
-      { this->do_reset(nullptr);  }
+      {
+        if(this->m_qstor)
+          this->do_reset(nullptr);
+      }
 
     storage_handle(const storage_handle&) = delete;
     storage_handle& operator=(const storage_handle&) = delete;
@@ -718,7 +721,9 @@ class storage_handle
 
     void
     deallocate() noexcept
-      { this->do_reset(nullptr);  }
+      {
+        this->do_reset(nullptr);
+      }
 
     void
     share_with(const storage_handle& other) noexcept

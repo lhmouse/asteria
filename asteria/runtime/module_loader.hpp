@@ -69,19 +69,21 @@ class Module_Loader::Unique_Stream
       }
 
   private:
-    Unique_Stream&
+    void
     do_reset(const refcnt_ptr<Module_Loader>& loader, locked_stream_pair* strm) noexcept
       {
         auto qloader = ::rocket::exchange(this->m_loader, loader);
         auto qstrm = ::rocket::exchange(this->m_strm, strm);
         if(qloader && qstrm)
           qloader->do_unlock_stream(qstrm);
-        return *this;
       }
 
   public:
     ~Unique_Stream()
-      { this->do_reset(nullptr, nullptr);  }
+      {
+        if(this->m_strm)
+          this->do_reset(nullptr, nullptr);
+      }
 
     explicit operator
     bool() const noexcept
@@ -97,7 +99,10 @@ class Module_Loader::Unique_Stream
 
     Unique_Stream&
     reset() noexcept
-      { return this->do_reset(nullptr, nullptr);  }
+      {
+        this->do_reset(nullptr, nullptr);
+        return *this;
+      }
 
     Unique_Stream&
     reset(const refcnt_ptr<Module_Loader>& loader, const char* path)
@@ -105,8 +110,8 @@ class Module_Loader::Unique_Stream
         // Lock the stream. If an exception is thrown, there is no effect.
         ROCKET_ASSERT(loader);
         ROCKET_ASSERT(path);
-        auto qstrm = loader->do_lock_stream(path);
-        return this->do_reset(loader, qstrm);
+        this->do_reset(loader, loader->do_lock_stream(path));
+        return *this;
       }
   };
 
