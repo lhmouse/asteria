@@ -382,9 +382,10 @@ without `{ return ref` or `; }`.
 
 ## Object-oriented Programming and the `this` Parameter
 
-In many other programming languages, there is a concept about (non-static)
-member functions. A member function receives an implicit `this` parameter
-that references the object which is 'intuitively' used to call the function.
+In many other programming languages, there is a concept about non-static
+member functions. A non-static member function receives an implicit `this`
+parameter that references the object which is 'intuitively' used to call the
+function.
 
 Our definition of the argument for `this` is based on this 'intuitive' idea.
 The _argument_ for `this` is the reference that denotes the target function
