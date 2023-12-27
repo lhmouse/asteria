@@ -19,14 +19,20 @@ do_reallocate(uint32_t nbkt)
     minfo.count = nbkt + 1;
     ::rocket::xmemalloc(minfo);
 
-    ::rocket::xmemzero(minfo);
+    // Initialize the circular list head. This node may be read, but it is never
+    // written to, and needs no cleanup.
     minfo.count --;
-
     auto new_eptr = (Bucket*) minfo.data + minfo.count;
+    bfill(*new_eptr, 0);
     new_eptr->prev = new_eptr;
     new_eptr->next = new_eptr;
 
+    // Initialize the other nodes.
+    for(auto q = (Bucket*) minfo.data;  q != new_eptr;  ++q)
+      q->next = nullptr;
+
     if(this->m_bptr) {
+      // Move-construct old elements into the new table.
       auto eptr = this->m_bptr + this->m_nbkt;
       while(eptr->next != eptr) {
         // Look for a new bucket for this element. Uniqueness is implied.
