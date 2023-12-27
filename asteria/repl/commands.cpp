@@ -153,7 +153,7 @@ struct Handler_help : Handler
     void
     help_command(cow_string&& cmd) const
       {
-        auto qhand = do_find_handler_opt(::std::move(cmd));
+        auto qhand = do_find_handler_opt(move(cmd));
         if(!qhand)
           return repl_printf("! unknown command `%s`", cmd.c_str());
 
@@ -168,7 +168,7 @@ struct Handler_help : Handler
           return this->list_all_commands();
 
         for(size_t k = 0;  k != args.size();  ++k)
-          this->help_command(::std::move(args.mut(k)));
+          this->help_command(move(args.mut(k)));
       }
   };
 
@@ -204,7 +204,7 @@ struct Handler_heredoc : Handler
         if(args.size() != 1)
           return repl_printf("! exactly one terminator string expected");
 
-        repl_heredoc = ::std::move(args.mut(0));
+        repl_heredoc = move(args.mut(0));
         repl_printf("* the next snippet will be terminated by `%s`",
                     repl_heredoc.c_str());
       }
@@ -403,7 +403,7 @@ handle_repl_command(cow_string&& cmdline)
         // Blank characters outside quotes terminate arguments.
         size_t next = cmdline.find_not_of(pos, sref(" \f\n\r\t\v"));
         if((next != pos) && has_token) {
-          args.emplace_back(::std::move(cmd));
+          args.emplace_back(move(cmd));
           cmd.clear();
           has_token = false;
         }
@@ -440,16 +440,16 @@ handle_repl_command(cow_string&& cmdline)
       return;
 
     // Pop the command and execute it.
-    cmd = ::std::move(args.mut(0));
+    cmd = move(args.mut(0));
     args.erase(0, 1);
 
-    auto qhand = do_find_handler_opt(::std::move(cmd));
+    auto qhand = do_find_handler_opt(move(cmd));
     if(!qhand)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
           "Unknown command `%s` (type `:help` for available commands)",
           cmd.c_str());
 
-    qhand->handle(::std::move(args));
+    qhand->handle(move(args));
   }
 
 }  // namespace asteria

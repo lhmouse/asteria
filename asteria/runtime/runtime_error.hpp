@@ -36,7 +36,7 @@ class Runtime_Error
     explicit
     Runtime_Error(Uxtc_throw, XValT&& xval, const Source_Location& xsloc)
       :
-        m_value(::std::forward<XValT>(xval))
+        m_value(forward<XValT>(xval))
       {
         this->do_backtrace();
         this->do_insert_frame(frame_type_throw, &xsloc, this->m_value);

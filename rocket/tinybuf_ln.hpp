@@ -34,7 +34,8 @@ class basic_tinybuf_ln
       { }
 
     constexpr
-    basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)  { }
+    basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)
+      { }
 
     explicit
     basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
@@ -48,7 +49,7 @@ class basic_tinybuf_ln
     basic_tinybuf_ln(xlnT&& xln, open_mode mode, const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<buffer_type, xlnT&&, const allocator_type>::value)
       :
-        m_ln(::std::forward<xlnT>(xln), alloc), m_mode(mode)
+        m_ln(forward<xlnT>(xln), alloc), m_mode(mode)
       { }
 
     // The copy and move constructors are necessary because `basic_tinybuf`
@@ -76,19 +77,19 @@ class basic_tinybuf_ln
     basic_tinybuf_ln(basic_tinybuf_ln&& other)
       noexcept(is_nothrow_move_constructible<buffer_type>::value)
       :
-        tinybuf_type(), m_ln(::std::move(other.m_ln)), m_mode(noadl::exchange(other.m_mode))
+        tinybuf_type(), m_ln(move(other.m_ln)), m_mode(noadl::exchange(other.m_mode))
       { }
 
     basic_tinybuf_ln(basic_tinybuf_ln&& other, const allocator_type& alloc) noexcept
       :
-        m_ln(::std::move(other.m_ln), alloc), m_mode(noadl::exchange(other.m_mode))
+        m_ln(move(other.m_ln), alloc), m_mode(noadl::exchange(other.m_mode))
       { }
 
     basic_tinybuf_ln&
     operator=(basic_tinybuf_ln& other) &&
       noexcept(is_nothrow_move_assignable<buffer_type>::value)
       {
-        this->m_ln = ::std::move(other.m_ln);
+        this->m_ln = move(other.m_ln);
         this->m_mode = noadl::exchange(other.m_mode);
         return *this;
       }
@@ -136,7 +137,7 @@ class basic_tinybuf_ln
     basic_tinybuf_ln&
     set_buffer(xlnT&& xln, open_mode mode)
       {
-        this->m_ln = ::std::forward<xlnT>(xln);
+        this->m_ln = forward<xlnT>(xln);
         this->m_mode = mode;
         return *this;
       }
@@ -145,7 +146,7 @@ class basic_tinybuf_ln
     basic_tinybuf_ln&
     set_buffer(xlnT&& xln)
       {
-        this->m_ln = ::std::forward<xlnT>(xln);
+        this->m_ln = forward<xlnT>(xln);
         return *this;
       }
 

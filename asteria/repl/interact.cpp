@@ -104,7 +104,7 @@ read_execute_print_single()
         // Process the command, which may re-populate `repl_source`.
         auto cmdline = repl_source.substr(pos);
         repl_source.clear();
-        handle_repl_command(::std::move(cmdline));
+        handle_repl_command(move(cmdline));
       }
       catch(exception& stdex) {
         return repl_printf("! exception: %s", stdex.what());
@@ -139,11 +139,11 @@ read_execute_print_single()
       }
 
       ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
-      tstrm.reload(real_name, 1, ::std::move(cbuf));
-      stmtq.reload_oneline(::std::move(tstrm));
+      tstrm.reload(real_name, 1, move(cbuf));
+      stmtq.reload_oneline(move(tstrm));
 
-      repl_script.reload(real_name, ::std::move(stmtq));
-      repl_file = ::std::move(real_name);
+      repl_script.reload(real_name, move(stmtq));
+      repl_file = move(real_name);
     }
     catch(Compiler_Error& except) {
       try {
@@ -156,11 +156,11 @@ read_execute_print_single()
         }
 
         ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
-        tstrm.reload(real_name, 1, ::std::move(cbuf));
-        stmtq.reload(::std::move(tstrm));
+        tstrm.reload(real_name, 1, move(cbuf));
+        stmtq.reload(move(tstrm));
 
-        repl_script.reload(real_name, ::std::move(stmtq));
-        repl_file = ::std::move(real_name);
+        repl_script.reload(real_name, move(stmtq));
+        repl_file = move(real_name);
       }
       catch(Compiler_Error& again) {
         // It can't be parsed either way, so fail.
@@ -175,7 +175,7 @@ read_execute_print_single()
     try {
       // Execute the script.
       repl_printf("* running '%s'...", repl_file.c_str());
-      ref = repl_script.execute(::std::move(repl_args));
+      ref = repl_script.execute(move(repl_args));
     }
     catch(exception& stdex) {
       return repl_printf("! exception: %s", stdex.what());

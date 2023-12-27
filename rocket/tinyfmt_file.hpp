@@ -40,7 +40,7 @@ class basic_tinyfmt_file
     basic_tinyfmt_file(paramsT&&... params)
       noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
       :
-        m_buf(::std::forward<paramsT>(params)...)
+        m_buf(forward<paramsT>(params)...)
       { }
 
     basic_tinyfmt_file&
@@ -82,7 +82,7 @@ class basic_tinyfmt_file
     basic_tinyfmt_file&
     reset(file_type&& file) noexcept
       {
-        this->m_buf.reset(::std::move(file));
+        this->m_buf.reset(move(file));
         return *this;
       }
 

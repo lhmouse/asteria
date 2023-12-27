@@ -80,7 +80,7 @@ class cow_vector
 
     cow_vector(cow_vector&& other) noexcept
       :
-        m_sth(::std::move(other.m_sth.as_allocator()))
+        m_sth(move(other.m_sth.as_allocator()))
       { this->m_sth.exchange_with(other.m_sth);  }
 
     cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
@@ -113,7 +113,7 @@ class cow_vector
     cow_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       :
         cow_vector(alloc)
-      { this->assign(::std::move(first), ::std::move(last));  }
+      { this->assign(move(first), move(last));  }
 
     cow_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       :
@@ -497,7 +497,7 @@ class cow_vector
         size_type len = this->size();
 
         if(ROCKET_EXPECT(dist && (dist == n) && ptr && (n <= cap - len))) {
-          this->m_sth.append_range_unchecked(::std::move(first), ::std::move(last));
+          this->m_sth.append_range_unchecked(move(first), move(last));
           return *this;
         }
 
@@ -506,13 +506,13 @@ class cow_vector
         if(ROCKET_EXPECT(dist && (dist == n))) {
           // The length is known.
           ptr = sth.reallocate_prepare(this->m_sth, len, n | cap / 2);
-          sth.append_range_unchecked(::std::move(first), ::std::move(last));
+          sth.append_range_unchecked(move(first), move(last));
         }
         else {
           // The length is not known.
           ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
           cap = sth.capacity();
-          for(auto it = ::std::move(first);  it != last;  ++it) {
+          for(auto it = move(first);  it != last;  ++it) {
             if(ROCKET_UNEXPECT(sth.size() >= cap)) {
               ptr = sth.reallocate_prepare(sth, len, cap / 2);
               cap = sth.capacity();
@@ -536,14 +536,14 @@ class cow_vector
         size_type len = this->size();
 
         if(ROCKET_EXPECT(ptr && (len < cap))) {
-          auto& ref = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
+          auto& ref = this->m_sth.emplace_back_unchecked(forward<paramsT>(params)...);
           return ref;
         }
 
         // Allocate new storage.
         storage_handle sth(this->m_sth.as_allocator());
         ptr = sth.reallocate_prepare(this->m_sth, len, 17 | cap / 2);
-        auto& ref = sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
+        auto& ref = sth.emplace_back_unchecked(forward<paramsT>(params)...);
         sth.reallocate_finish(this->m_sth);
         this->m_sth.exchange_with(sth);
         return ref;
@@ -561,7 +561,7 @@ class cow_vector
     cow_vector&
     push_back(value_type&& value)
       {
-        this->emplace_back(::std::move(value));
+        this->emplace_back(move(value));
         return *this;
       }
 
@@ -582,7 +582,7 @@ class cow_vector
       {
         this->do_clamp_subvec(tpos, 0);  // just check
         size_type kpos = this->size();
-        this->push_back(::std::move(value));
+        this->push_back(move(value));
         this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
@@ -619,7 +619,7 @@ class cow_vector
       {
         this->do_clamp_subvec(tpos, 0);  // just check
         size_type kpos = this->size();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(move(first), move(last));
         this->do_swizzle_unchecked(tpos, kpos);
         return *this;
       }
@@ -639,7 +639,7 @@ class cow_vector
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
         size_type kpos = this->size();
-        this->push_back(::std::move(value));
+        this->push_back(move(value));
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(tptr - tpos, tpos, this->size());
       }
@@ -674,7 +674,7 @@ class cow_vector
       {
         size_type tpos = static_cast<size_type>(tins - this->begin());
         size_type kpos = this->size();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(move(first), move(last));
         auto tptr = this->do_swizzle_unchecked(tpos, kpos);
         return iterator(tptr - tpos, tpos, this->size());
       }
@@ -745,7 +745,7 @@ class cow_vector
     assign(inputT first, inputT last)
       {
         this->clear();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(move(first), move(last));
         return *this;
       }
 

@@ -37,9 +37,9 @@ int main()
 
 ///////////////////////////////////////////////////////////////////////////////
       )__"), tinybuf::open_read);
-    tstrm.reload(sref(__FILE__), 13, ::std::move(cbuf));
+    tstrm.reload(sref(__FILE__), 13, move(cbuf));
     Statement_Sequence sseq(opts);
-    sseq.reload(::std::move(tstrm));
+    sseq.reload(move(tstrm));
 
     const auto& stmts = sseq.get_statements();
     ASTERIA_TEST_CHECK(stmts.size() == 5);   // implicit return

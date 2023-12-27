@@ -94,7 +94,7 @@ struct Valuable_impl<StringT, typename ::std::enable_if<
     void
     assign(StorT& stor, XValT&& xval)
       {
-        stor = V_string(::std::forward<XValT>(xval));
+        stor = V_string(forward<XValT>(xval));
       }
   };
 
@@ -110,7 +110,7 @@ struct Valuable_impl<cow_opaque>
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
-          stor = V_opaque(::std::forward<XValT>(xval));
+          stor = V_opaque(forward<XValT>(xval));
         else
           stor = V_null();
       }
@@ -131,7 +131,7 @@ struct Valuable_impl<refcnt_ptr<OpaqueT>, typename ::std::enable_if<
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
-          stor = V_opaque(::std::forward<XValT>(xval));
+          stor = V_opaque(forward<XValT>(xval));
         else
           stor = V_null();
       }
@@ -149,7 +149,7 @@ struct Valuable_impl<cow_function>
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
-          stor = V_function(::std::forward<XValT>(xval));
+          stor = V_function(forward<XValT>(xval));
         else
           stor = V_null();
       }
@@ -170,7 +170,7 @@ struct Valuable_impl<refcnt_ptr<FunctionT>, typename ::std::enable_if<
     assign(StorT& stor, XValT&& xval)
       {
         if(xval)
-          stor = V_function(::std::forward<XValT>(xval));
+          stor = V_function(forward<XValT>(xval));
         else
           stor = V_null();
       }
@@ -187,7 +187,7 @@ struct Valuable_impl<V_array>
     void
     assign(StorT& stor, XValT&& xval)
       {
-        stor = V_array(::std::forward<XValT>(xval));
+        stor = V_array(forward<XValT>(xval));
       }
   };
 
@@ -202,7 +202,7 @@ struct Valuable_impl<V_object>
     void
     assign(StorT& stor, XValT&& xval)
       {
-        stor = V_object(::std::forward<XValT>(xval));
+        stor = V_object(forward<XValT>(xval));
       }
   };
 
@@ -223,7 +223,7 @@ struct Valuable_impl<XValT [N]>
           arr.emplace_back(static_cast<typename ::std::conditional<
                   ::std::is_lvalue_reference<XArrT&&>::value,
                            const XValT&, XValT&&>::type>(xarr[k]));
-        stor = ::std::move(arr);
+        stor = move(arr);
       }
   };
 
@@ -242,7 +242,7 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
                      XTupT&& xtup)
       {
         int dummy[] = { (static_cast<void>(arr.emplace_back(
-               ::std::get<N>(::std::forward<XTupT>(xtup)))), 1)...  };
+               ::std::get<N>(forward<XTupT>(xtup)))), 1)...  };
         (void)dummy;
       }
 
@@ -255,8 +255,8 @@ struct Valuable_impl<TupleT, typename ::std::conditional<
         constexpr size_t N = ::std::tuple_size<TupleT>::value;
         arr.reserve(N);
         unpack_tuple_aux(arr, ::std::make_index_sequence<N>(),
-                        ::std::forward<XTupT>(xtup));
-        stor = ::std::move(arr);
+                        forward<XTupT>(xtup));
+        stor = move(arr);
       }
   };
 

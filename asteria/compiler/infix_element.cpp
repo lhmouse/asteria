@@ -118,13 +118,13 @@ extract(cow_vector<Expression_Unit>& units)
         cow_vector<Expression_Unit::branch> branches;
         branches.append(2);
         branches.mut(0).type = Expression_Unit::branch_type::branch_type_true;
-        branches.mut(0).units = ::std::move(altr.branch_true);
+        branches.mut(0).units = move(altr.branch_true);
         branches.mut(1).type = Expression_Unit::branch_type::branch_type_false;
-        branches.mut(1).units = ::std::move(altr.branch_false);
+        branches.mut(1).units = move(altr.branch_false);
 
         // Append them to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
-        units.emplace_back(::std::move(xunit));
+        Expression_Unit::S_branch xunit = { altr.sloc, move(branches), altr.assign };
+        units.emplace_back(move(xunit));
         return;
       }
 
@@ -135,11 +135,11 @@ extract(cow_vector<Expression_Unit>& units)
         cow_vector<Expression_Unit::branch> branches;
         branches.append(1);
         branches.mut(0).type = Expression_Unit::branch_type::branch_type_true;
-        branches.mut(0).units = ::std::move(altr.branch_true);
+        branches.mut(0).units = move(altr.branch_true);
 
         // Append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
-        units.emplace_back(::std::move(xunit));
+        Expression_Unit::S_branch xunit = { altr.sloc, move(branches), altr.assign };
+        units.emplace_back(move(xunit));
         return;
       }
 
@@ -150,11 +150,11 @@ extract(cow_vector<Expression_Unit>& units)
         cow_vector<Expression_Unit::branch> branches;
         branches.append(1);
         branches.mut(0).type = Expression_Unit::branch_type::branch_type_false;
-        branches.mut(0).units = ::std::move(altr.branch_false);
+        branches.mut(0).units = move(altr.branch_false);
 
         // Append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
-        units.emplace_back(::std::move(xunit));
+        Expression_Unit::S_branch xunit = { altr.sloc, move(branches), altr.assign };
+        units.emplace_back(move(xunit));
         return;
       }
 
@@ -165,11 +165,11 @@ extract(cow_vector<Expression_Unit>& units)
         cow_vector<Expression_Unit::branch> branches;
         branches.append(1);
         branches.mut(0).type = Expression_Unit::branch_type::branch_type_null;
-        branches.mut(0).units = ::std::move(altr.branch_null);
+        branches.mut(0).units = move(altr.branch_null);
 
         // Append it to `units`.
-        Expression_Unit::S_branch xunit = { altr.sloc, ::std::move(branches), altr.assign };
-        units.emplace_back(::std::move(xunit));
+        Expression_Unit::S_branch xunit = { altr.sloc, move(branches), altr.assign };
+        units.emplace_back(move(xunit));
         return;
       }
 
@@ -183,7 +183,7 @@ extract(cow_vector<Expression_Unit>& units)
 
         // Append the operator itself.
         Expression_Unit::S_operator_rpn xunit = { altr.sloc, altr.xop, altr.assign };
-        units.emplace_back(::std::move(xunit));
+        units.emplace_back(move(xunit));
         return;
       }
 

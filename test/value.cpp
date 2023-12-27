@@ -29,7 +29,7 @@ int main()
     V_array array;
     array.emplace_back(V_boolean(true));
     array.emplace_back(V_string("world"));
-    value = ::std::move(array);
+    value = move(array);
     ASTERIA_TEST_CHECK(value.is_array());
     ASTERIA_TEST_CHECK(value.as_array().at(0).as_boolean() == true);
     ASTERIA_TEST_CHECK(value.as_array().at(1).as_string() == "world");
@@ -37,7 +37,7 @@ int main()
     V_object object;
     object.try_emplace(sref("one"), V_boolean(true));
     object.try_emplace(sref("two"), V_string("world"));
-    value = ::std::move(object);
+    value = move(object);
     ASTERIA_TEST_CHECK(value.is_object());
     ASTERIA_TEST_CHECK(value.as_object().at(sref("one")).as_boolean() == true);
     ASTERIA_TEST_CHECK(value.as_object().at(sref("two")).as_string() == "world");
@@ -117,7 +117,7 @@ int main()
     array.emplace_back(V_boolean(true));
     array.emplace_back(V_string("world"));
     value = array;
-    cmp = ::std::move(array);
+    cmp = move(array);
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_equal);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_equal);
@@ -137,7 +137,7 @@ int main()
     object.clear();
     object.try_emplace(sref("one"), V_boolean(true));
     object.try_emplace(sref("two"), V_string("world"));
-    value = ::std::move(object);
+    value = move(object);
     cmp = value;
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_unordered);
     swap(value, cmp);

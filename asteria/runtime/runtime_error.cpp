@@ -41,7 +41,7 @@ do_insert_frame(Frame_Type type, const Source_Location* sloc_opt, const Value& v
     if(sloc_opt)
       xfrm.sloc = *sloc_opt;
     xfrm.value = val;
-    this->m_frames.insert(this->m_frame_ins, ::std::move(xfrm));
+    this->m_frames.insert(this->m_frame_ins, move(xfrm));
     this->m_frame_ins ++;
 
     // Rebuild the message using new frames. The storage may be reused.

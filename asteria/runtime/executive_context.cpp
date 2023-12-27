@@ -23,7 +23,7 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
     // `this` is null, it is likely that it is never referenced in the function,
     // so lazy initialization is performed to avoid the overhead here.
     if(!xself.is_invalid())
-      this->do_mut_named_reference(nullptr, sref("__this")) = ::std::move(xself);
+      this->do_mut_named_reference(nullptr, sref("__this")) = move(xself);
 
     // Set arguments. Because arguments are evaluated from left to right, the
     // reference at the top is the last argument.
@@ -37,7 +37,7 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
         if(nargs == 0)
           param.set_temporary(nullopt);
         else
-          param = ::std::move(this->m_stack->mut_top(--nargs));
+          param = move(this->m_stack->mut_top(--nargs));
       }
       else
         has_ellipsis = true;
@@ -48,7 +48,7 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
 
     // Move all arguments into the variadic argument getter.
     while(nargs != 0)
-      this->m_lazy_args.emplace_back(::std::move(this->m_stack->mut_top(--nargs)));
+      this->m_lazy_args.emplace_back(move(this->m_stack->mut_top(--nargs)));
   }
 
 Executive_Context::
@@ -99,12 +99,12 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       }
 
       // Stash the result reference.
-      self = ::std::move(this->m_stack->mut_top());
+      self = move(this->m_stack->mut_top());
     }
 
     // Execute all deferred expressions backwards.
     while(!this->m_defer.empty()) {
-      auto pair = ::std::move(this->m_defer.mut_back());
+      auto pair = move(this->m_defer.mut_back());
       this->m_defer.pop_back();
 
       // Execute it.
@@ -121,7 +121,7 @@ do_on_scope_exit_normal_slow(AIR_Status status)
 
     // Restore the result reference.
     if(!self.is_invalid())
-      this->m_stack->push() = ::std::move(self);
+      this->m_stack->push() = move(self);
   }
 
 void
@@ -130,7 +130,7 @@ do_on_scope_exit_exceptional_slow(Runtime_Error& except)
   {
     // Execute all deferred expressions backwards.
     while(!this->m_defer.empty()) {
-      auto pair = ::std::move(this->m_defer.mut_back());
+      auto pair = move(this->m_defer.mut_back());
       this->m_defer.pop_back();
 
       // Execute it.

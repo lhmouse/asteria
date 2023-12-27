@@ -38,7 +38,7 @@ class once_flag
           return;
 
         try {
-          ::std::forward<funcT>(func) (::std::forward<paramsT>(params)...);
+          forward<funcT>(func) (forward<paramsT>(params)...);
           ::__cxxabiv1::__cxa_guard_release(this->m_guard);
         }
         catch(...) {

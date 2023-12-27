@@ -57,7 +57,7 @@ class stored_pointer
     explicit constexpr
     stored_pointer(pointer ptr) noexcept
       :
-        m_ptr(::std::move(ptr))
+        m_ptr(move(ptr))
       { }
 
     ~stored_pointer()

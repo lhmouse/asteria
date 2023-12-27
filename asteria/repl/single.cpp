@@ -24,7 +24,7 @@ load_and_execute_single_noreturn()
 
     // Execute the script, passing all command-line arguments to it. If the
     // script exits without returning a value, success is assumed.
-    auto ref = repl_script.execute(::std::move(repl_args));
+    auto ref = repl_script.execute(move(repl_args));
     if(ref.is_void())
       quick_exit();
 

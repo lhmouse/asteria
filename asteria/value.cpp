@@ -138,7 +138,7 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
           if(!altr.empty()) {
             Rbr_array elema = { &altr, altr.begin() };
             qval = &*(elema.curp);
-            stack.emplace_back(::std::move(elema));
+            stack.emplace_back(move(elema));
             goto r;
           }
           break;
@@ -149,7 +149,7 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
           if(!altr.empty()) {
             Rbr_object elemo = { &altr, altr.begin() };
             qval = &(elemo.curp->second);
-            stack.emplace_back(::std::move(elemo));
+            stack.emplace_back(move(elemo));
             goto r;
           }
           break;
@@ -339,7 +339,7 @@ compare_partial(const Value& other) const
         Rbr_array elem_oth = { &altr_oth, altr_oth.begin() };
         qval = &*(elem_val.curp);
         qoth = &*(elem_oth.curp);
-        stack.emplace_back(::std::move(elem_val), ::std::move(elem_oth));
+        stack.emplace_back(move(elem_val), move(elem_oth));
         goto r;
       }
 
@@ -422,7 +422,7 @@ print(tinyfmt& fmt) const
           Rbr_array elema = { &altr, altr.begin() };
           fmt << "[ ";
           qval = &*(elema.curp);
-          stack.emplace_back(::std::move(elema));
+          stack.emplace_back(move(elema));
           goto r;
         }
         fmt << "[ ]";
@@ -437,7 +437,7 @@ print(tinyfmt& fmt) const
           c_quote(fmt, elemo.curp->first);
           fmt << "\": ";
           qval = &(elemo.curp->second);
-          stack.emplace_back(::std::move(elemo));
+          stack.emplace_back(move(elemo));
           goto r;
         }
         fmt << "{ }";
@@ -548,7 +548,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
           fmt << (elema.curp - altr.begin()) << " = ";
           qval = &*(elema.curp);
-          stack.emplace_back(::std::move(elema));
+          stack.emplace_back(move(elema));
           goto r;
         }
         fmt << "array(0) [ ];";
@@ -565,7 +565,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           c_quote(fmt, elemo.curp->first);
           fmt << "\" = ";
           qval = &(elemo.curp->second);
-          stack.emplace_back(::std::move(elemo));
+          stack.emplace_back(move(elemo));
           goto r;
         }
         fmt << "object(0) { };";

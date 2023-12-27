@@ -172,7 +172,7 @@ std_csv_parse_file(V_string path)
           path);
 
     // Parse characters from the file.
-    ::rocket::tinybuf_file cbuf(::std::move(fp));
+    ::rocket::tinybuf_file cbuf(move(fp));
     return do_csv_parse(cbuf);
   }
 

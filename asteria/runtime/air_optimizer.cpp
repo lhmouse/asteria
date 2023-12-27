@@ -65,7 +65,7 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
     for(size_t k = 0;  k < code.size();  ++k)
       if(auto qnode = code.at(k).rebind_opt(ctx_func))
-        this->m_code.mut(k) = ::std::move(*qnode);
+        this->m_code.mut(k) = move(*qnode);
   }
 
 cow_function

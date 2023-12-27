@@ -44,13 +44,13 @@ class optional
 
     optional(value_type&& value)
       noexcept(is_nothrow_move_constructible<value_type>::value)
-      { this->m_stor.emplace_back(::std::move(value));  }
+      { this->m_stor.emplace_back(move(value));  }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT&&, value_type>::value)>
     optional(yvalueT&& yvalue)
       noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
-      { this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));  }
+      { this->m_stor.emplace_back(forward<yvalueT>(yvalue));  }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&,
@@ -71,7 +71,7 @@ class optional
                typename optional<yvalueT>::value_type&&>::value)
       {
         if(!other.m_stor.empty())
-          this->m_stor.emplace_back(::std::move(other.m_stor.mut_front()));
+          this->m_stor.emplace_back(move(other.m_stor.mut_front()));
       }
 
     // 19.6.3.3, assignment
@@ -100,9 +100,9 @@ class optional
                            is_nothrow_move_assignable<value_type>>::value)
       {
         if(!this->m_stor.empty())
-          this->m_stor.mut_front() = ::std::move(value);
+          this->m_stor.mut_front() = move(value);
         else
-          this->m_stor.emplace_back(::std::move(value));
+          this->m_stor.emplace_back(move(value));
         return *this;
       }
 
@@ -114,9 +114,9 @@ class optional
                            is_nothrow_assignable<value_type&, yvalueT&&>>::value)
       {
         if(!this->m_stor.empty())
-          this->m_stor.mut_front() = ::std::forward<yvalueT>(yvalue);
+          this->m_stor.mut_front() = forward<yvalueT>(yvalue);
         else
-          this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));
+          this->m_stor.emplace_back(forward<yvalueT>(yvalue));
         return *this;
       }
 
@@ -152,9 +152,9 @@ class optional
         if(other.m_stor.empty())
           this->m_stor.clear();
         else if(!this->m_stor.empty())
-          this->m_stor.mut_front() = ::std::move(other.m_stor.mut_front());
+          this->m_stor.mut_front() = move(other.m_stor.mut_front());
         else
-          this->m_stor.emplace_back(::std::move(other.m_stor.mut_front()));
+          this->m_stor.emplace_back(move(other.m_stor.mut_front()));
         return *this;
       }
 
@@ -228,7 +228,7 @@ class optional
     value_or(defvalT&& defval) const
       {
         return this->m_stor.empty()
-                 ? ::std::forward<defvalT>(defval)
+                 ? forward<defvalT>(defval)
                  : this->m_stor.front();
       }
 
@@ -238,7 +238,7 @@ class optional
     value_or(defvalT&& defval)
       {
         return this->m_stor.empty()
-                 ? ::std::forward<defvalT>(defval)
+                 ? forward<defvalT>(defval)
                  : this->m_stor.mut_front();
       }
 
@@ -248,8 +248,8 @@ class optional
     move_value_or(defvalT&& defval)
       {
         return this->m_stor.empty()
-                 ? ::std::forward<defvalT>(defval)
-                 : ::std::move(this->m_stor.mut_front());
+                 ? forward<defvalT>(defval)
+                 : move(this->m_stor.mut_front());
       }
 
     constexpr
@@ -285,7 +285,7 @@ class optional
     emplace(paramsT&&... params)
       {
         this->m_stor.clear();
-        return this->m_stor.emplace_back(::std::forward<paramsT>(params)...);
+        return this->m_stor.emplace_back(forward<paramsT>(params)...);
       }
 
     // N.B. This is a non-standard extension.
@@ -294,7 +294,7 @@ class optional
     value_or_emplace(paramsT&&... params)
       {
         return this->m_stor.empty()
-                 ? this->m_stor.emplace_back(::std::forward<paramsT>(params)...)
+                 ? this->m_stor.emplace_back(forward<paramsT>(params)...)
                  : this->m_stor.mut_front();
       }
   };

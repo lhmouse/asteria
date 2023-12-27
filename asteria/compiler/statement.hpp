@@ -206,7 +206,7 @@ class Statement
     Statement(XStmtT&& xstmt)
        noexcept(::std::is_nothrow_constructible<decltype(m_stor), XStmtT&&>::value)
       :
-        m_stor(::std::forward<XStmtT>(xstmt))
+        m_stor(forward<XStmtT>(xstmt))
       { }
 
     template<typename XStmtT,
@@ -215,7 +215,7 @@ class Statement
     operator=(XStmtT&& xstmt) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XStmtT&&>::value)
       {
-        this->m_stor = ::std::forward<XStmtT>(xstmt);
+        this->m_stor = forward<XStmtT>(xstmt);
         return *this;
       }
 

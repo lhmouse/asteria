@@ -60,18 +60,18 @@ class unique_handle
     explicit constexpr
     unique_handle(handle_type hv) noexcept(is_nothrow_constructible<closer_type>::value)
       :
-        m_sth(::std::move(hv))
+        m_sth(move(hv))
       { }
 
     constexpr
     unique_handle(handle_type hv, const closer_type& cl) noexcept
       :
-        m_sth(::std::move(hv), cl)
+        m_sth(move(hv), cl)
       { }
 
     unique_handle(unique_handle&& other) noexcept
       :
-        unique_handle(other.m_sth.release(), ::std::move(other.m_sth.as_closer()))
+        unique_handle(other.m_sth.release(), move(other.m_sth.as_closer()))
       { }
 
     unique_handle(unique_handle&& other, const closer_type& cl) noexcept
@@ -83,7 +83,7 @@ class unique_handle
     unique_handle&
     operator=(unique_handle&& other) & noexcept
       {
-        this->m_sth.as_closer() = ::std::move(other.m_sth.as_closer());
+        this->m_sth.as_closer() = move(other.m_sth.as_closer());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -136,14 +136,14 @@ class unique_handle
     unique_handle&
     reset(handle_type hv_new) noexcept
       {
-        this->m_sth.reset(::std::move(hv_new));
+        this->m_sth.reset(move(hv_new));
         return *this;
       }
 
     unique_handle&
     reset(handle_type hv_new, const closer_type& cl) noexcept
       {
-        this->m_sth.reset(::std::move(hv_new));
+        this->m_sth.reset(move(hv_new));
         this->m_sth.as_closer() = cl;
         return *this;
       }
@@ -219,7 +219,7 @@ inline
 unique_handle<handleT, details_unique_handle::default_closer_wrapper<handleT, closerT>>
 make_unique_handle(handleT hv, closerT&& cl) noexcept
   {
-    return { hv, ::std::forward<closerT>(cl) };
+    return { hv, forward<closerT>(cl) };
   }
 
 }  // namespace rocket

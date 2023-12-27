@@ -62,14 +62,14 @@ opt<IterT>
 do_find_opt(Reference& self, Reference_Stack& stack, Global_Context& global,
             IterT begin, IterT end, const Value& target, bool match)
   {
-    for(auto it = ::std::move(begin);  it != end;  ++it) {
+    for(auto it = move(begin);  it != end;  ++it) {
       bool result;
       if(target.is_function()) {
         // `target` is a unary predictor.
         stack.clear();
         stack.push().set_temporary(*it);
         self.clear();
-        target.as_function().invoke(self, global, ::std::move(stack));
+        target.as_function().invoke(self, global, move(stack));
         result = self.dereference_readonly().test();
       }
       else {
@@ -77,7 +77,7 @@ do_find_opt(Reference& self, Reference_Stack& stack, Global_Context& global,
         result = it->compare_partial(target) == compare_equal;
       }
       if(result == match)
-        return ::std::move(it);
+        return move(it);
     }
     return nullopt;
   }
@@ -95,7 +95,7 @@ do_compare_total(Reference& self, Reference_Stack& stack, Global_Context& global
     stack.push().set_temporary(lhs);
     stack.push().set_temporary(rhs);
     self.clear();
-    kcomp.invoke(self, global, ::std::move(stack));
+    kcomp.invoke(self, global, move(stack));
     return self.dereference_readonly().compare_total(V_integer(0));
   }
 
@@ -104,20 +104,20 @@ pair<IterT, bool>
 do_bsearch(Reference& self, Reference_Stack& stack, Global_Context& global,
            IterT begin, IterT end, const optV_function& kcomp, const Value& target)
   {
-    auto bpos = ::std::move(begin);
-    auto epos = ::std::move(end);
+    auto bpos = move(begin);
+    auto epos = move(end);
 
     for(;;) {
       ptrdiff_t dist = epos - bpos;
       if(dist <= 0)
-        return { ::std::move(bpos), false };
+        return { move(bpos), false };
 
       // Compare `target` to the element in the middle.
       auto mpos = bpos + (dist >> 1);
       auto cmp = do_compare_total(self, stack, global, kcomp, target, *mpos);
 
       if(cmp == compare_equal)
-        return { ::std::move(mpos), true };
+        return { move(mpos), true };
 
       if(cmp == compare_less)
         epos = mpos;
@@ -132,8 +132,8 @@ do_bound(Reference& self, Reference_Stack& stack, Global_Context& global,
          IterT begin, IterT end, const optV_function& kcomp, const Value& target,
          PredT&& pred)
   {
-    auto bpos = ::std::move(begin);
-    auto epos = ::std::move(end);
+    auto bpos = move(begin);
+    auto epos = move(end);
 
     for(;;) {
       auto dist = epos - bpos;
@@ -181,7 +181,7 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& comp
 
         // Move the element now.
         bout += 1;
-        bout[-1] = ::std::move(elem);
+        bout[-1] = move(elem);
       };
 
     // Input data are divided into blocks of `bsize` elements.
@@ -335,7 +335,7 @@ std_array_count(Global_Context& global, V_array data, V_integer from, optV_integ
     Reference_Stack stack;
     while(auto qit = do_find_opt(self, stack, global, range.first, range.second, target, true)) {
       ++count;
-      range.first = ::std::move(++*qit);
+      range.first = move(++*qit);
     }
     return count;
   }
@@ -349,7 +349,7 @@ std_array_count_not(Global_Context& global, V_array data, V_integer from, optV_i
     Reference_Stack stack;
     while(auto qit = do_find_opt(self, stack, global, range.first, range.second, target, false)) {
       ++count;
-      range.first = ::std::move(++*qit);
+      range.first = move(++*qit);
     }
     return count;
   }
@@ -502,7 +502,7 @@ std_array_ksort(Global_Context& global, V_object object, optV_function comparato
       V_array pair(2);
       pair.mut(0) = r.first.rdstr();
       pair.mut(1) = r.second;
-      data.emplace_back(::std::move(pair));
+      data.emplace_back(move(pair));
     }
 
     // Use reference counting as our advantage.
@@ -576,7 +576,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
 
       // Call the generator function and push the return value.
       self.clear();
-      generator.invoke(self, global, ::std::move(stack));
+      generator.invoke(self, global, move(stack));
       data.emplace_back(self.dereference_readonly());
     }
     return data;

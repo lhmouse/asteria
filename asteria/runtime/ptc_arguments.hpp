@@ -34,7 +34,7 @@ class PTC_Arguments
                   Reference&& self, Reference_Stack&& stack)
       :
         m_sloc(sloc), m_ptc(ptc), m_target(target),
-        m_self(::std::move(self)), m_stack(::std::move(stack))
+        m_self(move(self)), m_stack(move(stack))
       { }
 
   public:

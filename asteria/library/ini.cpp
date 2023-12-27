@@ -124,7 +124,7 @@ do_ini_parse(tinybuf& buf)
         key.assign(line, 1, line.size() - 2);
 
         // Insert a new section.
-        auto& sub = root.try_emplace(::std::move(key), V_object()).first->second;
+        auto& sub = root.try_emplace(move(key), V_object()).first->second;
         ROCKET_ASSERT(sub.is_object());
         sink = &(sub.mut_object());
         continue;
@@ -147,7 +147,7 @@ do_ini_parse(tinybuf& buf)
       }
 
       // Insert a new value.
-      sink->insert_or_assign(::std::move(key), ::std::move(value));
+      sink->insert_or_assign(move(key), move(value));
     }
 
     return root;
@@ -234,7 +234,7 @@ std_ini_parse_file(V_string path)
           path);
 
     // Parse characters from the file.
-    ::rocket::tinybuf_file cbuf(::std::move(fp));
+    ::rocket::tinybuf_file cbuf(move(fp));
     return do_ini_parse(cbuf);
   }
 

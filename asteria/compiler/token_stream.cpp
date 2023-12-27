@@ -105,7 +105,7 @@ class Text_Reader
           return it->first;
 
         val.shrink_to_fit();
-        it = this->m_interned_strings.try_emplace(::std::move(val)).first;
+        it = this->m_interned_strings.try_emplace(move(val)).first;
         return it->first;
       }
   };
@@ -114,7 +114,7 @@ template<typename XTokenT>
 bool
 do_push_token(cow_vector<Token>& tokens, Text_Reader& reader, size_t tlen, XTokenT&& xtoken)
   {
-    tokens.emplace_back(reader.tell(), tlen, ::std::forward<XTokenT>(xtoken));
+    tokens.emplace_back(reader.tell(), tlen, forward<XTokenT>(xtoken));
     reader.consume(tlen);
     return true;
   }
@@ -238,7 +238,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
 
         Token::S_real_literal xtoken;
         xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::quiet_NaN(), sign);
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+        return do_push_token(tokens, reader, tlen, move(xtoken));
       }
 
       case 'i':
@@ -254,7 +254,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
 
         Token::S_real_literal xtoken;
         xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::infinity(), sign);
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+        return do_push_token(tokens, reader, tlen, move(xtoken));
       }
 
       case '0':
@@ -345,7 +345,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
                   compiler_status_integer_literal_inexact, reader.tell());
 
       // Accept the integral value.
-      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+      return do_push_token(tokens, reader, tlen, move(xtoken));
     }
     else {
       // Try casting the value to a `real`. Real numbers are never exact.
@@ -361,7 +361,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
                   compiler_status_real_literal_underflow, reader.tell());
 
       // Accept the real value.
-      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+      return do_push_token(tokens, reader, tlen, move(xtoken));
     }
   }
 
@@ -482,7 +482,7 @@ do_accept_punctuator(cow_vector<Token>& tokens, Text_Reader& reader)
         continue;
 
       Token::S_punctuator xtoken = { cur.punct };
-      return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+      return do_push_token(tokens, reader, tlen, move(xtoken));
     }
 
     // No punctuator has been accepted.
@@ -636,8 +636,8 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
       }
     }
 
-    Token::S_string_literal xtoken = { reader.intern_string(::std::move(val)) };
-    return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+    Token::S_string_literal xtoken = { reader.intern_string(move(val)) };
+    return do_push_token(tokens, reader, tlen, move(xtoken));
   }
 
 struct Keyword_Element
@@ -732,7 +732,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
           continue;
 
         Token::S_keyword xtoken = { cur.kwrd };
-        return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+        return do_push_token(tokens, reader, tlen, move(xtoken));
       }
     }
 
@@ -740,8 +740,8 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
     cow_string name;
     name.assign(reader.data(), tlen);
 
-    Token::S_identifier xtoken = { reader.intern_string(::std::move(name)) };
-    return do_push_token(tokens, reader, tlen, ::std::move(xtoken));
+    Token::S_identifier xtoken = { reader.intern_string(move(name)) };
+    return do_push_token(tokens, reader, tlen, move(xtoken));
   }
 
 }  // namespace
@@ -864,7 +864,7 @@ reload(stringR file, int start_line, tinybuf&& cbuf)
 
     // Reverse the token sequence and accept it.
     ::std::reverse(tokens.mut_begin(), tokens.mut_end());
-    this->m_rtoks = ::std::move(tokens);
+    this->m_rtoks = move(tokens);
   }
 
 }  // namespace asteria

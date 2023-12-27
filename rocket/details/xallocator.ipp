@@ -18,7 +18,7 @@ class final_wrapper
     final_wrapper(paramsT&&... params)
       noexcept(is_nothrow_constructible<allocT, paramsT&&...>::value)
       :
-        m_alloc(::std::forward<paramsT>(params)...)
+        m_alloc(forward<paramsT>(params)...)
       { }
 
   public:
@@ -66,7 +66,7 @@ template<typename allocT>
 void
 propagate(propagate_move_tag, allocT& lhs, allocT& rhs) noexcept
   {
-    lhs = ::std::move(rhs);
+    lhs = move(rhs);
   }
 
 // propagate_on_container_swap

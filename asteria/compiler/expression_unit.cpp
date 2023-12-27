@@ -93,7 +93,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // Encode a constant.
         AIR_Node::S_push_constant xnode = { altr.value };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -113,7 +113,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             // A reference declared later has been found.
             // Record the context depth for later lookups.
             AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, altr.name };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
@@ -132,7 +132,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             }
 
             AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
@@ -150,7 +150,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         AIR_Node::S_define_function xnode = { opts, altr.sloc, altr.unique_name, altr.params,
                                               optmz.get_code() };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -167,9 +167,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         if((altr.branches.size() == 1) && (altr.branches.at(0).type == branch_type_null)) {
           // Encode a coalescence node.
-          AIR_Node::S_coalesce_expression xnode = { altr.sloc, ::std::move(code_branches.mut(0)),
+          AIR_Node::S_coalesce_expression xnode = { altr.sloc, move(code_branches.mut(0)),
                                                     altr.assign };
-          code.emplace_back(::std::move(xnode));
+          code.emplace_back(move(xnode));
           return;
         }
 
@@ -180,13 +180,13 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         for(size_t k = 0;  k < altr.branches.size();  ++k)
           if(altr.branches.at(k).type == branch_type_true)
-            xnode.code_true = ::std::move(code_branches.mut(k));
+            xnode.code_true = move(code_branches.mut(k));
           else if(altr.branches.at(k).type == branch_type_false)
-            xnode.code_false = ::std::move(code_branches.mut(k));
+            xnode.code_false = move(code_branches.mut(k));
           else
             ASTERIA_TERMINATE(("Invalid branch type `$1`"), altr.branches.at(k).type);
 
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -205,7 +205,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
           // Evaluate arguments on `alt_stack` directly.
           // https://github.com/lhmouse/asteria/issues/136
           AIR_Node::S_alt_clear_stack xstart = { };
-          code.emplace_back(::std::move(xstart));
+          code.emplace_back(move(xstart));
 
           for(const auto& arg : altr.args)
             for(const auto& unit : arg.units)
@@ -213,7 +213,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
           // Take alternative approach.
           AIR_Node::S_alt_function_call xnode = { altr.sloc, rptc };
-          code.emplace_back(::std::move(xnode));
+          code.emplace_back(move(xnode));
           return;
         }
 
@@ -223,7 +223,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             unit.generate_code(code, opts, global, ctx, ptc_aware_none);
 
         AIR_Node::S_function_call xnode = { altr.sloc, (uint32_t) altr.args.size(), rptc };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -242,14 +242,14 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             if((rhs.type() == type_string) && (altr.xop == xop_index)) {
               // Encode a pre-hashed object key.
               AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
-              code.mut_back() = ::std::move(xnode);
+              code.mut_back() = move(xnode);
               return;
             }
 
             if((rhs.type() == type_integer) && (altr.xop == xop_notb)) {
               // Encode the result directly, as the result will never overflow.
               AIR_Node::S_push_constant xnode = { rhs.as_integer() ^ -1 };
-              code.mut_back() = ::std::move(xnode);
+              code.mut_back() = move(xnode);
               return;
             }
 
@@ -263,14 +263,14 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
               // Fold this constant.
               AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
                                                         (int32_t) rhs.as_integer() };
-              code.mut_back() = ::std::move(xnode);
+              code.mut_back() = move(xnode);
               return;
             }
           }
         }
 
         AIR_Node::S_apply_operator xnode = { altr.sloc, altr.xop, altr.assign };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -278,7 +278,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<S_unnamed_array>();
 
         AIR_Node::S_push_unnamed_array xnode = { altr.sloc, altr.nelems };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -286,7 +286,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<S_unnamed_object>();
 
         AIR_Node::S_push_unnamed_object xnode = { altr.sloc, altr.keys };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -295,7 +295,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
         // This name is always looked up in the global context.
         AIR_Node::S_push_global_reference xnode = { altr.sloc, altr.name };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -311,7 +311,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         auto rptc = opts.proper_tail_calls ? ptc : ptc_aware_none;
 
         AIR_Node::S_variadic_call xnode = { altr.sloc, rptc };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -319,7 +319,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         const auto& altr = this->m_stor.as<S_check_argument>();
 
         AIR_Node::S_check_argument xnode = { altr.sloc, altr.by_ref };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -332,7 +332,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             unit.generate_code(code, opts, global, ctx, ptc_aware_none);
 
         AIR_Node::S_import_call xnode = { opts, altr.sloc, (uint32_t) altr.args.size() };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -345,8 +345,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         for(const auto& unit : altr.operand)
           unit.generate_code(code_op, opts, global, ctx, ptc_aware_none);
 
-        AIR_Node::S_catch_expression xnode = { ::std::move(code_op) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_catch_expression xnode = { move(code_op) };
+        code.emplace_back(move(xnode));
         return;
       }
 

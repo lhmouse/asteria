@@ -64,7 +64,7 @@ class basic_prehashed_string
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       :
-        m_sth(hf, eq, ::std::forward<paramsT>(params)...)
+        m_sth(hf, eq, forward<paramsT>(params)...)
       { }
 
     explicit constexpr
@@ -84,7 +84,7 @@ class basic_prehashed_string
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       :
-        m_sth(hf, eq, ::std::move(str))
+        m_sth(hf, eq, move(str))
       { }
 
     template<typename xstringT,
@@ -108,7 +108,7 @@ class basic_prehashed_string
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       :
-        m_sth(hf, eq, ::std::forward<xstringT>(xstr))
+        m_sth(hf, eq, forward<xstringT>(xstr))
       { }
 
     constexpr
@@ -275,7 +275,7 @@ class basic_prehashed_string
     basic_prehashed_string&
     assign(paramsT&&... params)
       {
-        this->m_sth.assign(::std::forward<paramsT>(params)...);
+        this->m_sth.assign(forward<paramsT>(params)...);
         return *this;
       }
 

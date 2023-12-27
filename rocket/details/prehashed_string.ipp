@@ -32,7 +32,7 @@ class string_storage
       :
         hasher_base(hf),
         key_equal_base(eq),
-        m_str(::std::forward<paramsT>(params)...),
+        m_str(forward<paramsT>(params)...),
         m_hval(this->as_hasher()(this->m_str))
       { }
 
@@ -81,7 +81,7 @@ class string_storage
     void
     assign(paramsT&&... params)
       {
-        this->m_str.assign(::std::forward<paramsT>(params)...);
+        this->m_str.assign(forward<paramsT>(params)...);
         this->m_hval = this->as_hasher()(this->m_str);
       }
 
@@ -89,7 +89,7 @@ class string_storage
     void
     set_string(paramT&& param)
       {
-        this->m_str = ::std::forward<paramT>(param);
+        this->m_str = forward<paramT>(param);
         this->m_hval = this->as_hasher()(this->m_str);
       }
 

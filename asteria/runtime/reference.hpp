@@ -56,10 +56,10 @@ class Reference
 
     Reference(Reference&& other) noexcept
       :
-        m_mods(::std::move(other.m_mods)),
+        m_mods(move(other.m_mods)),
         m_xref(::rocket::exchange(other.m_xref)),
-        m_var(::std::move(other.m_var)),
-        m_ptc(::std::move(other.m_ptc))
+        m_var(move(other.m_var)),
+        m_ptc(move(other.m_ptc))
       {
         if(this->m_xref == xref_temporary)
           this->m_value.swap(other.m_value);
@@ -139,7 +139,7 @@ class Reference
     Reference&
     set_temporary(XValT&& xval)
       {
-        this->m_value = ::std::forward<XValT>(xval);
+        this->m_value = forward<XValT>(xval);
         this->m_mods.clear();
         this->m_xref = xref_temporary;
         return *this;
@@ -191,7 +191,7 @@ class Reference
         if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
           this->do_throw_not_dereferenceable();
 
-        this->m_mods.emplace_back(::std::forward<XModT>(xmod));
+        this->m_mods.emplace_back(forward<XModT>(xmod));
         return *this;
       }
 

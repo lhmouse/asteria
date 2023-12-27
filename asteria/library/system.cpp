@@ -175,7 +175,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
       switch(ctx.index()) {
         case 0: {
           auto& ctxa = ctx.mut<Xparse_array>();
-          ctxa.arr.emplace_back(::std::move(value));
+          ctxa.arr.emplace_back(move(value));
 
           // A comma or semicolon may follow, but it has no meaning whatsoever.
           do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
@@ -186,13 +186,13 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
             goto parse_next;
 
           // Close this array.
-          value = ::std::move(ctxa.arr);
+          value = move(ctxa.arr);
           break;
         }
 
         case 1: {
           auto& ctxo = ctx.mut<Xparse_object>();
-          auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
+          auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
           if(!pair.second)
             throw Compiler_Error(xtc_status,
                       compiler_status_duplicate_key_in_object, ctxo.key_sloc);
@@ -208,7 +208,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
           }
 
           // Close this object.
-          value = ::std::move(ctxo.obj);
+          value = move(ctxo.obj);
           break;
         }
 
@@ -267,7 +267,7 @@ std_system_get_environment_variables()
         else
           key += *sp;
 
-      vars.insert_or_assign(::std::move(key), ::std::move(val));
+      vars.insert_or_assign(move(key), move(val));
     }
     return vars;
   }
@@ -523,7 +523,7 @@ std_system_load_conf(V_string path)
 
     Token_Stream tstrm(opts);
     ::rocket::tinybuf_file cbuf(path.safe_c_str(), tinybuf::open_read);
-    tstrm.reload(path, 1, ::std::move(cbuf));
+    tstrm.reload(path, 1, move(cbuf));
 
     Xparse_object ctxo;
     while(!tstrm.empty()) {
@@ -531,7 +531,7 @@ std_system_load_conf(V_string path)
       do_accept_object_key(ctxo, tstrm);
       auto value = do_conf_parse_value_nonrecursive(tstrm);
 
-      auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
+      auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
       if(!pair.second)
         throw Compiler_Error(xtc_status,
                   compiler_status_duplicate_key_in_object, ctxo.key_sloc);
@@ -541,7 +541,7 @@ std_system_load_conf(V_string path)
     }
 
     // Extract the value.
-    return ::std::move(ctxo.obj);
+    return move(ctxo.obj);
   }
 
 void

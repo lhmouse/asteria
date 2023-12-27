@@ -177,7 +177,7 @@ do_parse_command_line(int argc, char** argv)
 
     // These arguments are always overwritten.
     repl_file = path.move_value_or(sref("-"));
-    repl_args = ::std::move(args);
+    repl_args = move(args);
   }
 
 }  // namespace

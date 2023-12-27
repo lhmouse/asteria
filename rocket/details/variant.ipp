@@ -98,7 +98,7 @@ class const_func_table
 #endif
     operator()(size_t k, argsT&&... args) const
       {
-        return this->m_ptrs[k] (::std::forward<argsT>(args)...);
+        return this->m_ptrs[k] (forward<argsT>(args)...);
       }
   };
 
@@ -128,7 +128,7 @@ wrapped_move_construct(void* dptr, void* sptr)
   {
     auto dp = static_cast<altT*>(dptr);
     auto sp = static_cast<altT*>(sptr);
-    noadl::construct(dp, ::std::move(*sp));
+    noadl::construct(dp, move(*sp));
   }
 
 template<typename altT>
@@ -146,7 +146,7 @@ wrapped_move_assign(void* dptr, void* sptr)
   {
     auto dp = static_cast<altT*>(dptr);
     auto sp = static_cast<altT*>(sptr);
-    *dp = ::std::move(*sp);
+    *dp = move(*sp);
   }
 
 template<typename altT>
@@ -163,7 +163,7 @@ wrapped_move_then_destroy(void* dptr, void* sptr)
   {
     auto dp = static_cast<altT*>(dptr);
     auto sp = static_cast<altT*>(sptr);
-    noadl::construct(dp, ::std::move(*sp));
+    noadl::construct(dp, move(*sp));
     noadl::destroy(sp);
   }
 
@@ -182,7 +182,7 @@ wrapped_visit(xvoidT* sptr, visitorT&& visitor)
   {
     auto sp = static_cast<xaltT*>(sptr);
 #ifdef __cpp_lib_invoke
-    ::std::invoke(::std::forward<visitorT>(visitor), *sp);
+    ::std::invoke(forward<visitorT>(visitor), *sp);
 #else
     ::std::ref(visitor) (*sp);
 #endif

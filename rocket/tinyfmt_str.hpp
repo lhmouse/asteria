@@ -39,7 +39,7 @@ class basic_tinyfmt_str
     basic_tinyfmt_str(paramsT&&... params)
       noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
       :
-        m_buf(::std::forward<paramsT>(params)...)
+        m_buf(forward<paramsT>(params)...)
       { }
 
     basic_tinyfmt_str&
@@ -104,7 +104,7 @@ class basic_tinyfmt_str
     basic_tinyfmt_str&
     set_string(xstrT&& xstr, open_mode mode)
       {
-        this->m_buf.set_string(::std::forward<xstrT>(xstr), mode);
+        this->m_buf.set_string(forward<xstrT>(xstr), mode);
         return *this;
       }
 
@@ -112,7 +112,7 @@ class basic_tinyfmt_str
     basic_tinyfmt_str&
     set_string(xstrT&& xstr)
       {
-        this->m_buf.set_string(::std::forward<xstrT>(xstr));
+        this->m_buf.set_string(forward<xstrT>(xstr));
         return *this;
       }
 

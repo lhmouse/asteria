@@ -149,7 +149,7 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
       return false;
 
     if(varp_opt)
-      *varp_opt = ::std::move(qbkt->var_opt);
+      *varp_opt = move(qbkt->var_opt);
 
     // Destroy this element.
     this->do_erase_range((uint32_t) (qbkt - this->m_bptr), 1);

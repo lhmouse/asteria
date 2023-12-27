@@ -42,8 +42,8 @@ operator->*(target_R_gsa& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            self = this->m_target(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            self = this->m_target(global, move(self), move(reader));
             return self;
           }
       };
@@ -85,8 +85,8 @@ operator->*(target_R_ga& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            self = this->m_target(global, ::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            self = this->m_target(global, move(reader));
             return self;
           }
       };
@@ -128,8 +128,8 @@ operator->*(target_R_sa& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            self = this->m_target(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            self = this->m_target(move(self), move(reader));
             return self;
           }
       };
@@ -171,8 +171,8 @@ operator->*(target_R_a& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            self = this->m_target(::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            self = this->m_target(move(reader));
             return self;
           }
       };
@@ -214,9 +214,9 @@ operator->*(target_V_gsa& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            auto result = this->m_target(global, ::std::move(self), ::std::move(reader));
-            return self.set_temporary(::std::move(result));
+            Argument_Reader reader(this->m_name, move(stack));
+            auto result = this->m_target(global, move(self), move(reader));
+            return self.set_temporary(move(result));
           }
       };
 
@@ -257,9 +257,9 @@ operator->*(target_V_ga& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            auto result = this->m_target(global, ::std::move(reader));
-            return self.set_temporary(::std::move(result));
+            Argument_Reader reader(this->m_name, move(stack));
+            auto result = this->m_target(global, move(reader));
+            return self.set_temporary(move(result));
           }
       };
 
@@ -300,9 +300,9 @@ operator->*(target_V_sa& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            auto result = this->m_target(::std::move(self), ::std::move(reader));
-            return self.set_temporary(::std::move(result));
+            Argument_Reader reader(this->m_name, move(stack));
+            auto result = this->m_target(move(self), move(reader));
+            return self.set_temporary(move(result));
           }
       };
 
@@ -343,9 +343,9 @@ operator->*(target_V_a& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            auto result = this->m_target(::std::move(reader));
-            return self.set_temporary(::std::move(result));
+            Argument_Reader reader(this->m_name, move(stack));
+            auto result = this->m_target(move(reader));
+            return self.set_temporary(move(result));
           }
       };
 
@@ -386,8 +386,8 @@ operator->*(target_Z_gsa& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            this->m_target(global, ::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            this->m_target(global, move(self), move(reader));
             return self.set_void();
           }
       };
@@ -429,8 +429,8 @@ operator->*(target_Z_ga& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            this->m_target(global, ::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            this->m_target(global, move(reader));
             return self.set_void();
           }
       };
@@ -472,8 +472,8 @@ operator->*(target_Z_sa& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            this->m_target(::std::move(self), ::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            this->m_target(move(self), move(reader));
             return self.set_void();
           }
       };
@@ -515,8 +515,8 @@ operator->*(target_Z_a& target) const
         Reference&
         invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
           {
-            Argument_Reader reader(this->m_name, ::std::move(stack));
-            this->m_target(::std::move(reader));
+            Argument_Reader reader(this->m_name, move(stack));
+            this->m_target(move(reader));
             return self.set_void();
           }
       };

@@ -212,8 +212,8 @@ do_use_function_result_slow(Global_Context& global)
           hooks->on_call(ptcg->sloc(), ptcg->target());
 
         frames.emplace_back(ptcg);
-        *this = ::std::move(ptcg->self());
-        ptcg->target().invoke_ptc_aware(*this, global, ::std::move(ptcg->mut_stack()));
+        *this = move(ptcg->self());
+        ptcg->target().invoke_ptc_aware(*this, global, move(ptcg->mut_stack()));
       }
 
       // Check the result.
@@ -224,13 +224,13 @@ do_use_function_result_slow(Global_Context& global)
 
       // This is the normal return path.
       while(!frames.empty()) {
-        ptcg = ::std::move(frames.mut_back());
+        ptcg = move(frames.mut_back());
         frames.pop_back();
         const auto caller = ptcg->caller_opt();
 
         if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
           // Convert the result.
-          this->m_value = ::std::move(*result_value);
+          this->m_value = move(*result_value);
           result_value.reset();
           this->m_mods.clear();
           this->m_xref = xref_temporary;
@@ -240,15 +240,15 @@ do_use_function_result_slow(Global_Context& global)
           hooks->on_return(ptcg->sloc(), ptcg->ptc_aware());
 
         // Evaluate deferred expressions.
-        defer_ctx.stack() = ::std::move(ptcg->mut_stack());
-        defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
+        defer_ctx.stack() = move(ptcg->mut_stack());
+        defer_ctx.mut_defer() = move(ptcg->mut_defer());
         defer_ctx.on_scope_exit_normal(air_status_next);
       }
     }
     catch(Runtime_Error& except) {
       // This is the exceptional path.
       while(!frames.empty()) {
-        ptcg = ::std::move(frames.mut_back());
+        ptcg = move(frames.mut_back());
         frames.pop_back();
         const auto caller = ptcg->caller_opt();
 
@@ -261,8 +261,8 @@ do_use_function_result_slow(Global_Context& global)
           except.push_frame_function(caller->sloc(), caller->func());
 
         // Evaluate deferred expressions.
-        defer_ctx.stack() = ::std::move(ptcg->mut_stack());
-        defer_ctx.mut_defer() = ::std::move(ptcg->mut_defer());
+        defer_ctx.stack() = move(ptcg->mut_stack());
+        defer_ctx.mut_defer() = move(ptcg->mut_defer());
         defer_ctx.on_scope_exit_exceptional(except);
       }
 

@@ -89,7 +89,7 @@ struct basic_storage
         ROCKET_ASSERT_MSG(this->nelem < this->max_nelem_for_nblk(this->nblk), "no space for new elements");
 
         size_t off = this->nelem;
-        allocator_traits<allocator_type>::construct(*this, this->data + off, ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(*this, this->data + off, forward<paramsT>(params)...);
         this->nelem = static_cast<size_type>(off + 1U);
         return this->data[off];
       }
@@ -145,7 +145,7 @@ struct storage_traits
       {
         if(st_old.nref.unique())
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, ::std::move(st_old.data[k])),
+            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, move(st_old.data[k])),
             st_new.nskip = k;
         else
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
@@ -162,7 +162,7 @@ struct storage_traits
       {
         if(st_old.nref.unique())
           for(size_t k = st_old.nelem - 1;  k != nskip - 1;  --k)
-            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, ::std::move(st_old.data[k])),
+            allocator_traits<allocator_type>::construct(st_new, st_new.data + k, move(st_old.data[k])),
             st_new.nskip = k;
         else
           noadl::sprintf_and_throw<domain_error>(
@@ -222,7 +222,7 @@ class storage_handle
     explicit constexpr
     storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(::std::move(alloc))
+        allocator_base(move(alloc))
       { }
 
 #ifdef __cpp_constexpr_dynamic_alloc
@@ -377,7 +377,7 @@ class storage_handle
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "no storage allocated");
-        return qstor->emplace_back_unchecked(::std::forward<paramsT>(params)...);
+        return qstor->emplace_back_unchecked(forward<paramsT>(params)...);
       }
 
     void
@@ -400,7 +400,7 @@ class storage_handle
     void
     append_range_unchecked(inputT first, inputT last)
       {
-        for(auto it = ::std::move(first);  it != last;  ++it)
+        for(auto it = move(first);  it != last;  ++it)
           this->emplace_back_unchecked(*it);
       }
 

@@ -108,8 +108,12 @@ using ::rocket::tinyfmt;
 
 using ::rocket::begin;
 using ::rocket::end;
-using ::rocket::xswap;
 using ::rocket::swap;
+using ::rocket::xswap;
+using ::rocket::move;
+using ::rocket::forward;
+using ::rocket::forward_as_tuple;
+using ::rocket::exchange;
 using ::rocket::size;
 using ::rocket::ssize;
 using ::rocket::static_pointer_cast;
@@ -373,7 +377,7 @@ class cow_opaque
     template<typename OpaqT>
     cow_opaque(refcnt_ptr<OpaqT>&& sptr) noexcept
       :
-        m_sptr(::std::move(sptr))
+        m_sptr(move(sptr))
       { }
 
     cow_opaque&
@@ -418,7 +422,7 @@ class cow_opaque
     cow_opaque&
     reset(refcnt_ptr<OpaqT>&& sptr) noexcept
       {
-        this->m_sptr = ::std::move(sptr);
+        this->m_sptr = move(sptr);
         return *this;
       }
 
@@ -501,7 +505,7 @@ open()
 
     // Take ownership of the clone. The return type is covariant with the base.
     ROCKET_ASSERT(coptr == csptr.get());
-    this->m_sptr = ::std::move(csptr);
+    this->m_sptr = move(csptr);
     return *coptr;
   }
 
@@ -547,7 +551,7 @@ class cow_function
     template<typename FuncT>
     cow_function(refcnt_ptr<FuncT>&& sptr) noexcept
       :
-        m_sptr(::std::move(sptr))
+        m_sptr(move(sptr))
       { }
 
     cow_function&
@@ -607,7 +611,7 @@ class cow_function
       {
         this->m_desc = nullptr;
         this->m_fptr = nullptr;
-        this->m_sptr = ::std::move(sptr);
+        this->m_sptr = move(sptr);
         return *this;
       }
 

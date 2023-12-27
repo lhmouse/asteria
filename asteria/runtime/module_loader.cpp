@@ -34,7 +34,7 @@ do_lock_stream(const char* path)
 
     // Mark the stream locked.
     auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
-    auto result = this->m_strms.try_emplace(::std::move(skey), ::std::move(file));
+    auto result = this->m_strms.try_emplace(move(skey), move(file));
     if(!result.second)
       throw Runtime_Error(xtc_format,
                "Recursive import denied (loading '$1', file ID `$2`)", path, skey);

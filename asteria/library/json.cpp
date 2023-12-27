@@ -322,7 +322,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         indent.break_line(fmt);
 
         qval = &*(ctxa.curp);
-        stack.emplace_back(::std::move(ctxa));
+        stack.emplace_back(move(ctxa));
         goto format_next;
       }
       fmt << "[]";
@@ -338,7 +338,7 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
         do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
         qval = &(ctxo.curp->second);
-        stack.emplace_back(::std::move(ctxo));
+        stack.emplace_back(move(ctxo));
         goto format_next;
       }
       fmt << "{}";
@@ -562,7 +562,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
       switch(ctx.index()) {
         case 0: {
           auto& ctxa = ctx.mut<Xparse_array>();
-          ctxa.arr.emplace_back(::std::move(value));
+          ctxa.arr.emplace_back(move(value));
 
           // Look for the next element.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
@@ -578,13 +578,13 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           }
 
           // Close this array.
-          value = ::std::move(ctxa.arr);
+          value = move(ctxa.arr);
           break;
         }
 
         case 1: {
           auto& ctxo = ctx.mut<Xparse_object>();
-          auto pair = ctxo.obj.try_emplace(::std::move(ctxo.key), ::std::move(value));
+          auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
           if(!pair.second)
             throw Compiler_Error(xtc_status,
                       compiler_status_duplicate_key_in_object, ctxo.key_sloc);
@@ -605,7 +605,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
           }
 
           // Close this object.
-          value = ::std::move(ctxo.obj);
+          value = move(ctxo.obj);
           break;
         }
 
@@ -630,7 +630,7 @@ do_parse(tinybuf& cbuf)
     opts.integers_as_reals = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(sref("[JSON text]"), 1, ::std::move(cbuf));
+    tstrm.reload(sref("[JSON text]"), 1, move(cbuf));
     if(tstrm.empty())
       ASTERIA_THROW(("Empty JSON string"));
 
@@ -683,7 +683,7 @@ std_json_parse_file(V_string path)
           path);
 
     // Parse characters from the file.
-    ::rocket::tinybuf_file cbuf(::std::move(fp));
+    ::rocket::tinybuf_file cbuf(move(fp));
     return do_parse(cbuf);
   }
 

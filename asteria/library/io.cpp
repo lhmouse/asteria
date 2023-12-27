@@ -163,7 +163,7 @@ std_io_getln()
     if((wch == WEOF) && u8str.empty())
       return nullopt;
 
-    return ::std::move(u8str);
+    return move(u8str);
   }
 
 optV_integer
@@ -273,7 +273,7 @@ std_io_read(optV_integer limit)
     if(((nbatch != 0) || ::feof(sentry)) && data.empty())
       return nullopt;
 
-    return ::std::move(data);
+    return move(data);
   }
 
 V_integer

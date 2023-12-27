@@ -232,8 +232,8 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     auto qname = do_accept_identifier_opt(tstrm, true);
     if(qname) {
       // Accept a single identifier.
-      names.emplace_back(::std::move(*qname));
-      return ::std::move(names);
+      names.emplace_back(move(*qname));
+      return move(names);
     }
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
@@ -252,7 +252,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
           throw Compiler_Error(xtc_status,
                     compiler_status_duplicate_name_in_structured_binding, name_sloc);
 
-        names.emplace_back(::std::move(*qname));
+        names.emplace_back(move(*qname));
 
         // Look for the separator.
         kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -274,7 +274,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                   "[unmatched `[` at '$1']", op_sloc);
 
       names.emplace_back(sref("]"));
-      return ::std::move(names);
+      return move(names);
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
@@ -293,7 +293,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
           throw Compiler_Error(xtc_status,
                     compiler_status_duplicate_name_in_structured_binding, name_sloc);
 
-        names.emplace_back(::std::move(*qname));
+        names.emplace_back(move(*qname));
 
         // Look for the separator.
         kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -315,7 +315,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                   "[unmatched `{` at '$1']", op_sloc);
 
       names.emplace_back(sref("}"));
-      return ::std::move(names);
+      return move(names);
     }
 
     return nullopt;
@@ -362,8 +362,8 @@ do_accept_expression_opt(Token_Stream& tstrm)
     if(!do_accept_expression(units, tstrm))
       return nullopt;
 
-    Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
-    return ::std::move(xexpr);
+    Statement::S_expression xexpr = { move(sloc), move(units) };
+    return move(xexpr);
   }
 
 bool
@@ -375,8 +375,8 @@ do_accept_expression_and_check(cow_vector<Expression_Unit>& units, Token_Stream&
 
     if(by_ref || units.back().maybe_unreadable()) {
       // XXX: This may convert the result to an rvalue.
-      Expression_Unit::S_check_argument xunit = { ::std::move(sloc), by_ref };
-      units.emplace_back(::std::move(xunit));
+      Expression_Unit::S_check_argument xunit = { move(sloc), by_ref };
+      units.emplace_back(move(xunit));
     }
     return true;
   }
@@ -389,8 +389,8 @@ do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
     if(!do_accept_expression_and_check(units, tstrm, false))
       return nullopt;
 
-    Statement::S_expression xexpr = { ::std::move(sloc), ::std::move(units) };
-    return ::std::move(xexpr);
+    Statement::S_expression xexpr = { move(sloc), move(units) };
+    return move(xexpr);
   }
 
 opt<Statement::S_block>
@@ -407,7 +407,7 @@ do_accept_statement_block_opt(Token_Stream& tstrm, scope_flags scope)
 
     cow_vector<Statement> body;
     while(auto qstmt = do_accept_statement_opt(tstrm, scope))
-      body.emplace_back(::std::move(*qstmt));
+      body.emplace_back(move(*qstmt));
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
@@ -415,8 +415,8 @@ do_accept_statement_block_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_brace_or_statement_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", op_sloc);
 
-    Statement::S_block xstmt = { ::std::move(body) };
-    return ::std::move(xstmt);
+    Statement::S_block xstmt = { move(body) };
+    return move(xstmt);
   }
 
 opt<Statement::S_block>
@@ -429,7 +429,7 @@ do_accept_null_statement_opt(Token_Stream& tstrm)
       return nullopt;
 
     Statement::S_block xstmt = { };
-    return ::std::move(xstmt);
+    return move(xstmt);
   }
 
 opt<Statement::S_expression>
@@ -446,7 +446,7 @@ do_accept_equal_initializer_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_expression_expected, tstrm.next_sloc());
 
-    return ::std::move(*kexpr);
+    return move(*kexpr);
   }
 
 opt<Statement::S_expression>
@@ -463,7 +463,7 @@ do_accept_ref_initializer_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_expression_expected, tstrm.next_sloc());
 
-    return ::std::move(*kexpr);
+    return move(*kexpr);
   }
 
 opt<Statement>
@@ -492,9 +492,8 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       if(!qinit)
         qinit.emplace();
 
-      Statement::variable_declaration decl = { ::std::move(sloc), ::std::move(*qdecl),
-                                               ::std::move(*qinit) };
-      decls.emplace_back(::std::move(decl));
+      Statement::variable_declaration decl = { move(sloc), move(*qdecl), move(*qinit) };
+      decls.emplace_back(move(decl));
 
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -507,8 +506,8 @@ do_accept_variable_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_variables xstmt = { false, ::std::move(decls) };
-    return ::std::move(xstmt);
+    Statement::S_variables xstmt = { false, move(decls) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -538,9 +537,8 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
         throw Compiler_Error(xtc_status,
                   compiler_status_equals_sign_expected, tstrm.next_sloc());
 
-      Statement::variable_declaration decl = { ::std::move(sloc), ::std::move(*qdecl),
-                                               ::std::move(*qinit) };
-      decls.emplace_back(::std::move(decl));
+      Statement::variable_declaration decl = { move(sloc), move(*qdecl), move(*qinit) };
+      decls.emplace_back(move(decl));
 
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -553,8 +551,8 @@ do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_variables xstmt = { true, ::std::move(decls) };
-    return ::std::move(xstmt);
+    Statement::S_variables xstmt = { true, move(decls) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -582,9 +580,8 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
         throw Compiler_Error(xtc_status,
                   compiler_status_arrow_expected, tstrm.next_sloc());
 
-      Statement::reference_declaration decl = { ::std::move(sloc), ::std::move(*qname),
-                                                ::std::move(*qinit) };
-      decls.emplace_back(::std::move(decl));
+      Statement::reference_declaration decl = { move(sloc), move(*qname), move(*qinit) };
+      decls.emplace_back(move(decl));
 
       // Look for the separator.
       auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -597,8 +594,8 @@ do_accept_reference_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_references xstmt = { ::std::move(decls) };
-    return ::std::move(xstmt);
+    Statement::S_references xstmt = { move(decls) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -643,7 +640,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
         throw Compiler_Error(xtc_status,
                   compiler_status_duplicate_name_in_parameter_list, param_sloc);
 
-      params.emplace_back(::std::move(*kparam));
+      params.emplace_back(move(*kparam));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -670,7 +667,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
 
     cow_vector<Statement> body;
     while(auto qstmt = do_accept_statement_opt(tstrm, scope_flags_plain))
-      body.emplace_back(::std::move(*qstmt));
+      body.emplace_back(move(*qstmt));
 
     auto cl_sloc = tstrm.next_sloc();
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -680,12 +677,11 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 "[unmatched `{` at '$1']", op_sloc);
 
     // Add an implicit return.
-    Statement::S_return xendf = { ::std::move(cl_sloc), true, Statement::S_expression() };
-    body.emplace_back(::std::move(xendf));
+    Statement::S_return xendf = { move(cl_sloc), true, Statement::S_expression() };
+    body.emplace_back(move(xendf));
 
-    Statement::S_function xstmt = { ::std::move(sloc), ::std::move(*qname), ::std::move(params),
-                                    ::std::move(body) };
-    return ::std::move(xstmt);
+    Statement::S_function xstmt = { move(sloc), move(*qname), move(params), move(body) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -702,8 +698,8 @@ do_accept_expression_statement_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_expression xstmt = { ::std::move(*kexpr) };
-    return ::std::move(xstmt);
+    Statement::S_expression xstmt = { move(*kexpr) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -754,9 +750,8 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
     if(!qbfalse)
       qbfalse.emplace();  // empty `else` block
 
-    Statement::S_if xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qbtrue),
-                              ::std::move(*qbfalse) };
-    return ::std::move(xstmt);
+    Statement::S_if xstmt = { *kneg, move(*qcond), move(*qbtrue), move(*qbfalse) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -811,7 +806,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
                     compiler_status_expression_expected, tstrm.next_sloc());
 
         // Set the label.
-        clause.label = ::std::move(*qlabel);
+        clause.label = move(*qlabel);
         ROCKET_ASSERT(!clause.label.units.empty());
       }
       else {
@@ -829,7 +824,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
                   compiler_status_colon_expected, tstrm.next_sloc());
 
       while(auto qstmt = do_accept_statement_opt(tstrm, scope | scope_flags_switch))
-        clause.body.emplace_back(::std::move(*qstmt));
+        clause.body.emplace_back(move(*qstmt));
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -838,8 +833,8 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_brace_or_switch_clause_expected, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", op_sloc);
 
-    Statement::S_switch xstmt = { ::std::move(*qctrl), ::std::move(clauses) };
-    return ::std::move(xstmt);
+    Statement::S_switch xstmt = { move(*qctrl), move(clauses) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -887,8 +882,8 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_do_while xstmt = { ::std::move(*qblock), *kneg, ::std::move(*qcond) };
-    return ::std::move(xstmt);
+    Statement::S_do_while xstmt = { move(*qblock), *kneg, move(*qcond) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -926,8 +921,8 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
-    Statement::S_while xstmt = { *kneg, ::std::move(*qcond), ::std::move(*qblock) };
-    return ::std::move(xstmt);
+    Statement::S_while xstmt = { *kneg, move(*qcond), move(*qblock) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -951,7 +946,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
     if(kpunct) {
       // Move the first identifier into the key and expect the name for mapped
       // references.
-      key = ::std::move(*qmapped);
+      key = move(*qmapped);
       qmapped = do_accept_identifier_opt(tstrm, true);
       if(!qmapped)
         throw Compiler_Error(xtc_status,
@@ -980,9 +975,9 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
-    Statement::S_for_each xstmt = { ::std::move(key), ::std::move(*qmapped), ::std::move(sloc_init),
-                                    ::std::move(*qinit), ::std::move(*qblock) };
-    return ::std::move(xstmt);
+    Statement::S_for_each xstmt = { move(key), move(*qmapped), move(sloc_init), move(*qinit),
+                                    move(*qblock) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -992,16 +987,16 @@ do_accept_for_initializer_opt(Token_Stream& tstrm)
     //   null-statement | variable-definition | immutable-variable-definition |
     //   expression-statement
     if(auto qblock = do_accept_null_statement_opt(tstrm))
-      return ::std::move(*qblock);
+      return move(*qblock);
 
     if(auto qinit = do_accept_variable_definition_opt(tstrm))
-      return ::std::move(*qinit);
+      return move(*qinit);
 
     if(auto qinit = do_accept_immutable_variable_definition_opt(tstrm))
-      return ::std::move(*qinit);
+      return move(*qinit);
 
     if(auto qinit = do_accept_expression_statement_opt(tstrm))
-      return ::std::move(*qinit);
+      return move(*qinit);
 
     return nullopt;
   }
@@ -1017,7 +1012,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
       return nullopt;
 
     cow_vector<Statement> init;
-    init.emplace_back(::std::move(*qstmt));
+    init.emplace_back(move(*qstmt));
 
     Statement::S_expression cond;
     cond.sloc = tstrm.next_sloc();
@@ -1043,9 +1038,8 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
-    Statement::S_for xstmt = { ::std::move(init), ::std::move(cond), ::std::move(step),
-                               ::std::move(*qblock) };
-    return ::std::move(xstmt);
+    Statement::S_for xstmt = { move(init), move(cond), move(step), move(*qblock) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1055,10 +1049,10 @@ do_accept_for_complement_opt(Token_Stream& tstrm, const Source_Location& op_sloc
     // for-complement ::=
     //   for-complement-range | for-complement-triplet
     if(auto qcompl = do_accept_for_complement_range_opt(tstrm, op_sloc, scope))
-      return ::std::move(*qcompl);
+      return move(*qcompl);
 
     if(auto qcompl = do_accept_for_complement_triplet_opt(tstrm, op_sloc, scope))
-      return ::std::move(*qcompl);
+      return move(*qcompl);
 
     return nullopt;
   }
@@ -1083,7 +1077,7 @@ do_accept_for_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_for_statement_initializer_expected, tstrm.next_sloc());
 
-    return ::std::move(*qcompl);
+    return move(*qcompl);
   }
 
 opt<Statement>
@@ -1127,8 +1121,8 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_break xstmt = { ::std::move(sloc), target };
-    return ::std::move(xstmt);
+    Statement::S_break xstmt = { move(sloc), target };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1167,8 +1161,8 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_continue xstmt = { ::std::move(sloc), target };
-    return ::std::move(xstmt);
+    Statement::S_continue xstmt = { move(sloc), target };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1191,8 +1185,8 @@ do_accept_throw_statement_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_throw xstmt = { ::std::move(sloc), ::std::move(*kexpr) };
-    return ::std::move(xstmt);
+    Statement::S_throw xstmt = { move(sloc), move(*kexpr) };
+    return move(xstmt);
   }
 
 opt<bool>
@@ -1237,9 +1231,9 @@ do_accept_return_statement_opt(Token_Stream& tstrm)
                 succ ? compiler_status_semicolon_expected : compiler_status_expression_expected,
                 tstrm.next_sloc());
 
-    xexpr.sloc = ::std::move(arg_sloc);
-    Statement::S_return xstmt = { ::std::move(sloc), refsp.value_or(false), ::std::move(xexpr) };
-    return ::std::move(xstmt);
+    xexpr.sloc = move(arg_sloc);
+    Statement::S_return xstmt = { move(sloc), refsp.value_or(false), move(xexpr) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1274,8 +1268,8 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_assert xstmt = { ::std::move(sloc), ::std::move(*kexpr), ::std::move(*kmsg) };
-    return ::std::move(xstmt);
+    Statement::S_assert xstmt = { move(sloc), move(*kexpr), move(*kmsg) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1323,9 +1317,9 @@ do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
 
-    Statement::S_try xstmt = { ::std::move(sloc), ::std::move(*qbtry), ::std::move(sloc_catch),
-                               ::std::move(*kexcept), ::std::move(*qbcatch) };
-    return ::std::move(xstmt);
+    Statement::S_try xstmt = { move(sloc), move(*qbtry), move(sloc_catch), move(*kexcept),
+                               move(*qbcatch) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1348,8 +1342,8 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_defer xstmt = { ::std::move(sloc), ::std::move(*kexpr) };
-    return ::std::move(xstmt);
+    Statement::S_defer xstmt = { move(sloc), move(*kexpr) };
+    return move(xstmt);
   }
 
 opt<Statement>
@@ -1367,61 +1361,61 @@ do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
     //   return-statement | assert-statement | try-statement | statement-block |
     //   expression-statement
     if(auto qstmt = do_accept_variable_definition_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_immutable_variable_definition_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_reference_definition_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_function_definition_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_defer_statement_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qblock = do_accept_null_statement_opt(tstrm))
-      return ::std::move(*qblock);
+      return move(*qblock);
 
     if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_switch_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_while_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_for_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_break_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_continue_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_throw_statement_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_return_statement_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_assert_statement_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qstmt = do_accept_try_statement_opt(tstrm, scope))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     if(auto qblock = do_accept_statement_block_opt(tstrm, scope))
-      return ::std::move(*qblock);
+      return move(*qblock);
 
     if(auto qstmt = do_accept_expression_statement_opt(tstrm))
-      return ::std::move(*qstmt);
+      return move(*qstmt);
 
     return nullopt;
   }
@@ -1431,8 +1425,8 @@ do_blockify_statement(Statement&& stmt)
   {
     // Make a block consisting of a single statement.
     cow_vector<Statement> stmts;
-    stmts.emplace_back(::std::move(stmt));
-    Statement::S_block xblock = { ::std::move(stmts) };
+    stmts.emplace_back(move(stmt));
+    Statement::S_block xblock = { move(stmts) };
     return xblock;
   }
 
@@ -1445,43 +1439,43 @@ do_accept_nondeclaration_statement_as_block_opt(Token_Stream& tstrm, scope_flags
     //   return-statement | assert-statement | try-statement | statement-block |
     //   expression-statement
     if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_switch_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_do_while_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_while_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_for_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_break_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_continue_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_throw_statement_opt(tstrm))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_return_statement_opt(tstrm))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_assert_statement_opt(tstrm))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qstmt = do_accept_try_statement_opt(tstrm, scope))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     if(auto qblock = do_accept_statement_block_opt(tstrm, scope))
-      return ::std::move(*qblock);
+      return move(*qblock);
 
     if(auto qstmt = do_accept_expression_statement_opt(tstrm))
-      return do_blockify_statement(::std::move(*qstmt));
+      return do_blockify_statement(move(*qstmt));
 
     return nullopt;
   }
@@ -1567,7 +1561,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
       // Return the prefix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
-      units.emplace_back(::std::move(xunit));
+      units.emplace_back(move(xunit));
       return true;
     }
 
@@ -1579,7 +1573,7 @@ do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstr
       // Return the prefix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
-      units.emplace_back(::std::move(xunit));
+      units.emplace_back(move(xunit));
       return true;
     }
 
@@ -1598,18 +1592,18 @@ do_accept_local_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstr
     // Replace special names. This is what macros in C do.
     if(*qname == "__file") {
       Expression_Unit::S_literal xunit = { sloc.file() };
-      units.emplace_back(::std::move(xunit));
+      units.emplace_back(move(xunit));
       return true;
     }
 
     if(*qname == "__line") {
       Expression_Unit::S_literal xunit = { sloc.line() };
-      units.emplace_back(::std::move(xunit));
+      units.emplace_back(move(xunit));
       return true;
     }
 
-    Expression_Unit::S_local_reference xunit = { sloc, ::std::move(*qname) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_local_reference xunit = { sloc, move(*qname) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1628,8 +1622,8 @@ do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tst
       throw Compiler_Error(xtc_status,
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
-    Expression_Unit::S_global_reference xunit = { sloc, ::std::move(*qname) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_global_reference xunit = { sloc, move(*qname) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1641,8 +1635,8 @@ do_accept_literal(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!qval)
       return false;
 
-    Expression_Unit::S_literal xunit = { ::std::move(*qval) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_literal xunit = { move(*qval) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1656,7 +1650,7 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       return false;
 
     Expression_Unit::S_local_reference xunit = { sloc, sref("__this") };
-    units.emplace_back(::std::move(xunit));
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1697,7 +1691,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
         throw Compiler_Error(xtc_status,
                   compiler_status_duplicate_name_in_parameter_list, param_sloc);
 
-      params.emplace_back(::std::move(*kparam));
+      params.emplace_back(move(*kparam));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -1722,8 +1716,8 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
       auto qinit = do_accept_equal_initializer_opt(tstrm);
       if(qinit) {
         // Behave as if it was a `return-statement` by value.
-        Statement::S_return xstmt = { ::std::move(op_sloc), false, ::std::move(*qinit) };
-        qblock = do_blockify_statement(::std::move(xstmt));
+        Statement::S_return xstmt = { move(op_sloc), false, move(*qinit) };
+        qblock = do_blockify_statement(move(xstmt));
       }
     }
 
@@ -1732,8 +1726,8 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
       auto qinit = do_accept_ref_initializer_opt(tstrm);
       if(qinit) {
         // Behave as if it was a `return-statement` by reference.
-        Statement::S_return xstmt = { ::std::move(op_sloc), true, ::std::move(*qinit) };
-        qblock = do_blockify_statement(::std::move(xstmt));
+        Statement::S_return xstmt = { move(op_sloc), true, move(*qinit) };
+        qblock = do_blockify_statement(move(xstmt));
       }
     }
 
@@ -1743,9 +1737,9 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
 
     auto unique_name = format_string("__closure:$1:$2", sloc.line(), sloc.column());
 
-    Expression_Unit::S_closure_function xunit = { ::std::move(sloc), ::std::move(unique_name),
-                                                  ::std::move(params), ::std::move(qblock->stmts) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_closure_function xunit = { move(sloc), move(unique_name), move(params),
+                                                  move(qblock->stmts) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1789,7 +1783,7 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
                 "[unmatched `[` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
-    units.emplace_back(::std::move(xunit));
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1830,7 +1824,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
                   compiler_status_expression_expected, tstrm.next_sloc());
 
       // Look for the separator.
-      keys.emplace_back(::std::move(*qkey));
+      keys.emplace_back(move(*qkey));
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
       comma_allowed = !kpunct;
       if(!kpunct)
@@ -1845,8 +1839,8 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
                 tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", sloc);
 
-    Expression_Unit::S_unnamed_object xunit = { sloc, ::std::move(keys) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_unnamed_object xunit = { sloc, move(keys) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1918,7 +1912,7 @@ do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& t
                 "[unmatched `(` at '$1']", op_sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_fma, false };
-    units.emplace_back(::std::move(xunit));
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -1950,7 +1944,7 @@ do_accept_prefix_binary_operator_opt(Token_Stream& tstrm)
       // Return the prefix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, false };
-      return ::std::move(xunit);
+      return move(xunit);
     }
     return nullopt;
   }
@@ -1989,7 +1983,7 @@ do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Str
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    units.emplace_back(::std::move(*qxunit));
+    units.emplace_back(move(*qxunit));
     return true;
   }
 
@@ -2019,7 +2013,7 @@ do_accept_catch_expression(cow_vector<Expression_Unit>& units, Token_Stream& tst
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    units.emplace_back(::std::move(xunit));
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -2063,8 +2057,8 @@ do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Strea
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    Expression_Unit::S_variadic_call xunit = { ::std::move(sloc), ::std::move(args) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_variadic_call xunit = { move(sloc), move(args) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -2098,7 +2092,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
         throw Compiler_Error(xtc_status,
                   compiler_status_expression_expected, tstrm.next_sloc());
 
-      args.emplace_back(::std::move(arg));
+      args.emplace_back(move(arg));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -2119,8 +2113,8 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
                 tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    Expression_Unit::S_import_call xunit = { ::std::move(sloc), ::std::move(args) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_import_call xunit = { move(sloc), move(args) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -2214,7 +2208,7 @@ do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tst
       // Return the postfix operator and discard this token.
       tstrm.shift();
       Expression_Unit::S_operator_rpn xunit = { sloc, qconf->xop, true };
-      units.emplace_back(::std::move(xunit));
+      units.emplace_back(move(xunit));
       return true;
     }
     return false;
@@ -2246,7 +2240,7 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
         throw Compiler_Error(xtc_status,
                   compiler_status_expression_expected, tstrm.next_sloc());
 
-      args.emplace_back(::std::move(arg));
+      args.emplace_back(move(arg));
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
@@ -2263,8 +2257,8 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
                 tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", sloc);
 
-    Expression_Unit::S_function_call xunit = { ::std::move(sloc), ::std::move(args) };
-    units.emplace_back(::std::move(xunit));
+    Expression_Unit::S_function_call xunit = { move(sloc), move(args) };
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -2289,7 +2283,7 @@ do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& ts
                 "[unmatched `[` at '$1']", sloc);
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_index, false };
-    units.emplace_back(::std::move(xunit));
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -2308,11 +2302,11 @@ do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream
       throw Compiler_Error(xtc_status,
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
-    Expression_Unit::S_literal xname = { ::std::move(*qkey) };
-    units.emplace_back(::std::move(xname));
+    Expression_Unit::S_literal xname = { move(*qkey) };
+    units.emplace_back(move(xname));
 
     Expression_Unit::S_operator_rpn xunit = { sloc, xop_index, false };
-    units.emplace_back(::std::move(xunit));
+    units.emplace_back(move(xunit));
     return true;
   }
 
@@ -2360,8 +2354,8 @@ do_accept_infix_element_opt(Token_Stream& tstrm)
     if(!do_accept_infix_element(units, tstrm))
       return nullopt;
 
-    Infix_Element::S_head xelem = { ::std::move(units) };
-    return ::std::move(xelem);
+    Infix_Element::S_head xelem = { move(units) };
+    return move(xelem);
   }
 
 opt<Infix_Element>
@@ -2386,8 +2380,8 @@ do_accept_infix_ternary_opt(Token_Stream& tstrm)
                 compiler_status_colon_expected, tstrm.next_sloc(),
                 "[unmatched `$1` at '$2']", stringify_punctuator(*kpunct), sloc);
 
-    Infix_Element::S_ternary xelem = { ::std::move(sloc), assign, ::std::move(btrue), { } };
-    return ::std::move(xelem);
+    Infix_Element::S_ternary xelem = { move(sloc), assign, move(btrue), { } };
+    return move(xelem);
   }
 
 opt<Infix_Element>
@@ -2408,7 +2402,7 @@ do_accept_infix_logical_and_opt(Token_Stream& tstrm)
 
     bool assign = *kpunct == punctuator_andl_eq;
     Infix_Element::S_logical_and xelem = { sloc, assign, { } };
-    return ::std::move(xelem);
+    return move(xelem);
   }
 
 opt<Infix_Element>
@@ -2429,7 +2423,7 @@ do_accept_infix_logical_or_opt(Token_Stream& tstrm)
 
     bool assign = *kpunct == punctuator_orl_eq;
     Infix_Element::S_logical_or xelem = { sloc, assign, { } };
-    return ::std::move(xelem);
+    return move(xelem);
   }
 
 opt<Infix_Element>
@@ -2444,7 +2438,7 @@ do_accept_infix_coalescence_opt(Token_Stream& tstrm)
 
     bool assign = *kpunct == punctuator_coales_eq;
     Infix_Element::S_coalescence xelem = { sloc, assign, { } };
-    return ::std::move(xelem);
+    return move(xelem);
   }
 
 struct Infix_Punctuator_Xop
@@ -2518,7 +2512,7 @@ do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       // Return the infix operator and discard this token.
       tstrm.shift();
       Infix_Element::S_general xelem = { sloc, qconf->xop, qconf->assign, { } };
-      return ::std::move(xelem);
+      return move(xelem);
     }
     return nullopt;
   }
@@ -2530,19 +2524,19 @@ do_accept_infix_operator_opt(Token_Stream& tstrm)
     //   infix-ternary | infix-logical-and | infix-logical-or | infix-coalescence |
     //   infix-operator-general
     if(auto qelem = do_accept_infix_ternary_opt(tstrm))
-      return ::std::move(*qelem);
+      return move(*qelem);
 
     if(auto qelem = do_accept_infix_logical_and_opt(tstrm))
-      return ::std::move(*qelem);
+      return move(*qelem);
 
     if(auto qelem = do_accept_infix_logical_or_opt(tstrm))
-      return ::std::move(*qelem);
+      return move(*qelem);
 
     if(auto qelem = do_accept_infix_coalescence_opt(tstrm))
-      return ::std::move(*qelem);
+      return move(*qelem);
 
     if(auto qelem = do_accept_infix_operator_general_opt(tstrm))
-      return ::std::move(*qelem);
+      return move(*qelem);
 
     return nullopt;
   }
@@ -2561,7 +2555,7 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
       return false;
 
     cow_vector<Infix_Element> stack;
-    stack.emplace_back(::std::move(*qelem));
+    stack.emplace_back(move(*qelem));
 
     for(;;) {
       auto qnext = do_accept_infix_operator_opt(tstrm);
@@ -2580,16 +2574,16 @@ do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 
       while((stack.size() >= 2) && (stack.back().tell_precedence() <= next_precedence)) {
         // Collapse elements that have no lower precedence.
-        qelem = ::std::move(stack.mut_back());
+        qelem = move(stack.mut_back());
         stack.pop_back();
         qelem->extract(stack.mut_back().mut_junction());
       }
-      stack.emplace_back(::std::move(*qnext));
+      stack.emplace_back(move(*qnext));
     }
 
     while(stack.size() >= 2) {
       // Collapse all elements so we eventually have a single node in the stack.
-      qelem = ::std::move(stack.mut_back());
+      qelem = move(stack.mut_back());
       stack.pop_back();
       qelem->extract(stack.mut_back().mut_junction());
     }
@@ -2624,7 +2618,7 @@ reload(Token_Stream&& tstrm)
     // document ::=
     //   statement *
     while(auto qstmt = do_accept_statement_opt(tstrm, scope_flags_plain))
-      stmts.emplace_back(::std::move(*qstmt));
+      stmts.emplace_back(move(*qstmt));
 
     // If there are any non-statement tokens left in the stream, fail.
     if(!tstrm.empty())
@@ -2633,10 +2627,10 @@ reload(Token_Stream&& tstrm)
 
     // Add an implicit return.
     Statement::S_return xendf = { tstrm.next_sloc(), true, Statement::S_expression() };
-    stmts.emplace_back(::std::move(xendf));
+    stmts.emplace_back(move(xendf));
 
     // Succeed.
-    this->m_stmts = ::std::move(stmts);
+    this->m_stmts = move(stmts);
   }
 
 void
@@ -2660,11 +2654,11 @@ reload_oneline(Token_Stream&& tstrm)
                 compiler_status_invalid_expression, tstrm.next_sloc());
 
     // Build a return-statement that forwards the result by reference.
-    Statement::S_return xstmt = { kexpr->sloc, true, ::std::move(*kexpr) };
-    stmts.emplace_back(::std::move(xstmt));
+    Statement::S_return xstmt = { kexpr->sloc, true, move(*kexpr) };
+    stmts.emplace_back(move(xstmt));
 
     // Succeed.
-    this->m_stmts = ::std::move(stmts);
+    this->m_stmts = move(stmts);
   }
 
 }  // namespace asteria

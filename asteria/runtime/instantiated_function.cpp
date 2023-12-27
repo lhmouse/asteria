@@ -49,7 +49,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
   {
     // Create the stack and context for this function.
     Reference_Stack alt_stack;
-    Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, ::std::move(self));
+    Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, move(self));
 
     // Set the hooks up.
     auto scope_cleanup = [&](Abstract_Hooks* hooks) { hooks->on_function_leave(ctx_func);  };
@@ -79,7 +79,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         return self;
 
       case air_status_return_ref:
-        self = ::std::move(stack.mut_top());
+        self = move(stack.mut_top());
         return self;
 
       case air_status_break_unspec:

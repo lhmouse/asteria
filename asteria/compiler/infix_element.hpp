@@ -82,7 +82,7 @@ class Infix_Element
     Infix_Element(XElemT&& xelem)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XElemT&&>::value)
       :
-        m_stor(::std::forward<XElemT>(xelem))
+        m_stor(forward<XElemT>(xelem))
       { }
 
     template<typename XElemT,
@@ -91,7 +91,7 @@ class Infix_Element
     operator=(XElemT&& xelem) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XElemT&&>::value)
       {
-        this->m_stor = ::std::forward<XElemT>(xelem);
+        this->m_stor = forward<XElemT>(xelem);
         return *this;
       }
 

@@ -38,7 +38,7 @@ size_t
 estimate_distance_aux(::std::forward_iterator_tag, iteratorT first, iteratorT last)
   {
     size_t total = 0;
-    for(auto qit = ::std::move(first);  qit != last;  ++qit)
+    for(auto qit = move(first);  qit != last;  ++qit)
       ++total;
     return total;
   }
@@ -100,7 +100,7 @@ constexpr
 targetT
 static_or_dynamic_cast_aux(true_type, sourceT&& src)
   {
-    return static_cast<targetT>(::std::forward<sourceT>(src));
+    return static_cast<targetT>(forward<sourceT>(src));
   }
 
 template<typename targetT, typename sourceT>
@@ -108,7 +108,7 @@ constexpr
 targetT
 static_or_dynamic_cast_aux(false_type, sourceT&& src)
   {
-    return dynamic_cast<targetT>(::std::forward<sourceT>(src));
+    return dynamic_cast<targetT>(forward<sourceT>(src));
   }
 
 template<typename valueT>
@@ -125,7 +125,7 @@ struct binder_eq
     constexpr
     binder_eq(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
       :
-        m_val(::std::move(xval))
+        m_val(move(xval))
       { }
 
     template<typename xvalueT>
@@ -149,7 +149,7 @@ struct binder_ne
     constexpr
     binder_ne(valueT&& xval) noexcept(is_nothrow_move_constructible<valueT>::value)
       :
-        m_val(::std::move(xval))
+        m_val(move(xval))
       { }
 
     template<typename xvalueT>

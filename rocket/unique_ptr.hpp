@@ -64,12 +64,12 @@ class unique_ptr
     ROCKET_ENABLE_IF(is_constructible<deleter_type, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       :
-        m_sth(other.m_sth.release(), ::std::move(other.m_sth.as_deleter()))
+        m_sth(other.m_sth.release(), move(other.m_sth.as_deleter()))
       { }
 
     unique_ptr(unique_ptr&& other) noexcept
       :
-        m_sth(other.m_sth.release(), ::std::move(other.m_sth.as_deleter()))
+        m_sth(other.m_sth.release(), move(other.m_sth.as_deleter()))
       { }
 
     unique_ptr(unique_ptr&& other, const deleter_type& del) noexcept
@@ -81,7 +81,7 @@ class unique_ptr
     unique_ptr&
     operator=(unique_ptr&& other) & noexcept
       {
-        this->m_sth.as_deleter() = ::std::move(other.m_sth.as_deleter());
+        this->m_sth.as_deleter() = move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -92,7 +92,7 @@ class unique_ptr
     unique_ptr&
     operator=(unique_ptr<yelementT, ydeleterT>&& other) & noexcept
       {
-        this->m_sth.as_deleter() = ::std::move(other.m_sth.as_deleter());
+        this->m_sth.as_deleter() = move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -156,7 +156,7 @@ class unique_ptr
     unique_ptr&
     reset(pointer ptr_new = nullptr) noexcept
       {
-        this->m_sth.reset(::std::move(ptr_new));
+        this->m_sth.reset(move(ptr_new));
         return *this;
       }
   };
@@ -263,7 +263,7 @@ inline
 unique_ptr<elementT>
 make_unique(paramsT&&... params)
   {
-    return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+    return unique_ptr<elementT>(new elementT(forward<paramsT>(params)...));
   }
 
 template<typename targetT, typename sourceT>

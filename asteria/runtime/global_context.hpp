@@ -69,7 +69,7 @@ class Global_Context
     ASTERIA_INCOMPLET(Abstract_Hooks)
     void
     set_hooks(refcnt_ptr<Abstract_Hooks> hooks_opt) noexcept
-      { this->m_qhooks = ::std::move(hooks_opt);  }
+      { this->m_qhooks = move(hooks_opt);  }
 
     // These are interfaces for individual global components.
     ASTERIA_INCOMPLET(Garbage_Collector)

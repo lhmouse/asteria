@@ -154,7 +154,7 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
       return false;
 
     if(refp_opt)
-      *refp_opt = ::std::move(qbkt->ref);
+      *refp_opt = move(qbkt->ref);
 
     // Destroy this element.
     this->do_erase_range((uint32_t) (qbkt - this->m_bptr), 1);

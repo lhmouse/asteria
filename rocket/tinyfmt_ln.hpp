@@ -39,7 +39,7 @@ class basic_tinyfmt_ln
     basic_tinyfmt_ln(paramsT&&... params)
       noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
       :
-        m_buf(::std::forward<paramsT>(params)...)
+        m_buf(forward<paramsT>(params)...)
       { }
 
     basic_tinyfmt_ln&
@@ -93,7 +93,7 @@ class basic_tinyfmt_ln
     basic_tinyfmt_ln&
     set_buffer(xlnT&& xln, open_mode mode)
       {
-        this->m_buf.set_buffer(::std::forward<xlnT>(xln), mode);
+        this->m_buf.set_buffer(forward<xlnT>(xln), mode);
         return *this;
       }
 
@@ -101,7 +101,7 @@ class basic_tinyfmt_ln
     basic_tinyfmt_ln&
     set_buffer(xlnT&& xln)
       {
-        this->m_buf.set_buffer(::std::forward<xlnT>(xln));
+        this->m_buf.set_buffer(forward<xlnT>(xln));
         return *this;
       }
 

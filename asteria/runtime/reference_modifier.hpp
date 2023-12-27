@@ -60,7 +60,7 @@ class Reference_Modifier
     Reference_Modifier(XModT&& xmod)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XModT&&>::value)
       :
-        m_stor(::std::forward<XModT>(xmod))
+        m_stor(forward<XModT>(xmod))
       { }
 
     template<typename XModT,
@@ -69,7 +69,7 @@ class Reference_Modifier
     operator=(XModT&& xmod) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XModT&&>::value)
       {
-        this->m_stor = ::std::forward<XModT>(xmod);
+        this->m_stor = forward<XModT>(xmod);
         return *this;
       }
 

@@ -153,7 +153,7 @@ class Expression_Unit
     Expression_Unit(XUnitT&& xunit)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XUnitT&&>::value)
       :
-        m_stor(::std::forward<XUnitT>(xunit))
+        m_stor(forward<XUnitT>(xunit))
       { }
 
     template<typename XUnitT,
@@ -162,7 +162,7 @@ class Expression_Unit
     operator=(XUnitT&& xunit) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XUnitT&&>::value)
       {
-        this->m_stor = ::std::forward<XUnitT>(xunit);
+        this->m_stor = forward<XUnitT>(xunit);
         return *this;
       }
 

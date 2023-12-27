@@ -28,7 +28,7 @@ void
 do_set_rebound(bool& dirty, AIR_Node& res, AIR_Node&& bound)
   {
     dirty = true;
-    res = ::std::move(bound);
+    res = move(bound);
   }
 
 void
@@ -36,7 +36,7 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i)
       if(auto qnode = code.at(i).rebind_opt(ctx))
-        do_set_rebound(dirty, code.mut(i), ::std::move(*qnode));
+        do_set_rebound(dirty, code.mut(i), move(*qnode));
   }
 
 template<typename NodeT>
@@ -45,7 +45,7 @@ do_return_rebound_opt(bool dirty, NodeT&& bound)
   {
     opt<AIR_Node> res;
     if(dirty)
-      res.emplace(::std::forward<NodeT>(bound));
+      res.emplace(forward<NodeT>(bound));
     return res;
   }
 
@@ -70,7 +70,7 @@ template<typename XModT>
 void
 do_push_modifier_and_check(Reference& ref, XModT&& xmod)
   {
-    ref.push_modifier(::std::forward<XModT>(xmod));
+    ref.push_modifier(forward<XModT>(xmod));
     ref.dereference_readonly();
   }
 
@@ -121,7 +121,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
       rod.execute(ctx);
       auto& val = ctx.stack().mut_top().dereference_copy();
       ctx.stack().pop();
-      ctx.stack().top().dereference_mutable() = ::std::move(val);
+      ctx.stack().top().dereference_mutable() = move(val);
       return air_status_next;
     }
     else {
@@ -148,7 +148,7 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
     if(ptc != ptc_aware_none) {
       // Return a tail call wrapper.
       self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc,
-             target.as_function(), ::std::move(self), ::std::move(ctx.alt_stack())));
+             target.as_function(), move(self), move(ctx.alt_stack())));
       return air_status_return_ref;
     }
 
@@ -156,7 +156,7 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
     if(auto hooks = ctx.global().get_hooks_opt())
       hooks->on_call(sloc, target.as_function());
 
-    target.as_function().invoke(self, ctx.global(), ::std::move(ctx.alt_stack()));
+    target.as_function().invoke(self, ctx.global(), move(ctx.alt_stack()));
     return air_status_next;
   }
 
@@ -890,7 +890,7 @@ rebind_opt(Abstract_Context& ctx) const
         Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_if_statement: {
@@ -904,7 +904,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_true, ctx_body);
         do_rebind_nodes(dirty, bound.code_false, ctx_body);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_switch_statement: {
@@ -920,14 +920,14 @@ rebind_opt(Abstract_Context& ctx) const
           // expression, and are not parts of the body.
           for(size_t i = 0;  i < bound.clauses.at(k).code_label.size();  ++i)
             if(auto qnode = bound.clauses.at(k).code_label.at(i).rebind_opt(ctx))
-              do_set_rebound(dirty, bound.clauses.mut(k).code_label.mut(i), ::std::move(*qnode));
+              do_set_rebound(dirty, bound.clauses.mut(k).code_label.mut(i), move(*qnode));
 
           for(size_t i = 0;  i < bound.clauses.at(k).code_body.size();  ++i)
             if(auto qnode = bound.clauses.at(k).code_body.at(i).rebind_opt(ctx_body))
-              do_set_rebound(dirty, bound.clauses.mut(k).code_body.mut(i), ::std::move(*qnode));
+              do_set_rebound(dirty, bound.clauses.mut(k).code_body.mut(i), move(*qnode));
         }
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_do_while_statement: {
@@ -943,7 +943,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_cond, ctx);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_while_statement: {
@@ -959,7 +959,7 @@ rebind_opt(Abstract_Context& ctx) const
         Analytic_Context ctx_body(xtc_plain, ctx);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_for_each_statement: {
@@ -981,7 +981,7 @@ rebind_opt(Abstract_Context& ctx) const
         Analytic_Context ctx_body(xtc_plain, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_for_statement: {
@@ -1002,7 +1002,7 @@ rebind_opt(Abstract_Context& ctx) const
         Analytic_Context ctx_body(xtc_plain, ctx_for);
         do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_try_statement: {
@@ -1019,7 +1019,7 @@ rebind_opt(Abstract_Context& ctx) const
         ctx_catch.insert_named_reference(altr.name_except);
         do_rebind_nodes(dirty, bound.code_catch, ctx_catch);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_push_local_reference: {
@@ -1043,7 +1043,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         // Bind this reference.
         S_push_bound_reference xnode = { *qref };
-        return ::std::move(xnode);
+        return move(xnode);
       }
 
       case index_define_function: {
@@ -1058,7 +1058,7 @@ rebind_opt(Abstract_Context& ctx) const
         Analytic_Context ctx_func(xtc_function, &ctx, altr.params);
         do_rebind_nodes(dirty, bound.code_body, ctx_func);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_branch_expression: {
@@ -1071,7 +1071,7 @@ rebind_opt(Abstract_Context& ctx) const
         do_rebind_nodes(dirty, bound.code_true, ctx);
         do_rebind_nodes(dirty, bound.code_false, ctx);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_defer_expression: {
@@ -1083,7 +1083,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_body, ctx);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_catch_expression: {
@@ -1095,7 +1095,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_body, ctx);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       case index_coalesce_expression: {
@@ -1107,7 +1107,7 @@ rebind_opt(Abstract_Context& ctx) const
 
         do_rebind_nodes(dirty, bound.code_null, ctx);
 
-        return do_return_rebound_opt(dirty, ::std::move(bound));
+        return do_return_rebound_opt(dirty, move(bound));
       }
 
       default:
@@ -1763,7 +1763,7 @@ solidify(AVM_Rod& rod) const
               // going to change for all loops.
               AIR_Status next_status = sp.rod_init.execute(ctx_for);
               ROCKET_ASSERT(next_status == air_status_next);
-              mapped_ref = ::std::move(ctx_for.stack().mut_top());
+              mapped_ref = move(ctx_for.stack().mut_top());
 
               const auto range = mapped_ref.dereference_readonly();
               if(range.is_array()) {
@@ -1785,7 +1785,7 @@ solidify(AVM_Rod& rod) const
                   // Set the mapped reference.
                   mapped_ref.pop_modifier();
                   Reference_Modifier::S_array_index xmod = { i };
-                  do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
+                  do_push_modifier_and_check(mapped_ref, move(xmod));
 
                   // Execute the loop body.
                   next_status = do_execute_block(sp.rod_body, ctx_for);
@@ -1816,7 +1816,7 @@ solidify(AVM_Rod& rod) const
                   // Set the mapped reference.
                   mapped_ref.pop_modifier();
                   Reference_Modifier::S_object_key xmod = { it->first };
-                  do_push_modifier_and_check(mapped_ref, ::std::move(xmod));
+                  do_push_modifier_and_check(mapped_ref, move(xmod));
 
                   // Execute the loop body.
                   next_status = do_execute_block(sp.rod_body, ctx_for);
@@ -2001,10 +2001,10 @@ solidify(AVM_Rod& rod) const
                   r.try_emplace(sref("line"), except.frame(k).sloc.line());
                   r.try_emplace(sref("column"), except.frame(k).sloc.column());
                   r.try_emplace(sref("value"), except.frame(k).value);
-                  backtrace.emplace_back(::std::move(r));
+                  backtrace.emplace_back(move(r));
                 }
                 auto& backtrace_ref = ctx_catch.insert_named_reference(sref("__backtrace"));
-                backtrace_ref.set_temporary(::std::move(backtrace));
+                backtrace_ref.set_temporary(move(backtrace));
 
                 // Execute the `catch` clause.
                 status = sp.rod_catch.execute(ctx_catch);
@@ -2449,7 +2449,7 @@ solidify(AVM_Rod& rod) const
             // Collect arguments from left to right.
             ctx.alt_stack().clear();
             for(uint32_t k = 0;  k != nargs;  ++k)
-              ctx.alt_stack().push() = ::std::move(ctx.stack().mut_top(nargs - 1 - k));
+              ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 1 - k));
             ctx.stack().pop(nargs);
 
             // Copy the target reference into the red zone, as we probably don't
@@ -2498,7 +2498,7 @@ solidify(AVM_Rod& rod) const
             }
 
             // Push the array as a temporary.
-            ctx.stack().push().set_temporary(::std::move(arr));
+            ctx.stack().push().set_temporary(move(arr));
             return air_status_next;
           }
 
@@ -2543,7 +2543,7 @@ solidify(AVM_Rod& rod) const
             }
 
             // Push the object as a temporary.
-            ctx.stack().push().set_temporary(::std::move(obj));
+            ctx.stack().push().set_temporary(move(obj));
             return air_status_next;
           }
 
@@ -2666,21 +2666,21 @@ solidify(AVM_Rod& rod) const
                     // Unset the last element and return it as a temporary.
                     // `assign` is ignored.
                     auto val = top.dereference_unset();
-                    top.set_temporary(::std::move(val));
+                    top.set_temporary(move(val));
                     return air_status_next;
                   }
 
                   case xop_head: {
                     // Push an array head modifier. `assign` is ignored.
                     Reference_Modifier::S_array_head xmod = { };
-                    do_push_modifier_and_check(top, ::std::move(xmod));
+                    do_push_modifier_and_check(top, move(xmod));
                     return air_status_next;
                   }
 
                   case xop_tail: {
                     // Push an array tail modifier. `assign` is ignored.
                     Reference_Modifier::S_array_tail xmod = { };
-                    do_push_modifier_and_check(top, ::std::move(xmod));
+                    do_push_modifier_and_check(top, move(xmod));
                     return air_status_next;
                   }
 
@@ -2688,7 +2688,7 @@ solidify(AVM_Rod& rod) const
                     // Push a random subscript.
                     uint32_t seed = ctx.global().random_engine()->bump();
                     Reference_Modifier::S_array_random xmod = { seed };
-                    do_push_modifier_and_check(top, ::std::move(xmod));
+                    do_push_modifier_and_check(top, move(xmod));
                     return air_status_next;
                   }
 
@@ -2734,7 +2734,7 @@ solidify(AVM_Rod& rod) const
                 switch(uxop) {
                   case xop_assign: {
                     // `assign` is ignored.
-                    top.dereference_mutable() = ::std::move(rhs);
+                    top.dereference_mutable() = move(rhs);
                     return air_status_next;
                   }
 
@@ -2742,12 +2742,12 @@ solidify(AVM_Rod& rod) const
                     // Push a subscript.
                     if(rhs.type() == type_integer) {
                       Reference_Modifier::S_array_index xmod = { rhs.as_integer() };
-                      do_push_modifier_and_check(top, ::std::move(xmod));
+                      do_push_modifier_and_check(top, move(xmod));
                       return air_status_next;
                     }
                     else if(rhs.type() == type_string) {
                       Reference_Modifier::S_object_key xmod = { rhs.as_string() };
-                      do_push_modifier_and_check(top, ::std::move(xmod));
+                      do_push_modifier_and_check(top, move(xmod));
                       return air_status_next;
                     }
                     else
@@ -3865,7 +3865,7 @@ solidify(AVM_Rod& rod) const
               // Invoke the generator function with no argument to get the number
               // of variadic arguments. This destroys its self reference, so we have
               // to stash it first.
-              auto va_gen = ::std::move(temp_value.mut_function());
+              auto va_gen = move(temp_value.mut_function());
               ctx.stack().mut_top().pop_modifier();
               ctx.stack().push();
               ctx.stack().mut_top() = ctx.stack().mut_top(1);
@@ -3907,7 +3907,7 @@ solidify(AVM_Rod& rod) const
                 // Move arguments into `alt_stack` from left to right.
                 ctx.alt_stack().clear();
                 for(uint32_t k = 0;  k != nargs;  ++k)
-                  ctx.alt_stack().push() = ::std::move(ctx.stack().mut_top(k));
+                  ctx.alt_stack().push() = move(ctx.stack().mut_top(k));
                 ctx.stack().pop(nargs);
               }
             }
@@ -3962,7 +3962,7 @@ solidify(AVM_Rod& rod) const
             // Instantiate the expression and push it to the current context.
             AVM_Rod rod_body;
             do_solidify_nodes(rod_body, bound_body);
-            ctx.mut_defer().emplace_back(sloc, ::std::move(rod_body));
+            ctx.mut_defer().emplace_back(sloc, move(rod_body));
             return air_status_next;
           }
 
@@ -4013,7 +4013,7 @@ solidify(AVM_Rod& rod) const
             // Collect arguments from left to right.
             ctx.alt_stack().clear();
             for(uint32_t k = 0;  k != nargs - 1;  ++k)
-              ctx.alt_stack().push() = ::std::move(ctx.stack().mut_top(nargs - 2 - k));
+              ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 2 - k));
             ctx.stack().pop(nargs - 1);
 
             // Get the path to import.
@@ -4044,10 +4044,10 @@ solidify(AVM_Rod& rod) const
             istrm.reset(ctx.global().module_loader(), realpathp);
 
             Token_Stream tstrm(sp.opts);
-            tstrm.reload(abs_path, 1, ::std::move(istrm.get()));
+            tstrm.reload(abs_path, 1, move(istrm.get()));
 
             Statement_Sequence stmtq(sp.opts);
-            stmtq.reload(::std::move(tstrm));
+            stmtq.reload(move(tstrm));
 
             // Instantiate the script as a variadic function.
             cow_vector<phsh_string> script_params;
@@ -4130,7 +4130,7 @@ solidify(AVM_Rod& rod) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Move a reference from the stack into the current context.
-            ctx.insert_named_reference(sp.name) = ::std::move(ctx.stack().mut_top());
+            ctx.insert_named_reference(sp.name) = move(ctx.stack().mut_top());
             ctx.stack().pop();
             return air_status_next;
           }
@@ -4186,7 +4186,7 @@ solidify(AVM_Rod& rod) const
             ctx.stack().swap(saved_stack);
 
             // Push the exception object.
-            ctx.stack().push().set_temporary(::std::move(exval));
+            ctx.stack().push().set_temporary(move(exval));
             return air_status_next;
           }
 
@@ -4431,7 +4431,7 @@ solidify(AVM_Rod& rod) const
 
             // Push a modifier.
             Reference_Modifier::S_object_key xmod = { sp.key };
-            do_push_modifier_and_check(ctx.stack().mut_top(), ::std::move(xmod));
+            do_push_modifier_and_check(ctx.stack().mut_top(), move(xmod));
             return air_status_next;
           }
 
@@ -4511,7 +4511,7 @@ solidify(AVM_Rod& rod) const
                   case xop_index: {
                     // Push a subscript.
                     Reference_Modifier::S_array_index xmod = { irhs };
-                    do_push_modifier_and_check(top, ::std::move(xmod));
+                    do_push_modifier_and_check(top, move(xmod));
                     return air_status_next;
                   }
 

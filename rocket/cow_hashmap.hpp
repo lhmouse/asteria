@@ -115,7 +115,7 @@ class cow_hashmap
       noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
       :
-        m_sth(::std::move(other.m_sth.as_allocator()), other.m_sth.as_hasher(),
+        m_sth(move(other.m_sth.as_allocator()), other.m_sth.as_hasher(),
               other.m_sth.as_key_equal())
       { this->m_sth.exchange_with(other.m_sth);  }
 
@@ -139,7 +139,7 @@ class cow_hashmap
                 const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
       :
         cow_hashmap(res_arg, hf, eq, alloc)
-      { this->assign(::std::move(first), ::std::move(last));  }
+      { this->assign(move(first), move(last));  }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0,
                 const hasher& hf = hasher(), const key_equal& eq = key_equal(),
@@ -158,7 +158,7 @@ class cow_hashmap
     cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf,
                 const allocator_type& alloc)
       :
-        cow_hashmap(::std::move(first), ::std::move(last), res_arg, hf, key_equal(), alloc)
+        cow_hashmap(move(first), move(last), res_arg, hf, key_equal(), alloc)
       { }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf,
@@ -176,7 +176,7 @@ class cow_hashmap
     ROCKET_ENABLE_IF(is_input_iterator<inputT>::value)>
     cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
       :
-        cow_hashmap(::std::move(first), ::std::move(last), res_arg, hasher(), key_equal(), alloc)
+        cow_hashmap(move(first), move(last), res_arg, hasher(), key_equal(), alloc)
       { }
 
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type& alloc)
@@ -459,7 +459,7 @@ class cow_hashmap
     template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
     insert(pair<ykeyT, ymappedT>&& value)
-      { return this->try_emplace(::std::move(value.first), ::std::move(value.second));  }
+      { return this->try_emplace(move(value.first), move(value.second));  }
 
     // N.B. The return type is a non-standard extension.
     cow_hashmap&
@@ -484,7 +484,7 @@ class cow_hashmap
         size_type tpos;
         if(ROCKET_EXPECT(dist && bkts && (dist <= cap - this->size()))) {
           // Insert new elements in place.
-          for(auto it = ::std::move(first);  it != last;  ++it)
+          for(auto it = move(first);  it != last;  ++it)
             this->m_sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
 
           // The return type aligns with `std::string::append()`.
@@ -497,7 +497,7 @@ class cow_hashmap
         if(ROCKET_EXPECT(n && (n == dist))) {
           // The length is known.
           bkts = sth.reallocate_reserve(this->m_sth, false, n | cap / 2);
-          for(auto it = ::std::move(first);  it != last;  ++it)
+          for(auto it = move(first);  it != last;  ++it)
             if(!this->m_sth.find(tpos, it->first))
               sth.keyed_try_emplace(tpos, it->first, it->first, it->second);
         }
@@ -505,7 +505,7 @@ class cow_hashmap
           // The length is not known.
           bkts = sth.reallocate_reserve(this->m_sth, false, 17 | cap / 2);
           cap = sth.capacity();
-          for(auto it = ::std::move(first);  it != last;  ++it) {
+          for(auto it = move(first);  it != last;  ++it) {
             if(ROCKET_UNEXPECT(sth.size() >= cap)) {
               bkts = sth.reallocate_reserve(sth, this->size(), cap / 2);
               cap = sth.capacity();
@@ -531,7 +531,7 @@ class cow_hashmap
     template<typename ykeyT, typename ymappedT>
     iterator
     insert(const_iterator /*hint*/, pair<ykeyT, ymappedT>&& value)
-      { return this->insert(::std::move(value)).first;  }
+      { return this->insert(move(value)).first;  }
 
     template<typename ykeyT, typename... paramsT>
     pair<iterator, bool>
@@ -545,8 +545,8 @@ class cow_hashmap
           // Insert the new element in place.
           bool inserted = this->m_sth.keyed_try_emplace(tpos, ykey,
                     ::std::piecewise_construct,
-                    ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
-                    ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+                    forward_as_tuple(forward<ykeyT>(ykey)),
+                    forward_as_tuple(forward<paramsT>(params)...));
 
           // The return type aligns with `std::unordered_map::try_emplace()`.
           return { iterator(bkts, tpos, this->bucket_count()), inserted };
@@ -564,8 +564,8 @@ class cow_hashmap
 
         sth.keyed_try_emplace(tpos, ykey,
                  ::std::piecewise_construct,
-                 ::std::forward_as_tuple(::std::forward<ykeyT>(ykey)),
-                 ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+                 forward_as_tuple(forward<ykeyT>(ykey)),
+                 forward_as_tuple(forward<paramsT>(params)...));
 
         sth.reallocate_finish(this->m_sth);
         this->m_sth.exchange_with(sth);
@@ -577,16 +577,16 @@ class cow_hashmap
     iterator
     try_emplace(const_iterator /*hint*/, ykeyT&& ykey, paramsT&&... params)
       {
-        return this->try_emplace(::std::forward<ykeyT>(ykey), ::std::forward<paramsT>(params)...).first;
+        return this->try_emplace(forward<ykeyT>(ykey), forward<paramsT>(params)...).first;
       }
 
     template<typename ykeyT, typename ymappedT>
     pair<iterator, bool>
     insert_or_assign(ykeyT&& ykey, ymappedT&& ymapped)
       {
-        auto r = this->try_emplace(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped));
+        auto r = this->try_emplace(forward<ykeyT>(ykey), forward<ymappedT>(ymapped));
         if(!r.second)
-          r.first->second = ::std::forward<ymappedT>(ymapped);
+          r.first->second = forward<ymappedT>(ymapped);
         return r;
       }
 
@@ -595,14 +595,14 @@ class cow_hashmap
     iterator
     insert_or_assign(const_iterator /*hint*/, ykeyT&& ykey, ymappedT&& ymapped)
       {
-        return this->insert_or_assign(::std::forward<ykeyT>(ykey), ::std::forward<ymappedT>(ymapped)).first;
+        return this->insert_or_assign(forward<ykeyT>(ykey), forward<ymappedT>(ymapped)).first;
       }
 
     template<typename ykeyT>
     mapped_type&
     operator[](ykeyT&& ykey)
       {
-        return this->try_emplace(::std::forward<ykeyT>(ykey)).first->second;
+        return this->try_emplace(forward<ykeyT>(ykey)).first->second;
       }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -676,7 +676,7 @@ class cow_hashmap
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
-          return ::std::forward<ydefaultT>(ydef);
+          return forward<ydefaultT>(ydef);
         return this->do_buckets()[tpos]->second;
       }
 
@@ -687,8 +687,8 @@ class cow_hashmap
       {
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
-          return ::std::forward<ydefaultT>(ydef);
-        return ::std::move(this->do_mut_buckets()[tpos]->second);
+          return forward<ydefaultT>(ydef);
+        return move(this->do_mut_buckets()[tpos]->second);
       }
 
     // 26.5.4.3, element access
@@ -742,7 +742,7 @@ class cow_hashmap
     assign(inputT first, inputT last)
       {
         this->clear();
-        this->insert(::std::move(first), ::std::move(last));
+        this->insert(move(first), move(last));
         return *this;
       }
 

@@ -178,7 +178,7 @@ class basic_cow_string
 
     basic_cow_string(basic_cow_string&& other) noexcept
       :
-        m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(::std::move(other.m_sth.as_allocator()))
+        m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(move(other.m_sth.as_allocator()))
       { this->m_sth.exchange_with(other.m_sth);  }
 
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
@@ -218,7 +218,7 @@ class basic_cow_string
     basic_cow_string(inputT first, inputT last, const allocator_type& alloc = allocator_type())
       :
         basic_cow_string(alloc)
-      { this->append(::std::move(first), ::std::move(last));  }
+      { this->append(move(first), move(last));  }
 
     basic_cow_string&
     operator=(shallow_type sh) & noexcept
@@ -663,7 +663,7 @@ class basic_cow_string
         size_type len = this->size();
 
         if(ROCKET_EXPECT(dist && (dist == n) && ptr && (n <= cap - len))) {
-          for(auto it = ::std::move(first);  it != last;  ++it)
+          for(auto it = move(first);  it != last;  ++it)
             ptr[len++] = *it;
           this->do_set_data_and_size(ptr, len);
           return *this;
@@ -674,14 +674,14 @@ class basic_cow_string
         if(ROCKET_EXPECT(dist && (dist == n))) {
           // The length is known.
           ptr = sth.reallocate_more(this->m_ref.m_ptr, len, n | cap / 2);
-          for(auto it = ::std::move(first);  it != last;  ++it)
+          for(auto it = move(first);  it != last;  ++it)
             ptr[len++] = *it;
         }
         else {
           // The length is not known.
           ptr = sth.reallocate_more(this->m_ref.m_ptr, len, 17 | cap / 2);
           cap = sth.capacity();
-          for(auto it = ::std::move(first);  it != last;  ++it) {
+          for(auto it = move(first);  it != last;  ++it) {
             if(ROCKET_UNEXPECT(len >= cap)) {
               ptr = sth.reallocate_more(ptr, len, cap / 2);
               cap = sth.capacity();
@@ -765,31 +765,31 @@ class basic_cow_string
     basic_cow_string&&
     operator<<(shallow_type sh) &&
       {
-        return ::std::move(this->append(sh));
+        return move(this->append(sh));
       }
 
     basic_cow_string&&
     operator<<(initializer_list<value_type> init) &&
       {
-        return ::std::move(this->append(init));
+        return move(this->append(init));
       }
 
     basic_cow_string&&
     operator<<(const basic_cow_string& other) &&
       {
-        return ::std::move(this->append(other));
+        return move(this->append(other));
       }
 
     basic_cow_string&&
     operator<<(const value_type* s) &&
       {
-        return ::std::move(this->append(s));
+        return move(this->append(s));
       }
 
     basic_cow_string&&
     operator<<(value_type c) &&
       {
-        return ::std::move(this->push_back(c));
+        return move(this->push_back(c));
       }
 
     basic_cow_string&
@@ -801,7 +801,7 @@ class basic_cow_string
     basic_cow_string&&
     operator>>(size_type n) &&
       {
-        return ::std::move(this->pop_back(n));
+        return move(this->pop_back(n));
       }
 
     basic_cow_string&
@@ -891,7 +891,7 @@ class basic_cow_string
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
         size_type old_size = this->size();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(move(first), move(last));
         this->do_swizzle_unchecked(tpos, tlen, old_size);
         return *this;
       }
@@ -901,7 +901,7 @@ class basic_cow_string
     basic_cow_string&
     replace(size_type tpos, inputT first, inputT last)
       {
-        return this->replace(tpos, npos, ::std::move(first), ::std::move(last));
+        return this->replace(tpos, npos, move(first), move(last));
       }
 
     iterator
@@ -961,7 +961,7 @@ class basic_cow_string
         size_type tpos = static_cast<size_type>(tfirst - this->begin());
         size_type tlen = static_cast<size_type>(tlast - tfirst);
         size_type old_size = this->size();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(move(first), move(last));
         auto tptr = this->do_swizzle_unchecked(tpos, tlen, old_size);
         return iterator(tptr - tpos, tpos, this->size());
       }
@@ -1007,7 +1007,7 @@ class basic_cow_string
     basic_cow_string&
     insert(size_type tpos, inputT first, inputT last)
       {
-        return this->replace(tpos, size_type(0), ::std::move(first), ::std::move(last));
+        return this->replace(tpos, size_type(0), move(first), move(last));
       }
 
     iterator
@@ -1051,7 +1051,7 @@ class basic_cow_string
     iterator
     insert(const_iterator tins, inputT first, inputT last)
       {
-        return this->replace(tins, tins, ::std::move(first), ::std::move(last));
+        return this->replace(tins, tins, move(first), move(last));
       }
 
     basic_cow_string&
@@ -1179,7 +1179,7 @@ class basic_cow_string
     basic_cow_string&
     assign(inputT first, inputT last)
       {
-        this->replace(this->begin(), this->end(), ::std::move(first), ::std::move(last));
+        this->replace(this->begin(), this->end(), move(first), move(last));
         return *this;
       }
 
@@ -2414,7 +2414,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, basic_shallow_string<charT> rhs)
   {
     lhs.append(rhs);
-    return ::std::move(lhs);
+    return move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2423,7 +2423,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, initializer_list<charT> rhs)
   {
     lhs.append(rhs);
-    return ::std::move(lhs);
+    return move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2432,7 +2432,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, const basic_cow_string<charT, allocT>& rhs)
   {
     lhs.append(rhs);
-    return ::std::move(lhs);
+    return move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2441,7 +2441,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, basic_cow_string<charT, allocT>&& rhs)
   {
     lhs.append(rhs);
-    return ::std::move(lhs);
+    return move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2450,7 +2450,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, const charT* rhs)
   {
     lhs.append(rhs);
-    return ::std::move(lhs);
+    return move(lhs);
   }
 
 template<typename charT, typename allocT>
@@ -2459,7 +2459,7 @@ basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, charT rhs)
   {
     lhs.push_back(rhs);
-    return ::std::move(lhs);
+    return move(lhs);
   }
 
 template<typename charT, typename allocT>

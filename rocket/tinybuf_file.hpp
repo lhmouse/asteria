@@ -41,7 +41,7 @@ class basic_tinybuf_file
     explicit
     basic_tinybuf_file(file_type&& file) noexcept
       :
-        m_file(::std::move(file))
+        m_file(move(file))
       { }
 
     explicit
@@ -61,7 +61,7 @@ class basic_tinybuf_file
     basic_tinybuf_file(basic_tinybuf_file&& other)
       noexcept(is_nothrow_move_constructible<file_type>::value)
       :
-        m_file(::std::move(other.m_file)),
+        m_file(move(other.m_file)),
         m_mbst_g(noadl::exchange(other.m_mbst_g)),
         m_mbst_p(noadl::exchange(other.m_mbst_p))
       { }
@@ -70,7 +70,7 @@ class basic_tinybuf_file
     operator=(basic_tinybuf_file&& other) &
       noexcept(is_nothrow_move_assignable<file_type>::value)
       {
-        this->m_file = ::std::move(other.m_file);
+        this->m_file = move(other.m_file);
         this->m_mbst_g = noadl::exchange(other.m_mbst_g);
         this->m_mbst_p = noadl::exchange(other.m_mbst_p);
         return *this;
@@ -108,7 +108,7 @@ class basic_tinybuf_file
     basic_tinybuf_file&
     reset(file_type&& file) noexcept
       {
-        this->m_file = ::std::move(file);
+        this->m_file = move(file);
         this->m_mbst_g = { };
         this->m_mbst_p = { };
         return *this;
@@ -198,7 +198,7 @@ class basic_tinybuf_file
         fd.release();
 
         // Set the file now.
-        this->m_file = ::std::move(file);
+        this->m_file = move(file);
         this->m_mbst_g = { };
         this->m_mbst_p = { };
         return *this;

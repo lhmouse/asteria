@@ -172,7 +172,7 @@ std_filesystem_remove_recursive(V_string path)
 
     // Expand non-empty directories and remove all contents.
     while(stack.size()) {
-      auto elem = ::std::move(stack.mut_back());
+      auto elem = move(stack.mut_back());
       stack.pop_back();
 
       // Process this element.
@@ -260,7 +260,7 @@ std_filesystem_remove_recursive(V_string path)
             }
 
             // Append this entry.
-            stack.push_back({ is_dir ? rm_disp_expand : rm_disp_unlink, ::std::move(child) });
+            stack.push_back({ is_dir ? rm_disp_expand : rm_disp_unlink, move(child) });
           }
           break;
         }
@@ -361,7 +361,7 @@ std_filesystem_list(V_string path)
           is_sym  // whether this is a symbolic link
         ));
 
-      entries.try_emplace(cow_string(next->d_name), ::std::move(entry));
+      entries.try_emplace(cow_string(next->d_name), move(entry));
     }
     return entries;
   }
@@ -513,9 +513,9 @@ std_filesystem_stream(Global_Context& global, V_string path, V_function callback
       // Call the function but discard its return value.
       stack.clear();
       stack.push().set_temporary(roffset);
-      stack.push().set_temporary(::std::move(data));
+      stack.push().set_temporary(move(data));
       self.clear();
-      callback.invoke(self, global, ::std::move(stack));
+      callback.invoke(self, global, move(stack));
 
       roffset += nread;
       rlimit -= nread;

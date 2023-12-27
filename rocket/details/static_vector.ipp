@@ -62,7 +62,7 @@ class storage_handle
     explicit
     storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(::std::move(alloc)),
+        allocator_base(move(alloc)),
         m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
@@ -149,7 +149,7 @@ class storage_handle
         ROCKET_ASSERT_MSG(this->m_nelem < this->capacity(), "no space for new elements");
 
         size_t off = this->m_nelem;
-        allocator_traits<allocator_type>::construct(*this, this->m_data + off, ::std::forward<paramsT>(params)...);
+        allocator_traits<allocator_type>::construct(*this, this->m_data + off, forward<paramsT>(params)...);
         this->m_nelem = static_cast<nelem_type>(off + 1U);
         return this->m_data[off];
       }
@@ -176,7 +176,7 @@ class storage_handle
     void
     append_range_unchecked(inputT first, inputT last)
       {
-        for(auto it = ::std::move(first);  it != last;  ++it)
+        for(auto it = move(first);  it != last;  ++it)
           this->emplace_back_unchecked(*it);
       }
 
@@ -220,17 +220,17 @@ class storage_handle
           size_type m = this->m_nelem;
 
           for(size_type k = 0;  k < m;  ++k)
-            this->m_data[k] = ::std::move(other.m_data[k]);
+            this->m_data[k] = move(other.m_data[k]);
 
           for(size_type k = m;  k < other.m_nelem;  ++k)
-            this->emplace_back_unchecked(::std::move(other.m_data[k]));
+            this->emplace_back_unchecked(move(other.m_data[k]));
         }
         else {
           // `other` is shorter than `*this`, or they have the same length.
           size_type m = other.m_nelem;
 
           for(size_type k = 0;  k < m;  ++k)
-            this->m_data[k] = ::std::move(other.m_data[k]);
+            this->m_data[k] = move(other.m_data[k]);
 
           for(size_type k = this->m_nelem;  k > m;  --k)
             this->pop_back_unchecked();
@@ -248,7 +248,7 @@ class storage_handle
             noadl::xswap(this->m_data[k], other.m_data[k]);
 
           for(size_type k = m;  k < other.m_nelem;  ++k)
-            this->emplace_back_unchecked(::std::move(other.m_data[k]));
+            this->emplace_back_unchecked(move(other.m_data[k]));
 
           for(size_type k = other.m_nelem;  k > m;  --k)
             other.pop_back_unchecked();
@@ -261,7 +261,7 @@ class storage_handle
             noadl::xswap(this->m_data[k], other.m_data[k]);
 
           for(size_type k = m;  k < this->m_nelem;  ++k)
-            other.emplace_back_unchecked(::std::move(this->m_data[k]));
+            other.emplace_back_unchecked(move(this->m_data[k]));
 
           for(size_type k = this->m_nelem;  k > m;  --k)
             this->pop_back_unchecked();

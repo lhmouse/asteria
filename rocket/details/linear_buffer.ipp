@@ -40,7 +40,7 @@ class basic_storage
     explicit constexpr
     basic_storage(allocator_type&& alloc) noexcept
       :
-        allocator_base(::std::move(alloc))
+        allocator_base(move(alloc))
       { }
 
     ~basic_storage()
@@ -119,7 +119,7 @@ class basic_storage
           pbuf = pbuf_new;
 
           // Set up the new buffer.
-          this->m_ptr = ::std::move(ptr_new);
+          this->m_ptr = move(ptr_new);
           this->m_cap = cap_new;
         }
 

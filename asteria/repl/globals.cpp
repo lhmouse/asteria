@@ -37,10 +37,10 @@ struct Verbose_Hooks
         // Extract the string and write it to standard error.
         // Errors are ignored.
         auto str = this->m_fmt.extract_string();
-        write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__, ::std::move(str));
+        write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__, move(str));
 
         // Reuse the storage.
-        this->m_fmt.set_string(::std::move(str));
+        this->m_fmt.set_string(move(str));
       }
 
     void

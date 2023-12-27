@@ -38,7 +38,7 @@ class Value
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
                    typename details_value::Valuable<XValT>::via_type&&>::value)
       :
-        m_stor(typename details_value::Valuable<XValT>::via_type(::std::forward<XValT>(xval)))
+        m_stor(typename details_value::Valuable<XValT>::via_type(forward<XValT>(xval)))
       { }
 
     template<typename XValT,
@@ -49,7 +49,7 @@ class Value
       :
         m_bytes()
       {
-        details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
+        details_value::Valuable<XValT>::assign(this->m_stor, forward<XValT>(xval));
       }
 
     template<typename XValT,
@@ -59,7 +59,7 @@ class Value
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
                    typename details_value::Valuable<XValT>::via_type&&>::value)
       {
-        details_value::Valuable<XValT>::assign(this->m_stor, ::std::forward<XValT>(xval));
+        details_value::Valuable<XValT>::assign(this->m_stor, forward<XValT>(xval));
         return *this;
       }
 

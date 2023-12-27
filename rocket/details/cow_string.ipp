@@ -98,7 +98,7 @@ class storage_handle
     explicit constexpr
     storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(::std::move(alloc))
+        allocator_base(move(alloc))
       { }
 
 #ifdef __cpp_constexpr_dynamic_alloc

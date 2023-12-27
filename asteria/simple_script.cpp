@@ -67,8 +67,8 @@ Simple_Script::
 reload(stringR name, Token_Stream&& tstrm)
   {
     Statement_Sequence stmtq(this->m_opts);
-    stmtq.reload(::std::move(tstrm));
-    this->reload(name, ::std::move(stmtq));
+    stmtq.reload(move(tstrm));
+    this->reload(name, move(stmtq));
   }
 
 void
@@ -76,8 +76,8 @@ Simple_Script::
 reload(stringR name, int line, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
-    tstrm.reload(name, line, ::std::move(cbuf));
-    this->reload(name, ::std::move(tstrm));
+    tstrm.reload(name, line, move(cbuf));
+    this->reload(name, move(tstrm));
   }
 
 void
@@ -86,7 +86,7 @@ reload_string(stringR name, int line, stringR code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    this->reload(name, line, ::std::move(cbuf));
+    this->reload(name, line, move(cbuf));
   }
 
 void
@@ -102,7 +102,7 @@ reload_stdin(int line)
   {
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    this->reload(sref("[stdin]"), line, ::std::move(cbuf));
+    this->reload(sref("[stdin]"), line, move(cbuf));
   }
 
 void
@@ -125,7 +125,7 @@ reload_file(const char* path)
 
     ::rocket::tinybuf_file cbuf;
     cbuf.open(abspath, tinybuf::open_read);
-    this->reload(cow_string(abspath), 1, ::std::move(cbuf));
+    this->reload(cow_string(abspath), 1, move(cbuf));
   }
 
 void
@@ -142,7 +142,7 @@ execute(Reference_Stack&& stack)
     Reference self;
     this->m_global.set_recursion_base(&self);
     auto func = this->m_func;
-    func.invoke(self, this->m_global, ::std::move(stack));
+    func.invoke(self, this->m_global, move(stack));
     ::fflush(nullptr);
     return self;
   }
@@ -153,8 +153,8 @@ execute(cow_vector<Value>&& args)
   {
     Reference_Stack stack;
     for(auto it = args.mut_begin();  it != args.end(); ++it)
-      stack.push().set_temporary(::std::move(*it));
-    return this->execute(::std::move(stack));
+      stack.push().set_temporary(move(*it));
+    return this->execute(move(stack));
   }
 
 Reference
@@ -162,7 +162,7 @@ Simple_Script::
 execute()
   {
     Reference_Stack stack;
-    return this->execute(::std::move(stack));
+    return this->execute(move(stack));
   }
 
 }  // namespace asteria

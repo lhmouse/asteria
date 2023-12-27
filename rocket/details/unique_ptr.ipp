@@ -67,7 +67,7 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
     explicit constexpr
     stored_pointer_impl(pointer ptr, deleter_type del = nullptr) noexcept
       :
-        m_del(del), m_ptr(::std::move(ptr))
+        m_del(del), m_ptr(move(ptr))
       { }
 
     ~stored_pointer_impl()
@@ -97,7 +97,7 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
+        auto ptr = ::std::exchange(this->m_ptr, move(ptr_new));
         if(ptr)
           (*(this->as_deleter()))(ptr);
       }
@@ -133,7 +133,7 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
     stored_pointer_impl(pointer ptr, dparamsT&&... dparams)
       noexcept(is_nothrow_constructible<deleter_type, dparamsT&&...>::value)
       :
-        deleter_base(::std::forward<dparamsT>(dparams)...), m_ptr(::std::move(ptr))
+        deleter_base(forward<dparamsT>(dparams)...), m_ptr(move(ptr))
       { }
 
     ~stored_pointer_impl()
@@ -163,7 +163,7 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
+        auto ptr = ::std::exchange(this->m_ptr, move(ptr_new));
         if(ptr)
           this->as_deleter()(ptr);
       }
@@ -191,7 +191,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
     explicit constexpr
     stored_pointer_impl(pointer ptr, deleterT& del) noexcept
       :
-        deleter_base(del), m_ptr(::std::move(ptr))
+        deleter_base(del), m_ptr(move(ptr))
       { }
 
     ~stored_pointer_impl()
@@ -221,7 +221,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, ::std::move(ptr_new));
+        auto ptr = ::std::exchange(this->m_ptr, move(ptr_new));
         if(ptr)
           this->as_deleter().get()(ptr);
       }

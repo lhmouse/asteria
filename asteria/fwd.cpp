@@ -49,13 +49,13 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
       if(this->m_fptr) {
         // static
-        this->m_fptr(self, global, ::std::move(stack));
+        this->m_fptr(self, global, move(stack));
         return self;
       }
 
       if(this->m_sptr) {
         // dynamic
-        this->m_sptr->invoke_ptc_aware(self, global, ::std::move(stack));
+        this->m_sptr->invoke_ptc_aware(self, global, move(stack));
         if(self.is_ptc()) {
           const auto ptc = self.unphase_ptc_opt();
           ROCKET_ASSERT(ptc);
@@ -77,7 +77,7 @@ Reference&
 cow_function::
 invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
-    auto& result = this->invoke_ptc_aware(self, global, ::std::move(stack));
+    auto& result = this->invoke_ptc_aware(self, global, move(stack));
     result.check_function_result(global);
     return result;
   }

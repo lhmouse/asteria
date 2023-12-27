@@ -365,7 +365,7 @@ apply_unset(Value& parent) const
         if(it == obj.end())
           return nullopt;
 
-        auto val = ::std::move(it->second);
+        auto val = move(it->second);
         obj.erase(it);
         return val;
       }
@@ -385,7 +385,7 @@ apply_unset(Value& parent) const
         if(arr.empty())
           return nullopt;
 
-        auto val = ::std::move(arr.mut_front());
+        auto val = move(arr.mut_front());
         arr.erase(arr.begin());
         return val;
       }
@@ -405,7 +405,7 @@ apply_unset(Value& parent) const
         if(arr.empty())
           return nullopt;
 
-        auto val = ::std::move(arr.mut_back());
+        auto val = move(arr.mut_back());
         arr.pop_back();
         return val;
       }
@@ -427,7 +427,7 @@ apply_unset(Value& parent) const
           return nullopt;
 
         size_t r = ::rocket::probe_origin(arr.size(), altr.seed);
-        auto val = ::std::move(arr.mut(r));
+        auto val = move(arr.mut(r));
         arr.erase(r, 1);
         return val;
       }

@@ -189,7 +189,7 @@ struct basic_storage
       {
         auto qval = allocator_traits<allocator_type>::allocate(*this, size_type(1));
         try {
-          allocator_traits<allocator_type>::construct(*this, noadl::unfancy(qval), ::std::forward<paramsT>(params)...);
+          allocator_traits<allocator_type>::construct(*this, noadl::unfancy(qval), forward<paramsT>(params)...);
         }
         catch(...) {
           allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
@@ -386,7 +386,7 @@ class storage_handle
     constexpr
     storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
       :
-        allocator_base(::std::move(alloc)),
+        allocator_base(move(alloc)),
         ebo_select<hashT, allocT>(hf),
         ebo_select<eqT, allocT, hashT>(eq)
       { }
@@ -601,7 +601,7 @@ class storage_handle
 
         // Insert a new element otherwise.
         // Note that `tpos` shall have been set by `find()`.
-        qstor->adopt_value_unchecked(tpos, qstor->allocate_value(::std::forward<paramsT>(params)...));
+        qstor->adopt_value_unchecked(tpos, qstor->allocate_value(forward<paramsT>(params)...));
         return true;
       }
 

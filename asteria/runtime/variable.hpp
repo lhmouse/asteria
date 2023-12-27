@@ -44,7 +44,7 @@ class Variable
     void
     initialize(XValT&& xval)
       {
-        this->m_value = ::std::forward<XValT>(xval);
+        this->m_value = forward<XValT>(xval);
         this->m_init = true;
       }
 

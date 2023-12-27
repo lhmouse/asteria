@@ -97,7 +97,7 @@ Global_Context(API_Version api_version_req)
         mod.init(r.first->second.mut_object(), eptr[-1].api_version);
       });
 
-    this->do_mut_named_reference(nullptr, sref("std")).set_temporary(::std::move(ostd));
+    this->do_mut_named_reference(nullptr, sref("std")).set_temporary(move(ostd));
   }
 
 Global_Context::

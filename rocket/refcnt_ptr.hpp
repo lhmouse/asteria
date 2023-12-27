@@ -352,7 +352,7 @@ inline
 refcnt_ptr<elementT>
 make_refcnt(paramsT&&... params)
   {
-    return refcnt_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+    return refcnt_ptr<elementT>(new elementT(forward<paramsT>(params)...));
   }
 
 template<typename targetT, typename sourceT>

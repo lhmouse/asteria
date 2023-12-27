@@ -379,7 +379,7 @@ class AIR_Node
     AIR_Node(XNodeT&& xnode)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), XNodeT&&>::value)
       :
-        m_stor(::std::forward<XNodeT>(xnode))
+        m_stor(forward<XNodeT>(xnode))
       { }
 
     template<typename XNodeT,
@@ -388,7 +388,7 @@ class AIR_Node
     operator=(XNodeT&& xnode) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XNodeT&&>::value)
       {
-        this->m_stor = ::std::forward<XNodeT>(xnode);
+        this->m_stor = forward<XNodeT>(xnode);
         return *this;
       }
 

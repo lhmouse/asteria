@@ -209,7 +209,7 @@ inline
 basic_tinyfmt<charT>&&
 operator<<(basic_tinyfmt<charT>&& fmt, const valueT& value)
   {
-    return ::std::move(fmt << value);
+    return move(fmt << value);
   }
 
 // delegating inserters

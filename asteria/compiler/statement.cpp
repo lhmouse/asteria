@@ -30,7 +30,7 @@ void
 do_generate_clear_stack(cow_vector<AIR_Node>& code)
   {
     AIR_Node::S_clear_stack xnode = { };
-    code.emplace_back(::std::move(xnode));
+    code.emplace_back(move(xnode));
   }
 
 void
@@ -42,7 +42,7 @@ do_generate_subexpression(cow_vector<AIR_Node>& code, const Compiler_Options& op
       // Generate a single-step trap if it is requested. This happens at translation
       // time, so if it's not requested at all, there will be no runtime overhead.
       AIR_Node::S_single_step_trap xnode = { expr.sloc };
-      code.emplace_back(::std::move(xnode));
+      code.emplace_back(move(xnode));
     }
 
     if(expr.units.empty())
@@ -147,8 +147,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         // Generate code for the body. This can be PTC'd.
         auto code_body = do_generate_block(opts, global, ctx, ptc, altr);
 
-        AIR_Node::S_execute_block xnode = { ::std::move(code_body) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_execute_block xnode = { move(code_body) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -164,21 +164,21 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               // Declare a variable with default initialization.
               AIR_Node::S_define_null_variable xnode_decl = { decl.sloc, altr.immutable,
                                                               decl.names.at(0) };
-              code.emplace_back(::std::move(xnode_decl));
+              code.emplace_back(move(xnode_decl));
             }
             else {
               // Evaluate the initializer.
               do_generate_clear_stack(code);
 
               AIR_Node::S_declare_variable xnode_decl = { decl.sloc, decl.names.at(0) };
-              code.emplace_back(::std::move(xnode_decl));
+              code.emplace_back(move(xnode_decl));
 
               // Generate code for the initializer.
               do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, decl.init);
 
               // Initialize the variable.
               AIR_Node::S_initialize_variable xnode_init = { decl.sloc, altr.immutable };
-              code.emplace_back(::std::move(xnode_init));
+              code.emplace_back(move(xnode_init));
             }
           }
           else if((decl.names.size() >= 2) && (decl.names.at(0) == "[") && (decl.names.back() == "]")) {
@@ -191,7 +191,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               for(uint32_t k = 1;  k != decl.names.size() - 1;  ++k) {
                 AIR_Node::S_define_null_variable xnode_decl = { decl.sloc, altr.immutable,
                                                                 decl.names.at(k) };
-                code.emplace_back(::std::move(xnode_decl));
+                code.emplace_back(move(xnode_decl));
               }
             }
             else {
@@ -200,7 +200,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
               for(uint32_t k = 1;  k != decl.names.size() - 1;  ++k) {
                 AIR_Node::S_declare_variable xnode_decl = { decl.sloc, decl.names.at(k) };
-                code.emplace_back(::std::move(xnode_decl));
+                code.emplace_back(move(xnode_decl));
               }
 
               // Generate code for the initializer.
@@ -209,7 +209,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               // Initialize variables.
               AIR_Node::S_unpack_array xnode_init = { decl.sloc, altr.immutable,
                                                       (uint32_t) (decl.names.size() - 2) };
-              code.emplace_back(::std::move(xnode_init));
+              code.emplace_back(move(xnode_init));
             }
           }
           else if((decl.names.size() >= 2) && (decl.names.at(0) == "{") && (decl.names.back() == "}")) {
@@ -221,7 +221,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               // Declare variables with default initialization.
               for(uint32_t k = 1;  k != decl.names.size() - 1;  ++k) {
                 AIR_Node::S_define_null_variable xnode_decl = { decl.sloc, altr.immutable, decl.names.at(k) };
-                code.emplace_back(::std::move(xnode_decl));
+                code.emplace_back(move(xnode_decl));
               }
             }
             else {
@@ -230,7 +230,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
               for(uint32_t k = 1;  k != decl.names.size() - 1;  ++k) {
                 AIR_Node::S_declare_variable xnode_decl = { decl.sloc, decl.names.at(k) };
-                code.emplace_back(::std::move(xnode_decl));
+                code.emplace_back(move(xnode_decl));
               }
 
               // Generate code for the initializer.
@@ -239,7 +239,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               // Initialize variables.
               AIR_Node::S_unpack_object xnode_init = { decl.sloc, altr.immutable,
                                                        decl.names.subvec(1, decl.names.size() - 2) };
-              code.emplace_back(::std::move(xnode_init));
+              code.emplace_back(move(xnode_init));
             }
           }
           else
@@ -256,7 +256,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
-        code.emplace_back(::std::move(xnode_decl));
+        code.emplace_back(move(xnode_decl));
 
         // Generate code
         AIR_Optimizer optmz(opts);
@@ -264,11 +264,11 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params,
                                                    optmz.get_code() };
-        code.emplace_back(::std::move(xnode_defn));
+        code.emplace_back(move(xnode_defn));
 
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode = { altr.sloc, true };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -284,9 +284,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         auto code_true = do_generate_block(opts, global, ctx, ptc, altr.branch_true);
         auto code_false = do_generate_block(opts, global, ctx, ptc, altr.branch_false);
 
-        AIR_Node::S_if_statement xnode = { altr.negative, ::std::move(code_true),
-                                           ::std::move(code_false) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_if_statement xnode = { altr.negative, move(code_true), move(code_false) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -314,8 +313,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
                                      ptc_aware_none, clause.body);
         }
 
-        AIR_Node::S_switch_statement xnode = { ::std::move(clauses) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_switch_statement xnode = { move(clauses) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -330,9 +329,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
-        AIR_Node::S_do_while_statement xnode = { ::std::move(code_body), altr.negative,
-                                                 ::std::move(code_cond) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_do_while_statement xnode = { move(code_body), altr.negative, move(code_cond) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -347,9 +345,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
-        AIR_Node::S_while_statement xnode = { altr.negative, ::std::move(code_cond),
-                                              ::std::move(code_body) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_while_statement xnode = { altr.negative, move(code_cond), move(code_body) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -371,8 +368,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
         AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, altr.sloc_init,
-                                                 ::std::move(code_init), ::std::move(code_body) };
-        code.emplace_back(::std::move(xnode));
+                                                 move(code_init), move(code_body) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -392,9 +389,9 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         // Loop statements cannot be PTC'd.
         auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
-        AIR_Node::S_for_statement xnode = { ::std::move(code_init), ::std::move(code_cond),
-                                            ::std::move(code_step), ::std::move(code_body) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_for_statement xnode = { move(code_init), move(code_cond), move(code_step),
+                                            move(code_body) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -414,9 +411,9 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         auto code_catch = do_generate_statement_list(ctx_catch, nullptr, global, opts, ptc,
                                                      altr.body_catch.stmts);
 
-        AIR_Node::S_try_statement xnode = { altr.sloc_try, ::std::move(code_try), altr.sloc_catch,
-                                            altr.name_except, ::std::move(code_catch) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_try_statement xnode = { altr.sloc_try, move(code_try), altr.sloc_catch,
+                                            altr.name_except, move(code_catch) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -427,25 +424,25 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         switch(altr.target) {
           case jump_target_unspec: {
             AIR_Node::S_simple_status xnode = { air_status_break_unspec };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
           case jump_target_switch: {
             AIR_Node::S_simple_status xnode = { air_status_break_switch };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
           case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_break_while };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
           case jump_target_for: {
             AIR_Node::S_simple_status xnode = { air_status_break_for };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
@@ -461,7 +458,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         switch(altr.target) {
           case jump_target_unspec: {
             AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
@@ -470,13 +467,13 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
 
           case jump_target_while: {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
           case jump_target_for: {
             AIR_Node::S_simple_status xnode = { air_status_continue_for };
-            code.emplace_back(::std::move(xnode));
+            code.emplace_back(move(xnode));
             return;
           }
 
@@ -493,7 +490,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.expr);
 
         AIR_Node::S_throw_statement xnode = { altr.sloc };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -503,7 +500,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         if(altr.expr.units.empty()) {
           // Return void.
           AIR_Node::S_return_statement xnode = { altr.sloc, false, true };
-          code.emplace_back(::std::move(xnode));
+          code.emplace_back(move(xnode));
           return;
         }
 
@@ -513,7 +510,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
                                altr.expr);
 
         AIR_Node::S_return_statement xnode = { altr.sloc, altr.by_ref, false };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -525,7 +522,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.expr);
 
         AIR_Node::S_assert_statement xnode = { altr.sloc, altr.msg };
-        code.emplace_back(::std::move(xnode));
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -536,8 +533,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         ROCKET_ASSERT(!altr.expr.units.empty());
         auto code_body = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.expr);
 
-        AIR_Node::S_defer_expression xnode = { altr.sloc, ::std::move(code_body) };
-        code.emplace_back(::std::move(xnode));
+        AIR_Node::S_defer_expression xnode = { altr.sloc, move(code_body) };
+        code.emplace_back(move(xnode));
         return;
       }
 
@@ -552,14 +549,14 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           do_generate_clear_stack(code);
 
           AIR_Node::S_declare_reference xnode_decl = { decl.name };
-          code.emplace_back(::std::move(xnode_decl));
+          code.emplace_back(move(xnode_decl));
 
           // Generate code for the initializer.
           do_generate_subexpression(code, opts, global, ctx, ptc_aware_none, decl.init);
 
           // Initialize the reference.
           AIR_Node::S_initialize_reference xnode_init = { decl.sloc, decl.name };
-          code.emplace_back(::std::move(xnode_init));
+          code.emplace_back(move(xnode_init));
         }
         return;
       }

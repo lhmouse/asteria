@@ -25,7 +25,7 @@ format(cow_string& str, const array<const char*, N>& templs, const ParamsT&... p
     // Reuse the storage of `str` to create a formatter.
     ::rocket::tinyfmt_str fmt;
     str.clear();
-    fmt.set_string(::std::move(str), ::rocket::tinybuf::open_write);
+    fmt.set_string(move(str), ::rocket::tinybuf::open_write);
 
     if(N > 0)
       format(fmt, templs[0], params...);
@@ -46,7 +46,7 @@ format(cow_string& str, const char* templ, const ParamsT&... params)
     // Reuse the storage of `str` to create a formatter.
     ::rocket::tinyfmt_str fmt;
     str.clear();
-    fmt.set_string(::std::move(str), ::rocket::tinybuf::open_write);
+    fmt.set_string(move(str), ::rocket::tinybuf::open_write);
 
     format(fmt, templ, params...);
 

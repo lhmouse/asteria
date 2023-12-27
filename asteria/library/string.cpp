@@ -192,7 +192,7 @@ do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
 
     for(auto it = begin;  it != end;  ++it)
       if(table[(uint8_t)*it] == match)
-        return ::std::move(it);
+        return move(it);
 
     return nullopt;
   }
@@ -472,7 +472,7 @@ class PCRE2_Matcher
           size_t len = ::rocket::max(opair[0], opair[1]) - opair[0];
           matches.mut(k) = cow_string(text, off, len);
         }
-        return ::std::move(matches);
+        return move(matches);
       }
 
     optV_object
@@ -506,7 +506,7 @@ class PCRE2_Matcher
           size_t len = ::rocket::max(opair[0], opair[1]) - opair[0];
           ins.first->second = cow_string(text, off, len);
         }
-        return ::std::move(matches);
+        return move(matches);
       }
 
     V_string

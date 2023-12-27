@@ -37,9 +37,9 @@ int main()
       )__"), tinybuf::open_read);
 
     Token_Stream tstrm({ });
-    tstrm.reload(sref("dummy file"), 16, ::std::move(cbuf));
+    tstrm.reload(sref("dummy file"), 16, move(cbuf));
 
     Statement_Sequence stmtq({ });
-    stmtq.reload(::std::move(tstrm));
+    stmtq.reload(move(tstrm));
     ASTERIA_TEST_CHECK(stmtq.get_statements().size() == 5);  // implicit return
   }

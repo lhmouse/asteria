@@ -135,6 +135,9 @@ using ::std::underflow_error;
 using ::std::begin;
 using ::std::end;
 using ::std::swap;
+using ::std::move;
+using ::std::forward;
+using ::std::forward_as_tuple;
 
 using ::std::memory_order;
 using ::std::memory_order_relaxed;
@@ -230,8 +233,8 @@ constexpr
 valueT
 exchange(valueT& ref, withT&&... with)
   {
-    valueT old = ::std::move(ref);
-    ref = { ::std::forward<withT>(with)... };
+    valueT old = move(ref);
+    ref = { forward<withT>(with)... };
     return old;
   }
 
@@ -320,7 +323,7 @@ constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 min(lhsT&& lhs, rhsT&& rhs)
   {
-    return (rhs < lhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
+    return (rhs < lhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT, typename... restT>
@@ -328,8 +331,8 @@ constexpr
 typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 min(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
   {
-    return noadl::min(noadl::min(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
-                      ::std::forward<restT>(rest)...);
+    return noadl::min(noadl::min(forward<lhsT>(lhs), forward<rhsT>(rhs)),
+                      forward<restT>(rest)...);
   }
 
 template<typename lhsT, typename rhsT>
@@ -337,7 +340,7 @@ constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
   {
-    return (lhs < rhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
+    return (lhs < rhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT, typename... restT>
@@ -345,8 +348,8 @@ constexpr
 typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 max(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
   {
-    return noadl::max(noadl::max(::std::forward<lhsT>(lhs), ::std::forward<rhsT>(rhs)),
-                      ::std::forward<restT>(rest)...);
+    return noadl::max(noadl::max(forward<lhsT>(lhs), forward<rhsT>(rhs)),
+                      forward<restT>(rest)...);
   }
 
 template<typename xvT, typename loT, typename upT>
@@ -354,7 +357,7 @@ constexpr
 typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
   {
-    return (xv < lo) ? ::std::forward<loT>(lo) : (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv);
+    return (xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv);
   }
 
 template<typename resultT, typename xvT, typename loT, typename upT>
@@ -363,7 +366,7 @@ resultT
 clamp_cast(xvT&& xv, loT&& lo, upT&& up)
   {
     return static_cast<resultT>(
-             (xv < lo) ? ::std::forward<loT>(lo) : (up < xv) ? ::std::forward<upT>(up) : ::std::forward<xvT>(xv));
+             (xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv));
   }
 
 template<typename iteratorT>
@@ -398,17 +401,17 @@ template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
 for_range(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
-    for(auto qit = ::std::move(first); qit != last; ++qit)
-      ::std::forward<funcT>(func)(qit, params...);
+    for(auto qit = move(first); qit != last; ++qit)
+      forward<funcT>(func)(qit, params...);
   }
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
 do_while_range(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
-    auto qit = ::std::move(first);
+    auto qit = move(first);
     do
-      ::std::forward<funcT>(func)(qit, params...);
+      forward<funcT>(func)(qit, params...);
     while(++qit != last);
   }
 
@@ -419,7 +422,7 @@ estimate_distance(iteratorT first, iteratorT last)
   {
     return details_fwd::estimate_distance_aux(
              typename iterator_traits<iteratorT>::iterator_category(),
-             ::std::move(first), ::std::move(last));
+             move(first), move(last));
   }
 
 template<typename elementT, typename... paramsT>
@@ -430,7 +433,7 @@ construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)ptr, 0xAA, sizeof(elementT));
 #endif
-    return ::new((void*)ptr) elementT(::std::forward<paramsT>(params)...);
+    return ::new((void*)ptr) elementT(forward<paramsT>(params)...);
   }
 
 template<typename elementT>
@@ -471,7 +474,7 @@ reconstruct(elementT* ptr, paramsT&&... params) noexcept
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)ptr, 0xAA, sizeof(elementT));
 #endif
-    return ::new((void*)ptr) elementT(::std::forward<paramsT>(params)...);
+    return ::new((void*)ptr) elementT(forward<paramsT>(params)...);
   }
 
 template<typename elementT>
@@ -776,7 +779,7 @@ constexpr
 details_fwd::binder_eq<typename decay<xvalueT>::type>
 is(xvalueT&& xval)
   {
-    return ::std::forward<xvalueT>(xval);
+    return forward<xvalueT>(xval);
   }
 
 template<typename xvalueT>
@@ -784,7 +787,7 @@ constexpr
 details_fwd::binder_ne<typename decay<xvalueT>::type>
 isnt(xvalueT&& xval)
   {
-    return ::std::forward<xvalueT>(xval);
+    return forward<xvalueT>(xval);
   }
 
 template<typename xvalueT>
@@ -792,7 +795,7 @@ constexpr
 details_fwd::binder_eq<typename decay<xvalueT>::type>
 are(xvalueT&& xval)
   {
-    return ::std::forward<xvalueT>(xval);
+    return forward<xvalueT>(xval);
   }
 
 template<typename xvalueT>
@@ -800,7 +803,7 @@ constexpr
 details_fwd::binder_ne<typename decay<xvalueT>::type>
 arent(xvalueT&& xval)
   {
-    return ::std::forward<xvalueT>(xval);
+    return forward<xvalueT>(xval);
   }
 
 template<typename charT>
@@ -858,7 +861,7 @@ static_or_dynamic_cast(sourceT&& src)
   {
     return details_fwd::static_or_dynamic_cast_aux<targetT, sourceT>(
                      details_fwd::use_static_cast_aux<targetT, sourceT>(),
-                     ::std::forward<sourceT>(src));
+                     forward<sourceT>(src));
   }
 
 ROCKET_ALWAYS_INLINE

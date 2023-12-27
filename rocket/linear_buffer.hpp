@@ -63,7 +63,7 @@ class basic_linear_buffer
 
     basic_linear_buffer(basic_linear_buffer&& other) noexcept
       :
-        m_stor(::std::move(other.m_stor.as_allocator()))
+        m_stor(move(other.m_stor.as_allocator()))
       { this->do_exchange_with(other);  }
 
     basic_linear_buffer(basic_linear_buffer&& other, const allocator_type& alloc)
