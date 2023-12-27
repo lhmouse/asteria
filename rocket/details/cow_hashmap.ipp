@@ -82,7 +82,7 @@ class basic_bucket
 
     pointer
     exchange(pointer qval) noexcept
-      { return ::std::exchange(this->m_qval, qval);  }
+      { return noadl::exchange(this->m_qval, qval);  }
 
     explicit constexpr operator
     bool() const noexcept
@@ -412,7 +412,7 @@ class storage_handle
         if((this->m_qstor == nullptr) && (qstor_new == nullptr))
           return;
 
-        auto qstor = ::std::exchange(this->m_qstor, qstor_new);
+        auto qstor = noadl::exchange(this->m_qstor, qstor_new);
         auto qhead = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
         if((qhead != nullptr) && (qhead->nref.decrement() == 0))
           reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
@@ -927,11 +927,11 @@ class iterator
 
     iterator
     operator++(int) noexcept
-      { return ::std::exchange(*this, this->do_next());  }
+      { return noadl::exchange(*this, this->do_next());  }
 
     iterator
     operator--(int) noexcept
-      { return ::std::exchange(*this, this->do_prev());  }
+      { return noadl::exchange(*this, this->do_prev());  }
 
     template<typename ybucketT>
     constexpr

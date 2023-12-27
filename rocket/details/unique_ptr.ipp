@@ -173,7 +173,7 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, move(ptr_new));
+        auto ptr = noadl::exchange(this->m_ptr, move(ptr_new));
         if(ptr)
           this->as_deleter()(ptr);
       }
@@ -231,7 +231,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
     void
     reset(pointer ptr_new) noexcept
       {
-        auto ptr = ::std::exchange(this->m_ptr, move(ptr_new));
+        auto ptr = noadl::exchange(this->m_ptr, move(ptr_new));
         if(ptr)
           this->as_deleter().get()(ptr);
       }

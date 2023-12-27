@@ -386,11 +386,11 @@ class iterator
 
     iterator
     operator++(int) noexcept
-      { return ::std::exchange(*this, *this + 1);  }
+      { return noadl::exchange(*this, *this + 1);  }
 
     iterator
     operator--(int) noexcept
-      { return ::std::exchange(*this, *this - 1);  }
+      { return noadl::exchange(*this, *this - 1);  }
 
     friend
     iterator

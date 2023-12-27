@@ -246,7 +246,7 @@ class storage_handle
         if((this->m_qstor == nullptr) && (qstor_new == nullptr))
           return;
 
-        auto qstor = ::std::exchange(this->m_qstor, qstor_new);
+        auto qstor = noadl::exchange(this->m_qstor, qstor_new);
         auto qhead = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
         if((qhead != nullptr) && (qhead->nref.decrement() == 0))
           reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
@@ -620,11 +620,11 @@ class iterator
 
     iterator
     operator++(int) noexcept
-      { return ::std::exchange(*this, *this + 1);  }
+      { return noadl::exchange(*this, *this + 1);  }
 
     iterator
     operator--(int) noexcept
-      { return ::std::exchange(*this, *this - 1);  }
+      { return noadl::exchange(*this, *this - 1);  }
 
     friend
     iterator
