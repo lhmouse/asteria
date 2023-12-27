@@ -74,7 +74,7 @@ class Reference_Stack
     void
     clear_red_zone() noexcept
       {
-        while(this->m_einit != this->m_etop)
+        while(ROCKET_UNEXPECT(this->m_einit != this->m_etop))
           ::rocket::destroy(this->m_bptr + (-- this->m_einit));
       }
 
@@ -82,14 +82,14 @@ class Reference_Stack
     top(uint32_t index = 0) const noexcept
       {
         ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop - 1U - index);
+        return *(this->m_bptr + this->m_etop - 1 - index);
       }
 
     Reference&
     mut_top(uint32_t index = 0)
       {
         ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop - 1U - index);
+        return *(this->m_bptr + this->m_etop - 1 - index);
       }
 
     const Reference&
@@ -123,7 +123,7 @@ class Reference_Stack
         }
 
         this->m_etop ++;
-        return *(this->m_bptr + this->m_etop - 1U);
+        return *(this->m_bptr + this->m_etop - 1);
       }
 
     void

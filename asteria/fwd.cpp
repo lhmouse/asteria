@@ -56,7 +56,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       if(this->m_sptr) {
         // dynamic
         this->m_sptr->invoke_ptc_aware(self, global, move(stack));
-        if(self.is_ptc()) {
+        if(ROCKET_UNEXPECT(self.is_ptc())) {
           const auto ptc = self.unphase_ptc_opt();
           ROCKET_ASSERT(ptc);
           ptc->set_caller(dynamic_pointer_cast<const Instantiated_Function>(this->m_sptr));
