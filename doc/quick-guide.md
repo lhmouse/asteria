@@ -352,7 +352,7 @@ use the second form, and it looks like
 ];
 ```
 
-Another example is about how to sort an array of integers by their override
+Another example is about how to sort an array of integers by their final
 digits, as in
 
 ```
