@@ -177,56 +177,71 @@ using ::std::memory_order_seq_cst;
 
 template<typename typeT>
 struct remove_cvref
-  :
-    remove_cv<typename remove_reference<typeT>::type>
-  {
-  };
+  : remove_cv<typename remove_reference<typeT>::type>  { };
 
 template<typename typeT>
 struct is_nothrow_swappable
-  :
-    integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
-  {
-  };
+  : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>  { };
 
 template<typename typeT>
 struct identity
-  :
-    enable_if<true, typeT>
-  {
-  };
+  : enable_if<true, typeT> { };
+
+template<typename... typesT>
+struct conjunction
+  : true_type  { };
+
+template<typename firstT, typename... restT>
+struct conjunction<firstT, restT...>
+  : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type  { };
+
+template<typename... typesT>
+struct disjunction
+  : false_type  { };
+
+template<typename firstT, typename... restT>
+struct disjunction<firstT, restT...>
+  : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv
+  : identity<targetT>  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, const sourceT>
+  : add_const<targetT>  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, volatile sourceT>
+  : add_volatile<targetT>  { };
+
+template<typename targetT, typename sourceT>
+struct copy_cv<targetT, const volatile sourceT>
+  : add_cv<targetT>  { };
 
 template<typename containerT>
 constexpr
 decltype(::std::declval<const containerT&>().size())
 size(const containerT& cont) noexcept(noexcept(cont.size()))
-  {
-    return cont.size();
-  }
+  { return cont.size();  }
 
 template<typename elementT, size_t countT>
 constexpr
 size_t
 size(const elementT (&)[countT]) noexcept
-  {
-    return countT;
-  }
+  { return countT;  }
 
 template<typename containerT>
 constexpr
 decltype(static_cast<ptrdiff_t>(::std::declval<const containerT&>().size()))
 ssize(const containerT& cont) noexcept(noexcept(static_cast<ptrdiff_t>(cont.size())))
-  {
-    return static_cast<ptrdiff_t>(cont.size());
-  }
+  { return static_cast<ptrdiff_t>(cont.size());  }
 
 template<typename elementT, size_t countT>
 constexpr
 ptrdiff_t
 ssize(const elementT (&)[countT]) noexcept
-  {
-    return static_cast<ptrdiff_t>(countT);
-  }
+  { return static_cast<ptrdiff_t>(countT);  }
 
 template<typename valueT, typename withT>
 constexpr
@@ -248,164 +263,73 @@ exchange(valueT& ref, withT&&... with)
     return old;
   }
 
-template<typename... typesT>
-struct conjunction
-  :
-    true_type
-  {
-  };
-
-template<typename firstT, typename... restT>
-struct conjunction<firstT, restT...>
-  :
-    conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
-  {
-  };
-
-template<typename... typesT>
-struct disjunction
-  :
-    false_type
-  {
-  };
-
-template<typename firstT, typename... restT>
-struct disjunction<firstT, restT...>
-  :
-    conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
-  {
-  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv
-  :
-    identity<targetT>
-  {
-  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, const sourceT>
-  :
-    add_const<targetT>
-  {
-  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, volatile sourceT>
-  :
-    add_volatile<targetT>
-  {
-  };
-
-template<typename targetT, typename sourceT>
-struct copy_cv<targetT, const volatile sourceT>
-  :
-    add_cv<targetT>
-  {
-  };
-
 #include "details/fwd.ipp"
 
 template<typename typeT>
 inline
 void
 xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
-  {
-    swap(lhs, rhs);
-  }
+  { swap(lhs, rhs);  }
 
 template<typename firstT, typename secondT, typename... restT>
 struct select_type
-  :
-    select_type<typename select_type<firstT, secondT>::type, restT...>
-  {
-  };
+  : select_type<typename select_type<firstT, secondT>::type, restT...>  { };
 
 template<typename firstT, typename secondT>
 struct select_type<firstT, secondT>
-  :
-    identity<decltype(true ? ::std::declval<firstT()>()() : ::std::declval<secondT()>()())>
-  {
-  };
+  : identity<decltype(true ? ::std::declval<firstT()>()() : ::std::declval<secondT()>()())>  { };
 
 template<typename lhsT, typename rhsT>
 constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 min(lhsT&& lhs, rhsT&& rhs)
-  {
-    return (rhs < lhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);
-  }
+  { return (rhs < lhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);  }
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
 typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 min(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
-  {
-    return noadl::min(noadl::min(forward<lhsT>(lhs), forward<rhsT>(rhs)),
-                      forward<restT>(rest)...);
-  }
+  { return noadl::min(noadl::min(forward<lhsT>(lhs), forward<rhsT>(rhs)), forward<restT>(rest)...);  }
 
 template<typename lhsT, typename rhsT>
 constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
-  {
-    return (lhs < rhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);
-  }
+  { return (lhs < rhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);  }
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
 typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 max(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
-  {
-    return noadl::max(noadl::max(forward<lhsT>(lhs), forward<rhsT>(rhs)),
-                      forward<restT>(rest)...);
-  }
+  { return noadl::max(noadl::max(forward<lhsT>(lhs), forward<rhsT>(rhs)), forward<restT>(rest)...);  }
 
 template<typename xvT, typename loT, typename upT>
 constexpr
 typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
-  {
-    return (xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv);
-  }
+  { return (xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv);  }
 
 template<typename resultT, typename xvT, typename loT, typename upT>
 constexpr
 resultT
 clamp_cast(xvT&& xv, loT&& lo, upT&& up)
-  {
-    return static_cast<resultT>(
-             (xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv));
-  }
+  { return static_cast<resultT>((xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv));  }
 
 template<typename iteratorT>
 struct is_input_iterator
-  :
-    details_fwd::is_input_iterator_aux<iteratorT, void>
-  {
-  };
+  : details_fwd::is_input_iterator_aux<iteratorT, void>  { };
 
 template<typename targetT, typename... candidatesT>
 struct is_any_type_of
-  :
-    false_type
-  {
-  };
+  : false_type  { };
 
 template<typename targetT, typename... restT>
 struct is_any_type_of<targetT, targetT, restT...>
-  :
-    true_type
-  {
-  };
+  : true_type  { };
 
 template<typename targetT, typename firstT, typename... restT>
 struct is_any_type_of<targetT, firstT, restT...>
-  :
-    is_any_type_of<targetT, restT...>
-  {
-  };
+  : is_any_type_of<targetT, restT...>  { };
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 void
