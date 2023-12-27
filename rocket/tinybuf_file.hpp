@@ -25,13 +25,13 @@ class basic_tinybuf_file
     using tinybuf_type  = basic_tinybuf<charT>;
 
     using file_type     = unique_posix_file;
-    using handle_type   = typename file_type::handle_type;
-    using closer_type   = typename file_type::closer_type;
+    using handle_type   = ::FILE*;
+    using closer_type   = posix_file_closer;
 
   private:
     file_type m_file;
-    ::mbstate_t m_mbst_g = { };
-    ::mbstate_t m_mbst_p = { };
+    ::mbstate_t m_mbst_g = ::mbstate_t();
+    ::mbstate_t m_mbst_p = ::mbstate_t();
 
   public:
     constexpr
@@ -45,7 +45,7 @@ class basic_tinybuf_file
       { }
 
     explicit
-    basic_tinybuf_file(handle_type fp, closer_type cl) noexcept
+    basic_tinybuf_file(handle_type fp, const closer_type& cl) noexcept
       :
         m_file(fp, cl)
       { }
@@ -109,17 +109,17 @@ class basic_tinybuf_file
     reset(file_type&& file) noexcept
       {
         this->m_file = move(file);
-        this->m_mbst_g = { };
-        this->m_mbst_p = { };
+        this->m_mbst_g = ::mbstate_t();
+        this->m_mbst_p = ::mbstate_t();
         return *this;
       }
 
     basic_tinybuf_file&
-    reset(handle_type fp, closer_type cl) noexcept
+    reset(handle_type fp, const closer_type& cl) noexcept
       {
         this->m_file.reset(fp, cl);
-        this->m_mbst_g = { };
-        this->m_mbst_p = { };
+        this->m_mbst_g = ::mbstate_t();
+        this->m_mbst_p = ::mbstate_t();
         return *this;
       }
 
@@ -199,8 +199,8 @@ class basic_tinybuf_file
 
         // Set the file now.
         this->m_file = move(file);
-        this->m_mbst_g = { };
-        this->m_mbst_p = { };
+        this->m_mbst_g = ::mbstate_t();
+        this->m_mbst_p = ::mbstate_t();
         return *this;
       }
 
@@ -209,8 +209,8 @@ class basic_tinybuf_file
     close() noexcept
       {
         this->m_file.reset();
-        this->m_mbst_g = { };
-        this->m_mbst_p = { };
+        this->m_mbst_g = ::mbstate_t();
+        this->m_mbst_p = ::mbstate_t();
         return *this;
       }
 
@@ -258,8 +258,8 @@ class basic_tinybuf_file
               ::fileno(this->m_file), errno);
 
         // FIXME: We need to report errors about corrupted shift states.
-        this->m_mbst_g = { };
-        this->m_mbst_p = { };
+        this->m_mbst_g = ::mbstate_t();
+        this->m_mbst_p = ::mbstate_t();
         return *this;
       }
 
