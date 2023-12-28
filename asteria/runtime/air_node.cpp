@@ -2436,7 +2436,7 @@ solidify(AVM_Rod& rod) const
         up2.u2345 = altr.nargs;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const uint32_t nargs = head->uparam.u2345;
@@ -4217,7 +4217,7 @@ solidify(AVM_Rod& rod) const
         up2.b1 = altr.is_void;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const bool by_ref = head->uparam.b0;
             const bool is_void = head->uparam.b1;
@@ -4331,7 +4331,7 @@ solidify(AVM_Rod& rod) const
         up2.u0 = altr.ptc;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
             const auto& sloc = head->pv_meta->sloc;
