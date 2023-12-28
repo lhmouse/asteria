@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "xassert.hpp"
 #include <atomic>  // std::atomic<>
-#include <exception>  // std::terminate()
 namespace rocket {
 
 template<typename valueT = int>
@@ -41,16 +40,10 @@ class reference_counter
         reference_counter()
       { }
 
+    constexpr
     reference_counter&
     operator=(const reference_counter&) & noexcept
       { return *this;  }
-
-    ~reference_counter()
-      {
-        auto old = this->m_nref.load(memory_order_relaxed);
-        if(old > 1)
-          ::std::terminate();
-      }
 
   public:
     bool
