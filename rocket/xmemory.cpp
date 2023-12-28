@@ -21,14 +21,20 @@ pool s_pools[64];
 
 inline
 pool&
-do_get_pool_for_size(size_t& rsize)
+do_get_pool_for_size(size_t& size)
   {
-    uint64_t si64 = ::std::max(rsize, sizeof(free_block));
-    uint32_t i = 64U - (uint32_t) ROCKET_LZCNT64(si64 - 1ULL);
-    si64 = 1ULL << i;
-    ROCKET_ASSERT(si64 >= rsize);
-    rsize = (size_t) si64;
-    return s_pools[i];
+    int si = 5;
+    uint64_t rsize64 = 1ULL << si;
+
+    if(size > rsize64) {
+      // Round `size` up to the nearest power of two.
+      si = 64 - ROCKET_LZCNT64(size - 1ULL);
+      rsize64 = 1ULL << si;
+    }
+
+    ROCKET_ASSERT(size <= rsize64);
+    size = (size_t) rsize64;
+    return s_pools[si];
   }
 
 }  // namespace
