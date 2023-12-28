@@ -70,6 +70,7 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
         m_del(del), m_ptr(move(ptr))
       { }
 
+    ROCKET_ALWAYS_INLINE
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
@@ -146,6 +147,7 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
         deleter_base(forward<dparamsT>(dparams)...), m_ptr(move(ptr))
       { }
 
+    ROCKET_ALWAYS_INLINE
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
 
@@ -204,6 +206,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
         deleter_base(del), m_ptr(move(ptr))
       { }
 
+    ROCKET_ALWAYS_INLINE
     ~stored_pointer_impl()
       { this->reset(nullptr);  }
 

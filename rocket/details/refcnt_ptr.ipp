@@ -68,6 +68,7 @@ class stored_pointer
         m_ptr(move(ptr))
       { }
 
+    ROCKET_ALWAYS_INLINE
     ~stored_pointer()
       { this->reset(nullptr);  }
 
