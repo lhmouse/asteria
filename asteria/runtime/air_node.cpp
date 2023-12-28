@@ -2202,7 +2202,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2251,7 +2251,7 @@ solidify(AVM_Rod& rod) const
         sp2.name = altr.name;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const uint32_t depth = head->uparam.u2345;
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -2303,9 +2303,11 @@ solidify(AVM_Rod& rod) const
         sp2.ref = altr.ref;
 
         rod.append(
-          +[](Executive_Context& ctx, const Header* head) -> AIR_Status
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
           {
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+
+            // Push a copy of the captured reference.
             ctx.stack().push() = sp.ref;
             return air_status_next;
           }
