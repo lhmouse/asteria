@@ -285,7 +285,7 @@ unerase_cast(rcfwd<RealT>* ptr) noexcept  // like `static_cast`
   }
 
 template<typename TargetT, typename RealT>
-constexpr
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<TargetT>
 unerase_pointer_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   {
@@ -293,7 +293,7 @@ unerase_pointer_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `sta
   }
 
 template<typename TargetT, typename RealT>
-constexpr
+ROCKET_ALWAYS_INLINE
 refcnt_ptr<TargetT>
 unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
   {
