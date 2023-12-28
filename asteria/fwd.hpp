@@ -263,8 +263,10 @@ vtable_key_function_GklPAslB() noexcept
   }
 
 template<typename RealT>
-using rcfwd_ptr = refcnt_ptr<typename ::rocket::copy_cv<
-        rcfwd<typename ::std::remove_cv<RealT>::type>, RealT>::type>;
+using rcfwd_ptr = refcnt_ptr<
+         typename ::rocket::copy_cv<
+           rcfwd<typename ::std::remove_cv<RealT>::type>,
+           RealT>::type>;
 
 template<typename TargetT, typename RealT>
 constexpr
