@@ -6,6 +6,7 @@
 #include "../utils.hpp"
 namespace asteria {
 
+ROCKET_FLATTEN
 void
 Reference_Stack::
 do_reallocate(uint32_t estor)
@@ -34,6 +35,7 @@ do_reallocate(uint32_t estor)
     this->m_estor = (uint32_t) minfo.count;
   }
 
+ROCKET_FLATTEN
 void
 Reference_Stack::
 do_deallocate() noexcept

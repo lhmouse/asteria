@@ -6,6 +6,7 @@
 #include "../utils.hpp"
 namespace asteria {
 
+ROCKET_FLATTEN
 void
 Reference_Dictionary::
 do_reallocate(uint32_t nbkt)
@@ -58,6 +59,7 @@ do_reallocate(uint32_t nbkt)
     this->m_nbkt = (uint32_t) minfo.count;
   }
 
+ROCKET_FLATTEN
 void
 Reference_Dictionary::
 do_deallocate() noexcept
