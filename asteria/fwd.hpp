@@ -755,7 +755,6 @@ enum Compiler_Status : uint32_t
     compiler_status_digit_separator_following_nondigit         = 1019,
 
     // syntax errors
-    compiler_status_duplicate_key_in_object                    = 2001,
     compiler_status_identifier_expected                        = 2002,
     compiler_status_semicolon_expected                         = 2003,
     compiler_status_string_literal_expected                    = 2004,
@@ -786,20 +785,21 @@ enum Compiler_Status : uint32_t
     compiler_status_argument_expected                          = 2029,
     compiler_status_closing_parenthesis_or_argument_expected   = 2030,
     compiler_status_arrow_expected                             = 2031,
-    compiler_status_reserved_identifier_not_declarable         = 2032,
     compiler_status_break_no_matching_scope                    = 2033,
     compiler_status_continue_no_matching_scope                 = 2034,
     compiler_status_closing_bracket_or_identifier_expected     = 2035,
     compiler_status_closing_brace_or_identifier_expected       = 2036,
     compiler_status_invalid_expression                         = 2037,
-    compiler_status_multiple_default                           = 2038,
-    compiler_status_duplicate_name_in_structured_binding       = 2039,
-    compiler_status_duplicate_name_in_parameter_list           = 2040,
     compiler_status_nondeclaration_statement_expected          = 2041,
     compiler_status_closing_parenthesis_or_parameter_expected  = 2042,
 
     // semantic errors
     compiler_status_undeclared_identifier                      = 3001,
+    compiler_status_duplicate_key_in_object                    = 3002,
+    compiler_status_reserved_identifier_not_declarable         = 3003,
+    compiler_status_multiple_default                           = 3004,
+    compiler_status_duplicate_name_in_structured_binding       = 3005,
+    compiler_status_duplicate_name_in_parameter_list           = 3006,
   };
 
 ROCKET_CONST

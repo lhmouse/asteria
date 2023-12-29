@@ -146,6 +146,9 @@ read_execute_print_single()
       repl_file = move(real_name);
     }
     catch(Compiler_Error& except) {
+      if(except.status() >= compiler_status_undeclared_identifier)
+        return repl_printf("! exception: %s", except.what());
+
       try {
         // Try parsing it as a sequence of statements instead.
         real_name = repl_file;
