@@ -806,6 +806,7 @@ is_terminator() const noexcept
       case index_coalesce_expression:
       case index_member_access:
       case index_apply_operator_bi32:
+      case index_return_statement_bi32:
         return false;
 
       case index_throw_statement:
@@ -878,6 +879,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_alt_function_call:
       case index_member_access:
       case index_apply_operator_bi32:
+      case index_return_statement_bi32:
         return nullopt;
 
       case index_execute_block: {
@@ -1146,6 +1148,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_alt_function_call:
       case index_member_access:
       case index_apply_operator_bi32:
+      case index_return_statement_bi32:
         return;
 
       case index_execute_block: {
@@ -4592,6 +4595,56 @@ solidify(AVM_Rod& rod) const
           default:
             ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
         }
+      }
+
+
+      case index_return_statement_bi32: {
+        const auto& altr = this->m_stor.as<S_return_statement_bi32>();
+
+        Uparam up2;
+        up2.u0 = altr.type;
+        up2.i2345 = altr.irhs;
+
+        rod.append(
+          +[](Executive_Context& ctx, const Header* head) ROCKET_FLATTEN -> AIR_Status
+          {
+            const Type type = static_cast<Type>(head->uparam.u0);
+            const V_integer irhs = head->uparam.i2345;
+            const auto& sloc = head->pv_meta->sloc;
+
+            if(auto hooks = ctx.global().get_hooks_opt())
+              hooks->on_return(sloc, ptc_aware_none);
+
+            if(type == type_null) {
+              // null
+              ctx.stack().push().set_temporary(nullopt);
+              return air_status_return_ref;
+            }
+            else if(type == type_boolean) {
+              // boolean; unnormalized
+              ctx.stack().push().set_temporary(-irhs < 0);
+              return air_status_return_ref;
+            }
+            else {
+              // integer
+              ctx.stack().push().set_temporary(irhs);
+              return air_status_return_ref;
+            }
+          }
+
+          // Uparam
+          , up2
+
+          // Sparam
+          , 0, nullptr, nullptr, nullptr
+
+          // Collector
+          , nullptr
+
+          // Symbols
+          , &(altr.sloc)
+        );
+        return;
       }
     }
   }

@@ -509,6 +509,37 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
                                altr.by_ref ? ptc_aware_by_ref : ptc_aware_by_val,
                                altr.expr);
 
+        if(opts.optimization_level >= 1) {
+          // Can this be folded?
+          opt<Value> qrhs;
+          if(!code.empty() && (altr.expr.units.size() == 1))
+            qrhs = code.back().get_constant_opt();
+
+          if(qrhs) {
+            if(qrhs->is_null()) {
+              // Fold the constant.
+              AIR_Node::S_return_statement_bi32 xnode = { altr.sloc, type_null, 0 };
+              code.mut_back() = move(xnode);
+              return;
+            }
+
+            if(qrhs->is_boolean()) {
+              // Fold the constant.
+              AIR_Node::S_return_statement_bi32 xnode = { altr.sloc, type_boolean, qrhs->as_boolean() };
+              code.mut_back() = move(xnode);
+              return;
+            }
+
+            if(qrhs->is_integer() && ((int32_t) qrhs->as_integer() == qrhs->as_integer())) {
+              // Fold the integer.
+              AIR_Node::S_return_statement_bi32 xnode = { altr.sloc, type_integer,
+                                                          (int32_t) qrhs->as_integer() };
+              code.mut_back() = move(xnode);
+              return;
+            }
+          }
+        }
+
         AIR_Node::S_return_statement xnode = { altr.sloc, altr.by_ref, false };
         code.emplace_back(move(xnode));
         return;

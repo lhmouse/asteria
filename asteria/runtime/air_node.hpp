@@ -280,6 +280,13 @@ class AIR_Node
         int32_t irhs;
       };
 
+    struct S_return_statement_bi32
+      {
+        Source_Location sloc;
+        Type type;
+        int32_t irhs;
+      };
+
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
@@ -323,6 +330,7 @@ class AIR_Node
         index_coalesce_expression    = 38,
         index_member_access          = 39,
         index_apply_operator_bi32    = 40,
+        index_return_statement_bi32  = 41,
       };
 
   private:
@@ -369,6 +377,7 @@ class AIR_Node
         , S_coalesce_expression    // 38,
         , S_member_access          // 39,
         , S_apply_operator_bi32    // 40,
+        , S_return_statement_bi32  // 41,
       );
 
   public:
