@@ -230,30 +230,31 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
       case index_operator_rpn: {
         const auto& altr = this->m_stor.as<S_operator_rpn>();
 
-        if((opts.optimization_level >= 1)) {
+        if(opts.optimization_level >= 1) {
           // Can this be folded?
-          const auto qrhsc = code.at(code.size() - 1).get_constant_opt();
-          if(qrhsc) {
-            const auto& rhs = *qrhsc;
+          opt<Value> qrhs;
+          if(!code.empty())
+            qrhs = code.back().get_constant_opt();
 
+          if(qrhs) {
             if((altr.xop == xop_pos) && !altr.assign)
               return;
 
-            if((rhs.type() == type_string) && (altr.xop == xop_index)) {
+            if(qrhs->is_string() && (altr.xop == xop_index)) {
               // Encode a pre-hashed object key.
-              AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(rhs.as_string()) };
+              AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(qrhs->as_string()) };
               code.mut_back() = move(xnode);
               return;
             }
 
-            if((rhs.type() == type_integer) && (altr.xop == xop_notb)) {
+            if(qrhs->is_integer() && (altr.xop == xop_notb)) {
               // Encode the result directly, as the result will never overflow.
-              AIR_Node::S_push_constant xnode = { rhs.as_integer() ^ -1 };
+              AIR_Node::S_push_constant xnode = { qrhs->as_integer() ^ -1 };
               code.mut_back() = move(xnode);
               return;
             }
 
-            if((rhs.type() == type_integer) && ((int32_t) rhs.as_integer() == rhs.as_integer())
+            if(qrhs->is_integer() && ((int32_t) qrhs->as_integer() == qrhs->as_integer())
                && ::rocket::is_any_of(altr.xop,
                      { xop_assign, xop_index, xop_cmp_eq, xop_cmp_ne, xop_cmp_un, xop_cmp_lt,
                        xop_cmp_gt, xop_cmp_lte, xop_cmp_gte, xop_cmp_3way, xop_add, xop_sub,
@@ -262,7 +263,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                      )) {
               // Fold this constant.
               AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
-                                                        (int32_t) rhs.as_integer() };
+                                                        (int32_t) qrhs->as_integer() };
               code.mut_back() = move(xnode);
               return;
             }
