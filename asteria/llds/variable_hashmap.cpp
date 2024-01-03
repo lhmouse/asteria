@@ -42,6 +42,7 @@ do_reallocate(uint32_t nbkt)
                         [&](const Bucket&) { return false;  });
 
         // Relocate the value into the new bucket.
+        ROCKET_ASSERT(qrel);
         qrel->key = eptr->next->key;
         bcopy(qrel->var_opt, eptr->next->var_opt);
         qrel->attach(*new_eptr);
@@ -110,6 +111,7 @@ do_erase_range(uint32_t tpos, uint32_t tn) noexcept
                         [&](const Bucket&) { return false;  });
 
         // Relocate the value into the new bucket.
+        ROCKET_ASSERT(qrel);
         qrel->key = r.key;
         bcopy(qrel->var_opt, r.var_opt);
         qrel->attach(*eptr);
