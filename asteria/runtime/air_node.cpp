@@ -145,19 +145,20 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
       throw Runtime_Error(xtc_format,
                "Non-function value not invocable (target `$1`)", target);
 
-    if(ptc != ptc_aware_none) {
-      // Return a tail call wrapper.
-      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc,
-             target.as_function(), move(self), move(ctx.alt_stack())));
+    const auto& f = target.as_function();
+    if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
+      // Perform a plain call.
+      if(auto hooks = ctx.global().get_hooks_opt())
+        hooks->on_call(sloc, f);
+
+      f.invoke(self, ctx.global(), move(ctx.alt_stack()));
+      return air_status_next;
+    }
+    else {
+      // Perform a tail call.
+      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, f, move(self), move(ctx.alt_stack())));
       return air_status_return_ref;
     }
-
-    // Perform a plain call.
-    if(auto hooks = ctx.global().get_hooks_opt())
-      hooks->on_call(sloc, target.as_function());
-
-    target.as_function().invoke(self, ctx.global(), move(ctx.alt_stack()));
-    return air_status_next;
   }
 
 template<typename ContainerT>
