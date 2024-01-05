@@ -109,6 +109,12 @@ Global_Context::
     unerase_pointer_cast<Garbage_Collector>(this->m_gcoll)->finalize();
   }
 
+void
+Global_Context::
+vtable_key_function_sLBHstEX() noexcept
+  {
+  }
+
 API_Version
 Global_Context::
 max_api_version() const noexcept

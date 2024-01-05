@@ -32,6 +32,10 @@ class Analytic_Context
                      const cow_vector<phsh_string>& params);
 
   protected:
+    virtual
+    void
+    vtable_key_function_sLBHstEX() noexcept override;
+
     bool
     do_is_analytic() const noexcept override
       { return true;  }

@@ -22,13 +22,20 @@ class Abstract_Context
     Abstract_Context() noexcept = default;
 
   protected:
+    virtual
+    void
+    vtable_key_function_sLBHstEX() noexcept override;
+
     // This function is called when a name is not found in `m_named_refs`.
     // Built-in references such as `__func` are only created when they are
     // mentioned.
-    // This is the key function for RTTI.
     virtual
     Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const;
+    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
+      {
+        (void) name;
+        return hint_opt;
+      }
 
     // Retrieve properties of the final context.
     virtual

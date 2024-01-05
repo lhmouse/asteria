@@ -41,7 +41,8 @@ class Executive_Context
     // contexts of enclosing function will have been destroyed.
     ASTERIA_INCOMPLET(AVM_Rod)
     explicit
-    Executive_Context(Uxtc_defer, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack)
+    Executive_Context(Uxtc_defer, Global_Context& xglobal, Reference_Stack& xstack,
+                      Reference_Stack& ystack)
       :
         m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack)
       { }
@@ -50,10 +51,15 @@ class Executive_Context
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
     explicit
-    Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack,
-                      const Instantiated_Function& xfunc, Reference&& xself);
+    Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack,
+                      Reference_Stack& ystack, const Instantiated_Function& xfunc,
+                      Reference&& xself);
 
-  private:
+  protected:
+    virtual
+    void
+    vtable_key_function_sLBHstEX() noexcept override;
+
     Reference*
     do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
 

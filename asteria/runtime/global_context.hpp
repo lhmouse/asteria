@@ -26,6 +26,10 @@ class Global_Context
     Global_Context(API_Version api_version_req = api_version_latest);
 
   protected:
+    virtual
+    void
+    vtable_key_function_sLBHstEX() noexcept override;
+
     bool
     do_is_analytic() const noexcept override
       { return false;  }

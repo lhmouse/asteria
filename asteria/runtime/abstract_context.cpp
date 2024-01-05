@@ -6,11 +6,10 @@
 #include "../utils.hpp"
 namespace asteria {
 
-Reference*
+void
 Abstract_Context::
-do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR /*name*/) const
+vtable_key_function_sLBHstEX() noexcept
   {
-    return hint_opt;
   }
 
 }  // namespace asteria
