@@ -54,6 +54,9 @@ class Executive_Context
                       const Instantiated_Function& xfunc, Reference&& xself);
 
   private:
+    Reference*
+    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
+
     bool
     do_is_analytic() const noexcept override
       { return false;  }
@@ -61,9 +64,6 @@ class Executive_Context
     const Abstract_Context*
     do_get_parent_opt() const noexcept override
       { return this->m_parent_opt;  }
-
-    Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
 
     void
     do_on_scope_exit_normal_slow(AIR_Status status);

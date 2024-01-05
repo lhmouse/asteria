@@ -22,6 +22,15 @@ class Abstract_Context
     Abstract_Context() noexcept = default;
 
   protected:
+    // This function is called when a name is not found in `m_named_refs`.
+    // Built-in references such as `__func` are only created when they are
+    // mentioned.
+    // This is the key function for RTTI.
+    virtual
+    Reference*
+    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const;
+
+    // Retrieve properties of the final context.
     virtual
     bool
     do_is_analytic() const noexcept = 0;
@@ -29,13 +38,6 @@ class Abstract_Context
     virtual
     const Abstract_Context*
     do_get_parent_opt() const noexcept = 0;
-
-    // This function is called when a name is not found in `m_named_refs`.
-    // Built-in references such as `__func` are only created when they are
-    // mentioned.
-    virtual
-    Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const = 0;
 
     // This function is called by `do_create_lazy_reference_opt()` to avoid
     // infinite recursion.
@@ -52,8 +54,6 @@ class Abstract_Context
       }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Abstract_Context);
-
     bool
     is_analytic() const noexcept
       { return this->do_is_analytic();  }

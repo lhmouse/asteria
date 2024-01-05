@@ -34,10 +34,6 @@ class Global_Context
     do_get_parent_opt() const noexcept override
       { return nullptr;  }
 
-    Reference*
-    do_create_lazy_reference_opt(Reference*, phsh_stringR) const override
-      { return nullptr;  }
-
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Global_Context);
 

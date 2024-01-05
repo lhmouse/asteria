@@ -6,9 +6,11 @@
 #include "../utils.hpp"
 namespace asteria {
 
+Reference*
 Abstract_Context::
-~Abstract_Context()
+do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR /*name*/) const
   {
+    return hint_opt;
   }
 
 }  // namespace asteria
