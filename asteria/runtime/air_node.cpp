@@ -4173,9 +4173,8 @@ solidify(AVM_Rod& rod) const
             const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
             // Save the stack.
-            Reference_Stack saved_stack;
-            ctx.stack().swap(saved_stack);
-            ctx.stack().swap(ctx.alt_stack());
+            Reference_Stack saved_stack = move(ctx.stack());
+            ctx.swap_stacks();
 
             // Evaluate the expression in a `try` block.
             Value exval;
@@ -4188,8 +4187,8 @@ solidify(AVM_Rod& rod) const
             }
 
             // Restore the stack after the evaluation completes.
-            ctx.stack().swap(ctx.alt_stack());
-            ctx.stack().swap(saved_stack);
+            ctx.swap_stacks();
+            ctx.stack() = move(saved_stack);
 
             // Push the exception object.
             ctx.stack().push().set_temporary(move(exval));
@@ -4310,7 +4309,7 @@ solidify(AVM_Rod& rod) const
         rod.append(
           +[](Executive_Context& ctx, const Header* /*head*/) -> AIR_Status
           {
-            ctx.stack().swap(ctx.alt_stack());
+            ctx.swap_stacks();
             ctx.stack().clear();
             return air_status_next;
           }
@@ -4346,7 +4345,7 @@ solidify(AVM_Rod& rod) const
             if(auto hooks = ctx.global().get_hooks_opt())
               hooks->on_trap(sloc, ctx);
 
-            ctx.stack().swap(ctx.alt_stack());
+            ctx.swap_stacks();
 
             // Copy the target reference into the red zone, as we probably don't
             // want to introduce a temporary object on the system stack.

@@ -90,6 +90,10 @@ class Executive_Context
     alt_stack() const noexcept
       { return *(this->m_alt_stack);  }
 
+    void
+    swap_stacks() noexcept
+      { ::std::swap(this->m_stack, this->m_alt_stack);  }
+
     // Get the defer expression list.
     const cow_bivector<Source_Location, AVM_Rod>&
     defer() const noexcept
