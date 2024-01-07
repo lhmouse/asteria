@@ -1851,6 +1851,56 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if a read error occurs.
 
+### `std.checksum.Adler32()`
+
+* Creates a Adler-32 hasher according to ISO/IEC 3309. This algorithm is used
+  by zlib.
+
+* Returns the hasher as an object consisting of the following members:
+
+  * `update(data)`
+  * `finish()`
+  * `clear()`
+
+  The function `update()` is used to put a byte string into the hasher. After
+  all data have been put, the function `finish()` extracts the checksum as an
+  integer (whose high-order 32 bits are always zeroes), and then resets the
+  hasher, making it suitable for further data as if it had just been created.
+  The function `clear()` discards input data and resets the hasher to its
+  initial state.
+
+### `std.checksum.adler32(data)`
+
+* Calculates the Adler-32 checksum of `data` which must be a string, as if by
+
+  ```
+  std.checksum.adler32 = func(data) {
+    var h = this.Adler32();
+    h.update(data);
+    return h.finish();
+  };
+  ```
+
+* Returns the Adler-32 checksum as an integer. The high-order 32 bits are
+  always zeroes.
+
+### `std.checksum.adler32_file(path)`
+
+* Calculates the Adler-32 checksum of the file denoted by `path`, as if by
+
+  ```
+  std.checksum.adler32_file = func(path) {
+    var h = this.Adler32();
+    this.stream(path, func(off, data) { h.update(data);  });
+    return h.finish();
+  };
+  ```
+
+* Returns the Adler-32 checksum as an integer. The high-order 32 bits are
+  always zeroes.
+
+* Throws an exception if a read error occurs.
+
 ### `std.checksum.FNV1a32()`
 
 * Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the 32-bit FNV-1a

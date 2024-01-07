@@ -31,6 +31,30 @@ std_checksum_crc32(V_string data);
 V_integer
 std_checksum_crc32_file(V_string path);
 
+// `std.checksum.Adler32`
+V_object
+std_checksum_Adler32();
+
+V_opaque
+std_checksum_Adler32_private();
+
+void
+std_checksum_Adler32_update(V_opaque& h, V_string data);
+
+V_integer
+std_checksum_Adler32_finish(V_opaque& h);
+
+void
+std_checksum_Adler32_clear(V_opaque& h);
+
+// `std.checksum.adler32`
+V_integer
+std_checksum_adler32(V_string data);
+
+// `std.checksum.adler32_file`
+V_integer
+std_checksum_adler32_file(V_string path);
+
 // `std.checksum.FNV1a32`
 V_object
 std_checksum_FNV1a32();

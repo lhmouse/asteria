@@ -124,6 +124,115 @@ do_construct_CRC32(V_object& result)
       });
   }
 
+class Adler32_Hasher
+  :
+    public Abstract_Opaque
+  {
+  private:
+    ::uLong m_reg;
+
+  public:
+    explicit
+    Adler32_Hasher() noexcept
+      {
+        this->clear();
+      }
+
+  public:
+    tinyfmt&
+    describe(tinyfmt& fmt) const override
+      {
+        return format(fmt, "instance of `std.checksum.Adler32` at `$1`", this);
+      }
+
+    void
+    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+      {
+      }
+
+    Adler32_Hasher*
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+      {
+        auto ptr = new auto(*this);
+        out.reset(ptr);
+        return ptr;
+      }
+
+    void
+    clear() noexcept
+      {
+        this->m_reg = 1;
+      }
+
+    void
+    update(const void* data, size_t size) noexcept
+      {
+        this->m_reg = ::adler32_z(this->m_reg, static_cast<const ::Byte*>(data), size);
+      }
+
+    V_integer
+    finish() noexcept
+      {
+        uint32_t val = static_cast<uint32_t>(this->m_reg);
+        this->clear();
+        return val;
+      }
+  };
+
+void
+do_construct_Adler32(V_object& result)
+  {
+    static constexpr auto s_private_uuid = sref("{2F5059F5-002D-4E7E-559D-EDA4EDA43608}");
+    result.insert_or_assign(s_private_uuid, std_checksum_Adler32_private());
+
+    result.insert_or_assign(sref("update"),
+      ASTERIA_BINDING(
+        "std.checksum.Adler32::update", "data",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_string data;
+
+        reader.start_overload();
+        reader.required(data);
+        if(reader.end_overload())
+          return (void) std_checksum_Adler32_update(hasher, data);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("finish"),
+      ASTERIA_BINDING(
+        "std.checksum.Adler32::finish", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+
+        reader.start_overload();
+        if(reader.end_overload())
+          return (Value) std_checksum_Adler32_finish(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("clear"),
+      ASTERIA_BINDING(
+        "std.checksum.Adler32::clear", "",
+        Reference&& self, Argument_Reader&& reader)
+      {
+        auto& self_obj = self.dereference_mutable().mut_object();
+        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+
+        reader.start_overload();
+        if(reader.end_overload())
+          return (void) std_checksum_Adler32_clear(hasher);
+
+        reader.throw_no_matching_function_call();
+      });
+  }
+
 class FNV1a32_Hasher
   :
     public Abstract_Opaque
@@ -1012,6 +1121,50 @@ std_checksum_crc32_file(V_string path)
   }
 
 V_object
+std_checksum_Adler32()
+  {
+    V_object result;
+    do_construct_Adler32(result);
+    return result;
+  }
+
+V_opaque
+std_checksum_Adler32_private()
+  {
+    return ::rocket::make_refcnt<Adler32_Hasher>();
+  }
+
+void
+std_checksum_Adler32_update(V_opaque& h, V_string data)
+  {
+    h.open<Adler32_Hasher>().update(data.data(), data.size());
+  }
+
+V_integer
+std_checksum_Adler32_finish(V_opaque& h)
+  {
+    return h.open<Adler32_Hasher>().finish();
+  }
+
+void
+std_checksum_Adler32_clear(V_opaque& h)
+  {
+    h.open<Adler32_Hasher>().clear();
+  }
+
+V_integer
+std_checksum_adler32(V_string data)
+  {
+    return do_hash_bytes<Adler32_Hasher>(data);
+  }
+
+V_integer
+std_checksum_adler32_file(V_string path)
+  {
+    return do_hash_file<Adler32_Hasher>(path);
+  }
+
+V_object
 std_checksum_FNV1a32()
   {
     V_object result;
@@ -1360,6 +1513,48 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.required(path);
         if(reader.end_overload())
           return (Value) std_checksum_crc32_file(path);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("Adler32"),
+      ASTERIA_BINDING(
+        "std.checksum.Adler32", "",
+        Argument_Reader&& reader)
+      {
+        reader.start_overload();
+        if(reader.end_overload())
+          return (Value) std_checksum_Adler32();
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("adler32"),
+      ASTERIA_BINDING(
+        "std.checksum.adler32", "data",
+        Argument_Reader&& reader)
+      {
+        V_string data;
+
+        reader.start_overload();
+        reader.required(data);
+        if(reader.end_overload())
+          return (Value) std_checksum_adler32(data);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(sref("adler32_file"),
+      ASTERIA_BINDING(
+        "std.checksum.adler32_file", "path",
+        Argument_Reader&& reader)
+      {
+        V_string path;
+
+        reader.start_overload();
+        reader.required(path);
+        if(reader.end_overload())
+          return (Value) std_checksum_adler32_file(path);
 
         reader.throw_no_matching_function_call();
       });

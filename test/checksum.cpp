@@ -52,8 +52,48 @@ int main()
         q.update("2");
         assert q.finish() == 0x1E3888BE;
 
-        assert std.checksum.crc32_file((__file>>3)+"txt") == 3626666760;
+        assert std.checksum.crc32_file((__file>>3)+"txt") == 0xD82A8B08;
         assert catch( std.checksum.crc32_file("nonexistent") ) != null;
+
+        // Adler-32
+        const adler32_results = [
+          0x00000001, 0x0ADB02BD, 0x28DA0579, 0x59FD0835, 0x9E440AF1, 0xF5AF0DAD, 0x604D1069, 0xDE001325,
+          0x6EE615E1, 0x12F0189D, 0xCA0F1B59, 0x94611E15, 0x71D720D1, 0x6271238D, 0x662F2649, 0x7D112905,
+          0xA7172BC1, 0xE4412E7D, 0x349E3139, 0x981033F5, 0x0EB536B1, 0x986F396D, 0x355C3C29, 0xE55E3EE5,
+          0xA89341A1, 0x7EEC445D, 0x68694719, 0x650A49D5, 0x74CF4C91, 0x97B84F4D, 0xCDC55209, 0x170554C5,
+          0x735A5781, 0xE2D35A3D, 0x657F5CF9, 0xFB405FB5, 0xA4346271, 0x604C652D, 0x2F8867E9, 0x11E86AA5,
+          0x076C6D61, 0x1014701D, 0x2BE072D9, 0x5AD07595, 0x9CE47851, 0xF21C7B0D, 0x5A877DC9, 0xD6078085,
+          0x64BA8341, 0x069185FD, 0xBB7D88B9, 0x839C8B75, 0x5EDF8E31, 0x4D4690ED, 0x4ED193A9, 0x63809665,
+          0x8B539921, 0xC64A9BDD, 0x14749E99, 0x75B3A155, 0xEA16A411, 0x71ACA6CD, 0x0C66A989, 0xBA35AC45,
+          0x7B37AF01, 0x4F5DB1BD, 0x36A7B479, 0x3115B735, 0x3EA7B9F1, 0x5F5DBCAD, 0x9337BF69, 0xDA35C225,
+          0x3466C4E1, 0xA1ACC79D, 0x2225CA59, 0xB5B3CD15, 0x5C74CFD1, 0x1659D28D, 0xE353D549, 0xC380D805,
+          0xB6D1DAC1, 0xBD46DD7D, 0xD6DFE039, 0x03ABE2F5, 0x438CE5B1, 0x9691E86D, 0xFCBAEB29, 0x7616EDE5,
+          0x0296F0A1, 0xA22BF35D, 0x54F3F619, 0x1ADFF8D5, 0xF3E0FB91, 0xE014FE4D, 0xDF6C0118, 0xF1E803D4,
+          0x17970690, 0x505B094C, 0x9C430C08, 0xFB4F0EC4, 0x6D8E1180, 0xF2E2143C, 0x8B6916F8, 0x371419B4,
+          0xF5D41C70, 0xC7C71F2C, 0xACDE21E8, 0xA51924A4, 0xB0782760, 0xCEFB2A1C, 0x00B12CD8, 0x457C2F94,
+          0x9D6B3250, 0x088D350C, 0x86C437C8, 0x182E3A84, 0xBCAD3D40, 0x745F3FFC, 0x3F3542B8, 0x1D2F4574,
+          0x0E4D4830, 0x128F4AEC, 0x29F54DA8, 0x547F5064, 0x922D5320, 0xE2FF55DC, 0x47045898, 0xBE1E5B54,
+        ];
+        h = std.checksum.Adler32();
+        for(each k, v -> adler32_results) {
+          // split
+          for(var i = 0; i < k; ++i) {
+            h.update(s);
+          }
+          assert h.finish() == v;
+          // simple
+          assert std.checksum.adler32(s * k) == v;
+        }
+        h = std.checksum.Adler32();
+        h.update("hello");
+        q = h;
+        h.update("1");
+        assert h.finish() == 0x08720246;
+        q.update("2");
+        assert q.finish() == 0x08730247;
+
+        assert std.checksum.adler32_file((__file>>3)+"txt") == 0x481B06DE;
+        assert catch( std.checksum.adler32_file("nonexistent") ) != null;
 
         // FNV1a-32
         const fnv1a32_results = [
@@ -92,7 +132,7 @@ int main()
         q.update("2");
         assert q.finish() == 0xF09334DB;
 
-        assert std.checksum.fnv1a32_file((__file>>3)+"txt") == 3790343712;
+        assert std.checksum.fnv1a32_file((__file>>3)+"txt") == 0xE1EC0E20;
         assert catch( std.checksum.fnv1a32_file("nonexistent") ) != null;
 
         // MD5
