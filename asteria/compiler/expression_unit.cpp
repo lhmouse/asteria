@@ -202,7 +202,8 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                     return ::rocket::any_of(arg.units,
                         [](const Expression_Unit& unit) { return unit.clobbers_alt_stack();  });
                   })) {
-          // Evaluate arguments on `alt_stack` directly.
+          // Evaluate arguments and store results directly on the alternative
+          // stack, so they need not be moved around.
           // https://github.com/lhmouse/asteria/issues/136
           AIR_Node::S_alt_clear_stack xstart = { };
           code.emplace_back(move(xstart));
@@ -211,13 +212,13 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             for(const auto& unit : arg.units)
               unit.generate_code(code, opts, global, ctx, ptc_aware_none);
 
-          // Take alternative approach.
           AIR_Node::S_alt_function_call xnode = { altr.sloc, rptc };
           code.emplace_back(move(xnode));
           return;
         }
 
-        // Arguments can be evaluated directly on the stack.
+        // Evaluate arguments and store results on the argument stack, which will
+        // be popped into the alternative stack by `S_function_call`.
         for(const auto& arg : altr.args)
           for(const auto& unit : arg.units)
             unit.generate_code(code, opts, global, ctx, ptc_aware_none);
