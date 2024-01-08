@@ -178,7 +178,7 @@ execute(Executive_Context& ctx) const
               // There is metadata and symbols.
               status = head->pv_meta->exec(ctx, head);
             }
-            catch(Runtime_Error& except) { throw;  }  // forward
+            catch(Runtime_Error&) { throw;  }  // forward
             catch(exception& e) { throw Runtime_Error(xtc_format, "$1", e);  }  // replace
           }
           catch(Runtime_Error& except) {

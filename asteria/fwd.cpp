@@ -64,7 +64,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         return self;
       }
     }
-    catch(Runtime_Error& except) { throw;  }  // forward
+    catch(Runtime_Error&) { throw;  }  // forward
     catch(exception& e) { throw Runtime_Error(xtc_format, "$1", e);  }  // replace
 
     throw Runtime_Error(xtc_format,
