@@ -2218,7 +2218,7 @@ solidify(AVM_Rod& rod) const
 
             if(qref->is_invalid())
               throw Runtime_Error(xtc_format,
-                       "Reference `$1` not initialized", sp.name);
+                       "Global reference `$1` not initialized", sp.name);
 
             // Push a copy of the reference onto the stack.
             ctx.stack().push() = *qref;
