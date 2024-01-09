@@ -20,17 +20,16 @@ class Random_Engine
   private:
     // This matches `struct randctx` from 'rand.h'.
     //   https://www.burtleburtle.net/bob/c/rand.h
-    uint32_t m_randcnt;
-    uint32_t m_randrsl[256];
-    uint32_t m_randmem[256];
-    uint32_t m_randa;
-    uint32_t m_randb;
-    uint32_t m_randc;
+    uint32_t m_randcnt = 0;
+    uint32_t m_randrsl[256] = { };
+    uint32_t m_randmem[256] = { };
+    uint32_t m_randa = 0;
+    uint32_t m_randb = 0;
+    uint32_t m_randc = 0;
 
   public:
     explicit
-    Random_Engine() noexcept
-      { this->init();  }
+    Random_Engine() noexcept = default;
 
   private:
     void
@@ -41,7 +40,7 @@ class Random_Engine
 
     // Initializes this PRNG with some external entropy source.
     void
-    init() noexcept;
+    seed() noexcept;
 
     // Gets a random 32-bit number.
     uint32_t

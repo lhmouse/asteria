@@ -78,6 +78,8 @@ Global_Context(API_Version api_version_req)
     m_prng(::rocket::make_refcnt<Random_Engine>()),
     m_ldrlk(::rocket::make_refcnt<Module_Loader>())
   {
+    unerase_cast<Random_Engine*>(this->m_prng.get())->seed();
+
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which
     // will be referenced as `yend[-1].version`.
@@ -106,7 +108,7 @@ Global_Context::
     // Perform the final garbage collection. Note if there are still cyclic
     // references afterwards, they are left uncollected!
     this->do_clear_named_references();
-    unerase_pointer_cast<Garbage_Collector>(this->m_gcoll)->finalize();
+    unerase_cast<Garbage_Collector*>(this->m_gcoll.get())->finalize();
   }
 
 void

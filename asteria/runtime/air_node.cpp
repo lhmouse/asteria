@@ -2905,7 +2905,7 @@ solidify(AVM_Rod& rod) const
 
                   case xop_typeof: {
                     // Ge the type of the operand as a string.
-                    rhs = ::rocket::sref(describe_type(rhs.type()));
+                    rhs = sref(describe_type(rhs.type()));
                     return air_status_next;
                   }
 

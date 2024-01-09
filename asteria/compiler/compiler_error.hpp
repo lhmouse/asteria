@@ -26,7 +26,7 @@ class Compiler_Error
     Compiler_Error(Uxtc_status, Compiler_Status xstat, const Source_Location& xsloc)
       :
         m_stat(xstat), m_sloc(xsloc),
-        m_desc(::rocket::sref(describe_compiler_status(xstat)))
+        m_desc(sref(describe_compiler_status(xstat)))
       {
         this->do_compose_message();
       }

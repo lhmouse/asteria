@@ -20,8 +20,7 @@ class Variable
 
   public:
     explicit
-    Variable() noexcept
-      { }
+    Variable() noexcept = default;
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
@@ -51,7 +50,7 @@ class Variable
     void
     uninitialize() noexcept
       {
-        this->m_value = ::rocket::sref("[[`destroyed variable`]]");
+        this->m_value = sref("[[`destroyed variable`]]");
         this->m_init = false;
       }
 
