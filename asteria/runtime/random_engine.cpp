@@ -60,10 +60,7 @@ void
 Random_Engine::
 seed() noexcept
   {
-    // Initialize internal states.
-    this->m_randa = 0;
-    this->m_randb = 0;
-    this->m_randc = 0;
+    // Initialize seed memory.
     ::RAND_priv_bytes((uint8_t*) this->m_randrsl, sizeof(m_randrsl));
 
     ///////////////////////////////////////////////////////////////////////////
