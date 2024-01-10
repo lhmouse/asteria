@@ -87,7 +87,7 @@ operator<<(basic_tinyfmt<char16_t>& fmt, const char* s)
     do_putmbn_common(fmt.mut_buf(), ::mbrtoc16, s);
     return fmt;
 #else
-    noadl::sprintf_and_throw<domain_error>("u16tinyfmt: UTF-16 functions not available");
+    sprintf_and_throw<domain_error>("u16tinyfmt: UTF-16 functions not available");
 #endif
   }
 
@@ -98,7 +98,7 @@ operator<<(basic_tinyfmt<char32_t>& fmt, const char* s)
     do_putmbn_common(fmt.mut_buf(), ::mbrtoc32, s);
     return fmt;
 #else
-    noadl::sprintf_and_throw<domain_error>("u32tinyfmt: UTF-32 functions not available");
+    sprintf_and_throw<domain_error>("u32tinyfmt: UTF-32 functions not available");
 #endif
   }
 

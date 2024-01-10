@@ -18,7 +18,7 @@ sprintf_and_throw(const char* fmt, ...)
     va_end(ap);
 
     // Remove trailing line breaks.
-    long t = noadl::clamp_cast<long>(ret, 0, (long) sizeof(strbuf)) - 1;
+    long t = clamp_cast<long>(ret, 0, (long) sizeof(strbuf)) - 1;
     while((t >= 0) && (strbuf[t] == '\n'))
       strbuf[--t] = 0;
 

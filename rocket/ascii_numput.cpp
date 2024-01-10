@@ -1144,7 +1144,7 @@ do_frexp10_8(float value)
     ::memcpy(&abs_value, &xbits, sizeof(xbits));
 
     uint32_t bpos = 1;
-    uint32_t epos = (uint32_t) noadl::size(s_decimal_multipliers);
+    uint32_t epos = (uint32_t) size(s_decimal_multipliers);
 
     while(bpos != epos) {
       // book moves...
@@ -1231,7 +1231,7 @@ do_frexp10_17(double value)
     ::memcpy(&abs_value, &bits, sizeof(bits));
 
     uint32_t bpos = 1;
-    uint32_t epos = (uint32_t) noadl::size(s_decimal_multipliers);
+    uint32_t epos = (uint32_t) size(s_decimal_multipliers);
 
     while(bpos != epos) {
       // book moves...
@@ -1440,7 +1440,7 @@ void
 ascii_numput::
 put_DU(uint64_t value, uint32_t precision) noexcept
   {
-    if((precision == 1) && (value < noadl::size(s_small_decimals))) {
+    if((precision == 1) && (value < ::std::size(s_small_decimals))) {
       // Get the static string.
       do_get_small_decimal(this->m_data, this->m_size, (uint32_t) value);
       return;
@@ -1500,7 +1500,7 @@ put_DI(int64_t value, uint32_t precision) noexcept
     if(value >= 0)
       return this->put_DU((uint64_t) value, precision);
 
-    if((precision == 1) && (-(uint64_t) value < noadl::size(s_small_decimals))) {
+    if((precision == 1) && (-(uint64_t) value < ::std::size(s_small_decimals))) {
       // Get the static string.
       do_get_small_decimal(this->m_data, this->m_size, -(uint32_t) value);
       this->m_data -= 1;

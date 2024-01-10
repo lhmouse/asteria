@@ -1564,7 +1564,7 @@ cast_F(float& value, float min, float max) noexcept
             ::memcpy(&value, ss_zero + this->m_sign, sizeof(float));
             break;
           }
-          else if(exp >= s_decimal_exp_min + (int) noadl::size(s_decimal_multipliers)) {
+          else if(exp >= s_decimal_exp_min + (int) size(s_decimal_multipliers)) {
             this->m_ovfl = true;
             ::memcpy(&value, ss_inf + this->m_sign, sizeof(float));
             break;
@@ -1744,7 +1744,7 @@ cast_D(double& value, double min, double max) noexcept
             ::memcpy(&value, sd_zero + this->m_sign, sizeof(double));
             break;
           }
-          else if(exp >= s_decimal_exp_min + (int) noadl::size(s_decimal_multipliers)) {
+          else if(exp >= s_decimal_exp_min + (int) size(s_decimal_multipliers)) {
             this->m_ovfl = true;
             ::memcpy(&value, sd_inf + this->m_sign, sizeof(double));
             break;

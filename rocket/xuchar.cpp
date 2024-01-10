@@ -20,7 +20,7 @@ void
 do_throw_if_error(::FILE* fp)
   {
     if(::ferror(fp))
-      noadl::sprintf_and_throw<runtime_error>(
+      sprintf_and_throw<runtime_error>(
           "uchar_io: I/O error (fileno `%d`, errno `%d`)",
           ::fileno(fp), errno);
   }
@@ -173,7 +173,7 @@ xfgetn(::FILE* fp, ::mbstate_t& mbst, char16_t* s, size_t n)
     size_t r = do_xfgetn_common(fp, ::mbrtoc16, mbst, s, n);
     return r;
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-16 functions not available");
 #endif
   }
@@ -185,7 +185,7 @@ xfgetn(::FILE* fp, ::mbstate_t& mbst, char32_t* s, size_t n)
     size_t r = do_xfgetn_common(fp, ::mbrtoc32, mbst, s, n);
     return r;
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-32 functions not available");
 #endif
   }
@@ -217,7 +217,7 @@ xfgetc(::FILE* fp, ::mbstate_t& mbst, char16_t& c)
     size_t r = do_xfgetn_common(fp, ::mbrtoc16, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-16 functions not available");
 #endif
   }
@@ -229,7 +229,7 @@ xfgetc(::FILE* fp, ::mbstate_t& mbst, char32_t& c)
     size_t r = do_xfgetn_common(fp, ::mbrtoc32, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-32 functions not available");
 #endif
   }
@@ -260,7 +260,7 @@ xfputn(::FILE* fp, ::mbstate_t& mbst, const char16_t* s, size_t n)
     size_t r = do_xfputn_common(fp, ::c16rtomb, mbst, s, n);
     return r;
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-16 functions not available");
 #endif
   }
@@ -272,7 +272,7 @@ xfputn(::FILE* fp, ::mbstate_t& mbst, const char32_t* s, size_t n)
     size_t r = do_xfputn_common(fp, ::c32rtomb, mbst, s, n);
     return r;
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-32 functions not available");
 #endif
   }
@@ -303,7 +303,7 @@ xfputc(::FILE* fp, ::mbstate_t& mbst, char16_t c)
     size_t r = do_xfputn_common(fp, ::c16rtomb, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-16 functions not available");
 #endif
   }
@@ -315,7 +315,7 @@ xfputc(::FILE* fp, ::mbstate_t& mbst, char32_t c)
     size_t r = do_xfputn_common(fp, ::c32rtomb, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
-    noadl::sprintf_and_throw<domain_error>(
+    sprintf_and_throw<domain_error>(
         "uchar_io: UTF-32 functions not available");
 #endif
   }
