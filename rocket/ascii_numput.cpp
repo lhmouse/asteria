@@ -1140,7 +1140,7 @@ do_frexp10_8(float value)
 
     // Get the multiplier for this value, using binary search. This
     // will not become a subnormal double; no need to check that.
-    uint64_t xbits = (uint64_t)(uint32_t) (frx.exp + 896) << 52 | frx.mant << 29;
+    uint64_t xbits = (uint64_t) ((uint32_t) frx.exp + 896) << 52 | frx.mant << 29;
     uint32_t bnds[2] = { 1, ::std::size(s_decimal_multipliers) };
 
     while(bnds[0] != bnds[1]) {
