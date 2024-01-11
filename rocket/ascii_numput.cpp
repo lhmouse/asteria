@@ -1141,17 +1141,20 @@ do_frexp10_8(float value)
     // Get the multiplier for this value, using binary search. This
     // will not become a subnormal double; no need to check that.
     uint64_t xbits = (uint64_t) ((uint32_t) frx.exp + 896) << 52 | frx.mant << 29;
-    uint32_t bnds[2] = { 1, ::std::size(s_decimal_multipliers) };
+    uint32_t mlo = 1;
+    uint32_t mhi = ::std::size(s_decimal_multipliers);
 
-    while(bnds[0] != bnds[1]) {
+    while(mlo != mhi) {
       // book moves...
-      uint32_t mpos = (bnds[0] + bnds[1]) / 2;
-      uint32_t lt = (uint32_t) ((xbits - s_decimal_multipliers[mpos].bound) >> 63);
-      bnds[lt] = mpos + 1 - lt;
+      uint32_t mid = (mlo + mhi) / 2;
+      if(xbits < s_decimal_multipliers[mid].bound)
+        mhi = mid;
+      else
+        mlo = mid + 1;
     }
 
-    bnds[0] --;
-    const auto& mult = s_decimal_multipliers[bnds[0]];
+    mlo --;
+    const auto& mult = s_decimal_multipliers[mlo];
 
     // Raise the value to (0,0x1p24) and convert it to an integer. This
     // produces 9 significant digits.
@@ -1181,13 +1184,13 @@ do_frexp10_8(float value)
     if(bits >= 1000000000U) {
       // Rounding has effected a carry, so revert it.
       bits /= 10U;
-      bnds[0] ++;
+      mlo ++;
     }
 
     // Convert the exponent and mantissa back. The number will be
     // interpreted as `sign mant E exp` in scientific floating-point
     // notation.
-    frx.exp = (int) bnds[0] - s_decimal_exp_min - 8;
+    frx.exp = (int) mlo - s_decimal_exp_min - 8;
     frx.mant = bits;
     return frx;
   }
@@ -1222,17 +1225,20 @@ do_frexp10_17(double value)
 
     // Get the multiplier for this value, using binary search.
     bits &= 0x7FFFFFFFFFFFFFFFULL;
-    uint32_t bnds[2] = { 1, ::std::size(s_decimal_multipliers) };
+    uint32_t mlo = 1;
+    uint32_t mhi = ::std::size(s_decimal_multipliers);
 
-    while(bnds[0] != bnds[1]) {
+    while(mlo != mhi) {
       // book moves...
-      uint32_t mpos = (bnds[0] + bnds[1]) / 2;
-      uint32_t lt = (uint32_t) ((bits - s_decimal_multipliers[mpos].bound) >> 63);
-      bnds[lt] = mpos + 1 - lt;
+      uint32_t mid = (mlo + mhi) / 2;
+      if(bits < s_decimal_multipliers[mid].bound)
+        mhi = mid;
+      else
+        mlo = mid + 1;
     }
 
-    bnds[0] --;
-    const auto& mult = s_decimal_multipliers[bnds[0]];
+    mlo --;
+    const auto& mult = s_decimal_multipliers[mlo];
 
     // Raise the value to (0,0x1p53) and convert it to an integer. This
     // produces 18 significant digits.
@@ -1261,13 +1267,13 @@ do_frexp10_17(double value)
     if(bits >= 1000000000000000000ULL) {
       // Rounding has effected a carry, so revert it.
       bits /= 10U;
-      bnds[0] ++;
+      mlo ++;
     }
 
     // Convert the exponent and mantissa back. The number will be
     // interpreted as `sign mant E exp` in scientific floating-point
     // notation.
-    frx.exp = (int) bnds[0] - s_decimal_exp_min - 17;
+    frx.exp = (int) mlo - s_decimal_exp_min - 17;
     frx.mant = bits;
     return frx;
   }
