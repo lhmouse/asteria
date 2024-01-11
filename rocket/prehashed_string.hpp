@@ -314,67 +314,62 @@ struct basic_prehashed_string<stringT, hashT, eqT>::hash
 template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.equals(rhs)))
-  {
-    return lhs.equals(rhs);
-  }
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
+           const basic_prehashed_string<stringT, hashT, eqT>& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs) noexcept(noexcept(lhs.equals(rhs)))
-  {
-    return lhs.equals(rhs);
-  }
+operator==(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(rhs.equals(lhs)))
-  {
-    return rhs.equals(lhs);
-  }
+operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
+  noexcept(noexcept(rhs.equals(lhs)))
+  { return rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
 constexpr
 bool
-operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.equals(rhs)))
-  {
-    return not lhs.equals(rhs);
-  }
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs,
+           const basic_prehashed_string<stringT, hashT, eqT>& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return not lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs) noexcept(noexcept(lhs.equals(rhs)))
-  {
-    return not lhs.equals(rhs);
-  }
+operator!=(const basic_prehashed_string<stringT, hashT, eqT>& lhs, const otherT& rhs)
+  noexcept(noexcept(lhs.equals(rhs)))
+  { return not lhs.equals(rhs);  }
 
 template<typename stringT, typename hashT, typename eqT, typename otherT>
 constexpr
 bool
-operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(rhs.equals(lhs)))
-  {
-    return not rhs.equals(lhs);
-  }
+operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>& rhs)
+  noexcept(noexcept(rhs.equals(lhs)))
+  { return not rhs.equals(lhs);  }
 
 template<typename stringT, typename hashT, typename eqT>
 inline
 void
-swap(basic_prehashed_string<stringT, hashT, eqT>& lhs, basic_prehashed_string<stringT, hashT, eqT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+swap(basic_prehashed_string<stringT, hashT, eqT>& lhs,
+     basic_prehashed_string<stringT, hashT, eqT>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
+  { lhs.swap(rhs);  }
 
 template<typename charT, typename stringT, typename hashT, typename eqT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const basic_prehashed_string<stringT, hashT, eqT>& str)
-  {
-    return fmt << str.rdstr();
-  }
+  { return fmt << str.rdstr();  }
 
+// aliases
 using prehashed_string     = basic_prehashed_string<cow_string,    cow_string::hash>;
 using prehashed_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::hash>;
 using prehashed_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hash>;

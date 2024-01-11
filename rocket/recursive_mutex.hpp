@@ -103,9 +103,7 @@ class recursive_mutex
 inline
 void
 swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 #endif

@@ -255,105 +255,79 @@ template<typename xelementT, typename yelementT>
 constexpr
 bool
 operator==(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs) noexcept
-  {
-    return lhs.get() == rhs.get();
-  }
+  { return lhs.get() == rhs.get();  }
 
 template<typename xelementT, typename yelementT>
 constexpr
 bool
 operator!=(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs) noexcept
-  {
-    return lhs.get() != rhs.get();
-  }
+  { return lhs.get() != rhs.get();  }
 
 template<typename xelementT, typename yelementT>
 constexpr
 bool
 operator<(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
-  {
-    return lhs.get() < rhs.get();
-  }
+  { return lhs.get() < rhs.get();  }
 
 template<typename xelementT, typename yelementT>
 constexpr
 bool
 operator>(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
-  {
-    return lhs.get() > rhs.get();
-  }
+  { return lhs.get() > rhs.get();  }
 
 template<typename xelementT, typename yelementT>
 constexpr
 bool
 operator<=(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
-  {
-    return lhs.get() <= rhs.get();
-  }
+  { return lhs.get() <= rhs.get();  }
 
 template<typename xelementT, typename yelementT>
 constexpr
 bool
 operator>=(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
-  {
-    return lhs.get() >= rhs.get();
-  }
+  { return lhs.get() >= rhs.get();  }
 
 template<typename elementT>
 constexpr
 bool
 operator==(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
-  {
-    return !lhs;
-  }
+  { return !lhs;  }
 
 template<typename elementT>
 constexpr
 bool
 operator!=(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
-  {
-    return !!lhs;
-  }
+  { return !!lhs;  }
 
 template<typename elementT>
 constexpr
 bool
 operator==(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
-  {
-    return !rhs;
-  }
+  { return !rhs;  }
 
 template<typename elementT>
 constexpr
 bool
 operator!=(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
-  {
-    return !!rhs;
-  }
+  { return !!rhs;  }
 
 template<typename elementT>
 inline
 void
 swap(refcnt_ptr<elementT>& lhs, refcnt_ptr<elementT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 template<typename charT, typename elementT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const refcnt_ptr<elementT>& rhs)
-  {
-    return fmt << rhs.get();
-  }
+  { return fmt << rhs.get();  }
 
 template<typename elementT, typename... paramsT>
 inline
 refcnt_ptr<elementT>
 make_refcnt(paramsT&&... params)
-  {
-    return refcnt_ptr<elementT>(new elementT(forward<paramsT>(params)...));
-  }
+  { return refcnt_ptr<elementT>(new elementT(forward<paramsT>(params)...));  }
 
 template<typename targetT, typename sourceT>
 ROCKET_ALWAYS_INLINE

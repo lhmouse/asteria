@@ -782,9 +782,7 @@ inline
 void
 swap(cow_hashmap<K, V, H, E, allocT>& lhs, cow_hashmap<K, V, H, E, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 #endif

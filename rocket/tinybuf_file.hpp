@@ -338,9 +338,7 @@ inline
 void
 swap(basic_tinybuf_file<charT>& lhs, basic_tinybuf_file<charT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 using tinybuf_file     = basic_tinybuf_file<char>;
 using wtinybuf_file    = basic_tinybuf_file<wchar_t>;

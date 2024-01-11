@@ -272,33 +272,25 @@ template<typename TargetT, typename RealT>
 constexpr
 TargetT
 unerase_cast(const rcfwd<RealT>* ptr) noexcept  // like `static_cast`
-  {
-    return static_cast<TargetT>(ptr);
-  }
+  { return static_cast<TargetT>(ptr);  }
 
 template<typename TargetT, typename RealT>
 constexpr
 TargetT
 unerase_cast(rcfwd<RealT>* ptr) noexcept  // like `static_cast`
-  {
-    return static_cast<TargetT>(ptr);
-  }
+  { return static_cast<TargetT>(ptr);  }
 
 template<typename TargetT, typename RealT>
 ROCKET_ALWAYS_INLINE
 refcnt_ptr<TargetT>
 unerase_pointer_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
-  {
-    return static_pointer_cast<TargetT>(ptr);
-  }
+  { return static_pointer_cast<TargetT>(ptr);  }
 
 template<typename TargetT, typename RealT>
 ROCKET_ALWAYS_INLINE
 refcnt_ptr<TargetT>
 unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
-  {
-    return static_pointer_cast<TargetT>(ptr);
-  }
+  { return static_pointer_cast<TargetT>(ptr);  }
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque : rcfwd<Abstract_Opaque>
@@ -329,9 +321,7 @@ struct Abstract_Opaque : rcfwd<Abstract_Opaque>
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
-  {
-    return opaq.describe(fmt);
-  }
+  { return opaq.describe(fmt);  }
 
 struct Abstract_Function : rcfwd<Abstract_Function>
   {
@@ -357,9 +347,7 @@ struct Abstract_Function : rcfwd<Abstract_Function>
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Function& func)
-  {
-    return func.describe(fmt);
-  }
+  { return func.describe(fmt);  }
 
 class cow_opaque
   {
@@ -515,16 +503,12 @@ open()
 inline
 void
 swap(cow_opaque& lhs, cow_opaque& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const cow_opaque& opaq)
-  {
-    return opaq.describe(fmt);
-  }
+  { return opaq.describe(fmt);  }
 
 // Function type support
 class cow_function
@@ -649,16 +633,12 @@ class cow_function
 inline
 void
 swap(cow_function& lhs, cow_function& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const cow_function& func)
-  {
-    return func.describe(fmt);
-  }
+  { return func.describe(fmt);  }
 
 // Value types
 using V_null      = nullopt_t;

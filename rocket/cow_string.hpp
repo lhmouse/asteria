@@ -96,17 +96,13 @@ template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const basic_shallow_string<charT>& sh)
-  {
-    return fmt.putn(sh.data(), sh.size());
-  }
+  { return fmt.putn(sh.data(), sh.size());  }
 
 template<typename charT>
 constexpr
 basic_shallow_string<charT>
 sref(const charT* ptr) noexcept
-  {
-    return basic_shallow_string<charT>(ptr);
-  }
+  { return basic_shallow_string<charT>(ptr);  }
 
 template<typename charT, typename allocT>
 class basic_cow_string
@@ -2354,9 +2350,7 @@ inline
 void
 swap(basic_cow_string<charT, allocT>& lhs, basic_cow_string<charT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 template<typename charT, typename allocT>
 inline
@@ -2551,353 +2545,267 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator==(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return lhs.equals(rhs);
-  }
+  { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator==(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
-  {
-    return lhs.equals(rhs);
-  }
+  { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator==(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  {
-    return lhs.equals(rhs);
-  }
+  { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator==(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
-  {
-    return lhs.equals(rhs);
-  }
+  { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator==(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.equals(lhs);
-  }
+  { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator==(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.equals(lhs);
-  }
+  { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator==(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.equals(lhs);
-  }
+  { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return not lhs.equals(rhs);
-  }
+  { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
-  {
-    return not lhs.equals(rhs);
-  }
+  { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  {
-    return not lhs.equals(rhs);
-  }
+  { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
-  {
-    return not lhs.equals(rhs);
-  }
+  { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return not rhs.equals(lhs);
-  }
+  { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return not rhs.equals(lhs);
-  }
+  { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return not rhs.equals(lhs);
-  }
+  { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return lhs.compare(rhs) < 0;
-  }
+  { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) < 0;
-  }
+  { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) < 0;
-  }
+  { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
-  {
-    return lhs.compare(rhs) < 0;
-  }
+  { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) > 0;
-  }
+  { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) > 0;
-  }
+  { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) > 0;
-  }
+  { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return lhs.compare(rhs) <= 0;
-  }
+  { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) <= 0;
-  }
+  { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) <= 0;
-  }
+  { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
-  {
-    return lhs.compare(rhs) <= 0;
-  }
+  { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) >= 0;
-  }
+  { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) >= 0;
-  }
+  { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) >= 0;
-  }
+  { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return lhs.compare(rhs) > 0;
-  }
+  { return lhs.compare(rhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) > 0;
-  }
+  { return lhs.compare(rhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) > 0;
-  }
+  { return lhs.compare(rhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
-  {
-    return lhs.compare(rhs) > 0;
-  }
+  { return lhs.compare(rhs) > 0; }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) < 0;
-  }
+  { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) < 0;
-  }
+  { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) < 0;
-  }
+  { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return lhs.compare(rhs) >= 0;
-  }
+  { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) >= 0;
-  }
+  { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  {
-    return lhs.compare(rhs) >= 0;
-  }
+  { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
-  {
-    return lhs.compare(rhs) >= 0;
-  }
+  { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) <= 0;
-  }
+  { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) <= 0;
-  }
+  { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  {
-    return rhs.compare(lhs) <= 0;
-  }
+  { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const basic_cow_string<charT, allocT>& str)
-  {
-    return fmt.putn(str.data(), str.size());
-  }
+  { return fmt.putn(str.data(), str.size());  }
 
 template<typename charT, typename allocT>
 inline
 bool
 getline(basic_cow_string<charT, allocT>& str, basic_tinybuf<charT>& buf)
   {
-    int ch;
     str.clear();
+    int ch;
     for(;;)
       if((ch = buf.getc()) < 0)
         return not str.empty();  // end of stream
@@ -2907,6 +2815,7 @@ getline(basic_cow_string<charT, allocT>& str, basic_tinybuf<charT>& buf)
         str.push_back(static_cast<charT>(ch));
   }
 
+// aliases
 using shallow_string     = basic_shallow_string<char>;
 using shallow_wstring    = basic_shallow_string<wchar_t>;
 using shallow_u16string  = basic_shallow_string<char16_t>;

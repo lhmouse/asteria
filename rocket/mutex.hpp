@@ -103,9 +103,7 @@ class mutex
 inline
 void
 swap(mutex::unique_lock& lhs, mutex::unique_lock& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 #endif

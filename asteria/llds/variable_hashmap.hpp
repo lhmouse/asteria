@@ -90,9 +90,7 @@ class Variable_HashMap
 inline
 void
 swap(Variable_HashMap& lhs, Variable_HashMap& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace asteria
 #endif

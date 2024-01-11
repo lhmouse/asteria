@@ -121,9 +121,7 @@ inline
 void
 swap(basic_tinyfmt_file<charT>& lhs, basic_tinyfmt_file<charT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 using tinyfmt_file     = basic_tinyfmt_file<char>;
 using wtinyfmt_file    = basic_tinyfmt_file<wchar_t>;

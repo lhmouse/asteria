@@ -159,16 +159,12 @@ class Token
 inline
 void
 swap(Token& lhs, Token& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Token& token)
-  {
-    return token.print(fmt);
-  }
+  { return token.print(fmt);  }
 
 }  // namespace asteria
 #endif

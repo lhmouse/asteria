@@ -498,9 +498,7 @@ template<typename... altsT>
 inline
 void
 swap(variant<altsT...>& lhs, variant<altsT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 #endif

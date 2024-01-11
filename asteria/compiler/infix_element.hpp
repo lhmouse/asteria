@@ -119,9 +119,7 @@ class Infix_Element
 inline
 void
 swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace asteria
 #endif

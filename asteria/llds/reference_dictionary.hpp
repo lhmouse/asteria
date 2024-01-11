@@ -112,9 +112,7 @@ class Reference_Dictionary
 inline
 void
 swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace asteria
 #endif

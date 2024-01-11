@@ -165,106 +165,80 @@ template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
 operator==(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs) noexcept
-  {
-    return lhs.get() == rhs.get();
-  }
+  { return lhs.get() == rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
 operator!=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs) noexcept
-  {
-    return lhs.get() != rhs.get();
-  }
+  { return lhs.get() != rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
 operator<(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
-  {
-    return lhs.get() < rhs.get();
-  }
+  { return lhs.get() < rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
 operator>(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
-  {
-    return lhs.get() > rhs.get();
-  }
+  { return lhs.get() > rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
 operator<=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
-  {
-    return lhs.get() <= rhs.get();
-  }
+  { return lhs.get() <= rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
 operator>=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
-  {
-    return lhs.get() >= rhs.get();
-  }
+  { return lhs.get() >= rhs.get();  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
 operator==(const unique_ptr<elemT, delT>& lhs, nullptr_t) noexcept
-  {
-    return !lhs;
-  }
+  { return !lhs;  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
 operator!=(const unique_ptr<elemT, delT>& lhs, nullptr_t) noexcept
-  {
-    return !!lhs;
-  }
+  { return !!lhs;  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
 operator==(nullptr_t, const unique_ptr<elemT, delT>& rhs) noexcept
-  {
-    return !rhs;
-  }
+  { return !rhs;  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
 operator!=(nullptr_t, const unique_ptr<elemT, delT>& rhs) noexcept
-  {
-    return !!rhs;
-  }
+  { return !!rhs;  }
 
 template<typename elemT, typename delT>
 inline
 void
 swap(unique_ptr<elemT, delT>& lhs, unique_ptr<elemT, delT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 template<typename charT, typename elementT, typename deleterT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const unique_ptr<elementT, deleterT>& rhs)
-  {
-    return fmt << rhs.get();
-  }
+  { return fmt << rhs.get();  }
 
 template<typename elementT, typename... paramsT>
 inline
 unique_ptr<elementT>
 make_unique(paramsT&&... params)
-  {
-    return unique_ptr<elementT>(new elementT(forward<paramsT>(params)...));
-  }
+  { return unique_ptr<elementT>(new elementT(forward<paramsT>(params)...));  }
 
 template<typename targetT, typename sourceT>
 ROCKET_ALWAYS_INLINE

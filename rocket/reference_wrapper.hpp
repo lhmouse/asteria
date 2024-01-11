@@ -62,17 +62,13 @@ template<typename valueT>
 constexpr
 reference_wrapper<const valueT>
 cref(valueT& value) noexcept
-  {
-    return reference_wrapper<const valueT>(value);
-  }
+  { return reference_wrapper<const valueT>(value);  }
 
 template<typename valueT>
 constexpr
 reference_wrapper<const valueT>
 cref(reference_wrapper<valueT> value) noexcept
-  {
-    return reference_wrapper<const valueT>(value);
-  }
+  { return reference_wrapper<const valueT>(value);  }
 
 template<typename valueT>
 constexpr
@@ -83,17 +79,13 @@ template<typename valueT>
 constexpr
 reference_wrapper<valueT>
 ref(valueT& value) noexcept
-  {
-    return reference_wrapper<valueT>(value);
-  }
+  { return reference_wrapper<valueT>(value);  }
 
 template<typename valueT>
 constexpr
 reference_wrapper<valueT>
 ref(reference_wrapper<valueT> value) noexcept
-  {
-    return reference_wrapper<valueT>(value);
-  }
+  { return reference_wrapper<valueT>(value);  }
 
 template<typename valueT>
 constexpr

@@ -130,9 +130,7 @@ inline
 void
 swap(basic_tinyfmt_ln<charT, allocT>& lhs, basic_tinyfmt_ln<charT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 using tinyfmt_ln     = basic_tinyfmt_ln<char>;
 using wtinyfmt_ln    = basic_tinyfmt_ln<wchar_t>;

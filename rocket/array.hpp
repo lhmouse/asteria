@@ -26,7 +26,8 @@ class array
 
   public:
     // types
-    using value_type  = typename details_array::element_type_of<valueT, capacityT, nestedT...>::type;
+    using value_type  = typename details_array::element_type_of<
+                                   valueT, capacityT, nestedT...>::type;
 
     using size_type        = size_t;
     using difference_type  = ptrdiff_t;
@@ -254,13 +255,12 @@ class array
       { return this->m_stor;  }
   };
 
-template<typename valueT, size_t capacityT, size_t... nestedT>
+template<typename valueT, size_t N, size_t... St>
 inline
 void
-swap(array<valueT, capacityT, nestedT...>& lhs, array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+swap(array<valueT, N, St...>& lhs, array<valueT, N, St...>& rhs)
+  noexcept(noexcept(lhs.swap(rhs)))
+  { lhs.swap(rhs);  }
 
 }  // namespace rocket
 #endif

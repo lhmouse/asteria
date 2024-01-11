@@ -256,9 +256,7 @@ class Statement
 inline
 void
 swap(Statement& lhs, Statement& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace asteria
 #endif

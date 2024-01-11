@@ -97,9 +97,7 @@ class AVM_Rod
 inline
 void
 swap(AVM_Rod& lhs, AVM_Rod& rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 }  // namespace asteria
 #endif

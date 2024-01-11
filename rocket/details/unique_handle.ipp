@@ -85,18 +85,14 @@ class stored_handle
   };
 
 template<typename handleT, typename closerT>
-class default_closer_wrapper
+class closer_wrapper
   {
   private:
-    typename conditional<
-        is_function<typename remove_reference<closerT>::type>::value,
-        closerT&,                      // take functions by reference
-        typename decay<closerT>::type  // take non-functions by value
-      >::type m_cl;
+    typename decay<closerT>::type m_cl;
 
   public:
-    constexpr  // non-explicit
-    default_closer_wrapper(closerT&& xcl)
+    constexpr
+    closer_wrapper(closerT&& xcl)
       :
         m_cl(forward<closerT>(xcl))
       { }
@@ -105,7 +101,7 @@ class default_closer_wrapper
     constexpr
     handleT
     null() const noexcept
-      { return { };  }
+      { return handleT();  }
 
     constexpr
     bool
@@ -114,7 +110,7 @@ class default_closer_wrapper
 
     constexpr
     void
-    close(handleT hv)
+    close(handleT hv) noexcept
       { this->m_cl(hv);  }
   };
 

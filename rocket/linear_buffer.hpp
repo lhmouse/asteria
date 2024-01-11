@@ -365,18 +365,15 @@ inline
 void
 swap(basic_linear_buffer<charT, allocT>& lhs, basic_linear_buffer<charT, allocT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
-  {
-    lhs.swap(rhs);
-  }
+  { lhs.swap(rhs);  }
 
 template<typename charT, typename allocT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const basic_linear_buffer<charT, allocT>& buf)
-  {
-    return fmt.putn(buf.data(), buf.size());
-  }
+  { return fmt.putn(buf.data(), buf.size());  }
 
+// aliases
 using linear_buffer      = basic_linear_buffer<char>;
 using linear_wbuffer     = basic_linear_buffer<wchar_t>;
 using linear_u16buffer   = basic_linear_buffer<char16_t>;
