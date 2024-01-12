@@ -15,7 +15,7 @@
 
 // Ensure all requested macros are defined.
 #if !(1  \
-    && defined(ROCKET_ATTRIBUTE_PRINTF)  \
+    && defined(ROCKET_FORMAT_PRINTF)  \
     && defined(ROCKET_SELECTANY)  \
     && defined(ROCKET_SECTION)  \
     && defined(ROCKET_NEVER_INLINE)  \
