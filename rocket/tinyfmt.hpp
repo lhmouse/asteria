@@ -121,32 +121,46 @@ class basic_tinyfmt
       }
 
     basic_tinyfmt&
-    putn_latin1(const char* s, size_t n)
-      {
-        constexpr size_t M = 32;
-        char_type x[M];
-        size_t ns = 0, nx = 0;
-
-        while(ns != n) {
-          // Zero-extend one character to `char_type`.
-          ROCKET_ASSERT(nx != M);
-          x[nx++] = static_cast<char_type>(s[ns++] & 0xFF);
-
-          if(ROCKET_EXPECT(ns != n) && ROCKET_EXPECT(nx != M))
-            continue;
-
-          // Flush all pending characters.
-          this->mut_buf().putn(x, nx);
-          nx = 0;
-        }
-        return *this;
-      }
+    putn_latin1(const char* s, size_t n);
   };
 
 template<typename charT>
 basic_tinyfmt<charT>::
 ~basic_tinyfmt()
   {
+  }
+
+template<typename charT>
+basic_tinyfmt<charT>&
+basic_tinyfmt<charT>::
+putn_latin1(const char* s, size_t n)
+  {
+    constexpr size_t M = 32;
+    char_type x[M];
+    size_t ns = 0, nx = 0;
+
+    while(ns != n) {
+      // Zero-extend one character to `char_type`.
+      ROCKET_ASSERT(nx != M);
+      x[nx++] = static_cast<char_type>(s[ns++] & 0xFF);
+
+      if(ROCKET_EXPECT(ns != n) && ROCKET_EXPECT(nx != M))
+        continue;
+
+      // Flush all pending characters.
+      this->mut_buf().putn(x, nx);
+      nx = 0;
+    }
+    return *this;
+  }
+
+template<>
+inline
+basic_tinyfmt<char>&
+basic_tinyfmt<char>::
+putn_latin1(const char* s, size_t n)
+  {
+    return this->putn(s, n);
   }
 
 // Inserts a null-terminated multi-byte string. The string shall begin and
@@ -171,13 +185,7 @@ template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
-  {
-    if(s == nullptr) {
-      static constexpr charT nu11ptr[] = { '(','n','u','l','l','p','t','r',')' };
-      return fmt.putn(nu11ptr, noadl::size(nu11ptr));
-    }
-    return fmt.putn(s, noadl::xstrlen(s));
-  }
+  { return !s ? fmt.putn_latin1("(nullptr)", 9) : fmt.putn(s, noadl::xstrlen(s));  }
 
 template<typename charT, typename allocT>
 basic_tinyfmt<charT>&
@@ -239,12 +247,9 @@ template<typename charT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
   {
-    char* dname = ::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr);
-    if(dname == nullptr) {
-      static constexpr charT bad_type[] = { '(','b','a','d',' ','t','y','p','e',')' };
-      return fmt.putn(bad_type, noadl::size(bad_type));
-    }
-    ::std::unique_ptr<char, decltype(::free)&> dname_guard(dname, ::free);
+    using dname_uptr = ::std::unique_ptr<char, decltype(::free)&>;
+    dname_uptr uptr(::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr), ::free);
+    const char* dname = !uptr ? "(bad type)" : uptr.get();
     return fmt.putn_latin1(dname, ::strlen(dname));
   }
 
