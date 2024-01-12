@@ -28,7 +28,7 @@ jobs:
 
   msys2:
     name: MSYS2 native build (x86-64)
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     defaults:
       run:
