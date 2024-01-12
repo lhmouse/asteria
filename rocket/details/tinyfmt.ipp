@@ -19,13 +19,13 @@ template<typename charT>
 void
 do_format_strerror_errno(basic_tinyfmt<charT>& fmt)
   {
-    char storage[1024];
+    char str_stor[128];
     const char* str;
 #ifdef _GNU_SOURCE
-    str = ::strerror_r(errno, storage, sizeof(storage));
+    str = ::strerror_r(errno, str_stor, sizeof(str_stor));
 #else
-    ::strerror_r(errno, storage, sizeof(storage));
-    str = storage;
+    ::strerror_r(errno, str_stor, sizeof(str_stor));
+    str = str_stor;
 #endif
     fmt.putn_latin1(str, ::strlen(str));
   }

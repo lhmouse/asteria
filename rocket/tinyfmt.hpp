@@ -172,8 +172,11 @@ inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
   {
-    static constexpr charT nu11ptr[] = { '(','n','u','l','l','p','t','r',')' };
-    return s ? fmt.putn(s, noadl::xstrlen(s)) : fmt.putn(nu11ptr, 9);
+    if(s == nullptr) {
+      static constexpr charT nu11ptr[] = { '(','n','u','l','l','p','t','r',')' };
+      return fmt.putn(nu11ptr, noadl::size(nu11ptr));
+    }
+    return fmt.putn(s, noadl::xstrlen(s));
   }
 
 template<typename charT, typename allocT>
@@ -236,10 +239,13 @@ template<typename charT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
   {
-    static constexpr charT bad_type[] = { '(','b','a','d',' ','t','y','p','e',')' };
     char* dname = ::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr);
+    if(dname == nullptr) {
+      static constexpr charT bad_type[] = { '(','b','a','d',' ','t','y','p','e',')' };
+      return fmt.putn(bad_type, noadl::size(bad_type));
+    }
     ::std::unique_ptr<char, decltype(::free)&> dname_guard(dname, ::free);
-    return dname ? fmt.putn_latin1(dname, ::strlen(dname)) : fmt.putn(bad_type, 10);
+    return fmt.putn_latin1(dname, ::strlen(dname));
   }
 
 template<typename charT, typename elementT, typename deleteT>
@@ -589,7 +595,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
           }
           else {
             static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
-            fmt.putn(no_arg, 8);
+            fmt.putn(no_arg, noadl::size(no_arg));
           }
           break;
         }
@@ -686,7 +692,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
           }
           else {
             static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
-            fmt.putn(no_arg, 8);
+            fmt.putn(no_arg, noadl::size(no_arg));
           }
           break;
         }
