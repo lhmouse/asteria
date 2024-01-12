@@ -9,6 +9,7 @@
 #include "tinybuf.hpp"
 #include "ascii_numput.hpp"
 #include <chrono>
+#include <cxxabi.h>
 namespace rocket {
 
 // Differences from `std::basic_ostream`:
@@ -243,8 +244,13 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
 
 template<typename charT>
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const type_info& value)
-  { return fmt << value.name();  }
+operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
+  {
+    static constexpr charT bad_type[] = { '(','b','a','d',' ','t','y','p','e',')' };
+    char* dname = ::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr);
+    ::std::unique_ptr<char, decltype(::free)&> dname_guard(dname, ::free);
+    return dname ? fmt.putn_latin1(dname, ::strlen(dname)) : fmt.putn(bad_type, 10);
+  }
 
 template<typename charT, typename valueT,
 ROCKET_ENABLE_IF(is_base_of<exception, typename remove_reference<valueT>::type>::value)>
