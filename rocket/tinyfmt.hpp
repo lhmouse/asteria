@@ -232,16 +232,6 @@ operator<<(basic_tinyfmt<charT>& fmt, valueT* value)
     return fmt << nump;
   }
 
-template<typename charT, typename elementT, typename deleteT>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::unique_ptr<elementT, deleteT>& ptr)
-  { return fmt << ptr.get();  }
-
-template<typename charT, typename elementT>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
-  { return fmt << ptr.get();  }
-
 template<typename charT>
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
@@ -251,6 +241,16 @@ operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
     ::std::unique_ptr<char, decltype(::free)&> dname_guard(dname, ::free);
     return dname ? fmt.putn_latin1(dname, ::strlen(dname)) : fmt.putn(bad_type, 10);
   }
+
+template<typename charT, typename elementT, typename deleteT>
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::unique_ptr<elementT, deleteT>& ptr)
+  { return fmt << ptr.get();  }
+
+template<typename charT, typename elementT>
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
+  { return fmt << ptr.get();  }
 
 template<typename charT, typename valueT,
 ROCKET_ENABLE_IF(is_base_of<exception, typename remove_reference<valueT>::type>::value)>
