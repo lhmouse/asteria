@@ -13,7 +13,7 @@ on:
 jobs:
   ubuntu:
     name: Ubuntu native build (x86-64)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v3
@@ -21,14 +21,14 @@ jobs:
     - name: Install dependencies
       run: >-
            sudo apt-get install -y --no-install-recommends autoconf automake
-           libtool g++ gettext make libedit-dev libpcre2-dev libssl-dev zlib1g-dev
+           libtool g++-7 gettext make libedit-dev libpcre2-dev libssl-dev zlib1g-dev
 
     - name: Run tests
-      run: ./ci/build.sh
+      run: CXX='g++-7' ./ci/build.sh
 
   msys2:
     name: MSYS2 native build (x86-64)
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     defaults:
       run:
@@ -51,15 +51,15 @@ jobs:
 
   macos:
     name: macOS native build (x86-64)
-    runs-on: macos-latest
+    runs-on: macos-11
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Install dependencies
       run: >-
-           brew install autoconf automake libtool gcc@10 gettext make libedit
+           brew install autoconf automake libtool gcc@7 gettext make libedit
            pcre2 openssl@3 zlib
 
     - name: Run tests
-      run: CXX='g++-10 -I/usr/local/include -L/usr/local/lib' ./ci/build.sh
+      run: CXX='g++-7 -I/usr/local/include -L/usr/local/lib' ./ci/build.sh
