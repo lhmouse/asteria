@@ -12,7 +12,7 @@ namespace rocket {
 class once_flag
   {
   private:
-    ::__cxxabiv1::__guard m_guard[1] = { };
+    ::abi::__guard m_guard[1] = { };
 
   public:
     constexpr once_flag() noexcept = default;
@@ -34,15 +34,15 @@ class once_flag
         // Try acquiring the guard. If `__atomic_load_n()` returns zero, another
         // thread will have finished initialization.
         if(__atomic_load_n((const bool*) this->m_guard, __ATOMIC_ACQUIRE)
-            || (::__cxxabiv1::__cxa_guard_acquire(this->m_guard) == 0))
+            || (::abi::__cxa_guard_acquire(this->m_guard) == 0))
           return;
 
         try {
           forward<funcT>(func) (forward<paramsT>(params)...);
-          ::__cxxabiv1::__cxa_guard_release(this->m_guard);
+          ::abi::__cxa_guard_release(this->m_guard);
         }
         catch(...) {
-          ::__cxxabiv1::__cxa_guard_abort(this->m_guard);
+          ::abi::__cxa_guard_abort(this->m_guard);
           throw;
         }
       }
