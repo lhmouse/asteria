@@ -171,11 +171,8 @@ inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
   {
-    if(!s) {
-      static constexpr charT null[] = { '(','n','u','l','l',')' };
-      return fmt.putn(null, 6);
-    }
-    return fmt.putn(s, noadl::xstrlen(s));
+    static constexpr charT nu11ptr[] = { '(','n','u','l','l','p','t','r',')' };
+    return s ? fmt.putn(s, noadl::xstrlen(s)) : fmt.putn(nu11ptr, 9);
   }
 
 template<typename charT, typename allocT>
@@ -585,8 +582,8 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
             inst->ifunc(fmt, inst->param);
           }
           else {
-            static constexpr charT bad_index[] = { '(','b','a','d','-','i','n','d','e','x',')' };
-            fmt.putn(bad_index, 11);
+            static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
+            fmt.putn(no_arg, 8);
           }
           break;
         }
@@ -682,8 +679,8 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
             inst->ifunc(fmt, inst->param);
           }
           else {
-            static constexpr charT bad_index[] = { '(','b','a','d','-','i','n','d','e','x',')' };
-            fmt.putn(bad_index, 11);
+            static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
+            fmt.putn(no_arg, 8);
           }
           break;
         }
