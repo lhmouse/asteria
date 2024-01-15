@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 namespace asteria {
 
-// Operators
 enum Xop : uint8_t
   {
     xop_inc       =  0,  // ++
@@ -70,11 +69,6 @@ enum Xop : uint8_t
     xop_isvoid    = 57,  // __isvoid
   };
 
-ROCKET_CONST
-const char*
-describe_xop(Xop xop) noexcept;
-
-// IR status codes
 enum AIR_Status : uint8_t
   {
     air_status_next             = 0,
@@ -89,7 +83,6 @@ enum AIR_Status : uint8_t
     air_status_continue_for     = 9,
   };
 
-// Proper tail call (PTC) awareness
 enum PTC_Aware : uint8_t
   {
     ptc_aware_none    = 0,

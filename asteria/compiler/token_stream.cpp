@@ -642,7 +642,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
 
 struct Keyword_Element
   {
-    char str[10];
+    char str[15];
     Keyword kwrd;
   }
 constexpr s_keywords[] =
@@ -731,7 +731,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
         if(::memcmp(reader.data(), cur.str, tlen) != 0)
           continue;
 
-        Token::S_keyword xtoken = { cur.kwrd };
+        Token::S_keyword xtoken = { cur.kwrd, cur.str };
         return do_push_token(tokens, reader, tlen, move(xtoken));
       }
     }

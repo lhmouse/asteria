@@ -114,5 +114,10 @@ bool
 operator!=(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
   { return lhs != rhs.status();  }
 
+static_assert(::std::is_nothrow_copy_constructible<Compiler_Error>::value);
+static_assert(::std::is_nothrow_move_constructible<Compiler_Error>::value);
+static_assert(::std::is_nothrow_copy_assignable<Compiler_Error>::value);
+static_assert(::std::is_nothrow_move_assignable<Compiler_Error>::value);
+
 }  // namespace asteria
 #endif

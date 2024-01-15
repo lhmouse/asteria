@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 namespace asteria {
 
-// Punctuators
 enum Punctuator : uint8_t
   {
     punctuator_add         =  0,  // +
@@ -73,11 +72,6 @@ enum Punctuator : uint8_t
     punctuator_cmp_un      = 60,  // </>
   };
 
-ROCKET_CONST
-const char*
-stringify_punctuator(Punctuator punct) noexcept;
-
-// Keywords
 enum Keyword : uint8_t
   {
     keyword_var       =  0,
@@ -140,11 +134,6 @@ enum Keyword : uint8_t
     keyword_isvoid    = 57,  // __isvoid
   };
 
-ROCKET_CONST
-const char*
-stringify_keyword(Keyword kwrd) noexcept;
-
-// Target of jump statements
 enum Jump_Target : uint8_t
   {
     jump_target_unspec  = 0,
@@ -153,7 +142,6 @@ enum Jump_Target : uint8_t
     jump_target_for     = 3,
   };
 
-// Infix operator precedences
 enum Precedence : uint8_t
   {
     precedence_highest         =  0,

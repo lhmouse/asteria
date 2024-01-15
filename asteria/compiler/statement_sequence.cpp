@@ -121,12 +121,11 @@ do_accept_json5_key_opt(Token_Stream& tstrm)
     if(!qtok)
       return nullopt;
 
-    // See whether it is a keyword, identifier, or string literal.
     if(qtok->is_keyword()) {
       // Treat the keyword as a plain identifier and discard this token.
-      auto kwrd = qtok->as_keyword();
+      const char* kwstr = qtok->as_keyword_c_str();
       tstrm.shift();
-      return sref(stringify_keyword(kwrd));
+      return sref(kwstr);
     }
 
     if(qtok->is_identifier()) {
@@ -2378,7 +2377,7 @@ do_accept_infix_ternary_opt(Token_Stream& tstrm)
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
                 compiler_status_colon_expected, tstrm.next_sloc(),
-                "[unmatched `$1` at '$2']", stringify_punctuator(*kpunct), sloc);
+                "[unmatched `$1` at '$2']", !assign ? "?" : "?=", sloc);
 
     Infix_Element::S_ternary xelem = { move(sloc), assign, move(btrue), { } };
     return move(xelem);

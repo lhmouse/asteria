@@ -78,7 +78,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/llds/reference_dictionary.cpp  \
   %reldir%/llds/reference_stack.cpp  \
   %reldir%/llds/avm_rod.cpp  \
-  %reldir%/runtime/enums.cpp  \
   %reldir%/runtime/abstract_hooks.cpp  \
   %reldir%/runtime/reference.cpp  \
   %reldir%/runtime/reference_modifier.cpp  \
@@ -98,7 +97,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/runtime/air_optimizer.cpp  \
   %reldir%/runtime/argument_reader.cpp  \
   %reldir%/runtime/binding_generator.cpp  \
-  %reldir%/compiler/enums.cpp  \
   %reldir%/compiler/compiler_error.cpp  \
   %reldir%/compiler/token.cpp  \
   %reldir%/compiler/token_stream.cpp  \

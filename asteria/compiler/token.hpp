@@ -14,6 +14,7 @@ class Token
     struct S_keyword
       {
         Keyword kwrd;
+        const char* str;
       };
 
     struct S_punctuator
@@ -84,6 +85,8 @@ class Token
       }
 
   public:
+    ASTERIA_COPYABLE_DESTRUCTOR(Token);
+
     const Source_Location&
     sloc() const noexcept
       { return this->m_sloc;  }
@@ -111,6 +114,10 @@ class Token
     Keyword
     as_keyword() const
       { return this->m_stor.as<S_keyword>().kwrd;  }
+
+    const char*
+    as_keyword_c_str() const
+      { return this->m_stor.as<S_keyword>().str;  }
 
     bool
     is_punctuator() const noexcept
@@ -151,20 +158,12 @@ class Token
     const cow_string&
     as_string_literal() const
       { return this->m_stor.as<S_string_literal>().val;  }
-
-    tinyfmt&
-    print(tinyfmt& fmt) const;
   };
 
 inline
 void
 swap(Token& lhs, Token& rhs) noexcept
   { lhs.swap(rhs);  }
-
-inline
-tinyfmt&
-operator<<(tinyfmt& fmt, const Token& token)
-  { return token.print(fmt);  }
 
 }  // namespace asteria
 #endif
