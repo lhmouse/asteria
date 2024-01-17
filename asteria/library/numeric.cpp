@@ -436,6 +436,7 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
           text.append(nump.begin(), nump.end());
           break;
         }
+
         ASTERIA_THROW((
             "Invalid exponent base for binary notation (`$1` is not 2)"),
             *ebase);
