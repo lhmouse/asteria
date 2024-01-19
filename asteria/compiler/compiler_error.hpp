@@ -15,7 +15,7 @@ class Compiler_Error
     public virtual exception
   {
   private:
-    Compiler_Status m_stat;
+    Compiler_Status m_status;
     Source_Location m_sloc;
     cow_string m_desc;
 
@@ -25,7 +25,7 @@ class Compiler_Error
     explicit
     Compiler_Error(Uxtc_status, Compiler_Status xstat, const Source_Location& xsloc)
       :
-        m_stat(xstat), m_sloc(xsloc),
+        m_status(xstat), m_sloc(xsloc),
         m_desc(sref(describe_compiler_status(xstat)))
       {
         this->do_compose_message();
@@ -36,7 +36,7 @@ class Compiler_Error
     Compiler_Error(Uxtc_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :
-        m_stat(xstat), m_sloc(xsloc)
+        m_status(xstat), m_sloc(xsloc)
       {
         format(this->m_fmt, templ, params...);
         this->m_desc = this->m_fmt.extract_string();
@@ -49,7 +49,7 @@ class Compiler_Error
     Compiler_Error(Uxtc_status_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :
-        m_stat(xstat), m_sloc(xsloc)
+        m_status(xstat), m_sloc(xsloc)
       {
         format(this->m_fmt, templ, params...);
         this->m_desc = this->m_fmt.extract_string();
@@ -75,7 +75,7 @@ class Compiler_Error
 
     Compiler_Status
     status() const noexcept
-      { return this->m_stat;  }
+      { return this->m_status;  }
 
     const Source_Location&
     sloc() const noexcept

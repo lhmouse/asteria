@@ -60,22 +60,20 @@ do_insert_frame(Frame_Type type, const Source_Location* sloc_opt, const Value& v
       // Write frame information.
       nump.put_DU(k + 1);
       ::std::copy_backward(nump.begin(), nump.end(), sbuf.mut_end() - 1);
-      this->m_fmt << "\n  " << sbuf.data() << ") " << describe_frame_type(r.type)
-                  << " at '" << r.sloc << "': ";
+      const char* ftype = describe_frame_type(r.type);
+      format(this->m_fmt, "\n  $1) $2 at '$3': ", sbuf.data(), ftype, r.sloc);
 
       // Write the value in this frame.
       this->m_tempf.clear_string();
-      r.value.print(this->m_tempf);
-      const auto& vstr = this->m_tempf.get_string();
+      this->m_tempf << r.value;
 
-      if(vstr.size() > 100) {
-        // Trim the message.
-        constexpr size_t trunc_to = 80;
-        this->m_fmt.putn(vstr.data(), trunc_to);
-        this->m_fmt << " ... (" << (vstr.size() - trunc_to) << " characters omitted)";
+      if(this->m_tempf.size() > 80) {
+        // Truncate the message.
+        this->m_fmt.putn(this->m_tempf.data(), 60);
+        format(this->m_fmt, " ... ($1 characters omitted)", this->m_tempf.size() - 60);
       }
       else
-        this->m_fmt.putn(vstr.data(), vstr.size());
+        this->m_fmt.putn(this->m_tempf.data(), this->m_tempf.size());
     }
     this->m_fmt << "\n  -- end of backtrace frames]";
   }
