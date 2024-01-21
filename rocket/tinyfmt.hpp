@@ -95,7 +95,9 @@ class basic_tinyfmt
     size_t
     getn(char_type* s, size_t n)
       {
-        size_t ngot = this->mut_buf().getn(s, n);
+        size_t ngot = 0;
+        if(n != 0)
+          ngot = this->mut_buf().getn(s, n);
         return ngot;
       }
 
@@ -109,7 +111,8 @@ class basic_tinyfmt
     basic_tinyfmt&
     putn(const char_type* s, size_t n)
       {
-        this->mut_buf().putn(s, n);
+        if(n != 0)
+          this->mut_buf().putn(s, n);
         return *this;
       }
 
