@@ -70,7 +70,7 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
 cow_function
 AIR_Optimizer::
-create_function(const Source_Location& sloc, stringR name)
+create_function(const Source_Location& sloc, cow_stringR name)
   {
     cow_string func = name;
     if(is_cmask(func.front(), cmask_namei) && is_cmask(func.back(), cmask_namei | cmask_digit)) {

@@ -49,7 +49,7 @@ erase_global_variable(phsh_stringR name) noexcept
 
 void
 Simple_Script::
-reload(stringR name, Statement_Sequence&& stmtq)
+reload(cow_stringR name, Statement_Sequence&& stmtq)
   {
     // Instantiate the function.
     cow_vector<phsh_string> script_params;
@@ -64,7 +64,7 @@ reload(stringR name, Statement_Sequence&& stmtq)
 
 void
 Simple_Script::
-reload(stringR name, Token_Stream&& tstrm)
+reload(cow_stringR name, Token_Stream&& tstrm)
   {
     Statement_Sequence stmtq(this->m_opts);
     stmtq.reload(move(tstrm));
@@ -73,7 +73,7 @@ reload(stringR name, Token_Stream&& tstrm)
 
 void
 Simple_Script::
-reload(stringR name, int line, tinybuf&& cbuf)
+reload(cow_stringR name, int line, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, line, move(cbuf));
@@ -82,7 +82,7 @@ reload(stringR name, int line, tinybuf&& cbuf)
 
 void
 Simple_Script::
-reload_string(stringR name, int line, stringR code)
+reload_string(cow_stringR name, int line, cow_stringR code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
@@ -91,7 +91,7 @@ reload_string(stringR name, int line, stringR code)
 
 void
 Simple_Script::
-reload_string(stringR name, stringR code)
+reload_string(cow_stringR name, cow_stringR code)
   {
     this->reload_string(name, 1, code);
   }
@@ -130,7 +130,7 @@ reload_file(const char* path)
 
 void
 Simple_Script::
-reload_file(stringR path)
+reload_file(cow_stringR path)
   {
     this->reload_file(path.safe_c_str());
   }

@@ -157,7 +157,7 @@ editline_gets(cow_string& line)
   }
 
 void
-editline_puts(stringR text)
+editline_puts(cow_stringR text)
   {
     s_once.call(do_init_once);
     ::el_push(s_editor, text.c_str());
@@ -171,7 +171,7 @@ editline_reset()
   }
 
 void
-editline_add_history(stringR text)
+editline_add_history(cow_stringR text)
   {
     s_once.call(do_init_once);
     ::HistEvent event;

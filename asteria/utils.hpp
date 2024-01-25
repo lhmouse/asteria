@@ -220,7 +220,7 @@ bool
 utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
 
 bool
-utf8_decode(char32_t& cp, stringR text, size_t& offset);
+utf8_decode(char32_t& cp, cow_stringR text, size_t& offset);
 
 // UTF-16 conversion functions
 bool
@@ -240,13 +240,13 @@ tinyfmt&
 c_quote(tinyfmt& fmt, const char* data, size_t size);
 
 tinyfmt&
-c_quote(tinyfmt& fmt, stringR data);
+c_quote(tinyfmt& fmt, cow_stringR data);
 
 cow_string&
 c_quote(cow_string& str, const char* data, size_t size);
 
 cow_string&
-c_quote(cow_string& str, stringR data);
+c_quote(cow_string& str, cow_stringR data);
 
 }  // namespace asteria
 #endif

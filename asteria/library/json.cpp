@@ -75,7 +75,7 @@ struct Indenter_string : Indenter
     cow_string cur;
 
     explicit
-    Indenter_string(stringR xadd)
+    Indenter_string(cow_stringR xadd)
       {
         this->add = xadd;
         this->cur = sref("\n");
@@ -165,7 +165,7 @@ struct Indenter_spaces : Indenter
   };
 
 void
-do_quote_string(tinyfmt& fmt, stringR str)
+do_quote_string(tinyfmt& fmt, cow_stringR str)
   {
     // Although JavaScript uses UCS-2 rather than UTF-16, the JSON
     // specification adopts UTF-16.
@@ -235,7 +235,7 @@ do_quote_string(tinyfmt& fmt, stringR str)
   }
 
 void
-do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, stringR name)
+do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, cow_stringR name)
   {
     // Write the key.
     if(json5 && name.size() && is_cmask(name[0], cmask_namei)

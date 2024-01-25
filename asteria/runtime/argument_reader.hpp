@@ -29,7 +29,7 @@ class Argument_Reader
 
   public:
     explicit
-    Argument_Reader(stringR name, Reference_Stack&& stack) noexcept
+    Argument_Reader(cow_stringR name, Reference_Stack&& stack) noexcept
       :
         m_name(name), m_stack(move(stack))
       { }

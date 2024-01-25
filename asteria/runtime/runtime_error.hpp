@@ -43,7 +43,7 @@ class Runtime_Error
       }
 
     explicit
-    Runtime_Error(Uxtc_assert, const Source_Location& xsloc, stringR msg)
+    Runtime_Error(Uxtc_assert, const Source_Location& xsloc, cow_stringR msg)
       :
         m_value("assertion failure: " + msg)
       {
@@ -106,13 +106,13 @@ class Runtime_Error
       }
 
     void
-    push_frame_plain(const Source_Location& sloc, stringR remarks = cow_string())
+    push_frame_plain(const Source_Location& sloc, cow_stringR remarks = cow_string())
       {
         this->do_insert_frame(frame_type_plain, &sloc, remarks);
       }
 
     void
-    push_frame_function(const Source_Location& sloc, stringR name)
+    push_frame_function(const Source_Location& sloc, cow_stringR name)
       {
         this->do_insert_frame(frame_type_func, &sloc, name);
       }

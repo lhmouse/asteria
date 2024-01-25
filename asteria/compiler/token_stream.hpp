@@ -85,7 +85,7 @@ class Token_Stream
     // tokens into `*this`. The contents of `*this` are destroyed
     // This function throws a `Compiler_Error` upon failure.
     void
-    reload(stringR file, int start_line, tinybuf&& cbuf);
+    reload(cow_stringR file, int start_line, tinybuf&& cbuf);
   };
 
 }  // namespace asteria

@@ -20,7 +20,7 @@ class Source_Location
         m_file(sref("[unknown]")), m_line(-1), m_column(-1)
       { }
 
-    Source_Location(stringR xfile, int xline, int xcolumn) noexcept
+    Source_Location(cow_stringR xfile, int xline, int xcolumn) noexcept
       :
         m_file(xfile), m_line(xline), m_column(xcolumn)
       { }

@@ -26,7 +26,7 @@ class Text_Reader
 
   public:
     explicit
-    Text_Reader(tinybuf& xcbuf, stringR xfile, int xline)
+    Text_Reader(tinybuf& xcbuf, cow_stringR xfile, int xline)
       :
         m_cbuf(xcbuf), m_file(xfile), m_line(xline)
       {
@@ -753,7 +753,7 @@ Token_Stream::
 
 void
 Token_Stream::
-reload(stringR file, int start_line, tinybuf&& cbuf)
+reload(cow_stringR file, int start_line, tinybuf&& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if
