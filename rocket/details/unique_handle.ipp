@@ -76,7 +76,7 @@ class stored_handle
 
         auto hv_old = noadl::exchange(this->m_hv, hv_new);
         if(!this->as_closer().is_null(hv_old))
-          this->as_closer() (hv_old);
+          this->as_closer().close(hv_old);
       }
 
     void

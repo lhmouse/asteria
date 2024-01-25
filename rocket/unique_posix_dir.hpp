@@ -31,23 +31,15 @@ class posix_dir_closer
       { }
 
   public:
-    constexpr operator
-    closer_type() const noexcept
-      { return this->m_cl;  }
-
-    int
-    operator()(handle_type dp) const noexcept
-      { return this->close(dp);  }
+    constexpr
+    bool
+    is_null(handle_type dp) const noexcept
+      { return dp == nullptr;  }
 
     constexpr
     handle_type
     null() const noexcept
       { return nullptr;  }
-
-    constexpr
-    bool
-    is_null(handle_type dp) const noexcept
-      { return dp == nullptr;  }
 
     int
     close(handle_type dp) const noexcept

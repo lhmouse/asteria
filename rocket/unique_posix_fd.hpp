@@ -31,23 +31,15 @@ class posix_fd_closer
       { }
 
   public:
-    constexpr operator
-    closer_type() const noexcept
-      { return this->m_cl;  }
-
-    int
-    operator()(handle_type fd) const noexcept
-      { return this->close(fd);  }
+    constexpr
+    bool
+    is_null(handle_type fd) const noexcept
+      { return fd == -1;  }
 
     constexpr
     handle_type
     null() const noexcept
       { return -1;  }
-
-    constexpr
-    bool
-    is_null(handle_type fd) const noexcept
-      { return fd == -1;  }
 
     int
     close(handle_type fd) const noexcept
