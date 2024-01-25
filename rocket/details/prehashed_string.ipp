@@ -27,7 +27,7 @@ class string_storage
 
   public:
     template<typename... paramsT>
-    explicit constexpr
+    constexpr
     string_storage(const hasher& hf, const key_equal& eq, paramsT&&... params)
       :
         hasher_base(hf),

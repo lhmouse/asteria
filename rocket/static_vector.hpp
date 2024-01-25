@@ -56,8 +56,7 @@ class static_vector
         m_sth()
       { }
 
-    explicit
-    static_vector(const allocator_type& alloc) noexcept
+    explicit static_vector(const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
       { }
@@ -87,8 +86,7 @@ class static_vector
         m_sth(alloc)
       { this->m_sth.move_from(move(other.m_sth));  }
 
-    explicit
-    static_vector(size_type n, const allocator_type& alloc = allocator_type())
+    explicit static_vector(size_type n, const allocator_type& alloc = allocator_type())
       :
         static_vector(alloc)
       { this->append(n);  }

@@ -39,8 +39,7 @@ struct Bucket
         this->next = nullptr;
       }
 
-    explicit operator
-    bool() const noexcept
+    explicit operator bool() const noexcept
       { return this->next != nullptr;  }
   };
 

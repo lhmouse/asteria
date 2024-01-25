@@ -213,14 +213,14 @@ class storage_handle
         allocator_base()
       { }
 
-    explicit constexpr
-    storage_handle(const allocator_type& alloc) noexcept
+    constexpr
+    explicit storage_handle(const allocator_type& alloc) noexcept
       :
         allocator_base(alloc)
       { }
 
-    explicit constexpr
-    storage_handle(allocator_type&& alloc) noexcept
+    constexpr
+    explicit storage_handle(allocator_type&& alloc) noexcept
       :
         allocator_base(move(alloc))
       { }

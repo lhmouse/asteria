@@ -34,13 +34,14 @@ class basic_tinyfmt_file
       noexcept(is_nothrow_default_constructible<tinybuf_type>::value)
       { }
 
-    template<typename... paramsT,
-    ROCKET_ENABLE_IF(is_constructible<tinybuf_type, paramsT&&...>::value)>
-    explicit
-    basic_tinyfmt_file(paramsT&&... params)
-      noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
+    explicit basic_tinyfmt_file(file_type&& file) noexcept
       :
-        m_buf(forward<paramsT>(params)...)
+        m_buf(move(file))
+      { }
+
+    basic_tinyfmt_file(handle_type fp, const closer_type& cl) noexcept
+      :
+        m_buf(fp, cl)
       { }
 
     basic_tinyfmt_file&

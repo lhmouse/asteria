@@ -184,8 +184,8 @@ class optional
     has_value() const noexcept
       { return this->m_stor.size() != 0;  }
 
-    explicit constexpr operator
-    bool() const noexcept
+    constexpr
+    explicit operator bool() const noexcept
       { return this->m_stor.size() != 0;  }
 
     const_reference

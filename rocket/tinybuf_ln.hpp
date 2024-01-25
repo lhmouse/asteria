@@ -27,8 +27,8 @@ class basic_tinybuf_ln
     open_mode m_mode = tinybuf_base::open_read_write;
 
   public:
-    explicit constexpr
-    basic_tinybuf_ln(const allocator_type& alloc) noexcept
+    constexpr
+    explicit basic_tinybuf_ln(const allocator_type& alloc) noexcept
       :
         m_ln(alloc)
       { }
@@ -37,15 +37,14 @@ class basic_tinybuf_ln
     basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)
       { }
 
-    explicit
-    basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
+    explicit basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_ln(alloc), m_mode(mode)
       { }
 
     template<typename xlnT,
     ROCKET_ENABLE_IF(is_constructible<buffer_type, xlnT&&, const allocator_type&>::value)>
-    explicit constexpr
+    constexpr
     basic_tinybuf_ln(xlnT&& xln, open_mode mode, const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<buffer_type, xlnT&&, const allocator_type>::value)
       :

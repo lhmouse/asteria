@@ -31,14 +31,14 @@ class basic_storage
         allocator_base()
       { }
 
-    explicit constexpr
-    basic_storage(const allocator_type& alloc) noexcept
+    constexpr
+    explicit basic_storage(const allocator_type& alloc) noexcept
       :
         allocator_base(alloc)
       { }
 
-    explicit constexpr
-    basic_storage(allocator_type&& alloc) noexcept
+    constexpr
+    explicit basic_storage(allocator_type&& alloc) noexcept
       :
         allocator_base(move(alloc))
       { }

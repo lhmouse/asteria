@@ -28,8 +28,8 @@ class Random_Engine
     uint32_t m_randc = 0;
 
   public:
-    explicit
-    Random_Engine() noexcept = default;
+    Random_Engine() noexcept
+      { }
 
   private:
     void

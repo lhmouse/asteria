@@ -290,8 +290,7 @@ class PCRE2_Error
     char m_buf[480];
 
   public:
-    explicit
-    PCRE2_Error(int err) noexcept
+    explicit PCRE2_Error(int err) noexcept
       {
         ::pcre2_get_error_message(err, (uint8_t*) this->m_buf, sizeof(m_buf));
       }
@@ -324,7 +323,6 @@ class PCRE2_Matcher
     uint32_t m_name_count = UINT32_MAX;  // unknown yet
 
   public:
-    explicit
     PCRE2_Matcher(const V_string& patt, const optV_array& opts)
       :
         m_patt(patt), m_opts(PCRE2_NEVER_UTF | PCRE2_NEVER_UCP),
@@ -359,7 +357,6 @@ class PCRE2_Matcher
               this->m_patt, off, PCRE2_Error(err));
       }
 
-    explicit
     PCRE2_Matcher(const PCRE2_Matcher& other, int)
       :
         m_patt(other.m_patt), m_opts(other.m_opts),

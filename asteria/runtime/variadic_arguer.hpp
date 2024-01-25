@@ -21,7 +21,6 @@ class Variadic_Arguer
     cow_vector<Reference> m_vargs;
 
   public:
-    explicit
     Variadic_Arguer(const Instantiated_Function& xfunc, const cow_vector<Reference>& xvargs)
       :
         m_sloc(xfunc.sloc()), m_func(xfunc.func()), m_vargs(xvargs)

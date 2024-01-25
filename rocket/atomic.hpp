@@ -26,8 +26,7 @@ class atomic
         m_val()
       { }
 
-    explicit
-    atomic(value_type val) noexcept
+    explicit atomic(value_type val) noexcept
       :
         m_val(val)
       { }

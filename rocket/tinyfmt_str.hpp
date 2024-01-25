@@ -33,13 +33,16 @@ class basic_tinyfmt_str
       noexcept(is_nothrow_default_constructible<tinybuf_type>::value)
       { }
 
-    template<typename... paramsT,
-    ROCKET_ENABLE_IF(is_constructible<tinybuf_type, paramsT&&...>::value)>
-    explicit
-    basic_tinyfmt_str(paramsT&&... params)
-      noexcept(is_nothrow_constructible<tinybuf_type, paramsT&&...>::value)
+    explicit basic_tinyfmt_str(const string_type& str)
+      noexcept(is_nothrow_constructible<tinybuf_type, open_mode, const string_type&>::value)
       :
-        m_buf(forward<paramsT>(params)...)
+        m_buf(str, tinybuf_base::open_read_write)
+      { }
+
+    explicit basic_tinyfmt_str(string_type&& str)
+      noexcept(is_nothrow_constructible<tinybuf_type, open_mode, string_type&&>::value)
+      :
+        m_buf(move(str), tinybuf_base::open_read_write)
       { }
 
     basic_tinyfmt_str&

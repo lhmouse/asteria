@@ -18,7 +18,7 @@ class Reference_Dictionary
     uint32_t m_size = 0;
 
   public:
-    explicit constexpr
+    constexpr
     Reference_Dictionary() noexcept
       { }
 

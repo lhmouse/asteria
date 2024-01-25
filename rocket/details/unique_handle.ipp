@@ -22,15 +22,15 @@ class stored_handle
     handle_type m_hv;
 
   public:
-    explicit constexpr
-    stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
+    constexpr
+    explicit stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
       :
         closer_base(), m_hv(this->as_closer().null())
       { }
 
     template<typename... clparamsT>
-    explicit constexpr
-    stored_handle(handle_type hv, clparamsT&&... clparams)
+    constexpr
+    explicit stored_handle(handle_type hv, clparamsT&&... clparams)
       noexcept(is_nothrow_constructible<closer_type, clparamsT&&...>::value)
       :
         closer_base(forward<clparamsT>(clparams)...), m_hv(move(hv))

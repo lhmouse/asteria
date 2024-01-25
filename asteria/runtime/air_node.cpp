@@ -4597,7 +4597,6 @@ solidify(AVM_Rod& rod) const
         }
       }
 
-
       case index_return_statement_bi32: {
         const auto& altr = this->m_stor.as<S_return_statement_bi32>();
 

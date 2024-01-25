@@ -27,7 +27,6 @@ class Garbage_Collector
     Variable_HashMap m_unreach;
 
   public:
-    explicit
     Garbage_Collector() noexcept
       { }
 

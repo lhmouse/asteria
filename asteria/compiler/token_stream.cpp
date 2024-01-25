@@ -25,7 +25,6 @@ class Text_Reader
     cow_dictionary<bool> m_interned_strings;
 
   public:
-    explicit
     Text_Reader(tinybuf& xcbuf, cow_stringR xfile, int xline)
       :
         m_cbuf(xcbuf), m_file(xfile), m_line(xline)

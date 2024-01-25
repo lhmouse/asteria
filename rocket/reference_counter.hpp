@@ -28,8 +28,8 @@ class reference_counter
         m_nref(1)
       { }
 
-    explicit constexpr
-    reference_counter(value_type nref) noexcept
+    constexpr
+    explicit reference_counter(value_type nref) noexcept
       :
         m_nref(nref)
       { }
@@ -89,8 +89,8 @@ class reference_counter
       }
 
     // Provide some convenient operators.
-    operator
-    value_type() const noexcept
+
+    operator value_type() const noexcept
       { return this->get();  }
 
     value_type

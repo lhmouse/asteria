@@ -23,8 +23,7 @@ class IOF_Sentry
     ::FILE* m_fp;
 
   public:
-    explicit
-    IOF_Sentry(::FILE* sentry, IOF_Mode mode)
+    explicit IOF_Sentry(::FILE* sentry, IOF_Mode mode)
       :
         m_fp(sentry)
       {
@@ -62,8 +61,7 @@ class IOF_Sentry
         ::funlockfile(this->m_fp);
       }
 
-    operator
-    ::FILE*() const noexcept
+    operator ::FILE*() const noexcept
       { return this->m_fp;  }
   };
 

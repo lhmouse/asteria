@@ -38,19 +38,16 @@ class basic_tinybuf_file
     basic_tinybuf_file() noexcept
       { }
 
-    explicit
-    basic_tinybuf_file(file_type&& file) noexcept
+    explicit basic_tinybuf_file(file_type&& file) noexcept
       :
         m_file(move(file))
       { }
 
-    explicit
     basic_tinybuf_file(handle_type fp, const closer_type& cl) noexcept
       :
         m_file(fp, cl)
       { }
 
-    explicit
     basic_tinybuf_file(const char* path, open_mode mode)
       {
         this->open(path, mode);

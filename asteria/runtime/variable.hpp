@@ -19,8 +19,8 @@ class Variable
     int m_gc_ref;  // uninitialized by default
 
   public:
-    explicit
-    Variable() noexcept = default;
+    Variable() noexcept
+      { }
 
   public:
     ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);

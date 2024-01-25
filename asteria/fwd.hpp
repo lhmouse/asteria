@@ -416,8 +416,7 @@ class cow_opaque
         return *this;
       }
 
-    explicit operator
-    bool() const noexcept
+    explicit operator bool() const noexcept
       { return static_cast<bool>(this->m_sptr);  }
 
     const type_info&
@@ -601,8 +600,7 @@ class cow_function
         return *this;
       }
 
-    explicit operator
-    bool() const noexcept
+    explicit operator bool() const noexcept
       { return this->m_fptr || this->m_sptr;  }
 
     const type_info&

@@ -54,8 +54,8 @@ class basic_shallow_string
 
   public:
     ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    explicit constexpr
-    basic_shallow_string(const charT* ptr) noexcept
+    constexpr
+    explicit basic_shallow_string(const charT* ptr) noexcept
       :
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
       { }
@@ -148,8 +148,8 @@ class basic_cow_string
         m_ref(s_zstr), m_sth()
       { }
 
-    explicit constexpr
-    basic_cow_string(const allocator_type& alloc) noexcept
+    constexpr
+    explicit basic_cow_string(const allocator_type& alloc) noexcept
       :
         m_ref(s_zstr), m_sth(alloc)
       { }

@@ -18,8 +18,7 @@ class Simple_Script
     cow_function m_func;
 
   public:
-    explicit
-    Simple_Script(API_Version version = api_version_latest)
+    explicit Simple_Script(API_Version version = api_version_latest)
       :
         m_global(version)
       { }
@@ -41,12 +40,10 @@ class Simple_Script
     global() noexcept
       { return this->m_global;  }
 
-    explicit operator
-    bool() const noexcept
+    explicit operator bool() const noexcept
       { return static_cast<bool>(this->m_func);  }
 
-    operator
-    const cow_function&() const noexcept
+    operator const cow_function&() const noexcept
       { return this->m_func;  }
 
     void

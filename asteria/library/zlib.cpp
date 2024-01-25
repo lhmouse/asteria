@@ -34,7 +34,6 @@ class Deflator
     ::z_stream m_strm[1] = { };
 
   public:
-    explicit
     Deflator(int wbits, int level)
       {
         int err = ::deflateInit2(this->m_strm, level, Z_DEFLATED, wbits, 9, 0);
@@ -42,7 +41,6 @@ class Deflator
           do_zlib_throw_error("deflateInit2", this->m_strm, err);
       }
 
-    explicit
     Deflator(const Deflator& other, int)
       {
         int err = ::deflateCopy(this->m_strm, const_cast<::z_stream*>(other.m_strm));
@@ -226,7 +224,6 @@ class Inflator
     ::z_stream m_strm[1] = { };
 
   public:
-    explicit
     Inflator(int wbits)
       {
         int err = ::inflateInit2(this->m_strm, wbits);
@@ -234,7 +231,6 @@ class Inflator
           do_zlib_throw_error("inflateInit2", this->m_strm, err);
       }
 
-    explicit
     Inflator(const Inflator& other, int)
       {
         int err = ::inflateCopy(this->m_strm, const_cast<::z_stream*>(other.m_strm));

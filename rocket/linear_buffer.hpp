@@ -44,8 +44,8 @@ class basic_linear_buffer
         m_stor()
       { }
 
-    explicit constexpr
-    basic_linear_buffer(const allocator_type& alloc) noexcept
+    constexpr
+    explicit basic_linear_buffer(const allocator_type& alloc) noexcept
       :
         m_stor(alloc)
       { }

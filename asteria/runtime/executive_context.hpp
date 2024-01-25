@@ -29,7 +29,6 @@ class Executive_Context
   public:
     // A plain context must have a parent context.
     // Its parent context shall outlast itself.
-    explicit
     Executive_Context(Uxtc_plain, const Executive_Context& parent)
       :
         m_parent_opt(&parent), m_global(parent.m_global), m_stack(parent.m_stack),
@@ -40,7 +39,6 @@ class Executive_Context
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
     ASTERIA_INCOMPLET(AVM_Rod)
-    explicit
     Executive_Context(Uxtc_defer, Global_Context& xglobal, Reference_Stack& xstack,
                       Reference_Stack& ystack)
       :
@@ -50,7 +48,6 @@ class Executive_Context
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
-    explicit
     Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack,
                       Reference_Stack& ystack, const Instantiated_Function& xfunc,
                       Reference&& xself);

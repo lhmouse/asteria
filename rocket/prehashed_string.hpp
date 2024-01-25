@@ -58,7 +58,7 @@ class basic_prehashed_string
       { }
 
     template<typename... paramsT>
-    explicit constexpr
+    constexpr
     basic_prehashed_string(const hasher& hf, const key_equal& eq, paramsT&&... params)
       noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
                            is_nothrow_copy_constructible<hasher>,
@@ -67,9 +67,9 @@ class basic_prehashed_string
         m_sth(hf, eq, forward<paramsT>(params)...)
       { }
 
-    explicit constexpr
-    basic_prehashed_string(const string_type& str, const hasher& hf = hasher(),
-                           const key_equal& eq = key_equal())
+    constexpr
+    explicit basic_prehashed_string(const string_type& str, const hasher& hf = hasher(),
+                                    const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_copy_constructible<string_type>,
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
@@ -89,9 +89,9 @@ class basic_prehashed_string
 
     template<typename xstringT,
     ROCKET_ENABLE_IF(is_convertible<xstringT&, string_type>::value)>
-    explicit constexpr
-    basic_prehashed_string(xstringT& xstr, const hasher& hf = hasher(),
-                           const key_equal& eq = key_equal())
+    constexpr
+    explicit basic_prehashed_string(xstringT& xstr, const hasher& hf = hasher(),
+                                    const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_constructible<string_type, xstringT&>,
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_copy_constructible<key_equal>>::value)
@@ -173,8 +173,7 @@ class basic_prehashed_string
     rdstr() const noexcept
       { return this->m_sth.str();  }
 
-    operator
-    const string_type&() const noexcept
+    operator const string_type&() const noexcept
       { return this->m_sth.str();  }
 
     constexpr

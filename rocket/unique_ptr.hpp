@@ -41,14 +41,14 @@ class unique_ptr
         m_sth()
       { }
 
-    explicit constexpr
-    unique_ptr(const deleter_type& del) noexcept
+    constexpr
+    explicit unique_ptr(const deleter_type& del) noexcept
       :
         m_sth(nullptr, del)
       { }
 
-    explicit constexpr
-    unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+    constexpr
+    explicit unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth(ptr)
       { }
@@ -130,12 +130,12 @@ class unique_ptr
         return ptr;
       }
 
-    ROCKET_PURE explicit constexpr operator
-    bool() const noexcept
+    ROCKET_PURE constexpr
+    explicit operator bool() const noexcept
       { return static_cast<bool>(this->get());  }
 
-    ROCKET_PURE constexpr operator
-    pointer() const noexcept
+    ROCKET_PURE constexpr
+    operator pointer() const noexcept
       { return this->get();  }
 
     constexpr

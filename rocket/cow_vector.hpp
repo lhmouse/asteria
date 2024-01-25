@@ -61,8 +61,8 @@ class cow_vector
         m_sth()
       { }
 
-    explicit constexpr
-    cow_vector(const allocator_type& alloc) noexcept
+    constexpr
+    explicit cow_vector(const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
       { }
@@ -88,8 +88,7 @@ class cow_vector
         m_sth(alloc)
       { this->m_sth.exchange_with(other.m_sth);  }
 
-    explicit
-    cow_vector(size_type n, const allocator_type& alloc = allocator_type())
+    explicit cow_vector(size_type n, const allocator_type& alloc = allocator_type())
       :
         cow_vector(alloc)
       { this->assign(n);  }

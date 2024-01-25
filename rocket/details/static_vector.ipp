@@ -48,8 +48,7 @@ class storage_handle
         m_init_nelem(0)
       { }
 
-    explicit
-    storage_handle(const allocator_type& alloc) noexcept
+    explicit storage_handle(const allocator_type& alloc) noexcept
       :
         allocator_base(alloc),
         m_init_nelem(0)
@@ -59,8 +58,7 @@ class storage_handle
 #endif
       }
 
-    explicit
-    storage_handle(allocator_type&& alloc) noexcept
+    explicit storage_handle(allocator_type&& alloc) noexcept
       :
         allocator_base(move(alloc)),
         m_init_nelem(0)

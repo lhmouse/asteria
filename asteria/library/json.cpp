@@ -42,7 +42,6 @@ Indenter::
 
 struct Indenter_none : Indenter
   {
-    explicit
     Indenter_none()
       {
       }
@@ -74,8 +73,7 @@ struct Indenter_string : Indenter
     cow_string add;
     cow_string cur;
 
-    explicit
-    Indenter_string(cow_stringR xadd)
+    explicit Indenter_string(cow_stringR xadd)
       {
         this->add = xadd;
         this->cur = sref("\n");
@@ -111,8 +109,7 @@ struct Indenter_spaces : Indenter
     size_t add;
     size_t cur;
 
-    explicit
-    Indenter_spaces(int64_t xadd)
+    explicit Indenter_spaces(int64_t xadd)
       {
         this->add = ::rocket::clamp_cast<size_t>(xadd, 0, 10);
         this->cur = 0;

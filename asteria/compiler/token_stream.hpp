@@ -17,8 +17,8 @@ class Token_Stream
     cow_vector<Token> m_rtoks;  // Tokens are stored in reverse order.
 
   public:
-    explicit constexpr
-    Token_Stream(const Compiler_Options& opts) noexcept
+    constexpr
+    explicit Token_Stream(const Compiler_Options& opts) noexcept
       :
         m_opts(opts)
       { }

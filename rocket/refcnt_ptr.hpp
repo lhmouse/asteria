@@ -117,8 +117,8 @@ class refcnt_ptr
         m_sth()
       { }
 
-    explicit constexpr
-    refcnt_ptr(pointer ptr) noexcept
+    constexpr
+    explicit refcnt_ptr(pointer ptr) noexcept
       :
         m_sth(ptr)
       { }
@@ -230,12 +230,12 @@ class refcnt_ptr
         return ptr;
       }
 
-    ROCKET_PURE explicit constexpr operator
-    bool() const noexcept
+    ROCKET_PURE constexpr
+    explicit operator bool() const noexcept
       { return static_cast<bool>(this->get());  }
 
-    ROCKET_PURE constexpr operator
-    pointer() const noexcept
+    ROCKET_PURE constexpr
+    operator pointer() const noexcept
       { return this->get();  }
 
     // 23.11.1.2.5, modifiers

@@ -23,7 +23,6 @@ class CRC32_Hasher
     ::uLong m_reg;
 
   public:
-    explicit
     CRC32_Hasher() noexcept
       {
         this->clear();
@@ -132,7 +131,6 @@ class Adler32_Hasher
     ::uLong m_reg;
 
   public:
-    explicit
     Adler32_Hasher() noexcept
       {
         this->clear();
@@ -241,7 +239,6 @@ class FNV1a32_Hasher
     uint32_t m_reg;
 
   public:
-    explicit
     FNV1a32_Hasher() noexcept
       {
         this->clear();
@@ -369,7 +366,6 @@ class MD5_Hasher
     ::MD5_CTX m_reg[1];
 
   public:
-    explicit
     MD5_Hasher() noexcept
       {
         this->clear();
@@ -479,7 +475,6 @@ class SHA1_Hasher
     ::SHA_CTX m_reg[1];
 
   public:
-    explicit
     SHA1_Hasher() noexcept
       {
         this->clear();
@@ -589,7 +584,6 @@ class SHA224_Hasher
     ::SHA256_CTX m_reg[1];
 
   public:
-    explicit
     SHA224_Hasher() noexcept
       {
         this->clear();
@@ -699,7 +693,6 @@ class SHA256_Hasher
     ::SHA256_CTX m_reg[1];
 
   public:
-    explicit
     SHA256_Hasher() noexcept
       {
         this->clear();
@@ -809,7 +802,6 @@ class SHA384_Hasher
     ::SHA512_CTX m_reg[1];
 
   public:
-    explicit
     SHA384_Hasher() noexcept
       {
         this->clear();
@@ -919,7 +911,6 @@ class SHA512_Hasher
     ::SHA512_CTX m_reg[1];
 
   public:
-    explicit
     SHA512_Hasher() noexcept
       {
         this->clear();

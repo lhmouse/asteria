@@ -19,7 +19,6 @@ class Instantiated_Function
     AVM_Rod m_rod;
 
   public:
-    explicit
     Instantiated_Function(const Source_Location& xsloc, const cow_string& xfunc,
                           const cow_vector<phsh_string>& xparams, const cow_vector<AIR_Node>& code);
 

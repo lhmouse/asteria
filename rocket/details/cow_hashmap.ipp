@@ -84,8 +84,8 @@ class basic_bucket
     exchange(pointer qval) noexcept
       { return noadl::exchange(this->m_qval, qval);  }
 
-    explicit constexpr operator
-    bool() const noexcept
+    constexpr
+    explicit operator bool() const noexcept
       { return static_cast<bool>(this->m_qval);  }
 
     constexpr

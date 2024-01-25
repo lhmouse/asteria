@@ -20,8 +20,8 @@ class Module_Loader
     using locked_stream_pair = decltype(m_strms)::value_type;
 
   public:
-    explicit
-    Module_Loader() noexcept = default;
+    Module_Loader() noexcept
+      { }
 
   private:
     locked_stream_pair*
@@ -41,16 +41,15 @@ class Module_Loader::Unique_Stream
     locked_stream_pair* m_strm = nullptr;
 
   public:
-    explicit constexpr
-    Unique_Stream() noexcept = default;
+    constexpr
+    Unique_Stream() noexcept
+      { }
 
-    explicit
     Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const char* path)
       {
         this->reset(loader, path);
       }
 
-    explicit
     Unique_Stream(Unique_Stream&& other) noexcept
       {
         this->swap(other);
@@ -77,8 +76,7 @@ class Module_Loader::Unique_Stream
         this->reset();
       }
 
-    explicit operator
-    bool() const noexcept
+    explicit operator bool() const noexcept
       { return this->m_strm != nullptr;  }
 
     ::rocket::tinybuf_file&

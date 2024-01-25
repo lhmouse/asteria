@@ -84,9 +84,9 @@ class cow_hashmap
         m_sth()
       { }
 
-    explicit constexpr
-    cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(),
-                const key_equal& eq = key_equal())
+    constexpr
+    explicit cow_hashmap(const allocator_type& alloc, const hasher& hf = hasher(),
+                         const key_equal& eq = key_equal())
       noexcept(conjunction<is_nothrow_constructible<hasher>,
                            is_nothrow_copy_constructible<hasher>,
                            is_nothrow_constructible<key_equal>,
@@ -126,9 +126,8 @@ class cow_hashmap
         m_sth(alloc, other.m_sth.as_hasher(), other.m_sth.as_key_equal())
       { this->m_sth.exchange_with(other.m_sth);  }
 
-    explicit
-    cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
-                const allocator_type& alloc = allocator_type())
+    explicit cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
+                         const allocator_type& alloc = allocator_type())
       :
         cow_hashmap(alloc, hf, eq)
       { this->reserve(res_arg);  }

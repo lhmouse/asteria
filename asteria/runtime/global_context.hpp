@@ -22,8 +22,7 @@ class Global_Context
 
   public:
     // A global context has no parent.
-    explicit
-    Global_Context(API_Version api_version_req = api_version_latest);
+    explicit Global_Context(API_Version api_version_req = api_version_latest);
 
   protected:
     virtual

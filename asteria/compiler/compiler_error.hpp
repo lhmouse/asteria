@@ -22,7 +22,6 @@ class Compiler_Error
     ::rocket::tinyfmt_str m_fmt;  // human-readable message
 
   public:
-    explicit
     Compiler_Error(Uxtc_status, Compiler_Status xstat, const Source_Location& xsloc)
       :
         m_status(xstat), m_sloc(xsloc),
@@ -32,7 +31,6 @@ class Compiler_Error
       }
 
     template<typename... ParamsT>
-    explicit
     Compiler_Error(Uxtc_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :
@@ -45,7 +43,6 @@ class Compiler_Error
       }
 
     template<typename... ParamsT>
-    explicit
     Compiler_Error(Uxtc_status_format, Compiler_Status xstat, const Source_Location& xsloc,
                    const char* templ, const ParamsT&... params)
       :

@@ -73,8 +73,8 @@ class recursive_mutex
           }
 
       public:
-        explicit constexpr operator
-        bool() const noexcept
+        constexpr
+        explicit operator bool() const noexcept
           { return this->m_mtx != nullptr;  }
 
         void

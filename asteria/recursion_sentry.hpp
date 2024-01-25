@@ -19,14 +19,14 @@ class Recursion_Sentry
     const void* m_base;
 
   public:
-    explicit constexpr
+    constexpr
     Recursion_Sentry() noexcept
       :
         m_base(this)
       { }
 
-    explicit constexpr
-    Recursion_Sentry(const void* base) noexcept
+    constexpr
+    explicit Recursion_Sentry(const void* base) noexcept
       :
         m_base(base)
       { }

@@ -33,7 +33,6 @@ class Runtime_Error
 
   public:
     template<typename XValT>
-    explicit
     Runtime_Error(Uxtc_throw, XValT&& xval, const Source_Location& xsloc)
       :
         m_value(forward<XValT>(xval))
@@ -42,7 +41,6 @@ class Runtime_Error
         this->do_insert_frame(frame_type_throw, &xsloc, this->m_value);
       }
 
-    explicit
     Runtime_Error(Uxtc_assert, const Source_Location& xsloc, cow_stringR msg)
       :
         m_value("assertion failure: " + msg)
@@ -52,7 +50,6 @@ class Runtime_Error
       }
 
     template<typename... ParamsT>
-    explicit
     Runtime_Error(Uxtc_format, const char* templ, const ParamsT&... params)
       :
         m_value()
