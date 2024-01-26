@@ -13,18 +13,18 @@ on:
 jobs:
   ubuntu:
     name: Ubuntu native build (x86-64)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Install dependencies
       run: >-
-           sudo apt-get install -y --no-install-recommends g++-7 meson
+           sudo apt-get install -y --no-install-recommends g++ meson
            pkg-config libedit-dev libpcre2-dev libssl-dev zlib1g-dev
 
     - name: Run tests
-      run: CXX='g++-7' ./ci/build.sh
+      run: ./ci/build.sh
 
   msys2:
     name: MSYS2 native build (x86-64)
@@ -62,6 +62,4 @@ jobs:
            zlib libiconv
 
     - name: Run tests
-      run: >-
-           CXX='g++-7' CPPFLAGS='-I/usr/local/opt/libiconv/include'
-           LDFLAGS='-L/usr/local/opt/libiconv/lib' ./ci/build.sh
+      run: CXX='g++-7' ./ci/build.sh
