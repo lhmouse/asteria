@@ -58,7 +58,8 @@ jobs:
 
     - name: Install dependencies
       run: >-
-           brew install gcc@7 meson pkg-config libedit pcre2 openssl@3 zlib
+           brew install gcc@7 meson pkg-config libedit pcre2 openssl@3
+           zlib libiconv
 
     - name: Run tests
       run: CXX='g++-7 -I/usr/local/include -L/usr/local/lib' ./ci/build.sh
