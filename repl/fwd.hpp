@@ -4,8 +4,8 @@
 #ifndef ASTERIA_REPL_FWD_
 #define ASTERIA_REPL_FWD_
 
-#include "../fwd.hpp"
-#include "../value.hpp"
+#include "../asteria/fwd.hpp"
+#include "../asteria/value.hpp"
 namespace asteria {
 
 // These are process exit status codes.

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../precompiled.hpp"
 #include "global_context.hpp"
 #include "garbage_collector.hpp"
 #include "random_engine.hpp"

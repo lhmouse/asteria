@@ -1,9 +1,9 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../asteria/precompiled.hpp"
 #include "fwd.hpp"
-#include "rocket/once_flag.hpp"
+#include "../rocket/once_flag.hpp"
 #include <stdarg.h>
 #include <signal.h>
 #include <histedit.h>
@@ -72,7 +72,7 @@ do_init_once()
       exit_printf(exit_system_error, "! could not initialize history: %m");
 
     ROCKET_ASSERT(!s_editor);
-    s_editor = ::el_init(PACKAGE_TARNAME, stdin, stdout, stderr);
+    s_editor = ::el_init("asteria", stdin, stdout, stderr);
     if(!s_editor)
       exit_printf(exit_system_error, "! could not initialize editline: %m");
 

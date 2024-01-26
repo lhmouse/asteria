@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../precompiled.hpp"
 #include "air_node.hpp"
 #include "enums.hpp"
 #include "executive_context.hpp"

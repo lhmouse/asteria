@@ -6,9 +6,6 @@
 #include "xthrow.hpp"
 #include <limits.h>  // MB_LEN_MAX
 #include <wchar.h>
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
 #ifdef HAVE_UCHAR_H
 #  include <uchar.h>
 #endif

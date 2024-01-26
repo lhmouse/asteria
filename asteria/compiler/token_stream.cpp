@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../precompiled.hpp"
 #include "token_stream.hpp"
 #include "enums.hpp"
 #include "token.hpp"

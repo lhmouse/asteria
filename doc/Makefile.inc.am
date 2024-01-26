@@ -1,7 +1,0 @@
-EXTRA_DIST +=  \
-  doc/quick-guide.md  \
-  doc/standard-library.md  \
-  doc/asteria.nanorc  \
-  doc/grammar.txt  \
-  doc/operator-precedence.txt  \
-  ${END}

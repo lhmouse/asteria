@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.ipp"
+#include "../asteria/precompiled.hpp"
 #include "fwd.hpp"
-#include "../simple_script.hpp"
-#include "../value.hpp"
+#include "../asteria/simple_script.hpp"
+#include "../asteria/value.hpp"
 namespace asteria {
 
 void

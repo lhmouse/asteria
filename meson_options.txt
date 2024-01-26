@@ -1,0 +1,15 @@
+option('enable-debug-checks',
+       type: 'boolean', value: false,
+       description: 'enable run-time assertions')
+
+option('enable-sanitizer',
+       type: 'combo', choices: [ 'none', 'address', 'thread' ],
+       description: 'enable sanitizer library')
+
+option('enable-repl',
+       type: 'boolean', value: true,
+       description: 'enable interactive interpretor')
+
+option('enable-avx',
+       type: 'boolean', value: true,
+       description: 'enable AVX instruction set on x86 and x86-64')
