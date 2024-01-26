@@ -1,5 +1,3 @@
-noinst_LTLIBRARIES += lib/librocket.la
-
 nobase_include_HEADERS +=  \
   %reldir%/details/xcompiler_clang.i  \
   %reldir%/details/xcompiler_gcc.i  \
@@ -65,7 +63,7 @@ nobase_include_HEADERS +=  \
   %reldir%/bit_mask.hpp  \
   ${END}
 
-lib_librocket_la_SOURCES =  \
+librocket_SOURCES =  \
   %reldir%/xassert.cpp  \
   %reldir%/xthrow.cpp  \
   %reldir%/xuchar.cpp  \
@@ -84,6 +82,3 @@ lib_librocket_la_SOURCES =  \
   %reldir%/tinyfmt_ln.cpp  \
   %reldir%/prehashed_string.cpp  \
   ${END}
-
-lib_librocket_la_CXXFLAGS = ${AM_CXXFLAGS}
-lib_librocket_la_LDFLAGS =

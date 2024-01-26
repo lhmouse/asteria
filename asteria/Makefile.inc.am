@@ -65,6 +65,7 @@ lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS} @libpcre2_8_CFLAGS@ @libcrypto_CFLAG
 lib_libasteria_la_LDFLAGS = -no-undefined -version-number @abi_major@:@abi_minor@
 
 lib_libasteria_la_SOURCES =  \
+  ${librocket_SOURCES}  \
   %reldir%/version.h.in  \
   %reldir%/precompiled.ipp  \
   %reldir%/fwd.cpp  \
@@ -121,8 +122,7 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/library/csv.cpp  \
   ${END}
 
-lib_libasteria_la_LIBADD = lib/librocket.la ${LTLIBICONV} @libpcre2_8_LIBS@  \
-  @libcrypto_LIBS@ @libz_LIBS@
+lib_libasteria_la_LIBADD = ${LTLIBICONV} @libpcre2_8_LIBS@ @libcrypto_LIBS@ @libz_LIBS@
 
 if enable_repl
 bin_PROGRAMS += bin/asteria
