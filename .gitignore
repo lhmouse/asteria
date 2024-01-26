@@ -1,5 +1,8 @@
-build_*
+.*
 *.rej
 *.orig
 *.save*
 *.swp
+*.deb
+*.log
+build_*
