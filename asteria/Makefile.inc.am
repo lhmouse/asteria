@@ -61,8 +61,9 @@ nobase_include_HEADERS +=  \
   ${END}
 
 lib_LTLIBRARIES += lib/libasteria.la
-lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS} @libpcre2_8_CFLAGS@ @libcrypto_CFLAGS@ @libz_CFLAGS@
+lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
 lib_libasteria_la_LDFLAGS = -no-undefined -version-number @abi_major@:@abi_minor@
+lib_libasteria_la_LIBADD = ${LTLIBICONV} @libpcre2_8_LIBS@ @libcrypto_LIBS@ @libz_LIBS@
 
 lib_libasteria_la_SOURCES =  \
   ${librocket_SOURCES}  \
@@ -122,25 +123,6 @@ lib_libasteria_la_SOURCES =  \
   %reldir%/library/csv.cpp  \
   ${END}
 
-lib_libasteria_la_LIBADD = ${LTLIBICONV} @libpcre2_8_LIBS@ @libcrypto_LIBS@ @libz_LIBS@
-
-if enable_repl
-bin_PROGRAMS += bin/asteria
-bin_asteria_CXXFLAGS = ${AM_CXXFLAGS}
-
-bin_asteria_SOURCES =  \
-  %reldir%/repl/fwd.hpp  \
-  %reldir%/repl/globals.cpp  \
-  %reldir%/repl/single.cpp  \
-  %reldir%/repl/interact.cpp  \
-  %reldir%/repl/commands.cpp  \
-  %reldir%/repl/main.cpp  \
-  %reldir%/repl/editline.cpp  \
-  ${END}
-
-bin_asteria_LDADD = @libedit_LIBS@ ${LDADD}
-endif
-
 if enable_pch
 lib_libasteria_la_CXXFLAGS += -include %reldir%/precompiled.xipp
 BUILT_SOURCES += %reldir%/precompiled.xipp
@@ -160,3 +142,22 @@ endif
 
 clean-local:
 	-rm -rf %reldir%/precompiled.x*
+
+######################## REPL ########################
+if enable_repl
+
+bin_PROGRAMS += bin/asteria
+bin_asteria_CXXFLAGS = ${AM_CXXFLAGS}
+bin_asteria_LDADD = @libedit_LIBS@ ${LDADD}
+
+bin_asteria_SOURCES =  \
+  %reldir%/repl/fwd.hpp  \
+  %reldir%/repl/globals.cpp  \
+  %reldir%/repl/single.cpp  \
+  %reldir%/repl/interact.cpp  \
+  %reldir%/repl/commands.cpp  \
+  %reldir%/repl/main.cpp  \
+  %reldir%/repl/editline.cpp  \
+  ${END}
+
+endif
