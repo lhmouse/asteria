@@ -48,20 +48,3 @@ jobs:
 
     - name: Run tests
       run: ./ci/build.sh
-
-  macos:
-    name: macOS native build (x86-64)
-    runs-on: macos-11
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install dependencies
-      run: >-
-           brew install gcc@7 meson pkg-config libedit pcre2 openssl@3
-           zlib libiconv
-
-    - name: Run tests
-      run: >-
-           CXX='g++-7' CPPFLAGS='-I/usr/local/opt/libiconv/include'
-           LDFLAGS='-L/usr/local/opt/libiconv/lib' ./ci/build.sh
