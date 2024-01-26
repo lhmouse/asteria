@@ -318,7 +318,7 @@ if get_option('enable-sanitizer') == 'thread'
 endif
 
 add_project_arguments(
-    '-pipe', '-Wall', '-Wextra', '-Winvalid-pch',
+    '-Wall', '-Wextra', '-Winvalid-pch',
     '-D_FILE_OFFSET_BITS=64', '-D_POSIX_C_SOURCE=200809', '-D_DEFAULT_SOURCE',
     '-D_DARWIN_C_SOURCE', '-U_FORTIFY_SOURCE', '-fno-stack-protector',
     '-fstrict-aliasing', '-fstrict-overflow', '-fmerge-all-constants',
@@ -389,7 +389,6 @@ endif
 # Rules for tests
 #===========================================================
 foreach src: test_src
-  name = src.replace('/', '_').replace('.cpp', '')
-  program = executable(name, src, link_with: lib_asteria)
-  test(name, program)
+  test = executable(src.underscorify(), src, link_with: lib_asteria)
+  test(src.underscorify(), test)
 endforeach
