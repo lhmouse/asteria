@@ -302,7 +302,7 @@ if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
 endif
 
 if get_option('enable-debug-checks')
-  add_project_arguments('-D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG', language: [ 'c', 'cpp' ])
+  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: [ 'c', 'cpp' ])
 endif
 
 if cxx.links('extern "C" int mbrtoc16(); int main() { return (int) mbrtoc16; }')
