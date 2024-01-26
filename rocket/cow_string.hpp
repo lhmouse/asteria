@@ -53,8 +53,7 @@ class basic_shallow_string
     size_t m_len;
 
   public:
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr
+    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     explicit basic_shallow_string(const charT* ptr) noexcept
       :
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
@@ -2325,7 +2324,7 @@ struct basic_cow_string<charT, allocT>::hash
     using result_type    = uint32_t;
     using argument_type  = basic_cow_string;
 
-    constexpr
+    constexpr ROCKET_ALWAYS_INLINE
     result_type
     operator()(const argument_type& str) const noexcept
       {
