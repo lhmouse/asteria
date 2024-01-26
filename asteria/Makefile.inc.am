@@ -61,7 +61,7 @@ nobase_include_HEADERS +=  \
   ${END}
 
 lib_LTLIBRARIES += lib/libasteria.la
-lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS}
+lib_libasteria_la_CXXFLAGS = ${AM_CXXFLAGS} @libpcre2_8_CFLAGS@ @libcrypto_CFLAGS@ @libz_CFLAGS@
 lib_libasteria_la_LDFLAGS = -no-undefined -version-number @abi_major@:@abi_minor@
 
 lib_libasteria_la_SOURCES =  \
