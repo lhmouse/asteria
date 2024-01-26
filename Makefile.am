@@ -16,24 +16,28 @@ ACLOCAL_AMFLAGS = -I m4
 END =
 
 ## Compiler & linker options
-AM_CPPFLAGS = -pipe -Wall -Wextra -Iasteria -U_FORTIFY_SOURCE  \
-  @libpcre2_8_CFLAGS@ @libcrypto_CFLAGS@ @libz_CFLAGS@ -D_FILE_OFFSET_BITS=64  \
-  -D_POSIX_C_SOURCE=200809 -D_DEFAULT_SOURCE -D_DARWIN_C_SOURCE  \
+AM_CPPFLAGS = -pipe -Wall -Wextra @host_asm_opt@ -Iasteria \
+  -U_FORTIFY_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809  \
+  -D_BSD_SOURCE -D_SVID_SOURCE -D_DEFAULT_SOURCE -D_DARWIN_C_SOURCE  \
   -f{strict-{aliasing,overflow},merge-all-constants,rounding-math}  \
-  -fno-{stack-protector,align-{functions,jumps,loops},semantic-interposition}  \
-  -fno-{devirtualize-speculatively,ident,math-errno,trapping-math}  \
+  -fno-{stack-protector,align-{functions,jumps,loops}}  \
+  -fno-{math-errno,trapping-math}  \
+  -fno-{devirtualize-speculatively,semantic-interposition,ident}  \
   -Werror={conversion,sign-{compare,conversion},write-strings}  \
   -Werror={return-type,double-promotion,missing-declarations}  \
-  -W{missing-field-initializers,suggest-attribute=noreturn,shadow,switch-enum}  \
-  -Wunused-{function,label,local-typedefs,but-set-{variable,parameter}}
+  -W{missing-field-initializers,suggest-attribute=noreturn,shadow}  \
+  -W{switch-enum,unused-{function,label,local-typedefs}}  \
+  -Wunused-but-set-{variable,parameter}
 
-AM_CXXFLAGS = @asm_CFLAGS@ @asan_CFLAGS@ -fno-elide-constructors  \
-  -std=c++17 -f{visibility-inlines-hidden,nothrow-opt,no-enforce-eh-specs}  \
-  -Wno-redundant-move -Wzero-as-null-pointer-constant -Werror=non-virtual-dtor
+AM_CXXFLAGS = -std=c++17 @sanitizer_flags@ -fno-elide-constructors  \
+  -f{visibility-inlines-hidden,nothrow-opt,no-enforce-eh-specs}  \
+  -W{no-redundant-move,zero-as-null-pointer-constant}  \
+  -Werror=non-virtual-dtor
 
 AM_LDFLAGS = -no-undefined
-LDADD = lib/libasteria.la ${lib_libasteria_la_LIBADD}
+
 AM_DEFAULT_SOURCE_EXT = .cpp
+LDADD = lib/libasteria.la
 SUFFIXES = .xipp
 
 ## Initialization

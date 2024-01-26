@@ -34,16 +34,16 @@ AS_VAR_SET([abi_suffix], [beta.0])
 
 ## Check for required libraries
 AC_CHECK_HEADERS([uchar.h])
+AC_CHECK_LIB([z], [crc32_z], [], [AC_MSG_ERROR([zlib >= 1.2.9 required])])
+AC_CHECK_LIB([pcre2-8], [pcre2_compile_8], [], [AC_MSG_ERROR([PCRE2 not found])])
+AC_CHECK_LIB([crypto], [MD5_Init], [], [AC_MSG_ERROR([OpenSSL not found])])
 AM_ICONV_LINK()
-PKG_CHECK_MODULES([libz], [zlib >= 1.2.9], [], [AC_MSG_ERROR([zlib >= 1.2.9 required])])
-PKG_CHECK_MODULES([libpcre2_8], [libpcre2-8], [], [AC_MSG_ERROR([PCRE2 required])])
-PKG_CHECK_MODULES([libcrypto], [libcrypto], [], [AC_MSG_ERROR([OpenSSL required])])
 
 ## Check whether REPL is to be built
 AC_ARG_ENABLE([repl], AS_HELP_STRING([--disable-repl], [do not build the REPL]))
 AM_CONDITIONAL([enable_repl], [test "${enable_repl}" != "no"])
 AM_COND_IF([enable_repl], [
-  PKG_CHECK_MODULES([libedit], [libedit], [],
+  AC_CHECK_LIB([edit], [el_init], [],
     [AC_MSG_ERROR([Editline library not found; if you don't need the REPL, pass `--disable-repl`])])
 ])
 
@@ -63,19 +63,19 @@ AM_CONDITIONAL([enable_pch], [test "${enable_pch}" != "no"])
 ## Check for sanitizers
 AC_ARG_ENABLE([sanitizer], AS_HELP_STRING([--enable-sanitizer=address|thread],
   [enable sanitizer (address sanitizer and thread sanitizer cannot be enabled at the same time)]))
-AS_VAR_SET([asan_CFLAGS])
+AS_VAR_SET([sanitizer_flags])
 AM_CONDITIONAL([enable_address_sanitizer], [test "${enable_sanitizer}" == "address"])
 AM_COND_IF([enable_address_sanitizer], [
   AC_CHECK_LIB([asan], [__asan_report_error], [], [AC_MSG_ERROR([address sanitizer not found])])
   AC_CHECK_LIB([ubsan], [__ubsan_on_report], [], [AC_MSG_ERROR([undefined behavior sanitizer not found])])
   AC_DEFINE([POSEIDON_ENABLE_ADDRESS_SANITIZER], [1], [Define to 1 to enable address sanitizer.])
-  AS_VAR_APPEND([asan_CFLAGS], [" -fsanitize=address,undefined"])
+  AS_VAR_APPEND([sanitizer_flags], [" -fsanitize=address,undefined"])
 ])
 AM_CONDITIONAL([enable_thread_sanitizer], [test "${enable_sanitizer}" == "thread"])
 AM_COND_IF([enable_thread_sanitizer], [
   AC_CHECK_LIB([tsan], [__tsan_on_report], [], [AC_MSG_ERROR([thread sanitizer not found])])
   AC_DEFINE([POSEIDON_ENABLE_THREAD_SANITIZER], [1], [Define to 1 to enable thread sanitizer.])
-  AS_VAR_APPEND([asan_CFLAGS], [" -fsanitize=thread"])
+  AS_VAR_APPEND([sanitizer_flags], [" -fsanitize=thread"])
 ])
 
 AC_CHECK_DECL([__APPLE__], [
@@ -83,16 +83,16 @@ AC_CHECK_DECL([__APPLE__], [
   AC_MSG_WARN([Apple systems are nonsense and receive no standard support.])
 ], [
   # Set host-specific options
-  AC_CHECK_DECL([__i386__], AS_VAR_SET([asm_CFLAGS], ["-masm=intel -mavx -mfpmath=sse"]))
-  AC_CHECK_DECL([__amd64__], AS_VAR_SET([asm_CFLAGS], ["-masm=intel -mavx"]))
+  AC_CHECK_DECL([__i386__], AS_VAR_SET([host_asm_opt], ["-masm=intel -mavx -mfpmath=sse"]))
+  AC_CHECK_DECL([__amd64__], AS_VAR_SET([host_asm_opt], ["-masm=intel -mavx"]))
 ])
 
 ## Finish
 AC_SUBST([abi_major])
 AC_SUBST([abi_minor])
 AC_SUBST([abi_suffix])
-AC_SUBST([asan_CFLAGS])
-AC_SUBST([asm_CFLAGS])
+AC_SUBST([sanitizer_flags])
+AC_SUBST([host_asm_opt])
 
 AC_CONFIG_FILES([Makefile asteria/version.h])
 AC_OUTPUT
