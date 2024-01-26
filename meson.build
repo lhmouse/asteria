@@ -362,7 +362,6 @@ dep_iconv = cxx.find_library('libiconv', required: false)
 lib_asteria = shared_library('asteria',
       sources: [ rocket_src, asteria_src ],
       soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
-      link_args: [ '-Wl,--no-undefined' ],
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       cpp_pch: 'asteria/precompiled.hpp',
       install: true)
