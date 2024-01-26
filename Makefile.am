@@ -27,7 +27,8 @@ AM_CPPFLAGS = -pipe -Wall -Wextra @host_asm_opt@ -Iasteria \
   -Werror={return-type,double-promotion,missing-declarations}  \
   -W{missing-field-initializers,suggest-attribute=noreturn,shadow}  \
   -W{switch-enum,unused-{function,label,local-typedefs}}  \
-  -Wunused-but-set-{variable,parameter}
+  -Wunused-but-set-{variable,parameter}  \
+  @libpcre2_8_CFLAGS@ @libcrypto_CFLAGS@ @libz_CFLAGS@
 
 AM_CXXFLAGS = -std=c++17 @sanitizer_flags@ -fno-elide-constructors  \
   -f{visibility-inlines-hidden,nothrow-opt,no-enforce-eh-specs}  \
@@ -35,9 +36,8 @@ AM_CXXFLAGS = -std=c++17 @sanitizer_flags@ -fno-elide-constructors  \
   -Werror=non-virtual-dtor
 
 AM_LDFLAGS = -no-undefined
-
+LDADD = lib/libasteria.la ${lib_libasteria_la_LIBADD}
 AM_DEFAULT_SOURCE_EXT = .cpp
-LDADD = lib/libasteria.la
 SUFFIXES = .xipp
 
 ## Initialization
