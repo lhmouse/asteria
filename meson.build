@@ -393,6 +393,7 @@ endif
 # Rules for tests
 #===========================================================
 foreach src: test_src
-  test = executable(src.underscorify(), src, link_with: lib_asteria_a)
-  test(src.underscorify(), test)
+  name = src.replace('.cpp', '').underscorify()
+  test = executable(name, src, link_with: lib_asteria_a)
+  test(name, test)
 endforeach
