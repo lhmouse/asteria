@@ -353,18 +353,18 @@ add_project_arguments(
     '-Wno-redundant-move', '-Werror=non-virtual-dtor',
     language: 'cpp')
 
-#===========================================================
-# Rules for headers
-#===========================================================
-install_headers(rocket_include, preserve_path: true)
-install_headers(asteria_include, preserve_path: true)
-
 conf = configuration_data()
 conf.set('abi_major', meson.project_version().split('.')[0])
 conf.set('abi_minor', meson.project_version().split('.')[1])
 conf.set_quoted('abi_string', meson.project_version())
 configure_file(input: 'asteria/version.h.in', configuration: conf, output: 'version.h')
-install_headers(meson.current_build_dir() + '/version.h', subdir: 'asteria')
+
+#===========================================================
+# Rules for headers
+#===========================================================
+install_headers(rocket_include, preserve_path: true)
+install_headers(asteria_include, preserve_path: true)
+install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
 
 #===========================================================
 # Rules for 'lib/libasteria.so'
