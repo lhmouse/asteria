@@ -5,4 +5,5 @@
 *.swp
 *.deb
 *.log
-build_*
+/build_*
+/profiling/*
