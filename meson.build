@@ -373,6 +373,10 @@ lib_asteria_so = shared_library('asteria',
       soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
       install: true)
 
+libasteria_pc = import('pkgconfig').generate(lib_asteria_so,
+      name: 'asteria',
+      description: 'The Asteria programming language')
+
 #===========================================================
 # Rules for 'bin/asteria'
 #===========================================================
