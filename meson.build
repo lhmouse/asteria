@@ -353,15 +353,19 @@ add_project_arguments(
     '-Wno-redundant-move', '-Werror=non-virtual-dtor',
     language: 'cpp')
 
-conf = configuration_data()
-conf.set('abi_major', meson.project_version().split('.')[0])
-conf.set('abi_minor', meson.project_version().split('.')[1])
-conf.set_quoted('abi_string', meson.project_version())
-configure_file(input: 'asteria/version.h.in', configuration: conf, output: 'version.h')
-
 #===========================================================
 # Rules for headers
 #===========================================================
+version_h = configuration_data()
+version_h.set('abi_major', meson.project_version().split('.')[0])
+version_h.set('abi_minor', meson.project_version().split('.')[1])
+version_h.set_quoted('abi_string', meson.project_version())
+
+configure_file(input: 'asteria/version.h.in',
+               configuration: version_h,
+               output: 'version.h',
+               install: false)
+
 install_headers(rocket_include, preserve_path: true)
 install_headers(asteria_include, preserve_path: true)
 install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
@@ -378,7 +382,7 @@ lib_asteria = both_libraries('asteria',
       cpp_pch: 'asteria/precompiled.hpp',
       sources: [ rocket_src, asteria_src ],
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
-      soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
+      soversion: version_h.get('abi_major') + '.' + version_h.get('abi_minor') + '.0',
       install: true)
 
 libasteria_pc = import('pkgconfig').generate(lib_asteria,
