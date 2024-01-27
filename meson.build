@@ -375,7 +375,8 @@ if get_option('enable-repl')
   # to compose a more friendly message later.
   dep_editline = dependency('libedit', required: false)
   if not dep_editline.found()
-    error('libedit is required to build the REPL. If you do not need the')
+    error('libedit is required to build the REPL. If you do not need the REPL, '
+          + 'use `meson setup -Denable-repl=false`.')
   endif
 
   executable('asteria',
