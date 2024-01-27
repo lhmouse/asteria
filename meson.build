@@ -358,7 +358,7 @@ install_headers(meson.current_build_dir() + '/version.h', subdir: 'asteria')
 dep_zlib = dependency('zlib', version: '>= 1.2.9')
 dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
-dep_iconv = cxx.find_library('libiconv', required: false)
+dep_iconv = dependency('iconv', required: false)
 
 lib_asteria = shared_library('asteria',
       sources: [ rocket_src, asteria_src ],
