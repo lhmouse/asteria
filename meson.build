@@ -342,8 +342,8 @@ add_project_arguments(
 #===========================================================
 # Rules for headers
 #===========================================================
-install_headers(rocket_include, subdir: 'rocket')
-install_headers(asteria_include, subdir: 'asteria')
+install_headers(rocket_include, preserve_path: true)
+install_headers(asteria_include, preserve_path: true)
 
 conf = configuration_data()
 conf.set('abi_major', meson.project_version().split('.')[0])
