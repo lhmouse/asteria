@@ -25,7 +25,8 @@ jobs:
            ninja-build python3-pip
 
     - name: Install newest meson
-      run: sudo pip3 install meson  # --break-system-packages
+      run: >-
+           sudo pip3 install meson  # --break-system-packages
 
     - name: Run tests
       run: >-
