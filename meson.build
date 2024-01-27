@@ -360,7 +360,12 @@ dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
 dep_iconv = dependency('iconv', required: false)
 
-lib_asteria = shared_library('asteria',
+lib_asteria_a = static_library('asteria',
+      sources: [ rocket_src, asteria_src ],
+      cpp_pch: 'asteria/precompiled.hpp',
+      install: true)
+
+lib_asteria_so = shared_library('asteria',
       sources: [ rocket_src, asteria_src ],
       soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
@@ -379,7 +384,7 @@ if get_option('enable-repl')
              sources: repl_src,
              dependencies: [ dep_editline ],
              cpp_pch: 'asteria/precompiled.hpp',
-             link_with: lib_asteria,
+             link_with: lib_asteria_so,
              install: true)
 endif
 
@@ -387,6 +392,6 @@ endif
 # Rules for tests
 #===========================================================
 foreach src: test_src
-  test = executable(src.underscorify(), src, link_with: lib_asteria)
+  test = executable(src.underscorify(), src, link_with: lib_asteria_a)
   test(src.underscorify(), test)
 endforeach
