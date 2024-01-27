@@ -374,20 +374,14 @@ dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
 dep_iconv = dependency('iconv', required: false)
 
-lib_asteria_a = static_library('asteria',
-      cpp_pch: 'asteria/precompiled.hpp',
-      sources: [ rocket_src, asteria_src ],
-      dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
-      install: true)
-
-lib_asteria_so = shared_library('asteria',
+lib_asteria = both_libraries('asteria',
       cpp_pch: 'asteria/precompiled.hpp',
       sources: [ rocket_src, asteria_src ],
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
       install: true)
 
-libasteria_pc = import('pkgconfig').generate(lib_asteria_so,
+libasteria_pc = import('pkgconfig').generate(lib_asteria,
       name: 'asteria',
       description: 'The Asteria programming language')
 
@@ -403,7 +397,7 @@ if get_option('enable-repl')
              cpp_pch: 'asteria/precompiled.hpp',
              sources: [ repl_src ],
              dependencies: [ dep_editline ],
-             link_with: lib_asteria_so,
+             link_with: lib_asteria,
              install: true)
 endif
 
@@ -412,6 +406,6 @@ endif
 #===========================================================
 foreach src: test_src
   name = src.replace('.cpp', '').underscorify()
-  test = executable(name, src, link_with: lib_asteria_a)
+  test = executable(name, src, link_with: lib_asteria)
   test(name, test)
 endforeach
