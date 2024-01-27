@@ -371,13 +371,9 @@ lib_asteria = shared_library('asteria',
 # Rules for 'bin/asteria'
 #===========================================================
 if get_option('enable-repl')
-  # This is actually required, but we pass `required: false`, as we want
-  # to compose a more friendly message later.
-  dep_editline = dependency('libedit', required: false)
-  if not dep_editline.found()
-    error('libedit is required to build the REPL. If you do not need the REPL, '
-          + 'use `meson setup -Denable-repl=false`.')
-  endif
+  dep_editline = dependency('libedit',
+      not_found_message: 'libedit is required to build the REPL. If you do not need '
+                         + 'the REPL, use `meson setup -Denable-repl=false`.')
 
   executable('asteria',
              sources: repl_src,
