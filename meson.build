@@ -288,7 +288,7 @@ cxx = meson.get_compiler('cpp')
 cxx_is_i386 = cxx.compiles('int foo = __i386__;')
 cxx_is_amd64 = cxx.compiles('int foo = __amd64__;')
 cxx_asm_intel = cxx.compiles('int foo(int a) { return a + 1; }', args: [ '-masm=intel' ])
-cxx_has_uchar = cxx.links('extern "C" int mbrtoc16(); int main() { return mbrtoc16 != 0; }')
+cxx_has_uchar = cxx.links('extern "C" int mbrtoc16(); int main() { return *(int*) mbrtoc16; }')
 
 if cxx_asm_intel
   add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
