@@ -28,10 +28,9 @@ jobs:
       run: sudo pip3 install meson  # --break-system-packages
 
     - name: Run tests
-      run: |
+      run: >-
            CXX='g++-7' meson setup -Denable-debug-checks=true build_ci
-           cd build_ci
-           ninja -v test
+           && cd build_ci && ninja -v test
 
   msys2:
     name: MSYS2 native build (x86-64)
@@ -54,10 +53,9 @@ jobs:
            pcre2-devel openssl-devel zlib-devel libiconv-devel
 
     - name: Run tests
-      run: |
+      run: >-
            meson setup -Denable-debug-checks=true build_ci
-           cd build_ci
-           ninja -v test
+           && cd build_ci && ninja -v test
 
   macos:
     name: macOS native build (x86-64)
@@ -72,7 +70,6 @@ jobs:
            zlib libiconv
 
     - name: Run tests
-      run: |
+      run: >-
            CXX='g++-7' meson setup -Denable-debug-checks=true build_ci
-           cd build_ci
-           ninja -v test
+           && cd build_ci && ninja -v test
