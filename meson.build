@@ -361,15 +361,16 @@ dep_openssl = dependency('openssl')
 dep_iconv = dependency('iconv', required: false)
 
 lib_asteria_a = static_library('asteria',
-      sources: [ rocket_src, asteria_src ],
       cpp_pch: 'asteria/precompiled.hpp',
+      sources: [ rocket_src, asteria_src ],
+      dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       install: true)
 
 lib_asteria_so = shared_library('asteria',
-      sources: [ rocket_src, asteria_src ],
-      soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
-      dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       cpp_pch: 'asteria/precompiled.hpp',
+      sources: [ rocket_src, asteria_src ],
+      dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
+      soversion: conf.get('abi_major') + '.' + conf.get('abi_minor') + '.0',
       install: true)
 
 #===========================================================
@@ -381,9 +382,9 @@ if get_option('enable-repl')
                          + 'the REPL, use `meson setup -Denable-repl=false`.')
 
   executable('asteria',
-             sources: repl_src,
-             dependencies: [ dep_editline ],
              cpp_pch: 'asteria/precompiled.hpp',
+             sources: [ repl_src ],
+             dependencies: [ dep_editline ],
              link_with: lib_asteria_so,
              install: true)
 endif
