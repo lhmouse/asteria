@@ -20,8 +20,12 @@ jobs:
 
     - name: Install dependencies
       run: >-
-           sudo apt-get install -y --no-install-recommends g++ meson
+           sudo apt-get install -y --no-install-recommends g++ python3
            pkg-config libedit-dev libpcre2-dev libssl-dev zlib1g-dev
+           ninja-build python3-pip
+
+    - name: Install newest meson
+      run: sudo pip3 install --break-system-packages meson
 
     - name: Run tests
       run: ./ci/build.sh
