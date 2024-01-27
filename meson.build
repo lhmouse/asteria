@@ -285,9 +285,10 @@ test_src = [
 # Global configuration
 #===========================================================
 cxx = meson.get_compiler('cpp')
-cxx_asm_intel = cxx.compiles('typedef int foo;', args: [ '-masm=intel' ])
 cxx_is_i386 = cxx.compiles('int foo = __i386__;')
 cxx_is_amd64 = cxx.compiles('int foo = __amd64__;')
+cxx_asm_intel = cxx.compiles('int foo(int a) { return a + 1; }', args: [ '-masm=intel' ])
+cxx_has_uchar = cxx.links('extern "C" int mbrtoc16(); int main() { return mbrtoc16 != 0; }')
 
 if cxx_asm_intel
   add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
@@ -305,7 +306,7 @@ if get_option('enable-debug-checks')
   add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: [ 'c', 'cpp' ])
 endif
 
-if cxx.links('extern "C" int mbrtoc16(); int main() { return (int) mbrtoc16; }')
+if cxx_has_uchar
   add_project_arguments('-DHAVE_UCHAR_H', language: [ 'c', 'cpp' ])
 endif
 
@@ -357,7 +358,7 @@ install_headers(meson.current_build_dir() + '/version.h', subdir: 'asteria')
 dep_zlib = dependency('zlib', version: '>= 1.2.9')
 dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
-dep_iconv = dependency('iconv', required: false)
+dep_iconv = cxx.find_library('libiconv', required: false)
 
 lib_asteria = shared_library('asteria',
       sources: [ rocket_src, asteria_src ],
