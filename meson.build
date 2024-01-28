@@ -395,7 +395,7 @@ lib_asteria = both_libraries('asteria',
       soversion: version_h.get('abi_major') + '.' + version_h.get('abi_minor') + '.0',
       install: true)
 
-libasteria_pc = import('pkgconfig').generate(lib_asteria,
+import('pkgconfig').generate(lib_asteria,
       name: 'asteria',
       description: 'The Asteria programming language')
 
