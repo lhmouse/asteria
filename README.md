@@ -45,14 +45,13 @@ Then we can build as usual
 
 ```sh
 meson setup build_dir
-cd build_dir
-ninja
+meson compile -Cbuild_dir
 ```
 
 Finally we launch the REPL, as
 
 ```sh
-./asteria
+./build_dir/asteria
 ```
 
 ![README](README.png)
