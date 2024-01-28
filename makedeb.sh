@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 _pkgname=asteria
-_pkgversion=$(printf "0.%u.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)")
+_pkgversion=$(git describe --tag | sed 's/^[^0-9]*//')
 _pkgarch=$(dpkg --print-architecture)
 _tempdir=$(readlink -f "./.makedeb")
 
