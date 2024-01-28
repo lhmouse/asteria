@@ -354,6 +354,21 @@ add_project_arguments(
     language: 'cpp')
 
 #===========================================================
+# Dependencies
+#===========================================================
+dep_zlib = dependency('zlib', version: '>= 1.2.9')
+dep_pcre2 = dependency('libpcre2-8')
+dep_openssl = dependency('openssl')
+dep_iconv = dependency('iconv', required: false)
+dep_editline = disabler()
+
+if get_option('enable-repl')
+  dep_editline = dependency('libedit',
+      not_found_message: 'libedit is required to build the REPL. If you do not need '
+                         + 'the REPL, use `meson setup -Denable-repl=false`.')
+endif
+
+#===========================================================
 # Rules for headers
 #===========================================================
 version_h = configuration_data()
@@ -373,11 +388,6 @@ install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
 #===========================================================
 # Rules for 'lib/libasteria.so'
 #===========================================================
-dep_zlib = dependency('zlib', version: '>= 1.2.9')
-dep_pcre2 = dependency('libpcre2-8')
-dep_openssl = dependency('openssl')
-dep_iconv = dependency('iconv', required: false)
-
 lib_asteria = both_libraries('asteria',
       cpp_pch: 'asteria/precompiled.hpp',
       sources: [ rocket_src, asteria_src ],
@@ -393,10 +403,6 @@ libasteria_pc = import('pkgconfig').generate(lib_asteria,
 # Rules for 'bin/asteria'
 #===========================================================
 if get_option('enable-repl')
-  dep_editline = dependency('libedit',
-      not_found_message: 'libedit is required to build the REPL. If you do not need '
-                         + 'the REPL, use `meson setup -Denable-repl=false`.')
-
   executable('asteria',
              cpp_pch: 'asteria/precompiled.hpp',
              sources: [ repl_src ],
