@@ -9,7 +9,10 @@ rm -rf ${_tempdir}
 mkdir -p ${_tempdir}
 cp -pr DEBIAN -t ${_tempdir}
 
-meson setup -Dbuildtype=release build_makedeb
+export CFLAGS='-O2 -g'
+export CXXFLAGS='-O2 -g'
+
+meson setup -Dbuildtype=plain build_makedeb
 meson compile -Cbuild_makedeb
 DESTDIR=${_tempdir} meson install --strip -Cbuild_makedeb
 
