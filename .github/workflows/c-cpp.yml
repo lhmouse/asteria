@@ -67,7 +67,7 @@ jobs:
 
     - name: Install dependencies
       run: >-
-           brew install gcc@7 meson pkgconf libedit pcre2 openssl@3
+           brew install gcc@7 meson pkg-config libedit pcre2 openssl@3
            zlib libiconv
 
     - name: Run tests
