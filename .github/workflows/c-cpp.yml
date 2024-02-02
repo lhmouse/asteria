@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: >-
            sudo apt-get install -y --no-install-recommends g++-7 python3
-           pkg-config libedit-dev libpcre2-dev libssl-dev zlib1g-dev
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
            ninja-build python3-pip
 
     - name: Install newest meson
@@ -50,7 +50,7 @@ jobs:
 
     - name: Install dependencies
       run: >-
-           pacman -S --noconfirm gcc meson pkg-config libedit-devel
+           pacman -S --noconfirm gcc meson pkgconf libedit-devel
            pcre2-devel openssl-devel zlib-devel libiconv-devel
 
     - name: Run tests
@@ -67,7 +67,7 @@ jobs:
 
     - name: Install dependencies
       run: >-
-           brew install gcc@7 meson pkg-config libedit pcre2 openssl@3
+           brew install gcc@7 meson pkgconf libedit pcre2 openssl@3
            zlib libiconv
 
     - name: Run tests

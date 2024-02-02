@@ -23,22 +23,23 @@ which can be done with
 
 ```sh
 # For Debian, Ubuntu, Linux Mint:
-# GCC 9+ is generally recommended. If you don't have it in your APT sources,
-# try <https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/ppa>.
-sudo apt-get install meson g++ libpcre2-dev libssl-dev zlib1g-dev libedit-dev
+# There is usually an outdated version of meson in the system APT source. Do
+# not use it; instead, install the latest one from pip.
+sudo apt-get install ninja-build python3 python3-pip pkgconf g++ libpcre2-dev libssl-dev zlib1g-dev libedit-dev
+sudo pip3 install meson
 ```
 ```sh
 # For MSYS2 on Windows:
-# The `iconv_open()` etc. functions are provided by libiconv. Only the MSYS
+# The `iconv_open()` etc. functions are provided by libiconv~g. Only the MSYS
 # shell is supported. Do not try building in the MINGW64 or UCRT64 shell.
-pacman -S meson gcc pcre2-devel openssl-devel zlib-devel libiconv-devel libedit-devel
+pacman -S meson gcc pkgconf pcre2-devel openssl-devel zlib-devel libiconv-devel libedit-devel
 ```
 ```sh
 # For macOS:
-# The `gcc` command actually denotes Clang, so you need to ask for a specific
-# version of GCC explicitly.
-brew install meson gcc@10 pcre2 openssl@3 zlib libedit
-export CXX='g++-10 -I/usr/local/include -L/usr/local/lib'
+# The `gcc` command actually denotes Clang, so ask for a specific version
+# explicitly.
+brew install meson pkgconf gcc@10 pcre2 openssl@3 zlib libedit
+export CXX='g++-10'
 ```
 
 Then we can build as usual
