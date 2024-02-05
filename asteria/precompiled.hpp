@@ -6,12 +6,6 @@
 
 #include "version.h"
 
-#ifdef DLL_EXPORT
-#  define ASTERIA_DLLEXPORT  __declspec(dllexport)
-#else
-#  define ASTERIA_DLLEXPORT
-#endif
-
 #ifdef __FAST_MATH__
 #  error Please turn off `-ffast-math`.
 #endif
