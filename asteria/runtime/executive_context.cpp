@@ -56,12 +56,6 @@ Executive_Context::
   {
   }
 
-void
-Executive_Context::
-vtable_key_function_sLBHstEX() noexcept
-  {
-  }
-
 Reference*
 Executive_Context::
 do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const

@@ -10,55 +10,7 @@
 namespace asteria {
 
 Random_Engine::
-~Random_Engine()
-  {
-  }
-
-void
-Random_Engine::
-do_isaac() noexcept
-  {
-    ///////////////////////////////////////////////////////////////////////////
-    // Below is a direct copy with a few fixups.
-    //   https://www.burtleburtle.net/bob/c/rand.c
-    ///////////////////////////////////////////////////////////////////////////
-
-#define ind(mm,x)  (*(uint32_t *)((uint8_t *)(mm) + ((x) & (255<<2))))
-#define rngstep(mix,a,b,mm,m,m2,r,x) \
-    { \
-      x = *m;  \
-      a = (a^(mix)) + *(m2++); \
-      *(m++) = y = ind(mm,x) + a + b; \
-      *(r++) = b = ind(mm,y>>8) + x; \
-    }
-
-    uint32_t a,b,x,y,*m,*mm,*m2,*r,*mend;
-    mm=this->m_randmem; r=this->m_randrsl;
-    a = this->m_randa; b = this->m_randb + (++this->m_randc);
-    for (m = mm, mend = m2 = m+128; m<mend; )
-    {
-      rngstep( a<<13, a, b, mm, m, m2, r, x);
-      rngstep( a>>6 , a, b, mm, m, m2, r, x);
-      rngstep( a<<2 , a, b, mm, m, m2, r, x);
-      rngstep( a>>16, a, b, mm, m, m2, r, x);
-    }
-    for (m2 = mm; m2<mend; )
-    {
-      rngstep( a<<13, a, b, mm, m, m2, r, x);
-      rngstep( a>>6 , a, b, mm, m, m2, r, x);
-      rngstep( a<<2 , a, b, mm, m, m2, r, x);
-      rngstep( a>>16, a, b, mm, m, m2, r, x);
-    }
-    this->m_randb = b; this->m_randa = a;
-
-    ///////////////////////////////////////////////////////////////////////////
-    // End of copied code
-    ///////////////////////////////////////////////////////////////////////////
-  }
-
-void
-Random_Engine::
-seed() noexcept
+Random_Engine() noexcept
   {
     // Initialize seed memory.
     ::RAND_priv_bytes((uint8_t*) this->m_randrsl, sizeof(m_randrsl));
@@ -119,6 +71,53 @@ seed() noexcept
     // Discard results of the first round.
     this->do_isaac();
     this->m_randcnt = 0;
+  }
+
+Random_Engine::
+~Random_Engine()
+  {
+  }
+
+void
+Random_Engine::
+do_isaac() noexcept
+  {
+    ///////////////////////////////////////////////////////////////////////////
+    // Below is a direct copy with a few fixups.
+    //   https://www.burtleburtle.net/bob/c/rand.c
+    ///////////////////////////////////////////////////////////////////////////
+
+#define ind(mm,x)  (*(uint32_t *)((uint8_t *)(mm) + ((x) & (255<<2))))
+#define rngstep(mix,a,b,mm,m,m2,r,x) \
+    { \
+      x = *m;  \
+      a = (a^(mix)) + *(m2++); \
+      *(m++) = y = ind(mm,x) + a + b; \
+      *(r++) = b = ind(mm,y>>8) + x; \
+    }
+
+    uint32_t a,b,x,y,*m,*mm,*m2,*r,*mend;
+    mm=this->m_randmem; r=this->m_randrsl;
+    a = this->m_randa; b = this->m_randb + (++this->m_randc);
+    for (m = mm, mend = m2 = m+128; m<mend; )
+    {
+      rngstep( a<<13, a, b, mm, m, m2, r, x);
+      rngstep( a>>6 , a, b, mm, m, m2, r, x);
+      rngstep( a<<2 , a, b, mm, m, m2, r, x);
+      rngstep( a>>16, a, b, mm, m, m2, r, x);
+    }
+    for (m2 = mm; m2<mend; )
+    {
+      rngstep( a<<13, a, b, mm, m, m2, r, x);
+      rngstep( a>>6 , a, b, mm, m, m2, r, x);
+      rngstep( a<<2 , a, b, mm, m, m2, r, x);
+      rngstep( a>>16, a, b, mm, m, m2, r, x);
+    }
+    this->m_randb = b; this->m_randa = a;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // End of copied code
+    ///////////////////////////////////////////////////////////////////////////
   }
 
 }  // namespace asteria

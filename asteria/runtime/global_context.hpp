@@ -21,14 +21,11 @@ class Global_Context
     rcfwd_ptr<Module_Loader> m_ldrlk;
 
   public:
-    // A global context has no parent.
+    // Creates a global context, with the standard library initialized according
+    // to `api_version_req`.
     explicit Global_Context(API_Version api_version_req = api_version_latest);
 
   protected:
-    virtual
-    void
-    vtable_key_function_sLBHstEX() noexcept override;
-
     bool
     do_is_analytic() const noexcept override
       { return false;  }
@@ -38,7 +35,9 @@ class Global_Context
       { return nullptr;  }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Global_Context);
+    Global_Context(const Global_Context&) = delete;
+    Global_Context& operator=(const Global_Context&) & = delete;
+    ~Global_Context();
 
     // This provides stack overflow protection.
     Recursion_Sentry

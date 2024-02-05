@@ -30,10 +30,6 @@ class Analytic_Context
                      const cow_vector<phsh_string>& params);
 
   protected:
-    virtual
-    void
-    vtable_key_function_sLBHstEX() noexcept override;
-
     bool
     do_is_analytic() const noexcept override
       { return true;  }
@@ -43,7 +39,9 @@ class Analytic_Context
       { return this->m_parent_opt;  }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
+    Analytic_Context(const Analytic_Context&) = delete;
+    Analytic_Context& operator=(const Analytic_Context&) & = delete;
+    ~Analytic_Context();
 
     const Abstract_Context*
     get_parent_opt() const noexcept

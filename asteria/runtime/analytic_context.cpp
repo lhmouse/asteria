@@ -30,10 +30,4 @@ Analytic_Context::
   {
   }
 
-void
-Analytic_Context::
-vtable_key_function_sLBHstEX() noexcept
-  {
-  }
-
 }  // namespace asteria

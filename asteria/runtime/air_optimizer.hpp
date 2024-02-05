@@ -22,7 +22,9 @@ class AIR_Optimizer
       { }
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(AIR_Optimizer);
+    AIR_Optimizer(const AIR_Optimizer&) = delete;
+    AIR_Optimizer& operator=(const AIR_Optimizer&) & = delete;
+    ~AIR_Optimizer();
 
     // These are accessors and modifiers of options for optimizing.
     const Compiler_Options&

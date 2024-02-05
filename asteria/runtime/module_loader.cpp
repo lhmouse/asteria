@@ -11,11 +11,16 @@
 namespace asteria {
 
 Module_Loader::
+Module_Loader() noexcept
+  {
+  }
+
+Module_Loader::
 ~Module_Loader()
   {
   }
 
-Module_Loader::locked_stream_pair*
+Module_Loader::locked_pair*
 Module_Loader::
 do_lock_stream(const char* path)
   {
@@ -51,7 +56,7 @@ do_lock_stream(const char* path)
 
 void
 Module_Loader::
-do_unlock_stream(locked_stream_pair* qstrm) noexcept
+do_unlock_stream(locked_pair* qstrm) noexcept
   {
     // Erase the strment denoted by `qstrm`.
     ROCKET_ASSERT(qstrm);

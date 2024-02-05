@@ -35,41 +35,14 @@
 namespace asteria {
 namespace noadl = asteria;
 
-#define ASTERIA_COPYABLE_DESTRUCTOR(C)  \
-    C(const C&) = default;  \
-    C(C&&) noexcept = default;  \
-    C& operator=(const C&) = default;  \
-    C& operator=(C&&) & noexcept = default;  \
-    ~C()  // no semicolon
-
-#define ASTERIA_MOVABLE_DESTRUCTOR(C)  \
-    C(const C&) = delete;  \
-    C(C&&) noexcept = default;  \
-    C& operator=(const C&) = delete;  \
-    C& operator=(C&&) & noexcept = default;  \
-    ~C()  // no semicolon
-
-#define ASTERIA_NONCOPYABLE_DESTRUCTOR(C)  \
-    C(const C&) = delete;  \
-    C(C&&) noexcept = delete;  \
-    C& operator=(const C&) = delete;  \
-    C& operator=(C&&) & noexcept = delete;  \
-    ~C()  // no semicolon
-
-#define ASTERIA_NONCOPYABLE_VIRTUAL_DESTRUCTOR(C)  \
-    C(const C&) = delete;  \
-    C(C&&) noexcept = delete;  \
-    C& operator=(const C&) = delete;  \
-    C& operator=(C&&) & noexcept = delete;  \
-    virtual ~C()  // no semicolon
+// Macros
+#define ASTERIA_INCOMPLET(T)  \
+    template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
 
 #define ASTERIA_VARIANT(m, ...)  \
     ::rocket::variant<__VA_ARGS__> m  // no semicolon
 
-#define ASTERIA_INCOMPLET(T)  \
-    template<typename T##_IKYvW2aJ = T, typename T = T##_IKYvW2aJ>
-
-// `using`-directives
+// Directives
 using ::std::nullptr_t;
 using ::std::max_align_t;
 using ::std::ptrdiff_t;

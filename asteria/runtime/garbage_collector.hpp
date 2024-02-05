@@ -27,8 +27,8 @@ class Garbage_Collector
     Variable_HashMap m_unreach;
 
   public:
-    Garbage_Collector() noexcept
-      { }
+    // Creates an empty garbage collector.
+    Garbage_Collector() noexcept;
 
   private:
     inline
@@ -36,9 +36,11 @@ class Garbage_Collector
     do_collect_generation(uint32_t gen);
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Garbage_Collector);
+    Garbage_Collector(const Garbage_Collector&) = delete;
+    Garbage_Collector& operator=(const Garbage_Collector&) & = delete;
+    ~Garbage_Collector();
 
-    // Properties
+    // accessors
     size_t
     get_threshold(GC_Generation gen) const
       { return this->m_thres.at(gMax-gen);  }
@@ -59,7 +61,9 @@ class Garbage_Collector
     clear_pooled_variables() noexcept
       { this->m_pool.clear();  }
 
-    // Allocation and collection
+    // These functions manage dynamic memory by managing variables. Variables
+    // that are not created with `create_variable()` are 'foreign' and will never
+    // be collected.
     refcnt_ptr<Variable>
     create_variable(GC_Generation gen_hint = gc_generation_newest);
 

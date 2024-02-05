@@ -85,8 +85,13 @@ class Token
       }
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(Token);
+    Token(const Token&) = default;
+    Token(Token&&) = default;
+    Token& operator=(const Token&) & = default;
+    Token& operator=(Token&&) & = default;
+    ~Token();
 
+    // accessors
     const Source_Location&
     sloc() const noexcept
       { return this->m_sloc;  }

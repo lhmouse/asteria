@@ -18,8 +18,7 @@ class Abstract_Context
     mutable Reference_Dictionary m_named_refs;
 
   protected:
-    Abstract_Context() noexcept
-      { }
+    Abstract_Context() noexcept = default;
 
   protected:
     virtual

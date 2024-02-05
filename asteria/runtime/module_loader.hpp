@@ -17,28 +17,30 @@ class Module_Loader
 
   private:
     cow_dictionary<::rocket::tinybuf_file> m_strms;
-    using locked_stream_pair = decltype(m_strms)::value_type;
+    using locked_pair = pair<const phsh_string, ::rocket::tinybuf_file>;
 
   public:
-    Module_Loader() noexcept
-      { }
+    // Creates an empty module loader.
+    Module_Loader() noexcept;
 
   private:
-    locked_stream_pair*
+    locked_pair*
     do_lock_stream(const char* path);
 
     void
-    do_unlock_stream(locked_stream_pair* qstrm) noexcept;
+    do_unlock_stream(locked_pair* qstrm) noexcept;
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Module_Loader);
+    Module_Loader(const Module_Loader&) = delete;
+    Module_Loader& operator=(const Module_Loader&) & = delete;
+    ~Module_Loader();
   };
 
 class Module_Loader::Unique_Stream
   {
   private:
     refcnt_ptr<Module_Loader> m_loader;
-    locked_stream_pair* m_strm = nullptr;
+    locked_pair* m_strm = nullptr;
 
   public:
     constexpr
@@ -102,7 +104,7 @@ class Module_Loader::Unique_Stream
     reset(const refcnt_ptr<Module_Loader>& loader, const char* path)
       {
         // If an exception is thrown, there shall be no effect.
-        locked_stream_pair* strm = nullptr;
+        locked_pair* strm = nullptr;
         if(loader)
           strm = loader->do_lock_stream(path);
 

@@ -37,8 +37,11 @@ class PTC_Arguments
       { }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(PTC_Arguments);
+    PTC_Arguments(const PTC_Arguments&) = delete;
+    PTC_Arguments& operator=(const PTC_Arguments&) & = delete;
+    virtual ~PTC_Arguments();
 
+    // accessors
     const Source_Location&
     sloc() const noexcept
       { return this->m_sloc;  }

@@ -70,8 +70,13 @@ class Runtime_Error
     do_insert_frame(Frame_Type type, const Source_Location* sloc_opt, const Value& val);
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(Runtime_Error);
+    Runtime_Error(const Runtime_Error&) noexcept = default;
+    Runtime_Error(Runtime_Error&&) noexcept = default;
+    Runtime_Error& operator=(const Runtime_Error&) & noexcept = default;
+    Runtime_Error& operator=(Runtime_Error&&) & noexcept = default;
+    virtual ~Runtime_Error();
 
+    // accessors
     const char*
     what() const noexcept override
       { return this->m_fmt.c_str();  }
@@ -120,11 +125,6 @@ class Runtime_Error
         this->do_insert_frame(frame_type_try, &sloc, this->m_value);
       }
   };
-
-static_assert(::std::is_nothrow_copy_constructible<Runtime_Error>::value);
-static_assert(::std::is_nothrow_move_constructible<Runtime_Error>::value);
-static_assert(::std::is_nothrow_copy_assignable<Runtime_Error>::value);
-static_assert(::std::is_nothrow_move_assignable<Runtime_Error>::value);
 
 }  // namespace asteria
 #endif

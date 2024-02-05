@@ -48,10 +48,13 @@ class Deflator
           do_zlib_throw_error("deflateCopy", this->m_strm, err);
       }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Deflator)
+    ~Deflator()
       {
         ::deflateEnd(this->m_strm);
       }
+
+    Deflator(const Deflator&) = delete;
+    Deflator& operator=(const Deflator&) & = delete;
 
   private:
     int
@@ -224,7 +227,7 @@ class Inflator
     ::z_stream m_strm[1] = { };
 
   public:
-    Inflator(int wbits)
+    explicit Inflator(int wbits)
       {
         int err = ::inflateInit2(this->m_strm, wbits);
         if(err != Z_OK)
@@ -238,10 +241,13 @@ class Inflator
           do_zlib_throw_error("inflateCopy", this->m_strm, err);
       }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Inflator)
+    ~Inflator()
       {
         ::inflateEnd(this->m_strm);
       }
+
+    Inflator(const Inflator&) = delete;
+    Inflator& operator=(const Inflator&) & = delete;
 
   private:
     int

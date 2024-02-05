@@ -53,10 +53,6 @@ class Executive_Context
                       Reference&& xself);
 
   protected:
-    virtual
-    void
-    vtable_key_function_sLBHstEX() noexcept override;
-
     Reference*
     do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
 
@@ -75,7 +71,9 @@ class Executive_Context
     do_on_scope_exit_exceptional_slow(Runtime_Error& except);
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Executive_Context);
+    Executive_Context(const Executive_Context&) = delete;
+    Executive_Context& operator=(const Executive_Context&) & = delete;
+    ~Executive_Context();
 
     const Executive_Context*
     get_parent_opt() const noexcept

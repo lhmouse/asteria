@@ -20,27 +20,26 @@ class Random_Engine
   private:
     // This matches `struct randctx` from 'rand.h'.
     //   https://www.burtleburtle.net/bob/c/rand.h
-    uint32_t m_randcnt = 0;
-    uint32_t m_randrsl[256] = { };
-    uint32_t m_randmem[256] = { };
-    uint32_t m_randa = 0;
-    uint32_t m_randb = 0;
-    uint32_t m_randc = 0;
+    uint32_t m_randcnt;
+    uint32_t m_randrsl[256];
+    uint32_t m_randmem[256];
+    uint32_t m_randa;
+    uint32_t m_randb;
+    uint32_t m_randc;
 
   public:
-    Random_Engine() noexcept
-      { }
+    // Creates a PRNG from some external entropy source. It is not necessary
+    // to seed this generator explicitly.
+    Random_Engine() noexcept;
 
   private:
     void
     do_isaac() noexcept;
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(Random_Engine);
-
-    // Initializes this PRNG with some external entropy source.
-    void
-    seed() noexcept;
+    Random_Engine(const Random_Engine&) = delete;
+    Random_Engine& operator=(const Random_Engine&) & = delete;
+    ~Random_Engine();
 
     // Gets a random 32-bit number.
     uint32_t
@@ -48,8 +47,8 @@ class Random_Engine
       {
         // This matches `main()` from 'rand.c'.
         //   https://www.burtleburtle.net/bob/c/rand.c
-        uint32_t off = this->m_randcnt++ % 256;
-        if(ROCKET_UNEXPECT(off == 0))
+        uint32_t off = this->m_randcnt ++ % 256;
+        if(off == 0)
           this->do_isaac();
         return this->m_randrsl[off];
       }

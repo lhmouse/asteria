@@ -64,8 +64,13 @@ class Compiler_Error
     do_compose_message();
 
   public:
-    ASTERIA_COPYABLE_DESTRUCTOR(Compiler_Error);
+    Compiler_Error(const Compiler_Error&) noexcept = default;
+    Compiler_Error(Compiler_Error&&) noexcept = default;
+    Compiler_Error& operator=(const Compiler_Error&) & noexcept = default;
+    Compiler_Error& operator=(Compiler_Error&&) & noexcept = default;
+    virtual ~Compiler_Error();
 
+    // accessors
     const char*
     what() const noexcept override
       { return this->m_fmt.c_str();  }
@@ -90,31 +95,6 @@ class Compiler_Error
     column() const noexcept
       { return this->m_sloc.column();  }
   };
-
-inline
-bool
-operator==(const Compiler_Error& lhs, Compiler_Status rhs) noexcept
-  { return lhs.status() == rhs;  }
-
-inline
-bool
-operator!=(const Compiler_Error& lhs, Compiler_Status rhs) noexcept
-  { return lhs.status() != rhs;  }
-
-inline
-bool
-operator==(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
-  { return lhs == rhs.status();  }
-
-inline
-bool
-operator!=(Compiler_Status lhs, const Compiler_Error& rhs) noexcept
-  { return lhs != rhs.status();  }
-
-static_assert(::std::is_nothrow_copy_constructible<Compiler_Error>::value);
-static_assert(::std::is_nothrow_move_constructible<Compiler_Error>::value);
-static_assert(::std::is_nothrow_copy_assignable<Compiler_Error>::value);
-static_assert(::std::is_nothrow_move_assignable<Compiler_Error>::value);
 
 }  // namespace asteria
 #endif

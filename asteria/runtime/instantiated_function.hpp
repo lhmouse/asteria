@@ -23,7 +23,9 @@ class Instantiated_Function
                           const cow_vector<phsh_string>& xparams, const cow_vector<AIR_Node>& code);
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Instantiated_Function);
+    Instantiated_Function(const Instantiated_Function&) = delete;
+    Instantiated_Function& operator=(const Instantiated_Function&) & = delete;
+    ~Instantiated_Function();
 
     const Source_Location&
     sloc() const noexcept

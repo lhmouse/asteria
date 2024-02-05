@@ -21,9 +21,13 @@ class Statement_Sequence
       { }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Statement_Sequence);
+    Statement_Sequence(const Statement_Sequence&) = default;
+    Statement_Sequence(Statement_Sequence&&) = default;
+    Statement_Sequence& operator=(const Statement_Sequence&) & = default;
+    Statement_Sequence& operator=(Statement_Sequence&&) & = default;
+    ~Statement_Sequence();
 
-    // These are accessors and modifiers of options for parsing.
+    // accessors
     const Compiler_Options&
     get_options() const noexcept
       { return this->m_opts;  }
@@ -36,8 +40,6 @@ class Statement_Sequence
     set_options(const Compiler_Options& opts) noexcept
       { this->m_opts = opts;  }
 
-    // These are accessors to the statements in this sequence.
-    // Note that the sequence cannot be modified.
     bool
     empty() const noexcept
       { return this->m_stmts.empty();  }

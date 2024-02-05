@@ -23,9 +23,11 @@ class Variable
       { }
 
   public:
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(Variable);
+    Variable(const Variable&) = delete;
+    Variable& operator=(const Variable&) & = delete;
+    ~Variable();
 
-    // Accessors
+    // accessors
     bool
     is_initialized() const noexcept
       { return this->m_init;  }

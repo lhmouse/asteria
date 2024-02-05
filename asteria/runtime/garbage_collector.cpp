@@ -8,6 +8,11 @@
 namespace asteria {
 
 Garbage_Collector::
+Garbage_Collector() noexcept
+  {
+  }
+
+Garbage_Collector::
 ~Garbage_Collector()
   {
   }

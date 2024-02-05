@@ -23,7 +23,7 @@ class IOF_Sentry
     ::FILE* m_fp;
 
   public:
-    explicit IOF_Sentry(::FILE* sentry, IOF_Mode mode)
+    IOF_Sentry(::FILE* sentry, IOF_Mode mode)
       :
         m_fp(sentry)
       {
@@ -56,13 +56,16 @@ class IOF_Sentry
               mode_req);
       }
 
-    ASTERIA_NONCOPYABLE_DESTRUCTOR(IOF_Sentry)
+    ~IOF_Sentry()
       {
         ::funlockfile(this->m_fp);
       }
 
     operator ::FILE*() const noexcept
       { return this->m_fp;  }
+
+    IOF_Sentry(const IOF_Sentry&) = delete;
+    IOF_Sentry& operator=(const IOF_Sentry&) & = delete;
   };
 
 size_t
