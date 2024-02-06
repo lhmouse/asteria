@@ -251,8 +251,7 @@ struct Handler_source : Handler
             args.mut(0).insert(0, home);
         }
 
-        unique_ptr<char, void (void*)> abspath(::free);
-        abspath.reset(::realpath(args[0].safe_c_str(), nullptr));
+        unique_ptr<char, void (void*)> abspath(::realpath(args[0].safe_c_str(), nullptr), ::free);
         if(!abspath)
           return repl_printf("! could not open '%s': %m", args[0].c_str());
 

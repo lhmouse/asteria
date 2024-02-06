@@ -1042,9 +1042,8 @@ do_hash_file(const V_string& path)
           path);
 
     // Allocate the I/O buffer.
-    unique_ptr<char, void (void*)> pbuf(::operator delete);
     size_t nbuf = static_cast<size_t>(stb.st_blksize | 0x1000);
-    pbuf.reset(static_cast<char*>(::operator new(nbuf)));
+    unique_ptr<char, void (void*)> pbuf(static_cast<char*>(::operator new(nbuf)), ::operator delete);
 
     // Read bytes from the file and hash them.
     HasherT h;

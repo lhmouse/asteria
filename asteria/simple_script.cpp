@@ -116,8 +116,8 @@ void
 Simple_Script::
 reload_file(const char* path)
   {
-    unique_ptr<char, void (void*)> abspath(::free);
-    if(!abspath.reset(::realpath(path, nullptr)))
+    unique_ptr<char, void (void*)> abspath(::realpath(path, nullptr), ::free);
+    if(!abspath)
       ASTERIA_THROW((
           "Could not open script file '$1'",
           "[`realpath()` failed: ${errno:full}]"),

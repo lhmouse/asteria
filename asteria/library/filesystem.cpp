@@ -54,8 +54,7 @@ V_string
 std_filesystem_get_real_path(V_string path)
   {
     // Pass a null pointer to request dynamic allocation.
-    unique_ptr<char, void (void*)> abspath(::free);
-    abspath.reset(::realpath(path.safe_c_str(), nullptr));
+    unique_ptr<char, void (void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!abspath)
       ASTERIA_THROW((
           "Could not resolve path '$1'",
@@ -611,9 +610,8 @@ std_filesystem_copy_file(V_string path_new, V_string path_old)
           path_old);
 
     // Allocate the I/O buffer.
-    unique_ptr<char, void (void*)> pbuf(::operator delete);
     size_t nbuf = static_cast<size_t>(stb_old.st_blksize | 0x1000);
-    pbuf.reset(static_cast<char*>(::operator new(nbuf)));
+    unique_ptr<char, void (void*)> pbuf(static_cast<char*>(::operator new(nbuf)), ::operator delete);
 
     // Copy all contents.
     for(;;) {

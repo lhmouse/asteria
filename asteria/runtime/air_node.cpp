@@ -4037,8 +4037,8 @@ solidify(AVM_Rod& rod) const
             if((abs_path[0] != '/') && (src_file[0] == '/'))
               abs_path.insert(0, src_file, 0, src_file.rfind('/') + 1);
 
-            unique_ptr<char, void (void*)> realpathp(::free);
-            if(!realpathp.reset(::realpath(abs_path.safe_c_str(), nullptr)))
+            unique_ptr<char, void (void*)> realpathp(::realpath(abs_path.safe_c_str(), nullptr), ::free);
+            if(!realpathp)
               throw Runtime_Error(xtc_format,
                        "Could not open script file '$1': ${errno:full}", path_val);
 

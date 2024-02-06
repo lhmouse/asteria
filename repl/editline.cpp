@@ -108,8 +108,8 @@ do_init_once()
       auto path = cow_string(home) + "/.editrc";
       repl_printf("* loading settings from `%s`...", path.c_str());
 
-      unique_ptr<char, void (void*)> abspath(::free);
-      if(abspath.reset(::realpath(path.c_str(), nullptr))) {
+      unique_ptr<char, void (void*)> abspath(::realpath(path.c_str(), nullptr), ::free);
+      if(abspath) {
         ::el_source(s_editor, nullptr);
         repl_printf("* ... done.");
       }

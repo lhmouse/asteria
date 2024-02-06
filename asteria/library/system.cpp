@@ -229,8 +229,7 @@ std_system_get_working_directory()
   {
     // Pass a null pointer to request dynamic allocation.
     // Note this behavior is an extension that exists almost everywhere.
-    unique_ptr<char, void (void*)> cwd(::free);
-    cwd.reset(::getcwd(nullptr, 0));
+    unique_ptr<char, void (void*)> cwd(::getcwd(nullptr, 0), ::free);
     if(!cwd)
       ASTERIA_THROW((
           "Could not get current working directory",
