@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "precompiled.hpp"
+#include "xprecompiled.hpp"
 #include "simple_script.hpp"
 #include "compiler/token_stream.hpp"
 #include "compiler/statement_sequence.hpp"

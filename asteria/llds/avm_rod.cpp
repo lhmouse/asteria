@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.hpp"
+#include "../xprecompiled.hpp"
 #include "avm_rod.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/runtime_error.hpp"

@@ -82,32 +82,11 @@ rocket_include = [
   'rocket/bit_mask.hpp',
 ]
 
-rocket_src = [
-  'rocket/xassert.cpp',
-  'rocket/xthrow.cpp',
-  'rocket/xuchar.cpp',
-  'rocket/xmemory.cpp',
-  'rocket/cow_string.cpp',
-  'rocket/linear_buffer.cpp',
-  'rocket/tinybuf.cpp',
-  'rocket/tinybuf_str.cpp',
-  'rocket/tinybuf_file.cpp',
-  'rocket/tinybuf_ln.cpp',
-  'rocket/ascii_numput.cpp',
-  'rocket/ascii_numget.cpp',
-  'rocket/tinyfmt.cpp',
-  'rocket/tinyfmt_str.cpp',
-  'rocket/tinyfmt_file.cpp',
-  'rocket/tinyfmt_ln.cpp',
-  'rocket/prehashed_string.cpp',
-]
-
 asteria_include = [
   'asteria/details/value.ipp',
   'asteria/details/variable_hashmap.ipp',
   'asteria/details/reference_dictionary.ipp',
   'asteria/details/avm_rod.ipp',
-  'asteria/precompiled.hpp',
   'asteria/fwd.hpp',
   'asteria/utils.hpp',
   'asteria/recursion_sentry.hpp',
@@ -165,6 +144,23 @@ asteria_include = [
 ]
 
 asteria_src = [
+  'rocket/xassert.cpp',
+  'rocket/xthrow.cpp',
+  'rocket/xuchar.cpp',
+  'rocket/xmemory.cpp',
+  'rocket/cow_string.cpp',
+  'rocket/linear_buffer.cpp',
+  'rocket/tinybuf.cpp',
+  'rocket/tinybuf_str.cpp',
+  'rocket/tinybuf_file.cpp',
+  'rocket/tinybuf_ln.cpp',
+  'rocket/ascii_numput.cpp',
+  'rocket/ascii_numget.cpp',
+  'rocket/tinyfmt.cpp',
+  'rocket/tinyfmt_str.cpp',
+  'rocket/tinyfmt_file.cpp',
+  'rocket/tinyfmt_ln.cpp',
+  'rocket/prehashed_string.cpp',
   'asteria/fwd.cpp',
   'asteria/utils.cpp',
   'asteria/recursion_sentry.cpp',
@@ -389,8 +385,8 @@ install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
 # Rules for 'lib/libasteria.so'
 #===========================================================
 lib_asteria = both_libraries('asteria',
-      cpp_pch: 'asteria/precompiled.hpp',
-      sources: [ rocket_src, asteria_src ],
+      cpp_pch: 'asteria/xprecompiled.hpp',
+      sources: asteria_src,
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       soversion: ver.get('abi_major'),
       version: '@0@.@1@.@2@'.format(ver.get('abi_major'), ver.get('abi_minor'), 0),
@@ -407,7 +403,7 @@ import('pkgconfig').generate(lib_asteria,
 #===========================================================
 if get_option('enable-repl')
   executable('asteria',
-             cpp_pch: 'asteria/precompiled.hpp',
+             cpp_pch: 'asteria/xprecompiled.hpp',
              sources: [ repl_src ],
              dependencies: [ dep_editline ],
              link_with: lib_asteria,

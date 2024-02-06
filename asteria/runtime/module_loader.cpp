@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.hpp"
+#include "../xprecompiled.hpp"
 #include "module_loader.hpp"
 #include "runtime_error.hpp"
 #include "../utils.hpp"

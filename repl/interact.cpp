@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../asteria/precompiled.hpp"
+#include "../asteria/xprecompiled.hpp"
 #include "fwd.hpp"
 #include "../asteria/compiler/compiler_error.hpp"
 #include "../asteria/compiler/token_stream.hpp"

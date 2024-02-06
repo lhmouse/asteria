@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.hpp"
+#include "../xprecompiled.hpp"
 #include "binding_generator.hpp"
 #include "argument_reader.hpp"
 #include "reference.hpp"

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2020, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2024, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_PRECOMPILED_
-#define ASTERIA_PRECOMPILED_
+#ifndef ASTERIA_XPRECOMPILED_
+#define ASTERIA_XPRECOMPILED_
 
 #include "version.h"
 
