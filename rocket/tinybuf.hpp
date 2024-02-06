@@ -28,8 +28,7 @@ class basic_tinybuf
     basic_tinybuf& operator=(const basic_tinybuf&) & noexcept = delete;
 
   public:
-    virtual
-    ~basic_tinybuf();
+    virtual ~basic_tinybuf();
 
     // Flushes a stream, like `fflush()`.
     // The default implementation does nothing.

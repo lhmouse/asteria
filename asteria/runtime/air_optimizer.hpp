@@ -15,8 +15,7 @@ class AIR_Optimizer
     cow_vector<AIR_Node> m_code;
 
   public:
-    constexpr
-    explicit AIR_Optimizer(const Compiler_Options& opts) noexcept
+    explicit constexpr AIR_Optimizer(const Compiler_Options& opts) noexcept
       :
         m_opts(opts)
       { }

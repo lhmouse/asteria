@@ -33,8 +33,7 @@ class mutex
         ::pthread_mutex_t* m_mtx = nullptr;
 
       public:
-        constexpr
-        unique_lock() noexcept = default;
+        constexpr unique_lock() noexcept = default;
 
         unique_lock(mutex& m) noexcept
           {
@@ -67,16 +66,15 @@ class mutex
             return *this;
           }
 
+        explicit constexpr operator bool() const noexcept
+          { return this->m_mtx != nullptr;  }
+
         ~unique_lock()
           {
             this->unlock();
           }
 
       public:
-        constexpr
-        explicit operator bool() const noexcept
-          { return this->m_mtx != nullptr;  }
-
         void
         lock(mutex& m) noexcept
           {

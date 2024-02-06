@@ -54,8 +54,7 @@ class basic_tinyfmt
     do_get_tinybuf_nonconst() const = 0;
 
   public:
-    virtual
-    ~basic_tinyfmt();
+    virtual ~basic_tinyfmt();
 
     // These are wrappers for the buffer.
     const tinybuf_type&

@@ -14,19 +14,19 @@ class refcnt_cJveMKH5bI7L
   public:
     bool
     unique() const noexcept
-      { return this->m_nref == 1;  }
+      { return this->m_nref.unique();  }
 
     int
     use_count() const noexcept
-      { return this->m_nref;  }
+      { return this->m_nref.get();  }
 
     int
     add_reference() const noexcept
-      { return ++ this->m_nref;  }
+      { return this->m_nref.increment();  }
 
     int
     drop_reference() const noexcept
-      { return -- this->m_nref;  }
+      { return this->m_nref.decrement();  }
   };
 
 template<typename elementT, typename deleterT>
@@ -56,14 +56,12 @@ class stored_pointer
     pointer m_ptr;
 
   public:
-    constexpr
-    stored_pointer() noexcept
+    constexpr stored_pointer() noexcept
       :
         m_ptr()
       { }
 
-    constexpr
-    explicit stored_pointer(pointer ptr) noexcept
+    explicit constexpr stored_pointer(pointer ptr) noexcept
       :
         m_ptr(move(ptr))
       { }

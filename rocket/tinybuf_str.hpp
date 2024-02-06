@@ -28,14 +28,14 @@ class basic_tinybuf_str
     open_mode m_mode = tinybuf_base::open_read_write;
 
   public:
-    constexpr
-    explicit basic_tinybuf_str(const allocator_type& alloc) noexcept
+    constexpr basic_tinybuf_str() noexcept(is_nothrow_default_constructible<string_type>::value)
       :
-        m_str(alloc)
+        m_str()
       { }
 
-    constexpr
-    basic_tinybuf_str() noexcept(is_nothrow_default_constructible<string_type>::value)
+    explicit constexpr basic_tinybuf_str(const allocator_type& alloc) noexcept
+      :
+        m_str(alloc)
       { }
 
     explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
@@ -45,8 +45,7 @@ class basic_tinybuf_str
 
     template<typename xstrT,
     ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&, const allocator_type&>::value)>
-    constexpr
-    basic_tinybuf_str(xstrT&& xstr, open_mode mode, const allocator_type& alloc = allocator_type())
+    constexpr basic_tinybuf_str(xstrT&& xstr, open_mode mode, const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<string_type, xstrT&&, const allocator_type>::value)
       :
         m_str(forward<xstrT>(xstr), alloc), m_mode(mode)
@@ -109,8 +108,7 @@ class basic_tinybuf_str
       }
 
   public:
-    virtual
-    ~basic_tinybuf_str() override;
+    virtual ~basic_tinybuf_str() override;
 
     // Gets the internal string.
     const string_type&

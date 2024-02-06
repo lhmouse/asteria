@@ -141,20 +141,17 @@ class basic_cow_string
 
   public:
     // 24.3.2.2, construct/copy/destroy
-    constexpr
-    basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(s_zstr), m_sth()
       { }
 
-    constexpr
-    explicit basic_cow_string(const allocator_type& alloc) noexcept
+    explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
       :
         m_ref(s_zstr), m_sth(alloc)
       { }
 
-    constexpr
-    basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
+    constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_ref(sh), m_sth(alloc)
       { }
@@ -192,8 +189,8 @@ class basic_cow_string
         basic_cow_string(alloc)
       { this->append(other, pos, n);  }
 
-    explicit  // no implicit conversion from string literal; see `sref()`.
-    basic_cow_string(const value_type* s, const allocator_type& alloc = allocator_type())
+    // Implicit conversion from string literal is disallowed; use `sref()`.
+    explicit basic_cow_string(const value_type* s, const allocator_type& alloc = allocator_type())
       :
         basic_cow_string(alloc)
       { this->append(s);  }

@@ -15,8 +15,7 @@ namespace {
 
 struct Indenter
   {
-    virtual
-    ~Indenter();
+    virtual ~Indenter();
 
     virtual
     void

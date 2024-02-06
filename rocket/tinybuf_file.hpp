@@ -84,8 +84,7 @@ class basic_tinybuf_file
       }
 
   public:
-    virtual
-    ~basic_tinybuf_file() override;
+    virtual ~basic_tinybuf_file() override;
 
     // Gets the file pointer.
     handle_type

@@ -62,8 +62,7 @@ class basic_tinyfmt_file
       }
 
   public:
-    virtual
-    ~basic_tinyfmt_file() override;
+    virtual ~basic_tinyfmt_file() override;
 
     // Gets the file pointer.
     handle_type

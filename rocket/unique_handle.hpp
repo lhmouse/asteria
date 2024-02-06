@@ -45,26 +45,22 @@ class unique_handle
 
   public:
     // 23.11.1.2.1, constructors
-    constexpr
-    unique_handle() noexcept(is_nothrow_constructible<closer_type>::value)
+    constexpr unique_handle() noexcept(is_nothrow_constructible<closer_type>::value)
       :
         m_sth()
       { }
 
-    constexpr
-    explicit unique_handle(const closer_type& cl) noexcept
+    explicit constexpr unique_handle(const closer_type& cl) noexcept
       :
         m_sth(cl.null(), cl)
       { }
 
-    constexpr
-    explicit unique_handle(handle_type hv) noexcept(is_nothrow_constructible<closer_type>::value)
+    explicit constexpr unique_handle(handle_type hv) noexcept(is_nothrow_constructible<closer_type>::value)
       :
         m_sth(move(hv))
       { }
 
-    constexpr
-    unique_handle(handle_type hv, const closer_type& cl) noexcept
+    constexpr unique_handle(handle_type hv, const closer_type& cl) noexcept
       :
         m_sth(move(hv), cl)
       { }
@@ -112,11 +108,11 @@ class unique_handle
     get_closer() noexcept
       { return this->m_sth.as_closer();  }
 
-    constexpr
+    ROCKET_PURE constexpr
     explicit operator bool() const noexcept
       { return not this->m_sth.as_closer().is_null(this->m_sth.get());  }
 
-    constexpr
+    ROCKET_PURE constexpr
     operator const handle_type&() const noexcept
       { return this->m_sth.get();  }
 

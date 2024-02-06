@@ -111,29 +111,25 @@ class refcnt_ptr
     details_refcnt_ptr::stored_pointer<element_type> m_sth;
 
   public:
-    constexpr
-    refcnt_ptr(nullptr_t = nullptr) noexcept
+    constexpr refcnt_ptr(nullptr_t = nullptr) noexcept
       :
         m_sth()
       { }
 
-    constexpr
-    explicit refcnt_ptr(pointer ptr) noexcept
+    explicit constexpr refcnt_ptr(pointer ptr) noexcept
       :
         m_sth(ptr)
       { }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                    pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
       :
         m_sth(other.m_sth.fork())
       { }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                    pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
       :
         m_sth(other.m_sth.release())
@@ -157,8 +153,7 @@ class refcnt_ptr
       }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                    pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr&
     operator=(const refcnt_ptr<yelementT>& other) & noexcept
       {
@@ -167,8 +162,7 @@ class refcnt_ptr
       }
 
     template<typename yelementT,
-    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                    pointer>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
     refcnt_ptr&
     operator=(refcnt_ptr<yelementT>&& other) & noexcept
       {

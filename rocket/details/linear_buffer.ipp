@@ -25,20 +25,17 @@ class basic_storage
     size_type m_cap = 0;  // size of allocated storage
 
   public:
-    constexpr
-    basic_storage() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_storage() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         allocator_base()
       { }
 
-    constexpr
-    explicit basic_storage(const allocator_type& alloc) noexcept
+    explicit constexpr basic_storage(const allocator_type& alloc) noexcept
       :
         allocator_base(alloc)
       { }
 
-    constexpr
-    explicit basic_storage(allocator_type&& alloc) noexcept
+    explicit constexpr basic_storage(allocator_type&& alloc) noexcept
       :
         allocator_base(move(alloc))
       { }

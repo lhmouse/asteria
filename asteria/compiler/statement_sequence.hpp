@@ -14,8 +14,7 @@ class Statement_Sequence
     cow_vector<Statement> m_stmts;
 
   public:
-    constexpr
-    explicit Statement_Sequence(const Compiler_Options& opts) noexcept
+    explicit constexpr Statement_Sequence(const Compiler_Options& opts) noexcept
       :
         m_opts(opts)
       { }

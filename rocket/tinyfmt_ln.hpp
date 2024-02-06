@@ -63,8 +63,7 @@ class basic_tinyfmt_ln
       }
 
   public:
-    virtual
-    ~basic_tinyfmt_ln() override;
+    virtual ~basic_tinyfmt_ln() override;
 
     // Gets the internal buffer.
     const buffer_type&

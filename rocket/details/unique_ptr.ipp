@@ -58,14 +58,12 @@ class stored_pointer_impl<pointerT, deleterT, true, true, false>
     pointer m_ptr;
 
   public:
-    constexpr
-    stored_pointer_impl() noexcept
+    constexpr stored_pointer_impl() noexcept
       :
         m_del(), m_ptr()
       { }
 
-    constexpr
-    explicit stored_pointer_impl(pointer ptr, deleter_type del = nullptr) noexcept
+    explicit constexpr stored_pointer_impl(pointer ptr, deleter_type del) noexcept
       :
         m_del(del), m_ptr(move(ptr))
       { }
@@ -133,15 +131,13 @@ class stored_pointer_impl<pointerT, deleterT, false, true, false>
     pointer m_ptr;
 
   public:
-    constexpr
-    stored_pointer_impl() noexcept(is_nothrow_constructible<deleter_type>::value)
+    constexpr stored_pointer_impl() noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         deleter_base(), m_ptr()
       { }
 
     template<typename... dparamsT>
-    constexpr
-    explicit stored_pointer_impl(pointer ptr, dparamsT&&... dparams)
+    explicit constexpr stored_pointer_impl(pointer ptr, dparamsT&&... dparams)
       noexcept(is_nothrow_constructible<deleter_type, dparamsT&&...>::value)
       :
         deleter_base(forward<dparamsT>(dparams)...), m_ptr(move(ptr))
@@ -200,8 +196,7 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
     pointer m_ptr = nullptr;
 
   public:
-    constexpr
-    explicit stored_pointer_impl(pointer ptr, deleterT& del) noexcept
+    explicit constexpr stored_pointer_impl(pointer ptr, deleterT& del) noexcept
       :
         deleter_base(del), m_ptr(move(ptr))
       { }
@@ -246,8 +241,8 @@ class stored_pointer_impl<pointerT, deleterT, false, false, true>
 
 template<typename pointerT, typename deleterT>
 using stored_pointer
-  = stored_pointer_impl<pointerT, deleterT,
-        is_pointer<deleterT>::value, is_object<deleterT>::value,
-        is_function<deleterT>::value || is_reference<deleterT>::value>;
+        = stored_pointer_impl<pointerT, deleterT,
+              is_pointer<deleterT>::value, is_object<deleterT>::value,
+              is_function<deleterT>::value || is_reference<deleterT>::value>;
 
 }  // namespace details_unique_ptr

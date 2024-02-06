@@ -12,8 +12,7 @@ namespace rocket {
 template<typename valueT = int>
 class reference_counter
   {
-    static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value,
-        "invalid reference counter value type");
+    static_assert(is_integral<valueT>::value && !is_same<valueT, bool>::value);
 
   public:
     using value_type  = valueT;
@@ -22,14 +21,12 @@ class reference_counter
     ::std::atomic<value_type> m_nref;
 
   public:
-    constexpr
-    reference_counter() noexcept
+    constexpr reference_counter() noexcept
       :
         m_nref(1)
       { }
 
-    constexpr
-    explicit reference_counter(value_type nref) noexcept
+    explicit constexpr reference_counter(value_type nref) noexcept
       :
         m_nref(nref)
       { }
@@ -87,27 +84,6 @@ class reference_counter
         ROCKET_ASSERT(old >= 1);
         return old - 1;
       }
-
-    // Provide some convenient operators.
-
-    operator value_type() const noexcept
-      { return this->get();  }
-
-    value_type
-    operator++() noexcept
-      { return this->increment();  }
-
-    value_type
-    operator--() noexcept
-      { return this->decrement();  }
-
-    value_type
-    operator++(int) noexcept
-      { return this->increment() - 1;  }
-
-    value_type
-    operator--(int) noexcept
-      { return this->decrement() + 1;  }
   };
 
 }  // namespace rocket

@@ -63,8 +63,7 @@ class basic_tinyfmt_str
       }
 
   public:
-    virtual
-    ~basic_tinyfmt_str() override;
+    virtual ~basic_tinyfmt_str() override;
 
     // Gets the internal string.
     const string_type&

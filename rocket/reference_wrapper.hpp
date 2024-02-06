@@ -27,22 +27,21 @@ class reference_wrapper
     // construct/copy/destroy
     template<typename otherT,
     ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-    constexpr
-    explicit reference_wrapper(otherT& other) noexcept
+    explicit constexpr reference_wrapper(otherT& other) noexcept
       :
         m_ptr(::std::addressof(other))
       { }
 
     template<typename otherT,
     ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-    constexpr
-    reference_wrapper(const reference_wrapper<otherT>& other) noexcept
+    constexpr reference_wrapper(const reference_wrapper<otherT>& other) noexcept
       :
         m_ptr(other.m_ptr)
       { }
 
-  public:
-    // access
+    constexpr operator reference() const noexcept
+      { return this->get();  }
+
     constexpr
     reference
     get() const noexcept
@@ -52,10 +51,6 @@ class reference_wrapper
     pointer
     ptr() const noexcept
       { return this->m_ptr;  }
-
-    constexpr
-    operator reference() const noexcept
-      { return this->get();  }
   };
 
 template<typename valueT>

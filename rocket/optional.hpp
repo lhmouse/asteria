@@ -169,6 +169,9 @@ class optional
         return *this;
       }
 
+    explicit constexpr operator bool() const noexcept
+      { return this->m_stor.size() != 0;  }
+
   private:
     [[noreturn]] ROCKET_NEVER_INLINE
     reference
@@ -182,10 +185,6 @@ class optional
     constexpr
     bool
     has_value() const noexcept
-      { return this->m_stor.size() != 0;  }
-
-    constexpr
-    explicit operator bool() const noexcept
       { return this->m_stor.size() != 0;  }
 
     const_reference

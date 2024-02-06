@@ -83,20 +83,17 @@ class storage_handle
     storage_pointer m_qstor = nullptr;
 
   public:
-    constexpr
-    storage_handle() noexcept
+    constexpr storage_handle() noexcept
       :
         allocator_base()
       { }
 
-    constexpr
-    explicit storage_handle(const allocator_type& alloc) noexcept
+    explicit constexpr storage_handle(const allocator_type& alloc) noexcept
       :
         allocator_base(alloc)
       { }
 
-    constexpr
-    explicit storage_handle(allocator_type&& alloc) noexcept
+    explicit constexpr storage_handle(allocator_type&& alloc) noexcept
       :
         allocator_base(move(alloc))
       { }

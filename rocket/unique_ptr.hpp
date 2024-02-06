@@ -35,26 +35,22 @@ class unique_ptr
 
   public:
     // 23.11.1.2.1, constructors
-    constexpr
-    unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+    constexpr unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth()
       { }
 
-    constexpr
-    explicit unique_ptr(const deleter_type& del) noexcept
+    explicit constexpr unique_ptr(const deleter_type& del) noexcept
       :
         m_sth(nullptr, del)
       { }
 
-    constexpr
-    explicit unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+    explicit constexpr unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth(ptr)
       { }
 
-    constexpr
-    unique_ptr(pointer ptr, const deleter_type& del) noexcept
+    constexpr unique_ptr(pointer ptr, const deleter_type& del) noexcept
       :
         m_sth(ptr, del)
       { }

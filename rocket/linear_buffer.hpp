@@ -38,14 +38,12 @@ class basic_linear_buffer
     size_type m_eoff = 0;  // offset of the end
 
   public:
-    constexpr
-    basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_stor()
       { }
 
-    constexpr
-    explicit basic_linear_buffer(const allocator_type& alloc) noexcept
+    explicit constexpr basic_linear_buffer(const allocator_type& alloc) noexcept
       :
         m_stor(alloc)
       { }
@@ -71,12 +69,14 @@ class basic_linear_buffer
       :
         m_stor(alloc)
       {
-        if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc))
+        if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc)) {
           // If the allocators compare equal, they can deallocate memory allocated by each other.
           this->do_exchange_with(other);
-        else
+        }
+        else {
           // Otherwise, we have to copy its contents instead.
           this->putn(other.data(), other.size());
+        }
       }
 
     basic_linear_buffer&

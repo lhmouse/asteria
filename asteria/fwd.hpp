@@ -201,8 +201,7 @@ ASTERIA_DEFINE_TAG_(xtc_throw);
 // Type erasure
 struct Rcbase : ::rocket::refcnt_base<Rcbase>
   {
-    virtual
-    ~Rcbase() = default;
+    virtual ~Rcbase() = default;
 
     virtual
     void

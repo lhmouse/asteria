@@ -67,6 +67,9 @@ class basic_bucket
   public:
     constexpr basic_bucket() noexcept = default;
 
+    explicit constexpr operator bool() const noexcept
+      { return static_cast<bool>(this->m_qval);  }
+
     basic_bucket(const basic_bucket&) = delete;
     basic_bucket& operator=(const basic_bucket&) = delete;
 
@@ -83,10 +86,6 @@ class basic_bucket
     pointer
     exchange(pointer qval) noexcept
       { return noadl::exchange(this->m_qval, qval);  }
-
-    constexpr
-    explicit operator bool() const noexcept
-      { return static_cast<bool>(this->m_qval);  }
 
     constexpr
     const value_type&

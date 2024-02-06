@@ -27,14 +27,14 @@ class basic_tinybuf_ln
     open_mode m_mode = tinybuf_base::open_read_write;
 
   public:
-    constexpr
-    explicit basic_tinybuf_ln(const allocator_type& alloc) noexcept
+    constexpr basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)
       :
-        m_ln(alloc)
+        m_ln()
       { }
 
-    constexpr
-    basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)
+    explicit constexpr basic_tinybuf_ln(const allocator_type& alloc) noexcept
+      :
+        m_ln(alloc)
       { }
 
     explicit basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
@@ -44,8 +44,7 @@ class basic_tinybuf_ln
 
     template<typename xlnT,
     ROCKET_ENABLE_IF(is_constructible<buffer_type, xlnT&&, const allocator_type&>::value)>
-    constexpr
-    basic_tinybuf_ln(xlnT&& xln, open_mode mode, const allocator_type& alloc = allocator_type())
+    constexpr basic_tinybuf_ln(xlnT&& xln, open_mode mode, const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<buffer_type, xlnT&&, const allocator_type>::value)
       :
         m_ln(forward<xlnT>(xln), alloc), m_mode(mode)
@@ -103,8 +102,7 @@ class basic_tinybuf_ln
       }
 
   public:
-    virtual
-    ~basic_tinybuf_ln() override;
+    virtual ~basic_tinybuf_ln() override;
 
     // Gets the internal buffer.
     const buffer_type&
