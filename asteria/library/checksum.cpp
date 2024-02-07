@@ -72,10 +72,10 @@ class CRC32_Hasher
 void
 do_construct_CRC32(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}");
+    static constexpr auto s_private_uuid = &"{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}";
     result.insert_or_assign(s_private_uuid, std_checksum_CRC32_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.CRC32::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -92,7 +92,7 @@ do_construct_CRC32(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.CRC32::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -107,7 +107,7 @@ do_construct_CRC32(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.CRC32::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -180,10 +180,10 @@ class Adler32_Hasher
 void
 do_construct_Adler32(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2F5059F5-002D-4E7E-559D-EDA4EDA43608}");
+    static constexpr auto s_private_uuid = &"{2F5059F5-002D-4E7E-559D-EDA4EDA43608}";
     result.insert_or_assign(s_private_uuid, std_checksum_Adler32_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.Adler32::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -200,7 +200,7 @@ do_construct_Adler32(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.Adler32::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -215,7 +215,7 @@ do_construct_Adler32(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.Adler32::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -291,10 +291,10 @@ class FNV1a32_Hasher
 void
 do_construct_FNV1a32(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2C79571C-5D7B-4674-056A-6C0D075A82FC}");
+    static constexpr auto s_private_uuid = &"{2C79571C-5D7B-4674-056A-6C0D075A82FC}";
     result.insert_or_assign(s_private_uuid, std_checksum_FNV1a32_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.FNV1a32::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -311,7 +311,7 @@ do_construct_FNV1a32(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.FNV1a32::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -326,7 +326,7 @@ do_construct_FNV1a32(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.FNV1a32::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -416,10 +416,10 @@ class MD5_Hasher
 void
 do_construct_MD5(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2C795808-7290-4675-056A-D3825905F8E1}");
+    static constexpr auto s_private_uuid = &"{2C795808-7290-4675-056A-D3825905F8E1}";
     result.insert_or_assign(s_private_uuid, std_checksum_MD5_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.MD5::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -436,7 +436,7 @@ do_construct_MD5(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.MD5::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -451,7 +451,7 @@ do_construct_MD5(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.MD5::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -525,10 +525,10 @@ class SHA1_Hasher
 void
 do_construct_SHA1(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}");
+    static constexpr auto s_private_uuid = &"{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA1_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.SHA1::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -545,7 +545,7 @@ do_construct_SHA1(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.SHA1::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -560,7 +560,7 @@ do_construct_SHA1(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.SHA1::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -634,10 +634,10 @@ class SHA224_Hasher
 void
 do_construct_SHA224(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2D24231A-8D6F-4EDC-0612-C448C44886E4}");
+    static constexpr auto s_private_uuid = &"{2D24231A-8D6F-4EDC-0612-C448C44886E4}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA224_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.SHA224::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -654,7 +654,7 @@ do_construct_SHA224(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.SHA224::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -669,7 +669,7 @@ do_construct_SHA224(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.SHA224::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -743,10 +743,10 @@ class SHA256_Hasher
 void
 do_construct_SHA256(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2D24231C-F3D7-4EDC-0612-551055107FE2}");
+    static constexpr auto s_private_uuid = &"{2D24231C-F3D7-4EDC-0612-551055107FE2}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA256_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.SHA256::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -763,7 +763,7 @@ do_construct_SHA256(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.SHA256::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -778,7 +778,7 @@ do_construct_SHA256(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.SHA256::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -852,10 +852,10 @@ class SHA384_Hasher
 void
 do_construct_SHA384(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2D24231E-B48F-4EDC-0612-145E145E6F29}");
+    static constexpr auto s_private_uuid = &"{2D24231E-B48F-4EDC-0612-145E145E6F29}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA384_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.SHA384::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -872,7 +872,7 @@ do_construct_SHA384(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.SHA384::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -887,7 +887,7 @@ do_construct_SHA384(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.SHA384::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -961,10 +961,10 @@ class SHA512_Hasher
 void
 do_construct_SHA512(V_object& result)
   {
-    static constexpr auto s_private_uuid = sref("{2D242320-7A94-4EDC-0612-8851885187F8}");
+    static constexpr auto s_private_uuid = &"{2D242320-7A94-4EDC-0612-8851885187F8}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA512_private());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.checksum.SHA512::update", "data",
         Reference&& self, Argument_Reader&& reader)
@@ -981,7 +981,7 @@ do_construct_SHA512(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.checksum.SHA512::finish", "",
         Reference&& self, Argument_Reader&& reader)
@@ -996,7 +996,7 @@ do_construct_SHA512(V_object& result)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.checksum.SHA512::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -1465,7 +1465,7 @@ std_checksum_sha512_file(V_string path)
 void
 create_bindings_checksum(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("CRC32"),
+    result.insert_or_assign(&"CRC32",
       ASTERIA_BINDING(
         "std.checksum.CRC32", "",
         Argument_Reader&& reader)
@@ -1477,7 +1477,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("crc32"),
+    result.insert_or_assign(&"crc32",
       ASTERIA_BINDING(
         "std.checksum.crc32", "data",
         Argument_Reader&& reader)
@@ -1492,7 +1492,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("crc32_file"),
+    result.insert_or_assign(&"crc32_file",
       ASTERIA_BINDING(
         "std.checksum.crc32_file", "path",
         Argument_Reader&& reader)
@@ -1507,7 +1507,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("Adler32"),
+    result.insert_or_assign(&"Adler32",
       ASTERIA_BINDING(
         "std.checksum.Adler32", "",
         Argument_Reader&& reader)
@@ -1519,7 +1519,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("adler32"),
+    result.insert_or_assign(&"adler32",
       ASTERIA_BINDING(
         "std.checksum.adler32", "data",
         Argument_Reader&& reader)
@@ -1534,7 +1534,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("adler32_file"),
+    result.insert_or_assign(&"adler32_file",
       ASTERIA_BINDING(
         "std.checksum.adler32_file", "path",
         Argument_Reader&& reader)
@@ -1549,7 +1549,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("FNV1a32"),
+    result.insert_or_assign(&"FNV1a32",
       ASTERIA_BINDING(
         "std.checksum.FNV1a32", "",
         Argument_Reader&& reader)
@@ -1561,7 +1561,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("fnv1a32"),
+    result.insert_or_assign(&"fnv1a32",
       ASTERIA_BINDING(
         "std.checksum.fnv1a32", "data",
         Argument_Reader&& reader)
@@ -1576,7 +1576,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("fnv1a32_file"),
+    result.insert_or_assign(&"fnv1a32_file",
       ASTERIA_BINDING(
         "std.checksum.fnv1a32_file", "path",
         Argument_Reader&& reader)
@@ -1591,7 +1591,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("MD5"),
+    result.insert_or_assign(&"MD5",
       ASTERIA_BINDING(
         "std.checksum.MD5", "",
         Argument_Reader&& reader)
@@ -1603,7 +1603,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("md5"),
+    result.insert_or_assign(&"md5",
       ASTERIA_BINDING(
         "std.checksum.md5", "data",
         Argument_Reader&& reader)
@@ -1618,7 +1618,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("md5_file"),
+    result.insert_or_assign(&"md5_file",
       ASTERIA_BINDING(
         "std.checksum.md5_file", "path",
         Argument_Reader&& reader)
@@ -1633,7 +1633,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("SHA1"),
+    result.insert_or_assign(&"SHA1",
       ASTERIA_BINDING(
         "std.checksum.SHA1", "",
         Argument_Reader&& reader)
@@ -1645,7 +1645,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha1"),
+    result.insert_or_assign(&"sha1",
       ASTERIA_BINDING(
         "std.checksum.sha1", "data",
         Argument_Reader&& reader)
@@ -1660,7 +1660,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha1_file"),
+    result.insert_or_assign(&"sha1_file",
       ASTERIA_BINDING(
         "std.checksum.sha1_file", "path",
         Argument_Reader&& reader)
@@ -1675,7 +1675,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("SHA224"),
+    result.insert_or_assign(&"SHA224",
       ASTERIA_BINDING(
         "std.checksum.SHA224", "",
         Argument_Reader&& reader)
@@ -1687,7 +1687,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha224"),
+    result.insert_or_assign(&"sha224",
       ASTERIA_BINDING(
         "std.checksum.sha224", "data",
         Argument_Reader&& reader)
@@ -1702,7 +1702,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha224_file"),
+    result.insert_or_assign(&"sha224_file",
       ASTERIA_BINDING(
         "std.checksum.sha224_file", "path",
         Argument_Reader&& reader)
@@ -1717,7 +1717,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("SHA256"),
+    result.insert_or_assign(&"SHA256",
       ASTERIA_BINDING(
         "std.checksum.SHA256", "",
         Argument_Reader&& reader)
@@ -1729,7 +1729,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha256"),
+    result.insert_or_assign(&"sha256",
       ASTERIA_BINDING(
         "std.checksum.sha256", "data",
         Argument_Reader&& reader)
@@ -1744,7 +1744,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha256_file"),
+    result.insert_or_assign(&"sha256_file",
       ASTERIA_BINDING(
         "std.checksum.sha256_file", "path",
         Argument_Reader&& reader)
@@ -1759,7 +1759,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("SHA384"),
+    result.insert_or_assign(&"SHA384",
       ASTERIA_BINDING(
         "std.checksum.SHA384", "",
         Argument_Reader&& reader)
@@ -1771,7 +1771,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha384"),
+    result.insert_or_assign(&"sha384",
       ASTERIA_BINDING(
         "std.checksum.sha384", "data",
         Argument_Reader&& reader)
@@ -1786,7 +1786,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha384_file"),
+    result.insert_or_assign(&"sha384_file",
       ASTERIA_BINDING(
         "std.checksum.sha384_file", "path",
         Argument_Reader&& reader)
@@ -1801,7 +1801,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("SHA512"),
+    result.insert_or_assign(&"SHA512",
       ASTERIA_BINDING(
         "std.checksum.SHA512", "",
         Argument_Reader&& reader)
@@ -1813,7 +1813,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha512"),
+    result.insert_or_assign(&"sha512",
       ASTERIA_BINDING(
         "std.checksum.sha512", "data",
         Argument_Reader&& reader)
@@ -1828,7 +1828,7 @@ create_bindings_checksum(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sha512_file"),
+    result.insert_or_assign(&"sha512_file",
       ASTERIA_BINDING(
         "std.checksum.sha512_file", "path",
         Argument_Reader&& reader)

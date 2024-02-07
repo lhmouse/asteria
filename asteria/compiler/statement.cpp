@@ -404,7 +404,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(xtc_plain, ctx);
         do_user_declare(ctx_catch, names_opt, altr.name_except);
-        ctx_catch.insert_named_reference(sref("__backtrace"));
+        ctx_catch.insert_named_reference(&"__backtrace");
 
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be PTC'd.

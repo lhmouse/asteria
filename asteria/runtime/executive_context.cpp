@@ -23,7 +23,7 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
     // `this` is null, it is likely that it is never referenced in the function,
     // so lazy initialization is performed to avoid the overhead here.
     if(!xself.is_invalid())
-      this->do_mut_named_reference(nullptr, sref("__this")) = move(xself);
+      this->do_mut_named_reference(nullptr, &"__this") = move(xself);
 
     // Set arguments. Because arguments are evaluated from left to right, the
     // reference at the top is the last argument.
@@ -31,7 +31,7 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
     bool has_ellipsis = false;
 
     for(const auto& name : this->m_func->params())
-      if(name != sref("...")) {
+      if(name != "...") {
         // Try popping an argument and assign it.
         auto& param = this->do_mut_named_reference(nullptr, name);
         if(nargs == 0)
@@ -63,17 +63,17 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update
     // 'analytic_context.cpp' as well.
-    if(name == sref("__this"))
+    if(name == "__this")
       return &(this->do_mut_named_reference(hint_opt, name));
 
-    if(name == sref("__func")) {
+    if(name == "__func") {
       ROCKET_ASSERT(this->m_func);
       auto& ref = this->do_mut_named_reference(hint_opt, name);
       ref.set_temporary(this->m_func->func());
       return &ref;
     }
 
-    if(name == sref("__varg")) {
+    if(name == "__varg") {
       ROCKET_ASSERT(this->m_func);
       auto& ref = this->do_mut_named_reference(hint_opt, name);
       ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(*(this->m_func), this->m_lazy_args));

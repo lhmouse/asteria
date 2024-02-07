@@ -17,7 +17,7 @@ class Source_Location
   public:
     Source_Location() noexcept
       :
-        m_file(sref("[unknown]")), m_line(-1), m_column(-1)
+        m_file(&"[unknown]"), m_line(-1), m_column(-1)
       { }
 
     Source_Location(cow_stringR xfile, int xline, int xcolumn) noexcept

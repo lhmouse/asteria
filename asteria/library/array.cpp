@@ -645,7 +645,7 @@ std_array_copy_values(V_object source)
 void
 create_bindings_array(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("slice"),
+    result.insert_or_assign(&"slice",
       ASTERIA_BINDING(
         "std.array.slice", "data, from, [length]",
         Argument_Reader&& reader)
@@ -664,7 +664,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("replace_slice"),
+    result.insert_or_assign(&"replace_slice",
       ASTERIA_BINDING(
         "std.array.replace_slice", "data, from, [length], replacement, [rfrom, [rlength]]",
         Argument_Reader&& reader)
@@ -697,7 +697,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find"),
+    result.insert_or_assign(&"find",
       ASTERIA_BINDING(
         "std.array.find", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -730,7 +730,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find_not"),
+    result.insert_or_assign(&"find_not",
       ASTERIA_BINDING(
         "std.array.find_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -763,7 +763,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rfind"),
+    result.insert_or_assign(&"rfind",
       ASTERIA_BINDING(
         "std.array.rfind", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -796,7 +796,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rfind_not"),
+    result.insert_or_assign(&"rfind_not",
       ASTERIA_BINDING(
         "std.array.rfind_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -829,7 +829,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("count"),
+    result.insert_or_assign(&"count",
       ASTERIA_BINDING(
         "std.array.count", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -862,7 +862,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("count_not"),
+    result.insert_or_assign(&"count_not",
       ASTERIA_BINDING(
         "std.array.count_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -895,7 +895,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("exclude"),
+    result.insert_or_assign(&"exclude",
       ASTERIA_BINDING(
         "std.array.exclude", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -928,7 +928,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("exclude_not"),
+    result.insert_or_assign(&"exclude_not",
       ASTERIA_BINDING(
         "std.array.exclude_not", "data, [from, [length]], [target]",
         Global_Context& global, Argument_Reader&& reader)
@@ -961,7 +961,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("is_sorted"),
+    result.insert_or_assign(&"is_sorted",
       ASTERIA_BINDING(
         "std.array.is_sorted", "data, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -978,7 +978,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("binary_search"),
+    result.insert_or_assign(&"binary_search",
       ASTERIA_BINDING(
         "std.array.binary_search", "data, [target], [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -997,7 +997,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("lower_bound"),
+    result.insert_or_assign(&"lower_bound",
       ASTERIA_BINDING(
         "std.array.lower_bound", "data, [target], [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1016,7 +1016,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("upper_bound"),
+    result.insert_or_assign(&"upper_bound",
       ASTERIA_BINDING(
         "std.array.upper_bound", "data, [target], [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1035,7 +1035,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("equal_range"),
+    result.insert_or_assign(&"equal_range",
       ASTERIA_BINDING(
         "std.array.equal_range", "data, [target], [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1054,7 +1054,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sort"),
+    result.insert_or_assign(&"sort",
       ASTERIA_BINDING(
         "std.array.sort", "data, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1071,7 +1071,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("usort"),
+    result.insert_or_assign(&"usort",
       ASTERIA_BINDING(
         "std.array.usort", "data, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1088,7 +1088,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("ksort"),
+    result.insert_or_assign(&"ksort",
       ASTERIA_BINDING(
         "std.array.ksort", "object, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1105,7 +1105,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("max_of"),
+    result.insert_or_assign(&"max_of",
       ASTERIA_BINDING(
         "std.array.max_of", "data, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1122,7 +1122,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("min_of"),
+    result.insert_or_assign(&"min_of",
       ASTERIA_BINDING(
         "std.array.min_of", "data, [comparator]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1139,7 +1139,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("reverse"),
+    result.insert_or_assign(&"reverse",
       ASTERIA_BINDING(
         "std.array.reverse", "data",
         Argument_Reader&& reader)
@@ -1154,7 +1154,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("generate"),
+    result.insert_or_assign(&"generate",
       ASTERIA_BINDING(
         "std.array.generate", "generator, length",
         Global_Context& global, Argument_Reader&& reader)
@@ -1171,7 +1171,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("shuffle"),
+    result.insert_or_assign(&"shuffle",
       ASTERIA_BINDING(
         "std.array.shuffle", "data, [seed]",
         Argument_Reader&& reader)
@@ -1188,7 +1188,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rotate"),
+    result.insert_or_assign(&"rotate",
       ASTERIA_BINDING(
         "std.array.rotate", "data, shift",
         Argument_Reader&& reader)
@@ -1205,7 +1205,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("copy_keys"),
+    result.insert_or_assign(&"copy_keys",
       ASTERIA_BINDING(
         "std.array.copy_keys", "source",
         Argument_Reader&& reader)
@@ -1220,7 +1220,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("copy_values"),
+    result.insert_or_assign(&"copy_values",
       ASTERIA_BINDING(
         "std.array.copy_values", "source",
         Argument_Reader&& reader)

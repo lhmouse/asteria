@@ -12,7 +12,7 @@ int main()
 
     Simple_Script code;
     code.reload_string(
-      cow_string(abspath), __LINE__, sref(R"__(
+      cow_string(abspath), __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         std.debug.logf("__file = $1", __file);
@@ -29,6 +29,6 @@ int main()
           assert std.string.find(e, "Recursive import") != null;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

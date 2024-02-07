@@ -180,7 +180,7 @@ do_parse_command_line(int argc, char** argv)
       repl_script.mut_options().optimization_level = uint8_t(*optimize);
 
     // These arguments are always overwritten.
-    repl_file = path.move_value_or(sref("-"));
+    repl_file = path.move_value_or(&"-");
     repl_args = move(args);
   }
 

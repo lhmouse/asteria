@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func noop(x) { }
@@ -17,6 +17,6 @@ int main()
         noop(->obj[1]);  // `obj[1]` is not a valid reference because `obj` is not an array.
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     ASTERIA_TEST_CHECK_CATCH(code.execute());
   }

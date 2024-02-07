@@ -302,7 +302,7 @@ std_io_flush()
 void
 create_bindings_io(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("getc"),
+    result.insert_or_assign(&"getc",
       ASTERIA_BINDING(
         "std.io.getc", "",
         Argument_Reader&& reader)
@@ -314,7 +314,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("getln"),
+    result.insert_or_assign(&"getln",
       ASTERIA_BINDING(
         "std.io.getln", "",
         Argument_Reader&& reader)
@@ -326,7 +326,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("putc"),
+    result.insert_or_assign(&"putc",
       ASTERIA_BINDING(
         "std.io.putc", "value",
         Argument_Reader&& reader)
@@ -347,7 +347,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("putln"),
+    result.insert_or_assign(&"putln",
       ASTERIA_BINDING(
         "std.io.putln", "text",
         Argument_Reader&& reader)
@@ -362,7 +362,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("putf"),
+    result.insert_or_assign(&"putf",
       ASTERIA_BINDING(
         "std.io.putf", "templ, ...",
         Argument_Reader&& reader)
@@ -378,7 +378,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("putfln"),
+    result.insert_or_assign(&"putfln",
       ASTERIA_BINDING(
         "std.io.putfln", "templ, ...",
         Argument_Reader&& reader)
@@ -394,7 +394,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("read"),
+    result.insert_or_assign(&"read",
       ASTERIA_BINDING(
         "std.io.read", "[limit]",
         Argument_Reader&& reader)
@@ -409,7 +409,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("write"),
+    result.insert_or_assign(&"write",
       ASTERIA_BINDING(
         "std.io.write", "data",
         Argument_Reader&& reader)
@@ -424,7 +424,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("flush"),
+    result.insert_or_assign(&"flush",
       ASTERIA_BINDING(
         "std.io.flush", "",
         Argument_Reader&& reader)

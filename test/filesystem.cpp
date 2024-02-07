@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -100,6 +100,6 @@ int main()
         assert std.filesystem.remove_directory(fname) == 1;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

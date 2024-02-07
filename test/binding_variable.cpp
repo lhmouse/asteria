@@ -10,13 +10,13 @@ int main()
   {
     Simple_Script code;
 
-    auto var = code.open_global_variable(sref("some_fancy_variable"));
+    auto var = code.open_global_variable(&"some_fancy_variable");
     var->initialize(42);  // integer
     ASTERIA_TEST_CHECK(var->get_value().is_integer());
     ASTERIA_TEST_CHECK(var->get_value().as_integer() == 42);
 
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         // read the old value
@@ -30,7 +30,7 @@ int main()
         assert extern some_fancy_variable == "meow!";
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
 
     ASTERIA_TEST_CHECK(var->get_value().is_string());

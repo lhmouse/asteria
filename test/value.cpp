@@ -22,7 +22,7 @@ int main()
     ASTERIA_TEST_CHECK(value.is_real());
     ASTERIA_TEST_CHECK(value.as_real() == 1.5);
 
-    value = V_string(sref("hello"));
+    value = V_string(&"hello");
     ASTERIA_TEST_CHECK(value.is_string());
     ASTERIA_TEST_CHECK(value.as_string() == "hello");
 
@@ -35,12 +35,12 @@ int main()
     ASTERIA_TEST_CHECK(value.as_array().at(1).as_string() == "world");
 
     V_object object;
-    object.try_emplace(sref("one"), V_boolean(true));
-    object.try_emplace(sref("two"), V_string("world"));
+    object.try_emplace(&"one", V_boolean(true));
+    object.try_emplace(&"two", V_string("world"));
     value = move(object);
     ASTERIA_TEST_CHECK(value.is_object());
-    ASTERIA_TEST_CHECK(value.as_object().at(sref("one")).as_boolean() == true);
-    ASTERIA_TEST_CHECK(value.as_object().at(sref("two")).as_string() == "world");
+    ASTERIA_TEST_CHECK(value.as_object().at(&"one").as_boolean() == true);
+    ASTERIA_TEST_CHECK(value.as_object().at(&"two").as_string() == "world");
 
     value = nullopt;
     Value cmp(nullopt);
@@ -107,8 +107,8 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_unordered);
 
-    value = V_string(sref("hello"));
-    cmp = V_string(sref("world"));
+    value = V_string(&"hello");
+    cmp = V_string(&"world");
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_less);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_greater);
@@ -122,7 +122,7 @@ int main()
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_equal);
 
-    value.mut_array().mut(1) = V_string(sref("hello"));
+    value.mut_array().mut(1) = V_string(&"hello");
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_less);
     swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_greater);
@@ -135,8 +135,8 @@ int main()
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_less);
 
     object.clear();
-    object.try_emplace(sref("one"), V_boolean(true));
-    object.try_emplace(sref("two"), V_string("world"));
+    object.try_emplace(&"one", V_boolean(true));
+    object.try_emplace(&"two", V_string("world"));
     value = move(object);
     cmp = value;
     ASTERIA_TEST_CHECK(value.compare_partial(cmp) == compare_unordered);

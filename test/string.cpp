@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.string.slice("hello", 0) == "hello";
@@ -364,6 +364,6 @@ int main()
         assert std.string.iconv("UTF-8", "\x43\x41\x54\x94\x4C", "SHIFT-JIS") == "CAT猫";
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

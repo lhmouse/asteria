@@ -14,7 +14,7 @@ int main()
     ASTERIA_TEST_CHECK(var->is_initialized() == true);
     ASTERIA_TEST_CHECK(var->get_value().is_real());
 
-    var->mut_value() = V_string(sref("hello"));
+    var->mut_value() = V_string(&"hello");
     ASTERIA_TEST_CHECK(var->is_initialized() == true);
     ASTERIA_TEST_CHECK(var->get_value().is_string());
 

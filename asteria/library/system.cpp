@@ -278,22 +278,22 @@ std_system_get_properties()
     struct ::utsname uts;
     ::uname(&uts);
 
-    names.try_emplace(sref("os"),
+    names.try_emplace(&"os",
       V_string(
         uts.sysname  // name of the operating system
       ));
 
-    names.try_emplace(sref("kernel"),
+    names.try_emplace(&"kernel",
       V_string(
         cow_string(uts.release) + ' ' + uts.version  // name and release of the kernel
       ));
 
-    names.try_emplace(sref("arch"),
+    names.try_emplace(&"arch",
       V_string(
         uts.machine  // name of the CPU architecture
       ));
 
-    names.try_emplace(sref("nprocs"),
+    names.try_emplace(&"nprocs",
       V_integer(
         ::sysconf(_SC_NPROCESSORS_ONLN)  // number of active CPU cores
       ));
@@ -546,7 +546,7 @@ std_system_load_conf(V_string path)
 void
 create_bindings_system(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("get_working_directory"),
+    result.insert_or_assign(&"get_working_directory",
       ASTERIA_BINDING(
         "std.system.get_working_directory", "",
         Argument_Reader&& reader)
@@ -558,7 +558,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_environment_variable"),
+    result.insert_or_assign(&"get_environment_variable",
       ASTERIA_BINDING(
         "std.system.get_environment_variable", "name",
         Argument_Reader&& reader)
@@ -573,7 +573,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_environment_variables"),
+    result.insert_or_assign(&"get_environment_variables",
       ASTERIA_BINDING(
         "std.system.get_environment_variables", "",
         Argument_Reader&& reader)
@@ -585,7 +585,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_properties"),
+    result.insert_or_assign(&"get_properties",
       ASTERIA_BINDING(
         "std.system.get_properties", "",
         Argument_Reader&& reader)
@@ -597,7 +597,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("generate_uuid"),
+    result.insert_or_assign(&"generate_uuid",
       ASTERIA_BINDING(
         "std.system.generate_uuid", "",
         Global_Context& global, Argument_Reader&& reader)
@@ -609,7 +609,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_pid"),
+    result.insert_or_assign(&"get_pid",
       ASTERIA_BINDING(
         "std.system.get_pid", "",
         Argument_Reader&& reader)
@@ -621,7 +621,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_ppid"),
+    result.insert_or_assign(&"get_ppid",
       ASTERIA_BINDING(
         "std.system.get_ppid", "",
         Argument_Reader&& reader)
@@ -633,7 +633,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_uid"),
+    result.insert_or_assign(&"get_uid",
       ASTERIA_BINDING(
         "std.system.get_uid", "",
         Argument_Reader&& reader)
@@ -645,7 +645,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_euid"),
+    result.insert_or_assign(&"get_euid",
       ASTERIA_BINDING(
         "std.system.get_euid", "",
         Argument_Reader&& reader)
@@ -657,7 +657,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("call"),
+    result.insert_or_assign(&"call",
       ASTERIA_BINDING(
         "std.system.call", "cmd, [argv], [envp]",
         Argument_Reader&& reader)
@@ -675,7 +675,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("daemonize"),
+    result.insert_or_assign(&"daemonize",
       ASTERIA_BINDING(
         "std.system.daemonize", "",
         Argument_Reader&& reader)
@@ -687,7 +687,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sleep"),
+    result.insert_or_assign(&"sleep",
       ASTERIA_BINDING(
         "std.system.sleep", "duration",
         Argument_Reader&& reader)
@@ -702,7 +702,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("load_conf"),
+    result.insert_or_assign(&"load_conf",
       ASTERIA_BINDING(
         "std.system.load_conf", "path",
         Argument_Reader&& reader)

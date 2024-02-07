@@ -48,7 +48,7 @@ std_debug_dump(Value value, optV_integer indent)
 void
 create_bindings_debug(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("logf"),
+    result.insert_or_assign(&"logf",
       ASTERIA_BINDING(
         "std.debug.logf", "templ, ...",
         Argument_Reader&& reader)
@@ -64,7 +64,7 @@ create_bindings_debug(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("dump"),
+    result.insert_or_assign(&"dump",
       ASTERIA_BINDING(
         "std.debug.dump", "[value], [indent]",
         Argument_Reader&& reader)

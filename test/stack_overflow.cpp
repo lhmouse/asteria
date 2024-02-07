@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func recur(n) {
@@ -19,6 +19,6 @@ int main()
         return recur(0);
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     ASTERIA_TEST_CHECK_CATCH(code.execute());
   }

@@ -150,18 +150,18 @@ class Deflator
 void
 do_construct_Deflator(V_object& result, V_string format, optV_integer level)
   {
-    static constexpr auto s_private_uuid = sref("{2D32F5E5-DECB-4A8C-0612-290629069F9C}");
+    static constexpr auto s_private_uuid = &"{2D32F5E5-DECB-4A8C-0612-290629069F9C}";
     result.insert_or_assign(s_private_uuid, std_zlib_Deflator_private(format, level));
-    result.insert_or_assign(sref("output"), V_string());
+    result.insert_or_assign(&"output", V_string());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.zlib.Deflator::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(sref("output")).mut_string();
+        auto& output = self_obj.mut(&"output").mut_string();
         V_string data;
 
         reader.start_overload();
@@ -172,14 +172,14 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("flush"),
+    result.insert_or_assign(&"flush",
       ASTERIA_BINDING(
         "std.zlib.Deflator::flush", "",
         Reference&& self, Argument_Reader&& reader)
       {
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(sref("output")).mut_string();
+        auto& output = self_obj.mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -188,14 +188,14 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.zlib.Deflator::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(sref("output")).mut_string();
+        auto& output = self_obj.mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -204,7 +204,7 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.zlib.Deflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -345,18 +345,18 @@ class Inflator
 void
 do_construct_Inflator(V_object& result, V_string format)
   {
-    static constexpr auto s_private_uuid = sref("{2D372D3E-4E40-4D8B-0632-19C519C5682D}");
+    static constexpr auto s_private_uuid = &"{2D372D3E-4E40-4D8B-0632-19C519C5682D}";
     result.insert_or_assign(s_private_uuid, std_zlib_Inflator_private(format));
-    result.insert_or_assign(sref("output"), V_string());
+    result.insert_or_assign(&"output", V_string());
 
-    result.insert_or_assign(sref("update"),
+    result.insert_or_assign(&"update",
       ASTERIA_BINDING(
         "std.zlib.Inflator::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(sref("output")).mut_string();
+        auto& output = self_obj.mut(&"output").mut_string();
         V_string data;
 
         reader.start_overload();
@@ -367,14 +367,14 @@ do_construct_Inflator(V_object& result, V_string format)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("flush"),
+    result.insert_or_assign(&"flush",
       ASTERIA_BINDING(
         "std.zlib.Inflator::flush", "",
         Reference&& self, Argument_Reader&& reader)
       {
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(sref("output")).mut_string();
+        auto& output = self_obj.mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -383,14 +383,14 @@ do_construct_Inflator(V_object& result, V_string format)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("finish"),
+    result.insert_or_assign(&"finish",
       ASTERIA_BINDING(
         "std.zlib.Inflator::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(sref("output")).mut_string();
+        auto& output = self_obj.mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -399,7 +399,7 @@ do_construct_Inflator(V_object& result, V_string format)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clear"),
+    result.insert_or_assign(&"clear",
       ASTERIA_BINDING(
         "std.zlib.Inflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
@@ -414,33 +414,17 @@ do_construct_Inflator(V_object& result, V_string format)
       });
   }
 
-bool
-do_streq_ci(const V_string& str, V_string::shallow_type cmp) noexcept
-  {
-    if(str.length() != cmp.length())
-      return false;
-
-    for(size_t k = 0;  k != cmp.length();  ++k)
-      if(::rocket::ascii_to_lower(str[k]) != cmp.c_str()[k])
-        return false;
-
-    return true;
-  }
-
 int
 do_wbits(const V_string& format)
   {
-    if(do_streq_ci(format, sref("gzip")))
+    if(format == "gzip")
       return 31;
-
-    if(do_streq_ci(format, sref("deflate")))
+    else if(format == "deflate")
       return 15;
-
-    if(do_streq_ci(format, sref("raw")))
+    else if(format == "raw")
       return -15;
-
-    ASTERIA_THROW((
-        "Invalid compression format `$1`"), format);
+    else
+      ASTERIA_THROW(("Invalid compression format `$1`"), format);
   }
 
 int
@@ -450,11 +434,9 @@ do_level(const optV_integer& level)
       return Z_DEFAULT_COMPRESSION;
 
     if(*level < 0)
-      ASTERIA_THROW((
-          "Negative compression level `$1`"), *level);
+      ASTERIA_THROW(( "Negative compression level `$1`"), *level);
 
-    return ::rocket::clamp_cast<int>(*level,
-               Z_NO_COMPRESSION, Z_BEST_COMPRESSION);
+    return ::rocket::clamp_cast<int>(*level, Z_NO_COMPRESSION, Z_BEST_COMPRESSION);
   }
 
 }  // namespace
@@ -501,7 +483,7 @@ std_zlib_Deflator_clear(V_opaque& r)
 V_string
 std_zlib_deflate(V_string data, optV_integer level)
   {
-    Deflator defl(do_wbits(sref("deflate")), do_level(level));
+    Deflator defl(do_wbits(&"deflate"), do_level(level));
     V_string output;
     defl.update(output, data.data(), data.size());
     defl.finish(output);
@@ -511,7 +493,7 @@ std_zlib_deflate(V_string data, optV_integer level)
 V_string
 std_zlib_gzip(V_string data, optV_integer level)
   {
-    Deflator defl(do_wbits(sref("gzip")), do_level(level));
+    Deflator defl(do_wbits(&"gzip"), do_level(level));
     V_string output;
     defl.update(output, data.data(), data.size());
     defl.finish(output);
@@ -560,7 +542,7 @@ std_zlib_Inflator_clear(V_opaque& r)
 V_string
 std_zlib_inflate(V_string data)
   {
-    Inflator infl(do_wbits(sref("deflate")));
+    Inflator infl(do_wbits(&"deflate"));
     V_string output;
     infl.update(output, data.data(), data.size());
     infl.finish(output);
@@ -570,7 +552,7 @@ std_zlib_inflate(V_string data)
 V_string
 std_zlib_gunzip(V_string data)
   {
-    Inflator infl(do_wbits(sref("gzip")));
+    Inflator infl(do_wbits(&"gzip"));
     V_string output;
     infl.update(output, data.data(), data.size());
     infl.finish(output);
@@ -580,7 +562,7 @@ std_zlib_gunzip(V_string data)
 void
 create_bindings_zlib(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("Deflator"),
+    result.insert_or_assign(&"Deflator",
       ASTERIA_BINDING(
         "std.zlib.Deflator", "format, [level]",
         Argument_Reader&& reader)
@@ -597,7 +579,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("deflate"),
+    result.insert_or_assign(&"deflate",
       ASTERIA_BINDING(
         "std.zlib.deflate", "data, [level]",
         Argument_Reader&& reader)
@@ -614,7 +596,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("gzip"),
+    result.insert_or_assign(&"gzip",
       ASTERIA_BINDING(
         "std.zlib.gzip", "data, [level]",
         Argument_Reader&& reader)
@@ -631,7 +613,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("Inflator"),
+    result.insert_or_assign(&"Inflator",
       ASTERIA_BINDING(
         "std.zlib.Inflator", "format",
         Argument_Reader&& reader)
@@ -646,7 +628,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("inflate"),
+    result.insert_or_assign(&"inflate",
       ASTERIA_BINDING(
         "std.zlib.inflate", "data",
         Argument_Reader&& reader)
@@ -661,7 +643,7 @@ create_bindings_zlib(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("gunzip"),
+    result.insert_or_assign(&"gunzip",
       ASTERIA_BINDING(
         "std.zlib.gunzip", "data",
         Argument_Reader&& reader)

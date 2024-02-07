@@ -78,7 +78,7 @@ class Token_Stream
     next_sloc() const noexcept
       {
         return this->m_rtoks.empty()
-                 ? Source_Location(sref("[end]"), -1, -1)
+                 ? Source_Location(&"[end]", -1, -1)
                  : this->m_rtoks.back().sloc();
       }
 

@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         std.debug.logf("__file = $1", __file);
@@ -22,6 +22,6 @@ int main()
         assert obj.section2."key without a value" == "";
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

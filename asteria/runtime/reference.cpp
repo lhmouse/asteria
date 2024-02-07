@@ -255,7 +255,7 @@ do_use_function_result_slow(Global_Context& global)
         // Note that if we arrive here, there must have been an exception thrown
         // when unpacking the last frame (i.e. the last call did not return), so
         // the last frame does not have its enclosing function set.
-        except.push_frame_plain(ptcg->sloc(), sref("[proper tail call]"));
+        except.push_frame_plain(ptcg->sloc(), &"[proper tail call]");
 
         if(caller)
           except.push_frame_function(caller->sloc(), caller->func());

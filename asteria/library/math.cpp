@@ -177,52 +177,52 @@ std_math_lgamma(V_real x)
 void
 create_bindings_math(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("pi"),
+    result.insert_or_assign(&"pi",
       V_real(
         3.1415926535897932384626433832795
       ));
 
-    result.insert_or_assign(sref("rad"),
+    result.insert_or_assign(&"rad",
       V_real(
         57.295779513082320876798154814105
       ));
 
-    result.insert_or_assign(sref("deg"),
+    result.insert_or_assign(&"deg",
       V_real(
         0.01745329251994329576923690768489
       ));
 
-    result.insert_or_assign(sref("e"),
+    result.insert_or_assign(&"e",
       V_real(
         2.7182818284590452353602874713527
       ));
 
-    result.insert_or_assign(sref("sqrt2"),
+    result.insert_or_assign(&"sqrt2",
       V_real(
         1.4142135623730950488016887242097
       ));
 
-    result.insert_or_assign(sref("sqrt3"),
+    result.insert_or_assign(&"sqrt3",
       V_real(
         1.7320508075688772935274463415059
       ));
 
-    result.insert_or_assign(sref("cbrt2"),
+    result.insert_or_assign(&"cbrt2",
       V_real(
         1.2599210498948731647672106072782
       ));
 
-    result.insert_or_assign(sref("lg2"),
+    result.insert_or_assign(&"lg2",
       V_real(
         0.30102999566398119521373889472449
       ));
 
-    result.insert_or_assign(sref("lb10"),
+    result.insert_or_assign(&"lb10",
       V_real(
         3.3219280948873623478703194294894
       ));
 
-    result.insert_or_assign(sref("exp"),
+    result.insert_or_assign(&"exp",
       ASTERIA_BINDING(
         "std.math.exp", "[base], y",
         Argument_Reader&& reader)
@@ -243,7 +243,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("log"),
+    result.insert_or_assign(&"log",
       ASTERIA_BINDING(
         "std.math.log", "[base], x",
         Argument_Reader&& reader)
@@ -264,7 +264,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("expm1"),
+    result.insert_or_assign(&"expm1",
       ASTERIA_BINDING(
         "std.math.expm1", "",
         Argument_Reader&& reader)
@@ -279,7 +279,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("log1p"),
+    result.insert_or_assign(&"log1p",
       ASTERIA_BINDING(
         "std.math.log1p", "x",
         Argument_Reader&& reader)
@@ -294,7 +294,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sin"),
+    result.insert_or_assign(&"sin",
       ASTERIA_BINDING(
         "std.math.sin", "x",
         Argument_Reader&& reader)
@@ -309,7 +309,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("cos"),
+    result.insert_or_assign(&"cos",
       ASTERIA_BINDING(
         "std.math.cos", "x",
         Argument_Reader&& reader)
@@ -324,7 +324,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("tan"),
+    result.insert_or_assign(&"tan",
       ASTERIA_BINDING(
         "std.math.tan", "x",
         Argument_Reader&& reader)
@@ -339,7 +339,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("asin"),
+    result.insert_or_assign(&"asin",
       ASTERIA_BINDING(
         "std.math.asin", "x",
         Argument_Reader&& reader)
@@ -354,7 +354,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("acos"),
+    result.insert_or_assign(&"acos",
       ASTERIA_BINDING(
         "std.math.acos", "x",
         Argument_Reader&& reader)
@@ -369,7 +369,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("atan"),
+    result.insert_or_assign(&"atan",
       ASTERIA_BINDING(
         "std.math.atan", "x",
         Argument_Reader&& reader)
@@ -384,7 +384,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("atan2"),
+    result.insert_or_assign(&"atan2",
       ASTERIA_BINDING(
         "std.math.atan2", "y, x",
         Argument_Reader&& reader)
@@ -401,7 +401,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("hypot"),
+    result.insert_or_assign(&"hypot",
       ASTERIA_BINDING(
         "std.math.hypot", "...",
         Argument_Reader&& reader)
@@ -415,7 +415,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sinh"),
+    result.insert_or_assign(&"sinh",
       ASTERIA_BINDING(
         "std.math.sinh", "x",
         Argument_Reader&& reader)
@@ -430,7 +430,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("cosh"),
+    result.insert_or_assign(&"cosh",
       ASTERIA_BINDING(
         "std.math.cosh", "x",
         Argument_Reader&& reader)
@@ -445,7 +445,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("tanh"),
+    result.insert_or_assign(&"tanh",
       ASTERIA_BINDING(
         "std.math.tanh", "x",
         Argument_Reader&& reader)
@@ -460,7 +460,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("asinh"),
+    result.insert_or_assign(&"asinh",
       ASTERIA_BINDING(
         "std.math.asinh", "x",
         Argument_Reader&& reader)
@@ -475,7 +475,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("acosh"),
+    result.insert_or_assign(&"acosh",
       ASTERIA_BINDING(
         "std.math.acosh", "x",
         Argument_Reader&& reader)
@@ -490,7 +490,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("atanh"),
+    result.insert_or_assign(&"atanh",
       ASTERIA_BINDING(
         "std.math.atanh", "x",
         Argument_Reader&& reader)
@@ -505,7 +505,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("erf"),
+    result.insert_or_assign(&"erf",
       ASTERIA_BINDING(
         "std.math.erf", "x",
         Argument_Reader&& reader)
@@ -520,7 +520,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("cerf"),
+    result.insert_or_assign(&"cerf",
       ASTERIA_BINDING(
         "std.math.cerf", "x",
         Argument_Reader&& reader)
@@ -535,7 +535,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("gamma"),
+    result.insert_or_assign(&"gamma",
       ASTERIA_BINDING(
         "std.math.gamma", "x",
         Argument_Reader&& reader)
@@ -550,7 +550,7 @@ create_bindings_math(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("lgamma"),
+    result.insert_or_assign(&"lgamma",
       ASTERIA_BINDING(
         "std.math.lgamma", "x",
         Argument_Reader&& reader)

@@ -98,6 +98,21 @@ struct Valuable_impl<StringT, typename ::std::enable_if<
       }
   };
 
+template<size_t N>
+struct Valuable_impl<const char (*)[N]>
+  {
+    using direct_init  = ::std::true_type;
+    using via_type     = V_string;
+
+    template<typename StorT, typename XValT>
+    static
+    void
+    assign(StorT& stor, XValT&& xval)
+      {
+        stor = V_string(forward<XValT>(xval));
+      }
+  };
+
 template<>
 struct Valuable_impl<cow_opaque>
   {

@@ -296,7 +296,7 @@ std_chrono_steady_now()
 void
 create_bindings_chrono(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("now"),
+    result.insert_or_assign(&"now",
       ASTERIA_BINDING(
         "std.chrono.now", "",
         Argument_Reader&& reader)
@@ -308,7 +308,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("format"),
+    result.insert_or_assign(&"format",
       ASTERIA_BINDING(
         "std.chrono.format", "time_point, [with_ms], [utc_offset]",
         Argument_Reader&& reader)
@@ -327,7 +327,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse"),
+    result.insert_or_assign(&"parse",
       ASTERIA_BINDING(
         "std.chrono.parse", "time_str",
         Argument_Reader&& reader)
@@ -342,7 +342,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("hires_now"),
+    result.insert_or_assign(&"hires_now",
       ASTERIA_BINDING(
         "std.chrono.hires_now", "",
         Argument_Reader&& reader)
@@ -354,7 +354,7 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("steady_now"),
+    result.insert_or_assign(&"steady_now",
       ASTERIA_BINDING(
         "std.chrono.steady_now", "",
         Argument_Reader&& reader)

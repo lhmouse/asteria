@@ -32,7 +32,7 @@ int main()
     code.global().set_hooks(hooks);
 
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func no_ptc_throw() {
@@ -54,7 +54,7 @@ int main()
         no_ptc_one();
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     hooks->fmt.clear_string();
     ASTERIA_TEST_CHECK_CATCH(code.execute());
     ::fprintf(stderr, "no_ptc ===> %s\n", hooks->fmt.c_str());
@@ -62,7 +62,7 @@ int main()
         "call 54; call 51; call 47; call 43; throw 39; ");
 
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func ptc_throw() {
@@ -84,7 +84,7 @@ int main()
         ptc_one();
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     hooks->fmt.clear_string();
     ASTERIA_TEST_CHECK_CATCH(code.execute());
     ::fprintf(stderr, "ptc ===> %s\n", hooks->fmt.c_str());

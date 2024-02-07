@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.numeric.abs(+42) == 42;
@@ -461,6 +461,6 @@ int main()
         assert std.numeric.unpack_f64le("\x9A\x99\x99\x99\x99\x99\xF1\x3F\xCD\xCC\xCC\xCC\xCC\xCC\xF4\x3F") == [ 1.1, 1.3 ];
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

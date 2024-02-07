@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.array.slice([0,1,2,3,4], 0) == [0,1,2,3,4];
@@ -253,6 +253,6 @@ int main()
         assert std.array.ksort({foo:1,bar:2,def:false}) == [['bar',2],['def',false],['foo',1]];
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

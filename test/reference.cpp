@@ -9,7 +9,7 @@ using namespace ::asteria;
 int main()
   {
     Reference ref;
-    ref.set_temporary(V_string(sref("meow")));
+    ref.set_temporary(V_string(&"meow"));
     auto val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_string());
     ASTERIA_TEST_CHECK(val.as_string() == "meow");
@@ -45,7 +45,7 @@ int main()
     ref.pop_modifier();
 
     ref.push_modifier(Reference_Modifier::S_array_index{ 2 });
-    ref.push_modifier(Reference_Modifier::S_object_key{ sref("my_key") });
+    ref.push_modifier(Reference_Modifier::S_object_key{ &"my_key" });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_null());
     ref.dereference_mutable() = V_real(10.5);
@@ -55,11 +55,11 @@ int main()
     ref.pop_modifier();
     ref.pop_modifier();
     ref.push_modifier(Reference_Modifier::S_array_index{ -1 });
-    ref.push_modifier(Reference_Modifier::S_object_key{ sref("my_key") });
+    ref.push_modifier(Reference_Modifier::S_object_key{ &"my_key" });
     val = ref.dereference_readonly();
     ASTERIA_TEST_CHECK(val.is_real());
     ASTERIA_TEST_CHECK(val.as_real() == 10.5);
-    ref.push_modifier(Reference_Modifier::S_object_key{ sref("invalid_access") });
+    ref.push_modifier(Reference_Modifier::S_object_key{ &"invalid_access" });
     ASTERIA_TEST_CHECK_CATCH(val = ref.dereference_readonly());
     ref.pop_modifier();
 

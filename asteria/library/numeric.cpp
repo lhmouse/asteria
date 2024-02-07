@@ -966,37 +966,37 @@ std_numeric_unpack_f64le(V_string text)
 void
 create_bindings_numeric(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("integer_max"),
+    result.insert_or_assign(&"integer_max",
       V_integer(
         ::std::numeric_limits<V_integer>::max()
       ));
 
-    result.insert_or_assign(sref("integer_min"),
+    result.insert_or_assign(&"integer_min",
       V_integer(
         ::std::numeric_limits<V_integer>::lowest()
       ));
 
-    result.insert_or_assign(sref("real_max"),
+    result.insert_or_assign(&"real_max",
       V_real(
         ::std::numeric_limits<V_real>::max()
       ));
 
-    result.insert_or_assign(sref("real_min"),
+    result.insert_or_assign(&"real_min",
       V_real(
         ::std::numeric_limits<V_real>::lowest()
       ));
 
-    result.insert_or_assign(sref("real_epsilon"),
+    result.insert_or_assign(&"real_epsilon",
       V_real(
         ::std::numeric_limits<V_real>::epsilon()
       ));
 
-    result.insert_or_assign(sref("size_max"),
+    result.insert_or_assign(&"size_max",
       V_integer(
         ::std::numeric_limits<ptrdiff_t>::max()
       ));
 
-    result.insert_or_assign(sref("abs"),
+    result.insert_or_assign(&"abs",
       ASTERIA_BINDING(
         "std.numeric.abs", "value",
         Argument_Reader&& reader)
@@ -1017,7 +1017,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("sign"),
+    result.insert_or_assign(&"sign",
       ASTERIA_BINDING(
         "std.numeric.sign", "value",
         Argument_Reader&& reader)
@@ -1038,7 +1038,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("is_finite"),
+    result.insert_or_assign(&"is_finite",
       ASTERIA_BINDING(
         "std.numeric.is_finite", "value",
         Argument_Reader&& reader)
@@ -1059,7 +1059,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("is_infinity"),
+    result.insert_or_assign(&"is_infinity",
       ASTERIA_BINDING(
         "std.numeric.is_finite", "value",
         Argument_Reader&& reader)
@@ -1080,7 +1080,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("is_nan"),
+    result.insert_or_assign(&"is_nan",
       ASTERIA_BINDING(
         "std.numeric.is_nan", "value",
         Argument_Reader&& reader)
@@ -1101,7 +1101,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("max"),
+    result.insert_or_assign(&"max",
       ASTERIA_BINDING(
         "std.numeric.max", "...",
         Argument_Reader&& reader)
@@ -1115,7 +1115,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("min"),
+    result.insert_or_assign(&"min",
       ASTERIA_BINDING(
         "std.numeric.min", "...",
         Argument_Reader&& reader)
@@ -1129,7 +1129,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("clamp"),
+    result.insert_or_assign(&"clamp",
       ASTERIA_BINDING(
         "std.numeric.clamp", "value, lower, upper",
         Argument_Reader&& reader)
@@ -1146,7 +1146,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("round"),
+    result.insert_or_assign(&"round",
       ASTERIA_BINDING(
         "std.numeric.round", "value",
         Argument_Reader&& reader)
@@ -1167,7 +1167,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("iround"),
+    result.insert_or_assign(&"iround",
       ASTERIA_BINDING(
         "std.numeric.iround", "value",
         Argument_Reader&& reader)
@@ -1188,7 +1188,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("floor"),
+    result.insert_or_assign(&"floor",
       ASTERIA_BINDING(
         "std.numeric.floor", "value",
         Argument_Reader&& reader)
@@ -1209,7 +1209,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("ifloor"),
+    result.insert_or_assign(&"ifloor",
       ASTERIA_BINDING(
         "std.numeric.floor", "value",
         Argument_Reader&& reader)
@@ -1230,7 +1230,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("ceil"),
+    result.insert_or_assign(&"ceil",
       ASTERIA_BINDING(
         "std.numeric.ceil", "value",
         Argument_Reader&& reader)
@@ -1251,7 +1251,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("iceil"),
+    result.insert_or_assign(&"iceil",
       ASTERIA_BINDING(
         "std.numeric.iceil", "value",
         Argument_Reader&& reader)
@@ -1272,7 +1272,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("trunc"),
+    result.insert_or_assign(&"trunc",
       ASTERIA_BINDING(
         "std.numeric.trunc", "value",
         Argument_Reader&& reader)
@@ -1293,7 +1293,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("itrunc"),
+    result.insert_or_assign(&"itrunc",
       ASTERIA_BINDING(
         "std.numeric.itrunc", "value",
         Argument_Reader&& reader)
@@ -1314,7 +1314,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("random"),
+    result.insert_or_assign(&"random",
       ASTERIA_BINDING(
         "std.numeric.random", "[limit]",
         Global_Context& global, Argument_Reader&& reader)
@@ -1329,7 +1329,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("remainder"),
+    result.insert_or_assign(&"remainder",
       ASTERIA_BINDING(
         "std.numeric.remainder", "x, y",
         Argument_Reader&& reader)
@@ -1345,7 +1345,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("frexp"),
+    result.insert_or_assign(&"frexp",
       ASTERIA_BINDING(
         "std.numeric.frexp", "x",
         Argument_Reader&& reader)
@@ -1360,7 +1360,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("ldexp"),
+    result.insert_or_assign(&"ldexp",
       ASTERIA_BINDING(
         "std.numeric.ldexp", "frac, exp",
         Argument_Reader&& reader)
@@ -1377,7 +1377,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rotl"),
+    result.insert_or_assign(&"rotl",
       ASTERIA_BINDING(
         "std.numeric.rotl", "m, x, n",
         Argument_Reader&& reader)
@@ -1396,7 +1396,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rotr"),
+    result.insert_or_assign(&"rotr",
       ASTERIA_BINDING(
         "std.numeric.rotr", "m, x, n",
         Argument_Reader&& reader)
@@ -1415,7 +1415,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("format"),
+    result.insert_or_assign(&"format",
       ASTERIA_BINDING(
         "std.numeric.format", "value, [base, [ebase]]",
         Argument_Reader&& reader)
@@ -1442,7 +1442,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse"),
+    result.insert_or_assign(&"parse",
       ASTERIA_BINDING(
         "std.numeric.parse", "text",
         Argument_Reader&& reader)
@@ -1457,7 +1457,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i8"),
+    result.insert_or_assign(&"pack_i8",
       ASTERIA_BINDING(
         "std.numeric.pack_i8", "values",
         Argument_Reader&& reader)
@@ -1478,7 +1478,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i8"),
+    result.insert_or_assign(&"unpack_i8",
       ASTERIA_BINDING(
         "std.numeric.unpack_i8", "text",
         Argument_Reader&& reader)
@@ -1493,7 +1493,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i16be"),
+    result.insert_or_assign(&"pack_i16be",
       ASTERIA_BINDING(
         "std.numeric.pack_i16be", "values",
         Argument_Reader&& reader)
@@ -1514,7 +1514,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i16be"),
+    result.insert_or_assign(&"unpack_i16be",
       ASTERIA_BINDING(
         "std.numeric.unpack_i16be", "text",
         Argument_Reader&& reader)
@@ -1529,7 +1529,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i16le"),
+    result.insert_or_assign(&"pack_i16le",
       ASTERIA_BINDING(
         "std.numeric.pack_i16le", "values",
         Argument_Reader&& reader)
@@ -1550,7 +1550,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i16le"),
+    result.insert_or_assign(&"unpack_i16le",
       ASTERIA_BINDING(
         "std.numeric.unpack_i16le", "text",
         Argument_Reader&& reader)
@@ -1565,7 +1565,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i32be"),
+    result.insert_or_assign(&"pack_i32be",
       ASTERIA_BINDING(
         "std.numeric.pack_i32be", "values",
         Argument_Reader&& reader)
@@ -1586,7 +1586,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i32be"),
+    result.insert_or_assign(&"unpack_i32be",
       ASTERIA_BINDING(
         "std.numeric.unpack_i32be", "text",
         Argument_Reader&& reader)
@@ -1601,7 +1601,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i32le"),
+    result.insert_or_assign(&"pack_i32le",
       ASTERIA_BINDING(
         "std.numeric.pack_i32le", "values",
         Argument_Reader&& reader)
@@ -1622,7 +1622,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i32le"),
+    result.insert_or_assign(&"unpack_i32le",
       ASTERIA_BINDING(
         "std.numeric.unpack_i32le", "text",
         Argument_Reader&& reader)
@@ -1637,7 +1637,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i64be"),
+    result.insert_or_assign(&"pack_i64be",
       ASTERIA_BINDING(
         "std.numeric.pack_i64be", "values",
         Argument_Reader&& reader)
@@ -1658,7 +1658,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i64be"),
+    result.insert_or_assign(&"unpack_i64be",
       ASTERIA_BINDING(
         "std.numeric.unpack_i64be", "text",
         Argument_Reader&& reader)
@@ -1673,7 +1673,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_i64le"),
+    result.insert_or_assign(&"pack_i64le",
       ASTERIA_BINDING(
         "std.numeric.pack_i64le", "values",
         Argument_Reader&& reader)
@@ -1694,7 +1694,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_i64le"),
+    result.insert_or_assign(&"unpack_i64le",
       ASTERIA_BINDING(
         "std.numeric.unpack_i64le", "text",
         Argument_Reader&& reader)
@@ -1709,7 +1709,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_f32be"),
+    result.insert_or_assign(&"pack_f32be",
       ASTERIA_BINDING(
         "std.numeric.pack_f32be", "values",
         Argument_Reader&& reader)
@@ -1730,7 +1730,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_f32be"),
+    result.insert_or_assign(&"unpack_f32be",
       ASTERIA_BINDING(
         "std.numeric.unpack_f32be", "text",
         Argument_Reader&& reader)
@@ -1745,7 +1745,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_f32le"),
+    result.insert_or_assign(&"pack_f32le",
       ASTERIA_BINDING(
         "std.numeric.pack_f32le", "values",
         Argument_Reader&& reader)
@@ -1766,7 +1766,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_f32le"),
+    result.insert_or_assign(&"unpack_f32le",
       ASTERIA_BINDING(
         "std.numeric.unpack_f32le", "text",
         Argument_Reader&& reader)
@@ -1781,7 +1781,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_f64be"),
+    result.insert_or_assign(&"pack_f64be",
       ASTERIA_BINDING(
         "std.numeric.pack_f64be", "values",
         Argument_Reader&& reader)
@@ -1802,7 +1802,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_f64be"),
+    result.insert_or_assign(&"unpack_f64be",
       ASTERIA_BINDING(
         "std.numeric.unpack_f64be", "text",
         Argument_Reader&& reader)
@@ -1817,7 +1817,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pack_f64le"),
+    result.insert_or_assign(&"pack_f64le",
       ASTERIA_BINDING(
         "std.numeric.pack_f64le", "values",
         Argument_Reader&& reader)
@@ -1838,7 +1838,7 @@ create_bindings_numeric(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("unpack_f64le"),
+    result.insert_or_assign(&"unpack_f64le",
       ASTERIA_BINDING(
         "std.numeric.unpack_f64le", "text",
         Argument_Reader&& reader)

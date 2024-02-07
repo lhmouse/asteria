@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         assert std.numeric.parse(" 0x1p-100") == +0x1.0p-100;
@@ -25,6 +25,6 @@ int main()
         assert std.numeric.parse("-0x1p+10000") == -infinity;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

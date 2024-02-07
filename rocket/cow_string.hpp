@@ -53,8 +53,8 @@ class basic_shallow_string
     size_t m_len;
 
   public:
-    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    explicit basic_shallow_string(const charT* ptr) noexcept
+    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
+    explicit constexpr basic_shallow_string(const charT* ptr) noexcept
       :
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
       { }
@@ -156,6 +156,13 @@ class basic_cow_string
         m_ref(sh), m_sth(alloc)
       { }
 
+    template<size_t N>
+    constexpr basic_cow_string(const value_type (*ps)[N],
+                               const allocator_type& alloc = allocator_type()) noexcept
+      :
+        m_ref(*ps), m_sth(alloc)
+      { }
+
     basic_cow_string(const basic_cow_string& other) noexcept
       :
         m_ref(other.m_ref),
@@ -189,7 +196,7 @@ class basic_cow_string
         basic_cow_string(alloc)
       { this->append(other, pos, n);  }
 
-    // Implicit conversion from string literal is disallowed; use `sref()`.
+    // Implicit conversion from string literal is disallowed.
     explicit basic_cow_string(const value_type* s, const allocator_type& alloc = allocator_type())
       :
         basic_cow_string(alloc)
@@ -216,6 +223,14 @@ class basic_cow_string
     operator=(shallow_type sh) & noexcept
       {
         this->m_ref = sh;
+        return *this;
+      }
+
+    template<size_t N>
+    basic_cow_string&
+    operator=(const value_type (*ps)[N]) & noexcept
+      {
+        this->m_ref = shallow_type(*ps);
         return *this;
       }
 
@@ -2322,23 +2337,31 @@ struct basic_cow_string<charT, allocT>::hash
     using argument_type  = basic_cow_string;
 
     constexpr ROCKET_ALWAYS_INLINE
-    result_type
-    operator()(const argument_type& str) const noexcept
+    uint32_t
+    do_hash_bytes(const charT* p, size_t n) const noexcept
       {
-        // Implement the FNV-1a hashing algorithm.
-        uint32_t reg = 2166136261U;
-        for(charT c : str) {
-          int ch = noadl::int_from(c);
-
-          // Accumulate bytes in little-endian byte order.
-          for(uint32_t k = 0;  k != sizeof(c);  ++k) {
-            reg ^= static_cast<uint8_t>(ch);
-            reg *= 16777619U;
-            ch >>= 8;
-          }
-        }
-        return reg;
+        // https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function#FNV-1a_hash
+        const uint8_t* cur = reinterpret_cast<const uint8_t*>(p);
+        const uint8_t* end = reinterpret_cast<const uint8_t*>(p + n);
+        uint32_t hval = 2166136261U;
+        while(cur != end) hval = (hval ^ *(cur++)) * 16777619U;
+        return hval;
       }
+
+    constexpr
+    uint32_t
+    operator()(const basic_cow_string& str) const noexcept
+      { return this->do_hash_bytes(str.m_ref.m_ptr, str.m_ref.m_len);  }
+
+    constexpr
+    uint32_t
+    operator()(const shallow_type& sh) const noexcept
+      { return this->do_hash_bytes(sh.m_ptr, sh.m_len);  }
+
+    constexpr
+    uint32_t
+    operator()(const value_type* s) const noexcept
+      { return this->do_hash_bytes(s, details_xstring::maybe_constexpr::ystrlen(s));  }
   };
 
 template<typename charT, typename allocT>

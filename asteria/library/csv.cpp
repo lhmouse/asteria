@@ -28,7 +28,7 @@ do_csv_parse(tinybuf& buf)
         line.erase(0, 3);
 
       // Convert CR LF pairs to LF characters.
-      if(line.ends_with(sref("\r")))
+      if(line.ends_with(&"\r"))
         line.pop_back();
 
       // Start a new line if this is not in quotation.
@@ -127,7 +127,7 @@ std_csv_format(V_array value)
         if(cellp->is_string()) {
           // Check whether we need to escape special characters.
           const auto& str = cellp->as_string();
-          if(str.find_of(sref(",\n\"")) != cow_string::npos) {
+          if(str.find_of(&",\n\"") != cow_string::npos) {
             fmt << "\"";
 
             for(char c : str)
@@ -179,7 +179,7 @@ std_csv_parse_file(V_string path)
 void
 create_bindings_csv(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("format"),
+    result.insert_or_assign(&"format",
       ASTERIA_BINDING(
         "std.csv.format", "[array]",
         Argument_Reader&& reader)
@@ -194,7 +194,7 @@ create_bindings_csv(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse"),
+    result.insert_or_assign(&"parse",
       ASTERIA_BINDING(
         "std.csv.parse", "text",
         Argument_Reader&& reader)
@@ -209,7 +209,7 @@ create_bindings_csv(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse_file"),
+    result.insert_or_assign(&"parse_file",
       ASTERIA_BINDING(
         "std.csv.parse_file", "path",
         Argument_Reader&& reader)

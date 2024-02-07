@@ -9,13 +9,13 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         var std = "meow";
         return typeof std + "/" + typeof extern std;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     ASTERIA_TEST_CHECK(code.execute().dereference_readonly().as_string() == "string/object");
   }

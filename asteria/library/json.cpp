@@ -75,7 +75,7 @@ struct Indenter_string : Indenter
     explicit Indenter_string(cow_stringR xadd)
       {
         this->add = xadd;
-        this->cur = sref("\n");
+        this->cur = &"\n";
       }
 
     void
@@ -626,7 +626,7 @@ do_parse(tinybuf& cbuf)
     opts.integers_as_reals = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(sref("[JSON text]"), 1, move(cbuf));
+    tstrm.reload(&"[JSON text]", 1, move(cbuf));
     if(tstrm.empty())
       ASTERIA_THROW(("Empty JSON string"));
 
@@ -686,7 +686,7 @@ std_json_parse_file(V_string path)
 void
 create_bindings_json(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("format"),
+    result.insert_or_assign(&"format",
       ASTERIA_BINDING(
         "std.json.format", "[value], [indent]",
         Argument_Reader&& reader)
@@ -713,7 +713,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse"),
+    result.insert_or_assign(&"parse",
       ASTERIA_BINDING(
         "std.json.parse", "text",
         Argument_Reader&& reader)
@@ -728,7 +728,7 @@ create_bindings_json(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("parse_file"),
+    result.insert_or_assign(&"parse_file",
       ASTERIA_BINDING(
         "std.json.parse_file", "path",
         Argument_Reader&& reader)

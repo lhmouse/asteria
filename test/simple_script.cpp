@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         var one = 1;
@@ -23,7 +23,7 @@ int main()
         return con.value + con.const;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     auto res = code.execute();
     ASTERIA_TEST_CHECK(res.dereference_readonly().as_integer() == 90);
   }

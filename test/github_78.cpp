@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func three() {
@@ -24,6 +24,6 @@ int main()
         return three();
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     ASTERIA_TEST_CHECK(code.execute().dereference_readonly().as_string() == "function");
   }

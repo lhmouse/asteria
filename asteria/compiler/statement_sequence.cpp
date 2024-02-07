@@ -125,7 +125,7 @@ do_accept_json5_key_opt(Token_Stream& tstrm)
       // Treat the keyword as a plain identifier and discard this token.
       const char* kwstr = qtok->as_keyword_c_str();
       tstrm.shift();
-      return sref(kwstr);
+      return ::rocket::sref(kwstr);
     }
 
     if(qtok->is_identifier()) {
@@ -239,7 +239,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     if(kpunct) {
       // Accept a list of identifiers wrapped in a pair of brackets and separated
       // by commas. There must be at least one identifier.
-      names.emplace_back(sref("["));
+      names.emplace_back(&"[");
 
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
@@ -272,7 +272,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                   tstrm.next_sloc(),
                   "[unmatched `[` at '$1']", op_sloc);
 
-      names.emplace_back(sref("]"));
+      names.emplace_back(&"]");
       return move(names);
     }
 
@@ -280,7 +280,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     if(kpunct) {
       // Accept a list of identifiers wrapped in a pair of braces and separated
       // by commas. There must be at least one identifier.
-      names.emplace_back(sref("{"));
+      names.emplace_back(&"{");
 
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
@@ -313,7 +313,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                   tstrm.next_sloc(),
                   "[unmatched `{` at '$1']", op_sloc);
 
-      names.emplace_back(sref("}"));
+      names.emplace_back(&"}");
       return move(names);
     }
 
@@ -626,7 +626,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
     for(;;) {
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
-        params.emplace_back(sref("..."));
+        params.emplace_back(&"...");
         break;
       }
 
@@ -1260,7 +1260,7 @@ do_accept_assert_statement_opt(Token_Stream& tstrm)
                 compiler_status_string_literal_expected, tstrm.next_sloc());
 
     if(!kmsg)
-      kmsg.emplace(sref("[no message]"));
+      kmsg.emplace(&"[no message]");
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
@@ -1648,7 +1648,7 @@ do_accept_this(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
     if(!qkwrd)
       return false;
 
-    Expression_Unit::S_local_reference xunit = { sloc, sref("__this") };
+    Expression_Unit::S_local_reference xunit = { sloc, &"__this" };
     units.emplace_back(move(xunit));
     return true;
   }
@@ -1677,7 +1677,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
     for(;;) {
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
-        params.emplace_back(sref("..."));
+        params.emplace_back(&"...");
         break;
       }
 

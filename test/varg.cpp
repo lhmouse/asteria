@@ -9,7 +9,7 @@ int main()
   {
     Simple_Script code;
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         func binary(a, b, ...) {
@@ -26,7 +26,7 @@ int main()
         ];
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     auto res = code.execute();
 
     const auto& array = res.dereference_readonly().as_array();
@@ -43,12 +43,12 @@ int main()
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(1).as_integer() == 4);
 
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         return __varg('meow', 42, true);
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     ASTERIA_TEST_CHECK_CATCH(code.execute());
   }

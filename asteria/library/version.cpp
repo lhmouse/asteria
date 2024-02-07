@@ -10,12 +10,12 @@ namespace asteria {
 void
 create_bindings_version(V_object& result, API_Version version)
   {
-    result.insert_or_assign(sref("major"),
+    result.insert_or_assign(&"major",
       V_integer(
         version / 0x10000
       ));
 
-    result.insert_or_assign(sref("minor"),
+    result.insert_or_assign(&"minor",
       V_integer(
         version % 0x10000
       ));

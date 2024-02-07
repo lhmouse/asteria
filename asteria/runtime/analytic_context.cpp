@@ -14,15 +14,15 @@ Analytic_Context(Uxtc_function, const Abstract_Context* parent_opt,
   {
     // Set parameters, which are local references.
     for(const auto& name : params)
-      if(name != sref("..."))
+      if(name != "...")
         this->do_mut_named_reference(nullptr, name);
 
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update
     // 'executive_context.cpp' as well.
-    this->do_mut_named_reference(nullptr, sref("__this"));
-    this->do_mut_named_reference(nullptr, sref("__func"));
-    this->do_mut_named_reference(nullptr, sref("__varg"));
+    this->do_mut_named_reference(nullptr, &"__this");
+    this->do_mut_named_reference(nullptr, &"__func");
+    this->do_mut_named_reference(nullptr, &"__varg");
   }
 
 Analytic_Context::

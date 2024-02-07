@@ -14,7 +14,7 @@ int main()
     code.mut_options().optimization_level = 0;
 #endif
     code.reload_string(
-      sref(__FILE__), __LINE__, sref(R"__(
+      &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         var b = false, i = 12, r = 8.5, s = "a";
@@ -542,6 +542,6 @@ int main()
         assert __isvoid func(){ return 1; }() == false;
 
 ///////////////////////////////////////////////////////////////////////////////
-      )__"));
+      )__");
     code.execute();
   }

@@ -78,42 +78,42 @@ std_filesystem_get_properties(V_string path)
     // Convert the result to an `object`.
     V_object stat;
 
-    stat.try_emplace(sref("device"),
+    stat.try_emplace(&"device",
       V_integer(
         stb.st_dev  // unique device ID on this machine
       ));
 
-    stat.try_emplace(sref("inode"),
+    stat.try_emplace(&"inode",
       V_integer(
         stb.st_ino  // unique file ID on this device
       ));
 
-    stat.try_emplace(sref("link_count"),
+    stat.try_emplace(&"link_count",
       V_integer(
         stb.st_nlink  // number of hard links
       ));
 
-    stat.try_emplace(sref("is_directory"),
+    stat.try_emplace(&"is_directory",
       V_boolean(
         S_ISDIR(stb.st_mode)  // whether this is a directory
       ));
 
-    stat.try_emplace(sref("is_symbolic"),
+    stat.try_emplace(&"is_symbolic",
       V_boolean(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link
       ));
 
-    stat.try_emplace(sref("size"),
+    stat.try_emplace(&"size",
       V_integer(
         stb.st_size  // size of contents in bytes
       ));
 
-    stat.try_emplace(sref("size_on_disk"),
+    stat.try_emplace(&"size_on_disk",
       V_integer(
         (int64_t) stb.st_blocks * 512  // size of storage on disk in bytes
       ));
 
-    stat.try_emplace(sref("time_accessed"),
+    stat.try_emplace(&"time_accessed",
       V_integer(
 #ifdef __USE_XOPEN2K8
         (int64_t) stb.st_atim.tv_sec * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of creation
@@ -122,7 +122,7 @@ std_filesystem_get_properties(V_string path)
 #endif
       ));
 
-    stat.try_emplace(sref("time_modified"),
+    stat.try_emplace(&"time_modified",
       V_integer(
 #ifdef __USE_XOPEN2K8
         (int64_t) stb.st_mtim.tv_sec * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of modification
@@ -345,17 +345,17 @@ std_filesystem_list(V_string path)
       // Append this entry, assuming the name is in UTF-8.
       V_object entry;
 
-      entry.try_emplace(sref("inode"),
+      entry.try_emplace(&"inode",
         V_integer(
           next->d_ino  // unique file ID on this device
         ));
 
-      entry.try_emplace(sref("is_directory"),
+      entry.try_emplace(&"is_directory",
         V_boolean(
           is_dir  // whether this is a directory
         ));
 
-      entry.try_emplace(sref("is_symbolic"),
+      entry.try_emplace(&"is_symbolic",
         V_boolean(
           is_sym  // whether this is a symbolic link
         ));
@@ -655,7 +655,7 @@ std_filesystem_remove_file(V_string path)
 void
 create_bindings_filesystem(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("get_real_path"),
+    result.insert_or_assign(&"get_real_path",
       ASTERIA_BINDING(
         "std.filesystem.get_real_path", "path",
         Argument_Reader&& reader)
@@ -670,7 +670,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_properties"),
+    result.insert_or_assign(&"get_properties",
       ASTERIA_BINDING(
         "`std.filesystem.get_properties", "path",
         Argument_Reader&& reader)
@@ -685,7 +685,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("move"),
+    result.insert_or_assign(&"move",
       ASTERIA_BINDING(
         "std.filesystem.move", "path_new, path_old",
         Argument_Reader&& reader)
@@ -701,7 +701,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("remove_recursive"),
+    result.insert_or_assign(&"remove_recursive",
       ASTERIA_BINDING(
         "std.filesystem.remove_recursive", "path",
         Argument_Reader&& reader)
@@ -716,7 +716,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("glob"),
+    result.insert_or_assign(&"glob",
       ASTERIA_BINDING(
         "std.filesystem.glob", "pattern",
         Argument_Reader&& reader)
@@ -731,7 +731,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("list"),
+    result.insert_or_assign(&"list",
       ASTERIA_BINDING(
         "std.filesystem.list", "path",
         Argument_Reader&& reader)
@@ -746,7 +746,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("create_directory"),
+    result.insert_or_assign(&"create_directory",
       ASTERIA_BINDING(
         "std.filesystem.create_directory", "path",
         Argument_Reader&& reader)
@@ -761,7 +761,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("remove_directory"),
+    result.insert_or_assign(&"remove_directory",
       ASTERIA_BINDING(
         "std.filesystem.remove_directory", "path",
         Argument_Reader&& reader)
@@ -776,7 +776,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("read"),
+    result.insert_or_assign(&"read",
       ASTERIA_BINDING(
         "std.filesystem.read", "path, [offset, [limit]]",
         Argument_Reader&& reader)
@@ -794,7 +794,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("stream"),
+    result.insert_or_assign(&"stream",
       ASTERIA_BINDING(
         "std.filesystem.stream", "path, callback, [offset, [limit]]",
         Global_Context& global, Argument_Reader&& reader)
@@ -814,7 +814,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("write"),
+    result.insert_or_assign(&"write",
       ASTERIA_BINDING(
         "std.filesystem.write", "path, data",
         Argument_Reader&& reader)
@@ -838,7 +838,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("append"),
+    result.insert_or_assign(&"append",
       ASTERIA_BINDING(
         "std.filesystem.append", "path, data, [exclusive]",
         Argument_Reader&& reader)
@@ -856,7 +856,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("copy_file"),
+    result.insert_or_assign(&"copy_file",
       ASTERIA_BINDING(
         "std.filesystem.copy_file", "path_new, path_old",
         Argument_Reader&& reader)
@@ -872,7 +872,7 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("remove_file"),
+    result.insert_or_assign(&"remove_file",
       ASTERIA_BINDING(
         "std.filesystem.remove_file", "path",
         Argument_Reader&& reader)

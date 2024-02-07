@@ -52,7 +52,7 @@ class Variable
     void
     uninitialize() noexcept
       {
-        this->m_value = sref("[[`destroyed variable`]]");
+        this->m_value = &"[[`destroyed variable`]]";
         this->m_init = false;
       }
 

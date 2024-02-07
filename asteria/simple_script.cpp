@@ -53,13 +53,13 @@ reload(cow_stringR name, Statement_Sequence&& stmtq)
   {
     // Instantiate the function.
     cow_vector<phsh_string> script_params;
-    script_params.emplace_back(sref("..."));
+    script_params.emplace_back(&"...");
 
     AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, script_params, this->m_global, stmtq.get_statements());
 
     Source_Location script_sloc(name, 0, 0);
-    this->m_func = optmz.create_function(script_sloc, sref("[file scope]"));
+    this->m_func = optmz.create_function(script_sloc, &"[file scope]");
   }
 
 void
@@ -102,7 +102,7 @@ reload_stdin(int line)
   {
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    this->reload(sref("[stdin]"), line, move(cbuf));
+    this->reload(&"[stdin]", line, move(cbuf));
   }
 
 void

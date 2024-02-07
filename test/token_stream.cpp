@@ -11,15 +11,15 @@ int main()
   {
     Token_Stream ts({});
     ::rocket::tinybuf_str cbuf;
-    cbuf.set_string(sref(
-      R"__(#!some shebang
+    cbuf.set_string(
+      &R"__(#!some shebang
         hh+++
         if <<<&>>>>>"\u55b5b喵"/
         * - 0x01`7.8`4p+4  // comments
         .false/*more
         comments*/;/*yet more*/-42e13
-      )__"), tinybuf::open_read);
-    ts.reload(sref("dummy_file"), 16, move(cbuf));
+      )__", tinybuf::open_read);
+    ts.reload(&"dummy_file", 16, move(cbuf));
     ASTERIA_TEST_CHECK(cbuf.getc() == EOF);
 
     auto p = ts.peek_opt();

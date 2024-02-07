@@ -45,10 +45,10 @@ int main()
     foreign->initialize(42);
     {
       Simple_Script code;
-      code.global().insert_named_reference(sref("foreign_variable")).set_variable(foreign);
+      code.global().insert_named_reference(&"foreign_variable").set_variable(foreign);
 
       code.reload_string(
-        sref(__FILE__), __LINE__, sref(R"__(
+        &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
           ref gr -> extern foreign_variable;
@@ -73,7 +73,7 @@ int main()
           assert std.gc.collect() == 3;  // x,y,z
 
 ///////////////////////////////////////////////////////////////////////////////
-        )__"));
+        )__");
       code.execute();
     }
 

@@ -77,7 +77,7 @@ std_gc_collect(Global_Context& global, optV_integer generation_limit)
 void
 create_bindings_gc(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("count_variables"),
+    result.insert_or_assign(&"count_variables",
       ASTERIA_BINDING(
         "std.gc.count_variables", "generation",
         Global_Context& global, Argument_Reader&& reader)
@@ -92,7 +92,7 @@ create_bindings_gc(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("get_threshold"),
+    result.insert_or_assign(&"get_threshold",
       ASTERIA_BINDING(
         "std.gc.get_threshold", "generation",
         Global_Context& global, Argument_Reader&& reader)
@@ -107,7 +107,7 @@ create_bindings_gc(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("set_threshold"),
+    result.insert_or_assign(&"set_threshold",
       ASTERIA_BINDING(
         "std.gc.set_threshold", "generation, threshold",
         Global_Context& global, Argument_Reader&& reader)
@@ -123,7 +123,7 @@ create_bindings_gc(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("collect"),
+    result.insert_or_assign(&"collect",
       ASTERIA_BINDING(
         "std.gc.collect", "[generation_limit]",
         Global_Context& global, Argument_Reader&& reader)

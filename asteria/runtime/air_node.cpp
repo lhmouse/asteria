@@ -250,7 +250,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
         int64_t cmp = lhs.compare_numeric_partial(irhs);
         lhs = cmp - compare_equal;
         if(ROCKET_UNEXPECT(cmp == compare_unordered))
-          lhs = sref("[unordered]");
+          lhs = &"[unordered]";
         return air_status_next;
       }
 
@@ -2000,14 +2000,14 @@ solidify(AVM_Rod& rod) const
                 V_array backtrace;
                 for(size_t k = 0;  k < except.count_frames();  ++k) {
                   V_object r;
-                  r.try_emplace(sref("frame"), sref(describe_frame_type(except.frame(k).type)));
-                  r.try_emplace(sref("file"), except.frame(k).sloc.file());
-                  r.try_emplace(sref("line"), except.frame(k).sloc.line());
-                  r.try_emplace(sref("column"), except.frame(k).sloc.column());
-                  r.try_emplace(sref("value"), except.frame(k).value);
+                  r.try_emplace(&"frame", ::rocket::sref(describe_frame_type(except.frame(k).type)));
+                  r.try_emplace(&"file", except.frame(k).sloc.file());
+                  r.try_emplace(&"line", except.frame(k).sloc.line());
+                  r.try_emplace(&"column", except.frame(k).sloc.column());
+                  r.try_emplace(&"value", except.frame(k).value);
                   backtrace.emplace_back(move(r));
                 }
-                auto& backtrace_ref = ctx_catch.insert_named_reference(sref("__backtrace"));
+                auto& backtrace_ref = ctx_catch.insert_named_reference(&"__backtrace");
                 backtrace_ref.set_temporary(move(backtrace));
 
                 // Execute the `catch` clause.
@@ -2905,7 +2905,7 @@ solidify(AVM_Rod& rod) const
 
                   case xop_typeof: {
                     // Ge the type of the operand as a string.
-                    rhs = sref(describe_type(rhs.type()));
+                    rhs = ::rocket::sref(describe_type(rhs.type()));
                     return air_status_next;
                   }
 
@@ -3270,7 +3270,7 @@ solidify(AVM_Rod& rod) const
                     int64_t cmp = lhs.compare_partial(rhs);
                     lhs = cmp - compare_equal;
                     if(ROCKET_UNEXPECT(cmp == compare_unordered))
-                      lhs = sref("[unordered]");
+                      lhs = &"[unordered]";
                     return air_status_next;
                   }
 
@@ -4057,7 +4057,7 @@ solidify(AVM_Rod& rod) const
 
             // Instantiate the script as a variadic function.
             cow_vector<phsh_string> script_params;
-            script_params.emplace_back(sref("..."));
+            script_params.emplace_back(&"...");
 
             AIR_Optimizer optmz(sp.opts);
             optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
@@ -4065,7 +4065,7 @@ solidify(AVM_Rod& rod) const
             ctx.stack().clear_red_zone();
             ctx.stack().mut_top().set_void();
             return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none,
-                                     optmz.create_function(script_sloc, sref("[file scope]")));
+                                     optmz.create_function(script_sloc, &"[file scope]"));
           }
 
           // Uparam

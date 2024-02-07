@@ -201,7 +201,7 @@ V_string
 do_get_reject(const optV_string& reject)
   {
     if(!reject)
-      return sref(" \t");
+      return &" \t";
 
     return *reject;
   }
@@ -210,7 +210,7 @@ V_string
 do_get_padding(const optV_string& padding)
   {
     if(!padding)
-      return sref(" ");
+      return &" ";
 
     if(padding->empty())
       ASTERIA_THROW(("Empty padding string not valid"));
@@ -271,19 +271,6 @@ do_xstrchr(const char* str, char c) noexcept
     return nullptr;
   }
 
-bool
-do_streq_ci(const V_string& str, V_string::shallow_type cmp) noexcept
-  {
-    if(str.length() != cmp.length())
-      return false;
-
-    for(size_t k = 0;  k != cmp.length();  ++k)
-      if(::rocket::ascii_to_lower(str[k]) != cmp.c_str()[k])
-        return false;
-
-    return true;
-  }
-
 class PCRE2_Error
   {
   private:
@@ -329,28 +316,27 @@ class PCRE2_Matcher
         m_code(::pcre2_code_free), m_match(::pcre2_match_data_free)
       {
         // Check options.
-        if(opts) {
-          for(const auto& opt : *opts)
-            if(do_streq_ci(opt.as_string(), sref("caseless")))
+        if(opts)
+          for(const auto& opt : *opts) {
+            const auto& str = opt.as_string();
+            if(str == "caseless")
               this->m_opts |= PCRE2_CASELESS;
-            else if(do_streq_ci(opt.as_string(), sref("dotall")))
+            else if(str == "dotall")
               this->m_opts |= PCRE2_DOTALL;
-            else if(do_streq_ci(opt.as_string(), sref("extended")))
+            else if(str == "extended")
               this->m_opts |= PCRE2_EXTENDED;
-            else if(do_streq_ci(opt.as_string(), sref("multiline")))
+            else if(str == "multiline")
               this->m_opts |= PCRE2_MULTILINE;
-            else if(!opt.as_string().empty())
-              ASTERIA_THROW((
-                  "Invalid option for regular expression: $1"),
-                  opt);
-        }
+            else
+              ASTERIA_THROW(("Invalid option for regular expression: $1"), str);
+          }
 
         // Compile the regular expression.
         int err;
         size_t off;
         if(!this->m_code.reset(::pcre2_compile(
-                      reinterpret_cast<const uint8_t*>(this->m_patt.data()),
-                      this->m_patt.size(), this->m_opts, &err, &off, nullptr)))
+              reinterpret_cast<const uint8_t*>(this->m_patt.data()),
+              this->m_patt.size(), this->m_opts, &err, &off, nullptr)))
           ASTERIA_THROW((
               "Invalid regular expression: $1",
               "[`pcre2_compile()` failed at offset `$2`: $3]"),
@@ -556,10 +542,10 @@ class PCRE2_Matcher
 void
 do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
   {
-    static constexpr auto s_private_uuid = sref("{2D86F6E8-8927-4A26-062F-77EB77EB23E7}");
+    static constexpr auto s_private_uuid = &"{2D86F6E8-8927-4A26-062F-77EB77EB23E7}";
     result.insert_or_assign(s_private_uuid, std_string_PCRE_private(pattern, options));
 
-    result.insert_or_assign(sref("find"),
+    result.insert_or_assign(&"find",
       ASTERIA_BINDING(
         "std.string.PCRE::find", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
@@ -591,7 +577,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("match"),
+    result.insert_or_assign(&"match",
       ASTERIA_BINDING(
         "std.string.PCRE::match", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
@@ -623,7 +609,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("named_match"),
+    result.insert_or_assign(&"named_match",
       ASTERIA_BINDING(
         "std.string.PCRE::named_match", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
@@ -655,7 +641,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("replace"),
+    result.insert_or_assign(&"replace",
       ASTERIA_BINDING(
         "std.string.PCRE::replace", "text, [from, [length]], replacement",
         Reference&& self, Argument_Reader&& reader)
@@ -866,7 +852,7 @@ std_string_trim(V_string text, optV_string reject)
     // Get the index of the first byte to keep.
     size_t bpos = text.find_not_of(rchars);
     if(bpos == V_string::npos)
-      return sref("");
+      return &"";
 
     // Get the index of the last byte to keep.
     size_t epos = text.rfind_not_of(rchars) + 1;
@@ -887,7 +873,7 @@ std_string_triml(V_string text, optV_string reject)
     // Get the index of the first byte to keep.
     size_t bpos = text.find_not_of(rchars);
     if(bpos == V_string::npos)
-      return sref("");
+      return &"";
     else if(bpos == 0)
       return text;
 
@@ -905,7 +891,7 @@ std_string_trimr(V_string text, optV_string reject)
     // Get the index of the last byte to keep.
     size_t epos = text.rfind_not_of(rchars) + 1;
     if(epos == 0)
-      return sref("");
+      return &"";
     else if(epos == text.size())
       return text;
 
@@ -1038,7 +1024,7 @@ std_string_explode(V_string text, optV_string delim, optV_integer limit)
       while((segments.size() + 1 < rlimit) && (tcur != text.end())) {
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.
-        segments.emplace_back(sref(s_char_table[uint8_t(*tcur)]));
+        segments.emplace_back(::rocket::sref(s_char_table[uint8_t(*tcur)]));
         tcur += 1;
       }
       if(tcur != text.end())
@@ -1754,7 +1740,7 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
 void
 create_bindings_string(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(sref("slice"),
+    result.insert_or_assign(&"slice",
       ASTERIA_BINDING(
         "std.string.slice", "text, from, [length]",
         Argument_Reader&& reader)
@@ -1773,7 +1759,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("replace_slice"),
+    result.insert_or_assign(&"replace_slice",
       ASTERIA_BINDING(
         "std.string.replace_slice", "text, from, [length], replacement, [rfrom, [rlength]]",
         Argument_Reader&& reader)
@@ -1806,7 +1792,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("compare"),
+    result.insert_or_assign(&"compare",
       ASTERIA_BINDING(
         "std.string.compare", "text1, text2, [length]",
         Argument_Reader&& reader)
@@ -1825,7 +1811,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("starts_with"),
+    result.insert_or_assign(&"starts_with",
       ASTERIA_BINDING(
         "std.string.starts_with", "text, prefix",
         Argument_Reader&& reader)
@@ -1842,7 +1828,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("ends_with"),
+    result.insert_or_assign(&"ends_with",
       ASTERIA_BINDING(
         "std.string.ends_with", "text, suffix",
         Argument_Reader&& reader)
@@ -1859,7 +1845,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find"),
+    result.insert_or_assign(&"find",
       ASTERIA_BINDING(
         "std.string.find", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
@@ -1891,7 +1877,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rfind"),
+    result.insert_or_assign(&"rfind",
       ASTERIA_BINDING(
         "std.string.rfind", "text, [from, [length]], pattern",
         Argument_Reader&& reader)
@@ -1923,7 +1909,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("replace"),
+    result.insert_or_assign(&"replace",
       ASTERIA_BINDING(
         "std.string.replace", "text, [from, [length]], pattern, replacement",
         Argument_Reader&& reader)
@@ -1958,7 +1944,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find_any_of"),
+    result.insert_or_assign(&"find_any_of",
       ASTERIA_BINDING(
         "std.string.find_any_of", "text, [from, [length]], accept",
         Argument_Reader&& reader)
@@ -1991,7 +1977,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rfind_any_of"),
+    result.insert_or_assign(&"rfind_any_of",
       ASTERIA_BINDING(
         "std.string.rfind_any_of", "text, [from, [length]], accept",
         Argument_Reader&& reader)
@@ -2024,7 +2010,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("find_not_of"),
+    result.insert_or_assign(&"find_not_of",
       ASTERIA_BINDING(
         "std.string.find_not_of", "text, [from, [length]], reject",
         Argument_Reader&& reader)
@@ -2057,7 +2043,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("rfind_not_of"),
+    result.insert_or_assign(&"rfind_not_of",
       ASTERIA_BINDING(
         "std.string.rfind_not_of", "text, [from, [length]], reject",
         Argument_Reader&& reader)
@@ -2090,7 +2076,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("reverse"),
+    result.insert_or_assign(&"reverse",
       ASTERIA_BINDING(
         "std.string.reverse", "text",
         Argument_Reader&& reader)
@@ -2105,7 +2091,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("trim"),
+    result.insert_or_assign(&"trim",
       ASTERIA_BINDING(
         "std.string.trim", "text, [reject]",
         Argument_Reader&& reader)
@@ -2122,7 +2108,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("triml"),
+    result.insert_or_assign(&"triml",
       ASTERIA_BINDING(
         "std.string.triml", "text, [reject]",
         Argument_Reader&& reader)
@@ -2139,7 +2125,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("trimr"),
+    result.insert_or_assign(&"trimr",
       ASTERIA_BINDING(
         "std.string.trimr", "text, [reject]",
         Argument_Reader&& reader)
@@ -2156,7 +2142,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("padl"),
+    result.insert_or_assign(&"padl",
       ASTERIA_BINDING(
         "std.string.padl", "text, length, [padding]",
         Argument_Reader&& reader)
@@ -2175,7 +2161,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("padr"),
+    result.insert_or_assign(&"padr",
       ASTERIA_BINDING(
         "std.string.padr", "text, length, [padding]",
         Argument_Reader&& reader)
@@ -2194,7 +2180,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("to_upper"),
+    result.insert_or_assign(&"to_upper",
       ASTERIA_BINDING(
         "std.string.to_upper", "text",
         Argument_Reader&& reader)
@@ -2209,7 +2195,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("to_lower"),
+    result.insert_or_assign(&"to_lower",
       ASTERIA_BINDING(
         "std.string.to_lower", "text",
         Argument_Reader&& reader)
@@ -2224,7 +2210,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("translate"),
+    result.insert_or_assign(&"translate",
       ASTERIA_BINDING(
         "std.string.translate", "text, inputs, [outputs]",
         Argument_Reader&& reader)
@@ -2243,7 +2229,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("explode"),
+    result.insert_or_assign(&"explode",
       ASTERIA_BINDING(
         "std.string.explode", "text, [delim, [limit]]",
         Argument_Reader&& reader)
@@ -2262,7 +2248,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("implode"),
+    result.insert_or_assign(&"implode",
       ASTERIA_BINDING(
         "std.string.implode", "segments, [delim]",
         Argument_Reader&& reader)
@@ -2279,7 +2265,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("hex_encode"),
+    result.insert_or_assign(&"hex_encode",
       ASTERIA_BINDING(
         "std.string.hex_encode", "data, [delim]",
         Argument_Reader&& reader)
@@ -2297,7 +2283,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("hex_decode"),
+    result.insert_or_assign(&"hex_decode",
       ASTERIA_BINDING(
         "std.string.hex_decode", "text",
         Argument_Reader&& reader)
@@ -2312,7 +2298,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("base32_encode"),
+    result.insert_or_assign(&"base32_encode",
       ASTERIA_BINDING(
         "std.string.base32_encode", "data",
         Argument_Reader&& reader)
@@ -2328,7 +2314,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("base32_decode"),
+    result.insert_or_assign(&"base32_decode",
       ASTERIA_BINDING(
         "std.string.base32_decode", "text",
         Argument_Reader&& reader)
@@ -2343,7 +2329,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("base64_encode"),
+    result.insert_or_assign(&"base64_encode",
       ASTERIA_BINDING(
         "std.string.base64_encode", "data",
         Argument_Reader&& reader)
@@ -2358,7 +2344,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("base64_decode"),
+    result.insert_or_assign(&"base64_decode",
       ASTERIA_BINDING(
         "std.string.base64_decode", "text",
         Argument_Reader&& reader)
@@ -2373,7 +2359,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("url_encode"),
+    result.insert_or_assign(&"url_encode",
       ASTERIA_BINDING(
         "std.string.url_encode", "data",
         Argument_Reader&& reader)
@@ -2389,7 +2375,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("url_decode"),
+    result.insert_or_assign(&"url_decode",
       ASTERIA_BINDING(
         "std.string.url_decode", "text",
         Argument_Reader&& reader)
@@ -2404,7 +2390,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("url_query_encode"),
+    result.insert_or_assign(&"url_query_encode",
       ASTERIA_BINDING(
         "std.string.url_query_encode", "data",
         Argument_Reader&& reader)
@@ -2420,7 +2406,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("url_query_decode"),
+    result.insert_or_assign(&"url_query_decode",
       ASTERIA_BINDING(
         "std.string.url_query_decode", "text",
         Argument_Reader&& reader)
@@ -2435,7 +2421,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("utf8_validate"),
+    result.insert_or_assign(&"utf8_validate",
      ASTERIA_BINDING(
        "std.string.utf8_validate", "text",
        Argument_Reader&& reader)
@@ -2450,7 +2436,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("utf8_encode"),
+    result.insert_or_assign(&"utf8_encode",
       ASTERIA_BINDING(
         "std.string.utf8_encode", "code_points, [permissive]",
         Argument_Reader&& reader)
@@ -2474,7 +2460,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("utf8_decode"),
+    result.insert_or_assign(&"utf8_decode",
       ASTERIA_BINDING(
         "std.string.utf8_decode", "text, [permissive]",
         Argument_Reader&& reader)
@@ -2491,7 +2477,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("format"),
+    result.insert_or_assign(&"format",
       ASTERIA_BINDING(
         "std.string.format", "templ, ...",
         Argument_Reader&& reader)
@@ -2507,7 +2493,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("PCRE"),
+    result.insert_or_assign(&"PCRE",
       ASTERIA_BINDING(
         "std.string.PCRE", "pattern, [options]",
         Argument_Reader&& reader)
@@ -2524,7 +2510,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pcre_find"),
+    result.insert_or_assign(&"pcre_find",
       ASTERIA_BINDING(
         "std.string.pcre_find", "text, [from, [length]], pattern, [options]",
         Argument_Reader&& reader)
@@ -2560,7 +2546,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pcre_match"),
+    result.insert_or_assign(&"pcre_match",
       ASTERIA_BINDING(
         "std.string.pcre_match", "text, [from, [length]], pattern, [options]",
         Argument_Reader&& reader)
@@ -2596,7 +2582,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pcre_named_match"),
+    result.insert_or_assign(&"pcre_named_match",
       ASTERIA_BINDING(
         "std.string.pcre_named_match", "text, [from, [length]], pattern, [options]",
         Argument_Reader&& reader)
@@ -2632,7 +2618,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("pcre_replace"),
+    result.insert_or_assign(&"pcre_replace",
       ASTERIA_BINDING(
         "std.string.pcre_replace", "text, [from, [length]], pattern, replacement, [options]",
         Argument_Reader&& reader)
@@ -2671,7 +2657,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(sref("iconv"),
+    result.insert_or_assign(&"iconv",
       ASTERIA_BINDING(
         "std.string.iconv", "to_encoding, text, [from_encoding]",
         Argument_Reader&& reader)

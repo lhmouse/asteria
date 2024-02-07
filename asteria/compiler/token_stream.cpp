@@ -207,12 +207,12 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
       case '+':
-        tstr = sref("+");
+        tstr = &"+";
         tlen += 1;
         break;
 
       case '-':
-        tstr = sref("-");
+        tstr = &"-";
         tlen += 1;
         sign = -1;
         break;
