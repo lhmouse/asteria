@@ -11,54 +11,42 @@ namespace asteria {
 class Value
   {
   private:
-    using variant_type =
-        ::rocket::variant<
+    template<typename xValue, bool xEnabled>
+    friend struct details_value::Valuable;
+
+    template<typename xValue>
+    using my_Valuable = details_value::Valuable<
+            typename ::rocket::remove_cvref<xValue>::type>;
+
+    using variant_type = ::rocket::variant<
             V_null, V_boolean, V_integer, V_real, V_string,
             V_opaque, V_function, V_array, V_object>;
 
-    using bytes_type =
-        ::std::aligned_storage<sizeof(variant_type), 16>::type;
+    using bytes_type = ::std::aligned_storage<
+            sizeof(variant_type), 16>::type;
 
     union {
+      bytes_type m_bytes = { };
       variant_type m_stor;
-      bytes_type m_bytes;
     };
 
   public:
     // Constructors and assignment operators
-    constexpr Value(nullopt_t = nullopt) noexcept
-      :
-        m_bytes()
-      { }
+    constexpr Value(nullopt_t = nullopt) noexcept { }
 
     template<typename xValue,
-    ROCKET_ENABLE_IF(details_value::Valuable<xValue>::direct_init::value)>
-    Value(xValue&& xval)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor),
-                   typename details_value::Valuable<xValue>::via_type&&>::value)
-      :
-        m_stor(typename details_value::Valuable<xValue>::via_type(forward<xValue>(xval)))
-      { }
-
-    template<typename xValue,
-    ROCKET_DISABLE_IF(details_value::Valuable<xValue>::direct_init::value)>
-    Value(xValue&& xval)
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
-                   typename details_value::Valuable<xValue>::via_type&&>::value)
-      :
-        m_bytes()
+    ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
+    Value(xValue&& xval) noexcept(my_Valuable<xValue>::is_noexcept)
       {
-        details_value::Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
+        my_Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
       }
 
     template<typename xValue,
-    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<xValue>::via_type)>
+    ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
     Value&
-    operator=(xValue&& xval) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
-                   typename details_value::Valuable<xValue>::via_type&&>::value)
+    operator=(xValue&& xval) & noexcept(my_Valuable<xValue>::is_noexcept)
       {
-        details_value::Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
+        my_Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
         return *this;
       }
 

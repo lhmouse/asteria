@@ -7,299 +7,371 @@
 namespace asteria {
 namespace details_value {
 
-// This controls implicit conversions to `Value` from other types.
-// The main templte is undefined and is SFINAE-friendly.
-// A member type alias `via_type` shall be provided, which shall designate
-// one of the `V_*` candidates.
-template<typename xVal, typename = void>
-struct Valuable_impl;
-
-template<>
-struct Valuable_impl<nullopt_t>
+template<typename xValue, bool xEnabled = true>
+struct Valuable
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_null;
-
-    template<typename xStor>
-    static
-    void
-    assign(xStor& stor, nullopt_t)
-      {
-        stor = V_null();
-      }
+    static constexpr bool is_enabled = false;
+    static constexpr bool is_noexcept = true;
   };
 
 template<>
-struct Valuable_impl<bool>
+struct Valuable<Value>
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_boolean;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage, typename xValue>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, xValue&& xval)
       {
-        stor = V_boolean(xval);
+        stor = forward<xValue>(xval).m_stor;
       }
   };
 
-template<typename xInteger>
-struct Valuable_impl<xInteger, typename ::std::enable_if<
-            ::rocket::is_any_type_of<xInteger,
-                        signed char, short, int, long, long long>::value
-        >::type>
+template<>
+struct Valuable<nullopt_t>
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_integer;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, V_null xval)
       {
-        stor = V_integer(xval);
+        stor = xval;
       }
   };
 
-template<typename xFloat>
-struct Valuable_impl<xFloat, typename ::std::enable_if<
-            ::rocket::is_any_type_of<xFloat,
-                                 float, double>::value
-        >::type>
+template<>
+struct Valuable<bool>
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_real;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, V_boolean xval)
       {
-        stor = V_real(xval);
+        stor = xval;
       }
   };
 
-template<typename xString>
-struct Valuable_impl<xString, typename ::std::enable_if<
-            ::rocket::is_any_type_of<xString,
-                        cow_string::shallow_type, cow_string>::value
-        >::type>
+template<>
+struct Valuable<signed char>
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_string;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, V_integer xval)
       {
-        stor = V_string(forward<xValue>(xval));
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<short>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, V_integer xval)
+      {
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<int>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, V_integer xval)
+      {
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<long>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, V_integer xval)
+      {
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<long long>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, V_integer xval)
+      {
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<float>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, V_real xval)
+      {
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<double>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, V_real xval)
+      {
+        stor = xval;
+      }
+  };
+
+template<>
+struct Valuable<cow_string>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage, typename xValue>
+    static
+    void
+    assign(xStorage& stor, xValue&& xval)
+      {
+        stor = forward<xValue>(xval);
+      }
+  };
+
+template<>
+struct Valuable<cow_opaque>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage, typename xValue>
+    static
+    void
+    assign(xStorage& stor, xValue&& xval)
+      {
+        stor = forward<xValue>(xval);
+      }
+  };
+
+template<>
+struct Valuable<cow_function>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage, typename xValue>
+    static
+    void
+    assign(xStorage& stor, xValue&& xval)
+      {
+        stor = forward<xValue>(xval);
+      }
+  };
+
+template<>
+struct Valuable<cow_vector<Value>>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage, typename xValue>
+    static
+    void
+    assign(xStorage& stor, xValue&& xval)
+      {
+        stor = forward<xValue>(xval);
+      }
+  };
+
+template<>
+struct Valuable<cow_dictionary<Value>>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage, typename xValue>
+    static
+    void
+    assign(xStorage& stor, xValue&& xval)
+      {
+        stor = forward<xValue>(xval);
+      }
+  };
+
+template<>
+struct Valuable<cow_string::shallow_type>
+  {
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, cow_string::shallow_type sh)
+      {
+        stor = V_string(sh);
       }
   };
 
 template<size_t N>
-struct Valuable_impl<const char (*)[N]>
+struct Valuable<const char (*)[N]>
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_string;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, const char (*ps)[N])
       {
-        stor = V_string(forward<xValue>(xval));
-      }
-  };
-
-template<>
-struct Valuable_impl<cow_opaque>
-  {
-    using direct_init  = ::std::false_type;
-    using via_type     = V_opaque;
-
-    template<typename xStor, typename xValue>
-    static
-    void
-    assign(xStor& stor, xValue&& xval)
-      {
-        if(xval)
-          stor = V_opaque(forward<xValue>(xval));
-        else
-          stor = V_null();
+        stor = V_string(ps);
       }
   };
 
 template<typename xOpaque>
-struct Valuable_impl<refcnt_ptr<xOpaque>, typename ::std::enable_if<
-            ::std::is_convertible<xOpaque*,
-                                  Abstract_Opaque*>::value
-        >::type>
+struct Valuable<refcnt_ptr<xOpaque>, ::std::is_base_of<Abstract_Opaque, xOpaque>::value>
   {
-    using direct_init  = ::std::false_type;
-    using via_type     = V_opaque;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage, typename xPointer>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, xPointer&& xptr)
       {
-        if(xval)
-          stor = V_opaque(forward<xValue>(xval));
-        else
+        if(!xptr)
           stor = V_null();
-      }
-  };
-
-template<>
-struct Valuable_impl<cow_function>
-  {
-    using direct_init  = ::std::false_type;
-    using via_type     = V_function;
-
-    template<typename xStor, typename xValue>
-    static
-    void
-    assign(xStor& stor, xValue&& xval)
-      {
-        if(xval)
-          stor = V_function(forward<xValue>(xval));
         else
-          stor = V_null();
+          stor = V_opaque(forward<xPointer>(xptr));
       }
   };
 
 template<typename xFunction>
-struct Valuable_impl<refcnt_ptr<xFunction>, typename ::std::enable_if<
-            ::std::is_convertible<xFunction*,
-                                  const Abstract_Function*>::value
-        >::type>
+struct Valuable<refcnt_ptr<xFunction>, ::std::is_base_of<Abstract_Function, xFunction>::value>
   {
-    using direct_init  = ::std::false_type;
-    using via_type     = V_function;
+    static constexpr bool is_enabled = true;
+    static constexpr bool is_noexcept = true;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage, typename xPointer>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, xPointer&& xptr)
       {
-        if(xval)
-          stor = V_function(forward<xValue>(xval));
-        else
+        if(!xptr)
           stor = V_null();
+        else
+          stor = V_function(forward<xPointer>(xptr));
       }
   };
 
-template<>
-struct Valuable_impl<V_array>
+template<typename tValue>
+struct Valuable<::rocket::optional<tValue>>
   {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_array;
+    static constexpr bool is_enabled = Valuable<tValue>::is_enabled;
+    static constexpr bool is_noexcept = Valuable<tValue>::is_noexcept;
 
-    template<typename xStor, typename xValue>
+    template<typename xStorage>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign(xStorage& stor, const ::rocket::optional<tValue>& opt)
       {
-        stor = V_array(forward<xValue>(xval));
+        if(!opt)
+          stor = V_null();
+        else
+          Valuable<tValue>::assign(stor, *opt);
+      }
+
+    template<typename xStorage>
+    static
+    void
+    assign(xStorage& stor, ::rocket::optional<tValue>&& opt)
+      {
+        if(!opt)
+          stor = V_null();
+        else
+          Valuable<tValue>::assign(stor, move(*opt));
       }
   };
 
-template<>
-struct Valuable_impl<V_object>
-  {
-    using direct_init  = ::std::true_type;
-    using via_type     = V_object;
+template<typename xTuple, typename xSequence>
+struct good_tuple;
 
-    template<typename xStor, typename xValue>
+template<typename xTuple, size_t... Ns>
+struct good_tuple<xTuple, ::std::index_sequence<Ns...>>
+  {
+    static constexpr bool is_enabled =
+        (Valuable<typename ::std::tuple_element<Ns, xTuple>::type>::is_enabled && ...);
+
+    template<typename tTuple>
     static
     void
-    assign(xStor& stor, xValue&& xval)
+    assign_array(V_array& temp, tTuple&& tuple)
       {
-        stor = V_object(forward<xValue>(xval));
-      }
-  };
-
-template<typename xValue, size_t N>
-struct Valuable_impl<xValue [N]>
-  {
-    using direct_init  = ::std::false_type;
-    using via_type     = V_array;
-
-    template<typename xStor, typename xArr>
-    static
-    void
-    assign(xStor& stor, xArr&& xarr)
-      {
-        V_array arr;
-        arr.reserve(N);
-        for(size_t k = 0;  k != N;  ++k)
-          arr.emplace_back(static_cast<typename ::std::conditional<
-                  ::std::is_lvalue_reference<xArr&&>::value,
-                           const xValue&, xValue&&>::type>(xarr[k]));
-        stor = move(arr);
+        (Valuable<typename ::std::tuple_element<Ns, xTuple>::type>::assign(
+                     temp.mut(Ns), ::std::get<Ns>(forward<tTuple>(tuple))), ...);
       }
   };
 
 template<typename xTuple>
-struct Valuable_impl<xTuple, typename ::std::conditional<
-               bool(::std::tuple_size<xTuple>::value), void, void
-        >::type>
+struct Valuable<xTuple, ::std::tuple_size<xTuple>::value >= 0>
   {
-    using direct_init  = ::std::false_type;
-    using via_type     = V_array;
+    using my_good_tuple = good_tuple<
+        xTuple, ::std::make_index_sequence<::std::tuple_size<xTuple>::value>>;
 
-    template<size_t... N, typename xTup>
+    static constexpr bool is_enabled = my_good_tuple::is_enabled;
+    static constexpr bool is_noexcept = false;
+
+    template<typename xStorage, typename tTuple>
     static
     void
-    unpack_tuple_aux(V_array& arr, ::std::index_sequence<N...>,
-                     xTup&& xtup)
+    assign(xStorage& stor, tTuple&& tuple)
       {
-        int dummy[] = { (static_cast<void>(arr.emplace_back(
-               ::std::get<N>(forward<xTup>(xtup)))), 1)...  };
-        (void)dummy;
-      }
-
-    template<typename xStor, typename xTup>
-    static
-    void
-    assign(xStor& stor, xTup&& xtup)
-      {
-        V_array arr;
-        constexpr size_t N = ::std::tuple_size<xTuple>::value;
-        arr.reserve(N);
-        unpack_tuple_aux(arr, ::std::make_index_sequence<N>(),
-                        forward<xTup>(xtup));
-        stor = move(arr);
+        V_array temp(::std::tuple_size<xTuple>::value);
+        my_good_tuple::assign_array(temp, forward<tTuple>(tuple));
+        stor = move(temp);
       }
   };
-
-template<typename xValue>
-struct Valuable_impl<opt<xValue>, typename ::std::conditional<
-               true, void, typename Valuable_impl<xValue>::via_type
-        >::type>
-  {
-    using direct_init  = ::std::false_type;
-    using via_type     = typename Valuable_impl<xValue>::via_type;
-
-    template<typename xStor, typename xOpt>
-    static
-    void
-    assign(xStor& stor, xOpt&& xopt)
-      {
-        if(xopt)
-          Valuable_impl<xValue>::assign(stor,
-              static_cast<typename ::std::conditional<
-                  ::std::is_lvalue_reference<xOpt&&>::value,
-                            const xValue&, xValue&&>::type>(*xopt));
-        else
-          stor = V_null();
-      }
-  };
-
-template<typename xValue>
-using Valuable = Valuable_impl<typename ::rocket::remove_cvref<xValue>::type, void>;
 
 }  // namespace details_value
 }  // namespace asteria
