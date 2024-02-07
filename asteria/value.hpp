@@ -11,7 +11,7 @@ namespace asteria {
 class Value
   {
   private:
-    template<typename xValue, bool xEnabled>
+    template<typename xValue, typename xEnable>
     friend struct details_value::Valuable;
 
     template<typename xValue>

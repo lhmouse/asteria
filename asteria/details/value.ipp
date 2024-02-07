@@ -7,7 +7,7 @@
 namespace asteria {
 namespace details_value {
 
-template<typename xValue, bool xEnabled = true>
+template<typename xValue, typename xEnable = void>
 struct Valuable
   {
     static constexpr bool is_enabled = false;
@@ -270,7 +270,9 @@ struct Valuable<const char (*)[N]>
   };
 
 template<typename xOpaque>
-struct Valuable<refcnt_ptr<xOpaque>, ::std::is_base_of<Abstract_Opaque, xOpaque>::value>
+struct Valuable<refcnt_ptr<xOpaque>,
+     typename ::std::enable_if<
+        ::std::is_base_of<Abstract_Opaque, xOpaque>::value>::type>
   {
     static constexpr bool is_enabled = true;
     static constexpr bool is_noexcept = true;
@@ -288,7 +290,9 @@ struct Valuable<refcnt_ptr<xOpaque>, ::std::is_base_of<Abstract_Opaque, xOpaque>
   };
 
 template<typename xFunction>
-struct Valuable<refcnt_ptr<xFunction>, ::std::is_base_of<Abstract_Function, xFunction>::value>
+struct Valuable<refcnt_ptr<xFunction>,
+     typename ::std::enable_if<
+        ::std::is_base_of<Abstract_Function, xFunction>::value>::type>
   {
     static constexpr bool is_enabled = true;
     static constexpr bool is_noexcept = true;
@@ -341,7 +345,8 @@ template<typename xTuple, size_t... Ns>
 struct good_tuple<xTuple, ::std::index_sequence<Ns...>>
   {
     static constexpr bool is_enabled =
-        (Valuable<typename ::std::tuple_element<Ns, xTuple>::type>::is_enabled && ...);
+        (Valuable<typename ::std::tuple_element<Ns, xTuple>::type>::is_enabled
+         && ...);
 
     template<typename tTuple>
     static
@@ -349,12 +354,14 @@ struct good_tuple<xTuple, ::std::index_sequence<Ns...>>
     assign_array(V_array& temp, tTuple&& tuple)
       {
         (Valuable<typename ::std::tuple_element<Ns, xTuple>::type>::assign(
-                     temp.mut(Ns), ::std::get<Ns>(forward<tTuple>(tuple))), ...);
+                    temp.mut(Ns), ::std::get<Ns>(forward<tTuple>(tuple))), ...);
       }
   };
 
 template<typename xTuple>
-struct Valuable<xTuple, ::std::tuple_size<xTuple>::value >= 0>
+struct Valuable<xTuple,
+     typename ::std::enable_if<
+         !!::std::tuple_size<xTuple>::value>::type>
   {
     using my_good_tuple = good_tuple<
         xTuple, ::std::make_index_sequence<::std::tuple_size<xTuple>::value>>;
