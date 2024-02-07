@@ -301,22 +301,5 @@ struct Valuable_impl<opt<xValue>, typename ::std::conditional<
 template<typename xValue>
 using Valuable = Valuable_impl<typename ::rocket::remove_cvref<xValue>::type, void>;
 
-inline
-void
-do_break_line(tinyfmt& fmt, size_t step, size_t next)
-  {
-    if(step == 0) {
-      // When `step` is zero, separate fields with a single space.
-      fmt.putc(' ');
-    }
-    else {
-      // Otherwise, terminate the current line, and indent the next.
-      static constexpr char spaces[] = "                       ";
-      fmt.putc('\n');
-      for(size_t t = next, p;  (p = ::rocket::min(t, sizeof(spaces) - 1)) != 0;  t -= p)
-        fmt.putn(spaces, p);
-    }
-  }
-
 }  // namespace details_value
 }  // namespace asteria

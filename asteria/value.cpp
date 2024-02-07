@@ -10,6 +10,24 @@
 namespace asteria {
 namespace {
 
+void
+do_break_line(tinyfmt& fmt, size_t step, size_t next)
+  {
+    static constexpr char s_spaces[] = "                                ";
+    if(step != 0) {
+      // Terminate the current line, and indent the next one.
+      fmt.putc('\n');
+      size_t rem = next;
+      while(rem != 0) {
+        size_t n = ::std::min(rem, sizeof(s_spaces) - 1);
+        fmt.putn(s_spaces, n);
+        rem -= n;
+      }
+    }
+    else
+      fmt.putc(s_spaces[0]);
+  }
+
 // Recursion breaker
 struct Rbr_array
   {
@@ -545,7 +563,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         if(!altr.empty()) {
           Rbr_array elema = { &altr, altr.begin() };
           fmt << "array(" << altr.size() << ") [";
-          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
+          do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
           fmt << (elema.curp - altr.begin()) << " = ";
           qval = &*(elema.curp);
           stack.emplace_back(move(elema));
@@ -560,7 +578,7 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         if(!altr.empty()) {
           Rbr_object elemo = { &altr, altr.begin() };
           fmt << "object(" << altr.size() << ") {";
-          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
+          do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
           fmt << "\"";
           c_quote(fmt, elemo.curp->first);
           fmt << "\" = ";
@@ -582,12 +600,12 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           Rbr_array& elema = stack.mut_back().mut<0>();
           ++ elema.curp;
           if(elema.curp != elema.refa->end()) {
-            details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
+            do_break_line(fmt, indent, hanging + indent * stack.size());
             fmt << (elema.curp - elema.refa->begin()) << " = ";
             qval = &*(elema.curp);
             goto r;
           }
-          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
+          do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
           fmt << "];";
           stack.pop_back();
           break;
@@ -597,14 +615,14 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
           Rbr_object& elemo = stack.mut_back().mut<1>();
           ++ elemo.curp;
           if(elemo.curp != elemo.refo->end()) {
-            details_value::do_break_line(fmt, indent, hanging + indent * stack.size());
+            do_break_line(fmt, indent, hanging + indent * stack.size());
             fmt << "\"";
             c_quote(fmt, elemo.curp->first);
             fmt << "\" = ";
             qval = &(elemo.curp->second);
             goto r;
           }
-          details_value::do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
+          do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
           fmt << "};";
           stack.pop_back();
           break;
