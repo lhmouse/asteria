@@ -19,7 +19,6 @@
 #include "../rocket/reference_wrapper.hpp"
 #include "../rocket/tinyfmt.hpp"
 #include "../rocket/xascii.hpp"
-#include "../rocket/bit_mask.hpp"
 #include "../rocket/atomic.hpp"
 #include <utility>
 #include <stdexcept>
@@ -374,9 +373,7 @@ class cow_opaque
     refcnt_ptr<Abstract_Opaque> m_sptr;
 
   public:
-    constexpr
-    cow_opaque(nullptr_t = nullptr) noexcept
-      { }
+    constexpr cow_opaque(nullptr_t = nullptr) noexcept { }
 
     template<typename xOpaq>
     cow_opaque(const refcnt_ptr<xOpaq>& sptr) noexcept
@@ -537,12 +534,9 @@ class cow_function
     refcnt_ptr<const Abstract_Function> m_sptr;
 
   public:
-    constexpr
-    cow_function(nullptr_t = nullptr) noexcept
-      { }
+    constexpr cow_function(nullptr_t = nullptr) noexcept { }
 
-    constexpr
-    cow_function(const char* desc, simple_function* fptr) noexcept
+    constexpr cow_function(const char* desc, simple_function* fptr) noexcept
       :
         m_desc(desc), m_fptr(fptr)
       { }

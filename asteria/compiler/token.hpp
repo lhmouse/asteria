@@ -68,8 +68,7 @@ class Token
 
   public:
     template<typename xToken>
-    constexpr
-    Token(const Source_Location& xsloc, size_t xlen, xToken&& xtok)
+    constexpr Token(const Source_Location& xsloc, size_t xlen, xToken&& xtok)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xToken&&>::value)
       :
         m_sloc(xsloc), m_length(xlen), m_stor(forward<xToken>(xtok))

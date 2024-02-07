@@ -56,8 +56,7 @@ class Reference_Modifier
     // Constructors and assignment operators
     template<typename xModifier,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xModifier&&>::value)>
-    constexpr
-    Reference_Modifier(xModifier&& xmod)
+    constexpr Reference_Modifier(xModifier&& xmod)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xModifier&&>::value)
       :
         m_stor(forward<xModifier>(xmod))

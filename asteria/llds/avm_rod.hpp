@@ -26,9 +26,7 @@ class AVM_Rod
     uint32_t m_estor = 0;
 
   public:
-    constexpr
-    AVM_Rod() noexcept
-      { }
+    constexpr AVM_Rod() noexcept = default;
 
     AVM_Rod(AVM_Rod&& other) noexcept
       {

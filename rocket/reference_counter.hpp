@@ -22,20 +22,10 @@ class reference_counter
 
   public:
     constexpr reference_counter() noexcept
-      :
-        m_nref(1)
-      { }
+      : m_nref(1)  { }
 
-    explicit constexpr reference_counter(value_type nref) noexcept
-      :
-        m_nref(nref)
-      { }
-
-    constexpr
-    reference_counter(const reference_counter&) noexcept
-      :
-        reference_counter()
-      { }
+    constexpr reference_counter(const reference_counter&) noexcept
+      : m_nref(1)  { }
 
     constexpr
     reference_counter&

@@ -43,9 +43,7 @@ class Module_Loader::Unique_Stream
     locked_pair* m_strm = nullptr;
 
   public:
-    constexpr
-    Unique_Stream() noexcept
-      { }
+    constexpr Unique_Stream() noexcept = default;
 
     Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const char* path)
       {

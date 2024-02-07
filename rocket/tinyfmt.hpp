@@ -507,29 +507,20 @@ struct basic_formatter
     using tinyfmt_type   = basic_tinyfmt<charT>;
     using callback_type  = void (tinyfmt_type&, const void*);
 
+    callback_type* ifunc;
+    const void* param;
+
     template<typename valueT>
     static
     void
     default_callback(tinyfmt_type& fmt, const void* ptr)
-      {
-        // Find `operator<<()` via argument-dependent lookup.
-        fmt << *static_cast<const valueT*>(ptr);
-      }
+      { fmt << *static_cast<const valueT*>(ptr);  }
 
-    callback_type* ifunc;
-    const void* param;
+    constexpr basic_formatter() noexcept
+      : ifunc(nullptr), param(nullptr)  { }
 
-    constexpr
-    basic_formatter() noexcept
-      :
-        ifunc(nullptr), param(nullptr)
-      { }
-
-    constexpr
-    basic_formatter(callback_type* xifunc, const void* xparam) noexcept
-      :
-        ifunc(xifunc), param(xparam)
-      { }
+    constexpr basic_formatter(callback_type* xifunc, const void* xparam) noexcept
+      : ifunc(xifunc), param(xparam)  { }
   };
 
 template<typename charT, typename valueT>

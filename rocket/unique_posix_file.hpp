@@ -18,14 +18,12 @@ class posix_file_closer
     closer_type m_cl;
 
   public:
-    constexpr
-    posix_file_closer() noexcept
+    constexpr posix_file_closer() noexcept
       :
         m_cl(::fclose)
       { }
 
-    constexpr
-    posix_file_closer(closer_type cl) noexcept
+    constexpr posix_file_closer(closer_type cl) noexcept
       :
         m_cl(cl)
       { }

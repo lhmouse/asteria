@@ -149,8 +149,7 @@ class Expression_Unit
     // Constructors and assignment operators
     template<typename xUnit,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xUnit&&>::value)>
-    constexpr
-    Expression_Unit(xUnit&& xunit)
+    constexpr Expression_Unit(xUnit&& xunit)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xUnit&&>::value)
       :
         m_stor(forward<xUnit>(xunit))

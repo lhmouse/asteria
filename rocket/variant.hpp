@@ -75,8 +75,7 @@ class variant
 
   public:
     // 23.7.3.1, constructors
-    constexpr
-    variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
+    constexpr variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
       :
         m_init_stor(), m_init_index()
       { }

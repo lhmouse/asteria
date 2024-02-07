@@ -25,14 +25,10 @@ struct deleter_reference
   {
     typename remove_reference<deleterT>::type* m_del;
 
-    constexpr
-    deleter_reference(deleterT& del) noexcept
-      :
-        m_del(::std::addressof(del))
-      { }
+    constexpr deleter_reference(deleterT& del) noexcept
+      : m_del(::std::addressof(del))  { }
 
-    constexpr
-    operator deleterT&() const noexcept
+    constexpr operator deleterT&() const noexcept
       { return *(this->m_del);  }
 
     constexpr

@@ -17,9 +17,7 @@ class Reference_Stack
     uint32_t m_estor = 0;
 
   public:
-    constexpr
-    Reference_Stack() noexcept
-      { }
+    constexpr Reference_Stack() noexcept = default;
 
     Reference_Stack(Reference_Stack&& other) noexcept
       {

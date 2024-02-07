@@ -78,8 +78,7 @@ class Infix_Element
     // Constructors and assignment operators
     template<typename xElement,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xElement&&>::value)>
-    constexpr
-    Infix_Element(xElement&& xelem)
+    constexpr Infix_Element(xElement&& xelem)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xElement&&>::value)
       :
         m_stor(forward<xElement>(xelem))

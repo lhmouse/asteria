@@ -55,8 +55,7 @@ class const_bitset
     uint32_t m_words[(sizeof...(bitsT) + 31) / 32] = { };
 
   public:
-    constexpr
-    const_bitset() noexcept
+    constexpr const_bitset() noexcept
       {
         constexpr bool bits[] = { bitsT... };
         for(size_t k = 0;  k != sizeof...(bitsT);  ++k)
@@ -86,8 +85,7 @@ class const_func_table
     targetT* m_ptrs[sizeof...(ptrsT)] = { ptrsT... };
 
   public:
-    constexpr
-    const_func_table() noexcept = default;
+    constexpr const_func_table() noexcept = default;
 
     template<typename... argsT>
     constexpr

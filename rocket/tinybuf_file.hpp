@@ -34,9 +34,7 @@ class basic_tinybuf_file
     ::mbstate_t m_mbst_p = ::mbstate_t();
 
   public:
-    constexpr
-    basic_tinybuf_file() noexcept
-      { }
+    constexpr basic_tinybuf_file() noexcept = default;
 
     explicit basic_tinybuf_file(file_type&& file) noexcept
       :

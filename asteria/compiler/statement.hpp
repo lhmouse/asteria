@@ -202,8 +202,7 @@ class Statement
     // Constructors and assignment operators
     template<typename xStatement,
     ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xStatement&&>::value)>
-    constexpr
-    Statement(xStatement&& xstmt)
+    constexpr Statement(xStatement&& xstmt)
        noexcept(::std::is_nothrow_constructible<decltype(m_stor), xStatement&&>::value)
       :
         m_stor(forward<xStatement>(xstmt))

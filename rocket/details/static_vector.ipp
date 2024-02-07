@@ -41,17 +41,14 @@ class storage_handle
     };
 
   public:
-    constexpr
-    storage_handle() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr storage_handle() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
-        allocator_base(),
-        m_init_nelem(0)
+        allocator_base(), m_init_nelem(0)
       { }
 
     explicit storage_handle(const allocator_type& alloc) noexcept
       :
-        allocator_base(alloc),
-        m_init_nelem(0)
+        allocator_base(alloc), m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
@@ -60,8 +57,7 @@ class storage_handle
 
     explicit storage_handle(allocator_type&& alloc) noexcept
       :
-        allocator_base(move(alloc)),
-        m_init_nelem(0)
+        allocator_base(move(alloc)), m_init_nelem(0)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void*>(this->m_data), '*', sizeof(m_data));
@@ -287,27 +283,22 @@ class iterator
 
   private:
     // This constructor is called by the container.
-    constexpr
-    iterator(valueT* begin, size_t ncur, size_t nend) noexcept
+    constexpr iterator(valueT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
-    constexpr
-    iterator() noexcept
+    constexpr iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
-    constexpr
-    iterator(const iterator<vectorT, yvalueT>& other) noexcept
+    constexpr iterator(const iterator<vectorT, yvalueT>& other) noexcept
       :
-        m_begin(other.m_begin),
-        m_cur(other.m_cur),
-        m_end(other.m_end)
+        m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
 
     template<typename yvalueT,

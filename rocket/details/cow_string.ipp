@@ -295,27 +295,22 @@ class iterator
 
   private:
     // This constructor is called by the container.
-    constexpr
-    iterator(charT* begin, size_t ncur, size_t nend) noexcept
+    constexpr iterator(charT* begin, size_t ncur, size_t nend) noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
-    constexpr
-    iterator() noexcept
+    constexpr iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
-    constexpr
-    iterator(const iterator<stringT, ycharT>& other) noexcept
+    constexpr iterator(const iterator<stringT, ycharT>& other) noexcept
       :
-        m_begin(other.m_begin),
-        m_cur(other.m_cur),
-        m_end(other.m_end)
+        m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
 
     template<typename ycharT,

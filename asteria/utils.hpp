@@ -173,8 +173,7 @@ struct Wrapped_Index
     size_t rindex;  // wrapped index, within range if and only if
                     // both `nappend` and `nprepend` are zeroes
 
-    constexpr
-    Wrapped_Index(ptrdiff_t ssize, int64_t sindex) noexcept
+    constexpr Wrapped_Index(ptrdiff_t ssize, int64_t sindex) noexcept
       :
         nappend(0), nprepend(0),
         rindex(0)

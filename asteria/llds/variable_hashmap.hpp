@@ -18,9 +18,7 @@ class Variable_HashMap
     uint32_t m_nbkt = 0;
 
   public:
-    constexpr
-    Variable_HashMap() noexcept
-      { }
+    constexpr Variable_HashMap() noexcept = default;
 
     Variable_HashMap(Variable_HashMap&& other) noexcept
       {

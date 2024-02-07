@@ -22,9 +22,7 @@ template<size_t indexT>
 struct ebo_placeholder
   {
     template<typename noopT>
-    constexpr
-    ebo_placeholder(noopT&&) noexcept
-      { }
+    constexpr ebo_placeholder(noopT&&) noexcept { }
   };
 
 template<typename baseT, size_t indexT, typename... othersT>
@@ -363,8 +361,7 @@ class storage_handle
     storage_pointer m_qstor = nullptr;
 
   public:
-    constexpr
-    storage_handle()
+    constexpr storage_handle()
       noexcept(conjunction<is_nothrow_constructible<allocator_type>,
                            is_nothrow_constructible<hasher>,
                            is_nothrow_constructible<key_equal>>::value)
@@ -374,16 +371,14 @@ class storage_handle
         ebo_select<eqT, allocT, hashT>()
       { }
 
-    constexpr
-    storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
+    constexpr storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
       :
         allocator_base(alloc),
         ebo_select<hashT, allocT>(hf),
         ebo_select<eqT, allocT, hashT>(eq)
       { }
 
-    constexpr
-    storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
+    constexpr storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
       :
         allocator_base(move(alloc)),
         ebo_select<hashT, allocT>(hf),
@@ -826,20 +821,16 @@ class iterator
       }
 
   public:
-    constexpr
-    iterator() noexcept
+    constexpr iterator() noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
-    constexpr
-    iterator(const iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
+    constexpr iterator(const iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
       :
-        m_begin(other.m_begin),
-        m_cur(other.m_cur),
-        m_end(other.m_end)
+        m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
 
     template<typename yvalueT, typename ybucketT,

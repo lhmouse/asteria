@@ -23,8 +23,7 @@ class Reference
 
   public:
     // Constructors and assignment operators
-    constexpr
-    Reference() noexcept
+    constexpr Reference() noexcept
       : m_xref_st()
       { }
 

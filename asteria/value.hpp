@@ -26,8 +26,7 @@ class Value
 
   public:
     // Constructors and assignment operators
-    constexpr
-    Value(nullopt_t = nullopt) noexcept
+    constexpr Value(nullopt_t = nullopt) noexcept
       :
         m_bytes()
       { }

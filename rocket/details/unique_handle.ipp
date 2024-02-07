@@ -89,11 +89,8 @@ class closer_wrapper
     typename decay<closerT>::type m_cl;
 
   public:
-    constexpr
-    closer_wrapper(closerT&& xcl)
-      :
-        m_cl(forward<closerT>(xcl))
-      { }
+    constexpr closer_wrapper(closerT&& xcl)
+      : m_cl(forward<closerT>(xcl))  { }
 
   public:
     constexpr

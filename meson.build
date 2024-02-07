@@ -79,7 +79,6 @@ rocket_include = [
   'rocket/recursive_mutex.hpp',
   'rocket/condition_variable.hpp',
   'rocket/once_flag.hpp',
-  'rocket/bit_mask.hpp',
 ]
 
 asteria_include = [

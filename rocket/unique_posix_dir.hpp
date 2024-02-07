@@ -18,14 +18,12 @@ class posix_dir_closer
     closer_type m_cl;
 
   public:
-    constexpr
-    posix_dir_closer() noexcept
+    constexpr posix_dir_closer() noexcept
       :
         m_cl(::closedir)
       { }
 
-    constexpr
-    posix_dir_closer(closer_type cl) noexcept
+    constexpr posix_dir_closer(closer_type cl) noexcept
       :
         m_cl(cl)
       { }
