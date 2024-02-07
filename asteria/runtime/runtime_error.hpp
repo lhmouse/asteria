@@ -49,8 +49,8 @@ class Runtime_Error
         this->do_insert_frame(frame_type_assert, &xsloc, this->m_value);
       }
 
-    template<typename... ParamsT>
-    Runtime_Error(Uxtc_format, const char* templ, const ParamsT&... params)
+    template<typename... xParams>
+    Runtime_Error(Uxtc_format, const char* templ, const xParams&... params)
       :
         m_value()
       {

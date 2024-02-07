@@ -256,60 +256,60 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
     vtable_key_function_sLBHstEX() noexcept;
   };
 
-template<typename RealT>
+template<typename xReal>
 struct rcfwd : virtual Rcbase
   {
     virtual
     void
     vtable_key_function_GklPAslB() noexcept;
 
-    template<typename xRealT = RealT>
+    template<typename xRealT = xReal>
     refcnt_ptr<const xRealT>
     share_this() const
       { return this->Rcbase::template share_this<xRealT, rcfwd>();  }
 
-    template<typename xRealT = RealT>
+    template<typename xRealT = xReal>
     refcnt_ptr<xRealT>
     share_this()
       { return this->Rcbase::template share_this<xRealT, rcfwd>();  }
   };
 
-template<typename RealT>
+template<typename xReal>
 void
-rcfwd<RealT>::
+rcfwd<xReal>::
 vtable_key_function_GklPAslB() noexcept
   {
   }
 
-template<typename RealT>
+template<typename xReal>
 using rcfwd_ptr = refcnt_ptr<
          typename ::rocket::copy_cv<
-           rcfwd<typename ::std::remove_cv<RealT>::type>,
-           RealT>::type>;
+           rcfwd<typename ::std::remove_cv<xReal>::type>,
+           xReal>::type>;
 
-template<typename TargetT, typename RealT>
+template<typename xTarget, typename xReal>
 constexpr
-TargetT
-unerase_cast(const rcfwd<RealT>* ptr) noexcept  // like `static_cast`
-  { return static_cast<TargetT>(ptr);  }
+xTarget
+unerase_cast(const rcfwd<xReal>* ptr) noexcept  // like `static_cast`
+  { return static_cast<xTarget>(ptr);  }
 
-template<typename TargetT, typename RealT>
+template<typename xTarget, typename xReal>
 constexpr
-TargetT
-unerase_cast(rcfwd<RealT>* ptr) noexcept  // like `static_cast`
-  { return static_cast<TargetT>(ptr);  }
+xTarget
+unerase_cast(rcfwd<xReal>* ptr) noexcept  // like `static_cast`
+  { return static_cast<xTarget>(ptr);  }
 
-template<typename TargetT, typename RealT>
+template<typename xTarget, typename xReal>
 ROCKET_ALWAYS_INLINE
-refcnt_ptr<TargetT>
-unerase_pointer_cast(const refcnt_ptr<rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
-  { return static_pointer_cast<TargetT>(ptr);  }
+refcnt_ptr<xTarget>
+unerase_pointer_cast(const refcnt_ptr<rcfwd<xReal>>& ptr) noexcept  // like `static_pointer_cast`
+  { return static_pointer_cast<xTarget>(ptr);  }
 
-template<typename TargetT, typename RealT>
+template<typename xTarget, typename xReal>
 ROCKET_ALWAYS_INLINE
-refcnt_ptr<TargetT>
-unerase_pointer_cast(const refcnt_ptr<const rcfwd<RealT>>& ptr) noexcept  // like `static_pointer_cast`
-  { return static_pointer_cast<TargetT>(ptr);  }
+refcnt_ptr<xTarget>
+unerase_pointer_cast(const refcnt_ptr<const rcfwd<xReal>>& ptr) noexcept  // like `static_pointer_cast`
+  { return static_pointer_cast<xTarget>(ptr);  }
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque : rcfwd<Abstract_Opaque>
@@ -378,14 +378,14 @@ class cow_opaque
     cow_opaque(nullptr_t = nullptr) noexcept
       { }
 
-    template<typename OpaqT>
-    cow_opaque(const refcnt_ptr<OpaqT>& sptr) noexcept
+    template<typename xOpaq>
+    cow_opaque(const refcnt_ptr<xOpaq>& sptr) noexcept
       :
         m_sptr(sptr)
       { }
 
-    template<typename OpaqT>
-    cow_opaque(refcnt_ptr<OpaqT>&& sptr) noexcept
+    template<typename xOpaq>
+    cow_opaque(refcnt_ptr<xOpaq>&& sptr) noexcept
       :
         m_sptr(move(sptr))
       { }
@@ -420,17 +420,17 @@ class cow_opaque
         return *this;
       }
 
-    template<typename OpaqT>
+    template<typename xOpaq>
     cow_opaque&
-    reset(const refcnt_ptr<OpaqT>& sptr) noexcept
+    reset(const refcnt_ptr<xOpaq>& sptr) noexcept
       {
         this->m_sptr = sptr;
         return *this;
       }
 
-    template<typename OpaqT>
+    template<typename xOpaq>
     cow_opaque&
-    reset(refcnt_ptr<OpaqT>&& sptr) noexcept
+    reset(refcnt_ptr<xOpaq>&& sptr) noexcept
       {
         this->m_sptr = move(sptr);
         return *this;
@@ -453,18 +453,18 @@ class cow_opaque
           this->m_sptr->collect_variables(staged, temp);
       }
 
-    template<typename OpaqueT = Abstract_Opaque>
-    const OpaqueT&
+    template<typename xOpaque = Abstract_Opaque>
+    const xOpaque&
     get() const;
 
-    template<typename OpaqueT = Abstract_Opaque>
-    OpaqueT&
+    template<typename xOpaque = Abstract_Opaque>
+    xOpaque&
     open();
   };
 
-template<typename OpaqueT>
+template<typename xOpaque>
 inline
-const OpaqueT&
+const xOpaque&
 cow_opaque::
 get() const
   {
@@ -472,20 +472,20 @@ get() const
     if(!tptr)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from a null pointer",
-            typeid(OpaqueT).name());
+            typeid(xOpaque).name());
 
-    auto toptr = dynamic_cast<const OpaqueT*>(tptr);
+    auto toptr = dynamic_cast<const xOpaque*>(tptr);
     if(!toptr)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from `%s`",
-            typeid(OpaqueT).name(), typeid(*tptr).name());
+            typeid(xOpaque).name(), typeid(*tptr).name());
 
     return *toptr;
   }
 
-template<typename OpaqueT>
+template<typename xOpaque>
 inline
-OpaqueT&
+xOpaque&
 cow_opaque::
 open()
   {
@@ -493,13 +493,13 @@ open()
     if(!tptr)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from a null pointer",
-            typeid(OpaqueT).name());
+            typeid(xOpaque).name());
 
-    auto toptr = dynamic_cast<OpaqueT*>(tptr);
+    auto toptr = dynamic_cast<xOpaque*>(tptr);
     if(!toptr)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
             "cow_opaque: invalid dynamic cast to `%s` from `%s`",
-            typeid(OpaqueT).name(), typeid(*tptr).name());
+            typeid(xOpaque).name(), typeid(*tptr).name());
 
     // If the value is unique, return it.
     if(tptr->use_count() == 1)
@@ -508,7 +508,7 @@ open()
     // Clone an existent instance if it is shared. A final overrider should return
     // a null pointer to request that the shared instance be used.
     refcnt_ptr<Abstract_Opaque> csptr;
-    OpaqueT* coptr = toptr->clone_opt(csptr);
+    xOpaque* coptr = toptr->clone_opt(csptr);
     if(!coptr)
       return *toptr;
 
@@ -547,14 +547,14 @@ class cow_function
         m_desc(desc), m_fptr(fptr)
       { }
 
-    template<typename FuncT>
-    cow_function(const refcnt_ptr<FuncT>& sptr) noexcept
+    template<typename xFunc>
+    cow_function(const refcnt_ptr<xFunc>& sptr) noexcept
       :
         m_sptr(sptr)
       { }
 
-    template<typename FuncT>
-    cow_function(refcnt_ptr<FuncT>&& sptr) noexcept
+    template<typename xFunc>
+    cow_function(refcnt_ptr<xFunc>&& sptr) noexcept
       :
         m_sptr(move(sptr))
       { }
@@ -600,9 +600,9 @@ class cow_function
         return *this;
       }
 
-    template<typename FuncT>
+    template<typename xFunc>
     cow_function&
-    reset(const refcnt_ptr<FuncT>& sptr) noexcept
+    reset(const refcnt_ptr<xFunc>& sptr) noexcept
       {
         this->m_desc = nullptr;
         this->m_fptr = nullptr;
@@ -610,9 +610,9 @@ class cow_function
         return *this;
       }
 
-    template<typename FuncT>
+    template<typename xFunc>
     cow_function&
-    reset(refcnt_ptr<FuncT>&& sptr) noexcept
+    reset(refcnt_ptr<xFunc>&& sptr) noexcept
       {
         this->m_desc = nullptr;
         this->m_fptr = nullptr;

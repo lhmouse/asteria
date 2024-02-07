@@ -58,16 +58,16 @@ do_slice(const V_string& text, const V_integer& from, const optV_integer& length
     return do_slice(text, text.begin(), rfrom + *length);
   }
 
-template<typename IterT>
+template<typename xIter>
 class BMH_Searcher
   {
   private:
-    IterT m_pbegin, m_pend;
+    xIter m_pbegin, m_pend;
     ptrdiff_t m_bcr_offsets[0x100];
 
   public:
     inline
-    BMH_Searcher(IterT pbegin, IterT pend)
+    BMH_Searcher(xIter pbegin, xIter pend)
       :
         m_pbegin(pbegin), m_pend(pend)
       {
@@ -103,8 +103,8 @@ class BMH_Searcher
       }
 
   public:
-    opt<IterT>
-    search_opt(IterT tbegin, IterT tend) const
+    opt<xIter>
+    search_opt(xIter tbegin, xIter tend) const
       {
         const ptrdiff_t plen = this->m_pend - this->m_pbegin;
         ROCKET_ASSERT(plen != 0);
@@ -156,16 +156,16 @@ class BMH_Searcher
       }
   };
 
-template<typename IterT>
-BMH_Searcher<IterT>
-do_create_searcher_for_pattern(IterT pbegin, IterT pend)
+template<typename xIter>
+BMH_Searcher<xIter>
+do_create_searcher_for_pattern(xIter pbegin, xIter pend)
   {
-    return BMH_Searcher<IterT>(pbegin, pend);
+    return BMH_Searcher<xIter>(pbegin, pend);
   }
 
-template<typename IterT>
-opt<IterT>
-do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
+template<typename xIter>
+opt<xIter>
+do_find_opt(xIter tbegin, xIter tend, xIter pbegin, xIter pend)
   {
     // If the pattern is empty, there is a match at the beginning.
     // Don't pass empty patterns to the BMH searcher.
@@ -181,9 +181,9 @@ do_find_opt(IterT tbegin, IterT tend, IterT pbegin, IterT pend)
     return srch.search_opt(tbegin, tend);
   }
 
-template<typename IterT>
-opt<IterT>
-do_find_of_opt(IterT begin, IterT end, const V_string& set, bool match)
+template<typename xIter>
+opt<xIter>
+do_find_of_opt(xIter begin, xIter end, const V_string& set, bool match)
   {
     bool table[256] = { };
 

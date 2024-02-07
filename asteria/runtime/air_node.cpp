@@ -39,13 +39,13 @@ do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
         do_set_rebound(dirty, code.mut(i), move(*qnode));
   }
 
-template<typename NodeT>
+template<typename xNode>
 opt<AIR_Node>
-do_return_rebound_opt(bool dirty, NodeT&& bound)
+do_return_rebound_opt(bool dirty, xNode&& bound)
   {
     opt<AIR_Node> res;
     if(dirty)
-      res.emplace(forward<NodeT>(bound));
+      res.emplace(forward<xNode>(bound));
     return res;
   }
 
@@ -77,18 +77,18 @@ do_push_modifier_and_check(Reference& ref, xModifierT&& xmod)
 using Uparam  = AVM_Rod::Uparam;
 using Header  = AVM_Rod::Header;
 
-template<typename SparamT>
+template<typename xSparam>
 void
 do_sparam_ctor(Header* head, void* arg)
   {
-    ::rocket::details_variant::wrapped_move_construct<SparamT>(head->sparam, arg);
+    ::rocket::details_variant::wrapped_move_construct<xSparam>(head->sparam, arg);
   }
 
-template<typename SparamT>
+template<typename xSparam>
 void
 do_sparam_dtor(Header* head)
   {
-    ::rocket::details_variant::wrapped_destroy<SparamT>(head->sparam);
+    ::rocket::details_variant::wrapped_destroy<xSparam>(head->sparam);
   }
 
 AIR_Status
@@ -161,9 +161,9 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
     }
   }
 
-template<typename ContainerT>
+template<typename xContainer>
 void
-do_duplicate_sequence(ContainerT& src, int64_t count)
+do_duplicate_sequence(xContainer& src, int64_t count)
   {
     if(count < 0)
       throw Runtime_Error(xtc_format,

@@ -22,9 +22,9 @@ struct Verbose_Hooks
   {
     ::rocket::tinyfmt_str m_fmt;  // reusable storage
 
-    template<typename... ParamsT>
+    template<typename... xParams>
     void
-    do_verbose_trace(const Source_Location& sloc, const char* templ, const ParamsT&... params)
+    do_verbose_trace(const Source_Location& sloc, const char* templ, const xParams&... params)
       {
         if(ROCKET_EXPECT(!repl_verbose))
           return;

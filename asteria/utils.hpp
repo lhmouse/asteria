@@ -9,18 +9,18 @@
 namespace asteria {
 
 // Formatting
-template<typename... LiteralT>
+template<typename... xLiteral>
 constexpr
-array<const char*, sizeof...(LiteralT)>
-make_string_template(const LiteralT&... templs)
+array<const char*, sizeof...(xLiteral)>
+make_string_template(const xLiteral&... templs)
   {
     return { templs... };
   }
 
-template<size_t N, typename... ParamsT>
+template<size_t N, typename... xParams>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string&
-format(cow_string& str, const array<const char*, N>& templs, const ParamsT&... params)
+format(cow_string& str, const array<const char*, N>& templs, const xParams&... params)
   {
     // Reuse the storage of `str` to create a formatter.
     ::rocket::tinyfmt_str fmt;
@@ -38,10 +38,10 @@ format(cow_string& str, const array<const char*, N>& templs, const ParamsT&... p
     return str;
   }
 
-template<typename... ParamsT>
+template<typename... xParams>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string&
-format(cow_string& str, const char* templ, const ParamsT&... params)
+format(cow_string& str, const char* templ, const xParams&... params)
   {
     // Reuse the storage of `str` to create a formatter.
     ::rocket::tinyfmt_str fmt;
@@ -54,20 +54,20 @@ format(cow_string& str, const char* templ, const ParamsT&... params)
     return str;
   }
 
-template<size_t N, typename... ParamsT>
+template<size_t N, typename... xParams>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
-format_string(const array<const char*, N>& templs, const ParamsT&... params)
+format_string(const array<const char*, N>& templs, const xParams&... params)
   {
     cow_string str;
     format(str, templs, params...);
     return str;
   }
 
-template<typename... ParamsT>
+template<typename... xParams>
 ROCKET_NEVER_INLINE ROCKET_FLATTEN
 cow_string
-format_string(const char* templ, const ParamsT&... params)
+format_string(const char* templ, const xParams&... params)
   {
     cow_string str;
     format(str, templ, params...);

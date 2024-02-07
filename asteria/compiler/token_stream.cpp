@@ -366,25 +366,25 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
 
 struct Prefix_Comparator
   {
-    template<typename ElementT>
+    template<typename xElement>
     bool
-    operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
+    operator()(const xElement& lhs, const xElement& rhs) const noexcept
       { return ::memcmp(lhs.str, rhs.str, sizeof(lhs.str)) < 0;  }
 
-    template<typename ElementT>
+    template<typename xElement>
     bool
-    operator()(char lhs, const ElementT& rhs) const noexcept
+    operator()(char lhs, const xElement& rhs) const noexcept
       { return (uint8_t) lhs < (uint8_t) rhs.str[0];  }
 
-    template<typename ElementT>
+    template<typename xElement>
     bool
-    operator()(const ElementT& lhs, char rhs) const noexcept
+    operator()(const xElement& lhs, char rhs) const noexcept
       { return (uint8_t) lhs.str[0] < (uint8_t) rhs;  }
   };
 
-template<typename ElementT, size_t N>
-pair<ElementT*, ElementT*>
-do_prefix_range(ElementT (&table)[N], char ch)
+template<typename xElement, size_t N>
+pair<xElement*, xElement*>
+do_prefix_range(xElement (&table)[N], char ch)
   {
     static constexpr Prefix_Comparator comp;
 #ifdef ROCKET_DEBUG

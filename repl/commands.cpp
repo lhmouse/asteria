@@ -46,11 +46,11 @@ do_find_handler_opt(cow_string&& cmd)
     return nullptr;
   }
 
-template<typename HandlerT>
+template<typename xHandler>
 void
 do_add_handler()
   {
-    s_handlers.emplace_back(::rocket::make_unique<HandlerT>());
+    s_handlers.emplace_back(::rocket::make_unique<xHandler>());
   }
 
 struct Handler_exit : Handler

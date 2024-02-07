@@ -57,10 +57,10 @@ do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
     return do_slice(data, data.begin(), rfrom + *length);
   }
 
-template<typename IterT>
-opt<IterT>
+template<typename xIter>
+opt<xIter>
 do_find_opt(Reference& self, Reference_Stack& stack, Global_Context& global,
-            IterT begin, IterT end, const Value& target, bool match)
+            xIter begin, xIter end, const Value& target, bool match)
   {
     for(auto it = move(begin);  it != end;  ++it) {
       bool result;
@@ -99,10 +99,10 @@ do_compare_total(Reference& self, Reference_Stack& stack, Global_Context& global
     return self.dereference_readonly().compare_total(V_integer(0));
   }
 
-template<typename IterT>
-pair<IterT, bool>
+template<typename xIter>
+pair<xIter, bool>
 do_bsearch(Reference& self, Reference_Stack& stack, Global_Context& global,
-           IterT begin, IterT end, const optV_function& kcomp, const Value& target)
+           xIter begin, xIter end, const optV_function& kcomp, const Value& target)
   {
     auto bpos = move(begin);
     auto epos = move(end);
@@ -126,11 +126,11 @@ do_bsearch(Reference& self, Reference_Stack& stack, Global_Context& global,
     }
   }
 
-template<typename IterT, typename PredT>
-IterT
+template<typename xIter, typename xPred>
+xIter
 do_bound(Reference& self, Reference_Stack& stack, Global_Context& global,
-         IterT begin, IterT end, const optV_function& kcomp, const Value& target,
-         PredT&& pred)
+         xIter begin, xIter end, const optV_function& kcomp, const Value& target,
+         xPred&& pred)
   {
     auto bpos = move(begin);
     auto epos = move(end);
@@ -151,9 +151,9 @@ do_bound(Reference& self, Reference_Stack& stack, Global_Context& global,
     }
   }
 
-template<typename ComparatorT>
+template<typename xComparator>
 V_array&
-do_merge_blocks(V_array& output, bool unique, V_array& input, ComparatorT&& compare,
+do_merge_blocks(V_array& output, bool unique, V_array& input, xComparator&& compare,
                 ptrdiff_t bsize)
   {
     ROCKET_ASSERT(output.size() >= input.size());

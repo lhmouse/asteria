@@ -30,9 +30,9 @@ class Compiler_Error
         this->do_compose_message();
       }
 
-    template<typename... ParamsT>
+    template<typename... xParams>
     Compiler_Error(Uxtc_format, Compiler_Status xstat, const Source_Location& xsloc,
-                   const char* templ, const ParamsT&... params)
+                   const char* templ, const xParams&... params)
       :
         m_status(xstat), m_sloc(xsloc)
       {
@@ -42,9 +42,9 @@ class Compiler_Error
         this->do_compose_message();
       }
 
-    template<typename... ParamsT>
+    template<typename... xParams>
     Compiler_Error(Uxtc_status_format, Compiler_Status xstat, const Source_Location& xsloc,
-                   const char* templ, const ParamsT&... params)
+                   const char* templ, const xParams&... params)
       :
         m_status(xstat), m_sloc(xsloc)
       {

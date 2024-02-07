@@ -1012,17 +1012,17 @@ do_construct_SHA512(V_object& result)
       });
   }
 
-template<typename HasherT>
-decltype(declval<HasherT&>().finish())
+template<typename xHasher>
+decltype(declval<xHasher&>().finish())
 do_hash_bytes(const V_string& data)
   {
-    HasherT h;
+    xHasher h;
     h.update(data.data(), data.size());
     return h.finish();
   }
 
-template<typename HasherT>
-decltype(declval<HasherT&>().finish())
+template<typename xHasher>
+decltype(declval<xHasher&>().finish())
 do_hash_file(const V_string& path)
   {
     // Open the file for reading.
@@ -1046,7 +1046,7 @@ do_hash_file(const V_string& path)
     unique_ptr<char, void (void*)> pbuf(static_cast<char*>(::operator new(nbuf)), ::operator delete);
 
     // Read bytes from the file and hash them.
-    HasherT h;
+    xHasher h;
     for(;;) {
       ::ssize_t nread = ::read(fd, pbuf, nbuf);
       if(nread <= 0) {
