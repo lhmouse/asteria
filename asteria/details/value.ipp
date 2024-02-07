@@ -35,10 +35,10 @@ struct Valuable_impl<bool>
     using direct_init  = ::std::true_type;
     using via_type     = V_boolean;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         stor = V_boolean(xval);
       }
@@ -53,10 +53,10 @@ struct Valuable_impl<xInteger, typename ::std::enable_if<
     using direct_init  = ::std::true_type;
     using via_type     = V_integer;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         stor = V_integer(xval);
       }
@@ -71,10 +71,10 @@ struct Valuable_impl<xFloat, typename ::std::enable_if<
     using direct_init  = ::std::true_type;
     using via_type     = V_real;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         stor = V_real(xval);
       }
@@ -89,12 +89,12 @@ struct Valuable_impl<xString, typename ::std::enable_if<
     using direct_init  = ::std::true_type;
     using via_type     = V_string;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
-        stor = V_string(forward<xValueT>(xval));
+        stor = V_string(forward<xValue>(xval));
       }
   };
 
@@ -104,12 +104,12 @@ struct Valuable_impl<const char (*)[N]>
     using direct_init  = ::std::true_type;
     using via_type     = V_string;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
-        stor = V_string(forward<xValueT>(xval));
+        stor = V_string(forward<xValue>(xval));
       }
   };
 
@@ -119,13 +119,13 @@ struct Valuable_impl<cow_opaque>
     using direct_init  = ::std::false_type;
     using via_type     = V_opaque;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         if(xval)
-          stor = V_opaque(forward<xValueT>(xval));
+          stor = V_opaque(forward<xValue>(xval));
         else
           stor = V_null();
       }
@@ -140,13 +140,13 @@ struct Valuable_impl<refcnt_ptr<xOpaque>, typename ::std::enable_if<
     using direct_init  = ::std::false_type;
     using via_type     = V_opaque;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         if(xval)
-          stor = V_opaque(forward<xValueT>(xval));
+          stor = V_opaque(forward<xValue>(xval));
         else
           stor = V_null();
       }
@@ -158,13 +158,13 @@ struct Valuable_impl<cow_function>
     using direct_init  = ::std::false_type;
     using via_type     = V_function;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         if(xval)
-          stor = V_function(forward<xValueT>(xval));
+          stor = V_function(forward<xValue>(xval));
         else
           stor = V_null();
       }
@@ -179,13 +179,13 @@ struct Valuable_impl<refcnt_ptr<xFunction>, typename ::std::enable_if<
     using direct_init  = ::std::false_type;
     using via_type     = V_function;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
         if(xval)
-          stor = V_function(forward<xValueT>(xval));
+          stor = V_function(forward<xValue>(xval));
         else
           stor = V_null();
       }
@@ -197,12 +197,12 @@ struct Valuable_impl<V_array>
     using direct_init  = ::std::true_type;
     using via_type     = V_array;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
-        stor = V_array(forward<xValueT>(xval));
+        stor = V_array(forward<xValue>(xval));
       }
   };
 
@@ -212,32 +212,32 @@ struct Valuable_impl<V_object>
     using direct_init  = ::std::true_type;
     using via_type     = V_object;
 
-    template<typename xStor, typename xValueT>
+    template<typename xStor, typename xValue>
     static
     void
-    assign(xStor& stor, xValueT&& xval)
+    assign(xStor& stor, xValue&& xval)
       {
-        stor = V_object(forward<xValueT>(xval));
+        stor = V_object(forward<xValue>(xval));
       }
   };
 
-template<typename xValueT, size_t N>
-struct Valuable_impl<xValueT [N]>
+template<typename xValue, size_t N>
+struct Valuable_impl<xValue [N]>
   {
     using direct_init  = ::std::false_type;
     using via_type     = V_array;
 
-    template<typename xStor, typename xArrT>
+    template<typename xStor, typename xArr>
     static
     void
-    assign(xStor& stor, xArrT&& xarr)
+    assign(xStor& stor, xArr&& xarr)
       {
         V_array arr;
         arr.reserve(N);
         for(size_t k = 0;  k != N;  ++k)
           arr.emplace_back(static_cast<typename ::std::conditional<
-                  ::std::is_lvalue_reference<xArrT&&>::value,
-                           const xValueT&, xValueT&&>::type>(xarr[k]));
+                  ::std::is_lvalue_reference<xArr&&>::value,
+                           const xValue&, xValue&&>::type>(xarr[k]));
         stor = move(arr);
       }
   };
@@ -250,56 +250,56 @@ struct Valuable_impl<xTuple, typename ::std::conditional<
     using direct_init  = ::std::false_type;
     using via_type     = V_array;
 
-    template<size_t... N, typename xTupT>
+    template<size_t... N, typename xTup>
     static
     void
     unpack_tuple_aux(V_array& arr, ::std::index_sequence<N...>,
-                     xTupT&& xtup)
+                     xTup&& xtup)
       {
         int dummy[] = { (static_cast<void>(arr.emplace_back(
-               ::std::get<N>(forward<xTupT>(xtup)))), 1)...  };
+               ::std::get<N>(forward<xTup>(xtup)))), 1)...  };
         (void)dummy;
       }
 
-    template<typename xStor, typename xTupT>
+    template<typename xStor, typename xTup>
     static
     void
-    assign(xStor& stor, xTupT&& xtup)
+    assign(xStor& stor, xTup&& xtup)
       {
         V_array arr;
         constexpr size_t N = ::std::tuple_size<xTuple>::value;
         arr.reserve(N);
         unpack_tuple_aux(arr, ::std::make_index_sequence<N>(),
-                        forward<xTupT>(xtup));
+                        forward<xTup>(xtup));
         stor = move(arr);
       }
   };
 
-template<typename xValueT>
-struct Valuable_impl<opt<xValueT>, typename ::std::conditional<
-               true, void, typename Valuable_impl<xValueT>::via_type
+template<typename xValue>
+struct Valuable_impl<opt<xValue>, typename ::std::conditional<
+               true, void, typename Valuable_impl<xValue>::via_type
         >::type>
   {
     using direct_init  = ::std::false_type;
-    using via_type     = typename Valuable_impl<xValueT>::via_type;
+    using via_type     = typename Valuable_impl<xValue>::via_type;
 
-    template<typename xStor, typename xOptT>
+    template<typename xStor, typename xOpt>
     static
     void
-    assign(xStor& stor, xOptT&& xopt)
+    assign(xStor& stor, xOpt&& xopt)
       {
         if(xopt)
-          Valuable_impl<xValueT>::assign(stor,
+          Valuable_impl<xValue>::assign(stor,
               static_cast<typename ::std::conditional<
-                  ::std::is_lvalue_reference<xOptT&&>::value,
-                            const xValueT&, xValueT&&>::type>(*xopt));
+                  ::std::is_lvalue_reference<xOpt&&>::value,
+                            const xValue&, xValue&&>::type>(*xopt));
         else
           stor = V_null();
       }
   };
 
-template<typename xValueT>
-using Valuable = Valuable_impl<typename ::rocket::remove_cvref<xValueT>::type, void>;
+template<typename xValue>
+using Valuable = Valuable_impl<typename ::rocket::remove_cvref<xValue>::type, void>;
 
 inline
 void

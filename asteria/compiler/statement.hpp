@@ -200,22 +200,22 @@ class Statement
 
   public:
     // Constructors and assignment operators
-    template<typename xStatementT,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xStatementT&&>::value)>
+    template<typename xStatement,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xStatement&&>::value)>
     constexpr
-    Statement(xStatementT&& xstmt)
-       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xStatementT&&>::value)
+    Statement(xStatement&& xstmt)
+       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xStatement&&>::value)
       :
-        m_stor(forward<xStatementT>(xstmt))
+        m_stor(forward<xStatement>(xstmt))
       { }
 
-    template<typename xStatementT,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xStatementT&&>::value)>
+    template<typename xStatement,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xStatement&&>::value)>
     Statement&
-    operator=(xStatementT&& xstmt) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xStatementT&&>::value)
+    operator=(xStatement&& xstmt) &
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xStatement&&>::value)
       {
-        this->m_stor = forward<xStatementT>(xstmt);
+        this->m_stor = forward<xStatement>(xstmt);
         return *this;
       }
 

@@ -66,11 +66,11 @@ do_solidify_nodes(AVM_Rod& rod, const cow_vector<AIR_Node>& code)
     rod.finalize();
   }
 
-template<typename xModifierT>
+template<typename xModifier>
 void
-do_push_modifier_and_check(Reference& ref, xModifierT&& xmod)
+do_push_modifier_and_check(Reference& ref, xModifier&& xmod)
   {
-    ref.push_modifier(forward<xModifierT>(xmod));
+    ref.push_modifier(forward<xModifier>(xmod));
     ref.dereference_readonly();
   }
 

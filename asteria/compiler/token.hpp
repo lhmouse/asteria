@@ -67,12 +67,12 @@ class Token
       );
 
   public:
-    template<typename xTokenT>
+    template<typename xToken>
     constexpr
-    Token(const Source_Location& xsloc, size_t xlen, xTokenT&& xtok)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xTokenT&&>::value)
+    Token(const Source_Location& xsloc, size_t xlen, xToken&& xtok)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xToken&&>::value)
       :
-        m_sloc(xsloc), m_length(xlen), m_stor(forward<xTokenT>(xtok))
+        m_sloc(xsloc), m_length(xlen), m_stor(forward<xToken>(xtok))
       { }
 
     Token&

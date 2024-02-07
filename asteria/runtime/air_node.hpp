@@ -382,22 +382,22 @@ class AIR_Node
 
   public:
     // Constructors and assignment operators
-    template<typename xNodeT,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xNodeT&&>::value)>
+    template<typename xNode,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xNode&&>::value)>
     constexpr
-    AIR_Node(xNodeT&& xnode)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xNodeT&&>::value)
+    AIR_Node(xNode&& xnode)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xNode&&>::value)
       :
-        m_stor(forward<xNodeT>(xnode))
+        m_stor(forward<xNode>(xnode))
       { }
 
-    template<typename xNodeT,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xNodeT&&>::value)>
+    template<typename xNode,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xNode&&>::value)>
     AIR_Node&
-    operator=(xNodeT&& xnode) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xNodeT&&>::value)
+    operator=(xNode&& xnode) &
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xNode&&>::value)
       {
-        this->m_stor = forward<xNodeT>(xnode);
+        this->m_stor = forward<xNode>(xnode);
         return *this;
       }
 

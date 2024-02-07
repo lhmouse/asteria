@@ -147,22 +147,22 @@ class Expression_Unit
 
   public:
     // Constructors and assignment operators
-    template<typename xUnitT,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xUnitT&&>::value)>
+    template<typename xUnit,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xUnit&&>::value)>
     constexpr
-    Expression_Unit(xUnitT&& xunit)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xUnitT&&>::value)
+    Expression_Unit(xUnit&& xunit)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xUnit&&>::value)
       :
-        m_stor(forward<xUnitT>(xunit))
+        m_stor(forward<xUnit>(xunit))
       { }
 
-    template<typename xUnitT,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xUnitT&&>::value)>
+    template<typename xUnit,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xUnit&&>::value)>
     Expression_Unit&
-    operator=(xUnitT&& xunit) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xUnitT&&>::value)
+    operator=(xUnit&& xunit) &
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xUnit&&>::value)
       {
-        this->m_stor = forward<xUnitT>(xunit);
+        this->m_stor = forward<xUnit>(xunit);
         return *this;
       }
 

@@ -32,34 +32,34 @@ class Value
         m_bytes()
       { }
 
-    template<typename xValueT,
-    ROCKET_ENABLE_IF(details_value::Valuable<xValueT>::direct_init::value)>
-    Value(xValueT&& xval)
+    template<typename xValue,
+    ROCKET_ENABLE_IF(details_value::Valuable<xValue>::direct_init::value)>
+    Value(xValue&& xval)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor),
-                   typename details_value::Valuable<xValueT>::via_type&&>::value)
+                   typename details_value::Valuable<xValue>::via_type&&>::value)
       :
-        m_stor(typename details_value::Valuable<xValueT>::via_type(forward<xValueT>(xval)))
+        m_stor(typename details_value::Valuable<xValue>::via_type(forward<xValue>(xval)))
       { }
 
-    template<typename xValueT,
-    ROCKET_DISABLE_IF(details_value::Valuable<xValueT>::direct_init::value)>
-    Value(xValueT&& xval)
+    template<typename xValue,
+    ROCKET_DISABLE_IF(details_value::Valuable<xValue>::direct_init::value)>
+    Value(xValue&& xval)
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
-                   typename details_value::Valuable<xValueT>::via_type&&>::value)
+                   typename details_value::Valuable<xValue>::via_type&&>::value)
       :
         m_bytes()
       {
-        details_value::Valuable<xValueT>::assign(this->m_stor, forward<xValueT>(xval));
+        details_value::Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
       }
 
-    template<typename xValueT,
-    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<xValueT>::via_type)>
+    template<typename xValue,
+    ROCKET_ENABLE_IF_HAS_TYPE(typename details_value::Valuable<xValue>::via_type)>
     Value&
-    operator=(xValueT&& xval) &
+    operator=(xValue&& xval) &
       noexcept(::std::is_nothrow_assignable<decltype(m_stor)&,
-                   typename details_value::Valuable<xValueT>::via_type&&>::value)
+                   typename details_value::Valuable<xValue>::via_type&&>::value)
       {
-        details_value::Valuable<xValueT>::assign(this->m_stor, forward<xValueT>(xval));
+        details_value::Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
         return *this;
       }
 
