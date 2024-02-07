@@ -109,11 +109,11 @@ class Text_Reader
       }
   };
 
-template<typename XTokenT>
+template<typename xTokenT>
 bool
-do_push_token(cow_vector<Token>& tokens, Text_Reader& reader, size_t tlen, XTokenT&& xtoken)
+do_push_token(cow_vector<Token>& tokens, Text_Reader& reader, size_t tlen, xTokenT&& xtoken)
   {
-    tokens.emplace_back(reader.tell(), tlen, forward<XTokenT>(xtoken));
+    tokens.emplace_back(reader.tell(), tlen, forward<xTokenT>(xtoken));
     reader.consume(tlen);
     return true;
   }

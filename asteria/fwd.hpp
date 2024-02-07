@@ -263,15 +263,15 @@ struct rcfwd : virtual Rcbase
     void
     vtable_key_function_GklPAslB() noexcept;
 
-    template<typename XRealT = RealT>
-    refcnt_ptr<const XRealT>
+    template<typename xRealT = RealT>
+    refcnt_ptr<const xRealT>
     share_this() const
-      { return this->Rcbase::template share_this<XRealT, rcfwd>();  }
+      { return this->Rcbase::template share_this<xRealT, rcfwd>();  }
 
-    template<typename XRealT = RealT>
-    refcnt_ptr<XRealT>
+    template<typename xRealT = RealT>
+    refcnt_ptr<xRealT>
     share_this()
-      { return this->Rcbase::template share_this<XRealT, rcfwd>();  }
+      { return this->Rcbase::template share_this<xRealT, rcfwd>();  }
   };
 
 template<typename RealT>

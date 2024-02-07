@@ -76,22 +76,22 @@ class Infix_Element
 
   public:
     // Constructors and assignment operators
-    template<typename XElemT,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XElemT&&>::value)>
+    template<typename xElementT,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xElementT&&>::value)>
     constexpr
-    Infix_Element(XElemT&& xelem)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XElemT&&>::value)
+    Infix_Element(xElementT&& xelem)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xElementT&&>::value)
       :
-        m_stor(forward<XElemT>(xelem))
+        m_stor(forward<xElementT>(xelem))
       { }
 
-    template<typename XElemT,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XElemT&&>::value)>
+    template<typename xElementT,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xElementT&&>::value)>
     Infix_Element&
-    operator=(XElemT&& xelem) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XElemT&&>::value)
+    operator=(xElementT&& xelem) &
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xElementT&&>::value)
       {
-        this->m_stor = forward<XElemT>(xelem);
+        this->m_stor = forward<xElementT>(xelem);
         return *this;
       }
 

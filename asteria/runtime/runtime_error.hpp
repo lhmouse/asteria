@@ -32,10 +32,10 @@ class Runtime_Error
     ::rocket::tinyfmt_str m_fmt;  // human-readable message
 
   public:
-    template<typename XValT>
-    Runtime_Error(Uxtc_throw, XValT&& xval, const Source_Location& xsloc)
+    template<typename xValueT>
+    Runtime_Error(Uxtc_throw, xValueT&& xval, const Source_Location& xsloc)
       :
-        m_value(forward<XValT>(xval))
+        m_value(forward<xValueT>(xval))
       {
         this->do_backtrace();
         this->do_insert_frame(frame_type_throw, &xsloc, this->m_value);

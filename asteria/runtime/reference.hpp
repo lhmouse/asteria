@@ -134,12 +134,12 @@ class Reference
     is_temporary() const noexcept
       { return this->m_xref == xref_temporary;  }
 
-    template<typename XValT,
-    ROCKET_ENABLE_IF(::std::is_assignable<Value&, XValT&&>::value)>
+    template<typename xValueT,
+    ROCKET_ENABLE_IF(::std::is_assignable<Value&, xValueT&&>::value)>
     Reference&
-    set_temporary(XValT&& xval)
+    set_temporary(xValueT&& xval)
       {
-        this->m_value = forward<XValT>(xval);
+        this->m_value = forward<xValueT>(xval);
         this->m_mods.clear();
         this->m_xref = xref_temporary;
         return *this;
@@ -183,15 +183,15 @@ class Reference
     clear_modifiers() noexcept
       { this->m_mods.clear();  }
 
-    template<typename XModT,
-    ROCKET_ENABLE_IF(::std::is_constructible<Reference_Modifier, XModT&&>::value)>
+    template<typename xModifierT,
+    ROCKET_ENABLE_IF(::std::is_constructible<Reference_Modifier, xModifierT&&>::value)>
     Reference&
-    push_modifier(XModT&& xmod)
+    push_modifier(xModifierT&& xmod)
       {
         if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
           this->do_throw_not_dereferenceable();
 
-        this->m_mods.emplace_back(forward<XModT>(xmod));
+        this->m_mods.emplace_back(forward<xModifierT>(xmod));
         return *this;
       }
 

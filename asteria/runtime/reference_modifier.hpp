@@ -54,22 +54,22 @@ class Reference_Modifier
 
   public:
     // Constructors and assignment operators
-    template<typename XModT,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), XModT&&>::value)>
+    template<typename xModifierT,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xModifierT&&>::value)>
     constexpr
-    Reference_Modifier(XModT&& xmod)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), XModT&&>::value)
+    Reference_Modifier(xModifierT&& xmod)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xModifierT&&>::value)
       :
-        m_stor(forward<XModT>(xmod))
+        m_stor(forward<xModifierT>(xmod))
       { }
 
-    template<typename XModT,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, XModT&&>::value)>
+    template<typename xModifierT,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xModifierT&&>::value)>
     Reference_Modifier&
-    operator=(XModT&& xmod) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, XModT&&>::value)
+    operator=(xModifierT&& xmod) &
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xModifierT&&>::value)
       {
-        this->m_stor = forward<XModT>(xmod);
+        this->m_stor = forward<xModifierT>(xmod);
         return *this;
       }
 

@@ -40,12 +40,12 @@ class Variable
     mut_value()
       { return this->m_value;  }
 
-    template<typename XValT,
-    ROCKET_ENABLE_IF(::std::is_assignable<Value&, XValT&&>::value)>
+    template<typename xValueT,
+    ROCKET_ENABLE_IF(::std::is_assignable<Value&, xValueT&&>::value)>
     void
-    initialize(XValT&& xval)
+    initialize(xValueT&& xval)
       {
-        this->m_value = forward<XValT>(xval);
+        this->m_value = forward<xValueT>(xval);
         this->m_init = true;
       }
 
