@@ -2336,7 +2336,7 @@ struct basic_cow_string<charT, allocT>::hash
     using result_type    = uint32_t;
     using argument_type  = basic_cow_string;
 
-    constexpr ROCKET_ALWAYS_INLINE
+    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     uint32_t
     do_hash_bytes(const charT* p, size_t n) const noexcept
       {
@@ -2348,17 +2348,17 @@ struct basic_cow_string<charT, allocT>::hash
         return hval;
       }
 
-    constexpr
+    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     uint32_t
     operator()(const basic_cow_string& str) const noexcept
       { return this->do_hash_bytes(str.m_ref.m_ptr, str.m_ref.m_len);  }
 
-    constexpr
+    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     uint32_t
     operator()(const shallow_type& sh) const noexcept
       { return this->do_hash_bytes(sh.m_ptr, sh.m_len);  }
 
-    constexpr
+    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     uint32_t
     operator()(const value_type* s) const noexcept
       { return this->do_hash_bytes(s, details_xstring::maybe_constexpr::ystrlen(s));  }
