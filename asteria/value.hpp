@@ -12,12 +12,12 @@ class Value
   {
   private:
     using variant_type =
-            ::rocket::variant<
-                  V_null, V_boolean, V_integer, V_real, V_string,
-                  V_opaque, V_function, V_array, V_object>;
+        ::rocket::variant<
+            V_null, V_boolean, V_integer, V_real, V_string,
+            V_opaque, V_function, V_array, V_object>;
 
     using bytes_type =
-            ::std::aligned_storage<sizeof(variant_type), 16U>::type;
+        ::std::aligned_storage<sizeof(variant_type), 16>::type;
 
     union {
       variant_type m_stor;
