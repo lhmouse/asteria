@@ -1205,13 +1205,12 @@ class basic_cow_string
     const value_type*
     safe_c_str() const
       {
-        size_type clen = noadl::xstrlen(this->c_str());
-        if(clen != this->length())
+        size_type clen = noadl::xstrlen(this->m_ref.m_ptr);
+        if(clen != this->m_ref.m_len)
           noadl::sprintf_and_throw<domain_error>(
               "basic_cow_string: embedded null character detected at `%lld`",
               static_cast<long long>(clen));
-
-        return this->c_str();
+        return this->m_ref.m_ptr;
       }
 
     // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
@@ -1221,7 +1220,7 @@ class basic_cow_string
     mut_data()
       {
         auto ptr = this->m_sth.mut_data_opt();
-        if(ROCKET_EXPECT(ptr))
+        if(ROCKET_EXPECT(ptr == this->m_ref.m_ptr))
           return ptr;
 
         // If the string is empty, return a pointer to constant storage. The
