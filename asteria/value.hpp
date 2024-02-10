@@ -308,7 +308,8 @@ class Value
     bool
     test() const noexcept
       {
-        switch(this->m_stor.index()) {
+        switch(this->m_stor.index())
+          {
           case type_null:
             return false;
 

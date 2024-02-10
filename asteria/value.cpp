@@ -67,7 +67,8 @@ do_destroy_variant_slow() noexcept
 
   r:
     if(this->m_stor.index() >= type_string)
-      switch(this->m_stor.index()) {
+      switch(this->m_stor.index())
+        {
         case type_string:
           this->m_stor.mut<type_string>().~V_string();
           break;
@@ -80,31 +81,33 @@ do_destroy_variant_slow() noexcept
           this->m_stor.mut<type_function>().~V_function();
           break;
 
-        case type_array: {
-          auto& altr = this->m_stor.mut<type_array>();
-          if(!altr.empty() && altr.unique()) {
-            for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
-              // Move raw bytes into `stack`.
-              stack.push_back(it->m_bytes);
-              bfill(it->m_bytes, 0);
+        case type_array:
+          {
+            auto& altr = this->m_stor.mut<type_array>();
+            if(!altr.empty() && altr.unique()) {
+              for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
+                // Move raw bytes into `stack`.
+                stack.push_back(it->m_bytes);
+                bfill(it->m_bytes, 0);
+              }
             }
+            altr.~V_array();
+            break;
           }
-          altr.~V_array();
-          break;
-        }
 
-        case type_object: {
-          auto& altr = this->m_stor.mut<type_object>();
-          if(!altr.empty() && altr.unique()) {
-            for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
-              // Move raw bytes into `stack`.
-              stack.push_back(it->second.m_bytes);
-              bfill(it->second.m_bytes, 0);
+        case type_object:
+          {
+            auto& altr = this->m_stor.mut<type_object>();
+            if(!altr.empty() && altr.unique()) {
+              for(auto it = altr.mut_begin();  it != altr.end();  ++it) {
+                // Move raw bytes into `stack`.
+                stack.push_back(it->second.m_bytes);
+                bfill(it->second.m_bytes, 0);
+              }
             }
+            altr.~V_object();
+            break;
           }
-          altr.~V_object();
-          break;
-        }
 
         default:
           ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
@@ -142,7 +145,8 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
 
   r:
     if(staged.insert(qval, null_var_ptr))  // mark once
-      switch(qval->m_stor.index()) {
+      switch(qval->m_stor.index())
+        {
         case type_opaque:
           qval->m_stor.as<V_opaque>().collect_variables(staged, temp);
           break;
@@ -151,52 +155,57 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
           qval->m_stor.as<V_function>().collect_variables(staged, temp);
           break;
 
-        case type_array: {
-          const auto& altr = qval->m_stor.as<V_array>();
-          if(!altr.empty()) {
-            Rbr_array elema = { &altr, altr.begin() };
-            qval = &*(elema.curp);
-            stack.emplace_back(move(elema));
-            goto r;
+        case type_array:
+          {
+            const auto& altr = qval->m_stor.as<V_array>();
+            if(!altr.empty()) {
+              Rbr_array elema = { &altr, altr.begin() };
+              qval = &*(elema.curp);
+              stack.emplace_back(move(elema));
+              goto r;
+            }
+            break;
           }
-          break;
-        }
 
-        case type_object: {
-          const auto& altr = qval->m_stor.as<V_object>();
-          if(!altr.empty()) {
-            Rbr_object elemo = { &altr, altr.begin() };
-            qval = &(elemo.curp->second);
-            stack.emplace_back(move(elemo));
-            goto r;
+        case type_object:
+          {
+            const auto& altr = qval->m_stor.as<V_object>();
+            if(!altr.empty()) {
+              Rbr_object elemo = { &altr, altr.begin() };
+              qval = &(elemo.curp->second);
+              stack.emplace_back(move(elemo));
+              goto r;
+            }
+            break;
           }
-          break;
-        }
       }
 
     while(stack.size())
-      switch(stack.back().index()) {
-        case 0: {
-          Rbr_array& elema = stack.mut_back().mut<0>();
-          ++ elema.curp;
-          if(elema.curp != elema.refa->end()) {
-            qval = &*(elema.curp);
-            goto r;
+      switch(stack.back().index())
+        {
+        case 0:
+          {
+            Rbr_array& elema = stack.mut_back().mut<0>();
+            ++ elema.curp;
+            if(elema.curp != elema.refa->end()) {
+              qval = &*(elema.curp);
+              goto r;
+            }
+            stack.pop_back();
+            break;
           }
-          stack.pop_back();
-          break;
-        }
 
-        case 1: {
-          Rbr_object& elemo = stack.mut_back().mut<1>();
-          ++ elemo.curp;
-          if(elemo.curp != elemo.refo->end()) {
-            qval = &(elemo.curp->second);
-            goto r;
+        case 1:
+          {
+            Rbr_object& elemo = stack.mut_back().mut<1>();
+            ++ elemo.curp;
+            if(elemo.curp != elemo.refo->end()) {
+              qval = &(elemo.curp->second);
+              goto r;
+            }
+            stack.pop_back();
+            break;
           }
-          stack.pop_back();
-          break;
-        }
 
         default:
           ROCKET_ASSERT(false);
@@ -403,7 +412,8 @@ print(tinyfmt& fmt) const
     cow_vector<Rbr_Element> stack;
 
   r:
-    switch(qval->m_stor.index()) {
+    switch(qval->m_stor.index())
+      {
       case type_null:
         fmt << "null";
         break;
@@ -434,67 +444,72 @@ print(tinyfmt& fmt) const
         fmt << "(function) [[" << qval->m_stor.as<V_function>() << "]]";
         break;
 
-      case type_array: {
-        const auto& altr = qval->m_stor.as<V_array>();
-        if(!altr.empty()) {
-          Rbr_array elema = { &altr, altr.begin() };
-          fmt << "[ ";
-          qval = &*(elema.curp);
-          stack.emplace_back(move(elema));
-          goto r;
+      case type_array:
+        {
+          const auto& altr = qval->m_stor.as<V_array>();
+          if(!altr.empty()) {
+            Rbr_array elema = { &altr, altr.begin() };
+            fmt << "[ ";
+            qval = &*(elema.curp);
+            stack.emplace_back(move(elema));
+            goto r;
+          }
+          fmt << "[ ]";
+          break;
         }
-        fmt << "[ ]";
-        break;
-      }
 
-      case type_object: {
-        const auto& altr = qval->m_stor.as<V_object>();
-        if(!altr.empty()) {
-          Rbr_object elemo = { &altr, altr.begin() };
-          fmt << "{ \"";
-          c_quote(fmt, elemo.curp->first);
-          fmt << "\": ";
-          qval = &(elemo.curp->second);
-          stack.emplace_back(move(elemo));
-          goto r;
+      case type_object:
+        {
+          const auto& altr = qval->m_stor.as<V_object>();
+          if(!altr.empty()) {
+            Rbr_object elemo = { &altr, altr.begin() };
+            fmt << "{ \"";
+            c_quote(fmt, elemo.curp->first);
+            fmt << "\": ";
+            qval = &(elemo.curp->second);
+            stack.emplace_back(move(elemo));
+            goto r;
+          }
+          fmt << "{ }";
+          break;
         }
-        fmt << "{ }";
-        break;
-      }
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
     }
 
     while(stack.size())
-      switch(stack.back().index()) {
-        case 0: {
-          Rbr_array& elema = stack.mut_back().mut<0>();
-          ++ elema.curp;
-          if(elema.curp != elema.refa->end()) {
-            fmt << ", ";
-            qval = &*(elema.curp);
-            goto r;
+      switch(stack.back().index())
+        {
+        case 0:
+          {
+            Rbr_array& elema = stack.mut_back().mut<0>();
+            ++ elema.curp;
+            if(elema.curp != elema.refa->end()) {
+              fmt << ", ";
+              qval = &*(elema.curp);
+              goto r;
+            }
+            fmt << " ]";
+            stack.pop_back();
+            break;
           }
-          fmt << " ]";
-          stack.pop_back();
-          break;
-        }
 
-        case 1: {
-          Rbr_object& elemo = stack.mut_back().mut<1>();
-          ++ elemo.curp;
-          if(elemo.curp != elemo.refo->end()) {
-            fmt << ", \"";
-            c_quote(fmt, elemo.curp->first);
-            fmt << "\": ";
-            qval = &(elemo.curp->second);
-            goto r;
+        case 1:
+          {
+            Rbr_object& elemo = stack.mut_back().mut<1>();
+            ++ elemo.curp;
+            if(elemo.curp != elemo.refo->end()) {
+              fmt << ", \"";
+              c_quote(fmt, elemo.curp->first);
+              fmt << "\": ";
+              qval = &(elemo.curp->second);
+              goto r;
+            }
+            fmt << " }";
+            stack.pop_back();
+            break;
           }
-          fmt << " }";
-          stack.pop_back();
-          break;
-        }
 
         default:
           ROCKET_ASSERT(false);
@@ -521,7 +536,8 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
     cow_vector<Rbr_Element> stack;
 
   r:
-    switch(qval->type()) {
+    switch(qval->type())
+      {
       case type_null:
         fmt << "null;";
         break;
@@ -538,95 +554,103 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         fmt << "real " << qval->m_stor.as<V_real>() << ";";
         break;
 
-      case type_string: {
-        const auto& altr = qval->m_stor.as<V_string>();
-        fmt << "string(" << altr.size() << ") \"";
-        c_quote(fmt, altr);
-        fmt << "\";";
-        break;
-      }
-
-      case type_opaque: {
-        const auto& altr = qval->m_stor.as<V_opaque>();
-        fmt << "opaque [[" << altr << "]];";
-        break;
-      }
-
-      case type_function: {
-        const auto& altr = qval->m_stor.as<V_function>();
-        fmt << "function [[" << altr << "]];";
-        break;
-      }
-
-      case type_array: {
-        const auto& altr = qval->m_stor.as<V_array>();
-        if(!altr.empty()) {
-          Rbr_array elema = { &altr, altr.begin() };
-          fmt << "array(" << altr.size() << ") [";
-          do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
-          fmt << (elema.curp - altr.begin()) << " = ";
-          qval = &*(elema.curp);
-          stack.emplace_back(move(elema));
-          goto r;
+      case type_string:
+        {
+          const auto& altr = qval->m_stor.as<V_string>();
+          fmt << "string(" << altr.size() << ") \"";
+          c_quote(fmt, altr);
+          fmt << "\";";
+          break;
         }
-        fmt << "array(0) [ ];";
-        break;
-      }
 
-      case type_object: {
-        const auto& altr = qval->m_stor.as<V_object>();
-        if(!altr.empty()) {
-          Rbr_object elemo = { &altr, altr.begin() };
-          fmt << "object(" << altr.size() << ") {";
-          do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
-          fmt << "\"";
-          c_quote(fmt, elemo.curp->first);
-          fmt << "\" = ";
-          qval = &(elemo.curp->second);
-          stack.emplace_back(move(elemo));
-          goto r;
+      case type_opaque:
+        {
+          const auto& altr = qval->m_stor.as<V_opaque>();
+          fmt << "opaque [[" << altr << "]];";
+          break;
         }
-        fmt << "object(0) { };";
-        break;
-      }
+
+      case type_function:
+        {
+          const auto& altr = qval->m_stor.as<V_function>();
+          fmt << "function [[" << altr << "]];";
+          break;
+        }
+
+      case type_array:
+        {
+          const auto& altr = qval->m_stor.as<V_array>();
+          if(!altr.empty()) {
+            Rbr_array elema = { &altr, altr.begin() };
+            fmt << "array(" << altr.size() << ") [";
+            do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
+            fmt << (elema.curp - altr.begin()) << " = ";
+            qval = &*(elema.curp);
+            stack.emplace_back(move(elema));
+            goto r;
+          }
+          fmt << "array(0) [ ];";
+          break;
+        }
+
+      case type_object:
+        {
+          const auto& altr = qval->m_stor.as<V_object>();
+          if(!altr.empty()) {
+            Rbr_object elemo = { &altr, altr.begin() };
+            fmt << "object(" << altr.size() << ") {";
+            do_break_line(fmt, indent, hanging + indent * (stack.size() + 1));
+            fmt << "\"";
+            c_quote(fmt, elemo.curp->first);
+            fmt << "\" = ";
+            qval = &(elemo.curp->second);
+            stack.emplace_back(move(elemo));
+            goto r;
+          }
+          fmt << "object(0) { };";
+          break;
+        }
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), qval->type());
     }
 
     while(stack.size())
-      switch(stack.back().index()) {
-        case 0: {
-          Rbr_array& elema = stack.mut_back().mut<0>();
-          ++ elema.curp;
-          if(elema.curp != elema.refa->end()) {
-            do_break_line(fmt, indent, hanging + indent * stack.size());
-            fmt << (elema.curp - elema.refa->begin()) << " = ";
-            qval = &*(elema.curp);
-            goto r;
+      switch(stack.back().index())
+        {
+        case 0:
+          {
+            Rbr_array& elema = stack.mut_back().mut<0>();
+            ++ elema.curp;
+            if(elema.curp != elema.refa->end()) {
+              do_break_line(fmt, indent, hanging + indent * stack.size());
+              fmt << (elema.curp - elema.refa->begin()) << " = ";
+              qval = &*(elema.curp);
+              goto r;
+            }
+            do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
+            fmt << "];";
+            stack.pop_back();
+            break;
           }
-          do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
-          fmt << "];";
-          stack.pop_back();
-          break;
-        }
 
-        case 1: {
-          Rbr_object& elemo = stack.mut_back().mut<1>();
-          ++ elemo.curp;
-          if(elemo.curp != elemo.refo->end()) {
-            do_break_line(fmt, indent, hanging + indent * stack.size());
-            fmt << "\"";
-            c_quote(fmt, elemo.curp->first);
-            fmt << "\" = ";
-            qval = &(elemo.curp->second);
-            goto r;
+        case 1:
+          {
+            Rbr_object& elemo = stack.mut_back().mut<1>();
+            ++ elemo.curp;
+            if(elemo.curp != elemo.refo->end()) {
+              do_break_line(fmt, indent, hanging + indent * stack.size());
+              fmt << "\"";
+              c_quote(fmt, elemo.curp->first);
+              fmt << "\" = ";
+              qval = &(elemo.curp->second);
+              goto r;
+            }
+            do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
+            fmt << "};";
+            stack.pop_back();
+            break;
           }
-          do_break_line(fmt, indent, hanging + indent * (stack.size() - 1));
-          fmt << "};";
-          stack.pop_back();
-          break;
-        }
 
         default:
           ROCKET_ASSERT(false);

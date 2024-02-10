@@ -161,7 +161,8 @@ execute(Executive_Context& ctx) const
       auto head = this->m_bptr + this->m_einit + offset;
       offset += 1L + head->nheaders;
 
-      switch(head->meta_ver) {
+      switch(head->meta_ver)
+        {
         case 0:
           // There is no metadata or symbols.
           status = head->pv_exec(ctx, head);

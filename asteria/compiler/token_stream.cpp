@@ -205,7 +205,8 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     uint8_t expch = 'e';
 
     // Look for an explicit sign symbol.
-    switch(reader.peek(tlen)) {
+    switch(reader.peek(tlen))
+      {
       case '+':
         tstr = &"+";
         tlen += 1;
@@ -223,7 +224,8 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     if((tlen != 0) && do_may_infix_operators_follow(tokens))
       return false;
 
-    switch(reader.peek(tlen)) {
+    switch(reader.peek(tlen))
+      {
       case 'n':
       case 'N':
       {
@@ -537,7 +539,8 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
       int xcnt = 0;
 
       // Translate it.
-      switch(next) {
+      switch(next)
+        {
         case '\'':
         case '\"':
         case '\\':

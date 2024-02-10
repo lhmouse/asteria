@@ -72,7 +72,8 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     }
     ctx_func.on_scope_exit_normal(status);
 
-    switch(status) {
+    switch(status)
+      {
       case air_status_next:
       case air_status_return_void:
         self.set_void();

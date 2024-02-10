@@ -103,7 +103,8 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
 
     // Neutralize control characters: ['\x00','\x1F'] and '\x7F'.
     for(char c : msg)
-      switch(c) {
+      switch(c)
+        {
         break; case 0x00U:  data += "[NUL]";
         break; case 0x01U:  data += "[SOH]";
         break; case 0x02U:  data += "[STX]";

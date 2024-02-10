@@ -43,7 +43,8 @@ do_dereference_readonly_slow() const
     const Value* valp = nullptr;
     size_t mi = 0;
 
-    switch(this->m_xref) {
+    switch(this->m_xref)
+      {
       case xref_invalid:
         throw Runtime_Error(xtc_format,
                  "Reference not initialized");
@@ -56,17 +57,18 @@ do_dereference_readonly_slow() const
         valp = &(this->m_value);
         break;
 
-      case xref_variable: {
-        auto var = unerase_cast<Variable*>(this->m_var.get());
-        ROCKET_ASSERT(var);
+      case xref_variable:
+        {
+          auto var = unerase_cast<Variable*>(this->m_var.get());
+          ROCKET_ASSERT(var);
 
-        if(!var->is_initialized())
-          throw Runtime_Error(xtc_format,
-                   "Reference not initialized");
+          if(!var->is_initialized())
+            throw Runtime_Error(xtc_format,
+                     "Reference not initialized");
 
-        valp = &(var->get_value());
-        break;
-      }
+          valp = &(var->get_value());
+          break;
+        }
 
       case xref_ptc:
         throw Runtime_Error(xtc_format,
@@ -92,7 +94,8 @@ dereference_mutable() const
     Value* valp = nullptr;
     size_t mi = 0;
 
-    switch(this->m_xref) {
+    switch(this->m_xref)
+      {
       case xref_invalid:
         throw Runtime_Error(xtc_format,
                  "Reference not initialized");
@@ -105,21 +108,22 @@ dereference_mutable() const
         throw Runtime_Error(xtc_format,
                  "Attempt to modify a temporary value");
 
-      case xref_variable: {
-        auto var = unerase_cast<Variable*>(this->m_var.get());
-        ROCKET_ASSERT(var);
+      case xref_variable:
+        {
+          auto var = unerase_cast<Variable*>(this->m_var.get());
+          ROCKET_ASSERT(var);
 
-        if(!var->is_initialized())
-          throw Runtime_Error(xtc_format,
-                   "Reference not initialized");
+          if(!var->is_initialized())
+            throw Runtime_Error(xtc_format,
+                     "Reference not initialized");
 
-        if(var->is_immutable())
-          throw Runtime_Error(xtc_format,
-                   "Attempt to modify a `const` variable");
+          if(var->is_immutable())
+            throw Runtime_Error(xtc_format,
+                     "Attempt to modify a `const` variable");
 
-        valp = &(var->mut_value());
-        break;
-      }
+          valp = &(var->mut_value());
+          break;
+        }
 
       case xref_ptc:
         throw Runtime_Error(xtc_format,
@@ -142,7 +146,8 @@ dereference_unset() const
     Value* valp = nullptr;
     size_t mi = 0;
 
-    switch(this->m_xref) {
+    switch(this->m_xref)
+      {
       case xref_invalid:
         throw Runtime_Error(xtc_format,
                  "Reference not initialized");
@@ -155,21 +160,22 @@ dereference_unset() const
         throw Runtime_Error(xtc_format,
                  "Attempt to modify a temporary value");
 
-      case xref_variable: {
-        auto var = unerase_cast<Variable*>(this->m_var.get());
-        ROCKET_ASSERT(var);
+      case xref_variable:
+        {
+          auto var = unerase_cast<Variable*>(this->m_var.get());
+          ROCKET_ASSERT(var);
 
-        if(!var->is_initialized())
-          throw Runtime_Error(xtc_format,
-                   "Reference not initialized");
+          if(!var->is_initialized())
+            throw Runtime_Error(xtc_format,
+                     "Reference not initialized");
 
-        if(var->is_immutable())
-          throw Runtime_Error(xtc_format,
-                   "Attempt to modify a `const` variable");
+          if(var->is_immutable())
+            throw Runtime_Error(xtc_format,
+                     "Attempt to modify a `const` variable");
 
-        valp = &(var->mut_value());
-        break;
-      }
+          valp = &(var->mut_value());
+          break;
+        }
 
       case xref_ptc:
         throw Runtime_Error(xtc_format,

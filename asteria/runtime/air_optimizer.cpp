@@ -78,7 +78,8 @@ create_function(const Source_Location& sloc, cow_stringR name)
       // to form a function signature.
       func << "(";
       uint32_t tid = 0;
-      switch(this->m_params.size()) {
+      switch(this->m_params.size())
+        {
           do {
             func << ", ";  // fallthrough
         default:

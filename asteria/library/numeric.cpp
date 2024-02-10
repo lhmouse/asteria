@@ -258,7 +258,8 @@ std_numeric_random(Global_Context& global, optV_real limit)
     // If a limit is specified, magnify the value.
     // The default magnitude is 1.0 so no action is taken.
     if(limit) {
-      switch(::std::fpclassify(*limit)) {
+      switch(::std::fpclassify(*limit))
+        {
         case FP_ZERO:
           ASTERIA_THROW(("Random number limit was zero"));
 
@@ -348,66 +349,70 @@ std_numeric_format(V_integer value, optV_integer base, optV_integer ebase)
     V_string text;
     ::rocket::ascii_numput nump;
 
-    switch(base.value_or(10)) {
-      case 2: {
-        if(!ebase) {
-          nump.put_BI(value);  // binary, long
-          text.append(nump.begin(), nump.end());
-          break;
+    switch(base.value_or(10))
+      {
+      case 2:
+        {
+          if(!ebase) {
+            nump.put_BI(value);  // binary, long
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          if(*ebase == 2) {
+            auto p = do_decompose_integer(2, value);
+            nump.put_BI(p.first);  // binary, long
+            text.append(nump.begin(), nump.end());
+            do_append_exponent(text, nump, 'p', p.second);
+            break;
+          }
+
+          ASTERIA_THROW((
+              "Invalid exponent base for binary notation (`$1` is not 2)"),
+              *ebase);
         }
 
-        if(*ebase == 2) {
-          auto p = do_decompose_integer(2, value);
-          nump.put_BI(p.first);  // binary, long
-          text.append(nump.begin(), nump.end());
-          do_append_exponent(text, nump, 'p', p.second);
-          break;
+      case 16:
+        {
+          if(!ebase) {
+            nump.put_XI(value);  // hexadecimal, long
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          if(*ebase == 2) {
+            auto p = do_decompose_integer(2, value);
+            nump.put_XI(p.first);  // hexadecimal, long
+            text.append(nump.begin(), nump.end());
+            do_append_exponent(text, nump, 'p', p.second);
+            break;
+          }
+
+          ASTERIA_THROW((
+              "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
+              *ebase);
         }
 
-        ASTERIA_THROW((
-            "Invalid exponent base for binary notation (`$1` is not 2)"),
-            *ebase);
-      }
+      case 10:
+        {
+          if(!ebase) {
+            nump.put_DI(value);  // decimal, long
+            text.append(nump.begin(), nump.end());
+            break;
+          }
 
-      case 16: {
-        if(!ebase) {
-          nump.put_XI(value);  // hexadecimal, long
-          text.append(nump.begin(), nump.end());
-          break;
+          if(*ebase == 10) {
+            auto p = do_decompose_integer(10, value);
+            nump.put_DI(p.first);  // decimal, long
+            text.append(nump.begin(), nump.end());
+            do_append_exponent(text, nump, 'e', p.second);
+            break;
+          }
+
+          ASTERIA_THROW((
+              "Invalid exponent base for decimal notation (`$1` is not 10)"),
+              *ebase);
         }
-
-        if(*ebase == 2) {
-          auto p = do_decompose_integer(2, value);
-          nump.put_XI(p.first);  // hexadecimal, long
-          text.append(nump.begin(), nump.end());
-          do_append_exponent(text, nump, 'p', p.second);
-          break;
-        }
-
-        ASTERIA_THROW((
-            "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
-            *ebase);
-      }
-
-      case 10: {
-        if(!ebase) {
-          nump.put_DI(value);  // decimal, long
-          text.append(nump.begin(), nump.end());
-          break;
-        }
-
-        if(*ebase == 10) {
-          auto p = do_decompose_integer(10, value);
-          nump.put_DI(p.first);  // decimal, long
-          text.append(nump.begin(), nump.end());
-          do_append_exponent(text, nump, 'e', p.second);
-          break;
-        }
-
-        ASTERIA_THROW((
-            "Invalid exponent base for decimal notation (`$1` is not 10)"),
-            *ebase);
-      }
 
       default:
         ASTERIA_THROW((
@@ -423,60 +428,64 @@ std_numeric_format(V_real value, optV_integer base, optV_integer ebase)
     V_string text;
     ::rocket::ascii_numput nump;
 
-    switch(base.value_or(10)) {
-      case 2: {
-        if(!ebase) {
-          nump.put_BD(value);  // binary, float
-          text.append(nump.begin(), nump.end());
-          break;
+    switch(base.value_or(10))
+      {
+      case 2:
+        {
+          if(!ebase) {
+            nump.put_BD(value);  // binary, float
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          if(*ebase == 2) {
+            nump.put_BED(value);  // binary, scientific
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          ASTERIA_THROW((
+              "Invalid exponent base for binary notation (`$1` is not 2)"),
+              *ebase);
         }
 
-        if(*ebase == 2) {
-          nump.put_BED(value);  // binary, scientific
-          text.append(nump.begin(), nump.end());
-          break;
+      case 16:
+        {
+          if(!ebase) {
+            nump.put_XD(value);  // hexadecimal, float
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          if(*ebase == 2) {
+            nump.put_XED(value);  // hexadecimal, scientific
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          ASTERIA_THROW((
+              "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
+              *ebase);
         }
 
-        ASTERIA_THROW((
-            "Invalid exponent base for binary notation (`$1` is not 2)"),
-            *ebase);
-      }
+      case 10:
+        {
+          if(!ebase) {
+            nump.put_DD(value);  // decimal, float
+            text.append(nump.begin(), nump.end());
+            break;
+          }
 
-      case 16: {
-        if(!ebase) {
-          nump.put_XD(value);  // hexadecimal, float
-          text.append(nump.begin(), nump.end());
-          break;
+          if(*ebase == 10) {
+            nump.put_DED(value);  // decimal, scientific
+            text.append(nump.begin(), nump.end());
+            break;
+          }
+
+          ASTERIA_THROW((
+              "Invalid exponent base for decimal notation (`$1` is not 10)"),
+              *ebase);
         }
-
-        if(*ebase == 2) {
-          nump.put_XED(value);  // hexadecimal, scientific
-          text.append(nump.begin(), nump.end());
-          break;
-        }
-
-        ASTERIA_THROW((
-            "Invalid exponent base for hexadecimal notation (`$1` is not 2)"),
-            *ebase);
-      }
-
-      case 10: {
-        if(!ebase) {
-          nump.put_DD(value);  // decimal, float
-          text.append(nump.begin(), nump.end());
-          break;
-        }
-
-        if(*ebase == 10) {
-          nump.put_DED(value);  // decimal, scientific
-          text.append(nump.begin(), nump.end());
-          break;
-        }
-
-        ASTERIA_THROW((
-            "Invalid exponent base for decimal notation (`$1` is not 10)"),
-            *ebase);
-      }
 
       default:
         ASTERIA_THROW((

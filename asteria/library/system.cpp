@@ -172,45 +172,48 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
     while(stack.size()) {
       // Advance to the next element.
       auto& ctx = stack.mut_back();
-      switch(ctx.index()) {
-        case 0: {
-          auto& ctxa = ctx.mut<Xparse_array>();
-          ctxa.arr.emplace_back(move(value));
+      switch(ctx.index())
+        {
+        case 0:
+          {
+            auto& ctxa = ctx.mut<Xparse_array>();
+            ctxa.arr.emplace_back(move(value));
 
-          // A comma or semicolon may follow, but it has no meaning whatsoever.
-          do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+            // A comma or semicolon may follow, but it has no meaning whatsoever.
+            do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
 
-          // Look for the next element.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
-          if(!kpunct)
-            goto parse_next;
+            // Look for the next element.
+            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+            if(!kpunct)
+              goto parse_next;
 
-          // Close this array.
-          value = move(ctxa.arr);
-          break;
-        }
-
-        case 1: {
-          auto& ctxo = ctx.mut<Xparse_object>();
-          auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
-          if(!pair.second)
-            throw Compiler_Error(xtc_status,
-                      compiler_status_duplicate_key_in_object, ctxo.key_sloc);
-
-          // A comma or semicolon may follow, but it has no meaning whatsoever.
-          do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
-
-          // Look for the next element.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-          if(!kpunct) {
-            do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
-            goto parse_next;
+            // Close this array.
+            value = move(ctxa.arr);
+            break;
           }
 
-          // Close this object.
-          value = move(ctxo.obj);
-          break;
-        }
+        case 1:
+          {
+            auto& ctxo = ctx.mut<Xparse_object>();
+            auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
+            if(!pair.second)
+              throw Compiler_Error(xtc_status,
+                        compiler_status_duplicate_key_in_object, ctxo.key_sloc);
+
+            // A comma or semicolon may follow, but it has no meaning whatsoever.
+            do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
+
+            // Look for the next element.
+            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+            if(!kpunct) {
+              do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+              goto parse_next;
+            }
+
+            // Close this object.
+            value = move(ctxo.obj);
+            break;
+          }
 
         default:
           ROCKET_ASSERT(false);

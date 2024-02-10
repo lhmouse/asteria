@@ -527,7 +527,8 @@ throw_no_matching_function_call() const
     cow_string caller;
     caller << this->m_name << "(";
     uint32_t offset = this->m_stack.size() - 1;
-    switch(this->m_stack.size()) {
+    switch(this->m_stack.size())
+      {
         do {
           caller << ", ";  // fallthrough
       default:

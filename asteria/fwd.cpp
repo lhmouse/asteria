@@ -83,7 +83,8 @@ invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
 const char*
 describe_type(Type type) noexcept
   {
-    switch(type) {
+    switch(type)
+      {
       case type_null:
         return "null";
 
@@ -119,7 +120,8 @@ describe_type(Type type) noexcept
 const char*
 describe_xref(Xref xref) noexcept
   {
-    switch(xref) {
+    switch(xref)
+      {
       case xref_invalid:
         return "uninitialized reference";
 
@@ -143,7 +145,8 @@ describe_xref(Xref xref) noexcept
 const char*
 describe_frame_type(Frame_Type type) noexcept
   {
-    switch(type) {
+    switch(type)
+      {
       case frame_type_native:
         return "native code";
 
@@ -176,7 +179,8 @@ describe_frame_type(Frame_Type type) noexcept
 const char*
 describe_compiler_status(Compiler_Status status) noexcept
   {
-    switch(status) {
+    switch(status)
+      {
       case compiler_status_success:
         return "operation succeeded";
 

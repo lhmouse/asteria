@@ -174,7 +174,8 @@ do_quote_string(tinyfmt& fmt, cow_stringR str)
         cp = 0xFFFD;
 
       // Escape double quotes, backslashes, and control characters.
-      switch(cp) {
+      switch(cp)
+        {
         case '\"':
           fmt << "\\\"";
           break;
@@ -203,28 +204,29 @@ do_quote_string(tinyfmt& fmt, cow_stringR str)
           fmt << "\\t";
           break;
 
-        default: {
-          if((0x20 <= cp) && (cp <= 0x7E)) {
-            // Write printable characters as is.
-            fmt << (char) cp;
+        default:
+          {
+            if((0x20 <= cp) && (cp <= 0x7E)) {
+              // Write printable characters as is.
+              fmt << (char) cp;
+              break;
+            }
+
+            // Encode the character in UTF-16.
+            char16_t ustr[2];
+            char16_t* epos = ustr;
+            utf16_encode(epos, cp);
+
+            // Write code units.
+            ::rocket::ascii_numput nump;
+            for(auto p = ustr;  p != epos;  ++p) {
+              nump.put_XU(*p, 4);
+              char seq[8] = { "\\u" };
+              ::memcpy(seq + 2, nump.data() + 2, 4);
+              fmt.putn(seq, 6);
+            }
             break;
           }
-
-          // Encode the character in UTF-16.
-          char16_t ustr[2];
-          char16_t* epos = ustr;
-          utf16_encode(epos, cp);
-
-          // Write code units.
-          ::rocket::ascii_numput nump;
-          for(auto p = ustr;  p != epos;  ++p) {
-            nump.put_XU(*p, 4);
-            char seq[8] = { "\\u" };
-            ::memcpy(seq + 2, nump.data() + 2, 4);
-            fmt.putn(seq, 6);
-          }
-          break;
-        }
       }
     }
     fmt << '\"';
@@ -345,50 +347,53 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
     while(stack.size()) {
       // Advance to the next element.
       auto& ctx = stack.mut_back();
-      switch(ctx.index()) {
-        case 0: {
-          auto& ctxa = ctx.mut<0>();
-          ++ ctxa.curp;
-          if(ctxa.curp != ctxa.refa->end()) {
-            fmt << ',';
-            indent.break_line(fmt);
+      switch(ctx.index())
+        {
+        case 0:
+          {
+            auto& ctxa = ctx.mut<0>();
+            ++ ctxa.curp;
+            if(ctxa.curp != ctxa.refa->end()) {
+              fmt << ',';
+              indent.break_line(fmt);
 
-            // Format the next element.
-            qval = &*(ctxa.curp);
-            goto format_next;
+              // Format the next element.
+              qval = &*(ctxa.curp);
+              goto format_next;
+            }
+
+            // Close this array.
+            if(json5 && indent.has_indention())
+              fmt << ',';
+
+            indent.decrement_level();
+            indent.break_line(fmt);
+            fmt << ']';
+            break;
           }
 
-          // Close this array.
-          if(json5 && indent.has_indention())
-            fmt << ',';
+        case 1:
+          {
+            auto& ctxo = ctx.mut<1>();
+            if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
+              fmt << ',';
+              indent.break_line(fmt);
+              do_format_object_key(fmt, json5, indent, ctxo.curp->first);
 
-          indent.decrement_level();
-          indent.break_line(fmt);
-          fmt << ']';
-          break;
-        }
+              // Format the next value.
+              qval = &(ctxo.curp->second);
+              goto format_next;
+            }
 
-        case 1: {
-          auto& ctxo = ctx.mut<1>();
-          if(do_find_uncensored(++(ctxo.curp), *(ctxo.refo))) {
-            fmt << ',';
+            // Close this object.
+            if(json5 && indent.has_indention())
+              fmt << ',';
+
+            indent.decrement_level();
             indent.break_line(fmt);
-            do_format_object_key(fmt, json5, indent, ctxo.curp->first);
-
-            // Format the next value.
-            qval = &(ctxo.curp->second);
-            goto format_next;
+            fmt << '}';
+            break;
           }
-
-          // Close this object.
-          if(json5 && indent.has_indention())
-            fmt << ',';
-
-          indent.decrement_level();
-          indent.break_line(fmt);
-          fmt << '}';
-          break;
-        }
 
         default:
           ROCKET_ASSERT(false);
@@ -555,55 +560,58 @@ do_parse_nonrecursive(Token_Stream& tstrm)
     while(stack.size()) {
       // Advance to the next element.
       auto& ctx = stack.mut_back();
-      switch(ctx.index()) {
-        case 0: {
-          auto& ctxa = ctx.mut<Xparse_array>();
-          ctxa.arr.emplace_back(move(value));
+      switch(ctx.index())
+        {
+        case 0:
+          {
+            auto& ctxa = ctx.mut<Xparse_array>();
+            ctxa.arr.emplace_back(move(value));
 
-          // Look for the next element.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
-          if(!kpunct)
-            throw Compiler_Error(xtc_status,
-                      compiler_status_closing_bracket_or_comma_expected, tstrm.next_sloc());
-
-          if(*kpunct == punctuator_comma) {
-            // A closing bracket may still follow.
-            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+            // Look for the next element.
+            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
             if(!kpunct)
-              goto parse_next;
-          }
+              throw Compiler_Error(xtc_status,
+                        compiler_status_closing_bracket_or_comma_expected, tstrm.next_sloc());
 
-          // Close this array.
-          value = move(ctxa.arr);
-          break;
-        }
-
-        case 1: {
-          auto& ctxo = ctx.mut<Xparse_object>();
-          auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
-          if(!pair.second)
-            throw Compiler_Error(xtc_status,
-                      compiler_status_duplicate_key_in_object, ctxo.key_sloc);
-
-          // Look for the next element.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
-          if(!kpunct)
-            throw Compiler_Error(xtc_status,
-                      compiler_status_closing_brace_or_comma_expected, tstrm.next_sloc());
-
-          if(*kpunct == punctuator_comma) {
-            // A closing brace may still follow.
-            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-            if(!kpunct) {
-              do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
-              goto parse_next;
+            if(*kpunct == punctuator_comma) {
+              // A closing bracket may still follow.
+              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+              if(!kpunct)
+                goto parse_next;
             }
+
+            // Close this array.
+            value = move(ctxa.arr);
+            break;
           }
 
-          // Close this object.
-          value = move(ctxo.obj);
-          break;
-        }
+        case 1:
+          {
+            auto& ctxo = ctx.mut<Xparse_object>();
+            auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
+            if(!pair.second)
+              throw Compiler_Error(xtc_status,
+                        compiler_status_duplicate_key_in_object, ctxo.key_sloc);
+
+            // Look for the next element.
+            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
+            if(!kpunct)
+              throw Compiler_Error(xtc_status,
+                        compiler_status_closing_brace_or_comma_expected, tstrm.next_sloc());
+
+            if(*kpunct == punctuator_comma) {
+              // A closing brace may still follow.
+              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+              if(!kpunct) {
+                do_accept_object_key(stack.mut_back().mut<Xparse_object>(), tstrm);
+                goto parse_next;
+              }
+            }
+
+            // Close this object.
+            value = move(ctxo.obj);
+            break;
+          }
 
         default:
           ROCKET_ASSERT(false);

@@ -175,94 +175,98 @@ std_filesystem_remove_recursive(V_string path)
       stack.pop_back();
 
       // Process this element.
-      switch(elem.disp) {
-        case rm_disp_rmdir: {
-          // This is an empty directory. Remove it.
-          if(::rmdir(elem.path.c_str()) == 0) {
-            nremoved++;
-            break;
-          }
+      switch(elem.disp)
+        {
+        case rm_disp_rmdir:
+          {
+            // This is an empty directory. Remove it.
+            if(::rmdir(elem.path.c_str()) == 0) {
+              nremoved++;
+              break;
+            }
 
-          // Hmm... avoid TOCTTOU errors.
-          if(errno == ENOENT)
-            break;
+            // Hmm... avoid TOCTTOU errors.
+            if(errno == ENOENT)
+              break;
 
-          ASTERIA_THROW((
-              "Could not remove directory '$1'",
-              "[`rmdir()` failed: ${errno:full}]"),
-              elem.path);
-        }
-
-        case rm_disp_unlink: {
-          // This is a non-directory. Unlink it.
-          if(::unlink(elem.path.c_str()) == 0) {
-            nremoved++;
-            break;
-          }
-
-          // Hmm... avoid TOCTTOU errors.
-          if(errno == ENOENT)
-            break;
-
-          ASTERIA_THROW((
-              "Could not remove file '$1'",
-              "[`unlink()` failed: ${errno:full}]"),
-              elem.path);
-        }
-
-        case rm_disp_expand: {
-          // This is a subdirectory that has not been expanded.
-          // Push the directory itself. Since elements are maintained in LIFO order,
-          // only when this element is encountered for a second time, will all of its
-          // children have been removed.
-          stack.push_back({ rm_disp_rmdir, elem.path });
-
-          // Open the directory for listing.
-          ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()));
-          if(!dp)
             ASTERIA_THROW((
-                "Could not open directory '$1'",
-                "[`opendir()` failed: ${errno:full}]"),
+                "Could not remove directory '$1'",
+                "[`rmdir()` failed: ${errno:full}]"),
                 elem.path);
-
-          // Append all entries.
-          while(auto next = ::readdir(dp)) {
-            // Skip special entries.
-            if(::strcmp(next->d_name, ".") == 0)
-              continue;
-
-            if(::strcmp(next->d_name, "..") == 0)
-              continue;
-
-            // Get the name and type of this entry.
-            cow_string child = elem.path + '/' + next->d_name;
-            bool is_dir = false;
-
-#ifdef _DIRENT_HAVE_D_TYPE
-            if(next->d_type != DT_UNKNOWN) {
-              // Get the file type if it is available immediately.
-              is_dir = next->d_type == DT_DIR;
-            }
-            else
-#endif
-            {
-              // If the file type is unknown, ask for it.
-              struct ::stat stb;
-              if(::lstat(child.c_str(), &stb) != 0)
-                ASTERIA_THROW((
-                    "Could not get information about '$1'",
-                    "[`lstat()` failed: ${errno:full}]"),
-                    child);
-
-              // Check whether the child path denotes a directory.
-              is_dir = S_ISDIR(stb.st_mode);
-            }
-
-            // Append this entry.
-            stack.push_back({ is_dir ? rm_disp_expand : rm_disp_unlink, move(child) });
           }
-          break;
-        }
+
+        case rm_disp_unlink:
+          {
+            // This is a non-directory. Unlink it.
+            if(::unlink(elem.path.c_str()) == 0) {
+              nremoved++;
+              break;
+            }
+
+            // Hmm... avoid TOCTTOU errors.
+            if(errno == ENOENT)
+              break;
+
+            ASTERIA_THROW((
+                "Could not remove file '$1'",
+                "[`unlink()` failed: ${errno:full}]"),
+                elem.path);
+          }
+
+        case rm_disp_expand:
+          {
+            // This is a subdirectory that has not been expanded.
+            // Push the directory itself. Since elements are maintained in LIFO order,
+            // only when this element is encountered for a second time, will all of its
+            // children have been removed.
+            stack.push_back({ rm_disp_rmdir, elem.path });
+
+            // Open the directory for listing.
+            ::rocket::unique_posix_dir dp(::opendir(elem.path.c_str()));
+            if(!dp)
+              ASTERIA_THROW((
+                  "Could not open directory '$1'",
+                  "[`opendir()` failed: ${errno:full}]"),
+                  elem.path);
+
+            // Append all entries.
+            while(auto next = ::readdir(dp)) {
+              // Skip special entries.
+              if(::strcmp(next->d_name, ".") == 0)
+                continue;
+
+              if(::strcmp(next->d_name, "..") == 0)
+                continue;
+
+              // Get the name and type of this entry.
+              cow_string child = elem.path + '/' + next->d_name;
+              bool is_dir = false;
+
+  #ifdef _DIRENT_HAVE_D_TYPE
+              if(next->d_type != DT_UNKNOWN) {
+                // Get the file type if it is available immediately.
+                is_dir = next->d_type == DT_DIR;
+              }
+              else
+  #endif
+              {
+                // If the file type is unknown, ask for it.
+                struct ::stat stb;
+                if(::lstat(child.c_str(), &stb) != 0)
+                  ASTERIA_THROW((
+                      "Could not get information about '$1'",
+                      "[`lstat()` failed: ${errno:full}]"),
+                      child);
+
+                // Check whether the child path denotes a directory.
+                is_dir = S_ISDIR(stb.st_mode);
+              }
+
+              // Append this entry.
+              stack.push_back({ is_dir ? rm_disp_expand : rm_disp_unlink, move(child) });
+            }
+            break;
+          }
 
         default:
           ROCKET_ASSERT(false);

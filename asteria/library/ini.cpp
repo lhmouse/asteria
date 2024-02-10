@@ -34,7 +34,8 @@ do_format_key(tinyfmt& fmt, cow_stringR key)
 bool
 do_format_check_scalar(const Value& value)
   {
-    switch(value.type()) {
+    switch(value.type())
+      {
       case type_null:
       case type_boolean:
       case type_integer:
@@ -42,23 +43,24 @@ do_format_check_scalar(const Value& value)
         // These values are always convertible to strings.
         return true;
 
-      case type_string: {
-        // Verify the string, as we will have to write it verbatim later.
-        const auto& str = value.as_string();
-        if(str.empty())
+      case type_string:
+        {
+          // Verify the string, as we will have to write it verbatim later.
+          const auto& str = value.as_string();
+          if(str.empty())
+            return true;
+
+          if(str.find_of(s_reject) != cow_string::npos)
+            ASTERIA_THROW(("Value contains invalid characters: $1"), str);
+
+          if(str.find_of(s_space) == 0)
+            ASTERIA_THROW(("Value shall not begin with a space: $1"), str);
+
+          if(str.rfind_of(s_space) == str.size() - 1)
+            ASTERIA_THROW(("Value shall not end with a space: $1"), str);
+
           return true;
-
-        if(str.find_of(s_reject) != cow_string::npos)
-          ASTERIA_THROW(("Value contains invalid characters: $1"), str);
-
-        if(str.find_of(s_space) == 0)
-          ASTERIA_THROW(("Value shall not begin with a space: $1"), str);
-
-        if(str.rfind_of(s_space) == str.size() - 1)
-          ASTERIA_THROW(("Value shall not end with a space: $1"), str);
-
-        return true;
-      }
+        }
 
       case type_opaque:
       case type_function:
