@@ -120,19 +120,19 @@ class Value
     V_boolean
     as_boolean() const
       {
-        if(this->m_stor.index() == type_boolean)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.as<V_boolean>();
 
         this->do_throw_type_mismatch("`boolean`");
       }
 
     V_boolean&
-    mut_boolean()
+    mut_boolean() noexcept
       {
-        if(this->m_stor.index() == type_boolean)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.mut<V_boolean>();
 
-        this->do_throw_type_mismatch("`boolean`");
+        return this->m_stor.emplace<V_boolean>();
       }
 
     bool
@@ -142,19 +142,19 @@ class Value
     V_integer
     as_integer() const
       {
-        if(this->m_stor.index() == type_integer)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.as<V_integer>();
 
         this->do_throw_type_mismatch("`integer`");
       }
 
     V_integer&
-    mut_integer()
+    mut_integer() noexcept
       {
-        if(this->m_stor.index() == type_integer)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.mut<V_integer>();
 
-        this->do_throw_type_mismatch("`integer`");
+        return this->m_stor.emplace<V_integer>();
       }
 
     bool
@@ -164,26 +164,25 @@ class Value
     V_real
     as_real() const
       {
-        if(this->m_stor.index() == type_real)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.as<V_real>();
 
-        if(this->m_stor.index() == type_integer)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
           return static_cast<V_real>(this->m_stor.as<V_integer>());
 
         this->do_throw_type_mismatch("`integer` or `real`");
       }
 
     V_real&
-    mut_real()
+    mut_real() noexcept
       {
-        if(this->m_stor.index() == type_real)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.mut<V_real>();
 
-        if(this->m_stor.index() == type_integer)
-          return this->m_stor.emplace<V_real>(
-                   static_cast<V_real>(this->m_stor.mut<V_integer>()));
+        if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
+          return this->m_stor.emplace<V_real>(static_cast<V_real>(this->m_stor.mut<V_integer>()));
 
-        this->do_throw_type_mismatch("`integer` or `real`");
+        return this->m_stor.emplace<V_real>();
       }
 
     bool
@@ -193,19 +192,19 @@ class Value
     const V_string&
     as_string() const
       {
-        if(this->m_stor.index() == type_string)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.as<V_string>();
 
         this->do_throw_type_mismatch("`string`");
       }
 
     V_string&
-    mut_string()
+    mut_string() noexcept
       {
-        if(this->m_stor.index() == type_string)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.mut<V_string>();
 
-        this->do_throw_type_mismatch("`string`");
+        return this->m_stor.emplace<V_string>();
       }
 
     bool
@@ -215,19 +214,19 @@ class Value
     const V_function&
     as_function() const
       {
-        if(this->m_stor.index() == type_function)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.as<V_function>();
 
         this->do_throw_type_mismatch("`function`");
       }
 
     V_function&
-    mut_function()
+    mut_function() noexcept
       {
-        if(this->m_stor.index() == type_function)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.mut<V_function>();
 
-        this->do_throw_type_mismatch("`function`");
+        return this->m_stor.emplace<V_function>();
       }
 
     bool
@@ -237,19 +236,19 @@ class Value
     const V_opaque&
     as_opaque() const
       {
-        if(this->m_stor.index() == type_opaque)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.as<V_opaque>();
 
         this->do_throw_type_mismatch("`opaque`");
       }
 
     V_opaque&
-    mut_opaque()
+    mut_opaque() noexcept
       {
-        if(this->m_stor.index() == type_opaque)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.mut<V_opaque>();
 
-        this->do_throw_type_mismatch("`opaque`");
+        return this->m_stor.emplace<V_opaque>();
       }
 
     bool
@@ -259,19 +258,19 @@ class Value
     const V_array&
     as_array() const
       {
-        if(this->m_stor.index() == type_array)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.as<V_array>();
 
         this->do_throw_type_mismatch("`array`");
       }
 
     V_array&
-    mut_array()
+    mut_array() noexcept
       {
-        if(this->m_stor.index() == type_array)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.mut<V_array>();
 
-        this->do_throw_type_mismatch("`array`");
+        return this->m_stor.emplace<V_array>();
       }
 
     bool
@@ -281,19 +280,19 @@ class Value
     const V_object&
     as_object() const
       {
-        if(this->m_stor.index() == type_object)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.as<V_object>();
 
         this->do_throw_type_mismatch("`object`");
       }
 
     V_object&
-    mut_object()
+    mut_object() noexcept
       {
-        if(this->m_stor.index() == type_object)
+        if(ROCKET_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.mut<V_object>();
 
-        this->do_throw_type_mismatch("`object`");
+        return this->m_stor.emplace<V_object>();
       }
 
     // This is used by garbage collection.
