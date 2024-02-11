@@ -580,18 +580,6 @@ class basic_cow_string
 
     // 24.3.2.6, modifiers
     basic_cow_string&
-    append(shallow_type sh)
-      {
-        return this->append(sh.data(), sh.size());
-      }
-
-    basic_cow_string&
-    append(initializer_list<value_type> init)
-      {
-        return this->append(init.begin(), init.size());
-      }
-
-    basic_cow_string&
     append(const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         return this->append(other.data() + pos, other.do_clamp_substr(pos, n));
@@ -716,18 +704,6 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    operator+=(shallow_type sh) &
-      {
-        return this->append(sh);
-      }
-
-    basic_cow_string&
-    operator+=(initializer_list<value_type> init) &
-      {
-        return this->append(init);
-      }
-
-    basic_cow_string&
     operator+=(const basic_cow_string& other) &
       {
         return this->append(other);
@@ -746,18 +722,6 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    operator<<(shallow_type sh) &
-      {
-        return this->append(sh);
-      }
-
-    basic_cow_string&
-    operator<<(initializer_list<value_type> init) &
-      {
-        return this->append(init);
-      }
-
-    basic_cow_string&
     operator<<(const basic_cow_string& other) &
       {
         return this->append(other);
@@ -773,18 +737,6 @@ class basic_cow_string
     operator<<(value_type c) &
       {
         return this->push_back(c);
-      }
-
-    basic_cow_string&&
-    operator<<(shallow_type sh) &&
-      {
-        return move(this->append(sh));
-      }
-
-    basic_cow_string&&
-    operator<<(initializer_list<value_type> init) &&
-      {
-        return move(this->append(init));
       }
 
     basic_cow_string&&
@@ -815,30 +767,6 @@ class basic_cow_string
     operator>>(size_type n) &&
       {
         return move(this->pop_back(n));
-      }
-
-    basic_cow_string&
-    replace(size_type tpos, size_type tn, shallow_type sh)
-      {
-        return this->replace(tpos, tn, sh.data(), sh.size());
-      }
-
-    basic_cow_string&
-    replace(size_type tpos, shallow_type sh)
-      {
-        return this->replace(tpos, npos, sh);
-      }
-
-    basic_cow_string&
-    replace(size_type tpos, size_type tn, initializer_list<value_type> init)
-      {
-        return this->replace(tpos, tn, init.begin(), init.size());
-      }
-
-    basic_cow_string&
-    replace(size_type tpos, initializer_list<value_type> init)
-      {
-        return this->replace(tpos, npos, init);
       }
 
     basic_cow_string&
@@ -918,18 +846,6 @@ class basic_cow_string
       }
 
     iterator
-    replace(const_iterator tfirst, const_iterator tlast, shallow_type sh)
-      {
-        return this->replace(tfirst, tlast, sh.data(), sh.size());
-      }
-
-    iterator
-    replace(const_iterator tfirst, const_iterator tlast, initializer_list<value_type> init)
-      {
-        return this->replace(tfirst, tlast, init.begin(), init.size());
-      }
-
-    iterator
     replace(const_iterator tfirst, const_iterator tlast, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         return this->replace(tfirst, tlast, other.data() + pos, other.do_clamp_substr(pos, n));
@@ -980,18 +896,6 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    insert(size_type tpos, shallow_type sh)
-      {
-        return this->replace(tpos, size_type(0), sh);
-      }
-
-    basic_cow_string&
-    insert(size_type tpos, initializer_list<value_type> init)
-      {
-        return this->replace(tpos, size_type(0), init);
-      }
-
-    basic_cow_string&
     insert(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         return this->replace(tpos, size_type(0), other, pos, n);
@@ -1021,18 +925,6 @@ class basic_cow_string
     insert(size_type tpos, inputT first, inputT last)
       {
         return this->replace(tpos, size_type(0), move(first), move(last));
-      }
-
-    iterator
-    insert(const_iterator tins, shallow_type sh)
-      {
-        return this->replace(tins, tins, sh);
-      }
-
-    iterator
-    insert(const_iterator tins, initializer_list<value_type> init)
-      {
-        return this->replace(tins, tins, init);
       }
 
     iterator
@@ -1146,20 +1038,6 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    assign(shallow_type sh)
-      {
-        this->replace(this->begin(), this->end(), sh);
-        return *this;
-      }
-
-    basic_cow_string&
-    assign(initializer_list<value_type> init)
-      {
-        this->replace(this->begin(), this->end(), init);
-        return *this;
-      }
-
-    basic_cow_string&
     assign(const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         this->replace(this->begin(), this->end(), other, pos, n);
@@ -1250,34 +1128,7 @@ class basic_cow_string
     get_allocator() noexcept
       { return this->m_sth.as_allocator();  }
 
-    constexpr
-    size_type
-    find(size_type from, shallow_type sh) const noexcept
-      {
-        return this->find(from, sh.data(), sh.size());
-      }
-
-    constexpr
-    size_type
-    find(shallow_type sh) const noexcept
-      {
-        return this->find(size_type(0), sh);
-      }
-
-    constexpr
-    size_type
-    find(size_type from, initializer_list<value_type> init) const noexcept
-      {
-        return this->find(from, init.begin(), init.size());
-      }
-
-    constexpr
-    size_type
-    find(initializer_list<value_type> init) const noexcept
-      {
-        return this->find(size_type(0), init);
-      }
-
+    // searching functions
     constexpr
     size_type
     find(size_type from, const basic_cow_string& other) const noexcept
@@ -1372,34 +1223,6 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind(size_type to, shallow_type sh) const noexcept
-      {
-        return this->rfind(to, sh.data(), sh.size());
-      }
-
-    constexpr
-    size_type
-    rfind(shallow_type sh) const noexcept
-      {
-        return this->rfind(npos, sh);
-      }
-
-    constexpr
-    size_type
-    rfind(size_type to, initializer_list<value_type> init) const noexcept
-      {
-        return this->rfind(to, init.begin(), init.size());
-      }
-
-    constexpr
-    size_type
-    rfind(initializer_list<value_type> init) const noexcept
-      {
-        return this->rfind(npos, init);
-      }
-
-    constexpr
-    size_type
     rfind(size_type to, const basic_cow_string& other) const noexcept
       {
         return this->rfind(to, other.data(), other.size());
@@ -1486,34 +1309,6 @@ class basic_cow_string
     rfind(value_type c) const noexcept
       {
         return this->rfind(npos, c);
-      }
-
-    constexpr
-    size_type
-    find_of(size_type from, shallow_type sh) const noexcept
-      {
-        return this->find_of(from, sh.data(), sh.size());
-      }
-
-    constexpr
-    size_type
-    find_of(shallow_type sh) const noexcept
-      {
-        return this->find_of(size_type(0), sh);
-      }
-
-    constexpr
-    size_type
-    find_of(size_type from, initializer_list<value_type> init) const noexcept
-      {
-        return this->find_of(from, init.begin(), init.size());
-      }
-
-    constexpr
-    size_type
-    find_of(initializer_list<value_type> init) const noexcept
-      {
-        return this->find_of(size_type(0), init);
       }
 
     constexpr
@@ -1623,34 +1418,6 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind_of(size_type to, shallow_type sh) const noexcept
-      {
-        return this->rfind_of(to, sh.data(), sh.size());
-      }
-
-    constexpr
-    size_type
-    rfind_of(shallow_type sh) const noexcept
-      {
-        return this->rfind_of(npos, sh);
-      }
-
-    constexpr
-    size_type
-    rfind_of(size_type to, initializer_list<value_type> init) const noexcept
-      {
-        return this->rfind_of(to, init.begin(), init.size());
-      }
-
-    constexpr
-    size_type
-    rfind_of(initializer_list<value_type> init) const noexcept
-      {
-        return this->rfind_of(npos, init);
-      }
-
-    constexpr
-    size_type
     rfind_of(size_type to, const basic_cow_string& other) const noexcept
       {
         return this->rfind_of(to, other.data(), other.size());
@@ -1750,34 +1517,6 @@ class basic_cow_string
     rfind_of(value_type c) const noexcept
       {
         return this->rfind_of(npos, c);
-      }
-
-    constexpr
-    size_type
-    find_not_of(size_type from, shallow_type sh) const noexcept
-      {
-        return this->find_not_of(from, sh.data(), sh.size());
-      }
-
-    constexpr
-    size_type
-    find_not_of(shallow_type sh) const noexcept
-      {
-        return this->find_not_of(size_type(0), sh);
-      }
-
-    constexpr
-    size_type
-    find_not_of(size_type from, initializer_list<value_type> init) const noexcept
-      {
-        return this->find_not_of(from, init.begin(), init.size());
-      }
-
-    constexpr
-    size_type
-    find_not_of(initializer_list<value_type> init) const noexcept
-      {
-        return this->find_not_of(size_type(0), init);
       }
 
     constexpr
@@ -1885,34 +1624,6 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind_not_of(size_type to, shallow_type sh) const noexcept
-      {
-        return this->rfind_not_of(to, sh.data(), sh.size());
-      }
-
-    constexpr
-    size_type
-    rfind_not_of(shallow_type sh) const noexcept
-      {
-        return this->rfind_not_of(npos, sh);
-      }
-
-    constexpr
-    size_type
-    rfind_not_of(size_type to, initializer_list<value_type> init) const noexcept
-      {
-        return this->rfind_not_of(to, init.begin(), init.size());
-      }
-
-    constexpr
-    size_type
-    rfind_not_of(initializer_list<value_type> init) const noexcept
-      {
-        return this->rfind_not_of(npos, init);
-      }
-
-    constexpr
-    size_type
     rfind_not_of(size_type to, const basic_cow_string& other) const noexcept
       {
         return this->rfind_not_of(to, other.data(), other.size());
@@ -2016,20 +1727,6 @@ class basic_cow_string
 
     constexpr
     bool
-    equals(shallow_type sh) const noexcept
-      {
-        return this->equals(sh.data(), sh.size());
-      }
-
-    constexpr
-    bool
-    equals(initializer_list<value_type> init) const noexcept
-      {
-        return this->equals(init.begin(), init.size());
-      }
-
-    constexpr
-    bool
     equals(const basic_cow_string& other) const noexcept
       {
         return this->equals(other.data(), other.size());
@@ -2054,34 +1751,6 @@ class basic_cow_string
     equals(const value_type* s, size_type n) const noexcept
       {
         return (this->size() == n) && noadl::xmemeq(this->data(), s, n);
-      }
-
-    constexpr
-    bool
-    substr_equals(size_type tpos, size_type tn, shallow_type sh) const
-      {
-        return this->substr_equals(tpos, tn, sh.data(), sh.size());
-      }
-
-    constexpr
-    bool
-    substr_equals(size_type tpos, shallow_type sh) const
-      {
-        return this->substr_equals(tpos, npos, sh);
-      }
-
-    constexpr
-    bool
-    substr_equals(size_type tpos, size_type tn, initializer_list<value_type> init) const
-      {
-        return this->substr_equals(tpos, tn, init.begin(), init.size());
-      }
-
-    constexpr
-    bool
-    substr_equals(size_type tpos, initializer_list<value_type> init) const
-      {
-        return this->substr_equals(tpos, npos, init);
       }
 
     constexpr
@@ -2128,20 +1797,6 @@ class basic_cow_string
 
     constexpr
     int
-    compare(shallow_type sh) const noexcept
-      {
-        return this->compare(sh.data(), sh.size());
-      }
-
-    constexpr
-    int
-    compare(initializer_list<value_type> init) const noexcept
-      {
-        return this->compare(init.begin(), init.size());
-      }
-
-    constexpr
-    int
     compare(const basic_cow_string& other) const noexcept
       {
         return this->compare(other.data(), other.size());
@@ -2166,34 +1821,6 @@ class basic_cow_string
     compare(const value_type* s, size_type n) const noexcept
       {
         return noadl::xmemcmp(this->data(), this->size(), s, n);
-      }
-
-    constexpr
-    int
-    substr_compare(size_type tpos, size_type tn, shallow_type sh) const
-      {
-        return this->substr_compare(tpos, tn, sh.data(), sh.size());
-      }
-
-    constexpr
-    int
-    substr_compare(size_type tpos, shallow_type sh) const
-      {
-        return this->substr_compare(tpos, npos, sh);
-      }
-
-    constexpr
-    int
-    substr_compare(size_type tpos, size_type tn, initializer_list<value_type> init) const
-      {
-        return this->substr_compare(tpos, tn, init.begin(), init.size());
-      }
-
-    constexpr
-    int
-    substr_compare(size_type tpos, initializer_list<value_type> init) const
-      {
-        return this->substr_compare(tpos, npos, init);
       }
 
     constexpr
@@ -2241,20 +1868,6 @@ class basic_cow_string
     // N.B. These are extensions but might be standardized in C++20.
     constexpr
     bool
-    starts_with(shallow_type sh) const noexcept
-      {
-        return this->starts_with(sh.data(), sh.size());
-      }
-
-    constexpr
-    bool
-    starts_with(initializer_list<value_type> init) const noexcept
-      {
-        return this->starts_with(init.begin(), init.size());
-      }
-
-    constexpr
-    bool
     starts_with(const basic_cow_string& other) const noexcept
       {
         return this->starts_with(other.data(), other.size());
@@ -2279,20 +1892,6 @@ class basic_cow_string
     starts_with(const value_type* s, size_type n) const noexcept
       {
         return (this->size() >= n) && noadl::xmemeq(this->data(), s, n);
-      }
-
-    constexpr
-    bool
-    ends_with(shallow_type sh) const noexcept
-      {
-        return this->ends_with(sh.data(), sh.size());
-      }
-
-    constexpr
-    bool
-    ends_with(initializer_list<value_type> init) const noexcept
-      {
-        return this->ends_with(init.begin(), init.size());
       }
 
     constexpr
@@ -2362,11 +1961,6 @@ struct basic_cow_string<charT, allocT>::hash
     uint32_t
     operator()(const shallow_type& sh) const noexcept
       { return this->do_hash_bytes(sh.m_ptr, sh.m_len);  }
-
-    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    uint32_t
-    operator()(const value_type* s) const noexcept
-      { return this->do_hash_bytes(s, details_xstring::maybe_constexpr::ystrlen(s));  }
   };
 
 template<typename charT, typename allocT>
