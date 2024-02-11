@@ -399,7 +399,7 @@ handle_repl_command(cow_string&& cmdline)
       }
       else {
         // Blank characters outside quotes terminate arguments.
-        size_t next = cmdline.find_not_of(pos, &" \f\n\r\t\v");
+        size_t next = cmdline.find_not_of(pos, " \f\n\r\t\v");
         if((next != pos) && has_token) {
           args.emplace_back(move(cmd));
           cmd.clear();

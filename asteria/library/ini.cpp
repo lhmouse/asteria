@@ -91,7 +91,7 @@ do_ini_parse(tinybuf& buf)
         line.erase(0, 3);
 
       // Convert CR LF pairs to LF characters.
-      if(line.ends_with(&"\r"))
+      if(line.ends_with("\r"))
         line.pop_back();
 
       // Remove comments.

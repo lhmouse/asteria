@@ -28,7 +28,7 @@ do_csv_parse(tinybuf& buf)
         line.erase(0, 3);
 
       // Convert CR LF pairs to LF characters.
-      if(line.ends_with(&"\r"))
+      if(line.ends_with("\r"))
         line.pop_back();
 
       // Start a new line if this is not in quotation.
@@ -127,7 +127,7 @@ std_csv_format(V_array value)
         if(cellp->is_string()) {
           // Check whether we need to escape special characters.
           const auto& str = cellp->as_string();
-          if(str.find_of(&",\n\"") != cow_string::npos) {
+          if(str.find_of(",\n\"") != cow_string::npos) {
             fmt << "\"";
 
             for(char c : str)

@@ -54,9 +54,16 @@ class basic_shallow_string
 
   public:
     ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    explicit constexpr basic_shallow_string(const charT* ptr) noexcept
+    constexpr basic_shallow_string(const charT* ptr) noexcept
       :
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
+      { }
+
+    template<size_t N>
+    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
+    constexpr basic_shallow_string(const charT (*ps)[N]) noexcept
+      :
+        m_ptr(*ps), m_len((ROCKET_ASSERT(*(*ps + N - 1) == charT()), N - 1))
       { }
 
   public:
@@ -157,10 +164,9 @@ class basic_cow_string
       { }
 
     template<size_t N>
-    constexpr basic_cow_string(const value_type (*ps)[N],
-                               const allocator_type& alloc = allocator_type()) noexcept
+    constexpr basic_cow_string(const value_type (*ps)[N], const allocator_type& alloc = allocator_type()) noexcept
       :
-        m_ref(*ps), m_sth(alloc)
+        m_ref(ps), m_sth(alloc)
       { }
 
     basic_cow_string(const basic_cow_string& other) noexcept
@@ -230,7 +236,7 @@ class basic_cow_string
     basic_cow_string&
     operator=(const value_type (*ps)[N]) & noexcept
       {
-        this->m_ref = shallow_type(*ps);
+        this->m_ref = shallow_type(ps);
         return *this;
       }
 
