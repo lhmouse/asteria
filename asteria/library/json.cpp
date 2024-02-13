@@ -170,8 +170,10 @@ do_quote_string(tinyfmt& fmt, cow_stringR str)
     while(offset < str.size()) {
       // Convert UTF-8 to UTF-16.
       char32_t cp;
-      if(!utf8_decode(cp, str, offset))
+      if(!utf8_decode(cp, str, offset)) {
         cp = 0xFFFD;
+        offset ++;
+      }
 
       // Escape double quotes, backslashes, and control characters.
       switch(cp)
