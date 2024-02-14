@@ -324,12 +324,8 @@ if cxx_has_uchar
   add_project_arguments('-DHAVE_UCHAR_H', language: [ 'c', 'cpp' ])
 endif
 
-if get_option('enable-sanitizer') == 'address'
-  add_project_arguments('-fsanitize=address,undefined', language: [ 'c', 'cpp' ])
-endif
-
-if get_option('enable-sanitizer') == 'thread'
-  add_project_arguments('-fsanitize=thread', language: [ 'c', 'cpp' ])
+if get_option('b_sanitize').contains('address')
+  add_project_arguments('-DPOSEIDON_ENABLE_ADDRESS_SANITIZER', language: [ 'c', 'cpp' ])
 endif
 
 add_project_arguments(
