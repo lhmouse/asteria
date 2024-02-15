@@ -5,11 +5,13 @@
 namespace rocket {
 
 template class basic_shallow_string<char>;
+template class basic_shallow_string<unsigned char>;
 template class basic_shallow_string<wchar_t>;
 template class basic_shallow_string<char16_t>;
 template class basic_shallow_string<char32_t>;
 
 template class basic_cow_string<char>;
+template class basic_cow_string<unsigned char>;
 template class basic_cow_string<wchar_t>;
 template class basic_cow_string<char16_t>;
 template class basic_cow_string<char32_t>;
