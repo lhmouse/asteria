@@ -1402,8 +1402,10 @@ std_string_url_encode(V_string data)
         continue;
 
       // Escape it.
-      pseq[1] = s_base16_table[(c >> 3) & 0x1E];
-      pseq[2] = s_base16_table[(c << 1) & 0x1E];
+      uint32_t hi = static_cast<uint32_t>((c & 0xF0) >> 3);
+      uint32_t lo = static_cast<uint32_t>((c & 0x0F) << 1);
+      pseq[1] = s_base16_table[hi];
+      pseq[2] = s_base16_table[lo];
       text.replace(nread - 1, 1, pseq, 3);
       nread += 2;
     }
@@ -1478,8 +1480,10 @@ std_string_url_query_encode(V_string data)
       }
 
       // Escape it.
-      pseq[1] = s_base16_table[(c >> 3) & 0x1E];
-      pseq[2] = s_base16_table[(c << 1) & 0x1E];
+      uint32_t hi = static_cast<uint32_t>((c & 0xF0) >> 3);
+      uint32_t lo = static_cast<uint32_t>((c & 0x0F) << 1);
+      pseq[1] = s_base16_table[hi];
+      pseq[2] = s_base16_table[lo];
       text.replace(nread - 1, 1, pseq, 3);
       nread += 2;
     }

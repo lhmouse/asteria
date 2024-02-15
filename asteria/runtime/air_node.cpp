@@ -705,7 +705,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
                        "Arithmetic left shift overflow (operands were `$1` and `$2`)",
                        lhs, irhs);
 
-            val <<= count;
+            reinterpret_cast<uint64_t&>(val) <<= count;
             return air_status_next;
           }
 

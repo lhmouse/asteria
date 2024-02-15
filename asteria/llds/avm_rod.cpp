@@ -75,7 +75,8 @@ clear() noexcept
     }
 
 #ifdef ROCKET_DEBUG
-    ::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
+    if(this->m_bptr)
+      ::memset(this->m_bptr, 0xE6, this->m_estor * sizeof(Header));
 #endif
     this->m_einit = 0;
   }
