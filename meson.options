@@ -12,6 +12,10 @@
 ## NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 ## CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+option('enable-avx',
+       type: 'boolean', value: true,
+       description: 'enable AVX instruction set on x86 and x86-64')
+
 option('enable-debug-checks',
        type: 'boolean', value: false,
        description: 'enable run-time assertions')
@@ -19,7 +23,3 @@ option('enable-debug-checks',
 option('enable-repl',
        type: 'boolean', value: true,
        description: 'enable interactive interpretor')
-
-option('enable-avx',
-       type: 'boolean', value: true,
-       description: 'enable AVX instruction set on x86 and x86-64')
