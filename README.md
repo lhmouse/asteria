@@ -45,14 +45,14 @@ export CXX='g++-10'
 Then we can build as usual
 
 ```sh
-meson setup build_dir
-meson compile -Cbuild_dir
+meson setup build_debug
+meson compile -Cbuild_debug
 ```
 
 Finally we launch the REPL, as
 
 ```sh
-./build_dir/asteria
+./build_debug/asteria
 ```
 
 ![README](README.png)
