@@ -25,14 +25,16 @@ which can be done with
 # For Debian, Ubuntu, Linux Mint:
 # There is usually an outdated version of meson in the system APT source. Do
 # not use it; instead, install the latest one from pip.
-sudo apt-get install ninja-build python3 python3-pip pkgconf g++ libpcre2-dev libssl-dev zlib1g-dev libedit-dev
+sudo apt-get install ninja-build python3 python3-pip pkgconf g++  \
+        libpcre2-dev libssl-dev zlib1g-dev libedit-dev
 sudo pip3 install meson
 ```
 ```sh
 # For MSYS2 on Windows:
 # The `iconv_open()` etc. functions are provided by libiconv~g. Only the MSYS
 # shell is supported. Do not try building in the MINGW64 or UCRT64 shell.
-pacman -S meson gcc pkgconf pcre2-devel openssl-devel zlib-devel libiconv-devel libedit-devel
+pacman -S meson gcc pkgconf pcre2-devel openssl-devel zlib-devel  \
+        libiconv-devel libedit-devel
 ```
 ```sh
 # For macOS:
