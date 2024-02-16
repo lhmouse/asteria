@@ -12,7 +12,7 @@ class Recursion_Sentry
   public:
     enum : uint32_t
       {
-        stack_mask_bits = 19,  // 512KiB
+        stack_mask_bits = 20,  // 1 MiB
       };
 
   private:
