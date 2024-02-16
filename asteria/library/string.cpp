@@ -1389,7 +1389,6 @@ std_string_url_encode(V_string data)
   {
     // Only modify the string as needed, without causing copies on write.
     V_string text = data;
-    char pseq[4] = { "%" };
     size_t nread = 0;
     while(nread != text.size()) {
       char c = text[nread++];
@@ -1404,8 +1403,7 @@ std_string_url_encode(V_string data)
       // Escape it.
       uint32_t hi = static_cast<uint32_t>((c & 0xF0) >> 3);
       uint32_t lo = static_cast<uint32_t>((c & 0x0F) << 1);
-      pseq[1] = s_base16_table[hi];
-      pseq[2] = s_base16_table[lo];
+      char pseq[3] = { '%', s_base16_table[hi], s_base16_table[lo] };
       text.replace(nread - 1, 1, pseq, 3);
       nread += 2;
     }
@@ -1461,7 +1459,6 @@ std_string_url_query_encode(V_string data)
   {
     // Only modify the string as needed, without causing copies on write.
     V_string text = data;
-    char pseq[4] = { "%" };
     size_t nread = 0;
     while(nread != text.size()) {
       char c = text[nread++];
@@ -1482,8 +1479,7 @@ std_string_url_query_encode(V_string data)
       // Escape it.
       uint32_t hi = static_cast<uint32_t>((c & 0xF0) >> 3);
       uint32_t lo = static_cast<uint32_t>((c & 0x0F) << 1);
-      pseq[1] = s_base16_table[hi];
-      pseq[2] = s_base16_table[lo];
+      char pseq[3] = { '%', s_base16_table[hi], s_base16_table[lo] };
       text.replace(nread - 1, 1, pseq, 3);
       nread += 2;
     }
