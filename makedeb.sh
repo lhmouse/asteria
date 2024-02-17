@@ -9,12 +9,10 @@ rm -rf ${_tempdir}
 mkdir -p ${_tempdir}
 cp -pr DEBIAN -t ${_tempdir}
 
-export CFLAGS='-O2 -g'
-export CXXFLAGS='-O2 -g'
-
-meson setup -Dbuildtype=plain build_makedeb
-meson compile -Cbuild_makedeb
-DESTDIR=${_tempdir} meson install --strip -Cbuild_makedeb
+meson setup -Dbuildtype=release build_release
+meson compile -Cbuild_release
+meson test -Cbuild_release
+DESTDIR=${_tempdir} meson install --strip -Cbuild_release
 
 sed -i "s/{_pkgname}/${_pkgname}/" ${_tempdir}/DEBIAN/control
 sed -i "s/{_pkgversion}/${_pkgversion}/" ${_tempdir}/DEBIAN/control
