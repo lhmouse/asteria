@@ -194,7 +194,7 @@ class basic_cow_string
     basic_cow_string(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       :
         basic_cow_string(alloc)
-      { this->append(init);  }
+      { this->append(init.begin(), init.size());  }
 
     basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
                      const allocator_type& alloc = allocator_type())
