@@ -384,7 +384,7 @@ lib_asteria = both_libraries('asteria',
       sources: asteria_src,
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
       soversion: ver.get('abi_major'),
-      version: '@0@.@1@.@2@'.format(ver.get('abi_major'), ver.get('abi_minor'), 0),
+      version: '.'.join([ ver.get('abi_major'), ver.get('abi_minor'), '0' ]),
       install: true)
 
 import('pkgconfig').generate(lib_asteria,
