@@ -339,6 +339,7 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
+// Native function support
 struct Abstract_Function : rcfwd<Abstract_Function>
   {
     // This function is called to convert this object to a human-readable string.
