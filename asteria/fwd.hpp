@@ -280,12 +280,6 @@ vtable_key_function_GklPAslB() noexcept
   {
   }
 
-template<typename xReal>
-using rcfwd_ptr = refcnt_ptr<
-         typename ::rocket::copy_cv<
-            rcfwd<typename ::std::remove_cv<xReal>::type>,
-            xReal>::type>;
-
 template<typename xTarget, typename xReal>
 constexpr
 xTarget
@@ -301,14 +295,18 @@ unerase_cast(rcfwd<xReal>* ptr) noexcept  // like `static_cast`
 template<typename xTarget, typename xReal>
 ROCKET_ALWAYS_INLINE
 refcnt_ptr<xTarget>
-unerase_pointer_cast(const refcnt_ptr<rcfwd<xReal>>& ptr) noexcept  // like `static_pointer_cast`
+unerase_pointer_cast(const refcnt_ptr<const rcfwd<xReal>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<xTarget>(ptr);  }
 
 template<typename xTarget, typename xReal>
 ROCKET_ALWAYS_INLINE
 refcnt_ptr<xTarget>
-unerase_pointer_cast(const refcnt_ptr<const rcfwd<xReal>>& ptr) noexcept  // like `static_pointer_cast`
+unerase_pointer_cast(const refcnt_ptr<rcfwd<xReal>>& ptr) noexcept  // like `static_pointer_cast`
   { return static_pointer_cast<xTarget>(ptr);  }
+
+template<typename xReal>
+using rcfwd_ptr = refcnt_ptr<typename ::rocket::copy_cv<
+    rcfwd<typename ::std::remove_cv<xReal>::type>, xReal>::type>;
 
 // Opaque (user-defined) type support
 struct Abstract_Opaque : rcfwd<Abstract_Opaque>
