@@ -207,7 +207,7 @@ struct basic_storage
     constexpr
     size_t
     hash(const ykeyT& ykey) const noexcept
-      { return static_cast<const hasher&>(*this)(ykey);  }
+      { return static_cast<const hasher&>(*this) (ykey);  }
 
     // This function does not check for duplicate keys.
     bucket_type*
@@ -409,7 +409,7 @@ class storage_handle
         auto qstor = noadl::exchange(this->m_qstor, qstor_new);
         auto qhead = reinterpret_cast<storage_header*>(noadl::unfancy(qstor));
         if((qhead != nullptr) && (qhead->nref.decrement() == 0))
-          reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor)(qstor);
+          reinterpret_cast<void (*)(storage_pointer)>(qhead->dtor) (qstor);
       }
 
     ROCKET_NEVER_INLINE static
