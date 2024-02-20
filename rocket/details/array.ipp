@@ -8,16 +8,14 @@ namespace details_array {
 
 template<typename valueT, size_t capT, size_t... nestedT>
 struct element_type_of
-  :
-    identity<array<valueT, nestedT...>>
   {
+    using type = array<valueT, nestedT...>;
   };
 
 template<typename valueT, size_t capT>
 struct element_type_of<valueT, capT>
-  :
-    identity<valueT>
   {
+    using type = valueT;
   };
 
 }  // namespace details_array

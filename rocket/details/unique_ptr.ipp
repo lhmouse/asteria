@@ -8,17 +8,11 @@ namespace details_unique_ptr {
 
 template<typename elementT, typename deleterT, typename = void>
 struct pointer_of
-  :
-    identity<elementT*>
-  {
-  };
+  { using type = elementT*;  };
 
 template<typename elementT, typename deleterT>
 struct pointer_of<elementT, deleterT, ROCKET_VOID_T(typename deleterT::pointer)>
-  :
-    identity<typename deleterT::pointer>
-  {
-  };
+  { using type = typename deleterT::pointer;  };
 
 template<typename deleterT>
 struct deleter_reference

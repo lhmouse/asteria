@@ -49,6 +49,7 @@ using ::std::false_type;
 using ::std::integral_constant;
 using ::std::enable_if;
 using ::std::conditional;
+using ::std::common_type;
 using ::std::decay;
 using ::std::is_constructible;
 using ::std::is_assignable;
@@ -160,6 +161,7 @@ using ::std::memory_order_seq_cst;
 #define ROCKET_MUL_SUB_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_SUB_OVERFLOW(*(r),z,r))
 #define ROCKET_SUB_MUL_OVERFLOW(x,y,z,r)   (ROCKET_SUB_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
 
+#define ROCKET_UNDEDUCED(...)    typename ::std::enable_if<true, __VA_ARGS__>::type
 #define ROCKET_VOID_T(...)       typename ::std::conditional<1, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)    typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)   typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
@@ -181,10 +183,6 @@ template<typename typeT>
 struct is_nothrow_swappable
   : integral_constant<bool, noexcept(swap(declval<typeT&>(), declval<typeT&>()))>  { };
 
-template<typename typeT>
-struct identity
-  : enable_if<true, typeT> { };
-
 template<typename... typesT>
 struct conjunction
   : true_type  { };
@@ -203,19 +201,19 @@ struct disjunction<firstT, restT...>
 
 template<typename targetT, typename sourceT>
 struct copy_cv
-  : identity<targetT>  { };
+  { using type = targetT;  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv<targetT, const sourceT>
-  : add_const<targetT>  { };
+  { using type = const targetT;  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv<targetT, volatile sourceT>
-  : add_volatile<targetT>  { };
+  { using type = volatile targetT;  };
 
 template<typename targetT, typename sourceT>
 struct copy_cv<targetT, const volatile sourceT>
-  : add_cv<targetT>  { };
+  { using type = const volatile targetT;  };
 
 template<typename containerT>
 constexpr
@@ -275,7 +273,7 @@ struct select_type
 
 template<typename firstT, typename secondT>
 struct select_type<firstT, secondT>
-  : identity<decltype(true ? declval<firstT()>()() : declval<secondT()>()())>  { };
+  : common_type<firstT, secondT>  { };
 
 template<typename lhsT, typename rhsT>
 constexpr

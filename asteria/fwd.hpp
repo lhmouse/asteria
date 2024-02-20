@@ -117,57 +117,8 @@ using ::rocket::atomic_release;
 using ::rocket::atomic_acq_rel;
 using ::rocket::atomic_seq_cst;
 
-struct string_hash
-  {
-    constexpr
-    size_t
-    operator()(phsh_stringR rhs) const noexcept
-      { return rhs.rdhash();  }
-
-    constexpr
-    size_t
-    operator()(cow_string::shallow_type rhs) const noexcept
-      { return phsh_string::hasher()(rhs);  }
-
-    template<size_t N>
-    constexpr
-    size_t
-    operator()(const char (*rhs)[N]) const noexcept
-      { return phsh_string::hasher()(*rhs);  }
-  };
-
-struct string_eq
-  {
-    constexpr
-    bool
-    operator()(phsh_stringR lhs, phsh_stringR rhs) const noexcept
-      { return lhs == rhs;  }
-
-    constexpr
-    bool
-    operator()(phsh_stringR lhs, cow_string::shallow_type rhs) const noexcept
-      { return lhs.rdstr() == rhs;  }
-
-    constexpr
-    bool
-    operator()(cow_string::shallow_type lhs, phsh_stringR rhs) const noexcept
-      { return lhs == rhs.rdstr();  }
-
-    template<size_t N>
-    constexpr
-    bool
-    operator()(phsh_stringR lhs, const char (*rhs)[N]) const noexcept
-      { return lhs.rdstr() == *rhs;  }
-
-    template<size_t N>
-    constexpr
-    bool
-    operator()(const char (*lhs)[N], phsh_stringR rhs) const noexcept
-      { return *lhs == rhs.rdstr();  }
-  };
-
 template<typename E>
-using cow_dictionary = cow_hashmap<phsh_string, E, string_hash, string_eq>;
+using cow_dictionary = cow_hashmap<phsh_string, E, phsh_string::hash>;
 
 template<typename T, typename U>
 using cow_bivector = cow_vector<pair<T, U>>;

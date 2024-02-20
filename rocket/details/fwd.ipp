@@ -52,7 +52,7 @@ struct integer_selector<integerT, valueT, firstT, remainingT...>
   :
     conditional<firstT(valueT) != valueT,
                 integer_selector<integerT, valueT, remainingT...>,
-                identity<firstT>>::type
+                enable_if<true, firstT>>::type
   {
   };
 

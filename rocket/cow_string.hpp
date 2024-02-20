@@ -101,7 +101,7 @@ class basic_shallow_string
 template<typename charT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const basic_shallow_string<charT>& sh)
+operator<<(basic_tinyfmt<charT>& fmt, basic_shallow_string<ROCKET_UNDEDUCED(charT)> sh)
   { return fmt.putn(sh.data(), sh.size());  }
 
 template<typename charT>
@@ -1942,7 +1942,7 @@ struct basic_cow_string<charT, allocT>::hash
 
     constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     uint32_t
-    do_hash_bytes(const charT* p, size_t n) const noexcept
+    operator()(const charT* p, size_t n) const noexcept
       {
         // https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function#FNV-1a_hash
         const uint8_t* cur = reinterpret_cast<const uint8_t*>(p);
@@ -1955,12 +1955,7 @@ struct basic_cow_string<charT, allocT>::hash
     constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     uint32_t
     operator()(const basic_cow_string& str) const noexcept
-      { return this->do_hash_bytes(str.m_ref.m_ptr, str.m_ref.m_len);  }
-
-    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    uint32_t
-    operator()(const shallow_type& sh) const noexcept
-      { return this->do_hash_bytes(sh.m_ptr, sh.m_len);  }
+      { return (*this) (str.m_ref.m_ptr, str.m_ref.m_len);  }
   };
 
 template<typename charT, typename allocT>
@@ -1973,7 +1968,7 @@ swap(basic_cow_string<charT, allocT>& lhs, basic_cow_string<charT, allocT>& rhs)
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
-operator+(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs)
+operator+(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
   {
     auto str = lhs;
     str.append(rhs);
@@ -2013,7 +2008,7 @@ operator+(const basic_cow_string<charT, allocT>& lhs, charT rhs)
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
-operator+(basic_cow_string<charT, allocT>&& lhs, basic_shallow_string<charT> rhs)
+operator+(basic_cow_string<charT, allocT>&& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
   {
     lhs.append(rhs);
     return move(lhs);
@@ -2058,7 +2053,7 @@ operator+(basic_cow_string<charT, allocT>&& lhs, charT rhs)
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
-operator+(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs)
+operator+(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
   {
     auto str = rhs;
     str.insert(str.begin(), lhs);
@@ -2088,7 +2083,7 @@ operator+(charT lhs, const basic_cow_string<charT, allocT>& rhs)
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
-operator+(basic_shallow_string<charT> lhs, basic_cow_string<charT, allocT>&& rhs)
+operator+(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, basic_cow_string<charT, allocT>&& rhs)
   {
     rhs.insert(rhs.begin(), lhs);
     return rhs;
@@ -2130,7 +2125,7 @@ operator==(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<ch
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
+operator==(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
   { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
@@ -2142,7 +2137,7 @@ operator==(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcep
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator==(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
@@ -2160,7 +2155,7 @@ operator!=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<ch
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
+operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
   { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
@@ -2172,7 +2167,7 @@ operator!=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcep
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator!=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
@@ -2190,7 +2185,7 @@ operator<(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<cha
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
+operator<(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
   { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
@@ -2202,7 +2197,7 @@ operator<(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
@@ -2220,7 +2215,7 @@ operator<=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<ch
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
+operator<=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
   { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
@@ -2232,7 +2227,7 @@ operator<=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcep
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
@@ -2250,7 +2245,7 @@ operator>(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<cha
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
+operator>(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
   { return lhs.compare(rhs) > 0;  }
 
 template<typename charT, typename allocT>
@@ -2262,7 +2257,7 @@ operator>(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
@@ -2280,7 +2275,7 @@ operator>=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<ch
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT> rhs) noexcept
+operator>=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
   { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
@@ -2292,7 +2287,7 @@ operator>=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcep
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>

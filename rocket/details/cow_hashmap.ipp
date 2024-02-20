@@ -27,24 +27,15 @@ struct ebo_placeholder
 
 template<typename baseT, size_t indexT, typename... othersT>
 struct ebo_select_aux
-  :
-    allocator_wrapper_base_for<baseT>  // no duplicate
-  {
-  };
+  : allocator_wrapper_base_for<baseT>  { };  // no duplicate
 
 template<typename baseT, size_t indexT, typename... othersT>
 struct ebo_select_aux<baseT, indexT, baseT, othersT...>
-  :
-    identity<ebo_placeholder<indexT>>  // duplicate
-  {
-  };
+  : enable_if<true, ebo_placeholder<indexT>>  { };   // duplicate
 
 template<typename baseT, size_t indexT, typename firstT, typename... restT>
 struct ebo_select_aux<baseT, indexT, firstT, restT...>
-  :
-    ebo_select_aux<baseT, indexT, restT...>  // recursive
-  {
-  };
+  : ebo_select_aux<baseT, indexT, restT...>  { };  // recursive
 
 template<typename baseT, typename... othersT>
 using ebo_select  = typename ebo_select_aux<baseT, sizeof...(othersT), othersT...>::type;
