@@ -13,7 +13,6 @@
 #include <atomic>  // std::atomic<>
 #include <initializer_list>  // std::initializer_list<>
 #include <limits>  // std::numeric_limits<>
-#include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
@@ -114,8 +113,6 @@ using ::std::is_function;
 using ::std::allocator;
 using ::std::allocator_traits;
 using ::std::default_delete;
-using ::std::hash;
-using ::std::equal_to;
 using ::std::pair;
 using ::std::tuple;
 using ::std::iterator_traits;
@@ -411,6 +408,66 @@ reconstruct(elementT* ptr, paramsT&&... params) noexcept
 #endif
     return ::new((void*)ptr) elementT(forward<paramsT>(params)...);
   }
+
+struct equal
+  {
+    template<typename lhsT, typename rhsT>
+    constexpr
+    bool
+    operator()(lhsT&& lhs, rhsT&& rhs) const
+      noexcept(noexcept(::std::declval<lhsT>() == ::std::declval<rhsT>()))
+      { return forward<lhsT>(lhs) == forward<rhsT>(rhs);  }
+  };
+
+struct unequal
+  {
+    template<typename lhsT, typename rhsT>
+    constexpr
+    bool
+    operator()(lhsT&& lhs, rhsT&& rhs) const
+      noexcept(noexcept(::std::declval<lhsT>() != ::std::declval<rhsT>()))
+      { return forward<lhsT>(lhs) != forward<rhsT>(rhs);  }
+  };
+
+struct less
+  {
+    template<typename lhsT, typename rhsT>
+    constexpr
+    bool
+    operator()(lhsT&& lhs, rhsT&& rhs) const
+      noexcept(noexcept(::std::declval<lhsT>() < ::std::declval<rhsT>()))
+      { return forward<lhsT>(lhs) < forward<rhsT>(rhs);  }
+  };
+
+struct greater
+  {
+    template<typename lhsT, typename rhsT>
+    constexpr
+    bool
+    operator()(lhsT&& lhs, rhsT&& rhs) const
+      noexcept(noexcept(::std::declval<lhsT>() > ::std::declval<rhsT>()))
+      { return forward<lhsT>(lhs) > forward<rhsT>(rhs);  }
+  };
+
+struct less_equal
+  {
+    template<typename lhsT, typename rhsT>
+    constexpr
+    bool
+    operator()(lhsT&& lhs, rhsT&& rhs) const
+      noexcept(noexcept(::std::declval<lhsT>() <= ::std::declval<rhsT>()))
+      { return forward<lhsT>(lhs) <= forward<rhsT>(rhs);  }
+  };
+
+struct greater_equal
+  {
+    template<typename lhsT, typename rhsT>
+    constexpr
+    bool
+    operator()(lhsT&& lhs, rhsT&& rhs) const
+      noexcept(noexcept(::std::declval<lhsT>() >= ::std::declval<rhsT>()))
+      { return forward<lhsT>(lhs) >= forward<rhsT>(rhs);  }
+  };
 
 template<typename elementT>
 void

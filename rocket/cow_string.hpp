@@ -1983,16 +1983,6 @@ operator+(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
-operator+(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs)
-  {
-    auto str = lhs;
-    str.append(rhs);
-    return str;
-  }
-
-template<typename charT, typename allocT>
-inline
-basic_cow_string<charT, allocT>
 operator+(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
   {
     auto str = lhs;
@@ -2024,15 +2014,6 @@ template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
 operator+(basic_cow_string<charT, allocT>&& lhs, basic_shallow_string<charT> rhs)
-  {
-    lhs.append(rhs);
-    return move(lhs);
-  }
-
-template<typename charT, typename allocT>
-inline
-basic_cow_string<charT, allocT>
-operator+(basic_cow_string<charT, allocT>&& lhs, initializer_list<charT> rhs)
   {
     lhs.append(rhs);
     return move(lhs);
@@ -2087,16 +2068,6 @@ operator+(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>
 template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
-operator+(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs)
-  {
-    auto str = rhs;
-    str.insert(str.begin(), lhs);
-    return str;
-  }
-
-template<typename charT, typename allocT>
-inline
-basic_cow_string<charT, allocT>
 operator+(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
   {
     auto str = rhs;
@@ -2118,15 +2089,6 @@ template<typename charT, typename allocT>
 inline
 basic_cow_string<charT, allocT>
 operator+(basic_shallow_string<charT> lhs, basic_cow_string<charT, allocT>&& rhs)
-  {
-    rhs.insert(rhs.begin(), lhs);
-    return rhs;
-  }
-
-template<typename charT, typename allocT>
-inline
-basic_cow_string<charT, allocT>
-operator+(initializer_list<charT> lhs, basic_cow_string<charT, allocT>&& rhs)
   {
     rhs.insert(rhs.begin(), lhs);
     return rhs;
@@ -2174,12 +2136,6 @@ operator==(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<char
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  { return lhs.equals(rhs);  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
 operator==(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   { return lhs.equals(rhs);  }
 
@@ -2187,12 +2143,6 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator==(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  { return rhs.equals(lhs);  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
-operator==(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
@@ -2216,12 +2166,6 @@ operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<char
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  { return not lhs.equals(rhs);  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
 operator!=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   { return not lhs.equals(rhs);  }
 
@@ -2229,12 +2173,6 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator!=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  { return not rhs.equals(lhs);  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
-operator!=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
@@ -2258,12 +2196,6 @@ operator<(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  { return lhs.compare(rhs) < 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
 operator<(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   { return lhs.compare(rhs) < 0;  }
 
@@ -2271,12 +2203,6 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator<(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  { return rhs.compare(lhs) > 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
-operator<(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
@@ -2300,12 +2226,6 @@ operator<=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<char
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  { return lhs.compare(rhs) <= 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
 operator<=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   { return lhs.compare(rhs) <= 0;  }
 
@@ -2313,12 +2233,6 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator<=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  { return rhs.compare(lhs) >= 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
-operator<=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
@@ -2342,12 +2256,6 @@ operator>(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<charT
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  { return lhs.compare(rhs) > 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
 operator>(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   { return lhs.compare(rhs) > 0; }
 
@@ -2355,12 +2263,6 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator>(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  { return rhs.compare(lhs) < 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
-operator>(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
@@ -2384,12 +2286,6 @@ operator>=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<char
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(const basic_cow_string<charT, allocT>& lhs, initializer_list<charT> rhs) noexcept
-  { return lhs.compare(rhs) >= 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
 operator>=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
   { return lhs.compare(rhs) >= 0;  }
 
@@ -2397,12 +2293,6 @@ template<typename charT, typename allocT>
 constexpr
 bool
 operator>=(basic_shallow_string<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
-  { return rhs.compare(lhs) <= 0;  }
-
-template<typename charT, typename allocT>
-constexpr
-bool
-operator>=(initializer_list<charT> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
   { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>

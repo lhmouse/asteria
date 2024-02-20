@@ -32,7 +32,7 @@ class string_storage
         hasher_base(hf),
         key_equal_base(eq),
         m_str(forward<paramsT>(params)...),
-        m_hval(this->as_hasher()(this->m_str))
+        m_hval(this->as_hasher() (this->m_str))
       { }
 
     string_storage(const string_storage&) = delete;
@@ -73,7 +73,7 @@ class string_storage
     clear()
       {
         this->m_str.clear();
-        this->m_hval = this->as_hasher()(this->m_str);
+        this->m_hval = this->as_hasher() (this->m_str);
       }
 
     template<typename... paramsT>
@@ -81,7 +81,7 @@ class string_storage
     assign(paramsT&&... params)
       {
         this->m_str.assign(forward<paramsT>(params)...);
-        this->m_hval = this->as_hasher()(this->m_str);
+        this->m_hval = this->as_hasher() (this->m_str);
       }
 
     template<typename paramT>
@@ -89,7 +89,7 @@ class string_storage
     set_string(paramT&& param)
       {
         this->m_str = forward<paramT>(param);
-        this->m_hval = this->as_hasher()(this->m_str);
+        this->m_hval = this->as_hasher() (this->m_str);
       }
 
     void

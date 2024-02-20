@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../llds/variable_hashmap.hpp"
+#include <array>
 namespace asteria {
 
 class Garbage_Collector

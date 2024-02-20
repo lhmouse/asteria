@@ -28,8 +28,8 @@ namespace rocket {
 // 7. The key and mapped types may be incomplete. The mapped type need be neither
 //    copy-assignable nor move-assignable.
 // 8. `erase()` may move elements around and invalidate iterators.
-template<typename keyT, typename mappedT, typename hashT = hash<keyT>,
-         typename eqT = equal_to<void>, typename allocT = allocator<pair<const keyT, mappedT>>>
+template<typename keyT, typename mappedT, typename hashT,
+         typename eqT = equal, typename allocT = allocator<pair<const keyT, mappedT>>>
 class cow_hashmap;
 
 #include "details/cow_hashmap.ipp"

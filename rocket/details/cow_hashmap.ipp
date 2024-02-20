@@ -560,7 +560,7 @@ class storage_handle
         // The load factor is kept below 0.5 so there is always at least one bucket available.
         size_t orig = noadl::probe_origin(qstor->bucket_count(), qstor->hash(ykey));
         auto qbkt = noadl::linear_probe(qstor->bkts, orig, orig, qstor->bucket_count(),
-              [&](const bucket_type& r) { return this->as_key_equal()(r->first, ykey);  });
+              [&](const bucket_type& r) { return this->as_key_equal() (r->first, ykey);  });
 
         static_assert(max_load_factor_reciprocal > 1);
         ROCKET_ASSERT(qbkt);
