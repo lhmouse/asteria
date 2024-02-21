@@ -45,7 +45,8 @@ class basic_tinybuf_str
 
     template<typename xstrT,
     ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&, const allocator_type&>::value)>
-    constexpr basic_tinybuf_str(xstrT&& xstr, open_mode mode, const allocator_type& alloc = allocator_type())
+    constexpr basic_tinybuf_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_read_write,
+                                const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<string_type, xstrT&&, const allocator_type>::value)
       :
         m_str(forward<xstrT>(xstr), alloc), m_mode(mode)
