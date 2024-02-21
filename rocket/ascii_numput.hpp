@@ -59,6 +59,13 @@ class ascii_numput
     length() const noexcept
       { return this->m_size;  }
 
+    char
+    operator[](size_t k) const noexcept
+      {
+        ROCKET_ASSERT(k <= this->m_size);
+        return this->m_stor[k];
+      }
+
     void
     clear() noexcept
       {
