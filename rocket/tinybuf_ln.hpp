@@ -170,6 +170,25 @@ class basic_tinybuf_ln
         return *this;
       }
 
+    // Gets the current stream pointer.
+    // This function always fails.
+    virtual
+    int64_t
+    tell() const override
+      {
+        return -1;
+      }
+
+    // Adjusts the current stream pointer.
+    // This function always fails.
+    virtual
+    basic_tinybuf_ln&
+    seek(int64_t /*off*/, seek_dir /*dir*/) override
+      {
+        noadl::sprintf_and_throw<invalid_argument>(
+            "basic_tinybuf_ln: linear buffer not seekable");
+      }
+
     // Reads some characters from the stream. If the end of stream has been
     // reached, zero is returned.
     // In case of an error, an exception is thrown, and the stream is left in an
