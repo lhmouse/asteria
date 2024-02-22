@@ -63,15 +63,15 @@ class ascii_numput
     operator[](size_t k) const noexcept
       {
         ROCKET_ASSERT(k <= this->m_size);
-        return this->m_stor[k];
+        return this->m_data[k];
       }
 
     void
     clear() noexcept
       {
+        this->m_stor[0] = 0;
         this->m_data = this->m_stor;
         this->m_size = 0;
-        this->m_stor[0] = 0;
       }
 
     // Gets and sets the radix point.
