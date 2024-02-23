@@ -52,7 +52,7 @@ class Source_Location
       { return this->m_column;  }
 
     tinyfmt&
-    print(tinyfmt& fmt) const;
+    print_to(tinyfmt& fmt) const;
   };
 
 inline
@@ -63,7 +63,7 @@ swap(Source_Location& lhs, Source_Location& rhs) noexcept
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Source_Location& sloc)
-  { return sloc.print(fmt);  }
+  { return sloc.print_to(fmt);  }
 
 }  // namespace asteria
 #endif

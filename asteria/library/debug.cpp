@@ -21,7 +21,7 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
           if(r.is_string())
             fmt << r.as_string();
           else
-            r.print(fmt);
+            r.print_to(fmt);
         },
         &val });
 

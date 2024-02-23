@@ -371,7 +371,7 @@ class Value
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
-    print(tinyfmt& fmt) const;
+    print_to(tinyfmt& fmt) const;
 
     bool
     print_to_stderr() const;
@@ -391,7 +391,7 @@ swap(Value& lhs, Value& rhs) noexcept
 inline
 tinyfmt&
 operator<<(tinyfmt& fmt, const Value& value)
-  { return value.print(fmt);  }
+  { return value.print_to(fmt);  }
 
 }  // namespace asteria
 #endif

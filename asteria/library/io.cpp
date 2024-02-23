@@ -108,7 +108,7 @@ do_format_write_utf8_common(const IOF_Sentry& sentry, const V_string& templ, con
           if(arg.is_string())
             fmt << arg.as_string();
           else
-            arg.print(fmt);
+            arg.print_to(fmt);
         },
         &val });
 

@@ -405,7 +405,7 @@ compare_partial(const Value& other) const
 
 tinyfmt&
 Value::
-print(tinyfmt& fmt) const
+print_to(tinyfmt& fmt) const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -523,7 +523,7 @@ Value::
 print_to_stderr() const
   {
     ::rocket::tinyfmt_file fmt(stderr, nullptr);
-    this->print(fmt);
+    this->print_to(fmt);
     return ::ferror(fmt.get_handle());
   }
 

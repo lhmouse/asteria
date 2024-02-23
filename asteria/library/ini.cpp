@@ -174,7 +174,7 @@ std_ini_format(V_object value)
       if(r.second.is_string())
         fmt << r.second.as_string();
       else
-        r.second.print(fmt);
+        r.second.print_to(fmt);
 
       fmt << "\r\n";
       nlines ++;
@@ -205,7 +205,7 @@ std_ini_format(V_object value)
         if(r.second.is_string())
           fmt << r.second.as_string();
         else
-          r.second.print(fmt);
+          r.second.print_to(fmt);
 
         fmt << "\r\n";
         nlines ++;
