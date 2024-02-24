@@ -162,7 +162,7 @@ using ::std::memory_order_seq_cst;
 #define ROCKET_SUB_MUL_OVERFLOW(x,y,z,r)   (ROCKET_SUB_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
 
 #define ROCKET_UNDEDUCED(...)    typename ::std::enable_if<true, __VA_ARGS__>::type
-#define ROCKET_VOID_T(...)       typename ::std::conditional<1, void, __VA_ARGS__>::type
+#define ROCKET_VOID_T(...)       typename ::std::conditional<true, void, __VA_ARGS__>::type
 #define ROCKET_ENABLE_IF(...)    typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)   typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
@@ -174,6 +174,8 @@ using ::std::memory_order_seq_cst;
     ROCKET_DISABLE_IF(::std::is_same<x,  \
         typename ::std::remove_cv<typename ::std::remove_reference<__VA_ARGS__>::type>::type  \
           >::value)
+
+#define ROCKET_SET_IF(x, ...)   ((x) && ((void) (*(x) = (__VA_ARGS__)), true))
 
 template<typename typeT>
 struct remove_cvref

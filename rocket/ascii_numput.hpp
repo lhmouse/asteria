@@ -178,18 +178,62 @@ class ascii_numput
         this->put_XP(value);
       }
 
-    template<typename valueT,
-    ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
     void
-    put(valueT value) noexcept
+    put(unsigned char value) noexcept
       {
         this->put_DU(value);
       }
 
-    template<typename valueT,
-    ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
     void
-    put(valueT value) noexcept
+    put(signed char value) noexcept
+      {
+        this->put_DI(value);
+      }
+
+    void
+    put(unsigned short value) noexcept
+      {
+        this->put_DU(value);
+      }
+
+    void
+    put(short value) noexcept
+      {
+        this->put_DI(value);
+      }
+
+    void
+    put(unsigned int value) noexcept
+      {
+        this->put_DU(value);
+      }
+
+    void
+    put(int value) noexcept
+      {
+        this->put_DI(value);
+      }
+
+    void
+    put(unsigned long value) noexcept
+      {
+        this->put_DU(value);
+      }
+
+    void
+    put(long value) noexcept
+      {
+        this->put_DI(value);
+      }
+
+    void
+    put(unsigned long long value) noexcept
+      {
+        this->put_DU(value);
+      }
+
+    void
+    put(long long value) noexcept
       {
         this->put_DI(value);
       }

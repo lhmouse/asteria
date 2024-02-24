@@ -144,81 +144,161 @@ class ascii_numget
     void
     get(bool& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        size_t acclen_temp;
-        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
-        acclen = this->parse_TB(str, len);
-
+        size_t acclen = this->parse_TB(str, len);
         int64_t temp;
         this->cast_I(temp, -1, 0);
         value = temp < 0;
+        ROCKET_SET_IF(acclen_opt, acclen);
       }
 
     void
     get(void*& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        size_t acclen_temp;
-        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
-        acclen = this->parse_XU(str, len);
-
+        size_t acclen = this->parse_XU(str, len);
         uint64_t temp;
         constexpr auto min = numeric_limits<uintptr_t>::min();
         constexpr auto max = numeric_limits<uintptr_t>::max();
         this->cast_U(temp, min, max);
         value = (void*)(uintptr_t) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
       }
 
-    template<typename valueT,
-    ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
     void
-    get(valueT& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+    get(unsigned char& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        size_t acclen_temp;
-        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
-        acclen = this->parse_U(str, len);
-
+        size_t acclen = this->parse_U(str, len);
         uint64_t temp;
-        constexpr auto min = numeric_limits<valueT>::min();
-        constexpr auto max = numeric_limits<valueT>::max();
+        constexpr auto min = numeric_limits<unsigned char>::min();
+        constexpr auto max = numeric_limits<unsigned char>::max();
         this->cast_U(temp, min, max);
-        value = (valueT) temp;
+        value = (unsigned char) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
       }
 
-    template<typename valueT,
-    ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
     void
-    get(valueT& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+    get(signed char& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        size_t acclen_temp;
-        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
-        acclen = this->parse_I(str, len);
-
+        size_t acclen = this->parse_I(str, len);
         int64_t temp;
-        constexpr auto min = numeric_limits<valueT>::min();
-        constexpr auto max = numeric_limits<valueT>::max();
+        constexpr auto min = numeric_limits<signed char>::min();
+        constexpr auto max = numeric_limits<signed char>::max();
         this->cast_I(temp, min, max);
-        value = (valueT) temp;
+        value = (signed char) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(unsigned short& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_U(str, len);
+        uint64_t temp;
+        constexpr auto min = numeric_limits<unsigned short>::min();
+        constexpr auto max = numeric_limits<unsigned short>::max();
+        this->cast_U(temp, min, max);
+        value = (unsigned short) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(short& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_I(str, len);
+        int64_t temp;
+        constexpr auto min = numeric_limits<short>::min();
+        constexpr auto max = numeric_limits<short>::max();
+        this->cast_I(temp, min, max);
+        value = (short) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(unsigned int& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_U(str, len);
+        uint64_t temp;
+        constexpr auto min = numeric_limits<unsigned int>::min();
+        constexpr auto max = numeric_limits<unsigned int>::max();
+        this->cast_U(temp, min, max);
+        value = (unsigned int) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(int& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_I(str, len);
+        int64_t temp;
+        constexpr auto min = numeric_limits<int>::min();
+        constexpr auto max = numeric_limits<int>::max();
+        this->cast_I(temp, min, max);
+        value = (int) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(unsigned long& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_U(str, len);
+        uint64_t temp;
+        constexpr auto min = numeric_limits<unsigned long>::min();
+        constexpr auto max = numeric_limits<unsigned long>::max();
+        this->cast_U(temp, min, max);
+        value = (unsigned long) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(long& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_I(str, len);
+        int64_t temp;
+        constexpr auto min = numeric_limits<long>::min();
+        constexpr auto max = numeric_limits<long>::max();
+        this->cast_I(temp, min, max);
+        value = (long) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(unsigned long long& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_U(str, len);
+        uint64_t temp;
+        constexpr auto min = numeric_limits<unsigned long long>::min();
+        constexpr auto max = numeric_limits<unsigned long long>::max();
+        this->cast_U(temp, min, max);
+        value = (unsigned long long) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
+      }
+
+    void
+    get(long long& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
+      {
+        size_t acclen = this->parse_I(str, len);
+        int64_t temp;
+        constexpr auto min = numeric_limits<long long>::min();
+        constexpr auto max = numeric_limits<long long>::max();
+        this->cast_I(temp, min, max);
+        value = (long long) temp;
+        ROCKET_SET_IF(acclen_opt, acclen);
       }
 
     void
     get(float& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        size_t acclen_temp;
-        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
-        acclen = this->parse_D(str, len);
-
+        size_t acclen = this->parse_D(str, len);
         constexpr auto inf = numeric_limits<float>::infinity();
         this->cast_F(value, -inf, +inf);
+        ROCKET_SET_IF(acclen_opt, acclen);
       }
 
     void
     get(double& value, const char* str, size_t len, size_t* acclen_opt = nullptr) noexcept
       {
-        size_t acclen_temp;
-        size_t& acclen = acclen_opt ? *acclen_opt : acclen_temp;
-        acclen = this->parse_D(str, len);
-
+        size_t acclen = this->parse_D(str, len);
         constexpr auto inf = numeric_limits<double>::infinity();
         this->cast_D(value, -inf, +inf);
+        ROCKET_SET_IF(acclen_opt, acclen);
       }
   };
 
