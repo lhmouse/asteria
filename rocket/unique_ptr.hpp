@@ -35,6 +35,7 @@ class unique_ptr
 
   public:
     // 23.11.1.2.1, constructors
+    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
     constexpr unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth()
