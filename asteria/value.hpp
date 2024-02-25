@@ -19,8 +19,7 @@ class Value
             typename ::rocket::remove_cvref<xValue>::type>;
 
     using variant_type = ::rocket::variant<
-            V_null, V_boolean, V_integer, V_real, V_string,
-            V_opaque, V_function, V_array, V_object>;
+            ASTERIA_TYPES_AIXE9XIG_(V)>;
 
     using bytes_type = ::std::aligned_storage<
             sizeof(variant_type), 16>::type;
@@ -394,4 +393,9 @@ operator<<(tinyfmt& fmt, const Value& value)
   { return value.print_to(fmt);  }
 
 }  // namespace asteria
+extern template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
+extern template class ::rocket::optional<::asteria::Value>;
+extern template class ::rocket::cow_vector<::asteria::Value>;
+extern template class ::rocket::cow_hashmap<::asteria::phsh_string,
+  ::asteria::Value, ::asteria::phsh_string::hash>;
 #endif

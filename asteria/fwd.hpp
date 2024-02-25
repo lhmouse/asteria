@@ -621,18 +621,20 @@ using optV_function  = V_function;
 using optV_array     = opt<V_array>;
 using optV_object    = opt<V_object>;
 
-enum Type : uint8_t
-  {
-    type_null      = 0,
-    type_boolean   = 1,
-    type_integer   = 2,
-    type_real      = 3,
-    type_string    = 4,
-    type_opaque    = 5,
-    type_function  = 6,
-    type_array     = 7,
-    type_object    = 8,
-  };
+// Expand a sequence of types without a trailing comma. This macro is part
+// of the ABI.
+#define ASTERIA_TYPES_AIXE9XIG_(U)  \
+  /*  0 */ U##_null,  \
+  /*  1 */ U##_boolean,  \
+  /*  2 */ U##_integer,  \
+  /*  3 */ U##_real,  \
+  /*  4 */ U##_string,  \
+  /*  5 */ U##_opaque,  \
+  /*  6 */ U##_function,  \
+  /*  7 */ U##_array,  \
+  /*  8 */ U##_object
+
+enum Type : uint8_t { ASTERIA_TYPES_AIXE9XIG_(type) };
 
 ROCKET_CONST
 const char*
