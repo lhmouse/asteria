@@ -7,11 +7,11 @@
 #include "llds/variable_hashmap.hpp"
 #include "../rocket/linear_buffer.hpp"
 #include "../rocket/tinyfmt_file.hpp"
+template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
 template class ::rocket::optional<::asteria::Value>;
 template class ::rocket::cow_vector<::asteria::Value>;
 template class ::rocket::cow_hashmap<::asteria::phsh_string,
   ::asteria::Value, ::asteria::phsh_string::hash>;
-template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
 namespace asteria {
 namespace {
 
