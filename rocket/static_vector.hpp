@@ -51,8 +51,7 @@ class static_vector
 
   public:
     // 26.3.11.2, construct/copy/destroy
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
+    ROCKET_CONSTEXPR_INLINE static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_sth()
       { }

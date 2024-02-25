@@ -75,8 +75,7 @@ class cow_hashmap
 
   public:
     // 26.5.4.2, construct/copy/destroy
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr cow_hashmap()
+    ROCKET_CONSTEXPR_INLINE cow_hashmap()
       noexcept(conjunction<is_nothrow_constructible<allocator_type>,
                            is_nothrow_constructible<hasher>,
                            is_nothrow_constructible<key_equal>>::value)

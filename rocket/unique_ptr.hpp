@@ -35,8 +35,8 @@ class unique_ptr
 
   public:
     // 23.11.1.2.1, constructors
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+    ROCKET_CONSTEXPR_INLINE unique_ptr(nullptr_t = nullptr)
+      noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth()
       { }
@@ -46,7 +46,8 @@ class unique_ptr
         m_sth(nullptr, del)
       { }
 
-    explicit constexpr unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+    explicit constexpr unique_ptr(pointer ptr)
+      noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth(ptr)
       { }
@@ -57,8 +58,10 @@ class unique_ptr
       { }
 
     template<typename yelementT, typename ydeleterT,
-    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value),
-    ROCKET_ENABLE_IF(is_constructible<deleter_type, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT,
+                                     ydeleterT>::pointer, pointer>::value),
+    ROCKET_ENABLE_IF(is_constructible<deleter_type,
+             typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       :
         m_sth(other.m_sth.release(), move(other.m_sth.as_deleter()))
@@ -84,8 +87,10 @@ class unique_ptr
       }
 
     template<typename yelementT, typename ydeleterT,
-    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value),
-    ROCKET_ENABLE_IF(is_assignable<deleter_type&, typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
+    ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT,
+                                     ydeleterT>::pointer, pointer>::value),
+    ROCKET_ENABLE_IF(is_assignable<deleter_type&,
+             typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr&
     operator=(unique_ptr<yelementT, ydeleterT>&& other) & noexcept
       {

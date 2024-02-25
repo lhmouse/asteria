@@ -53,15 +53,13 @@ class basic_shallow_string
     size_t m_len;
 
   public:
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr basic_shallow_string(const charT* ptr) noexcept
+    ROCKET_CONSTEXPR_INLINE basic_shallow_string(const charT* ptr) noexcept
       :
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
       { }
 
     template<size_t N>
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr basic_shallow_string(const charT (*ps)[N]) noexcept
+    ROCKET_CONSTEXPR_INLINE basic_shallow_string(const charT (*ps)[N]) noexcept
       :
         m_ptr(*ps), m_len((ROCKET_ASSERT(*(*ps + N - 1) == charT()), N - 1))
       { }
@@ -1940,7 +1938,7 @@ struct basic_cow_string<charT, allocT>::hash
     using result_type    = uint32_t;
     using argument_type  = basic_cow_string;
 
-    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
+    ROCKET_CONSTEXPR_INLINE
     uint32_t
     operator()(const charT* p, size_t n) const noexcept
       {
@@ -1952,7 +1950,7 @@ struct basic_cow_string<charT, allocT>::hash
         return hval;
       }
 
-    constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
+    ROCKET_CONSTEXPR_INLINE
     uint32_t
     operator()(const basic_cow_string& str) const noexcept
       { return (*this) (str.m_ref.m_ptr, str.m_ref.m_len);  }

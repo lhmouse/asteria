@@ -175,6 +175,7 @@ using ::std::memory_order_seq_cst;
         typename ::std::remove_cv<typename ::std::remove_reference<__VA_ARGS__>::type>::type  \
           >::value)
 
+#define ROCKET_CONSTEXPR_INLINE   constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
 #define ROCKET_SET_IF(x, ...)   ((x) && ((void) (*(x) = (__VA_ARGS__)), true))
 
 #define ROCKET_DEFINE_ENUM_OPERATORS(enumT)  \

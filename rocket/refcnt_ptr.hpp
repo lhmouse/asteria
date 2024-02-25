@@ -111,8 +111,7 @@ class refcnt_ptr
     details_refcnt_ptr::stored_pointer<element_type> m_sth;
 
   public:
-    ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
-    constexpr refcnt_ptr(nullptr_t = nullptr) noexcept
+    ROCKET_CONSTEXPR_INLINE refcnt_ptr(nullptr_t = nullptr) noexcept
       :
         m_sth()
       { }
