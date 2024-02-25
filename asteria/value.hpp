@@ -393,9 +393,9 @@ operator<<(tinyfmt& fmt, const Value& value)
   { return value.print_to(fmt);  }
 
 }  // namespace asteria
-extern template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
 extern template class ::rocket::optional<::asteria::Value>;
 extern template class ::rocket::cow_vector<::asteria::Value>;
 extern template class ::rocket::cow_hashmap<::asteria::phsh_string,
   ::asteria::Value, ::asteria::phsh_string::hash>;
+extern template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
 #endif
