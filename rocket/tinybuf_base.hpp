@@ -30,40 +30,7 @@ struct tinybuf_base
       };
   };
 
-constexpr
-tinybuf_base::open_mode
-operator~(tinybuf_base::open_mode rhs) noexcept
-  {
-    return static_cast<tinybuf_base::open_mode>(
-               ~ static_cast<uint32_t>(rhs));
-  }
-
-constexpr
-tinybuf_base::open_mode
-operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return static_cast<tinybuf_base::open_mode>(
-               static_cast<uint32_t>(lhs)
-               & static_cast<uint32_t>(rhs));
-  }
-
-constexpr
-tinybuf_base::open_mode
-operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return static_cast<tinybuf_base::open_mode>(
-               static_cast<uint32_t>(lhs)
-               | static_cast<uint32_t>(rhs));
-  }
-
-constexpr
-tinybuf_base::open_mode
-operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
-  {
-    return static_cast<tinybuf_base::open_mode>(
-               static_cast<uint32_t>(lhs)
-               ^ static_cast<uint32_t>(rhs));
-  }
+ROCKET_DEFINE_ENUM_OPERATORS(tinybuf_base::open_mode)
 
 }  // namespace rocket
 #endif

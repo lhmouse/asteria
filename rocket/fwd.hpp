@@ -177,6 +177,69 @@ using ::std::memory_order_seq_cst;
 
 #define ROCKET_SET_IF(x, ...)   ((x) && ((void) (*(x) = (__VA_ARGS__)), true))
 
+#define ROCKET_DEFINE_ENUM_OPERATORS(enumT)  \
+  constexpr  \
+  enumT  \
+  operator&(enumT lhs, enumT rhs) noexcept  \
+    {  \
+      return static_cast<enumT>(  \
+          static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
+          & static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }  \
+  \
+  constexpr  \
+  enumT&  \
+  operator&=(enumT& lhs, enumT rhs) noexcept  \
+    {  \
+      return lhs = static_cast<enumT>(  \
+          static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
+          & static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }  \
+  \
+  constexpr  \
+  enumT  \
+  operator|(enumT lhs, enumT rhs) noexcept  \
+    {  \
+      return static_cast<enumT>(  \
+          static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
+          | static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }  \
+  \
+  constexpr  \
+  enumT&  \
+  operator|=(enumT& lhs, enumT rhs) noexcept  \
+    {  \
+      return lhs = static_cast<enumT>(  \
+          static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
+          | static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }  \
+  \
+  constexpr  \
+  enumT  \
+  operator^(enumT lhs, enumT rhs) noexcept  \
+    {  \
+      return static_cast<enumT>(  \
+          static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
+          ^ static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }  \
+  \
+  constexpr  \
+  enumT&  \
+  operator^=(enumT& lhs, enumT rhs) noexcept  \
+    {  \
+      return lhs = static_cast<enumT>(  \
+          static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
+          ^ static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }  \
+  \
+  constexpr  \
+  enumT  \
+  operator~(enumT rhs) noexcept  \
+    {  \
+      return static_cast<enumT>(  \
+          ~ static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
+    }
+
 template<typename typeT>
 struct remove_cvref
   : remove_cv<typename remove_reference<typeT>::type>  { };

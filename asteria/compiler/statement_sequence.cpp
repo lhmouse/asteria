@@ -324,25 +324,13 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
 // or `continue` is allowed. Blocks may be nested, so flags may be OR'd.
 enum scope_flags : uint32_t
   {
-    scope_flags_plain      = 0b00000000,
-    scope_flags_switch     = 0b00000001,
-    scope_flags_while      = 0b00000010,
-    scope_flags_for        = 0b00000100,
+    scope_plain   = 0b00000000,
+    scope_switch  = 0b00000001,
+    scope_while   = 0b00000010,
+    scope_for     = 0b00000100,
   };
 
-constexpr
-scope_flags
-operator&(scope_flags x, scope_flags y) noexcept
-  {
-    return (scope_flags) ((uint32_t) x & (uint32_t) y);
-  }
-
-constexpr
-scope_flags
-operator|(scope_flags x, scope_flags y) noexcept
-  {
-    return (scope_flags) ((uint32_t) x | (uint32_t) y);
-  }
+ROCKET_DEFINE_ENUM_OPERATORS(scope_flags)
 
 opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope);
@@ -665,7 +653,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 compiler_status_open_brace_expected, tstrm.next_sloc());
 
     cow_vector<Statement> body;
-    while(auto qstmt = do_accept_statement_opt(tstrm, scope_flags_plain))
+    while(auto qstmt = do_accept_statement_opt(tstrm, scope_plain))
       body.emplace_back(move(*qstmt));
 
     auto cl_sloc = tstrm.next_sloc();
@@ -822,7 +810,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
         throw Compiler_Error(xtc_status,
                   compiler_status_colon_expected, tstrm.next_sloc());
 
-      while(auto qstmt = do_accept_statement_opt(tstrm, scope | scope_flags_switch))
+      while(auto qstmt = do_accept_statement_opt(tstrm, scope | scope_switch))
         clause.body.emplace_back(move(*qstmt));
     }
 
@@ -845,7 +833,7 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
     if(!qkwrd)
       return nullopt;
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_while);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_while);
     if(!qblock)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
@@ -915,7 +903,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_while);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_while);
     if(!qblock)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
@@ -969,7 +957,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_for);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_for);
     if(!qblock)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
@@ -1032,7 +1020,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_flags_for);
+    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_for);
     if(!qblock)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
@@ -1091,23 +1079,23 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
     if(!qkwrd)
       return nullopt;
 
-    scope_flags scope_check = scope_flags_switch | scope_flags_while | scope_flags_for;
+    scope_flags scope_check = scope_switch | scope_while | scope_for;
     Jump_Target target = jump_target_unspec;
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch, keyword_while, keyword_for });
     if(qkwrd && (*qkwrd == keyword_switch)) {
       // `switch`
-      scope_check = scope_flags_switch;
+      scope_check = scope_switch;
       target = jump_target_switch;
     }
     else if(qkwrd && (*qkwrd == keyword_while)) {
      // `do`...`while` and `while`
-      scope_check = scope_flags_while;
+      scope_check = scope_while;
       target = jump_target_while;
     }
     else if(qkwrd && (*qkwrd == keyword_for)) {
      // `for` and `for`...`each`
-      scope_check = scope_flags_for;
+      scope_check = scope_for;
       target = jump_target_for;
     }
 
@@ -1136,18 +1124,18 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
     if(!qkwrd)
       return nullopt;
 
-    scope_flags scope_check = scope_flags_while | scope_flags_for;
+    scope_flags scope_check = scope_while | scope_for;
     Jump_Target target = jump_target_unspec;
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while, keyword_for });
     if(qkwrd && (*qkwrd == keyword_while)) {
      // `do`...`while` and `while`
-      scope_check = scope_flags_while;
+      scope_check = scope_while;
       target = jump_target_while;
     }
     else if(qkwrd && (*qkwrd == keyword_for)) {
      // `for` and `for`...`each`
-      scope_check = scope_flags_for;
+      scope_check = scope_for;
       target = jump_target_for;
     }
 
@@ -1708,7 +1696,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
                 "[unmatched `(` at '$1']", op_sloc);
 
     op_sloc = tstrm.next_sloc();
-    auto qblock = do_accept_statement_block_opt(tstrm, scope_flags_plain);
+    auto qblock = do_accept_statement_block_opt(tstrm, scope_plain);
 
     if(!qblock) {
       // Try `equal-initializer`.
@@ -2616,7 +2604,7 @@ reload(Token_Stream&& tstrm)
 
     // document ::=
     //   statement *
-    while(auto qstmt = do_accept_statement_opt(tstrm, scope_flags_plain))
+    while(auto qstmt = do_accept_statement_opt(tstrm, scope_plain))
       stmts.emplace_back(move(*qstmt));
 
     // If there are any non-statement tokens left in the stream, fail.
