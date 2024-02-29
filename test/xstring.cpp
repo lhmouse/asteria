@@ -24,11 +24,11 @@ test_xstring()
     ASTERIA_TEST_CHECK(xmemchr((volatile const charT*) hello, 0, 5) == nullptr);
     ASTERIA_TEST_CHECK(xmemchr((volatile const charT*) hello, 'a', 5) == nullptr);
 
-#if (defined(__GNUC__) && (__GNUC__ >= 9))
+#if (defined __GNUC__ && (__GNUC__ >= 9))
 #  define ASTERIA_TEST_XSTRING_STATIC_ASSERT_  1
 #endif
 
-#if (defined(__clang_major__) && (__clang_major__ >= 11))
+#if (defined __clang_major__ && (__clang_major__ >= 11))
 #  define ASTERIA_TEST_XSTRING_STATIC_ASSERT_  1
 #endif
 

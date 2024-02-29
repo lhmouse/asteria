@@ -58,6 +58,6 @@
 #define ROCKET_LETOH64(x)     ROCKET_BSWAP_TO_LE(64,x)
 
 // Check for either libc++ or libstdc++.
-#if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
+#if defined _LIBCPP_DEBUG || defined _GLIBCXX_DEBUG
 #  define ROCKET_DEBUG   1
 #endif

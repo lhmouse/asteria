@@ -53,6 +53,6 @@
 #define ROCKET_LETOH64(x)     (x)
 
 // Check for project configuration.
-#if defined(_DEBUG)
+#if defined _DEBUG
 #  define ROCKET_DEBUG   1
 #endif

@@ -184,12 +184,12 @@ generate_random_seed() noexcept
   {
     unsigned long long val;
 
-#if defined(__x86_64__) && defined(__RDSEED__)
+#if defined __x86_64__ && defined __RDSEED__
     if(::_rdseed64_step(&val))
       return val;
 #endif  // 64-bit RDSEED
 
-#if defined(__x86_64__) && defined(__RDRND__)  // sic
+#if defined __x86_64__ && defined __RDRND__  // sic
     if(::_rdrand64_step(&val))
       return val;
 #endif  // 64-bit RDRAND
