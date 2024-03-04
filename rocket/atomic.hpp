@@ -23,7 +23,7 @@ class atomic
   public:
     atomic() noexcept
       :
-        m_val()
+        m_val(0)
       { }
 
     explicit atomic(value_type val) noexcept
