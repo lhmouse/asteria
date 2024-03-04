@@ -388,7 +388,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           const auto& altr = this->m_stor.as<S_for>();
 
           // Note that names declared in the first segment of a for-statement outlasts
-          // every iteration, so we have to create an outer contexts here.
+          // every iteration, so we have to create an outer context here.
           Analytic_Context ctx_for(xtc_plain, ctx);
 
           // Generate code for the initializer, the condition and the loop increment.
