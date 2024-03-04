@@ -15,7 +15,7 @@ template<typename valueT, memory_order memorderT = memory_order_acq_rel>
 class atomic
   {
   public:
-    using value_type  = valueT;
+    using value_type = valueT;
 
   private:
     ::std::atomic<value_type> m_val;
@@ -23,7 +23,7 @@ class atomic
   public:
     atomic() noexcept
       :
-        m_val(0)
+        m_val(value_type())
       { }
 
     explicit atomic(value_type val) noexcept
