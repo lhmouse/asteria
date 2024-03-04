@@ -9,7 +9,7 @@ rm -rf ${_tempdir}
 mkdir -p ${_tempdir}
 cp -pr DEBIAN -t ${_tempdir}
 
-meson setup -Dbuildtype=release build_release
+meson setup -Ddebug=true -Doptimization=3 build_release
 meson compile -Cbuild_release
 meson test -Cbuild_release
 DESTDIR=${_tempdir} meson install --strip -Cbuild_release
