@@ -23,9 +23,9 @@ std_system_get_environment_variables();
 V_object
 std_system_get_properties();
 
-// `std.system.generate_uuid`
+// `std.system.random_uuid`
 V_string
-std_system_generate_uuid(Global_Context& global);
+std_system_random_uuid();
 
 // `std.system.get_pid()`
 V_integer

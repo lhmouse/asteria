@@ -355,7 +355,8 @@ add_project_arguments(
 dep_zlib = dependency('zlib', version: '>= 1.2.9')
 dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
-dep_iconv = dependency('iconv', required: false)
+dep_iconv = dependency('iconv')
+dep_uuid = dependency('uuid')
 dep_editline = disabler()
 
 if get_option('enable-repl')
@@ -382,7 +383,7 @@ install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
 lib_asteria = both_libraries('asteria',
       cpp_pch: 'asteria/xprecompiled.hpp',
       sources: asteria_src,
-      dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
+      dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv, dep_uuid ],
       soversion: ver.get('abi_major'),
       version: '.'.join([ ver.get('abi_major'), ver.get('abi_minor'), '0' ]),
       install: true)

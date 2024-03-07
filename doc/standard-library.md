@@ -90,21 +90,12 @@ variable. Individual components are categorized into sub-objects.
   * `arch`     string: name of the CPU architecture
   * `nprocs`   integer: number of active CPU cores
 
-### `std.system.generate_uuid()`
+### `std.system.random_uuid()`
 
-* Generates a UUID of the form `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`, where
-
-  * x: number of 1/30518 seconds since UNIX Epoch
-  * M: always `4` (UUID version)
-  * y: process ID
-  * N: any of `0`-`7` (UUID variant)
-  * z: context ID
-  * w: random bytes
-
-  Unlike version-1 UUIDs in RFC 4122, the timestamp is written in big-endian
-  byte order. This ensures the (case-insensitive) lexicographical ordering of
-  such UUIDs match their order of creation. Hexadecimal digits above nine are
-  encoded as capital letters.
+* Generates a random UUID of the form `xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx`,
+  where `M` is always `4` (UUID version) and `N` is any of `8`-`f` (UUID
+  variant), and the others are random bits. Hexadecimal digits above nine are
+  encoded in lowercase.
 
 * Returns a UUID as a string of 36 characters, without braces.
 

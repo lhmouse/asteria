@@ -16,6 +16,7 @@
 #include <sys/utsname.h>  // ::uname()
 #include <sys/socket.h>  // ::socket()
 #include <time.h>  // ::clock_gettime()
+#include <uuid/uuid.h>  // ::uuid_generate_random()
 extern char **environ;
 namespace asteria {
 namespace {
@@ -305,56 +306,13 @@ std_system_get_properties()
   }
 
 V_string
-std_system_generate_uuid(Global_Context& global)
+std_system_random_uuid()
   {
-    // Canonical form: `xxxxxxxx-xxxx-Myyy-Nzzz-wwwwwwwwwwww`
-    //  * x: number of 1/30518 seconds since UNIX Epoch
-    //  * M: always `4` (UUID version)
-    //  * y: process ID
-    //  * N: any of `0`-`7` (UUID variant)
-    //  * z: context ID
-    //  * w: random bytes
-    static atomic<uint64_t> serial;
-    const auto prng = global.random_engine();
-
-    ::timespec ts;
-    ::clock_gettime(CLOCK_REALTIME, &ts);
-
-    uint64_t x = (uint64_t) ts.tv_sec * 30518U + (uint32_t) ts.tv_nsec / 32768U + serial.xadd(1U);
-    uint64_t y = (uint32_t) ::getpid();
-    uint64_t z = (uint64_t)(void*) &global >> 12;
-    uint64_t w = (uint64_t) prng->bump() << 32 | prng->bump();
-
-    // Set version and variant.
-    y &= 0x0FFF;
-    y |= 0x4000;
-    z &= 0x7FFF;
-
-    // Compose the UUID string.
-    cow_string str;
-    auto wpos = str.insert(str.begin(), 36, '-');
-
-    auto put_hex_uint16 = [&](uint64_t value)
-      {
-        uint32_t ch;
-        for(int k = 3;  k >= 0;  --k)
-          ch = (uint32_t) (value >> k * 4) & 0x0F,
-            *(wpos++) = (char) ('0' + ch + ((9 - ch) >> 29));
-      };
-
-    put_hex_uint16(x >> 32);
-    put_hex_uint16(x >> 16);
-    wpos++;
-    put_hex_uint16(x);
-    wpos++;
-    put_hex_uint16(y);
-    wpos++;
-    put_hex_uint16(z);
-    wpos++;
-    put_hex_uint16(w >> 32);
-    put_hex_uint16(w >> 32);
-    put_hex_uint16(w);
-    return str;
+    ::uuid_t uuid;
+    ::uuid_generate_random(uuid);
+    char str[37];
+    ::uuid_unparse_lower(uuid, str);
+    return V_string(str, 36);
   }
 
 V_integer
@@ -600,14 +558,14 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"generate_uuid",
+    result.insert_or_assign(&"random_uuid",
       ASTERIA_BINDING(
-        "std.system.generate_uuid", "",
-        Global_Context& global, Argument_Reader&& reader)
+        "std.system.random_uuid", "",
+        Argument_Reader&& reader)
       {
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_system_generate_uuid(global);
+          return (Value) std_system_random_uuid();
 
         reader.throw_no_matching_function_call();
       });
