@@ -53,16 +53,7 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
 V_string
 std_filesystem_get_real_path(V_string path)
   {
-    // Pass a null pointer to request dynamic allocation.
-    unique_ptr<char, void (void*)> abspath(::realpath(path.safe_c_str(), nullptr), ::free);
-    if(!abspath)
-      ASTERIA_THROW((
-          "Could not resolve path '$1'",
-          "[`realpath()` failed: ${errno:full}]"),
-          path);
-
-    V_string str(abspath.get());
-    return str;
+    return get_real_path(path);
   }
 
 optV_object

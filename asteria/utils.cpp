@@ -207,11 +207,11 @@ safe_double_to_int64(double val)
 
     if(fex & FE_INVALID)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_double_to_int64: `%.17g` is not representable as a 64-bit integer", val);
+            "safe_double_to_int64: `%.17g` is not representable", val);
 
     if(fex != 0)
       ::rocket::sprintf_and_throw<::std::invalid_argument>(
-            "safe_double_to_int64: `%.17g` is not an exact integer", val);
+            "safe_double_to_int64: `%.17g` is not exact", val);
 
     return ival;
   }
@@ -432,6 +432,18 @@ cow_string&
 c_quote(cow_string& str, cow_stringR data)
   {
     return c_quote(str, data.data(), data.size());
+  }
+
+cow_string
+get_real_path(cow_stringR path)
+  {
+    char* str = ::realpath(path.safe_c_str(), nullptr);
+    if(!str)
+      ::rocket::sprintf_and_throw<::std::runtime_error>(
+          "get_real_path: could not resolve `%s`: %m", path.c_str());
+
+    const auto guard = ::rocket::make_unique_handle(str, ::free);
+    return cow_string(str);
   }
 
 }  // namespace asteria

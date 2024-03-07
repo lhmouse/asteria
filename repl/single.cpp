@@ -15,7 +15,7 @@ load_and_execute_single_noreturn()
       if(repl_file == "-")
         repl_script.reload_stdin();
       else
-        repl_script.reload_file(repl_file.c_str());
+        repl_script.reload_file(repl_file);
     }
     catch(exception& stdex) {
       // Print the error and exit.

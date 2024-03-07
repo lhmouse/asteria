@@ -25,7 +25,7 @@ class Module_Loader
 
   private:
     locked_pair*
-    do_lock_stream(const char* path);
+    do_lock_stream(cow_stringR path);
 
     void
     do_unlock_stream(locked_pair* qstrm) noexcept;
@@ -45,7 +45,7 @@ class Module_Loader::Unique_Stream
   public:
     constexpr Unique_Stream() noexcept = default;
 
-    Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const char* path)
+    Unique_Stream(const refcnt_ptr<Module_Loader>& loader, cow_stringR path)
       {
         this->reset(loader, path);
       }
@@ -99,7 +99,7 @@ class Module_Loader::Unique_Stream
       }
 
     Unique_Stream&
-    reset(const refcnt_ptr<Module_Loader>& loader, const char* path)
+    reset(const refcnt_ptr<Module_Loader>& loader, cow_stringR path)
       {
         // If an exception is thrown, there shall be no effect.
         locked_pair* strm = nullptr;

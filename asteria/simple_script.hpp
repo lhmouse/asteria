@@ -84,9 +84,6 @@ class Simple_Script
     reload_stdin();
 
     void
-    reload_file(const char* path);
-
-    void
     reload_file(cow_stringR path);
 
     // Execute the script that has been loaded.

@@ -4184,23 +4184,21 @@ solidify(AVM_Rod& rod) const
               if(path_val.as_string() == "")
                 throw Runtime_Error(xtc_format, "Path was empty");
 
-              // If the path is relative, resolve it to an absolute one.
               cow_string abs_path = path_val.as_string();
-              const auto& src_file = sloc.file();
-              if((abs_path[0] != '/') && (src_file[0] == '/'))
-                abs_path.insert(0, src_file, 0, src_file.rfind('/') + 1);
+              if(abs_path[0] != '/') {
+                const auto& src_file = sloc.file();
+                if(src_file[0] == '/') {
+                  size_t pos = src_file.rfind('/');
+                  ROCKET_ASSERT(pos != cow_string::npos);
+                  abs_path.insert(0, src_file.c_str(), pos + 1);
+                }
+              }
 
-              unique_ptr<char, void (void*)> realpathp(::realpath(abs_path.safe_c_str(), nullptr), ::free);
-              if(!realpathp)
-                throw Runtime_Error(xtc_format,
-                         "Could not open script file '$1': ${errno:full}", path_val);
-
-              // Load and parse the file.
-              abs_path.assign(realpathp.get());
+              abs_path = get_real_path(abs_path);
               Source_Location script_sloc(abs_path, 0, 0);
 
               Module_Loader::Unique_Stream istrm;
-              istrm.reset(ctx.global().module_loader(), realpathp);
+              istrm.reset(ctx.global().module_loader(), abs_path);
 
               Token_Stream tstrm(sp.opts);
               tstrm.reload(abs_path, 1, move(istrm.get()));

@@ -102,19 +102,18 @@ do_init_once()
     ::el_set(s_editor, EL_BIND, R"(\e[5D)", "ed-prev-word", nullptr);
     ::el_set(s_editor, EL_BIND, R"(\e\e[D)", "ed-prev-word", nullptr);
 
-    // Load `~/.editrc`. Errors are ignored.
-    const char* home = ::getenv("HOME");
-    if(home) {
+    if(const char* home = ::getenv("HOME")) {
       auto path = cow_string(home) + "/.editrc";
       repl_printf("* loading settings from `%s`...", path.c_str());
 
-      unique_ptr<char, void (void*)> abspath(::realpath(path.c_str(), nullptr), ::free);
-      if(abspath) {
-        ::el_source(s_editor, nullptr);
+      if(::access(path.c_str(), R_OK) == 0) {
+        // Try loading `~/.editrc`. Errors are ignored.
+        ::el_source(s_editor, path.c_str());
         repl_printf("* ... done.");
       }
-      else
+      else {
         repl_printf("* ... ignored: %m");
+      }
     }
 
     // Done.

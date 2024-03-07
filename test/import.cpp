@@ -7,12 +7,9 @@ using namespace ::asteria;
 
 int main()
   {
-    const ::rocket::unique_ptr<char, void (&)(void*)> abspath(::realpath(__FILE__, nullptr), ::free);
-    ROCKET_ASSERT(abspath);
-
     Simple_Script code;
     code.reload_string(
-      cow_string(abspath), __LINE__, &R"__(
+      get_real_path(&__FILE__), __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
 
         std.debug.logf("__file = $1", __file);

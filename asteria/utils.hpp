@@ -247,5 +247,9 @@ c_quote(cow_string& str, const char* data, size_t size);
 cow_string&
 c_quote(cow_string& str, cow_stringR data);
 
+// Path resolution
+cow_string
+get_real_path(cow_stringR path);
+
 }  // namespace asteria
 #endif

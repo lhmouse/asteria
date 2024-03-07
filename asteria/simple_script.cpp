@@ -114,25 +114,12 @@ reload_stdin()
 
 void
 Simple_Script::
-reload_file(const char* path)
-  {
-    unique_ptr<char, void (void*)> abspath(::realpath(path, nullptr), ::free);
-    if(!abspath)
-      ASTERIA_THROW((
-          "Could not open script file '$1'",
-          "[`realpath()` failed: ${errno:full}]"),
-          path);
-
-    ::rocket::tinybuf_file cbuf;
-    cbuf.open(abspath, tinybuf::open_read);
-    this->reload(cow_string(abspath), 1, move(cbuf));
-  }
-
-void
-Simple_Script::
 reload_file(cow_stringR path)
   {
-    this->reload_file(path.safe_c_str());
+    ::rocket::tinybuf_file cbuf;
+    cow_string abs_path = get_real_path(path);
+    cbuf.open(abs_path.c_str(), tinybuf::open_read);
+    this->reload(abs_path, 1, move(cbuf));
   }
 
 Reference

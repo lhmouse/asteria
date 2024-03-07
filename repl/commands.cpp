@@ -246,18 +246,15 @@ struct Handler_source : Handler
           // so it becomes an absolute path, like in BASH.
           // I am too lazy to add support for `~+` or `~-` here.
           args.mut(0).erase(0, 1);
-          const char* home = ::getenv("HOME");
-          if(home)
+
+          if(const char* home = ::getenv("HOME"))
             args.mut(0).insert(0, home);
         }
 
-        unique_ptr<char, void (void*)> abspath(::realpath(args[0].safe_c_str(), nullptr), ::free);
-        if(!abspath)
-          return repl_printf("! could not open '%s': %m", args[0].c_str());
-
-        repl_printf("* loading file '%s'...", abspath.get());
+        auto abs_path = get_real_path(args[0]);
+        repl_printf("* loading file '%s'...", abs_path.c_str());
         ::rocket::tinybuf_file file;
-        file.open(abspath, ::rocket::tinybuf::open_read);
+        file.open(abs_path.c_str(), ::rocket::tinybuf::open_read);
         repl_printf("  ---+");
 
         cow_string source, textln;
@@ -308,10 +305,10 @@ struct Handler_source : Handler
         // Set the script to execute.
         repl_printf("  ---+");
         repl_source.swap(source);
-        repl_file.assign(abspath.get());
+        repl_file = abs_path;
         repl_args.assign(args.move_begin() + 1, args.move_end());
 
-        repl_printf("* finished loading file '%s'", abspath.get());
+        repl_printf("* finished loading file '%s'", abs_path.c_str());
       }
   };
 
