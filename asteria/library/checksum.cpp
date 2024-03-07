@@ -72,7 +72,7 @@ class CRC32_Hasher
 void
 do_construct_CRC32(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2C78B9D8-A8F4-4CE9-36E7-12B9EE14AD3D}";
+    static constexpr auto s_private_uuid = &"{2e1b59c9-be38-4c80-bc7f-75b89632d952}";
     result.insert_or_assign(s_private_uuid, std_checksum_CRC32_private());
 
     result.insert_or_assign(&"update",
@@ -180,7 +180,7 @@ class Adler32_Hasher
 void
 do_construct_Adler32(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2F5059F5-002D-4E7E-559D-EDA4EDA43608}";
+    static constexpr auto s_private_uuid = &"{b6f396f1-f21a-4436-87cb-48c4f72d0786}";
     result.insert_or_assign(s_private_uuid, std_checksum_Adler32_private());
 
     result.insert_or_assign(&"update",
@@ -291,7 +291,7 @@ class FNV1a32_Hasher
 void
 do_construct_FNV1a32(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2C79571C-5D7B-4674-056A-6C0D075A82FC}";
+    static constexpr auto s_private_uuid = &"{9bca0ffc-f708-4923-9f9e-13b48e3635c1}";
     result.insert_or_assign(s_private_uuid, std_checksum_FNV1a32_private());
 
     result.insert_or_assign(&"update",
@@ -416,7 +416,7 @@ class MD5_Hasher
 void
 do_construct_MD5(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2C795808-7290-4675-056A-D3825905F8E1}";
+    static constexpr auto s_private_uuid = &"{6b51abcb-f2f0-48b3-8a49-9b181253951f}";
     result.insert_or_assign(s_private_uuid, std_checksum_MD5_private());
 
     result.insert_or_assign(&"update",
@@ -525,7 +525,7 @@ class SHA1_Hasher
 void
 do_construct_SHA1(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2D242315-AF9A-4EDC-0612-CBBBCBBB75BB}";
+    static constexpr auto s_private_uuid = &"{520fa800-16b2-4c7c-81dc-bf4f4d59d4de}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA1_private());
 
     result.insert_or_assign(&"update",
@@ -634,7 +634,7 @@ class SHA224_Hasher
 void
 do_construct_SHA224(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2D24231A-8D6F-4EDC-0612-C448C44886E4}";
+    static constexpr auto s_private_uuid = &"{b4d818fb-7016-46ce-896d-009e028766da}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA224_private());
 
     result.insert_or_assign(&"update",
@@ -743,7 +743,7 @@ class SHA256_Hasher
 void
 do_construct_SHA256(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2D24231C-F3D7-4EDC-0612-551055107FE2}";
+    static constexpr auto s_private_uuid = &"{03d2d322-1e1d-4b28-bca5-e3f17e3b7d09}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA256_private());
 
     result.insert_or_assign(&"update",
@@ -852,7 +852,7 @@ class SHA384_Hasher
 void
 do_construct_SHA384(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2D24231E-B48F-4EDC-0612-145E145E6F29}";
+    static constexpr auto s_private_uuid = &"{977d234c-f17b-4399-91fd-e81f0e4b6730}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA384_private());
 
     result.insert_or_assign(&"update",
@@ -961,7 +961,7 @@ class SHA512_Hasher
 void
 do_construct_SHA512(V_object& result)
   {
-    static constexpr auto s_private_uuid = &"{2D242320-7A94-4EDC-0612-8851885187F8}";
+    static constexpr auto s_private_uuid = &"{852dd9fd-0a35-4a87-bc8b-984ed5913e49}";
     result.insert_or_assign(s_private_uuid, std_checksum_SHA512_private());
 
     result.insert_or_assign(&"update",

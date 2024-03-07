@@ -542,7 +542,7 @@ class PCRE2_Matcher
 void
 do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
   {
-    static constexpr auto s_private_uuid = &"{2D86F6E8-8927-4A26-062F-77EB77EB23E7}";
+    static constexpr auto s_private_uuid = &"{ae01217a-ea1a-4694-8bc0-bf607ed34f77}";
     result.insert_or_assign(s_private_uuid, std_string_PCRE_private(pattern, options));
 
     result.insert_or_assign(&"find",
