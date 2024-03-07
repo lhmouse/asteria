@@ -26,7 +26,7 @@ which can be done with
 # There is usually an outdated version of meson in the system APT source. Do
 # not use it; instead, install the latest one from pip.
 sudo apt-get install ninja-build python3 python3-pip pkgconf g++  \
-        libpcre2-dev libssl-dev zlib1g-dev libedit-dev
+        libpcre2-dev libssl-dev zlib1g-dev libedit-dev uuid-dev
 sudo pip3 install meson
 ```
 ```sh
@@ -34,7 +34,7 @@ sudo pip3 install meson
 # The `iconv_open()` etc. functions are provided by libiconv. Only the MSYS
 # shell is supported. Do not try building in the MINGW64 or UCRT64 shell.
 pacman -S meson gcc pkgconf pcre2-devel openssl-devel zlib-devel  \
-        libiconv-devel libedit-devel
+        libiconv-devel libedit-devel libutil-linux-devel
 ```
 ```sh
 # For macOS:
