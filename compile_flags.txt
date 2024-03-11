@@ -21,3 +21,4 @@
 -Werror=sign-conversion
 -mavx
 -masm=intel
+-DROCKET_DEBUG
