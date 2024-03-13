@@ -9,12 +9,6 @@ namespace asteria {
 
 class Recursion_Sentry
   {
-  public:
-    enum : uint32_t
-      {
-        stack_mask_bits = 20,  // 1 MiB
-      };
-
   private:
     const void* m_base;
 
@@ -45,21 +39,24 @@ class Recursion_Sentry
   private:
     [[noreturn]]
     void
-    do_throw_stack_overflow(ptrdiff_t usage) const;
+    do_throw_stack_overflow(ptrdiff_t usage, int limit) const;
 
     void
     do_validate_stack_usage() const
       {
         ptrdiff_t usage = (char*) this->m_base - (char*) this;
-        if(ROCKET_UNEXPECT(((usage >> stack_mask_bits) + 1) >> 1 != 0))
-          this->do_throw_stack_overflow(usage);
+        constexpr int mask_bits = 20;  // 1 MiB
+        constexpr int ptr_bits = ::std::numeric_limits<ptrdiff_t>::digits;
+
+        if(ROCKET_UNEXPECT(usage >> mask_bits != usage >> ptr_bits))
+          this->do_throw_stack_overflow(usage, 1 << mask_bits);
       }
 
   public:
     // Make this class non-trivial.
     ~Recursion_Sentry()
       {
-        __asm__ volatile ("" :);
+        __asm__ ("");
       }
 
     const void*
