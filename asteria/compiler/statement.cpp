@@ -303,8 +303,8 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           ROCKET_ASSERT(!altr.ctrl.units.empty());
           do_generate_expression(code, opts, global, ctx, ptc_aware_none, altr.ctrl);
 
-          // Create a fresh context for the `switch` body.
-          // Be advised that all clauses inside a `switch` statement share the same context.
+          // Create a fresh context for the `switch` body. Be advised that all
+          // clauses inside a `switch` statement share the same context.
           Analytic_Context ctx_body(xtc_plain, ctx);
           cow_vector<AIR_Node::switch_clause> clauses;
           for(const auto& clause : altr.clauses) {
@@ -329,8 +329,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
         {
           const auto& altr = this->m_stor.as<S_do_while>();
 
-          // Generate code for the body.
-          // Loop statements cannot be PTC'd.
+          // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
           // Generate code for the condition.
@@ -350,8 +349,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           ROCKET_ASSERT(!altr.cond.units.empty());
           auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
-          // Generate code for the body.
-          // Loop statements cannot be PTC'd.
+          // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
           AIR_Node::S_while_statement xnode = { altr.negative, move(code_cond), move(code_body) };
@@ -373,8 +371,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           ROCKET_ASSERT(!altr.init.units.empty());
           auto code_init = do_generate_expression(opts, global, ctx_for, ptc_aware_none, altr.init);
 
-          // Generate code for the body.
-          // Loop statements cannot be PTC'd.
+          // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
           AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, altr.sloc_init,
@@ -396,8 +393,7 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           auto code_cond = do_generate_expression(opts, global, ctx_for, ptc_aware_none, altr.cond);
           auto code_step = do_generate_expression(opts, global, ctx_for, ptc_aware_none, altr.step);
 
-          // Generate code for the body.
-          // Loop statements cannot be PTC'd.
+          // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
           AIR_Node::S_for_statement xnode = { move(code_init), move(code_cond), move(code_step),
