@@ -39,17 +39,17 @@ class Recursion_Sentry
   private:
     [[noreturn]]
     void
-    do_throw_stack_overflow(ptrdiff_t usage, int limit) const;
+    do_throw_overflow(ptrdiff_t usage, int limit) const;
 
     void
     do_validate_stack_usage() const
       {
         ptrdiff_t usage = (char*) this->m_base - (char*) this;
-        constexpr int size_bits = 20;  // 1 MiB
-        constexpr int ptr_bits = ::std::numeric_limits<ptrdiff_t>::digits;
+        constexpr int nbits_limit = 20;  // 1 MiB
+        constexpr int nbits_pointer = ::std::numeric_limits<ptrdiff_t>::digits;
 
-        if(ROCKET_UNEXPECT(usage >> (size_bits + 1) != usage >> ptr_bits))
-          this->do_throw_stack_overflow(usage, 1 << size_bits);
+        if(ROCKET_UNEXPECT(usage >> nbits_limit != usage >> nbits_pointer))
+          this->do_throw_overflow(usage, (1 << nbits_limit) - 1);
       }
 
   public:
