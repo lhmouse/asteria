@@ -957,9 +957,9 @@ rebind_opt(Abstract_Context& ctx) const
           for(size_t k = 0;  k < bound.clauses.size();  ++k) {
             // Labels are to be evaluated in the same scope as the condition
             // expression, and are not parts of the body.
-            for(size_t i = 0;  i < bound.clauses.at(k).code_label.size();  ++i)
-              if(auto qnode = bound.clauses.at(k).code_label.at(i).rebind_opt(ctx))
-                do_set_rebound(dirty, bound.clauses.mut(k).code_label.mut(i), move(*qnode));
+            for(size_t i = 0;  i < bound.clauses.at(k).code_labels.size();  ++i)
+              if(auto qnode = bound.clauses.at(k).code_labels.at(i).rebind_opt(ctx))
+                do_set_rebound(dirty, bound.clauses.mut(k).code_labels.mut(i), move(*qnode));
 
             for(size_t i = 0;  i < bound.clauses.at(k).code_body.size();  ++i)
               if(auto qnode = bound.clauses.at(k).code_body.at(i).rebind_opt(ctx_body))
@@ -1225,7 +1225,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
           // Collect variables from all labels and clauses.
           for(const auto& clause : altr.clauses) {
-            do_collect_variables_for_each(staged, temp, clause.code_label);
+            do_collect_variables_for_each(staged, temp, clause.code_labels);
             do_collect_variables_for_each(staged, temp, clause.code_body);
           }
           return;
@@ -1570,22 +1570,26 @@ solidify(AVM_Rod& rod) const
         {
           const auto& altr = this->m_stor.as<S_switch_statement>();
 
-          struct Clause
+          struct Sparam_switch_clause
             {
-              AVM_Rod rod_label;
+              Switch_Clause_Type type;
+              Compare cmp2_lower;
+              Compare cmp2_upper;
+              AVM_Rod rod_labels;
               AVM_Rod rod_body;
               cow_vector<phsh_string> names_added;
             };
 
-          struct Sparam
-            {
-              cow_vector<Clause> clauses;
-            };
-
+          using Sparam = cow_vector<Sparam_switch_clause>;
           Sparam sp2;
+          sp2.reserve(altr.clauses.size());
+
           for(const auto& clause : altr.clauses) {
-            auto& r = sp2.clauses.emplace_back();
-            do_solidify_nodes(r.rod_label, clause.code_label);
+            auto& r = sp2.emplace_back();
+            r.type = clause.type;
+            r.cmp2_lower = clause.lower_closed ? compare_equal : compare_greater;
+            r.cmp2_upper = clause.upper_closed ? compare_equal : compare_less;
+            do_solidify_nodes(r.rod_labels, clause.code_labels);
             do_solidify_nodes(r.rod_body, clause.code_body);
             r.names_added = clause.names_added;
           }
@@ -1596,45 +1600,60 @@ solidify(AVM_Rod& rod) const
               const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
               // Read the value of the condition and find the target clause for it.
+              // This is different from the `switch` statement in C, where `case`
+              // labels must have constant operands.
               auto cond = ctx.stack().top().dereference_readonly();
-              uint32_t target_index = UINT32_MAX;
+              size_t target_index = SIZE_MAX;
 
-              // This is different from the `switch` statement in C, where `case` labels must
-              // have constant operands.
-              for(uint32_t i = 0;  i < sp.clauses.size();  ++i) {
-                // This is a `default` clause if the condition is empty, and a `case` clause
-                // otherwise.
-                if(sp.clauses.at(i).rod_label.empty()) {
-                  target_index = i;
-                  continue;
+              for(size_t k = 0;  k < sp.size();  ++k)
+                if(sp.at(k).type == switch_clause_default) {
+                  target_index = k;
                 }
+                else if(sp.at(k).type == switch_clause_case) {
+                  // Expect an exact match of one value.
+                  AIR_Status status = sp.at(k).rod_labels.execute(ctx);
+                  ROCKET_ASSERT(status == air_status_next);
 
-                // Evaluate the operand and check whether it equals `cond`.
-                AIR_Status status = sp.clauses.at(i).rod_label.execute(ctx);
-                ROCKET_ASSERT(status == air_status_next);
-                if(ctx.stack().top().dereference_readonly().compare_partial(cond) == compare_equal) {
-                  target_index = i;
+                  if(cond.compare_partial(ctx.stack().top().dereference_readonly()) != compare_equal)
+                    continue;
+
+                  target_index = k;
                   break;
                 }
-              }
+                else if(sp.at(k).type == switch_clause_each) {
+                  // Expect an interval of two values.
+                  AIR_Status status = sp.at(k).rod_labels.execute(ctx);
+                  ROCKET_ASSERT(status == air_status_next);
+
+                  if(::rocket::is_none_of(cond.compare_partial(ctx.stack().top(1).dereference_readonly()),
+                                          { compare_greater, sp.at(k).cmp2_lower }))
+                    continue;
+
+                  if(::rocket::is_none_of(cond.compare_partial(ctx.stack().top(0).dereference_readonly()),
+                                          { compare_less, sp.at(k).cmp2_upper }))
+                    continue;
+
+                  target_index = k;
+                  break;
+                }
 
               // Skip this statement if no matching clause has been found.
-              if(target_index >= sp.clauses.size())
+              if(target_index >= sp.size())
                 return air_status_next;
 
               // Jump to the target clause.
               Executive_Context ctx_body(xtc_plain, ctx);
               AIR_Status status = air_status_next;
               try {
-                for(size_t i = 0;  i < sp.clauses.size();  ++i)
+                for(size_t i = 0;  i < sp.size();  ++i)
                   if(i < target_index) {
                     // Inject bypassed names into the scope.
-                    for(const auto& name : sp.clauses.at(i).names_added)
+                    for(const auto& name : sp.at(i).names_added)
                       ctx_body.insert_named_reference(name);
                   }
                   else {
                     // Execute the body of this clause.
-                    AIR_Status next_status = sp.clauses.at(i).rod_body.execute(ctx_body);
+                    AIR_Status next_status = sp.at(i).rod_body.execute(ctx_body);
                     if(next_status != air_status_next) {
                       if(::rocket::is_none_of(next_status, { air_status_break_unspec, air_status_break_switch }))
                         status = next_status;
@@ -1659,9 +1678,8 @@ solidify(AVM_Rod& rod) const
             // Collector
             , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
             {
-              const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-              for(const auto& r : sp.clauses) {
-                r.rod_label.collect_variables(staged, temp);
+              for(const auto& r : *reinterpret_cast<const Sparam*>(head->sparam)) {
+                r.rod_labels.collect_variables(staged, temp);
                 r.rod_body.collect_variables(staged, temp);
               }
             }

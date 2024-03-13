@@ -43,7 +43,10 @@ class AIR_Node
 
     struct switch_clause
       {
-        cow_vector<AIR_Node> code_label;
+        Switch_Clause_Type type;
+        bool lower_closed;
+        bool upper_closed;
+        cow_vector<AIR_Node> code_labels;
         cow_vector<AIR_Node> code_body;
         cow_vector<phsh_string> names_added;
       };

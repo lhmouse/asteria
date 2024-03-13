@@ -747,7 +747,8 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
     // switch-statement ::=
     //   "switch" "(" expression ")" "{" switch-clause * "}"
     // switch-clause ::=
-    //   ( "case" expression | "default" ) ":" statement *
+    //   ( "default" | "case" expression | "each" ( "[" | "(" ) expression ","
+    //   expression ( "]" | ")" ) ) ":" statement *
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
     if(!qkwrd)
       return nullopt;
@@ -780,29 +781,70 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
 
     for(;;) {
       auto label_sloc = tstrm.next_sloc();
-      qkwrd = do_accept_keyword_opt(tstrm, { keyword_case, keyword_default });
+      qkwrd = do_accept_keyword_opt(tstrm, { keyword_default, keyword_case, keyword_each });
       if(!qkwrd)
         break;
 
-      auto& clause = clauses.emplace_back();
-      if(*qkwrd == keyword_case) {
-        // The `case` label requires an expression argument.
+      if(*qkwrd == keyword_default) {
+        // There shall be no more than one `default` clause within each `switch`
+        // statement. A `default` clause takes no expression.
+        for(const auto& other : clauses)
+          if(other.type == switch_clause_default)
+            throw Compiler_Error(xtc_status,
+                      compiler_status_multiple_default, label_sloc);
+
+        // Add a new clause.
+        auto& clause = clauses.emplace_back();
+        clause.type = switch_clause_default;
+      }
+      else if(*qkwrd == keyword_case) {
+        // A `case` label takes an expression and expects an exact match.
         auto qlabel = do_accept_expression_as_rvalue_opt(tstrm);
         if(!qlabel)
           throw Compiler_Error(xtc_status,
                     compiler_status_expression_expected, tstrm.next_sloc());
 
-        // Set the label.
-        clause.label = move(*qlabel);
-        ROCKET_ASSERT(!clause.label.units.empty());
+        // Add a new clause.
+        auto& clause = clauses.emplace_back();
+        clause.type = switch_clause_case;
+        clause.label_lower = move(*qlabel);
       }
-      else {
-        // The `default` label takes no argument. There shall be no more than
-        // one `default` label within each `switch` statement.
-        for(size_t i = 0;  i < clauses.size() - 1;  ++i)
-          if(clauses.at(i).label.units.empty())
-            throw Compiler_Error(xtc_status,
-                      compiler_status_multiple_default, label_sloc);
+      else if(*qkwrd == keyword_each) {
+        // An `each` label takes an interval.
+        auto kpunct_lower = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op,
+                                                              punctuator_bracket_op });
+        if(!kpunct_lower)
+          throw Compiler_Error(xtc_status,
+                    compiler_status_interval_expected, tstrm.next_sloc());
+
+        auto qlabel_lower = do_accept_expression_as_rvalue_opt(tstrm);
+        if(!qlabel_lower)
+          throw Compiler_Error(xtc_status,
+                    compiler_status_expression_expected, tstrm.next_sloc());
+
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+        if(!kpunct)
+          throw Compiler_Error(xtc_status,
+                    compiler_status_comma_expected, tstrm.next_sloc());
+
+        auto qlabel_upper = do_accept_expression_as_rvalue_opt(tstrm);
+        if(!qlabel_upper)
+          throw Compiler_Error(xtc_status,
+                    compiler_status_expression_expected, tstrm.next_sloc());
+
+        auto kpunct_upper = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl,
+                                                              punctuator_bracket_cl });
+        if(!kpunct_upper)
+          throw Compiler_Error(xtc_status,
+                    compiler_status_interval_closure_expected, tstrm.next_sloc());
+
+        // Add a new clause.
+        auto& clause = clauses.emplace_back();
+        clause.type = switch_clause_each;
+        clause.lower_closed = *kpunct_lower == punctuator_bracket_op;
+        clause.upper_closed = *kpunct_upper == punctuator_bracket_cl;
+        clause.label_lower = move(*qlabel_lower);
+        clause.label_upper = move(*qlabel_upper);
       }
 
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
@@ -811,7 +853,7 @@ do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
                   compiler_status_colon_expected, tstrm.next_sloc());
 
       while(auto qstmt = do_accept_statement_opt(tstrm, scope | scope_switch))
-        clause.body.emplace_back(move(*qstmt));
+        clauses.mut_back().body.emplace_back(move(*qstmt));
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
@@ -929,7 +971,8 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
       throw Compiler_Error(xtc_status,
                 compiler_status_identifier_expected, tstrm.next_sloc());
 
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_colon, punctuator_assign });
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_colon,
+                                                    punctuator_assign });
     if(kpunct) {
       // Move the first identifier into the key and expect the name for mapped
       // references.

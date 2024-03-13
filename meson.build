@@ -288,6 +288,7 @@ test_src = [
   'test/for_each.cpp',
   'test/github_102.cpp',
   'test/github_308.cpp',
+  'test/github_312.cpp',
 ]
 
 #===========================================================

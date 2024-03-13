@@ -113,7 +113,8 @@ switch-statement ::=
 	"switch" "(" expression ")" "{" switch-clause * "}"
 
 switch-clause ::=
-	( "case" expression | "default" ) ":" statement *
+	( "default" | "case" expression | "each" ( "[" | "(" ) expression ","
+	expression ( "]" | ")" ) ) ":" statement *
 
 do-while-statement ::=
 	"do" nondeclaration-statement "while" negation ? "(" expression ")" ";"

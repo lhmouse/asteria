@@ -7,6 +7,13 @@
 #include "../fwd.hpp"
 namespace asteria {
 
+enum Switch_Clause_Type : uint8_t
+  {
+    switch_clause_default  = 0,
+    switch_clause_case     = 1,
+    switch_clause_each     = 2,
+  };
+
 enum Xop : uint8_t
   {
     xop_inc       =  0,  // ++

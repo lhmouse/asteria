@@ -281,7 +281,7 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "`:` expected";
 
       case compiler_status_closing_brace_or_switch_clause_expected:
-        return "`}`, `case` or `default` expected";
+        return "`}`, `default`, `case` or `each` expected";
 
       case compiler_status_keyword_while_expected:
         return "`while` expected";
@@ -369,6 +369,12 @@ describe_compiler_status(Compiler_Status status) noexcept
 
       case compiler_status_closing_parenthesis_or_parameter_expected:
         return "`)` or parameter expected";
+
+      case compiler_status_interval_expected:
+        return "`(` or `[` expected";
+
+      case compiler_status_interval_closure_expected:
+        return "`)` or `]` expected";
 
       default:
         return "[unknown compiler status]";

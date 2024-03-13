@@ -53,7 +53,11 @@ class Statement
 
     struct switch_clause
       {
-        S_expression label;
+        Switch_Clause_Type type;
+        bool lower_closed;  // lower bound is closed in `each` clause
+        bool upper_closed;  // upper bound is closed in `each` clause
+        S_expression label_lower;
+        S_expression label_upper;
         cow_vector<Statement> body;
       };
 

@@ -309,11 +309,19 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           cow_vector<AIR_Node::switch_clause> clauses;
           for(const auto& clause : altr.clauses) {
             auto& r = clauses.emplace_back();
+            r.type = clause.type;
+            r.lower_closed = clause.lower_closed;
+            r.upper_closed = clause.upper_closed;
 
-            // Generate code for `case` labels, or create empty code for the `default` label.
-            // Note labels are not part of the body.
-            if(!clause.label.units.empty())
-              do_generate_expression(r.code_label, opts, global, ctx, ptc_aware_none, clause.label);
+            // Generate code for `case` and `each` labels, or create empty code
+            // for `default` labels. Note labels are not part of the body.
+            if(!clause.label_lower.units.empty())
+              do_generate_expression(r.code_labels, opts, global, ctx, ptc_aware_none,
+                                     clause.label_lower);
+
+            if(!clause.label_upper.units.empty())
+              do_generate_subexpression(r.code_labels, opts, global, ctx, ptc_aware_none,
+                                        clause.label_upper);
 
             // Generate code for the clause and accumulate names.
             do_generate_statement_list(r.code_body, ctx_body, &(r.names_added), global, opts,

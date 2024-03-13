@@ -139,6 +139,7 @@ class Reference_Stack;
 class AVM_Rod;
 
 // Runtime
+enum Switch_Clause_Type : uint8_t;
 enum Xop : uint8_t;
 enum AIR_Status : uint8_t;
 enum AIR_Constant : uint8_t;
@@ -735,6 +736,8 @@ enum Compiler_Status : uint32_t
     compiler_status_invalid_expression                         = 2035,
     compiler_status_nondeclaration_statement_expected          = 2036,
     compiler_status_closing_parenthesis_or_parameter_expected  = 2037,
+    compiler_status_interval_expected                          = 2038,
+    compiler_status_interval_closure_expected                  = 2039,
 
     // semantic errors
     compiler_status_undeclared_identifier                      = 3001,
