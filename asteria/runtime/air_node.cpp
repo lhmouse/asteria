@@ -2158,6 +2158,9 @@ solidify(AVM_Rod& rod) const
               auto& val = ctx.stack().mut_top().dereference_copy();
               ctx.stack().pop();
 
+              if(val.is_null())
+                throw Runtime_Error(xtc_assert, sp.sloc, &"`null` not throwable");
+
               if(auto hooks = ctx.global().get_hooks_opt())
                 hooks->on_throw(sp.sloc, val);
 
