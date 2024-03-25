@@ -10,6 +10,11 @@
 #  error Please turn off `-ffast-math`.
 #endif
 
+// Prevent use of standard streams.
+#define _IOS_BASE_H  1
+#define _STREAM_ITERATOR_H  1
+#define _STREAMBUF_ITERATOR_H  1
+
 #include "../rocket/cow_string.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/cow_vector.hpp"
