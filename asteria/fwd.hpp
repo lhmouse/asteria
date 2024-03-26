@@ -27,10 +27,6 @@
 #include <cstdint>
 #include <limits.h>
 #include <wchar.h>
-#ifdef __SSE2__
-#include <x86intrin.h>
-#include <immintrin.h>
-#endif  // __SSE2__
 namespace asteria {
 namespace noadl = asteria;
 
