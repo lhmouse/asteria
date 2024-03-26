@@ -29,7 +29,7 @@ int main()
 
     const auto hooks = ::rocket::make_refcnt<Test_Hooks>();
     Simple_Script code;
-    code.global().set_hooks(hooks);
+    code.mut_global().set_hooks(hooks);
 
     code.reload_string(
       &__FILE__, __LINE__, &R"__(

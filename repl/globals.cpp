@@ -141,7 +141,7 @@ exit_printf(Exit_Status stat, const char* fmt, ...) noexcept
 void
 install_verbose_hooks()
   {
-    repl_script.global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
+    repl_script.mut_global().set_hooks(::rocket::make_refcnt<Verbose_Hooks>());
     repl_script.mut_options().verbose_single_step_traps = true;
   }
 
