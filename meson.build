@@ -12,7 +12,7 @@
 ## NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 ## CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-project('asteria', 'cpp', version: '1.0.alpha-0')
+project('asteria', 'cpp', version: '1.0.beta-0')
 
 #===========================================================
 # List of files
