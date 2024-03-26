@@ -867,8 +867,8 @@ string of the same length as the longer one:
 ## Calling C++ Functions from Asteria
 
 Functions are reference-counting pointers, and can be passed like any other
-values. The simplest but still powerful way to create a function value is the
-`ASTERIA_BINDING()` macro, which is defined as
+values. The simplest but still powerful way to create a function value is to
+use the `ASTERIA_BINDING()` macro, which looks like
 
 ```c++
 ASTERIA_BINDING(
@@ -1001,9 +1001,9 @@ my.sub(123, 654) = -531
 Calling an Asteria function from C++ is a bit complex. First, we pass a
 function value to C++, either via a static variable or a return value. Then,
 we define a special `Reference` which passes the `this` reference into the
-function and passes the result from the function. Then, we push positional
+function and passes the result out of the function. Then, we push positional
 arguments from left to right onto a `Reference_Stack`. Finally, we invoke the
-function.
+function with these arguments.
 
 ```c++
 #include <asteria/simple_script.hpp>
@@ -1017,8 +1017,8 @@ main(void)
   {
     static V_function my_add_and_print;
 
-    // Create a script and install a helper function to its global context,
-    // which is used to set `my_add_and_print`.
+    // Create a script and install a helper function to its global
+    // context, which is used to set `my_add_and_print`.
     Simple_Script script;
     script.mut_global()
       .insert_named_reference(&"set_my_add_and_print")
@@ -1040,8 +1040,8 @@ main(void)
           reader.throw_no_matching_function_call();
         });
 
-    // Load a script which defines the actual function and sets it into
-    // `my_add_and_print` for later use.
+    // Load a script which defines the actual function and sets it
+    // into `my_add_and_print` for later use.
     script.reload_string(
       &"script name",
       &R"##(
@@ -1066,8 +1066,7 @@ main(void)
     args.push().set_temporary(678);
     my_add_and_print.invoke(result, script.mut_global(), move(args));
     long res1 = result.dereference_readonly().as_integer();
-    ::printf("my_add_and_print(%d, %d) = %ld\n",
-             123, 678, res1);
+    ::fprintf(stderr, "my_add_and_print = %ld\n", res1);
 
     result.clear();
     args.clear();
@@ -1075,8 +1074,7 @@ main(void)
     args.push().set_temporary(&"world!");
     my_add_and_print.invoke(result, script.mut_global(), move(args));
     cow_string res2 = result.dereference_readonly().as_string();
-    ::printf("my_add_and_print(%s, %s) = %s\n",
-             "hello ", "world!", res2.c_str());
+    ::fprintf(stderr, "my_add_and_print = %s\n", res2.c_str());
   }
 ```
 
@@ -1086,7 +1084,9 @@ This gives
 $ g++ -std=c++17 -W{all,extra,pedantic} test.cpp -lasteria
 $ ./a.out
 add_and_print(123, 678) = 801
+my_add_and_print = 801
 add_and_print(hello , world!) = hello world!
+my_add_and_print = hello world!
 ```
 
 [back to table of contents](#table-of-contents)
