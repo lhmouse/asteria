@@ -33,11 +33,11 @@ class Simple_Script
       { return this->m_opts;  }
 
     const Global_Context&
-    mut_global() const noexcept
+    global() const noexcept
       { return this->m_global;  }
 
     Global_Context&
-    global() noexcept
+    mut_global() noexcept
       { return this->m_global;  }
 
     explicit operator bool() const noexcept
