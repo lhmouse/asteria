@@ -876,7 +876,8 @@ ASTERIA_BINDING(
   "parameter-list",          // parameter list, when converted to a string
   Global_Context& global,    // (optional) global context from caller
   Reference&& self,          // (optional) `this` argument from caller
-  Argument_Reader&& reader)  // arguments
+  Argument_Reader&& reader)  // positional arguments
+  -> Value                   // result; may be `Value`, `Reference` or `void`
 {
   // function body
 }
