@@ -37,6 +37,8 @@ as other scripting languages. However there are some fundamental differences:
 9. [Throwing and Catching Exceptions](#throwing-and-catching-exceptions)
 10. [Integer Overflows](#integer-overflows)
 11. [Bit-wise Operators on Strings](#bit-wise-operators-on-strings)
+12. [Calling C++ Functions from Asteria](#calling-c-functions-from-asteria)
+13. [Calling Asteria Functions from C++](#calling-asteria-functions-from-c)
 
 ## Course 101
 
@@ -858,6 +860,233 @@ string of the same length as the longer one:
 #12:1> "2345" ^ "12345678"
 * running 'expression #12'...
 * result #12: string(8) "\x03\x01\a\x015678";
+```
+
+[back to table of contents](#table-of-contents)
+
+## Calling C++ Functions from Asteria
+
+Functions are reference-counting pointers, and can be passed like any other
+values. The simplest but still powerful way to create a function value is the
+`ASTERIA_BINDING()` macro, which is defined as
+
+```c++
+ASTERIA_BINDING(
+  "display-name",            // display name, when converted to a string
+  "parameter-list",          // parameter list, when converted to a string
+  Global_Context& global,    // (optional) global context from caller
+  Reference&& self,          // (optional) `this` argument from caller
+  Argument_Reader&& reader)  // arguments
+{
+  // function body
+}
+```
+
+Like in C++, it is generally not recommended to define functions directly in
+the global namespace. Instead, we define functions in custom namespaces. This
+example defines a global object `my`, which contains two member `add` and
+`sub`, which can be referenced as `my.add` and `my.sub`.
+
+```c++
+#include <asteria/simple_script.hpp>
+#include <asteria/runtime/binding_generator.hpp>
+#include <asteria/runtime/argument_reader.hpp>
+#include <asteria/runtime/garbage_collector.hpp>
+#include <asteria/runtime/variable.hpp>
+using namespace rocket;
+using namespace asteria;
+
+int
+main(void)
+  {
+    V_object my;
+
+    // `my.add(x, y)`
+    my.try_emplace(&"add",
+      ASTERIA_BINDING("my.add", "x, y",
+        Argument_Reader&& reader)
+        -> Value
+      {
+        // Try overload `integer, integer`.
+        V_integer ix, iy;
+        reader.start_overload();
+        reader.required(ix);
+        reader.required(iy);
+        if(reader.end_overload())
+          return ix + iy;
+
+        // Try overload `real, real`.
+        V_real fx, fy;
+        reader.start_overload();
+        reader.required(fx);
+        reader.required(fy);
+        if(reader.end_overload())
+          return fx + fy;
+
+        // Try overload `string, string`.
+        V_string sx, sy;
+        reader.start_overload();
+        reader.required(sx);
+        reader.required(sy);
+        if(reader.end_overload())
+          return sx + sy;
+
+        // Fail.
+        reader.throw_no_matching_function_call();
+      });
+
+    // `my.sub(x, y)`
+    my.try_emplace(&"sub",
+      ASTERIA_BINDING("my.sub", "x, y",
+        Argument_Reader&& reader)
+        -> Value
+      {
+        // Try overload `integer, integer`.
+        V_integer ix, iy;
+        reader.start_overload();
+        reader.required(ix);
+        reader.required(iy);
+        if(reader.end_overload())
+          return ix - iy;
+
+        // Try overload `real, real`.
+        V_real fx, fy;
+        reader.start_overload();
+        reader.required(fx);
+        reader.required(fy);
+        if(reader.end_overload())
+          return fx - fy;
+
+        // Fail.
+        reader.throw_no_matching_function_call();
+      });
+
+    // Create a script and install `my` into its global context as
+    // an immutable variable.
+    Simple_Script script;
+    auto v = script.mut_global().garbage_collector()->create_variable();
+    v->initialize(my);
+    v->set_immutable(true);
+    script.mut_global().insert_named_reference(&"my").set_variable(v);
+
+    // Load a script which calls those functions. If there is a parser
+    // error, an exception is thrown.
+    script.reload_string(
+      &"script name",
+      &R"##(
+        std.io.putfln('my.add(123, 654) = $1', my.add(123, 654));
+        std.io.putfln('my.add("a", "b") = $1', my.add("a", "b"));
+        std.io.putfln('my.sub(123, 654) = $1', my.sub(123, 654));
+      )##");
+
+    // Execute the script. The result is ignored.
+    script.execute();
+  }
+```
+
+This gives
+
+```text
+$ g++ -std=c++17 -W{all,extra,pedantic} test.cpp -lasteria
+$ ./a.out
+my.add(123, 654) = 777
+my.add("a", "b") = ab
+my.sub(123, 654) = -531
+```
+
+[back to table of contents](#table-of-contents)
+
+## Calling Asteria Functions from C++
+
+Calling an Asteria function from C++ is a bit complex. First, we pass a
+function value to C++, either via a static variable or a return value. Then,
+we define a special `Reference` which passes the `this` reference into the
+function and passes the result from the function. Then, we push positional
+arguments from left to right onto a `Reference_Stack`. Finally, we invoke the
+function.
+
+```c++
+#include <asteria/simple_script.hpp>
+#include <asteria/runtime/binding_generator.hpp>
+#include <asteria/runtime/argument_reader.hpp>
+using namespace rocket;
+using namespace asteria;
+
+int
+main(void)
+  {
+    static V_function my_add_and_print;
+
+    // Create a script and install a helper function to its global context,
+    // which is used to set `my_add_and_print`.
+    Simple_Script script;
+    script.mut_global()
+      .insert_named_reference(&"set_my_add_and_print")
+      .set_temporary(
+        ASTERIA_BINDING("my_add_and_print", "fn",
+          Argument_Reader&& reader)
+          -> void
+        {
+          // Try overload `function`.
+          V_function fn;
+          reader.start_overload();
+          reader.required(fn);
+          if(reader.end_overload()) {
+            my_add_and_print = fn;
+            return;
+          }
+
+          // Fail.
+          reader.throw_no_matching_function_call();
+        });
+
+    // Load a script which defines the actual function and sets it into
+    // `my_add_and_print` for later use.
+    script.reload_string(
+      &"script name",
+      &R"##(
+        // define the actual function.
+        func add_and_print(x, y) {
+          var sum = x + y;
+          std.io.putfln("add_and_print($1, $2) = $3", x, y, sum);
+          return sum;
+        }
+
+        // set it.
+        set_my_add_and_print(add_and_print);
+      )##");
+
+    // Execute the script. The result is ignored.
+    script.execute();
+
+    // Now `my_add_and_print` points to a function. Use it.
+    Reference result;
+    Reference_Stack args;
+    args.push().set_temporary(123);
+    args.push().set_temporary(678);
+    my_add_and_print.invoke(result, script.mut_global(), move(args));
+    long res1 = result.dereference_readonly().as_integer();
+    ::printf("my_add_and_print(%d, %d) = %ld\n",
+             123, 678, res1);
+
+    result.clear();
+    args.clear();
+    args.push().set_temporary(&"hello ");
+    args.push().set_temporary(&"world!");
+    my_add_and_print.invoke(result, script.mut_global(), move(args));
+    cow_string res2 = result.dereference_readonly().as_string();
+    ::printf("my_add_and_print(%s, %s) = %s\n",
+             "hello ", "world!", res2.c_str());
+  }
+```
+
+This gives
+
+```text
+$ g++ -std=c++17 -W{all,extra,pedantic} test.cpp -lasteria
+$ ./a.out
+add_and_print(123, 678) = 801
+add_and_print(hello , world!) = hello world!
 ```
 
 [back to table of contents](#table-of-contents)
