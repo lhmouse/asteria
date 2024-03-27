@@ -5,6 +5,7 @@
 #define ROCKET_ASCII_NUMPUT_
 
 #include "fwd.hpp"
+#include "xassert.hpp"
 namespace rocket {
 
 class ascii_numput

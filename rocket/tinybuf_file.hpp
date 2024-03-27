@@ -8,6 +8,7 @@
 #include "unique_posix_file.hpp"
 #include "unique_posix_fd.hpp"
 #include "xuchar.hpp"
+#include "xthrow.hpp"
 #include <fcntl.h>  // ::open()
 #include <stdio.h>  // ::fdopen(), ::fclose()
 #include <errno.h>  // errno
