@@ -5,7 +5,9 @@
 #define ROCKET_TINYFMT_
 
 #include "fwd.hpp"
+#include "xassert.hpp"
 #include "xthrow.hpp"
+#include "xstring.hpp"
 #include "tinybuf.hpp"
 #include "ascii_numput.hpp"
 #include <chrono>
