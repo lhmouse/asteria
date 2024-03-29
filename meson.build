@@ -302,8 +302,10 @@ ver.set_quoted('abi_string', meson.project_version())
 cxx = meson.get_compiler('cpp')
 cxx_is_i386 = cxx.compiles('int foo = __i386__;')
 cxx_is_amd64 = cxx.compiles('int foo = __amd64__;')
-cxx_asm_intel = cxx.compiles('int foo(int a) { return a + 1; }', args: [ '-masm=intel' ])
-cxx_has_uchar = cxx.links('extern "C" int mbrtoc16(); int main() { return *(int*) mbrtoc16; }')
+cxx_asm_intel = cxx.compiles('int foo(int a) { return a + 1; }',
+                             args: [ '-masm=intel' ])
+cxx_has_uchar = cxx.links('extern "C" int mbrtoc16();
+                           int main() { return *(int*) mbrtoc16; }')
 
 if cxx_asm_intel
   add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
@@ -318,15 +320,15 @@ if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
 endif
 
 if get_option('enable-debug-checks')
-  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: [ 'c', 'cpp' ])
+  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: 'cpp')
 endif
 
 if cxx_has_uchar
-  add_project_arguments('-DHAVE_UCHAR_H', language: [ 'c', 'cpp' ])
+  add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
 endif
 
 if get_option('b_sanitize').contains('address')
-  add_project_arguments('-DPOSEIDON_ENABLE_ADDRESS_SANITIZER', language: [ 'c', 'cpp' ])
+  add_project_arguments('-DPOSEIDON_ENABLE_ADDRESS_SANITIZER', language: 'cpp')
 endif
 
 add_project_arguments(
@@ -362,8 +364,8 @@ dep_editline = disabler()
 
 if get_option('enable-repl')
   dep_editline = dependency('libedit',
-      not_found_message: 'libedit is required to build the REPL. If you do not need '
-                         + 'the REPL, use `meson setup -Denable-repl=false`.')
+      not_found_message: 'libedit is required to build the REPL. If you do not '
+                         + 'need it, use `meson setup -Denable-repl=false`.')
 endif
 
 #===========================================================
