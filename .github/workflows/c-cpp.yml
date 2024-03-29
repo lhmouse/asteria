@@ -20,6 +20,7 @@ jobs:
 
     - name: Install dependencies
       run: >-
+           sudo apt-get update &&
            sudo apt-get install -y --no-install-recommends g++-7 python3
            pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev uuid-dev
            ninja-build python3-pip
@@ -50,7 +51,7 @@ jobs:
 
     - name: Install dependencies
       run: >-
-           pacman -S --noconfirm gcc meson pkgconf libedit-devel
+           pacman -Sy --noconfirm gcc meson pkgconf libedit-devel
            pcre2-devel openssl-devel zlib-devel libiconv-devel
            libutil-linux-devel
 
