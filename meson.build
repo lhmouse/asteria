@@ -302,14 +302,20 @@ ver.set_quoted('abi_string', meson.project_version())
 cxx = meson.get_compiler('cpp')
 cxx_is_i386 = cxx.compiles('int foo = __i386__;')
 cxx_is_amd64 = cxx.compiles('int foo = __amd64__;')
-cxx_asm_intel = cxx.compiles('int foo(int a) { return a + 1; }',
-                             args: [ '-masm=intel' ])
-cxx_has_uchar = cxx.links('extern "C" int mbrtoc16();
-                           int main() { return *(int*) mbrtoc16; }')
 
-if cxx_asm_intel
-  add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
-endif
+cxx_asm_intel = cxx.compiles(
+    '''
+    int main(int argc, char** argv) { return argc + 1; }
+    ''',
+    args: [ '-masm=intel' ])
+
+cxx_has_uchar = cxx.links(
+    '''
+    #include <uchar.h>
+    int main(int argc, char** argv)
+    { return ::mbrtoc16(nullptr, nullptr, 0, nullptr);  }
+    ''',
+    args: [ '-std=c++11' ])
 
 if cxx_is_i386
   add_project_arguments('-msse2', '-mfpmath=sse', language: [ 'c', 'cpp' ])
@@ -319,12 +325,16 @@ if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
   add_project_arguments('-mavx', language: [ 'c', 'cpp' ])
 endif
 
-if get_option('enable-debug-checks')
-  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: 'cpp')
+if cxx_asm_intel
+  add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
 endif
 
 if cxx_has_uchar
   add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
+endif
+
+if get_option('enable-debug-checks')
+  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: 'cpp')
 endif
 
 if get_option('b_sanitize').contains('address')
