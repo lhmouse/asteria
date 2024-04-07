@@ -330,7 +330,7 @@ class variant
 
   public:
     // 23.7.3.5, value status
-    constexpr
+    ROCKET_CONSTEXPR_INLINE
     size_t
     index() const noexcept
       {
