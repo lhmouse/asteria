@@ -3,7 +3,7 @@
 # setup
 export CXX=${CXX:-"g++"}
 export CXXFLAGS="-D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809
-                 -D_GNU_SOURCE -Ibuild_debug -std=c++17"
+                 -D_GNU_SOURCE -Ibuild_debug -std=c++17 -mavx"
 
 # note: `sem` is not always available
 _sem="parallel --will-cite --semaphore --halt soon,fail=1"
