@@ -82,7 +82,7 @@ do_dereference_readonly_slow() const
       valp = this->m_mods[mi++].apply_read_opt(*valp);
 
     if(!valp)
-      return null_value;
+      return null;
 
     return *valp;
   }
@@ -193,7 +193,7 @@ dereference_unset() const
       valp = this->m_mods[mi++].apply_write_opt(*valp);
 
     if(!valp)
-      return null_value;
+      return null;
 
     return this->m_mods[mi].apply_unset(*valp);
   }

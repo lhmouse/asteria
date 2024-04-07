@@ -383,6 +383,6 @@ describe_compiler_status(Compiler_Status status) noexcept
 
 // We assume that a all-bit-zero struct represents the `null` value.
 // This is effectively undefined behavior. Don't play with this at home!
-alignas(Value) const unsigned char null_value_storage[sizeof(Value)] = { };
+alignas(Value) const char null_storage[sizeof(Value)] = { };
 
 }  // namespace asteria

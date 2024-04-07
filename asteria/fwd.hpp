@@ -850,8 +850,8 @@ using Compiler_Options_v2 = Compiler_Options_template<2>;
 using Compiler_Options = Compiler_Options_v2;
 
 // This value is initialized statically and never destroyed.
-extern const unsigned char null_value_storage[];
-static const Value& null_value = reinterpret_cast<const Value&>(null_value_storage);
+extern const char null_storage[];
+static const Value& null = reinterpret_cast<const Value&>(null_storage);
 
 }  // namespace asteria
 #endif
