@@ -157,7 +157,7 @@ do_accept_literal_opt(Token_Stream& tstrm)
     if(qtok->is_keyword() && (qtok->as_keyword() == keyword_null)) {
       // Discard this token and create a `null`.
       tstrm.shift();
-      return null_value;
+      return null;
     }
 
     if(qtok->is_keyword() && (qtok->as_keyword() == keyword_false)) {
