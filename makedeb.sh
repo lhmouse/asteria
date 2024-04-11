@@ -9,10 +9,10 @@ rm -rf ${_tempdir}
 mkdir -p ${_tempdir}
 cp -pr DEBIAN -t ${_tempdir}
 
-meson setup -Ddebug=true -Doptimization=3 build_release
-meson compile -Cbuild_release
-meson test -Cbuild_release
-DESTDIR=${_tempdir} meson install -Cbuild_release
+meson setup -Ddebug=true -Doptimization=3 build_makedeb
+meson compile -Cbuild_makedeb
+meson test -Cbuild_makedeb
+DESTDIR=${_tempdir} meson install -Cbuild_makedeb
 
 sed -i "s/{_pkgname}/${_pkgname}/" ${_tempdir}/DEBIAN/control
 sed -i "s/{_pkgversion}/${_pkgversion}/" ${_tempdir}/DEBIAN/control
