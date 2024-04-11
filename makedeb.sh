@@ -12,7 +12,7 @@ cp -pr DEBIAN -t ${_tempdir}
 meson setup -Ddebug=true -Doptimization=3 build_release
 meson compile -Cbuild_release
 meson test -Cbuild_release
-DESTDIR=${_tempdir} meson install --strip -Cbuild_release
+DESTDIR=${_tempdir} meson install -Cbuild_release
 
 sed -i "s/{_pkgname}/${_pkgname}/" ${_tempdir}/DEBIAN/control
 sed -i "s/{_pkgversion}/${_pkgversion}/" ${_tempdir}/DEBIAN/control
