@@ -51,9 +51,7 @@ class Argument_Reader
     do_peek_argument() const;
 
   public:
-    Argument_Reader(const Argument_Reader&) = default;
     Argument_Reader(Argument_Reader&&) = default;
-    Argument_Reader& operator=(const Argument_Reader&) & = default;
     Argument_Reader& operator=(Argument_Reader&&) & = default;
     ~Argument_Reader();
 
