@@ -168,12 +168,10 @@ using ::std::memory_order_seq_cst;
 
 #define ROCKET_VOID_DECLTYPE(...)         ROCKET_VOID_T(decltype(__VA_ARGS__))
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)    ROCKET_VOID_T(__VA_ARGS__)* = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)   ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) | 1)
-
-#define ROCKET_DISABLE_SELF(x,...)  \
-    ROCKET_DISABLE_IF(::std::is_same<x,  \
-        typename ::std::remove_cv<typename ::std::remove_reference<__VA_ARGS__>::type>::type  \
-          >::value)
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)   ROCKET_ENABLE_IF(sizeof(__VA_ARGS__) != 0)
+#define ROCKET_DISABLE_SELF(T, ...)       ROCKET_DISABLE_IF(::std::is_base_of<T,  \
+                                              typename ::std::remove_reference<__VA_ARGS__>::type  \
+                                               >::value)
 
 #define ROCKET_CONSTEXPR_INLINE   constexpr ROCKET_ALWAYS_INLINE  // https://gcc.gnu.org/PR109464
 #define ROCKET_SET_IF(x, ...)   ((x) && ((void) (*(x) = (__VA_ARGS__)), true))
