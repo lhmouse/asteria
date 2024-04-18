@@ -98,7 +98,7 @@ class shared_function<xreturnT (xparamsT...)>
       }
 
     xreturnT
-    operator()(xparamsT&&... params) const
+    operator()(xparamsT... params) const
       {
         if(this->m_pfn == nullptr)
           noadl::sprintf_and_throw<invalid_argument>(
