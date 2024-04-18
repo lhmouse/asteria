@@ -110,6 +110,10 @@ using ::std::is_union;
 using ::std::is_scalar;
 using ::std::is_arithmetic;
 using ::std::is_function;
+using ::std::is_invocable;
+using ::std::is_invocable_r;
+using ::std::is_nothrow_invocable;
+using ::std::is_nothrow_invocable_r;
 
 using ::std::allocator;
 using ::std::allocator_traits;
