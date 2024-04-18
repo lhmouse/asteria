@@ -36,35 +36,37 @@ class shared_function<xreturnT (xparamsT...)>
     constexpr shared_function() noexcept = default;
 
     constexpr shared_function(function_type* pfn) noexcept
-      : m_pfn(pfn)  { }
+      : m_pfn(pfn)
+      { }
+
+    shared_function&
+    operator=(function_type* pfn) & noexcept
+      {
+        this->reset(pfn);
+        return *this;
+      }
 
     template<typename xfuncT,
     ROCKET_ENABLE_IF(is_viable<xfuncT>::value),
     ROCKET_DISABLE_SELF(shared_function, xfuncT)>
-    shared_function(xfuncT&& xfunc)
+    explicit shared_function(xfuncT&& xfunc)
       {
-        struct container_xfunc : container
-          {
-            typename decay<xfuncT>::type func;
-            container_xfunc(xfuncT&& xf) : func(forward<xfuncT>(xf))  { }
+        this->reset(forward<xfuncT>(xfunc));
+      }
 
-            virtual xreturnT forward_call(xparamsT&&... params) override
-              { return this->func(forward<xparamsT>(params)...);  }
-          };
-
-        // Set `m_pfn` to a non-null value.
-        this->m_pobj.reset(new container_xfunc(forward<xfuncT>(xfunc)));
-        this->m_pfn = reinterpret_cast<function_type*>(-2);
+    template<typename xfuncT,
+    ROCKET_ENABLE_IF(is_viable<xfuncT>::value),
+    ROCKET_DISABLE_SELF(shared_function, xfuncT)>
+    shared_function&
+    operator=(xfuncT&& xfunc) &
+      {
+        this->reset(forward<xfuncT>(xfunc));
+        return *this;
       }
 
     shared_function(const shared_function& other) noexcept
       : m_pobj(other.m_pobj),
         m_pfn(other.m_pfn)
-      { }
-
-    shared_function(shared_function&& other) noexcept
-      : m_pobj(noadl::exchange(other.m_pobj)),
-        m_pfn(noadl::exchange(other.m_pfn))
       { }
 
     shared_function&
@@ -74,6 +76,11 @@ class shared_function<xreturnT (xparamsT...)>
         this->m_pfn = other.m_pfn;
         return *this;
       }
+
+    shared_function(shared_function&& other) noexcept
+      : m_pobj(noadl::exchange(other.m_pobj)),
+        m_pfn(noadl::exchange(other.m_pfn))
+      { }
 
     shared_function&
     operator=(shared_function&& other) & noexcept
@@ -108,6 +115,34 @@ class shared_function<xreturnT (xparamsT...)>
           return this->m_pobj->forward_call(forward<xparamsT>(params)...);
         else
           return this->m_pfn(forward<xparamsT>(params)...);
+      }
+
+    shared_function&
+    reset(function_type* pfn = nullptr) noexcept
+      {
+        this->m_pobj.reset();
+        this->m_pfn = pfn;
+        return *this;
+      }
+
+    template<typename xfuncT,
+    ROCKET_ENABLE_IF(is_viable<xfuncT>::value)>
+    shared_function&
+    reset(xfuncT&& xfunc)
+      {
+        struct container_xfunc : container
+          {
+            typename decay<xfuncT>::type func;
+            container_xfunc(xfuncT&& xf) : func(forward<xfuncT>(xf))  { }
+
+            virtual xreturnT forward_call(xparamsT&&... params) override
+              { return this->func(forward<xparamsT>(params)...);  }
+          };
+
+        // Set `m_pfn` to a non-null value.
+        this->m_pobj.reset(new container_xfunc(forward<xfuncT>(xfunc)));
+        this->m_pfn = reinterpret_cast<function_type*>(-2);
+        return *this;
       }
   };
 
