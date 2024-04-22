@@ -64,6 +64,9 @@ class basic_shallow_string
         m_ptr(*ps), m_len((ROCKET_ASSERT(*(*ps + N - 1) == charT()), N - 1))
       { }
 
+    template<size_t N>
+    constexpr basic_shallow_string(charT (*ps)[N]) = delete;
+
   public:
     constexpr
     const charT*
@@ -156,16 +159,33 @@ class basic_cow_string
         m_ref(s_zstr), m_sth(alloc)
       { }
 
-    constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
+    constexpr basic_cow_string(shallow_type sh) noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        m_ref(sh), m_sth()
+      { }
+
+    constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc) noexcept
       :
         m_ref(sh), m_sth(alloc)
       { }
 
     template<size_t N>
-    constexpr basic_cow_string(const value_type (*ps)[N], const allocator_type& alloc = allocator_type()) noexcept
+    constexpr basic_cow_string(const value_type (*ps)[N]) noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        m_ref(ps), m_sth()
+      { }
+
+    template<size_t N>
+    constexpr basic_cow_string(const value_type (*ps)[N], const allocator_type& alloc) noexcept
       :
         m_ref(ps), m_sth(alloc)
       { }
+
+    template<size_t N>
+    constexpr basic_cow_string(value_type (*ps)[N]) = delete;
+
+    template<size_t N>
+    constexpr basic_cow_string(value_type (*ps)[N], const allocator_type& alloc) = delete;
 
     basic_cow_string(const basic_cow_string& other) noexcept
       :
@@ -237,6 +257,10 @@ class basic_cow_string
         this->m_ref = shallow_type(ps);
         return *this;
       }
+
+    template<size_t N>
+    basic_cow_string&
+    operator=(value_type (*ps)[N]) & = delete;
 
     basic_cow_string&
     operator=(const basic_cow_string& other) & noexcept

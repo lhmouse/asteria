@@ -22,7 +22,8 @@ class static_char_buffer
 
   public:
     constexpr static_char_buffer() noexcept
-      : m_init()  { }
+      : m_init()
+      { }
 
     static_char_buffer(const char* str)
       {
