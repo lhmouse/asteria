@@ -244,17 +244,14 @@ class basic_cow_string
         return *this;
       }
 
-    template<size_t N>
+    template<typename ycharT, size_t N,
+    ROCKET_ENABLE_IF(is_same<ycharT, value_type>::value)>
     basic_cow_string&
-    operator=(const value_type (*ps)[N]) & noexcept
+    operator=(const ycharT (*ps)[N]) & noexcept
       {
         this->m_ref = shallow_type(ps);
         return *this;
       }
-
-    template<size_t N>
-    basic_cow_string&
-    operator=(value_type (*ps)[N]) & = delete;
 
     basic_cow_string&
     operator=(const basic_cow_string& other) & noexcept
