@@ -140,7 +140,8 @@ struct basic_storage
 
 #ifdef ROCKET_DEBUG
         this->nelem = static_cast<size_type>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(this->bkts), '~', sizeof(bucket_type) + (this->nblk - 1) * sizeof(basic_storage));
+        ::std::memset(static_cast<void*>(this->bkts), '~',
+                 sizeof(bucket_type) + (this->nblk - 1) * sizeof(basic_storage));
 #endif
       }
 
