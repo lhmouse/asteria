@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install dependencies
       run: >-
@@ -43,7 +43,7 @@ jobs:
         shell: msys2 {0}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: msys2/setup-msys2@v2
       with:
@@ -65,7 +65,7 @@ jobs:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install dependencies
       run: >-
