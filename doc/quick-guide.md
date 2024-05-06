@@ -61,7 +61,7 @@ The `putfln()` function takes a _template string_ with _placeholders_; the
 placeholder `$1` is to be replaced with the 1st argument that follows it, and
 `$2` is to be replaced with the 2nd argument that follows it, and so on.
 
-As our program no longer first into one line, we need to enable the _heredoc_
+As our program no longer fits into one line, we need to enable the _heredoc_
 mode. The `:heredoc` command takes an arbitrary string that will mark the end
 of a single snippet. In this example we use `@@`, so our program looks like
 
