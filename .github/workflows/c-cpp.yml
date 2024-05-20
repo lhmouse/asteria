@@ -62,7 +62,7 @@ jobs:
 
   macos:
     name: macOS native build (x86-64)
-    runs-on: macos-11
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
