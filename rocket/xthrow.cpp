@@ -13,14 +13,14 @@ sprintf_and_throw(const char* fmt, ...)
     // Compose the error message in temporary storage.
     ::va_list ap;
     va_start(ap, fmt);
-    char strbuf[1024];
-    int ret = ::vsnprintf(strbuf, sizeof(strbuf), fmt, ap);
+    char strbuf[2048];
+    int ret = ::vsnprintf(strbuf, sizeof strbuf, fmt, ap);
     va_end(ap);
 
     // Remove trailing line breaks.
-    long t = clamp_cast<long>(ret, 0, (long) sizeof(strbuf)) - 1;
-    while((t >= 0) && (strbuf[t] == '\n'))
-      strbuf[--t] = 0;
+    auto eptr = strbuf + clamp_cast<uint32_t>(ret, 0, (int) sizeof strbuf - 1);
+    while((eptr != strbuf) && (*eptr == '\n'))
+      *(eptr --) = 0;
 
     // Throw an exception with a copy of the formatted message...
     // Can we make use of the reference-counting string in standard
