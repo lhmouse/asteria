@@ -8,7 +8,12 @@
 ![asteria](asteria.png)
 
 **Asteria** is a procedural, dynamically typed programming language that is
-highly inspired by JavaScript but has been designed to address its issues.
+highly inspired by JavaScript.
+
+The most notable difference between Asteria and other languages is that the
+so-called 'objects' have _value semantics_. That is, an object is copied when
+it is passed to a function by value or is assigned to a variable, just like
+values of primitive types.
 
 * [Quick Guide](doc/quick-guide.md)
 * [Production Rules](doc/grammar.txt)
