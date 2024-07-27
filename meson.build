@@ -351,7 +351,7 @@ add_project_arguments(
     '-Wmissing-declarations', '-Wmissing-field-initializers', '-Wshadow',
     '-Wsuggest-attribute=noreturn', '-Wswitch-enum', '-Wunused-function',
     '-Wunused-label', '-Wunused-local-typedefs', '-Wunused-but-set-variable',
-    '-Wunused-but-set-parameter',
+    '-Wunused-but-set-parameter', '-Wno-stringop-overflow', '-Wno-array-bounds',
     language: [ 'c', 'cpp' ])
 
 add_project_arguments(
