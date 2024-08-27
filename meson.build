@@ -304,20 +304,7 @@ ver.set_quoted('abi_string', meson.project_version())
 cxx = meson.get_compiler('cpp')
 cxx_is_i386 = cxx.compiles('int foo = __i386__;')
 cxx_is_amd64 = cxx.compiles('int foo = __amd64__;')
-
-cxx_asm_intel = cxx.compiles(
-    '''
-    int main(int argc, char** argv) { return argc + 1; }
-    ''',
-    args: [ '-masm=intel' ])
-
-cxx_has_uchar = cxx.links(
-    '''
-    #include <uchar.h>
-    int main(int argc, char** argv)
-    { return ::mbrtoc16(nullptr, nullptr, 0, nullptr);  }
-    ''',
-    args: [ '-std=c++11' ])
+cxx_asm_intel = cxx.has_argument('-masm=intel')
 
 if cxx_is_i386
   add_project_arguments('-msse2', '-mfpmath=sse', language: [ 'c', 'cpp' ])
@@ -331,6 +318,14 @@ if cxx_asm_intel
   add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
 endif
 
+cxx_has_uchar = cxx.links(
+    '''
+    #include <uchar.h>
+    int main(int argc, char** argv)
+    { return ::mbrtoc16(nullptr, nullptr, 0, nullptr);  }
+    ''',
+    args: [ '-std=c++11' ])
+
 if cxx_has_uchar
   add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
 endif
@@ -340,24 +335,24 @@ if get_option('enable-debug-checks')
 endif
 
 add_project_arguments(
-    '-Wall', '-Wextra', '-Winvalid-pch',
-    '-D_FILE_OFFSET_BITS=64', '-D_POSIX_C_SOURCE=200809', '-D_DEFAULT_SOURCE',
-    '-D_DARWIN_C_SOURCE', '-U_FORTIFY_SOURCE', '-fno-stack-protector',
-    '-fstrict-aliasing', '-fstrict-overflow', '-fmerge-all-constants',
-    '-frounding-math', '-fno-math-errno', '-fno-trapping-math', '-fno-ident',
-    '-fno-devirtualize-speculatively', '-fno-semantic-interposition',
-    '-Werror=conversion', '-Werror=sign-compare', '-Werror=sign-conversion',
-    '-Werror=write-strings', '-Werror=return-type', '-Werror=double-promotion',
-    '-Wmissing-declarations', '-Wmissing-field-initializers', '-Wshadow',
-    '-Wsuggest-attribute=noreturn', '-Wswitch-enum', '-Wunused-function',
-    '-Wunused-label', '-Wunused-local-typedefs', '-Wunused-but-set-variable',
-    '-Wunused-but-set-parameter', '-Wno-stringop-overflow', '-Wno-array-bounds',
-    language: [ 'c', 'cpp' ])
-
-add_project_arguments(
-    '-std=c++17', '-fno-elide-constructors', '-fvisibility-inlines-hidden',
-    '-fnothrow-opt', '-fno-enforce-eh-specs', '-Wzero-as-null-pointer-constant',
-    '-Wno-redundant-move', '-Werror=non-virtual-dtor',
+    '-Wall', '-Wextra', '-Winvalid-pch', '-std=c++17', '-D_FILE_OFFSET_BITS=64',
+    '-D_POSIX_C_SOURCE=200809', '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
+    cxx.get_supported_arguments(
+      '-fno-elide-constructors', '-fvisibility-inlines-hidden', '-fnothrow-opt',
+      '-fno-enforce-eh-specs', '-Wzero-as-null-pointer-constant', '-fstrict-aliasing',
+      '-fno-stack-protector', '-fstrict-overflow', '-fmerge-all-constants',
+      '-frounding-math', '-fno-math-errno', '-fno-ident', '-fno-trapping-math',
+      '-fno-devirtualize-speculatively', '-fno-semantic-interposition',
+      '-Werror=conversion', '-Werror=sign-compare', '-Werror=sign-conversion',
+      '-Werror=write-strings', '-Werror=return-type', '-Werror=double-promotion',
+      '-Werror=non-virtual-dtor',
+      '-Wmissing-declarations', '-Wmissing-field-initializers', '-Wshadow',
+      '-Wsuggest-attribute=noreturn', '-Wswitch-enum', '-Wunused-function',
+      '-Wunused-label', '-Wunused-local-typedefs', '-Wunused-but-set-variable',
+      '-Wunused-but-set-parameter', '-Wno-array-bounds', '-Wno-stringop-overflow',
+      '-Wno-redundant-move', '-Wno-unqualified-std-cast-call', '-Wno-string-plus-int',
+      '-Wno-bitwise-instead-of-logical', '-Wno-missing-braces'
+    ),
     language: 'cpp')
 
 #===========================================================

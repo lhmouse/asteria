@@ -330,7 +330,15 @@ enum scope_flags : uint32_t
     scope_for     = 0b00000100,
   };
 
-ROCKET_DEFINE_ENUM_OPERATORS(scope_flags)
+constexpr
+scope_flags
+operator&(scope_flags x, scope_flags y) noexcept
+  { return (scope_flags) ((uint32_t) x & (uint32_t) y);  }
+
+constexpr
+scope_flags
+operator|(scope_flags x, scope_flags y) noexcept
+  { return (scope_flags) ((uint32_t) x | (uint32_t) y);  }
 
 opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope);
