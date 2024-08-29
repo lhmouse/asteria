@@ -302,31 +302,22 @@ ver.set('abi_minor', meson.project_version().split('.')[1])
 ver.set_quoted('abi_string', meson.project_version())
 
 cxx = meson.get_compiler('cpp')
-cxx_is_i386 = cxx.compiles('int foo = __i386__;')
-cxx_is_amd64 = cxx.compiles('int foo = __amd64__;')
-cxx_asm_intel = cxx.has_argument('-masm=intel')
+cxx_is_i386 = cxx.has_define('__i386__')
+cxx_is_amd64 = cxx.has_define('__amd64__')
 
 if cxx_is_i386
-  add_project_arguments('-msse2', '-mfpmath=sse', language: [ 'c', 'cpp' ])
+  add_project_arguments('-msse2', '-mfpmath=sse', language: 'cpp')
 endif
 
 if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
-  add_project_arguments('-mavx', language: [ 'c', 'cpp' ])
+  add_project_arguments('-mavx', language: 'cpp')
 endif
 
-if cxx_asm_intel
-  add_project_arguments('-masm=intel', language: [ 'c', 'cpp' ])
+if cxx.has_argument('-masm=intel')
+  add_project_arguments('-masm=intel', language: 'cpp')
 endif
 
-cxx_has_uchar = cxx.links(
-    '''
-    #include <uchar.h>
-    int main(int argc, char** argv)
-    { return ::mbrtoc16(nullptr, nullptr, 0, nullptr);  }
-    ''',
-    args: [ '-std=c++11' ])
-
-if cxx_has_uchar
+if cxx.has_header_symbol('uchar.h', 'mbrtoc16')
   add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
 endif
 
