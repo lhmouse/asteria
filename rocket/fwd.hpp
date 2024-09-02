@@ -554,7 +554,7 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
     if(isr == 0)
       return;
 
-    for(;;)
+    while(isl != isr)
       if(isl < isr) {
         // Before:
         //           stp           end
@@ -569,12 +569,12 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
           swap(ptr[bot++], ptr[brk++]);
         while(bot != stp);
 
-        // `isr` will have been decreased by `isl`, which will
+        // `isr` has been decreased by `isl`, which will
         // not yield zero. `isl` is unchanged.
         stp = brk;
         isr = end - brk;
       }
-      else if(isl > isr) {
+      else {
         // Before:
         //                   stp   end
         //     bot           brk
@@ -588,28 +588,24 @@ rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
           swap(ptr[bot++], ptr[brk++]);
         while(brk != end);
 
-        // `isl` will have been decreased by `isr`, which will
+        // `isl` has been decreased by `isr`, which will
         // not yield zero. `isr` is unchanged.
         brk = stp;
         isl = stp - bot;
       }
-      else {
-        // Before:
-        //               stp       end
-        //     bot       brk
-        //   > 0 1 2 3 4 5 6 7 8 9 -
-        //
-        // After:
-        //               stp       end
-        //               bot       brk
-        //   > 5 6 7 8 9 0 1 2 3 4 -
-        do
-          swap(ptr[bot++], ptr[brk++]);
-        while(bot != stp);
 
-        // `brk` equals `end` so there is no more work to do.
-        break;
-      }
+    // Before:
+    //               stp       end
+    //     bot       brk
+    //   > 0 1 2 3 4 5 6 7 8 9 -
+    //
+    // After:
+    //               stp       end
+    //               bot       brk
+    //   > 5 6 7 8 9 0 1 2 3 4 -
+    do
+      swap(ptr[bot++], ptr[brk++]);
+    while(bot != stp);
   }
 
 template<typename containerT, typename callbackT>
