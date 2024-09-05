@@ -396,17 +396,20 @@ import('pkgconfig').generate(lib_asteria,
 #===========================================================
 if get_option('enable-repl')
   executable('asteria',
-             cpp_pch: 'asteria/xprecompiled.hpp',
-             sources: [ repl_src ],
-             dependencies: [ dep_editline ],
-             link_with: lib_asteria,
-             install: true)
+      cpp_pch: 'asteria/xprecompiled.hpp',
+      sources: [ repl_src ],
+      dependencies: [ dep_editline ],
+      link_with: lib_asteria,
+      install: true)
 endif
 
 #===========================================================
 # Rules for tests
 #===========================================================
 foreach src: test_src
-  test(src, executable(src.replace('.cpp', '').underscorify(), src,
-                       link_with: lib_asteria))
+  test_exe = executable(src.underscorify(), src,
+      link_with: lib_asteria,
+      install: false)
+
+  test('..' / src, test_exe)
 endforeach
