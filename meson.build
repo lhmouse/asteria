@@ -342,8 +342,7 @@ add_project_arguments(
       '-Wunused-label', '-Wunused-local-typedefs', '-Wunused-but-set-variable',
       '-Wunused-but-set-parameter', '-Wno-array-bounds', '-Wno-stringop-overflow',
       '-Wno-redundant-move', '-Wno-unqualified-std-cast-call', '-Wno-string-plus-int',
-      '-Wno-bitwise-instead-of-logical', '-Wno-missing-braces'
-    ),
+      '-Wno-bitwise-instead-of-logical', '-Wno-missing-braces'),
     language: 'cpp')
 
 #===========================================================
