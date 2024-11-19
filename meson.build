@@ -246,7 +246,7 @@ endif
 #===========================================================
 # Rules for tests
 #===========================================================
-foreach src: test_src
+foreach src : test_src
   test_exe = executable(src.underscorify(), src,
       link_with: lib_asteria,
       install: false)
