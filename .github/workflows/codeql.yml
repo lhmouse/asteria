@@ -1,0 +1,58 @@
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches:
+    - master
+    - releases/*
+
+  pull_request:
+    branches:
+    - master
+
+  schedule:
+    - cron: '22 11 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: 'ubuntu-latest'
+
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: autobuild
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: >-
+           sudo apt-get update &&
+           sudo apt-get install -y --no-install-recommends g++ python3
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev uuid-dev
+           ninja-build python3-pip
+
+    - name: Install newest meson
+      run: >-
+           sudo PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install meson
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
