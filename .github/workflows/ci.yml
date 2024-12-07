@@ -31,7 +31,7 @@ jobs:
 
     - name: Install newest meson
       run: >-
-           sudo pip3 install meson  # --break-system-packages
+           sudo PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install meson
 
     - name: Run tests
       run: >-
