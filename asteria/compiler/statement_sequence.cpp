@@ -62,6 +62,11 @@ do_accept_identifier_opt(Token_Stream& tstrm, bool user_decl)
     if(!qtok)
       return nullopt;
 
+    if(user_decl && qtok->is_keyword())
+      throw Compiler_Error(xtc_format,
+                compiler_status_keyword_not_declarable, qtok->sloc(),
+                "Keyword `$1` not user-declarable", qtok->as_keyword_c_str());
+
     // See whether it is an identifier.
     if(!qtok->is_identifier())
       return nullopt;

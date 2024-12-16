@@ -742,6 +742,7 @@ enum Compiler_Status : uint32_t
     compiler_status_multiple_default                           = 3004,
     compiler_status_duplicate_name_in_structured_binding       = 3005,
     compiler_status_duplicate_name_in_parameter_list           = 3006,
+    compiler_status_keyword_not_declarable                     = 3007,
   };
 
 ROCKET_CONST

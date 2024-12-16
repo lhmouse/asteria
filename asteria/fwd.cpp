@@ -376,6 +376,9 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_interval_closure_expected:
         return "`)` or `]` expected";
 
+      case compiler_status_keyword_not_declarable:
+        return "keyword not declarable";
+
       default:
         return "[unknown compiler status]";
     }
