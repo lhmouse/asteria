@@ -96,8 +96,8 @@ do_parse_command_line(int argc, char** argv)
     opt<cow_string> path;
     cow_vector<Value> args;
 
-    // Check for some common options before calling `getopt()`.
     if(argc > 1) {
+      // Check for some common options before calling `getopt()`.
       if(::strcmp(argv[1], "--help") == 0)
         do_print_help_and_exit(argv[0]);
 
@@ -108,7 +108,6 @@ do_parse_command_line(int argc, char** argv)
     // Parse command-line options.
     int ch;
     while((ch = ::getopt(argc, argv, "+hIiO::Vv")) != -1) {
-      // Identify a single option.
       switch(ch) {
         case 'h':
           help = true;
@@ -126,8 +125,8 @@ do_parse_command_line(int argc, char** argv)
           if(!optarg || (optarg[0] < '0') || (optarg[0] > '9') || optarg[1])
             exit_printf(exit_invalid_argument,
                   "%s: `-O` requires an integer argument between 0 and 9.", argv[0]);
-          else
-            optimize = optarg[0] - '0';
+
+          optimize = optarg[0] - '0';
           continue;
 
         case 'V':
