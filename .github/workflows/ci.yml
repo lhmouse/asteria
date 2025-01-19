@@ -39,6 +39,30 @@ jobs:
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
            && meson test -Cbuild_ci
 
+  ubuntu-arm:
+    name: Ubuntu native build (ARM64)
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: >-
+           sudo apt-get update &&
+           sudo apt-get install -y --no-install-recommends g++-13 python3
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev uuid-dev
+           ninja-build python3-pip
+
+    - name: Install newest meson
+      run: >-
+           sudo pip3 install meson  # --break-system-packages
+
+    - name: Run tests
+      run: >-
+           export CXX='g++-13';
+           meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
+           && meson test -Cbuild_ci
+
   msys2:
     name: MSYS2 native build (x86-64)
     runs-on: windows-2022
