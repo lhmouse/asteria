@@ -37,7 +37,7 @@ jobs:
       run: >-
            export CXX='g++-7';
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
-           && meson test -Cbuild_ci
+           && meson test -Cbuild_ci --print-errorlogs
 
   ubuntu-arm:
     name: Ubuntu native build (ARM64)
@@ -61,7 +61,7 @@ jobs:
       run: >-
            export CXX='g++-13';
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
-           && meson test -Cbuild_ci
+           && meson test -Cbuild_ci --print-errorlogs
 
   msys2:
     name: MSYS2 native build (x86-64)
@@ -87,7 +87,7 @@ jobs:
     - name: Run tests
       run: >-
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
-           && meson test -Cbuild_ci
+           && meson test -Cbuild_ci --print-errorlogs
 
   macos:
     name: macOS native build (x86-64)
@@ -105,4 +105,4 @@ jobs:
       run: >-
            export CC='gcc-12' CXX='g++-12';
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
-           && meson test -Cbuild_ci
+           && meson test -Cbuild_ci --print-errorlogs
