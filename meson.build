@@ -249,6 +249,7 @@ endif
 foreach src : test_src
   test_exe = executable(src.underscorify(), src,
       link_with: lib_asteria,
+      build_by_default: false,
       install: false)
 
   test('..' / src, test_exe)
