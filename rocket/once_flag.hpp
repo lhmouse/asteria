@@ -37,14 +37,16 @@ class once_flag
             || (::abi::__cxa_guard_acquire(this->m_guard) == 0))
           return;
 
-        try {
-          forward<funcT>(func) (forward<paramsT>(params)...);
-          ::abi::__cxa_guard_release(this->m_guard);
-        }
-        catch(...) {
-          ::abi::__cxa_guard_abort(this->m_guard);
-          throw;
-        }
+        struct Sentry
+          {
+            decltype(::abi::__cxa_guard_abort)* dtor;
+            ::abi::__guard* guard;
+            ~Sentry() { (* this->dtor) (this->guard);  }
+          };
+
+        Sentry sentry = { ::abi::__cxa_guard_abort, this->m_guard };
+        forward<funcT>(func) (forward<paramsT>(params)...);
+        sentry.dtor = ::abi::__cxa_guard_release;
       }
   };
 
