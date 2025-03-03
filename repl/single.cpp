@@ -24,15 +24,17 @@ load_and_execute_single_noreturn()
 
     // Execute the script, passing all command-line arguments to it. If the
     // script exits without returning a value, success is assumed.
+    Exit_Status status = exit_non_integer;
     auto ref = repl_script.execute(move(repl_args));
     if(ref.is_void())
-      quick_exit();
+      status = exit_success;
+    else {
+      const auto& val = ref.dereference_readonly();
+      if(val.is_integer())
+        status = static_cast<Exit_Status>(val.as_integer());
+    }
 
-    const auto& val = ref.dereference_readonly();
-    if(val.is_integer())
-      quick_exit(static_cast<Exit_Status>(val.as_integer()));
-
-    quick_exit(exit_non_integer);
+    quick_exit(status);
   }
 
 }  // namespace asteria
