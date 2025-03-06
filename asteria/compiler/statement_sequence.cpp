@@ -1392,8 +1392,6 @@ do_accept_defer_statement_opt(Token_Stream& tstrm)
 opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
-    const auto sentry = tstrm.copy_recursion_sentry();
-
     // statement ::=
     //   variable-definition | immutable-variable-definition | reference-definition |
     //   function-definition | defer-statement | null-statement |
@@ -1403,6 +1401,8 @@ do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
     //   for-statement | break-statement | continue-statement | throw-statement |
     //   return-statement | assert-statement | try-statement | statement-block |
     //   expression-statement
+    const auto sentry = tstrm.copy_recursion_sentry();
+
     if(auto qstmt = do_accept_variable_definition_opt(tstrm))
       return move(*qstmt);
 
@@ -2587,12 +2587,12 @@ do_accept_infix_operator_opt(Token_Stream& tstrm)
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    const auto sentry = tstrm.copy_recursion_sentry();
-
     // expression ::=
     //   infix-element infix-carriage *
     // infix-carriage ::=
     //   infix-operator infix-element
+    const auto sentry = tstrm.copy_recursion_sentry();
+
     auto qelem = do_accept_infix_element_opt(tstrm);
     if(!qelem)
       return false;
