@@ -16,8 +16,12 @@
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
+#include <cwchar>  // std::wcslen()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 #include <cstdint>  // std::u?int(8|16|32|64|ptr)_t
+#include <limits.h>  // INT_MAX
+#include <string.h>  // stpcpy()
+#include <wchar.h>  // stpcpy()
 namespace rocket {
 namespace noadl = rocket;
 

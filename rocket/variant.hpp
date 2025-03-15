@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "xassert.hpp"
 #include "xthrow.hpp"
-#include <cstring>  // std::memset()
 namespace rocket {
 
 template<typename... altsT>

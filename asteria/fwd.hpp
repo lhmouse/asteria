@@ -25,8 +25,6 @@
 #include <typeinfo>
 #include <cstddef>
 #include <cstdint>
-#include <limits.h>
-#include <wchar.h>
 namespace asteria {
 namespace noadl = asteria;
 

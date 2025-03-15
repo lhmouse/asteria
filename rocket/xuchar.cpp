@@ -246,7 +246,7 @@ xfputn(::FILE* fp, ::mbstate_t& /*mbst*/, const char* s, size_t n)
 size_t
 xfputn(::FILE* fp, ::mbstate_t& mbst, const wchar_t* s, size_t n)
   {
-    size_t r = do_xfputn_common(fp, ::wcrtomb, mbst, s, n);
+    size_t r = do_xfputn_common(fp, ::std::wcrtomb, mbst, s, n);
     return r;
   }
 
@@ -289,7 +289,7 @@ xfputc(::FILE* fp, ::mbstate_t& /*mbst*/, char c)
 int
 xfputc(::FILE* fp, ::mbstate_t& mbst, wchar_t c)
   {
-    size_t r = do_xfputn_common(fp, ::wcrtomb, mbst, &c, 1);
+    size_t r = do_xfputn_common(fp, ::std::wcrtomb, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
   }
 

@@ -40,7 +40,7 @@ inline
 size_t
 ystrlen(const wchar_t* str) noexcept
   {
-    return ::wcslen(str);
+    return ::std::wcslen(str);
   }
 
 inline namespace maybe_constexpr
@@ -79,7 +79,7 @@ inline
 wchar_t*
 ystrchr(const wchar_t* str, wchar_t target) noexcept
   {
-    return (wchar_t*) ::wcschr(str, target);
+    return (wchar_t*) ::std::wcschr(str, target);
   }
 
 inline namespace maybe_constexpr
@@ -157,7 +157,7 @@ inline
 int
 ystrcmp(const wchar_t* lhs, const wchar_t* rhs) noexcept
   {
-    return ::wcscmp(lhs, rhs);
+    return ::std::wcscmp(lhs, rhs);
   }
 
 inline namespace maybe_constexpr
