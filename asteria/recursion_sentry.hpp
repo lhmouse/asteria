@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
+// Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_RECURSION_SENTRY_
 #define ASTERIA_RECURSION_SENTRY_

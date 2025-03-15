@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
+// Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_LLDS_REFERENCE_DICTIONARY_
 #  error Please include <asteria/llds/reference_dictionary.hpp> instead.

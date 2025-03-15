@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2024, LH_Mouse. All wrongs reserved.
+// Copyright (C) 2024-2025, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_STATIC_CHAR_BUFFER_
 #define ROCKET_STATIC_CHAR_BUFFER_

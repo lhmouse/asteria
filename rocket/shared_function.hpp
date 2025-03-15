@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2024, LH_Mouse. All wrongs reserved.
+// Copyright (C) 2024-2025, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_SHARED_FUNCTION_
 #define ROCKET_SHARED_FUNCTION_

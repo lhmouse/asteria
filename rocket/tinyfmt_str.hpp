@@ -1,5 +1,5 @@
 // This str is part of Asteria.
-// Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
+// Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_TINYFMT_STR_
 #define ROCKET_TINYFMT_STR_

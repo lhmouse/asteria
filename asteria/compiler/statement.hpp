@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018 - 2023, LH_Mouse. All wrongs reserved.
+// Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_COMPILER_STATEMENT_
 #define ASTERIA_COMPILER_STATEMENT_
