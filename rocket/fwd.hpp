@@ -21,7 +21,7 @@
 #include <cstdint>  // std::u?int(8|16|32|64|ptr)_t
 #include <limits.h>  // INT_MAX
 #include <string.h>  // stpcpy()
-#include <wchar.h>  // stpcpy()
+#include <wchar.h>  // wcpcpy()
 namespace rocket {
 namespace noadl = rocket;
 
