@@ -261,7 +261,7 @@ do_find_uncensored(V_object::const_iterator& curp, const V_object& object)
       else if(::rocket::is_none_of(curp->second.type(),
                  { type_null, type_boolean, type_integer, type_real, type_string,
                    type_array, type_object }))
-        ++curp;
+        ++ curp;
       else
         return true;
   }
