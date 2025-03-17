@@ -26,7 +26,7 @@ jobs:
       run: >-
            sudo apt-get update &&
            sudo apt-get install -y --no-install-recommends g++-7 python3
-           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev uuid-dev
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
            ninja-build python3-pip
 
     - name: Install newest meson
@@ -50,7 +50,7 @@ jobs:
       run: >-
            sudo apt-get update &&
            sudo apt-get install -y --no-install-recommends g++-13 python3
-           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev uuid-dev
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
            ninja-build python3-pip
 
     - name: Install newest meson
