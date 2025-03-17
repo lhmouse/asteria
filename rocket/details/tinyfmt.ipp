@@ -20,12 +20,11 @@ void
 do_format_strerror_errno(basic_tinyfmt<charT>& fmt)
   {
     char str_stor[128];
-    const char* str;
-#ifdef _GNU_SOURCE
+    const char* str = str_stor;
+#if defined _GNU_SOURCE
     str = ::strerror_r(errno, str_stor, sizeof(str_stor));
 #else
     ::strerror_r(errno, str_stor, sizeof(str_stor));
-    str = str_stor;
 #endif
     fmt.putn_latin1(str, ::strlen(str));
   }
