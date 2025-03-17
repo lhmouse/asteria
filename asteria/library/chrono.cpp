@@ -25,14 +25,6 @@ constexpr char s_2digit[100][2] =
   };
 
 inline
-void
-do_mempcpy(char*& wptr_out, const char* cstr, size_t len)
-  {
-    ::memcpy(wptr_out, cstr, len);
-    wptr_out += len;
-  }
-
-inline
 bool
 do_match(const char*& rptr_out, const char* cstr, size_t len)
   {
@@ -141,36 +133,36 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
     char time_str[64];
     char* wptr = time_str;
 
-    do_mempcpy(wptr, s_2digit[year / 100], 2);
-    do_mempcpy(wptr, s_2digit[year % 100], 2);
-    do_mempcpy(wptr, "-", 1);
-    do_mempcpy(wptr, s_2digit[mon], 2);
-    do_mempcpy(wptr, "-", 1);
-    do_mempcpy(wptr, s_2digit[day], 2);
-    do_mempcpy(wptr, " ", 1);
-    do_mempcpy(wptr, s_2digit[hour], 2);
-    do_mempcpy(wptr, ":", 1);
-    do_mempcpy(wptr, s_2digit[min], 2);
-    do_mempcpy(wptr, ":", 1);
-    do_mempcpy(wptr, s_2digit[sec], 2);
+    ::rocket::xmemrpcpy(wptr, s_2digit[year / 100], 2);
+    ::rocket::xmemrpcpy(wptr, s_2digit[year % 100], 2);
+    ::rocket::xmemrpcpy(wptr, "-", 1);
+    ::rocket::xmemrpcpy(wptr, s_2digit[mon], 2);
+    ::rocket::xmemrpcpy(wptr, "-", 1);
+    ::rocket::xmemrpcpy(wptr, s_2digit[day], 2);
+    ::rocket::xmemrpcpy(wptr, " ", 1);
+    ::rocket::xmemrpcpy(wptr, s_2digit[hour], 2);
+    ::rocket::xmemrpcpy(wptr, ":", 1);
+    ::rocket::xmemrpcpy(wptr, s_2digit[min], 2);
+    ::rocket::xmemrpcpy(wptr, ":", 1);
+    ::rocket::xmemrpcpy(wptr, s_2digit[sec], 2);
 
     if(with_ms == true) {
       // Output four digits, then overwrite the first one with
       // a decimal point.
-      do_mempcpy(wptr, s_2digit[ms / 100], 2);
+      ::rocket::xmemrpcpy(wptr, s_2digit[ms / 100], 2);
       wptr[-2] = '.';
-      do_mempcpy(wptr, s_2digit[ms % 100], 2);
+      ::rocket::xmemrpcpy(wptr, s_2digit[ms % 100], 2);
     }
 
     if(gmtoff_abs == 0) {
       // UTC (or conventionally, GMT)
-      do_mempcpy(wptr, " UTC", 4);
+      ::rocket::xmemrpcpy(wptr, " UTC", 4);
     }
     else {
       // numeric
-      do_mempcpy(wptr, " +\0 -" + (gmtoff_sign >> 1 & 3), 2);
-      do_mempcpy(wptr, s_2digit[gmtoff_abs / 60], 2);
-      do_mempcpy(wptr, s_2digit[gmtoff_abs % 60], 2);
+      ::rocket::xmemrpcpy(wptr, " +\0 -" + (gmtoff_sign >> 1 & 3), 2);
+      ::rocket::xmemrpcpy(wptr, s_2digit[gmtoff_abs / 60], 2);
+      ::rocket::xmemrpcpy(wptr, s_2digit[gmtoff_abs % 60], 2);
     }
 
     return cow_string(time_str, wptr);
