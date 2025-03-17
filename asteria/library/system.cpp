@@ -17,7 +17,7 @@
 #include <sys/socket.h>  // ::socket()
 #include <time.h>  // ::clock_gettime()
 #include <uuid/uuid.h>  // ::uuid_generate_random()
-extern char **environ;
+extern "C" char** environ;
 namespace asteria {
 namespace {
 
