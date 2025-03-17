@@ -561,7 +561,8 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
       // Parse this plafceholder.
       ROCKET_ASSERT(*next == charT('$'));
       next ++;
-      switch(*next) {
+      switch(*next)
+        {
         case charT():
           noadl::sprintf_and_throw<invalid_argument>(
               "vformat: dangling `$` at end of template string");
@@ -581,127 +582,127 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
         case charT('7'):
         case charT('8'):
         case charT('9'):
-        {
-          // simple placeholder
-          uint32_t iarg = static_cast<unsigned char>(*next - charT('0'));
-          if(iarg == 0) {
-            // `0` denotes the template string.
-            fmt.putn(stempl, noadl::xstrlen(stempl));
-          }
-          else if(iarg <= ninsts) {
-            // `1`...`ninsts` denote ordinal arguments.
-            const basic_formatter<charT>* inst = pinsts + iarg - 1;
-            inst->ifunc(fmt, inst->param);
-          }
-          else {
-            static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
-            fmt.putn(no_arg, noadl::size(no_arg));
+          {
+            // simple placeholder
+            uint32_t iarg = static_cast<unsigned char>(*next - charT('0'));
+            if(iarg == 0) {
+              // `0` denotes the template string.
+              fmt.putn(stempl, noadl::xstrlen(stempl));
+            }
+            else if(iarg <= ninsts) {
+              // `1`...`ninsts` denote ordinal arguments.
+              const basic_formatter<charT>* inst = pinsts + iarg - 1;
+              inst->ifunc(fmt, inst->param);
+            }
+            else {
+              static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
+              fmt.putn(no_arg, noadl::size(no_arg));
+            }
           }
           break;
-        }
 
         case charT('{'):
-        {
-          // composite placeholder
-          next ++;
-          base = next;
-
-          while((*next != charT()) && (*next != charT('}')))
+          {
+            // composite placeholder
             next ++;
+            base = next;
 
-          if(*next == charT())
-            noadl::sprintf_and_throw<invalid_argument>(
-                "vformat: no matching `}` in template string");
+            while((*next != charT()) && (*next != charT('}')))
+              next ++;
 
-          // Check for built-in placeholders.
-          static constexpr charT errno_str[] = { 'e','r','r','n','o',':','s','t','r' };
-          static constexpr charT errno_full[] = { 'e','r','r','n','o',':','f','u','l','l' };
-          static constexpr charT time_utc[] = { 't','i','m','e',':','u','t','c' };
+            if(*next == charT())
+              noadl::sprintf_and_throw<invalid_argument>(
+                  "vformat: no matching `}` in template string");
 
-          if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 5)) {
-            // `errno`: value of `errno`
-            details_tinyfmt::do_format_errno(fmt);
-            break;
-          }
+            // Check for built-in placeholders.
+            static constexpr charT errno_str[] = { 'e','r','r','n','o',':','s','t','r' };
+            static constexpr charT errno_full[] = { 'e','r','r','n','o',':','f','u','l','l' };
+            static constexpr charT time_utc[] = { 't','i','m','e',':','u','t','c' };
 
-          if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 9)) {
-            // `errno:str`: description of `errno`
-            details_tinyfmt::do_format_strerror_errno(fmt);
-            break;
-          }
-
-          if(noadl::xmemeq(base, (size_t) (next - base), errno_full, 10)) {
-            // `errno:full`: value of `errno` followed by its description
-            details_tinyfmt::do_format_strerror_errno(fmt);
-            fmt.putn_latin1(" (errno ", 8);
-            details_tinyfmt::do_format_errno(fmt);
-            fmt.putn_latin1(")", 1);
-            break;
-          }
-
-          if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 4)) {
-            // `time`: current date and time in local time zone
-            ::timespec tv;
-            ::clock_gettime(CLOCK_REALTIME, &tv);
-            ::tm tm;
-            ::localtime_r(&(tv.tv_sec), &tm);
-            details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
-            break;
-          }
-
-          if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 8)) {
-            // `time:utc`: current date and time in UTC
-            ::timespec tv;
-            ::clock_gettime(CLOCK_REALTIME, &tv);
-            ::tm tm;
-            ::gmtime_r(&(tv.tv_sec), &tm);
-            details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
-            break;
-          }
-
-          if(next == base) {
-            // ``: valid but no output
-            break;
-          }
-
-          // The placeholder shall be a non-negative integer.
-          uint32_t iarg = 0;
-
-          while(base != next) {
-            if((*base < charT('0')) || (*base > charT('9'))) {
-              iarg = UINT32_MAX;
+            if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 5)) {
+              // `errno`: value of `errno`
+              details_tinyfmt::do_format_errno(fmt);
               break;
             }
-            else if(iarg >= 0xFFFFU) {
-              iarg = UINT32_MAX;
+
+            if(noadl::xmemeq(base, (size_t) (next - base), errno_str, 9)) {
+              // `errno:str`: description of `errno`
+              details_tinyfmt::do_format_strerror_errno(fmt);
               break;
             }
-            iarg *= 10U;
-            iarg += static_cast<unsigned char>(*base - charT('0'));
-            base ++;
-          }
 
-          if(iarg == 0) {
-            // `0` denotes the template string.
-            fmt.putn(stempl, noadl::xstrlen(stempl));
-          }
-          else if(iarg <= ninsts) {
-            // `1`...`ninsts` denote ordinal arguments.
-            const basic_formatter<charT>* inst = pinsts + iarg - 1;
-            inst->ifunc(fmt, inst->param);
-          }
-          else {
-            static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
-            fmt.putn(no_arg, noadl::size(no_arg));
+            if(noadl::xmemeq(base, (size_t) (next - base), errno_full, 10)) {
+              // `errno:full`: value of `errno` followed by its description
+              details_tinyfmt::do_format_strerror_errno(fmt);
+              fmt.putn_latin1(" (errno ", 8);
+              details_tinyfmt::do_format_errno(fmt);
+              fmt.putn_latin1(")", 1);
+              break;
+            }
+
+            if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 4)) {
+              // `time`: current date and time in local time zone
+              ::timespec tv;
+              ::clock_gettime(CLOCK_REALTIME, &tv);
+              ::tm tm;
+              ::localtime_r(&(tv.tv_sec), &tm);
+              details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
+              break;
+            }
+
+            if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 8)) {
+              // `time:utc`: current date and time in UTC
+              ::timespec tv;
+              ::clock_gettime(CLOCK_REALTIME, &tv);
+              ::tm tm;
+              ::gmtime_r(&(tv.tv_sec), &tm);
+              details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
+              break;
+            }
+
+            if(next == base) {
+              // ``: valid but no output
+              break;
+            }
+
+            // The placeholder shall be a non-negative integer.
+            uint32_t iarg = 0;
+
+            while(base != next) {
+              if((*base < charT('0')) || (*base > charT('9'))) {
+                iarg = UINT32_MAX;
+                break;
+              }
+              else if(iarg >= 0xFFFFU) {
+                iarg = UINT32_MAX;
+                break;
+              }
+              iarg *= 10U;
+              iarg += static_cast<unsigned char>(*base - charT('0'));
+              base ++;
+            }
+
+            if(iarg == 0) {
+              // `0` denotes the template string.
+              fmt.putn(stempl, noadl::xstrlen(stempl));
+            }
+            else if(iarg <= ninsts) {
+              // `1`...`ninsts` denote ordinal arguments.
+              const basic_formatter<charT>* inst = pinsts + iarg - 1;
+              inst->ifunc(fmt, inst->param);
+            }
+            else {
+              static constexpr charT no_arg[] = { '(','n','o',' ','a','r','g',')' };
+              fmt.putn(no_arg, noadl::size(no_arg));
+            }
           }
           break;
-        }
 
         default:
           noadl::sprintf_and_throw<invalid_argument>(
               "vformat: unknown placeholder `$%c` in template string",
               static_cast<int>(*next));
-      }
+        }
 
       next ++;
       base = next;
