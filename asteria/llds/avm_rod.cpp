@@ -176,17 +176,19 @@ execute(Executive_Context& ctx) const
 
         default:
           try {
-            try {
-              // There is metadata and symbols.
-              status = head->pv_meta->exec(ctx, head);
-            }
-            catch(Runtime_Error&) { throw;  }  // forward
-            catch(exception& e) { throw Runtime_Error(xtc_format, "$1", e);  }  // replace
+            // There is metadata and symbols.
+            status = head->pv_meta->exec(ctx, head);
           }
           catch(Runtime_Error& except) {
             // Modify and rethrow the exception in place without copying it.
             except.push_frame_plain(head->pv_meta->sloc);
             throw;
+          }
+          catch(exception& stdex) {
+            // Replace the current exception.
+            Runtime_Error except(xtc_format, "$1", stdex);
+            except.push_frame_plain(head->pv_meta->sloc);
+            throw except;
           }
           break;
       }
