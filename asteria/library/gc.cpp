@@ -15,9 +15,7 @@ std_gc_count_variables(Global_Context& global, V_integer generation)
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW((
-          "Invalid generation `$1`"),
-          generation);
+      ASTERIA_THROW(("Invalid generation `$1`"), generation);
 
     // Get the current number of variables being tracked.
     const auto gcoll = global.garbage_collector();
@@ -30,9 +28,7 @@ std_gc_get_threshold(Global_Context& global, V_integer generation)
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW((
-          "Invalid generation `$1`"),
-          generation);
+      ASTERIA_THROW(("Invalid generation `$1`"), generation);
 
     // Get the current number of variables being tracked.
     const auto gcoll = global.garbage_collector();
@@ -45,9 +41,7 @@ std_gc_set_threshold(Global_Context& global, V_integer generation, V_integer thr
   {
     auto rgen = ::rocket::clamp_cast<GC_Generation>(generation, 0, 2);
     if(rgen != generation)
-      ASTERIA_THROW((
-          "Invalid generation `$1`"),
-          generation);
+      ASTERIA_THROW(("Invalid generation `$1`"), generation);
 
     // Set the threshold and return its old value.
     const auto gcoll = global.garbage_collector();
@@ -63,9 +57,7 @@ std_gc_collect(Global_Context& global, optV_integer generation_limit)
     if(generation_limit) {
       rglimit = ::rocket::clamp_cast<GC_Generation>(*generation_limit, 0, 2);
       if(rglimit != *generation_limit)
-        ASTERIA_THROW((
-            "Invalid generation limit `$1`"),
-            *generation_limit);
+        ASTERIA_THROW(("Invalid generation limit `$1`"), *generation_limit);
     }
 
     // Perform garbage collection up to the generation specified.
