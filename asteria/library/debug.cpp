@@ -28,7 +28,7 @@ std_debug_logf(V_string templ, cow_vector<Value> values)
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.safe_c_str(), insts.data(), insts.size());
-    ::ptrdiff_t nbytes = write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__, fmt.extract_string());
+    ::ptrdiff_t nbytes = ASTERIA_WRITE_STDERR(fmt.extract_string());
     return (nbytes < 0) ? nullopt : optV_integer(nbytes);
   }
 
@@ -41,7 +41,7 @@ std_debug_dump(Value value, optV_integer indent)
     // Format the value.
     ::rocket::tinyfmt_str fmt;
     value.dump(fmt, rindent);
-    ::ptrdiff_t nbytes = write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__, fmt.extract_string());
+    ::ptrdiff_t nbytes = ASTERIA_WRITE_STDERR(fmt.extract_string());
     return (nbytes < 0) ? nullopt : optV_integer(nbytes);
   }
 

@@ -37,9 +37,9 @@ struct Verbose_Hooks
         // Extract the string and write it to standard error.
         // Errors are ignored.
         auto str = this->m_fmt.extract_string();
-        write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__, move(str));
+        ASTERIA_WRITE_STDERR(move(str));
 
-        // Reuse the storage.
+        // Reuse the storage. This is not use after move.
         this->m_fmt.set_string(move(str));
       }
 

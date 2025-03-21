@@ -79,22 +79,21 @@ format_string(const char* templ, const xParams&... params)
 ptrdiff_t
 write_log_to_stderr(const char* file, long line, const char* func, cow_string&& msg);
 
+#define ASTERIA_WRITE_STDERR(str)  \
+    (::asteria::write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__, str))
+
+#define ASTERIA_TERMINATE(TEMPLATE, ...)  \
+    ((void) ::asteria::write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__,  \
+       ::asteria::format_string((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
+     ::std::terminate())
+
 [[noreturn]]
 void
 throw_runtime_error(const char* file, long line, const char* func, cow_string&& msg);
 
-#define ASTERIA_TERMINATE(TEMPLATE, ...)  \
-    (::asteria::write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__,  \
-       ::asteria::format_string(  \
-         (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
-       ),  \
-     ::std::terminate())
-
 #define ASTERIA_THROW(TEMPLATE, ...)  \
-    (::asteria::throw_runtime_error(__FILE__, __LINE__, __FUNCTION__,  \
-       ::asteria::format_string(  \
-         (::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)  \
-       ),  \
+    ((void) ::asteria::throw_runtime_error(__FILE__, __LINE__, __FUNCTION__,  \
+       ::asteria::format_string((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
      ROCKET_UNREACHABLE())
 
 // Raw memory management

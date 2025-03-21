@@ -13,22 +13,23 @@
       try {  \
         if(static_cast<bool>(expr) == false) {  \
           /* failed */  \
-          ::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
-              ::rocket::sref("ASTERIA_TEST_CHECK FAIL: " #expr));  \
-          \
+          ::rocket::cow_string msg;  \
+          msg << "ASTERIA_TEST_CHECK FAIL: " #expr;  \
+          ASTERIA_WRITE_STDERR(move(msg));  \
           ::abort();  \
         }  \
         \
         /* successful */  \
-        ::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
-            ::rocket::sref("ASTERIA_TEST_CHECK PASS: " #expr));  \
+        ::rocket::cow_string msg;  \
+        msg << "ASTERIA_TEST_CHECK PASS: " #expr;  \
+        ASTERIA_WRITE_STDERR(move(msg));  \
       }  \
       catch(::std::exception& stdex) {  \
         /* failed */  \
-        ::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
-            ::rocket::cow_string("ASTERIA_TEST_CHECK EXCEPTION: " #expr)  \
-              + "\n" + stdex.what());  \
-        \
+        ::rocket::cow_string msg;  \
+        msg << "ASTERIA_TEST_CHECK EXCEPT: " #expr;  \
+        msg << "\n" << stdex.what();  \
+        ASTERIA_WRITE_STDERR(move(msg));  \
         ::abort();  \
       }  \
     while(false)
@@ -39,44 +40,37 @@
         (void) (expr);  \
         \
         /* failed */  \
-        ::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
-            ::rocket::sref("ASTERIA_TEST_CHECK XPASS: " #expr));  \
-        \
+        ::rocket::cow_string msg;  \
+        msg << "ASTERIA_TEST_CHECK XPASS: " #expr;  \
+        ASTERIA_WRITE_STDERR(move(msg));  \
         ::abort();  \
       }  \
       catch(::std::exception& stdex) {  \
         /* successful */  \
-        ::asteria::write_log_to_stderr(__FILE__, __LINE__, __func__,  \
-            ::rocket::cow_string("ASTERIA_TEST_CHECK XFAIL: " #expr)  \
-              + "\n" + stdex.what());  \
+        ::rocket::cow_string msg;  \
+        msg << "ASTERIA_TEST_CHECK XFAIL: " #expr;  \
+        msg << "\n" << stdex.what();  \
+        ASTERIA_WRITE_STDERR(move(msg));  \
       }  \
     while(false)
 
 // Set terminate handler.
 static const auto asteria_test_terminate = ::std::set_terminate(
-    [] {
-      auto eptr = ::std::current_exception();
-      if(eptr) {
-        try {
-          ::std::rethrow_exception(eptr);
-        }
-        catch(::std::exception& stdex) {
-          ::fprintf(stderr,
-              "`::std::terminate()` called after `::std::exception`:\n%s\n",
-              stdex.what());
-        }
-        catch(...) {
-          ::fprintf(stderr,
-              "`::std::terminate()` called after an unknown exception\n");
-        }
-      }
+  [] {
+    try {
+      if(auto eptr = ::std::current_exception())
+        ::std::rethrow_exception(eptr);
       else
-        ::fprintf(stderr,
-            "`::std::terminate()` called without an exception\n");
+        ::fprintf(stderr, "terminated without an exception\n");
+    }
+    catch(::std::exception& stdex)
+    { ::fprintf(stderr, "terminated after `::std::exception`:\n%s\n", stdex.what());  }
+    catch(...)
+    { ::fprintf(stderr, "terminated after an unknown exception\n");  }
 
-      ::fflush(nullptr);
-      ::_Exit(1);
-    });
+    ::fflush(nullptr);
+    ::_Exit(1);
+  });
 
 // Set kill timer.
 static const auto asteria_test_alarm = ::alarm(30);
