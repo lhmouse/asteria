@@ -197,8 +197,8 @@ dep_editline = disabler()
 
 if get_option('enable-repl')
   dep_editline = dependency('libedit',
-      not_found_message: 'libedit is required to build the REPL. If you do not '
-                         + 'need it, use `meson setup -Denable-repl=false`.')
+        not_found_message: 'libedit is required to build the REPL. If you do not '
+                           + 'need it, use `meson setup -Denable-repl=false`.')
 endif
 
 #===========================================================
@@ -233,14 +233,12 @@ import('pkgconfig').generate(lib_asteria,
 #===========================================================
 # Rules for 'bin/asteria'
 #===========================================================
-if get_option('enable-repl')
-  executable('asteria',
+executable('asteria',
       cpp_pch: 'asteria/xprecompiled.hpp',
       sources: [ repl_src ],
       dependencies: [ dep_editline ],
       link_with: lib_asteria,
       install: true)
-endif
 
 #===========================================================
 # Rules for tests
