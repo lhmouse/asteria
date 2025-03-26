@@ -146,26 +146,6 @@ cxx = meson.get_compiler('cpp')
 cxx_is_i386 = cxx.has_define('__i386__')
 cxx_is_amd64 = cxx.has_define('__amd64__')
 
-if cxx_is_i386
-  add_project_arguments('-msse2', '-mfpmath=sse', language: 'cpp')
-endif
-
-if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
-  add_project_arguments('-mavx', language: 'cpp')
-endif
-
-if cxx.has_argument('-masm=intel')
-  add_project_arguments('-masm=intel', language: 'cpp')
-endif
-
-if cxx.has_header_symbol('uchar.h', 'mbrtoc16')
-  add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
-endif
-
-if get_option('enable-debug-checks')
-  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: 'cpp')
-endif
-
 add_project_arguments(
     '-Wall', '-Wextra', '-Winvalid-pch', '-std=c++17', '-D_FILE_OFFSET_BITS=64',
     '-D_POSIX_C_SOURCE=200809', '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
@@ -185,6 +165,26 @@ add_project_arguments(
       '-Wno-redundant-move', '-Wno-unqualified-std-cast-call', '-Wno-string-plus-int',
       '-Wno-bitwise-instead-of-logical', '-Wno-missing-braces'),
     language: 'cpp')
+
+if cxx_is_i386
+  add_project_arguments('-msse2', '-mfpmath=sse', language: 'cpp')
+endif
+
+if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
+  add_project_arguments('-mavx', language: 'cpp')
+endif
+
+if cxx.has_argument('-masm=intel')
+  add_project_arguments('-masm=intel', language: 'cpp')
+endif
+
+if cxx.has_header_symbol('uchar.h', 'mbrtoc16')
+  add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
+endif
+
+if get_option('enable-debug-checks')
+  add_project_arguments('-D_GLIBCXX_DEBUG', '-D_LIBCPP_DEBUG', language: 'cpp')
+endif
 
 #===========================================================
 # Dependencies
