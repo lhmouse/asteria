@@ -526,18 +526,17 @@ throw_no_matching_function_call() const
     // Compose the list of arguments.
     cow_string caller;
     caller << this->m_name << "(";
-    uint32_t offset = this->m_stack.size() - 1;
+    uint32_t off = this->m_stack.size() - 1;
     switch(this->m_stack.size())
       {
         do {
           caller << ", ";  // fallthrough
       default:
-          const auto& arg = this->m_stack.top(offset);
-          caller << describe_type(arg.dereference_readonly().type());
-        } while(-- offset != UINT32_MAX);  // fallthrough
+          caller << describe_type(this->m_stack.top(off).dereference_readonly().type());
+        } while(--off != UINT32_MAX);  // fallthrough
       case 0:
         break;
-    }
+      }
     caller << ")";
 
     // Get the width of the overload number column.
@@ -550,18 +549,18 @@ throw_no_matching_function_call() const
     // Compose the list of overloads.
     cow_string overloads;
     overloads << "[list of overloads:";
-    offset = 0;
+    off = 0;
     for(size_t k = 0;  k < overload_count;  ++k) {
       nump.put_DU(k + 1);
       ::std::copy_backward(nump.begin(), nump.end(), sbuf.mut_end() - 1);
       overloads << "\n  " << sbuf.data() << ") `" << this->m_name << "(";
 
-      size_t epos = this->m_overloads.find(offset, '|');
+      size_t epos = this->m_overloads.find(off, '|');
       ROCKET_ASSERT(epos != cow_string::npos);
-      overloads.append(this->m_overloads, offset, epos - offset);
+      overloads.append(this->m_overloads, off, epos - off);
 
       overloads << ")`";
-      offset = (uint32_t) epos + 1;
+      off = (uint32_t) epos + 1;
     }
     overloads << "\n  -- end of list of overloads]";
 

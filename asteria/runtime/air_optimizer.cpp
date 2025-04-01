@@ -77,17 +77,17 @@ create_function(const Source_Location& sloc, cow_stringR name)
       // If `name` looks like a function name, append the parameter list
       // to form a function signature.
       func << "(";
-      uint32_t tid = 0;
+      uint32_t off = 0;
       switch(this->m_params.size())
         {
           do {
             func << ", ";  // fallthrough
         default:
-            func << this->m_params[tid];
-          } while(++ tid != this->m_params.size());  // fallthrough
+            func << this->m_params[off];
+          } while(++off != this->m_params.size());  // fallthrough
         case 0:
           break;
-      }
+        }
       func << ")";
     }
 
