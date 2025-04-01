@@ -172,12 +172,8 @@ do_parse_command_line(int argc, char** argv)
     else
       repl_interactive = !path && ::isatty(STDIN_FILENO);
 
-    // The default optimization level is `2`.
-    // Note again that `-O` without an argument is equivalent to `-O1`, which
-    // effectively decreases optimization in comparison to when it wasn't
-    // specified.
     if(optimize)
-      repl_script.mut_options().optimization_level = uint8_t(*optimize);
+      repl_script.mut_options().optimization_level = (uint8_t) *optimize;
 
     // These arguments are always overwritten.
     repl_file = path.move_value_or(&"-");
