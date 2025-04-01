@@ -268,9 +268,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                  && ::rocket::is_any_of(altr.xop,
                        { xop_assign, xop_index, xop_cmp_eq, xop_cmp_ne, xop_cmp_un, xop_cmp_lt,
                          xop_cmp_gt, xop_cmp_lte, xop_cmp_gte, xop_cmp_3way, xop_add, xop_sub,
-                         xop_mul, xop_div, xop_mod, xop_andb, xop_orb, xop_xorb, xop_addm, xop_subm,
-                         xop_mulm, xop_adds, xop_subs, xop_muls, xop_sll, xop_srl, xop_sla, xop_sra }
-                       )) {
+                         xop_mul, xop_div, xop_mod, xop_andb, xop_orb, xop_xorb, xop_addm,
+                         xop_subm, xop_mulm, xop_adds, xop_subs, xop_muls, xop_sll, xop_srl,
+                         xop_sla, xop_sra })) {
                 // Fold this constant.
                 AIR_Node::S_apply_operator_bi32 xnode = { altr.sloc, altr.xop, altr.assign,
                                                           (int32_t) qrhs->as_integer() };
