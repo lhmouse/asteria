@@ -216,7 +216,7 @@ install_headers(meson.current_build_dir() / 'version.h', subdir: 'asteria')
 #===========================================================
 # Rules for 'lib/libasteria.so'
 #===========================================================
-lib_asteria = both_libraries('asteria',
+lib_asteria = library('asteria',
       cpp_pch: 'asteria/xprecompiled.hpp',
       sources: [ rocket_src, asteria_src ],
       dependencies: [ dep_zlib, dep_pcre2, dep_openssl, dep_iconv ],
