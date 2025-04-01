@@ -229,7 +229,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       case 'n':
       case 'N':
       {
-        if(do_cmask_length(tlen, reader, cmask_namei | cmask_digit) != 3)
+        if(do_cmask_length(tlen, reader, cmask_name) != 3)
           return false;
 
         // `nan` or `NaN`
@@ -245,7 +245,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       case 'i':
       case 'I':
       {
-        if(do_cmask_length(tlen, reader, cmask_namei | cmask_digit) != 8)
+        if(do_cmask_length(tlen, reader, cmask_name) != 8)
           return false;
 
         // `infinity` or `Infinity`
@@ -720,7 +720,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
 
     // Check for keywords if not otherwise disabled.
     size_t tlen = 0;
-    do_cmask_length(tlen, reader, cmask_namei | cmask_digit);
+    do_cmask_length(tlen, reader, cmask_name);
 
     if(!keywords_as_identifiers) {
       auto r = do_prefix_range(s_keywords, reader.peek());

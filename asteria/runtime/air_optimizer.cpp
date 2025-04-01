@@ -73,7 +73,7 @@ AIR_Optimizer::
 create_function(const Source_Location& sloc, cow_stringR name)
   {
     cow_string func = name;
-    if(is_cmask(func.front(), cmask_namei) && is_cmask(func.back(), cmask_namei | cmask_digit)) {
+    if(is_cmask(func.front(), cmask_namei) && is_cmask(func.back(), cmask_name)) {
       // If `name` looks like a function name, append the parameter list
       // to form a function signature.
       func << "(";

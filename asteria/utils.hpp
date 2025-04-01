@@ -125,6 +125,7 @@ enum : uint8_t
     cmask_digit   = 0x04,  // [0-9]
     cmask_xdigit  = 0x08,  // [0-9A-Fa-f]
     cmask_namei   = 0x10,  // [A-Za-z_]
+    cmask_name    = 0x14,  // [A-Za-z0-9_]
     cmask_blank   = 0x20,  // [ \t]
     cmask_cntrl   = 0x40,  // [[:cntrl:]]
   };

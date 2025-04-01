@@ -240,7 +240,7 @@ do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, cow_strin
     // Write the key.
     if(json5 && name.size() && is_cmask(name[0], cmask_namei)
          && ::std::all_of(name.begin() + 1, name.end(),
-               [](char c) { return is_cmask(c, cmask_namei | cmask_digit);  }))
+                          [](char c) { return is_cmask(c, cmask_name);  }))
       fmt << name;
     else
       do_quote_string(fmt, name);
