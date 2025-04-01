@@ -172,6 +172,7 @@ do_parse_command_line(int argc, char** argv)
     else
       repl_interactive = !path && ::isatty(STDIN_FILENO);
 
+    // Configure the parser.
     if(optimize)
       repl_script.mut_options().optimization_level = (uint8_t) *optimize;
 
