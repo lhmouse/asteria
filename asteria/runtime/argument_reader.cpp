@@ -529,13 +529,13 @@ throw_no_matching_function_call() const
     uint32_t off = this->m_stack.size() - 1;
     switch(this->m_stack.size())
       {
+      case 0:
+        break;
         do {
           caller << ", ";  // fallthrough
       default:
           caller << describe_type(this->m_stack.top(off).dereference_readonly().type());
         } while(--off != UINT32_MAX);  // fallthrough
-      case 0:
-        break;
       }
     caller << ")";
 

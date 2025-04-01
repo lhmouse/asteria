@@ -80,13 +80,13 @@ create_function(const Source_Location& sloc, cow_stringR name)
       uint32_t off = 0;
       switch(this->m_params.size())
         {
+        case 0:
+          break;
           do {
             func << ", ";  // fallthrough
         default:
             func << this->m_params[off];
           } while(++off != this->m_params.size());  // fallthrough
-        case 0:
-          break;
         }
       func << ")";
     }
