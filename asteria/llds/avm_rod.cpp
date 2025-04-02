@@ -156,12 +156,12 @@ AIR_Status
 AVM_Rod::
 execute(Executive_Context& ctx) const
   {
-    AIR_Status status = air_status_next;
     ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
     while(offset != 0) {
       auto head = this->m_bptr + this->m_einit + offset;
       offset += 1L + head->nheaders;
 
+      AIR_Status status;
       switch(head->meta_ver)
         {
         case 0:
@@ -194,9 +194,10 @@ execute(Executive_Context& ctx) const
       }
 
       if(ROCKET_UNEXPECT(status != air_status_next))
-        break;
+        return status;
     }
-    return status;
+
+    return air_status_next;
   }
 
 void
