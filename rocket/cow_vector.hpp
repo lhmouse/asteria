@@ -749,7 +749,7 @@ class cow_vector
     // 26.3.11.4, data access
     const value_type*
     data() const noexcept
-      { return this->m_sth.data_opt();  }
+      { return this->m_sth.data();  }
 
     // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.

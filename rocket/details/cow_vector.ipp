@@ -335,11 +335,11 @@ class storage_handle
 
     ROCKET_PURE
     const value_type*
-    data_opt() const noexcept
+    data() const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
-          return nullptr;
+          return reinterpret_cast<value_type*>(-1);
         return qstor->data;
       }
 

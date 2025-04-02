@@ -239,7 +239,7 @@ class Reference
     const Value&
     dereference_readonly() const
       {
-        if((this->m_xref == xref_temporary) && (this->m_mods.data() == nullptr))
+        if(ROCKET_EXPECT(this->m_xref == xref_temporary) && ROCKET_EXPECT(this->m_mods.empty()))
           return this->m_value;
 
         return this->do_dereference_readonly_slow();
@@ -251,7 +251,7 @@ class Reference
     Value&
     dereference_copy()
       {
-        if((this->m_xref == xref_temporary) && (this->m_mods.data() == nullptr))
+        if(ROCKET_EXPECT(this->m_xref == xref_temporary) && ROCKET_EXPECT(this->m_mods.empty()))
           return this->m_value;
 
         if(this->m_xref == xref_temporary) {
