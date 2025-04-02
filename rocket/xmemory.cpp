@@ -23,12 +23,12 @@ inline
 pool&
 do_get_pool_for_size(size_t& size)
   {
-    int si = 5;
+    uint32_t si = 5;
     uint64_t rsize64 = 1ULL << si;
 
     if(size > rsize64) {
       // Round `size` up to the nearest power of two.
-      si = 64 - ROCKET_LZCNT64(size - 1ULL);
+      si = (uint32_t) (64 - ROCKET_LZCNT64(size - 1ULL));
       rsize64 = 1ULL << si;
     }
 
