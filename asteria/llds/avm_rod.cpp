@@ -67,8 +67,8 @@ clear() noexcept
       if(head->meta_ver == 0)
         continue;
 
-      // Take ownership of metadata.
-      unique_ptr<Metadata> meta(head->pv_meta);
+      if(head->pv_meta)
+        delete head->pv_meta;
 
       if(head->pv_meta->dtor_opt)
         head->pv_meta->dtor_opt(head);
