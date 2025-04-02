@@ -14,7 +14,7 @@ Analytic_Context(Uxtc_function, const Abstract_Context* parent_opt,
   {
     // Set parameters, which are local references.
     for(const auto& name : params)
-      if(name != "...")
+      if(is_cmask(name[0], cmask_namei))
         this->do_mut_named_reference(nullptr, name);
 
     // Set pre-defined references.

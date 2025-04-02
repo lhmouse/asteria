@@ -31,7 +31,9 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
     bool has_ellipsis = false;
 
     for(const auto& name : this->m_func->params())
-      if(name != "...") {
+      if(name == "...")
+        has_ellipsis = true;
+      else {
         // Try popping an argument and assign it.
         auto& param = this->do_mut_named_reference(nullptr, name);
         if(nargs == 0)
@@ -39,8 +41,6 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
         else
           param = move(this->m_stack->mut_top(--nargs));
       }
-      else
-        has_ellipsis = true;
 
     if(!has_ellipsis && (nargs != 0))
       throw Runtime_Error(xtc_format,
