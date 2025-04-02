@@ -2555,14 +2555,14 @@ solidify(AVM_Rod& rod) const
               const auto& sloc = head->pv_meta->sloc;
               const auto sentry = ctx.global().copy_recursion_sentry();
 
-              if(auto hooks = ctx.global().get_hooks_opt())
-                hooks->on_trap(sloc, ctx);
-
               // Collect arguments from left to right.
               ctx.alt_stack().clear();
               for(uint32_t k = 0;  k != nargs;  ++k)
                 ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 1 - k));
               ctx.stack().pop(nargs);
+
+              if(auto hooks = ctx.global().get_hooks_opt())
+                hooks->on_trap(sloc, ctx);
 
               // Copy the target reference into the red zone, as we probably don't
               // want to introduce a temporary object on the system stack.
@@ -4023,9 +4023,6 @@ solidify(AVM_Rod& rod) const
               const auto& sloc = head->pv_meta->sloc;
               const auto sentry = ctx.global().copy_recursion_sentry();
 
-              if(auto hooks = ctx.global().get_hooks_opt())
-                hooks->on_trap(sloc, ctx);
-
               auto temp_value = ctx.stack().top().dereference_readonly();
               if(temp_value.is_null()) {
                 // There is no argument for the target function.
@@ -4092,6 +4089,9 @@ solidify(AVM_Rod& rod) const
               else
                 throw Runtime_Error(xtc_format,
                          "Invalid variadic argument generator (value `$1`)", temp_value);
+
+              if(auto hooks = ctx.global().get_hooks_opt())
+                hooks->on_trap(sloc, ctx);
 
               // Invoke the target function with arguments from `alt_stack`.
               ctx.stack().clear_red_zone();
@@ -4187,9 +4187,6 @@ solidify(AVM_Rod& rod) const
               const auto& sloc = head->pv_meta->sloc;
               const auto sentry = ctx.global().copy_recursion_sentry();
 
-              if(auto hooks = ctx.global().get_hooks_opt())
-                hooks->on_trap(sloc, ctx);
-
               // Collect arguments from left to right.
               ctx.alt_stack().clear();
               for(uint32_t k = 0;  k != nargs - 1;  ++k)
@@ -4233,6 +4230,9 @@ solidify(AVM_Rod& rod) const
 
               AIR_Optimizer optmz(sp.opts);
               optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
+
+              if(auto hooks = ctx.global().get_hooks_opt())
+                hooks->on_trap(sloc, ctx);
 
               ctx.stack().clear_red_zone();
               ctx.stack().mut_top().set_void();
@@ -4521,10 +4521,10 @@ solidify(AVM_Rod& rod) const
               const auto& sloc = head->pv_meta->sloc;
               const auto sentry = ctx.global().copy_recursion_sentry();
 
+              ctx.swap_stacks();
+
               if(auto hooks = ctx.global().get_hooks_opt())
                 hooks->on_trap(sloc, ctx);
-
-              ctx.swap_stacks();
 
               // Copy the target reference into the red zone, as we probably don't
               // want to introduce a temporary object on the system stack.
