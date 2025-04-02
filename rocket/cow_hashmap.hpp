@@ -240,10 +240,6 @@ class cow_hashmap
         if(ROCKET_EXPECT(bkts))
           return bkts;
 
-        // If the hashmap is empty, return a pointer to constant storage.
-        if(this->empty())
-          return const_cast<bucket_type*>(this->do_buckets());
-
         // Reallocate the storage. The length is left intact.
         // Note that this function shall preserve indices of buckets of cloned elements
         // in the new table.

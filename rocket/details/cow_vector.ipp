@@ -347,7 +347,9 @@ class storage_handle
     mut_data_opt() noexcept
       {
         auto qstor = this->m_qstor;
-        if(!qstor || !qstor->nref.unique())
+        if(!qstor)
+          return reinterpret_cast<value_type*>(-1);
+        if(!qstor->nref.unique())
           return nullptr;
         return qstor->data;
       }

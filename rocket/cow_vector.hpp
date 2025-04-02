@@ -761,10 +761,6 @@ class cow_vector
         if(ROCKET_EXPECT(ptr))
           return ptr;
 
-        // If the vector is empty, return a pointer to constant storage.
-        if(this->empty())
-          return const_cast<value_type*>(this->data());
-
         // Reallocate the storage. The length is left intact.
         ptr = this->m_sth.reallocate_clone(this->m_sth);
         return ptr;

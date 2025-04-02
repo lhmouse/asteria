@@ -525,7 +525,9 @@ class storage_handle
     mut_buckets_opt() noexcept
       {
         auto qstor = this->m_qstor;
-        if(!qstor || !qstor->nref.unique())
+        if(!qstor)
+          return reinterpret_cast<bucket_type*>(-1);
+        if(!qstor->nref.unique())
           return nullptr;
         return qstor->bkts;
       }
