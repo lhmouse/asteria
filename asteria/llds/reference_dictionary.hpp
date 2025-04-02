@@ -57,14 +57,17 @@ class Reference_Dictionary
         if(this->m_nbkt == 0)
           return nullptr;
 
-        // Find a bucket using linear probing.
+        // Find a bucket using linear probing. The load factor is kept <= 0.5
+        // so a bucket is always returned. If probing has stopped on an empty
+        // bucket, then there is no match.
         size_t orig = ::rocket::probe_origin(this->m_nbkt, key.rdhash());
         auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
                     [&](const Bucket& r) { return r.key == key;  });
 
-        // The load factor is kept <= 0.5 so a bucket is always returned. If
-        // probing has stopped on an empty bucket, then there is no match.
-        return *qbkt ? &(qbkt->ref) : nullptr;
+        if(!*qbkt)
+          return nullptr;
+
+        return &(qbkt->ref);
       }
 
   public:
