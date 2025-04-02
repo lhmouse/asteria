@@ -67,11 +67,10 @@ clear() noexcept
       if(head->meta_ver == 0)
         continue;
 
-      if(head->pv_meta)
-        delete head->pv_meta;
-
       if(head->pv_meta->dtor_opt)
         head->pv_meta->dtor_opt(head);
+
+      delete head->pv_meta;
     }
 
 #ifdef ROCKET_DEBUG
