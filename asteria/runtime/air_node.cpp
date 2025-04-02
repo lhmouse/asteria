@@ -1224,10 +1224,10 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
           const auto& altr = this->m_stor.as<S_switch_statement>();
 
           // Collect variables from all labels and clauses.
-          for(const auto& clause : altr.clauses) {
+          for(const auto& clause : altr.clauses)
             do_collect_variables_for_each(staged, temp, clause.code_labels);
+          for(const auto& clause : altr.clauses)
             do_collect_variables_for_each(staged, temp, clause.code_body);
-          }
           return;
         }
 
