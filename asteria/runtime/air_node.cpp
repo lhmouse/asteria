@@ -190,7 +190,7 @@ do_duplicate_sequence(xContainer& src, int64_t count)
       src.append(src.begin(), src.begin() + (ptrdiff_t) ::rocket::min(rlen - src.ssize(), src.ssize()));
   }
 
-ROCKET_FLATTEN ROCKET_ALWAYS_INLINE
+inline __attribute__((__always_inline__))
 AIR_Status
 do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
   {
