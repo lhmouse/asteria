@@ -770,7 +770,7 @@ do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
 
       default:
         ROCKET_UNREACHABLE();
-    }
+      }
   }
 
 }  // namespace
@@ -795,7 +795,7 @@ get_constant_opt() const noexcept
 
       default:
         return nullopt;
-    }
+      }
   }
 
 bool
@@ -877,7 +877,7 @@ is_terminator() const noexcept
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
-    }
+      }
   }
 
 opt<AIR_Node>
@@ -1162,7 +1162,7 @@ rebind_opt(Abstract_Context& ctx) const
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
-    }
+      }
   }
 
 void
@@ -1349,7 +1349,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
-    }
+      }
   }
 
 void
@@ -2727,7 +2727,7 @@ solidify(AVM_Rod& rod) const
                     auto& top = ctx.stack().mut_top();
 
                     switch(uxop)
-                        {
+                      {
                       case xop_inc:
                         {
                           // `assign` is `true` for the postfix variant and `false` for
@@ -2852,7 +2852,7 @@ solidify(AVM_Rod& rod) const
 
                       default:
                         ROCKET_UNREACHABLE();
-                    }
+                      }
                   }
 
                 // Uparam
@@ -2882,7 +2882,7 @@ solidify(AVM_Rod& rod) const
                     auto& top = ctx.stack().mut_top();
 
                     switch(uxop)
-                        {
+                      {
                       case xop_assign:
                         {
                           // `assign` is ignored.
@@ -2910,7 +2910,7 @@ solidify(AVM_Rod& rod) const
 
                       default:
                         ROCKET_UNREACHABLE();
-                    }
+                      }
                   }
 
                 // Uparam
@@ -2960,7 +2960,7 @@ solidify(AVM_Rod& rod) const
                     auto& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     switch(uxop)
-                        {
+                      {
                       case xop_pos:
                         {
                           // This operator does nothing.
@@ -3331,7 +3331,7 @@ solidify(AVM_Rod& rod) const
 
                       default:
                         ROCKET_UNREACHABLE();
-                    }
+                      }
                   }
 
                 // Uparam
@@ -3387,7 +3387,7 @@ solidify(AVM_Rod& rod) const
                     return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
 
                   switch(uxop)
-                      {
+                    {
                     case xop_cmp_eq:
                       {
                         // Check whether the two operands are equal. Unordered values are
@@ -3734,7 +3734,7 @@ solidify(AVM_Rod& rod) const
 
                       default:
                         ROCKET_UNREACHABLE();
-                    }
+                      }
                   }
 
                 // Uparam
@@ -3834,7 +3834,7 @@ solidify(AVM_Rod& rod) const
 
             default:
               ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.xop);
-          }
+            }
         }
 
       case index_unpack_array:
@@ -4737,7 +4737,7 @@ solidify(AVM_Rod& rod) const
                     auto& top = ctx.stack().mut_top();
 
                     switch(uxop)
-                        {
+                      {
                       case xop_assign:
                         {
                           // `assign` is ignored.
@@ -4755,7 +4755,7 @@ solidify(AVM_Rod& rod) const
 
                       default:
                         ROCKET_UNREACHABLE();
-                    }
+                      }
                   }
 
                 // Uparam
@@ -4828,7 +4828,7 @@ solidify(AVM_Rod& rod) const
 
             default:
               ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
-          }
+            }
         }
 
       case index_return_statement_bi32:
