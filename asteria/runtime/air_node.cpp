@@ -2363,7 +2363,7 @@ solidify(AVM_Rod& rod) const
           const auto& altr = this->m_stor.as<S_push_local_reference>();
 
           Uparam up2;
-          up2.u2345 = altr.depth;
+          up2.u01 = altr.depth;
 
           struct Sparam
             {
@@ -2377,7 +2377,7 @@ solidify(AVM_Rod& rod) const
             +[](Executive_Context& ctx, const Header* head)
               __attribute__((__always_inline__)) -> AIR_Status
               {
-                const uint32_t depth = head->uparam.u2345;
+                const uint32_t depth = head->uparam.u01;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Locate the target context.

@@ -117,7 +117,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
             if(qref) {
               // A reference declared later has been found.
               // Record the context depth for later lookups.
-              AIR_Node::S_push_local_reference xnode = { altr.sloc, depth, altr.name };
+              AIR_Node::S_push_local_reference xnode = { altr.sloc, (uint16_t) depth, altr.name };
               code.emplace_back(move(xnode));
               return;
             }
@@ -143,6 +143,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
             // Search in the outer context.
             ++ depth;
+            if(depth > 0xFFFF)
+              throw Compiler_Error(xtc_status,
+                        compiler_status_too_many_nested_levels, altr.sloc);
           }
         }
 

@@ -379,6 +379,9 @@ describe_compiler_status(Compiler_Status status) noexcept
       case compiler_status_keyword_not_declarable:
         return "keyword not declarable";
 
+      case compiler_status_too_many_nested_levels:
+        return "max level of nested scopes exceeded";
+
       default:
         return "[unknown compiler status]";
     }

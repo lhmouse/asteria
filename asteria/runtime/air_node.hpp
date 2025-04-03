@@ -127,7 +127,7 @@ class AIR_Node
     struct S_push_local_reference
       {
         Source_Location sloc;
-        uint32_t depth;
+        uint16_t depth;
         phsh_string name;
       };
 
