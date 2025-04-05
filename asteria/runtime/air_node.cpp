@@ -191,7 +191,7 @@ do_duplicate_sequence(xContainer& src, int64_t count)
   }
 
 AIR_Status
-do_apply_binary_operator_with_noninteger(uint8_t uxop, Value& lhs, const Value& rhs)
+do_apply_binary_operator_with_noninteger(uint32_t uxop, Value& lhs, const Value& rhs)
   {
     switch(uxop)
       {
@@ -545,7 +545,7 @@ do_apply_binary_operator_with_noninteger(uint8_t uxop, Value& lhs, const Value& 
   }
 
 AIR_Status
-do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
+do_apply_binary_operator_with_integer(uint32_t uxop, Value& lhs, V_integer irhs)
   {
     switch(uxop)
       {
@@ -3076,7 +3076,7 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     auto& top = ctx.stack().mut_top();
 
                     switch(uxop)
@@ -3229,7 +3229,7 @@ solidify(AVM_Rod& rod) const
                 +[](Executive_Context& ctx, const Header* head)
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     auto& rhs = ctx.stack().mut_top().dereference_copy();
                     ctx.stack().pop();
                     auto& top = ctx.stack().mut_top();
@@ -3308,7 +3308,7 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     auto& top = ctx.stack().mut_top();
                     auto& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
@@ -3729,7 +3729,7 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__, __flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     const auto& rhs = ctx.stack().top().dereference_readonly();
                     ctx.stack().pop();
                     auto& top = ctx.stack().mut_top();
@@ -3765,7 +3765,7 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__, __flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     const auto& rhs = ctx.stack().top().dereference_readonly();
                     ctx.stack().pop();
                     auto& top = ctx.stack().mut_top();
@@ -4736,7 +4736,7 @@ solidify(AVM_Rod& rod) const
                 +[](Executive_Context& ctx, const Header* head)
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     const V_integer irhs = head->uparam.i2345;
                     auto& top = ctx.stack().mut_top();
 
@@ -4808,7 +4808,7 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__, __flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint8_t uxop = head->uparam.u1;
+                    const uint32_t uxop = head->uparam.u1;
                     const V_integer irhs = head->uparam.i2345;
                     auto& top = ctx.stack().mut_top();
                     auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
