@@ -190,7 +190,360 @@ do_duplicate_sequence(xContainer& src, int64_t count)
       src.append(src.begin(), src.begin() + (ptrdiff_t) ::rocket::min(rlen - src.ssize(), src.ssize()));
   }
 
-inline __attribute__((__always_inline__))
+AIR_Status
+do_apply_binary_operator_with_noninteger(uint8_t uxop, Value& lhs, const Value& rhs)
+  {
+    switch(uxop)
+      {
+      case xop_cmp_eq:
+        {
+          // Check whether the two operands are equal. Unordered values are
+          // considered to be unequal.
+          lhs = lhs.compare_partial(rhs) == compare_equal;
+          return air_status_next;
+        }
+
+      case xop_cmp_ne:
+        {
+          // Check whether the two operands are not equal. Unordered values are
+          // considered to be unequal.
+          lhs = lhs.compare_partial(rhs) != compare_equal;
+          return air_status_next;
+        }
+
+      case xop_cmp_un:
+        {
+          // Check whether the two operands are unordered.
+          lhs = lhs.compare_partial(rhs) == compare_unordered;
+          return air_status_next;
+        }
+
+      case xop_cmp_lt:
+        {
+          // Check whether the LHS operand is less than the RHS operand. If
+          // they are unordered, an exception shall be thrown.
+          lhs = lhs.compare_total(rhs) == compare_less;
+          return air_status_next;
+        }
+
+      case xop_cmp_gt:
+        {
+          // Check whether the LHS operand is greater than the RHS operand. If
+          // they are unordered, an exception shall be thrown.
+          lhs = lhs.compare_total(rhs) == compare_greater;
+          return air_status_next;
+        }
+
+      case xop_cmp_lte:
+        {
+          // Check whether the LHS operand is less than or equal to the RHS
+          // operand. If they are unordered, an exception shall be thrown.
+          lhs = lhs.compare_total(rhs) != compare_greater;
+          return air_status_next;
+        }
+
+      case xop_cmp_gte:
+        {
+          // Check whether the LHS operand is greater than or equal to the RHS
+          // operand. If they are unordered, an exception shall be thrown.
+          lhs = lhs.compare_total(rhs) != compare_less;
+          return air_status_next;
+        }
+
+      case xop_cmp_3way:
+        {
+          // Defines a partial ordering on all values. For unordered operands,
+            // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
+            // the same result.
+            int64_t cmp = lhs.compare_partial(rhs);
+            lhs = cmp - compare_equal;
+            if(ROCKET_UNEXPECT(cmp == compare_unordered))
+              lhs = &"[unordered]";
+            return air_status_next;
+          }
+
+      case xop_add:
+        {
+          // Perform logical OR on two boolean values, or get the sum of two
+          // arithmetic values, or concatenate two strings.
+          if(lhs.is_real() && rhs.is_real()) {
+            V_real& val = lhs.mut_real();
+            V_real other = rhs.as_real();
+
+            val += other;
+            return air_status_next;
+          }
+
+          if(lhs.is_string() && rhs.is_string()) {
+            V_string& val = lhs.mut_string();
+            const V_string& other = rhs.as_string();
+
+            val.append(other);
+            return air_status_next;
+          }
+
+          if(lhs.is_boolean() && rhs.is_boolean()) {
+            V_boolean& val = lhs.mut_boolean();
+            V_boolean other = rhs.as_boolean();
+
+            val |= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Addition not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_sub:
+        {
+          // Perform logical XOR on two boolean values, or get the difference
+          // of two arithmetic values.
+          if(lhs.is_real() && rhs.is_real()) {
+            V_real& val = lhs.mut_real();
+            V_real other = rhs.as_real();
+
+            // Overflow will result in an infinity, so this is safe.
+            val -= other;
+            return air_status_next;
+          }
+
+          if(lhs.is_boolean() && rhs.is_boolean()) {
+            V_boolean& val = lhs.mut_boolean();
+            V_boolean other = rhs.as_boolean();
+
+            // Perform logical XOR of the operands.
+            val ^= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Subtraction not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_mul:
+        {
+           // Perform logical AND on two boolean values, or get the product of
+           // two arithmetic values, or duplicate a string or array by a given
+           // times.
+          if(lhs.is_real() && rhs.is_real()) {
+            V_real& val = lhs.mut_real();
+            V_real other = rhs.as_real();
+
+            val *= other;
+            return air_status_next;
+          }
+
+          if(lhs.is_integer() && rhs.is_string()) {
+            V_integer count = lhs.as_integer();
+            lhs = rhs.as_string();
+            V_string& val = lhs.mut_string();
+
+            do_duplicate_sequence(val, count);
+            return air_status_next;
+          }
+
+          if(lhs.is_integer() && rhs.is_array()) {
+            V_integer count = lhs.as_integer();
+            lhs = rhs.as_array();
+            V_array& val = lhs.mut_array();
+
+            do_duplicate_sequence(val, count);
+            return air_status_next;
+          }
+
+          if(lhs.is_boolean() && rhs.is_boolean()) {
+            V_boolean& val = lhs.mut_boolean();
+            V_boolean other = rhs.as_boolean();
+
+            val &= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Multiplication not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_div:
+        {
+          // Get the quotient of two arithmetic values. If both operands are
+          // integers, the result is also an integer, truncated towards zero.
+          if(lhs.is_real() && rhs.is_real()) {
+            V_real& val = lhs.mut_real();
+            V_real other = rhs.as_real();
+
+            val /= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Division not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_mod:
+        {
+          // Get the remainder of two arithmetic values. The quotient is
+          // truncated towards zero. If both operands are integers, the result
+          // is also an integer.
+          if(lhs.is_real() && rhs.is_real()) {
+            V_real& val = lhs.mut_real();
+            V_real other = rhs.as_real();
+
+            val = ::std::fmod(val, other);
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Modulo not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_andb:
+        {
+          // Perform the bitwise AND operation on all bits of the operands. If
+          // the two operands have different lengths, the result is truncated
+          // to the same length as the shorter one.
+          if(lhs.is_string() && rhs.is_string()) {
+            V_string& val = lhs.mut_string();
+            const V_string& mask = rhs.as_string();
+
+            if(val.size() > mask.size())
+              val.erase(mask.size());
+            auto maskp = mask.begin();
+            for(auto it = val.mut_begin();  it != val.end();  ++it, ++maskp)
+              *it = static_cast<char>(*it & *maskp);
+            return air_status_next;
+          }
+
+          if(lhs.is_boolean() && rhs.is_boolean()) {
+            V_boolean& val = lhs.mut_boolean();
+            V_boolean other = rhs.as_boolean();
+
+            val &= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_orb:
+        {
+          // Perform the bitwise OR operation on all bits of the operands. If
+          // the two operands have different lengths, the result is padded to
+          // the same length as the longer one, with zeroes.
+          if(lhs.is_string() && rhs.is_string()) {
+            V_string& val = lhs.mut_string();
+            const V_string& mask = rhs.as_string();
+
+            if(val.size() < mask.size())
+              val.append(mask.size() - val.size(), 0);
+            auto valp = val.mut_begin();
+            for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
+              *valp = static_cast<char>(*valp | *it);
+            return air_status_next;
+          }
+
+          if(lhs.is_boolean() && rhs.is_boolean()) {
+            V_boolean& val = lhs.mut_boolean();
+            V_boolean other = rhs.as_boolean();
+
+            val |= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_xorb:
+        {
+          // Perform the bitwise XOR operation on all bits of the operands. If
+          // the two operands have different lengths, the result is padded to
+          // the same length as the longer one, with zeroes.
+          if(lhs.is_string() && rhs.is_string()) {
+            V_string& val = lhs.mut_string();
+            const V_string& mask = rhs.as_string();
+
+            if(val.size() < mask.size())
+              val.append(mask.size() - val.size(), 0);
+            auto valp = val.mut_begin();
+            for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
+              *valp = static_cast<char>(*valp ^ *it);
+            return air_status_next;
+          }
+
+          if(lhs.is_boolean() && rhs.is_boolean()) {
+            V_boolean& val = lhs.mut_boolean();
+            V_boolean other = rhs.as_boolean();
+
+            val ^= other;
+            return air_status_next;
+          }
+
+          throw Runtime_Error(xtc_format,
+                   "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_addm:
+        {
+          // This should have been redirected to the fast path.
+          throw Runtime_Error(xtc_format,
+                   "Modular addition not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_subm:
+        {
+          // This should have been redirected to the fast path.
+          throw Runtime_Error(xtc_format,
+                   "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_mulm:
+        {
+          // This should have been redirected to the fast path.
+          throw Runtime_Error(xtc_format,
+                   "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_adds:
+        {
+          // This should have been redirected to the fast path.
+          throw Runtime_Error(xtc_format,
+                   "Saturating addition not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_subs:
+        {
+          // This should have been redirected to the fast path.
+          throw Runtime_Error(xtc_format,
+                   "Saturating subtraction not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      case xop_muls:
+        {
+          // This should have been redirected to the fast path.
+          throw Runtime_Error(xtc_format,
+                   "Saturating multiplication not applicable (operands were `$1` and `$2`)",
+                   lhs, rhs);
+        }
+
+      default:
+        ROCKET_UNREACHABLE();
+      }
+  }
+
 AIR_Status
 do_apply_binary_operator_with_integer(uint8_t uxop, Value& lhs, V_integer irhs)
   {
@@ -3373,368 +3726,19 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                __attribute__((__always_inline__, __flatten__)) -> AIR_Status
-                {
-                  const bool assign = head->uparam.b0;
-                  const uint8_t uxop = head->uparam.u1;
-                  const auto& rhs = ctx.stack().top().dereference_readonly();
-                  ctx.stack().pop();
-                  auto& top = ctx.stack().mut_top();
-                  auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const uint8_t uxop = head->uparam.u1;
+                    const auto& rhs = ctx.stack().top().dereference_readonly();
+                    ctx.stack().pop();
+                    auto& top = ctx.stack().mut_top();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                  // The fast path should be a proper tail call.
-                  if(rhs.type() == type_integer)
+                    if(rhs.type() != type_integer)
+                      return do_apply_binary_operator_with_noninteger(uxop, lhs, rhs);
+
                     return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
-
-                  switch(uxop)
-                    {
-                    case xop_cmp_eq:
-                      {
-                        // Check whether the two operands are equal. Unordered values are
-                        // considered to be unequal.
-                        lhs = lhs.compare_partial(rhs) == compare_equal;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_ne:
-                      {
-                        // Check whether the two operands are not equal. Unordered values are
-                        // considered to be unequal.
-                        lhs = lhs.compare_partial(rhs) != compare_equal;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_un:
-                      {
-                        // Check whether the two operands are unordered.
-                        lhs = lhs.compare_partial(rhs) == compare_unordered;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_lt:
-                      {
-                        // Check whether the LHS operand is less than the RHS operand. If
-                        // they are unordered, an exception shall be thrown.
-                        lhs = lhs.compare_total(rhs) == compare_less;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_gt:
-                      {
-                        // Check whether the LHS operand is greater than the RHS operand. If
-                        // they are unordered, an exception shall be thrown.
-                        lhs = lhs.compare_total(rhs) == compare_greater;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_lte:
-                      {
-                        // Check whether the LHS operand is less than or equal to the RHS
-                        // operand. If they are unordered, an exception shall be thrown.
-                        lhs = lhs.compare_total(rhs) != compare_greater;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_gte:
-                      {
-                        // Check whether the LHS operand is greater than or equal to the RHS
-                        // operand. If they are unordered, an exception shall be thrown.
-                        lhs = lhs.compare_total(rhs) != compare_less;
-                        return air_status_next;
-                      }
-
-                    case xop_cmp_3way:
-                      {
-                        // Defines a partial ordering on all values. For unordered operands,
-                          // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
-                          // the same result.
-                          int64_t cmp = lhs.compare_partial(rhs);
-                          lhs = cmp - compare_equal;
-                          if(ROCKET_UNEXPECT(cmp == compare_unordered))
-                            lhs = &"[unordered]";
-                          return air_status_next;
-                        }
-
-                      case xop_add:
-                        {
-                          // Perform logical OR on two boolean values, or get the sum of two
-                          // arithmetic values, or concatenate two strings.
-                          if(lhs.is_real() && rhs.is_real()) {
-                            V_real& val = lhs.mut_real();
-                            V_real other = rhs.as_real();
-
-                            val += other;
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_string() && rhs.is_string()) {
-                            V_string& val = lhs.mut_string();
-                            const V_string& other = rhs.as_string();
-
-                            val.append(other);
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_boolean() && rhs.is_boolean()) {
-                            V_boolean& val = lhs.mut_boolean();
-                            V_boolean other = rhs.as_boolean();
-
-                            val |= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Addition not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_sub:
-                        {
-                          // Perform logical XOR on two boolean values, or get the difference
-                          // of two arithmetic values.
-                          if(lhs.is_real() && rhs.is_real()) {
-                            V_real& val = lhs.mut_real();
-                            V_real other = rhs.as_real();
-
-                            // Overflow will result in an infinity, so this is safe.
-                            val -= other;
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_boolean() && rhs.is_boolean()) {
-                            V_boolean& val = lhs.mut_boolean();
-                            V_boolean other = rhs.as_boolean();
-
-                            // Perform logical XOR of the operands.
-                            val ^= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Subtraction not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_mul:
-                        {
-                           // Perform logical AND on two boolean values, or get the product of
-                           // two arithmetic values, or duplicate a string or array by a given
-                           // times.
-                          if(lhs.is_real() && rhs.is_real()) {
-                            V_real& val = lhs.mut_real();
-                            V_real other = rhs.as_real();
-
-                            val *= other;
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_integer() && rhs.is_string()) {
-                            V_integer count = lhs.as_integer();
-                            lhs = rhs.as_string();
-                            V_string& val = lhs.mut_string();
-
-                            do_duplicate_sequence(val, count);
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_integer() && rhs.is_array()) {
-                            V_integer count = lhs.as_integer();
-                            lhs = rhs.as_array();
-                            V_array& val = lhs.mut_array();
-
-                            do_duplicate_sequence(val, count);
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_boolean() && rhs.is_boolean()) {
-                            V_boolean& val = lhs.mut_boolean();
-                            V_boolean other = rhs.as_boolean();
-
-                            val &= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Multiplication not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_div:
-                        {
-                          // Get the quotient of two arithmetic values. If both operands are
-                          // integers, the result is also an integer, truncated towards zero.
-                          if(lhs.is_real() && rhs.is_real()) {
-                            V_real& val = lhs.mut_real();
-                            V_real other = rhs.as_real();
-
-                            val /= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Division not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_mod:
-                        {
-                          // Get the remainder of two arithmetic values. The quotient is
-                          // truncated towards zero. If both operands are integers, the result
-                          // is also an integer.
-                          if(lhs.is_real() && rhs.is_real()) {
-                            V_real& val = lhs.mut_real();
-                            V_real other = rhs.as_real();
-
-                            val = ::std::fmod(val, other);
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Modulo not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_andb:
-                        {
-                          // Perform the bitwise AND operation on all bits of the operands. If
-                          // the two operands have different lengths, the result is truncated
-                          // to the same length as the shorter one.
-                          if(lhs.is_string() && rhs.is_string()) {
-                            V_string& val = lhs.mut_string();
-                            const V_string& mask = rhs.as_string();
-
-                            if(val.size() > mask.size())
-                              val.erase(mask.size());
-                            auto maskp = mask.begin();
-                            for(auto it = val.mut_begin();  it != val.end();  ++it, ++maskp)
-                              *it = static_cast<char>(*it & *maskp);
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_boolean() && rhs.is_boolean()) {
-                            V_boolean& val = lhs.mut_boolean();
-                            V_boolean other = rhs.as_boolean();
-
-                            val &= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Bitwise AND not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_orb:
-                        {
-                          // Perform the bitwise OR operation on all bits of the operands. If
-                          // the two operands have different lengths, the result is padded to
-                          // the same length as the longer one, with zeroes.
-                          if(lhs.is_string() && rhs.is_string()) {
-                            V_string& val = lhs.mut_string();
-                            const V_string& mask = rhs.as_string();
-
-                            if(val.size() < mask.size())
-                              val.append(mask.size() - val.size(), 0);
-                            auto valp = val.mut_begin();
-                            for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
-                              *valp = static_cast<char>(*valp | *it);
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_boolean() && rhs.is_boolean()) {
-                            V_boolean& val = lhs.mut_boolean();
-                            V_boolean other = rhs.as_boolean();
-
-                            val |= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Bitwise OR not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_xorb:
-                        {
-                          // Perform the bitwise XOR operation on all bits of the operands. If
-                          // the two operands have different lengths, the result is padded to
-                          // the same length as the longer one, with zeroes.
-                          if(lhs.is_string() && rhs.is_string()) {
-                            V_string& val = lhs.mut_string();
-                            const V_string& mask = rhs.as_string();
-
-                            if(val.size() < mask.size())
-                              val.append(mask.size() - val.size(), 0);
-                            auto valp = val.mut_begin();
-                            for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
-                              *valp = static_cast<char>(*valp ^ *it);
-                            return air_status_next;
-                          }
-
-                          if(lhs.is_boolean() && rhs.is_boolean()) {
-                            V_boolean& val = lhs.mut_boolean();
-                            V_boolean other = rhs.as_boolean();
-
-                            val ^= other;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Bitwise XOR not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_addm:
-                        {
-                          // This should have been redirected to the fast path.
-                          throw Runtime_Error(xtc_format,
-                                   "Modular addition not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_subm:
-                        {
-                          // This should have been redirected to the fast path.
-                          throw Runtime_Error(xtc_format,
-                                   "Modular subtraction not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_mulm:
-                        {
-                          // This should have been redirected to the fast path.
-                          throw Runtime_Error(xtc_format,
-                                   "Modular multiplication not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_adds:
-                        {
-                          // This should have been redirected to the fast path.
-                          throw Runtime_Error(xtc_format,
-                                   "Saturating addition not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_subs:
-                        {
-                          // This should have been redirected to the fast path.
-                          throw Runtime_Error(xtc_format,
-                                   "Saturating subtraction not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      case xop_muls:
-                        {
-                          // This should have been redirected to the fast path.
-                          throw Runtime_Error(xtc_format,
-                                   "Saturating multiplication not applicable (operands were `$1` and `$2`)",
-                                   lhs, rhs);
-                        }
-
-                      default:
-                        ROCKET_UNREACHABLE();
-                      }
                   }
 
                 // Uparam
