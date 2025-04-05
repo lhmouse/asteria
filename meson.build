@@ -154,7 +154,7 @@ add_project_arguments(
       '-fno-enforce-eh-specs', '-Wzero-as-null-pointer-constant', '-fstrict-aliasing',
       '-fno-stack-protector', '-fstrict-overflow', '-fmerge-all-constants',
       '-frounding-math', '-fno-math-errno', '-fno-ident', '-fno-trapping-math',
-      '-fno-devirtualize-speculatively', '-fno-semantic-interposition',
+      '-fno-devirtualize-speculatively', '-fno-semantic-interposition', '-fno-plt',
       '-Werror=conversion', '-Werror=sign-compare', '-Werror=sign-conversion',
       '-Werror=write-strings', '-Werror=return-type', '-Werror=double-promotion',
       '-Werror=non-virtual-dtor',
