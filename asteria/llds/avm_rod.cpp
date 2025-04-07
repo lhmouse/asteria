@@ -165,18 +165,18 @@ execute(Executive_Context& ctx) const
         {
         case 0:
           // There is no metadata or symbols.
-          status = head->pv_exec(ctx, head);
+          status = (* head->pv_exec) (ctx, head);
           break;
 
         case 1:
           // There is metadata without symbols.
-          status = head->pv_meta->exec(ctx, head);
+          status = (* head->pv_meta->exec) (ctx, head);
           break;
 
         default:
           try {
             // There is metadata and symbols.
-            status = head->pv_meta->exec(ctx, head);
+            status = (* head->pv_meta->exec) (ctx, head);
           }
           catch(Runtime_Error& except) {
             // Modify and rethrow the exception in place without copying it.
