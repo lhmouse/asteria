@@ -72,8 +72,10 @@ class Reference_Stack
     void
     clear_red_zone() noexcept
       {
-        while(ROCKET_UNEXPECT(this->m_einit != this->m_etop))
-          ::rocket::destroy(this->m_bptr + (-- this->m_einit));
+        while(this->m_einit != this->m_etop) {
+          this->m_einit --;
+          ::rocket::destroy(this->m_bptr + this->m_einit);
+        }
       }
 
     const Reference&
