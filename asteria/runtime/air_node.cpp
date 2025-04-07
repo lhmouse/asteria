@@ -2793,10 +2793,10 @@ solidify(AVM_Rod& rod) const
 
             // Collector
             , +[](Variable_HashMap& staged, Variable_HashMap& temp, const Header* head)
-            {
-              const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-              sp.ref.collect_variables(staged, temp);
-            }
+              {
+                const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+                sp.ref.collect_variables(staged, temp);
+              }
 
             // Symbols
             , nullptr
