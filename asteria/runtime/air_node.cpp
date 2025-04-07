@@ -135,28 +135,21 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
 
 AIR_Status
 do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location& sloc,
-                  PTC_Aware ptc, const Value& target)
+                  PTC_Aware ptc, const cow_function& target)
   {
-    if(target.is_null())
-      throw Runtime_Error(xtc_format,
-               "Target function not found");
-
-    if(!target.is_function())
-      throw Runtime_Error(xtc_format,
-               "Non-function value not invocable (target `$1`)", target);
-
-    const auto& f = target.as_function();
+    ctx.stack().clear_red_zone();
     ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform a plain call.
-      ctx.global().call_hook(&Abstract_Hooks::on_call, sloc, f);
-      f.invoke(self, ctx.global(), move(ctx.alt_stack()));
+      ctx.global().call_hook(&Abstract_Hooks::on_call, sloc, target);
+      target.invoke(self, ctx.global(), move(ctx.alt_stack()));
       return air_status_next;
     }
     else {
       // Perform a tail call.
-      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, f, move(self), move(ctx.alt_stack())));
+      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target,
+                                              move(self), move(ctx.alt_stack())));
       return air_status_return_ref;
     }
   }
@@ -187,7 +180,7 @@ do_duplicate_sequence(xContainer& src, int64_t count)
     // Duplicate elements, using binary exponential backoff.
     src.reserve((size_t) rlen);
     while(src.ssize() < rlen)
-      src.append(src.begin(), src.begin() + (ptrdiff_t) ::rocket::min(rlen - src.ssize(), src.ssize()));
+      src.append(src.begin(), src.begin() + ::rocket::min(rlen - src.ssize(), src.ssize()));
   }
 
 AIR_Status
@@ -2932,14 +2925,18 @@ solidify(AVM_Rod& rod) const
                   ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 1 - k));
                 ctx.stack().pop(nargs);
 
-                ctx.stack().clear_red_zone();
+                // Get the target function.
+                const auto& target_value = ctx.stack().top().dereference_readonly();
+                if(target_value.is_null())
+                  throw Runtime_Error(xtc_format,
+                           "Target function not found");
 
-                // Copy the target reference into the red zone, as we probably don't
-                // want to introduce a temporary object on the system stack.
-                ctx.stack().push();
-                ctx.stack().mut_top() = ctx.stack().top(1);
-                const auto& target = ctx.stack().top().dereference_readonly();
-                ctx.stack().pop();
+                if(!target_value.is_function())
+                  throw Runtime_Error(xtc_format,
+                           "Non-function value not invocable (target `$1`)", target_value);
+
+                // Set the `this` reference and invoke the target function.
+                auto target = target_value.as_function();
                 ctx.stack().mut_top().pop_modifier();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
@@ -4068,12 +4065,12 @@ solidify(AVM_Rod& rod) const
                   // Invoke the generator function with no argument to get the number
                   // of variadic arguments. This destroys its self reference, so we have
                   // to stash it first.
-                  auto va_gen = move(temp_value.mut_function());
+                  auto va_generator = temp_value.as_function();
                   ctx.stack().mut_top().pop_modifier();
                   ctx.stack().push();
                   ctx.stack().mut_top() = ctx.stack().mut_top(1);
                   ctx.alt_stack().clear();
-                  do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, va_gen);
+                  do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, va_generator);
                   temp_value = ctx.stack().top().dereference_readonly();
                   ctx.stack().pop();
 
@@ -4085,7 +4082,7 @@ solidify(AVM_Rod& rod) const
                     throw Runtime_Error(xtc_format,
                              "Invalid number of variadic arguments (value `$1`)", temp_value);
 
-                  const uint32_t nargs = static_cast<uint32_t>(temp_value.as_integer());
+                  uint32_t nargs = static_cast<uint32_t>(temp_value.as_integer());
                   if(nargs == 0) {
                     // There is no argument for the target function.
                     ctx.alt_stack().clear();
@@ -4103,7 +4100,7 @@ solidify(AVM_Rod& rod) const
                     for(uint32_t k = 0;  k != nargs;  ++k) {
                       ctx.alt_stack().clear();
                       ctx.alt_stack().push().set_temporary(V_integer(k));
-                      do_invoke_partial(ctx.stack().mut_top(k), ctx, sloc, ptc_aware_none, va_gen);
+                      do_invoke_partial(ctx.stack().mut_top(k), ctx, sloc, ptc_aware_none, va_generator);
                       ctx.stack().top(k).dereference_readonly();
                     }
 
@@ -4118,12 +4115,20 @@ solidify(AVM_Rod& rod) const
                   throw Runtime_Error(xtc_format,
                            "Invalid variadic argument generator (value `$1`)", temp_value);
 
-                ctx.stack().clear_red_zone();
+                // Get the target function.
+                temp_value = ctx.stack().top().dereference_readonly();
+                if(temp_value.is_null())
+                  throw Runtime_Error(xtc_format,
+                           "Target function not found");
+
+                if(!temp_value.is_function())
+                  throw Runtime_Error(xtc_format,
+                           "Non-function value not invocable (target `$1`)", temp_value);
 
                 // Invoke the target function with arguments from `alt_stack`.
-                temp_value = ctx.stack().top().dereference_readonly();
+                const auto& target = temp_value.as_function();
                 ctx.stack().mut_top().pop_modifier();
-                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, temp_value);
+                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
             // Uparam
@@ -4253,18 +4258,15 @@ solidify(AVM_Rod& rod) const
                 stmtq.reload(move(tstrm));
 
                 // Instantiate the script as a variadic function.
+                AIR_Optimizer optmz(sp.opts);
                 cow_vector<phsh_string> script_params;
                 script_params.emplace_back(&"...");
-
-                AIR_Optimizer optmz(sp.opts);
                 optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
-                ctx.stack().clear_red_zone();
-
-                // Invoke it.
+                // Invoke it without `this`.
+                auto target = optmz.create_function(script_sloc, &"[file scope]");
                 ctx.stack().mut_top().set_void();
-                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none,
-                                         optmz.create_function(script_sloc, &"[file scope]"));
+                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, target);
               }
 
             // Uparam
@@ -4555,14 +4557,19 @@ solidify(AVM_Rod& rod) const
                 const auto sentry = ctx.global().copy_recursion_sentry();
 
                 ctx.swap_stacks();
-                ctx.stack().clear_red_zone();
 
-                // Copy the target reference into the red zone, as we probably don't
-                // want to introduce a temporary object on the system stack.
-                ctx.stack().push();
-                ctx.stack().mut_top() = ctx.stack().top(1);
-                const auto& target = ctx.stack().top().dereference_readonly();
-                ctx.stack().pop();
+                // Get the target function.
+                const auto& target_value = ctx.stack().top().dereference_readonly();
+                if(target_value.is_null())
+                  throw Runtime_Error(xtc_format,
+                           "Target function not found");
+
+                if(!target_value.is_function())
+                  throw Runtime_Error(xtc_format,
+                           "Non-function value not invocable (target `$1`)", target_value);
+
+                // Set the `this` reference and invoke the target function.
+                auto target = target_value.as_function();
                 ctx.stack().mut_top().pop_modifier();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
