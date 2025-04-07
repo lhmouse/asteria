@@ -4430,7 +4430,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              __attribute__((__always_inline__, __flatten__)) -> AIR_Status
               {
                 const bool by_ref = head->uparam.b0;
                 const bool is_void = head->uparam.b1;
@@ -4829,7 +4829,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              __attribute__((__always_inline__, __flatten__)) -> AIR_Status
               {
                 const Type type = static_cast<Type>(head->uparam.u0);
                 const V_integer irhs = head->uparam.i2345;
