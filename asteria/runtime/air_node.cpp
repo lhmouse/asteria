@@ -146,6 +146,8 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
                "Non-function value not invocable (target `$1`)", target);
 
     const auto& f = target.as_function();
+    ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
+
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform a plain call.
       ctx.global().call_hook(&Abstract_Hooks::on_call, sloc, f);
@@ -2931,7 +2933,6 @@ solidify(AVM_Rod& rod) const
                 ctx.stack().pop(nargs);
 
                 ctx.stack().clear_red_zone();
-                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Copy the target reference into the red zone, as we probably don't
                 // want to introduce a temporary object on the system stack.
@@ -4118,7 +4119,6 @@ solidify(AVM_Rod& rod) const
                            "Invalid variadic argument generator (value `$1`)", temp_value);
 
                 ctx.stack().clear_red_zone();
-                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Invoke the target function with arguments from `alt_stack`.
                 temp_value = ctx.stack().top().dereference_readonly();
@@ -4260,7 +4260,6 @@ solidify(AVM_Rod& rod) const
                 optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
                 ctx.stack().clear_red_zone();
-                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Invoke it.
                 ctx.stack().mut_top().set_void();
@@ -4557,7 +4556,6 @@ solidify(AVM_Rod& rod) const
 
                 ctx.swap_stacks();
                 ctx.stack().clear_red_zone();
-                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Copy the target reference into the red zone, as we probably don't
                 // want to introduce a temporary object on the system stack.
