@@ -2506,7 +2506,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              __attribute__((__always_inline__, __noreturn__)) -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
