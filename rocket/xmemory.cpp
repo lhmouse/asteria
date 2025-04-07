@@ -37,6 +37,16 @@ do_get_pool_for_size(size_t& size)
     return s_pools[si];
   }
 
+void
+do_deallocate_list(free_block* head) noexcept
+  {
+    free_block* next;
+    for(free_block* p = head;  p != nullptr;  p = next) {
+      next = p->next;
+      ::operator delete(p);
+    }
+  }
+
 }  // namespace
 
 void
@@ -64,8 +74,7 @@ xmemalloc(xmeminfo& info, xmemopt opt)
     if(b == nullptr)
       b = (free_block*) ::operator new(rsize);
     else
-      while(b->next != nullptr)
-        ::operator delete(exchange(b->next, b->next->next));
+      do_deallocate_list(b->next);
 
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xB5, rsize);
@@ -102,20 +111,16 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
     }
 
     // Return all blocks to the system.
-    while(b != nullptr)
-      ::operator delete(exchange(b, b->next));
+    do_deallocate_list(b);
   }
 
 void
 xmemclean() noexcept
   {
     for(auto& p : s_pools) {
-      // Extract all blocks.
+      // Extract all blocks and return them to the system.
       free_block* b = p.head.xchg(nullptr);
-
-      // Return all blocks to the system.
-      while(b != nullptr)
-        ::operator delete(exchange(b, b->next));
+      do_deallocate_list(b);
     }
   }
 
