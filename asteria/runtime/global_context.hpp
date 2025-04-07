@@ -60,7 +60,6 @@ class Global_Context
 
     // This helps debugging and profiling.
     ASTERIA_INCOMPLET(Abstract_Hooks)
-    ROCKET_ALWAYS_INLINE
     refcnt_ptr<Abstract_Hooks>
     get_hooks_opt() const noexcept
       { return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);  }

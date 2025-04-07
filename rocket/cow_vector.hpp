@@ -753,7 +753,6 @@ class cow_vector
 
     // Get a pointer to mutable data.
     // N.B. This is a non-standard extension.
-    ROCKET_ALWAYS_INLINE
     value_type*
     mut_data()
       {

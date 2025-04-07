@@ -34,7 +34,6 @@ class stored_handle
         closer_base(forward<clparamsT>(clparams)...), m_hv(move(hv))
       { }
 
-    ROCKET_ALWAYS_INLINE
     ~stored_handle()
       { this->reset(this->as_closer().null());  }
 
@@ -65,7 +64,6 @@ class stored_handle
         return hv_old;
       }
 
-    ROCKET_ALWAYS_INLINE
     void
     reset(handle_type hv_new) noexcept
       {
