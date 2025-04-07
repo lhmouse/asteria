@@ -68,7 +68,7 @@ clear() noexcept
         continue;
 
       if(head->pv_meta->dtor_opt)
-        head->pv_meta->dtor_opt(head);
+        (* head->pv_meta->dtor_opt) (head);
 
       delete head->pv_meta;
     }
@@ -130,14 +130,14 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     head->nheaders = (uint8_t) (nheaders_p1 - 1);
 
     if(ctor_opt)
-      ctor_opt(head, ctor_arg);
+      (*ctor_opt) (head, ctor_arg);
     else if(sparam_size != 0)
       ::memset(head->sparam, 0, sparam_size);
 
-    if(!meta)
-      head->pv_exec = exec;
-    else
+    if(meta)
       head->pv_meta = meta.release();
+    else
+      head->pv_exec = exec;
 
     head->meta_ver = meta_ver;
     this->m_einit += nheaders_p1;
@@ -212,7 +212,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
         continue;
 
       if(head->pv_meta->vcoll_opt)
-        head->pv_meta->vcoll_opt(staged, temp, head);
+        (* head->pv_meta->vcoll_opt) (staged, temp, head);
     }
   }
 
