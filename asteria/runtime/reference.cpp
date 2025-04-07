@@ -214,9 +214,7 @@ do_use_function_result_slow(Global_Context& global)
         ptcg.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
         ROCKET_ASSERT(ptcg.use_count() == 1);
 
-        if(auto hooks= global.get_hooks_opt())
-          hooks->on_call(ptcg->sloc(), ptcg->target());
-
+        global.call_hook(&Abstract_Hooks::on_call, ptcg->sloc(), ptcg->target());
         frames.emplace_back(ptcg);
         *this = move(ptcg->self());
         ptcg->target().invoke_ptc_aware(*this, global, move(ptcg->mut_stack()));
@@ -242,10 +240,8 @@ do_use_function_result_slow(Global_Context& global)
           this->m_xref = xref_temporary;
         }
 
-        if(auto hooks = global.get_hooks_opt())
-          hooks->on_return(ptcg->sloc(), ptcg->ptc_aware());
-
         // Evaluate deferred expressions.
+        global.call_hook(&Abstract_Hooks::on_return, ptcg->sloc(), ptcg->ptc_aware());
         defer_ctx.stack() = move(ptcg->mut_stack());
         defer_ctx.mut_defer() = move(ptcg->mut_defer());
         defer_ctx.on_scope_exit_normal(air_status_next);

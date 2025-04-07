@@ -64,6 +64,20 @@ class Global_Context
     get_hooks_opt() const noexcept
       { return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);  }
 
+    template<typename xHooks, typename xMemfn, typename... xArgs>
+    ROCKET_FLATTEN
+    void
+    call_hook(xMemfn xHooks::* mfn, xArgs&&... args)
+      {
+        auto hooks = unerase_pointer_cast<xHooks>(this->m_qhooks);
+        if(!hooks)
+          return;
+
+        hooks->xHooks::add_reference();
+        const refcnt_ptr<xHooks> sp(hooks);
+        (hooks->*mfn) (forward<xArgs>(args)...);
+      }
+
     ASTERIA_INCOMPLET(Abstract_Hooks)
     void
     set_hooks(refcnt_ptr<Abstract_Hooks> hooks_opt) noexcept

@@ -148,9 +148,7 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
     const auto& f = target.as_function();
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {
       // Perform a plain call.
-      if(auto hooks = ctx.global().get_hooks_opt())
-        hooks->on_call(sloc, f);
-
+      ctx.global().call_hook(&Abstract_Hooks::on_call, sloc, f);
       f.invoke(self, ctx.global(), move(ctx.alt_stack()));
       return air_status_next;
     }
@@ -1805,9 +1803,7 @@ solidify(AVM_Rod& rod) const
                 const auto gcoll = ctx.global().garbage_collector();
                 const auto var = gcoll->create_variable();
                 ctx.insert_named_reference(sp.name).set_variable(var);
-
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_declare(sloc, sp.name);
+                ctx.global().call_hook(&Abstract_Hooks::on_declare, sloc, sp.name);
 
                 // Push a copy of the reference onto the stack, which we will get
                 // back after the initializer finishes execution.
@@ -2527,9 +2523,7 @@ solidify(AVM_Rod& rod) const
                 if(val.is_null())
                   throw Runtime_Error(xtc_assert, sp.sloc, &"`null` not throwable");
 
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_throw(sp.sloc, val);
-
+                ctx.global().call_hook(&Abstract_Hooks::on_throw, sp.sloc, val);
                 throw Runtime_Error(xtc_throw, val, sp.sloc);
               }
 
@@ -2936,12 +2930,11 @@ solidify(AVM_Rod& rod) const
                   ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 1 - k));
                 ctx.stack().pop(nargs);
 
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_trap(sloc, ctx);
+                ctx.stack().clear_red_zone();
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Copy the target reference into the red zone, as we probably don't
                 // want to introduce a temporary object on the system stack.
-                ctx.stack().clear_red_zone();
                 ctx.stack().push();
                 ctx.stack().mut_top() = ctx.stack().top(1);
                 const auto& target = ctx.stack().top().dereference_readonly();
@@ -3989,9 +3982,7 @@ solidify(AVM_Rod& rod) const
                 const auto gcoll = ctx.global().garbage_collector();
                 const auto var = gcoll->create_variable();
                 ctx.insert_named_reference(sp.name).set_variable(var);
-
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_declare(sloc, sp.name);
+                ctx.global().call_hook(&Abstract_Hooks::on_declare, sloc, sp.name);
 
                 // Initialize it to null.
                 var->initialize(nullopt);
@@ -4025,10 +4016,7 @@ solidify(AVM_Rod& rod) const
               __attribute__((__always_inline__)) -> AIR_Status
               {
                 const auto& sloc = head->pv_meta->sloc;
-
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_trap(sloc, ctx);
-
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
                 return air_status_next;
               }
 
@@ -4129,11 +4117,10 @@ solidify(AVM_Rod& rod) const
                   throw Runtime_Error(xtc_format,
                            "Invalid variadic argument generator (value `$1`)", temp_value);
 
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_trap(sloc, ctx);
+                ctx.stack().clear_red_zone();
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Invoke the target function with arguments from `alt_stack`.
-                ctx.stack().clear_red_zone();
                 temp_value = ctx.stack().top().dereference_readonly();
                 ctx.stack().mut_top().pop_modifier();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, temp_value);
@@ -4272,10 +4259,10 @@ solidify(AVM_Rod& rod) const
                 AIR_Optimizer optmz(sp.opts);
                 optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_trap(sloc, ctx);
-
                 ctx.stack().clear_red_zone();
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
+
+                // Invoke it.
                 ctx.stack().mut_top().set_void();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none,
                                          optmz.create_function(script_sloc, &"[file scope]"));
@@ -4449,8 +4436,7 @@ solidify(AVM_Rod& rod) const
                 const bool is_void = head->uparam.b1;
                 const auto& sloc = head->pv_meta->sloc;
 
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_return(sloc, ptc_aware_none);
+                ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
 
                 if(is_void || ctx.stack().top().is_void()) {
                   // Discard the result.
@@ -4570,13 +4556,11 @@ solidify(AVM_Rod& rod) const
                 const auto sentry = ctx.global().copy_recursion_sentry();
 
                 ctx.swap_stacks();
-
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_trap(sloc, ctx);
+                ctx.stack().clear_red_zone();
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
                 // Copy the target reference into the red zone, as we probably don't
                 // want to introduce a temporary object on the system stack.
-                ctx.stack().clear_red_zone();
                 ctx.stack().push();
                 ctx.stack().mut_top() = ctx.stack().top(1);
                 const auto& target = ctx.stack().top().dereference_readonly();
@@ -4851,8 +4835,7 @@ solidify(AVM_Rod& rod) const
                 const V_integer irhs = head->uparam.i2345;
                 const auto& sloc = head->pv_meta->sloc;
 
-                if(auto hooks = ctx.global().get_hooks_opt())
-                  hooks->on_return(sloc, ptc_aware_none);
+                ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
 
                 if(type == type_null) {
                   // null
