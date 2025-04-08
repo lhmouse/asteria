@@ -5244,15 +5244,13 @@ solidify(AVM_Rod& rod) const
               // fused multiply-add; ternary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const auto& rhs = ctx.stack().top().dereference_readonly();
-                    ctx.stack().pop();
-                    const auto& mid = ctx.stack().top().dereference_readonly();
-                    ctx.stack().pop();
-                    auto& top = ctx.stack().mut_top();
-                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    const Value& mid = ctx.stack().top(1).dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(2);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     // Perform floating-point fused multiply-add.
                     if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
@@ -5261,6 +5259,7 @@ solidify(AVM_Rod& rod) const
                       V_real z_add = rhs.as_real();
 
                       val = ::std::fma(val, y_mul, z_add);
+                      ctx.stack().pop(2);
                       return air_status_next;
                     }
 
