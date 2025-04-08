@@ -111,8 +111,12 @@ Reference&
 Reference_Dictionary::
 insert(phsh_stringR key, bool* newly_opt)
   {
-    if(this->m_size >= this->m_nbkt / 2)
-      this->do_reallocate(this->m_size * 3 | 17);
+#ifdef ROCKET_DEBUG
+    this->do_reallocate(this->m_size * 2 + 2);
+#else
+    if(ROCKET_UNEXPECT(this->m_size >= this->m_nbkt / 2))
+      this->do_reallocate(this->m_size * 3 | 11);
+#endif
 
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, key.rdhash());

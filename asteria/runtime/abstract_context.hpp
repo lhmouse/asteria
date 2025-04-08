@@ -80,6 +80,18 @@ class Abstract_Context
         return qref;
       }
 
+    Reference*
+    mut_named_reference_opt(phsh_stringR name)
+      {
+        auto qref = this->m_named_refs.mut_find_opt(name);
+        if(!qref && name.rdstr().starts_with("__")) {
+          // Create a lazy reference. Built-in references such as `__func`
+          // are only created when they are mentioned.
+          qref = this->do_create_lazy_reference_opt(nullptr, name);
+        }
+        return qref;
+      }
+
     Reference&
     insert_named_reference(phsh_stringR name)
       {

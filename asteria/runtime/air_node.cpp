@@ -1280,21 +1280,26 @@ solidify(AVM_Rod& rod) const
                 AIR_Status status = air_status_next;
                 try {
                   // Create key and mapped references.
-                  Reference* qkey_ref = nullptr;
                   if(!sp.name_key.empty())
-                    qkey_ref = &(ctx_for.insert_named_reference(sp.name_key));
-                  auto& mapped_ref = ctx_for.insert_named_reference(sp.name_mapped);
+                    ctx_for.insert_named_reference(sp.name_key);
+                  ctx_for.insert_named_reference(sp.name_mapped);
 
                   // Evaluate the range initializer and set the range up, which isn't
                   // going to change for all loops.
                   AIR_Status next_status = sp.rod_init.execute(ctx_for);
                   ROCKET_ASSERT(next_status == air_status_next);
-                  mapped_ref = move(ctx_for.stack().mut_top());
 
-                  const auto range = mapped_ref.dereference_readonly();
+                  Reference* qkey_ref = nullptr;
+                  if(!sp.name_key.empty())
+                    qkey_ref = ctx_for.mut_named_reference_opt(sp.name_key);
+                  Reference* mapped_ref = ctx_for.mut_named_reference_opt(sp.name_mapped);
+                  ROCKET_ASSERT(mapped_ref);
+                  *mapped_ref = move(ctx_for.stack().mut_top());
+
+                  auto range = mapped_ref->dereference_readonly();
                   if(range.is_array()) {
                     const auto& arr = range.as_array();
-                    mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
+                    mapped_ref->push_modifier(Reference_Modifier::S_array_head());  // placeholder
                     for(int64_t i = 0;  i < arr.ssize();  ++i) {
                       // Set the key variable which is the subscript of the mapped
                       // element in the array.
@@ -1309,9 +1314,9 @@ solidify(AVM_Rod& rod) const
                       }
 
                       // Set the mapped reference.
-                      mapped_ref.pop_modifier();
+                      mapped_ref->pop_modifier();
                       Reference_Modifier::S_array_index xmod = { i };
-                      do_push_modifier_and_check(mapped_ref, move(xmod));
+                      do_push_modifier_and_check(*mapped_ref, move(xmod));
 
                       // Execute the loop body.
                       next_status = do_execute_block(sp.rod_body, ctx_for);
@@ -1325,7 +1330,7 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(range.is_object()) {
                     const auto& obj = range.as_object();
-                    mapped_ref.push_modifier(Reference_Modifier::S_array_head());  // placeholder
+                    mapped_ref->push_modifier(Reference_Modifier::S_array_head());  // placeholder
                     for(auto it = obj.begin();  it != obj.end();  ++it) {
                       // Set the key variable which is the name of the mapped element
                       // in the object.
@@ -1340,9 +1345,9 @@ solidify(AVM_Rod& rod) const
                       }
 
                       // Set the mapped reference.
-                      mapped_ref.pop_modifier();
+                      mapped_ref->pop_modifier();
                       Reference_Modifier::S_object_key xmod = { it->first };
-                      do_push_modifier_and_check(mapped_ref, move(xmod));
+                      do_push_modifier_and_check(*mapped_ref, move(xmod));
 
                       // Execute the loop body.
                       next_status = do_execute_block(sp.rod_body, ctx_for);
@@ -1518,10 +1523,6 @@ solidify(AVM_Rod& rod) const
                   // `::std::current_exception`.
                   Executive_Context ctx_catch(xtc_plain, ctx);
                   try {
-                    // Set the exception reference.
-                    auto& except_ref = ctx_catch.insert_named_reference(sp.name_except);
-                    except_ref.set_temporary(except.value());
-
                     // Set backtrace frames.
                     V_array backtrace;
                     for(size_t k = 0;  k < except.count_frames();  ++k) {
@@ -1533,8 +1534,9 @@ solidify(AVM_Rod& rod) const
                       r.try_emplace(&"value", except.frame(k).value);
                       backtrace.emplace_back(move(r));
                     }
-                    auto& backtrace_ref = ctx_catch.insert_named_reference(&"__backtrace");
-                    backtrace_ref.set_temporary(move(backtrace));
+
+                    ctx_catch.insert_named_reference(&"__backtrace").set_temporary(move(backtrace));
+                    ctx_catch.insert_named_reference(sp.name_except).set_temporary(except.value());
 
                     // Execute the `catch` clause.
                     status = sp.rod_catch.execute(ctx_catch);

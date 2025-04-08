@@ -90,8 +90,12 @@ bool
 Variable_HashMap::
 insert(const void* key, const refcnt_ptr<Variable>& var_opt)
   {
-    if(this->m_size >= this->m_nbkt / 2)
+#ifdef ROCKET_DEBUG
+    this->do_reallocate(this->m_size * 2 + 2);
+#else
+    if(ROCKET_UNEXPECT(this->m_size >= this->m_nbkt / 2))
       this->do_reallocate(this->m_size * 3 | 5);
+#endif
 
     // Find a bucket using linear probing.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, (uintptr_t) key);
