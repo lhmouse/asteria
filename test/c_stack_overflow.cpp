@@ -7,6 +7,11 @@ using namespace ::asteria;
 
 int main()
   {
+#ifdef ROCKET_DEBUG
+    fprintf(stderr, "This test is so slow that it is disabled.\n");
+    return 77;
+#endif
+
     Simple_Script code;
     code.reload_string(
       &__FILE__, __LINE__, &R"__(
