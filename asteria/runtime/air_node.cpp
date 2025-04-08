@@ -120,8 +120,8 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
       // of the LHS operand is returned.
       rod.execute(ctx);
       auto& val = ctx.stack().mut_top().dereference_copy();
+      ctx.stack().top(1).dereference_mutable().swap(val);
       ctx.stack().pop();
-      ctx.stack().top().dereference_mutable() = move(val);
       return air_status_next;
     }
     else {
@@ -917,16 +917,13 @@ solidify(AVM_Rod& rod) const
                 // Read the value of the initializer. The initializer must not have
                 // been empty for this function.
                 const auto& val = ctx.stack().top().dereference_readonly();
-                ctx.stack().pop();
-
-                // Get the variable back.
-                auto var = ctx.stack().top().unphase_variable_opt();
-                ctx.stack().pop();
+                auto var = ctx.stack().top(1).unphase_variable_opt();
                 ROCKET_ASSERT(var && !var->is_initialized());
 
                 // Initialize it with this value.
                 var->initialize(val);
                 var->set_immutable(immutable);
+                ctx.stack().pop(2);
                 return air_status_next;
               }
 
@@ -1592,14 +1589,13 @@ solidify(AVM_Rod& rod) const
 
                 // Read a value and throw it. The operand expression must not have
                 // been empty for this function.
-                auto& val = ctx.stack().mut_top().dereference_copy();
-                ctx.stack().pop();
-
+                auto val = ctx.stack().mut_top().dereference_copy();
                 if(val.is_null())
                   throw Runtime_Error(xtc_assert, sp.sloc, &"`null` not throwable");
 
+                ctx.stack().pop();
                 ctx.global().call_hook(&Abstract_Hooks::on_throw, sp.sloc, val);
-                throw Runtime_Error(xtc_throw, val, sp.sloc);
+                throw Runtime_Error(xtc_throw, move(val), sp.sloc);
               }
 
             // Uparam
@@ -1639,12 +1635,11 @@ solidify(AVM_Rod& rod) const
 
                 // Throw an exception if the assertion fails. This cannot be disabled.
                 const auto& tval = ctx.stack().top().dereference_readonly();
+                if(ROCKET_UNEXPECT(!tval.test()))
+                  throw Runtime_Error(xtc_assert, sp.sloc, sp.msg);
+
                 ctx.stack().pop();
-
-                if(ROCKET_EXPECT(tval.test()))
-                  return air_status_next;
-
-                throw Runtime_Error(xtc_assert, sp.sloc, sp.msg);
+                return air_status_next;
               }
 
             // Uparam
@@ -4727,10 +4722,8 @@ solidify(AVM_Rod& rod) const
                 const uint32_t nelems = head->uparam.u2345;
 
                 // Read the value of the initializer.
-                const auto& init = ctx.stack().top().dereference_readonly();
+                auto init = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
-
-                // Make sure it is really an array.
                 if(!init.is_null() && !init.is_array())
                   throw Runtime_Error(xtc_format,
                            "Initializer was not an array (value was `$1`)", init);
@@ -4791,10 +4784,8 @@ solidify(AVM_Rod& rod) const
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Read the value of the initializer.
-                const auto& init = ctx.stack().top().dereference_readonly();
+                auto init = ctx.stack().top().dereference_readonly();
                 ctx.stack().pop();
-
-                // Make sure it is really an object.
                 if(!init.is_null() && !init.is_object())
                   throw Runtime_Error(xtc_format,
                            "Initializer was not an object (value was `$1`)", init);

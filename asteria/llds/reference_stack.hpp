@@ -63,6 +63,7 @@ class Reference_Stack
     clear() noexcept
       {
         this->m_etop = 0;
+      clear_red_zone();
       }
 
     void
@@ -127,6 +128,7 @@ class Reference_Stack
       {
         ROCKET_ASSERT(count <= this->m_etop);
         this->m_etop -= count;
+      clear_red_zone();
       }
 
     void
