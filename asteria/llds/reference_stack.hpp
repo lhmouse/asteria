@@ -130,9 +130,6 @@ class Reference_Stack
         this->m_etop -= count;
       clear_red_zone();
       }
-
-    void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
   };
 
 inline

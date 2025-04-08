@@ -53,12 +53,4 @@ do_deallocate() noexcept
     this->m_estor = 0;
   }
 
-void
-Reference_Stack::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
-  {
-    for(uint32_t k = 0;  k != this->m_einit;  ++ k)
-      this->m_bptr[k].collect_variables(staged, temp);
-  }
-
 }  // namespace asteria
