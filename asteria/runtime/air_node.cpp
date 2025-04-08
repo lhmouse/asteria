@@ -133,6 +133,22 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
     }
   }
 
+ROCKET_NEVER_INLINE
+cow_function
+do_get_target_function(const Reference& top)
+  {
+    const auto& value = top.dereference_readonly();
+    if(value.is_null())
+      throw Runtime_Error(xtc_format, "Target function not found");
+
+    if(!value.is_function())
+      throw Runtime_Error(xtc_format,
+               "Non-function value not invocable (target `$1`)", value);
+
+    return value.as_function();
+  }
+
+ROCKET_NEVER_INLINE
 AIR_Status
 do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location& sloc,
                   PTC_Aware ptc, const cow_function& target)
@@ -1989,18 +2005,8 @@ solidify(AVM_Rod& rod) const
                   ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 1 - k));
                 ctx.stack().pop(nargs);
 
-                // Get the target function.
-                const auto& target_value = ctx.stack().top().dereference_readonly();
-                if(target_value.is_null())
-                  throw Runtime_Error(xtc_format,
-                           "Target function not found");
-
-                if(!target_value.is_function())
-                  throw Runtime_Error(xtc_format,
-                           "Non-function value not invocable (target `$1`)", target_value);
-
-                // Set the `this` reference and invoke the target function.
-                auto target = target_value.as_function();
+                // Invoke the target function.
+                auto target = do_get_target_function(ctx.stack().top());
                 ctx.stack().mut_top().pop_modifier();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
@@ -4988,18 +4994,8 @@ solidify(AVM_Rod& rod) const
                   throw Runtime_Error(xtc_format,
                            "Invalid variadic argument generator (value `$1`)", temp_value);
 
-                // Get the target function.
-                temp_value = ctx.stack().top().dereference_readonly();
-                if(temp_value.is_null())
-                  throw Runtime_Error(xtc_format,
-                           "Target function not found");
-
-                if(!temp_value.is_function())
-                  throw Runtime_Error(xtc_format,
-                           "Non-function value not invocable (target `$1`)", temp_value);
-
-                // Invoke the target function with arguments from `alt_stack`.
-                const auto& target = temp_value.as_function();
+                // Invoke the target function.
+                auto target = do_get_target_function(ctx.stack().top());
                 ctx.stack().mut_top().pop_modifier();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
@@ -5431,18 +5427,8 @@ solidify(AVM_Rod& rod) const
 
                 ctx.swap_stacks();
 
-                // Get the target function.
-                const auto& target_value = ctx.stack().top().dereference_readonly();
-                if(target_value.is_null())
-                  throw Runtime_Error(xtc_format,
-                           "Target function not found");
-
-                if(!target_value.is_function())
-                  throw Runtime_Error(xtc_format,
-                           "Non-function value not invocable (target `$1`)", target_value);
-
-                // Set the `this` reference and invoke the target function.
-                auto target = target_value.as_function();
+                // Invoke the target function.
+                auto target = do_get_target_function(ctx.stack().top());
                 ctx.stack().mut_top().pop_modifier();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
