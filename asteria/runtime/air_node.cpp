@@ -791,7 +791,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* /*head*/)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 ctx.stack().clear();
                 return air_status_next;
@@ -826,7 +826,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -868,7 +868,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = head->pv_meta->sloc;
@@ -909,7 +909,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool immutable = head->uparam.b0;
 
@@ -960,7 +960,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1021,7 +1021,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1136,7 +1136,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1201,7 +1201,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1269,7 +1269,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1411,7 +1411,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1497,7 +1497,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& try_sloc = head->pv_meta->sloc;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1585,7 +1585,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__, __noreturn__)) -> AIR_Status
+              __attribute__((__noreturn__)) -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1631,7 +1631,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1668,7 +1668,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& /*ctx*/, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 return static_cast<AIR_Status>(head->uparam.u0);
               }
@@ -1697,7 +1697,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool by_ref = head->uparam.b0;
 
@@ -1743,7 +1743,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1794,7 +1794,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const uint32_t depth = head->uparam.u01;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1848,7 +1848,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1896,7 +1896,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = head->pv_meta->sloc;
@@ -1948,7 +1948,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1989,7 +1989,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const uint32_t nargs = head->uparam.u2345;
@@ -2032,7 +2032,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const uint32_t nelems = head->uparam.u2345;
 
@@ -2078,7 +2078,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2125,7 +2125,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2184,7 +2184,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2243,7 +2243,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2272,7 +2272,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2300,7 +2300,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2328,7 +2328,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2357,7 +2357,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2386,7 +2386,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
@@ -2415,7 +2415,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
@@ -2457,7 +2457,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& /*ctx*/, const Header* /*head*/)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     // This operator does nothing.
                     return air_status_next;
@@ -2481,7 +2481,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2533,7 +2533,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2581,7 +2581,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2610,7 +2610,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2659,7 +2659,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2688,7 +2688,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2723,7 +2723,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2763,7 +2763,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2803,7 +2803,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2853,7 +2853,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2892,7 +2892,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2930,7 +2930,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2969,7 +2969,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3008,7 +3008,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3046,7 +3046,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3084,7 +3084,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3123,7 +3123,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3162,7 +3162,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3200,7 +3200,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3236,7 +3236,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3272,7 +3272,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3308,7 +3308,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const auto& rhs = ctx.stack().top().dereference_readonly();
@@ -3340,7 +3340,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3372,7 +3372,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3403,7 +3403,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3435,7 +3435,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3467,7 +3467,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3500,7 +3500,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3533,7 +3533,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3570,7 +3570,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3644,7 +3644,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3712,7 +3712,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3816,7 +3816,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3877,7 +3877,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3938,7 +3938,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4002,7 +4002,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4066,7 +4066,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4130,7 +4130,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4170,7 +4170,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4210,7 +4210,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4250,7 +4250,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4291,7 +4291,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4332,7 +4332,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4374,7 +4374,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4447,7 +4447,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4520,7 +4520,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4596,7 +4596,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4665,7 +4665,7 @@ solidify(AVM_Rod& rod) const
               // fused multiply-add; ternary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4718,7 +4718,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool immutable = head->uparam.b0;
                 const uint32_t nelems = head->uparam.u2345;
@@ -4780,7 +4780,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool immutable = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4842,7 +4842,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool immutable = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4883,7 +4883,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sloc = head->pv_meta->sloc;
                 ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
@@ -4914,7 +4914,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const auto& sloc = head->pv_meta->sloc;
@@ -5022,7 +5022,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = head->pv_meta->sloc;
@@ -5075,7 +5075,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const uint32_t nargs = head->uparam.u2345;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -5160,7 +5160,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -5198,7 +5198,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -5237,7 +5237,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -5293,7 +5293,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+              __attribute__((__flatten__)) -> AIR_Status
               {
                 const bool by_ref = head->uparam.b0;
                 const bool is_void = head->uparam.b1;
@@ -5347,7 +5347,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 ctx.stack().push().set_temporary(sp.val);
@@ -5381,7 +5381,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* /*head*/)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 ctx.swap_stacks();
                 ctx.stack().clear();
@@ -5412,7 +5412,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const auto& sloc = head->pv_meta->sloc;
@@ -5458,7 +5458,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -5502,7 +5502,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__)) -> AIR_Status
+              -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -5574,7 +5574,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
@@ -5602,7 +5602,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__)) -> AIR_Status
+                  -> AIR_Status
                   {
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
@@ -5631,7 +5631,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5662,7 +5662,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5693,7 +5693,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5723,7 +5723,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5754,7 +5754,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5785,7 +5785,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5817,7 +5817,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5849,7 +5849,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5885,7 +5885,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5939,7 +5939,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5993,7 +5993,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6064,7 +6064,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6123,7 +6123,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6182,7 +6182,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6221,7 +6221,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6260,7 +6260,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6299,7 +6299,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6338,7 +6338,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6377,7 +6377,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6416,7 +6416,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6456,7 +6456,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6496,7 +6496,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6537,7 +6537,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6602,7 +6602,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6667,7 +6667,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6735,7 +6735,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
-                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  __attribute__((__flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6807,7 +6807,7 @@ solidify(AVM_Rod& rod) const
 
           rod.append(
             +[](Executive_Context& ctx, const Header* head)
-              __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+              __attribute__((__flatten__)) -> AIR_Status
               {
                 const Type type = static_cast<Type>(head->uparam.u0);
                 const V_integer irhs = head->uparam.i2345;
