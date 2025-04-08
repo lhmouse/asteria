@@ -12,8 +12,7 @@ class Reference_Stack
   {
   private:
     Reference* m_bptr = nullptr;
-    uint32_t m_etop = 0;
-    uint32_t m_einit = 0;
+    uint32_t m_size = 0;
     uint32_t m_estor = 0;
 
   public:
@@ -35,8 +34,7 @@ class Reference_Stack
     swap(Reference_Stack& other) noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
-        ::std::swap(this->m_etop, other.m_etop);
-        ::std::swap(this->m_einit, other.m_einit);
+        ::std::swap(this->m_size, other.m_size);
         ::std::swap(this->m_estor, other.m_estor);
         return *this;
       }
@@ -46,60 +44,53 @@ class Reference_Stack
     do_reallocate(uint32_t estor);
 
     void
-    do_deallocate() noexcept;
+    do_clear(bool free_storage) noexcept;
 
   public:
     ~Reference_Stack()
       {
         if(this->m_bptr)
-          this->do_deallocate();
+          this->do_clear(true);
       }
 
     uint32_t
     size() const noexcept
-      { return this->m_etop;  }
+      {
+        return this->m_size;
+      }
 
     void
     clear() noexcept
       {
-        this->m_etop = 0;
-      clear_red_zone();
-      }
-
-    void
-    clear_red_zone() noexcept
-      {
-        while(this->m_einit != this->m_etop) {
-          this->m_einit --;
-          ::rocket::destroy(this->m_bptr + this->m_einit);
-        }
+        if(this->m_size != 0)
+          this->do_clear(false);
       }
 
     const Reference&
     top(uint32_t index = 0) const noexcept
       {
-        ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop - 1 - index);
+        ROCKET_ASSERT(index < this->m_size);
+        return *(this->m_bptr + this->m_size - 1 - index);
       }
 
     Reference&
     mut_top(uint32_t index = 0)
       {
-        ROCKET_ASSERT(index < this->m_etop);
-        return *(this->m_bptr + this->m_etop - 1 - index);
+        ROCKET_ASSERT(index < this->m_size);
+        return *(this->m_bptr + this->m_size - 1 - index);
       }
 
     const Reference&
     bottom(uint32_t index = 0) const noexcept
       {
-        ROCKET_ASSERT(index < this->m_etop);
+        ROCKET_ASSERT(index < this->m_size);
         return *(this->m_bptr + index);
       }
 
     Reference&
     mut_bottom(uint32_t index = 0)
       {
-        ROCKET_ASSERT(index < this->m_etop);
+        ROCKET_ASSERT(index < this->m_size);
         return *(this->m_bptr + index);
       }
 
@@ -107,28 +98,29 @@ class Reference_Stack
     push()
       {
 #ifdef ROCKET_DEBUG
-        this->do_reallocate(this->m_einit + 1);
-#endif  // debug
+        this->do_reallocate(this->m_size + 1);
+#else
+        if(ROCKET_UNEXPECT(this->m_size >= this->m_estor))
+          this->do_reallocate(this->m_size * 2 | 17);
+#endif
 
-        if(ROCKET_UNEXPECT(this->m_etop >= this->m_einit)) {
-          if(this->m_einit >= this->m_estor)
-            this->do_reallocate(this->m_estor / 2 * 3 | 17);
-
-          // Construct a new reference.
-          ::rocket::construct(this->m_bptr + this->m_einit);
-          this->m_einit ++;
-        }
-
-        this->m_etop ++;
-        return *(this->m_bptr + this->m_etop - 1);
+        // Construct a new reference.
+        ROCKET_ASSERT(this->m_size < this->m_estor);
+        auto ptr = ::rocket::construct(this->m_bptr + this->m_size);
+        this->m_size ++;
+        return *ptr;
       }
 
     void
     pop(uint32_t count = 1) noexcept
       {
-        ROCKET_ASSERT(count <= this->m_etop);
-        this->m_etop -= count;
-      clear_red_zone();
+        ROCKET_ASSERT(count <= this->m_size);
+        uint32_t target_size = this->m_size - count;
+        while(this->m_size != target_size) {
+          // Destroy a reference.
+          this->m_size --;
+          ::rocket::destroy(this->m_bptr + this->m_size);
+        }
       }
   };
 

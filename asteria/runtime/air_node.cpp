@@ -153,7 +153,6 @@ AIR_Status
 do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location& sloc,
                   PTC_Aware ptc, const cow_function& target)
   {
-    ctx.stack().clear_red_zone();
     ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
 
     if(ROCKET_EXPECT(ptc == ptc_aware_none)) {

@@ -45,8 +45,6 @@ cow_function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
     try {
-      stack.clear_red_zone();
-
       if(this->m_fptr) {
         // static
         this->m_fptr(self, global, move(stack));
