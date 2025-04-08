@@ -1292,6 +1292,7 @@ solidify(AVM_Rod& rod) const
                   Reference* qkey_ref = nullptr;
                   if(!sp.name_key.empty())
                     qkey_ref = ctx_for.mut_named_reference_opt(sp.name_key);
+
                   Reference* mapped_ref = ctx_for.mut_named_reference_opt(sp.name_mapped);
                   ROCKET_ASSERT(mapped_ref);
                   *mapped_ref = move(ctx_for.stack().mut_top());
