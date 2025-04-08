@@ -26,7 +26,7 @@ do_collect_generation(uint32_t gen)
       return 0;
 
     this->m_recur ++;
-    const ::rocket::unique_ptr<int, void (int*)> rguard(&(this->m_recur), *[](int* ptr) { -- *ptr;  });
+    const unique_ptr<int, void (int*)> rguard(&(this->m_recur), *[](int* ptr) { -- *ptr;  });
 
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
