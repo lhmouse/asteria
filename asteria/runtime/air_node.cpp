@@ -2117,7 +2117,6 @@ solidify(AVM_Rod& rod) const
 
           Uparam up2;
           up2.b0 = altr.assign;
-          up2.u1 = altr.xop;
 
           switch(altr.xop)
             {
@@ -5533,7 +5532,6 @@ solidify(AVM_Rod& rod) const
 
           Uparam up2;
           up2.b0 = altr.assign;
-          up2.u1 = altr.xop;
           up2.i2345 = altr.irhs;
 
           switch(altr.xop)
