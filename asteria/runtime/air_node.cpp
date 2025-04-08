@@ -3055,148 +3055,250 @@ solidify(AVM_Rod& rod) const
           switch(altr.xop)
             {
             case xop_inc:
-            case xop_dec:
-            case xop_unset:
-            case xop_head:
-            case xop_tail:
-            case xop_random:
-            case xop_isvoid:
               // unary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint32_t uxop = head->uparam.u1;
-                    auto& top = ctx.stack().mut_top();
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = top.dereference_mutable();
 
-                    switch(uxop)
-                      {
-                      case xop_inc:
-                        {
-                          // `assign` is `true` for the postfix variant and `false` for
-                          // the prefix variant.
-                          auto& rhs = top.dereference_mutable();
+                    // `assign` is `true` for the postfix variant and `false` for
+                    // the prefix variant.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
 
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
+                      // Increment the value with overflow checking.
+                      int64_t result;
+                      if(ROCKET_ADD_OVERFLOW(val, 1, &result))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer increment overflow (operand was `$1`)", val);
 
-                            // Increment the value with overflow checking.
-                            int64_t result;
-                            if(ROCKET_ADD_OVERFLOW(val, 1, &result))
-                              throw Runtime_Error(xtc_format,
-                                       "Integer increment overflow (operand was `$1`)", val);
+                      if(assign)
+                        top.set_temporary(val);
 
-                            if(assign)
-                              top.set_temporary(val);
+                      val = result;
+                      return air_status_next;
+                    }
 
-                            val = result;
-                            return air_status_next;
-                          }
+                    if(rhs.type() == type_real) {
+                      V_real& val = rhs.mut_real();
 
-                          if(rhs.type() == type_real) {
-                            V_real& val = rhs.mut_real();
+                      // Overflow will result in an infinity, so this is safe.
+                      double result = val + 1;
 
-                            // Overflow will result in an infinity, so this is safe.
-                            double result = val + 1;
+                      if(assign)
+                        top.set_temporary(val);
 
-                            if(assign)
-                              top.set_temporary(val);
+                      val = result;
+                      return air_status_next;
+                    }
 
-                            val = result;
-                            return air_status_next;
-                          }
+                    throw Runtime_Error(xtc_format,
+                             "Increment not applicable (operand was `$1`)", rhs);
+                  }
 
-                          throw Runtime_Error(xtc_format,
-                                   "Increment not applicable (operand was `$1`)", rhs);
-                        }
+                // Uparam
+                , up2
 
-                      case xop_dec:
-                        {
-                          // `assign` is `true` for the postfix variant and `false` for
-                          // the prefix variant.
-                          auto& rhs = top.dereference_mutable();
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
 
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
+                // Collector
+                , nullptr
 
-                            // Decrement the value with overflow checking.
-                            int64_t result;
-                            if(ROCKET_SUB_OVERFLOW(val, 1, &result))
-                              throw Runtime_Error(xtc_format,
-                                       "Integer decrement overflow (operand was `$1`)", val);
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
 
-                            if(assign)
-                              top.set_temporary(val);
+            case xop_dec:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = top.dereference_mutable();
 
-                            val = result;
-                            return air_status_next;
-                          }
+                    // `assign` is `true` for the postfix variant and `false` for
+                    // the prefix variant.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
 
-                          if(rhs.type() == type_real) {
-                            V_real& val = rhs.mut_real();
+                      // Decrement the value with overflow checking.
+                      int64_t result;
+                      if(ROCKET_SUB_OVERFLOW(val, 1, &result))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer decrement overflow (operand was `$1`)", val);
 
-                            // Overflow will result in an infinity, so this is safe.
-                            double result = val - 1;
+                      if(assign)
+                        top.set_temporary(val);
 
-                            if(assign)
-                              top.set_temporary(val);
+                      val = result;
+                      return air_status_next;
+                    }
 
-                            val = result;
-                            return air_status_next;
-                          }
+                    if(rhs.type() == type_real) {
+                      V_real& val = rhs.mut_real();
 
-                          throw Runtime_Error(xtc_format,
-                                   "Decrement not applicable (operand was `$1`)", rhs);
-                        }
+                      // Overflow will result in an infinity, so this is safe.
+                      double result = val - 1;
 
-                      case xop_unset:
-                        {
-                          // Unset the last element and return it as a temporary.
-                          // `assign` is ignored.
-                          auto val = top.dereference_unset();
-                          top.set_temporary(move(val));
-                          return air_status_next;
-                        }
+                      if(assign)
+                        top.set_temporary(val);
 
-                      case xop_head:
-                        {
-                          // Push an array head modifier. `assign` is ignored.
-                          Reference_Modifier::S_array_head xmod = { };
-                          do_push_modifier_and_check(top, move(xmod));
-                          return air_status_next;
-                        }
+                      val = result;
+                      return air_status_next;
+                    }
 
-                      case xop_tail:
-                        {
-                          // Push an array tail modifier. `assign` is ignored.
-                          Reference_Modifier::S_array_tail xmod = { };
-                          do_push_modifier_and_check(top, move(xmod));
-                          return air_status_next;
-                        }
+                    throw Runtime_Error(xtc_format,
+                             "Decrement not applicable (operand was `$1`)", rhs);
+                  }
 
-                      case xop_random:
-                        {
-                          // Push a random subscript.
-                          uint32_t seed = ctx.global().random_engine()->bump();
-                          Reference_Modifier::S_array_random xmod = { seed };
-                          do_push_modifier_and_check(top, move(xmod));
-                          return air_status_next;
-                        }
+                // Uparam
+                , up2
 
-                      case xop_isvoid:
-                        {
-                          // Check whether the argument is a void reference and save
-                          // the result as a temporary boolean.
-                          // `assign` is ignored.
-                          bool val = top.is_void();
-                          top.set_temporary(val);
-                          return air_status_next;
-                        }
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
 
-                      default:
-                        ROCKET_UNREACHABLE();
-                      }
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_unset:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    Reference& top = ctx.stack().mut_top();
+
+                    // Unset the last element and return it as a temporary.
+                    // `assign` is ignored.
+                    Value val = top.dereference_unset();
+                    top.set_temporary(move(val));
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_head:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    Reference& top = ctx.stack().mut_top();
+
+                    // Push an array head modifier. `assign` is ignored.
+                    Reference_Modifier::S_array_head xmod = { };
+                    do_push_modifier_and_check(top, move(xmod));
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_tail:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    Reference& top = ctx.stack().mut_top();
+
+                    // Push an array tail modifier. `assign` is ignored.
+                    Reference_Modifier::S_array_tail xmod = { };
+                    do_push_modifier_and_check(top, move(xmod));
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_random:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    Reference& top = ctx.stack().mut_top();
+
+                    // Push a random subscript.
+                    uint32_t seed = ctx.global().random_engine()->bump();
+                    Reference_Modifier::S_array_random xmod = { seed };
+                    do_push_modifier_and_check(top, move(xmod));
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_isvoid:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    Reference& top = ctx.stack().mut_top();
+
+                    // Check whether the argument is a void reference and save
+                    // the result as a temporary boolean. `assign` is ignored.
+                    bool val = top.is_void();
+                    top.set_temporary(val);
+                    return air_status_next;
                   }
 
                 // Uparam
@@ -3214,47 +3316,60 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_assign:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    Value& rhs = ctx.stack().mut_top().dereference_copy();
+                    Reference& top = ctx.stack().mut_top(1);
+
+                    // `assign` is ignored.
+                    top.dereference_mutable() = move(rhs);
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_index:
               // binary
               rod.append(
-                +[](Executive_Context& ctx, const Header* head)
+                +[](Executive_Context& ctx, const Header* /*head*/)
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
-                    const uint32_t uxop = head->uparam.u1;
-                    auto& rhs = ctx.stack().mut_top().dereference_copy();
-                    ctx.stack().pop();
-                    auto& top = ctx.stack().mut_top();
+                    Value& rhs = ctx.stack().mut_top().dereference_copy();
+                    Reference& top = ctx.stack().mut_top(1);
 
-                    switch(uxop)
-                      {
-                      case xop_assign:
-                        {
-                          // `assign` is ignored.
-                          top.dereference_mutable() = move(rhs);
-                          return air_status_next;
-                        }
+                    // Push a subscript.
+                    if(rhs.type() == type_integer) {
+                      Reference_Modifier::S_array_index xmod = { rhs.as_integer() };
+                      do_push_modifier_and_check(top, move(xmod));
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
 
-                      case xop_index:
-                        {
-                          // Push a subscript.
-                          if(rhs.type() == type_integer) {
-                            Reference_Modifier::S_array_index xmod = { rhs.as_integer() };
-                            do_push_modifier_and_check(top, move(xmod));
-                            return air_status_next;
-                          }
-                          else if(rhs.type() == type_string) {
-                            Reference_Modifier::S_object_key xmod = { rhs.as_string() };
-                            do_push_modifier_and_check(top, move(xmod));
-                            return air_status_next;
-                          }
-                          else
-                            throw Runtime_Error(xtc_format,
-                                     "Subscript value not valid (operand was `$1`)", rhs);
-                        }
+                    if(rhs.type() == type_string) {
+                      Reference_Modifier::S_object_key xmod = { rhs.as_string() };
+                      do_push_modifier_and_check(top, move(xmod));
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
 
-                      default:
-                        ROCKET_UNREACHABLE();
-                      }
+                    throw Runtime_Error(xtc_format,
+                             "Subscript value not valid (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -3272,26 +3387,820 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_pos:
+              // unary
+              rod.append(
+                +[](Executive_Context& /*ctx*/, const Header* /*head*/)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    // This operator does nothing.
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_neg:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the additive inverse of the operand.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
+
+                      int64_t result;
+                      if(ROCKET_SUB_OVERFLOW(0, val, &result))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer negation overflow (operand was `$1`)", val);
+
+                      val = result;
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      V_real& val = rhs.mut_real();
+
+                      int64_t bits;
+                      bcopy(bits, val);
+                      bits ^= INT64_MIN;
+
+                      bcopy(val, bits);
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Arithmetic negation not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_notb:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Flip all bits (of all bytes) in the operand.
+                    if(rhs.type() == type_boolean) {
+                      V_boolean& val = rhs.mut_boolean();
+                      val = !val;
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
+                      val = ~val;
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_string) {
+                      V_string& val = rhs.mut_string();
+                      for(auto it = val.mut_begin();  it != val.end();  ++it)
+                        *it = static_cast<char>(*it ^ -1);
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Bitwise NOT not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_notl:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform the builtin boolean conversion and negate the result.
+                    rhs = !rhs.test();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_countof:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the number of elements in the operand.
+                    if(rhs.type() == type_null) {
+                      rhs = V_integer(0);
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_string) {
+                      rhs = V_integer(rhs.as_string().size());
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_array) {
+                      rhs = V_integer(rhs.as_array().size());
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_object) {
+                      rhs = V_integer(rhs.as_object().size());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`countof` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_typeof:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the type of the operand as a string.
+                    rhs = ::rocket::sref(describe_type(rhs.type()));
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_sqrt:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the arithmetic square root of the operand, as a real
+                    // number always.
+                    if(rhs.is_real()) {
+                      rhs = ::std::sqrt(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__sqrt` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_isnan:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Checks whether the operand is a NaN. The operand must be
+                    // of an arithmetic type. An integer is never a NaN.
+                    if(rhs.type() == type_integer) {
+                      rhs = false;
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = ::std::isnan(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__isnan` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_isinf:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Checks whether the operand is an infinity. The operand must
+                    // be of an arithmetic type. An integer is never an infinity.
+                    if(rhs.type() == type_integer) {
+                      rhs = false;
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = ::std::isinf(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__isinf` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_abs:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the absolute value of the operand.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
+
+                      V_integer neg_val;
+                      if(ROCKET_SUB_OVERFLOW(0, val, &neg_val))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer negation overflow (operand was `$1`)", val);
+
+                      val ^= (val ^ neg_val) & (val >> 63);
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      V_real& val = rhs.mut_real();
+
+                      double result = ::std::fabs(val);
+
+                      val = result;
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__abs` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_sign:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the sign bit of the operand as a boolean value.
+                    if(rhs.type() == type_integer) {
+                      rhs = rhs.as_integer() < 0;
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = ::std::signbit(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__sign` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_round:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Round the operand to the nearest integer of the same type.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs.mut_real() = ::std::round(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__round` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_floor:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Round the operand to the nearest integer of the same type,
+                    // towards negative infinity.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs.mut_real() = ::std::floor(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__floor` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_ceil:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Round the operand to the nearest integer of the same type,
+                    // towards positive infinity.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs.mut_real() = ::std::ceil(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__ceil` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_trunc:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Truncate the operand to the nearest integer towards zero.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs.mut_real() = ::std::trunc(rhs.as_real());
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__trunc` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_iround:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Round the operand to the nearest integer.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = safe_double_to_int64(::std::round(rhs.as_real()));
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__iround` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_ifloor:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Round the operand to the nearest integer towards negative
+                    // infinity.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__ifloor` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_iceil:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Round the operand to the nearest integer towards positive
+                    //  infinity.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__iceil` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_itrunc:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Truncate the operand to the nearest integer towards zero.
+                    if(rhs.type() == type_integer) {
+                      return air_status_next;
+                    }
+
+                    if(rhs.type() == type_real) {
+                      rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__itrunc` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_lzcnt:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the number of leading zeroes in the operand.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
+
+                      val = (int64_t) ROCKET_LZCNT64((uint64_t) val);
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__lzcnt` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_tzcnt:
+              // unary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the number of trailing zeroes in the operand.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
+
+                      val = (int64_t) ROCKET_TZCNT64((uint64_t) val);
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__tzcnt` not applicable (operand was `$1`)", rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_popcnt:
               // unary
               rod.append(
@@ -3299,383 +4208,19 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint32_t uxop = head->uparam.u1;
-                    auto& top = ctx.stack().mut_top();
-                    auto& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
-
-                    switch(uxop)
-                      {
-                      case xop_pos:
-                        {
-                          // This operator does nothing.
-                          return air_status_next;
-                        }
-
-                      case xop_neg:
-                        {
-                          // Get the additive inverse of the operand.
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
-
-                            int64_t result;
-                            if(ROCKET_SUB_OVERFLOW(0, val, &result))
-                              throw Runtime_Error(xtc_format,
-                                       "Integer negation overflow (operand was `$1`)", val);
-
-                            val = result;
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            V_real& val = rhs.mut_real();
-
-                            int64_t bits;
-                            bcopy(bits, val);
-                            bits ^= INT64_MIN;
-
-                            bcopy(val, bits);
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Arithmetic negation not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_notb:
-                        {
-                          // Flip all bits (of all bytes) in the operand.
-                          if(rhs.type() == type_boolean) {
-                            V_boolean& val = rhs.mut_boolean();
-                            val = !val;
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
-                            val = ~val;
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_string) {
-                            V_string& val = rhs.mut_string();
-                            for(auto it = val.mut_begin();  it != val.end();  ++it)
-                              *it = static_cast<char>(*it ^ -1);
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "Bitwise NOT not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_notl:
-                        {
-                          // Perform the builtin boolean conversion and negate the result.
-                          rhs = !rhs.test();
-                          return air_status_next;
-                        }
-
-                      case xop_countof:
-                        {
-                          // Get the number of elements in the operand.
-                          if(rhs.type() == type_null) {
-                            rhs = V_integer(0);
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_string) {
-                            rhs = V_integer(rhs.as_string().size());
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_array) {
-                            rhs = V_integer(rhs.as_array().size());
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_object) {
-                            rhs = V_integer(rhs.as_object().size());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`countof` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_typeof:
-                        {
-                          // Ge the type of the operand as a string.
-                          rhs = ::rocket::sref(describe_type(rhs.type()));
-                          return air_status_next;
-                        }
-
-                      case xop_sqrt:
-                        {
-                          // Get the arithmetic square root of the operand, as a real number.
-                          if(rhs.is_real()) {
-                            rhs = ::std::sqrt(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__sqrt` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_isnan:
-                        {
-                          // Checks whether the operand is a NaN. The operand must be of an
-                          // arithmetic type. An integer is never a NaN.
-                          if(rhs.type() == type_integer) {
-                            rhs = false;
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = ::std::isnan(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__isnan` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_isinf:
-                        {
-                          // Checks whether the operand is an infinity. The operand must be of
-                          // an arithmetic type. An integer is never an infinity.
-                          if(rhs.type() == type_integer) {
-                            rhs = false;
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = ::std::isinf(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__isinf` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_abs:
-                        {
-                          // Get the absolute value of the operand.
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
-
-                            V_integer neg_val;
-                            if(ROCKET_SUB_OVERFLOW(0, val, &neg_val))
-                              throw Runtime_Error(xtc_format,
-                                       "Integer negation overflow (operand was `$1`)", val);
-
-                            val ^= (val ^ neg_val) & (val >> 63);
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            V_real& val = rhs.mut_real();
-
-                            double result = ::std::fabs(val);
-
-                            val = result;
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__abs` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_sign:
-                        {
-                          // Get the sign bit of the operand as a boolean value.
-                          if(rhs.type() == type_integer) {
-                            rhs = rhs.as_integer() < 0;
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = ::std::signbit(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__sign` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_round:
-                        {
-                          // Round the operand to the nearest integer of the same type.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs.mut_real() = ::std::round(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__round` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_floor:
-                        {
-                          // Round the operand to the nearest integer of the same type,
-                          // towards negative infinity.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs.mut_real() = ::std::floor(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__floor` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_ceil:
-                        {
-                          // Round the operand to the nearest integer of the same type,
-                          // towards positive infinity.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs.mut_real() = ::std::ceil(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__ceil` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_trunc:
-                        {
-                          // Truncate the operand to the nearest integer towards zero.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs.mut_real() = ::std::trunc(rhs.as_real());
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__trunc` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_iround:
-                        {
-                          // Round the operand to the nearest integer.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = safe_double_to_int64(::std::round(rhs.as_real()));
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__iround` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_ifloor:
-                        {
-                          // Round the operand to the nearest integer towards negative infinity.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__ifloor` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_iceil:
-                        {
-                          // Round the operand to the nearest integer towards positive infinity.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__iceil` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_itrunc:
-                        {
-                          // Truncate the operand to the nearest integer towards zero.
-                          if(rhs.type() == type_integer) {
-                            return air_status_next;
-                          }
-
-                          if(rhs.type() == type_real) {
-                            rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__itrunc` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_lzcnt:
-                        {
-                          // Get the number of leading zeroes in the operand.
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
-
-                            val = (int64_t) ROCKET_LZCNT64((uint64_t) val);
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__lzcnt` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_tzcnt:
-                        {
-                          // Get the number of trailing zeroes in the operand.
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
-
-                            val = (int64_t) ROCKET_TZCNT64((uint64_t) val);
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__tzcnt` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      case xop_popcnt:
-                        {
-                          // Get the number of ones in the operand.
-                          if(rhs.type() == type_integer) {
-                            V_integer& val = rhs.mut_integer();
-
-                            val = (int64_t) ROCKET_POPCNT64((uint64_t) val);
-                            return air_status_next;
-                          }
-
-                          throw Runtime_Error(xtc_format,
-                                   "`__popcnt` not applicable (operand was `$1`)", rhs);
-                        }
-
-                      default:
-                        ROCKET_UNREACHABLE();
-                      }
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the number of ones in the operand.
+                    if(rhs.type() == type_integer) {
+                      V_integer& val = rhs.mut_integer();
+
+                      val = (int64_t) ROCKET_POPCNT64((uint64_t) val);
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
@@ -3693,6 +4238,37 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_eq:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const auto& rhs = ctx.stack().top().dereference_readonly();
+                    auto& top = ctx.stack().mut_top(1);
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the two operands are equal. Unordered values are
+                    // considered to be unequal.
+                    lhs = lhs.compare_partial(rhs) == compare_equal;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_ne:
             case xop_cmp_un:
             case xop_cmp_lt:
