@@ -184,360 +184,6 @@ do_duplicate_sequence(xContainer& src, int64_t count)
   }
 
 AIR_Status
-do_apply_binary_operator_with_noninteger(uint32_t uxop, Value& lhs, const Value& rhs)
-  {
-    switch(uxop)
-      {
-      case xop_cmp_eq:
-        {
-          // Check whether the two operands are equal. Unordered values are
-          // considered to be unequal.
-          lhs = lhs.compare_partial(rhs) == compare_equal;
-          return air_status_next;
-        }
-
-      case xop_cmp_ne:
-        {
-          // Check whether the two operands are not equal. Unordered values are
-          // considered to be unequal.
-          lhs = lhs.compare_partial(rhs) != compare_equal;
-          return air_status_next;
-        }
-
-      case xop_cmp_un:
-        {
-          // Check whether the two operands are unordered.
-          lhs = lhs.compare_partial(rhs) == compare_unordered;
-          return air_status_next;
-        }
-
-      case xop_cmp_lt:
-        {
-          // Check whether the LHS operand is less than the RHS operand. If
-          // they are unordered, an exception shall be thrown.
-          lhs = lhs.compare_total(rhs) == compare_less;
-          return air_status_next;
-        }
-
-      case xop_cmp_gt:
-        {
-          // Check whether the LHS operand is greater than the RHS operand. If
-          // they are unordered, an exception shall be thrown.
-          lhs = lhs.compare_total(rhs) == compare_greater;
-          return air_status_next;
-        }
-
-      case xop_cmp_lte:
-        {
-          // Check whether the LHS operand is less than or equal to the RHS
-          // operand. If they are unordered, an exception shall be thrown.
-          lhs = lhs.compare_total(rhs) != compare_greater;
-          return air_status_next;
-        }
-
-      case xop_cmp_gte:
-        {
-          // Check whether the LHS operand is greater than or equal to the RHS
-          // operand. If they are unordered, an exception shall be thrown.
-          lhs = lhs.compare_total(rhs) != compare_less;
-          return air_status_next;
-        }
-
-      case xop_cmp_3way:
-        {
-          // Defines a partial ordering on all values. For unordered operands,
-            // a string is returned, so `x <=> y` and `(x <=> y) <=> 0` produces
-            // the same result.
-            int64_t cmp = lhs.compare_partial(rhs);
-            lhs = cmp - compare_equal;
-            if(ROCKET_UNEXPECT(cmp == compare_unordered))
-              lhs = &"[unordered]";
-            return air_status_next;
-          }
-
-      case xop_add:
-        {
-          // Perform logical OR on two boolean values, or get the sum of two
-          // arithmetic values, or concatenate two strings.
-          if(lhs.is_real() && rhs.is_real()) {
-            V_real& val = lhs.mut_real();
-            V_real other = rhs.as_real();
-
-            val += other;
-            return air_status_next;
-          }
-
-          if(lhs.is_string() && rhs.is_string()) {
-            V_string& val = lhs.mut_string();
-            const V_string& other = rhs.as_string();
-
-            val.append(other);
-            return air_status_next;
-          }
-
-          if(lhs.is_boolean() && rhs.is_boolean()) {
-            V_boolean& val = lhs.mut_boolean();
-            V_boolean other = rhs.as_boolean();
-
-            val |= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Addition not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_sub:
-        {
-          // Perform logical XOR on two boolean values, or get the difference
-          // of two arithmetic values.
-          if(lhs.is_real() && rhs.is_real()) {
-            V_real& val = lhs.mut_real();
-            V_real other = rhs.as_real();
-
-            // Overflow will result in an infinity, so this is safe.
-            val -= other;
-            return air_status_next;
-          }
-
-          if(lhs.is_boolean() && rhs.is_boolean()) {
-            V_boolean& val = lhs.mut_boolean();
-            V_boolean other = rhs.as_boolean();
-
-            // Perform logical XOR of the operands.
-            val ^= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Subtraction not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_mul:
-        {
-           // Perform logical AND on two boolean values, or get the product of
-           // two arithmetic values, or duplicate a string or array by a given
-           // times.
-          if(lhs.is_real() && rhs.is_real()) {
-            V_real& val = lhs.mut_real();
-            V_real other = rhs.as_real();
-
-            val *= other;
-            return air_status_next;
-          }
-
-          if(lhs.is_integer() && rhs.is_string()) {
-            V_integer count = lhs.as_integer();
-            lhs = rhs.as_string();
-            V_string& val = lhs.mut_string();
-
-            do_duplicate_sequence(val, count);
-            return air_status_next;
-          }
-
-          if(lhs.is_integer() && rhs.is_array()) {
-            V_integer count = lhs.as_integer();
-            lhs = rhs.as_array();
-            V_array& val = lhs.mut_array();
-
-            do_duplicate_sequence(val, count);
-            return air_status_next;
-          }
-
-          if(lhs.is_boolean() && rhs.is_boolean()) {
-            V_boolean& val = lhs.mut_boolean();
-            V_boolean other = rhs.as_boolean();
-
-            val &= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Multiplication not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_div:
-        {
-          // Get the quotient of two arithmetic values. If both operands are
-          // integers, the result is also an integer, truncated towards zero.
-          if(lhs.is_real() && rhs.is_real()) {
-            V_real& val = lhs.mut_real();
-            V_real other = rhs.as_real();
-
-            val /= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Division not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_mod:
-        {
-          // Get the remainder of two arithmetic values. The quotient is
-          // truncated towards zero. If both operands are integers, the result
-          // is also an integer.
-          if(lhs.is_real() && rhs.is_real()) {
-            V_real& val = lhs.mut_real();
-            V_real other = rhs.as_real();
-
-            val = ::std::fmod(val, other);
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Modulo not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_andb:
-        {
-          // Perform the bitwise AND operation on all bits of the operands. If
-          // the two operands have different lengths, the result is truncated
-          // to the same length as the shorter one.
-          if(lhs.is_string() && rhs.is_string()) {
-            V_string& val = lhs.mut_string();
-            const V_string& mask = rhs.as_string();
-
-            if(val.size() > mask.size())
-              val.erase(mask.size());
-            auto maskp = mask.begin();
-            for(auto it = val.mut_begin();  it != val.end();  ++it, ++maskp)
-              *it = static_cast<char>(*it & *maskp);
-            return air_status_next;
-          }
-
-          if(lhs.is_boolean() && rhs.is_boolean()) {
-            V_boolean& val = lhs.mut_boolean();
-            V_boolean other = rhs.as_boolean();
-
-            val &= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Bitwise AND not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_orb:
-        {
-          // Perform the bitwise OR operation on all bits of the operands. If
-          // the two operands have different lengths, the result is padded to
-          // the same length as the longer one, with zeroes.
-          if(lhs.is_string() && rhs.is_string()) {
-            V_string& val = lhs.mut_string();
-            const V_string& mask = rhs.as_string();
-
-            if(val.size() < mask.size())
-              val.append(mask.size() - val.size(), 0);
-            auto valp = val.mut_begin();
-            for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
-              *valp = static_cast<char>(*valp | *it);
-            return air_status_next;
-          }
-
-          if(lhs.is_boolean() && rhs.is_boolean()) {
-            V_boolean& val = lhs.mut_boolean();
-            V_boolean other = rhs.as_boolean();
-
-            val |= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Bitwise OR not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_xorb:
-        {
-          // Perform the bitwise XOR operation on all bits of the operands. If
-          // the two operands have different lengths, the result is padded to
-          // the same length as the longer one, with zeroes.
-          if(lhs.is_string() && rhs.is_string()) {
-            V_string& val = lhs.mut_string();
-            const V_string& mask = rhs.as_string();
-
-            if(val.size() < mask.size())
-              val.append(mask.size() - val.size(), 0);
-            auto valp = val.mut_begin();
-            for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
-              *valp = static_cast<char>(*valp ^ *it);
-            return air_status_next;
-          }
-
-          if(lhs.is_boolean() && rhs.is_boolean()) {
-            V_boolean& val = lhs.mut_boolean();
-            V_boolean other = rhs.as_boolean();
-
-            val ^= other;
-            return air_status_next;
-          }
-
-          throw Runtime_Error(xtc_format,
-                   "Bitwise XOR not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_addm:
-        {
-          // This should have been redirected to the fast path.
-          throw Runtime_Error(xtc_format,
-                   "Modular addition not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_subm:
-        {
-          // This should have been redirected to the fast path.
-          throw Runtime_Error(xtc_format,
-                   "Modular subtraction not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_mulm:
-        {
-          // This should have been redirected to the fast path.
-          throw Runtime_Error(xtc_format,
-                   "Modular multiplication not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_adds:
-        {
-          // This should have been redirected to the fast path.
-          throw Runtime_Error(xtc_format,
-                   "Saturating addition not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_subs:
-        {
-          // This should have been redirected to the fast path.
-          throw Runtime_Error(xtc_format,
-                   "Saturating subtraction not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      case xop_muls:
-        {
-          // This should have been redirected to the fast path.
-          throw Runtime_Error(xtc_format,
-                   "Saturating multiplication not applicable (operands were `$1` and `$2`)",
-                   lhs, rhs);
-        }
-
-      default:
-        ROCKET_UNREACHABLE();
-      }
-  }
-
-AIR_Status
 do_apply_binary_operator_with_integer(uint32_t uxop, Value& lhs, V_integer irhs)
   {
     switch(uxop)
@@ -4248,8 +3894,8 @@ solidify(AVM_Rod& rod) const
                     auto& top = ctx.stack().mut_top(1);
                     auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are equal. Unordered values are
-                    // considered to be unequal.
+                    // Check whether the two operands are equal. Unordered values
+                    // are considered unequal.
                     lhs = lhs.compare_partial(rhs) == compare_equal;
                     ctx.stack().pop();
                     return air_status_next;
@@ -4270,25 +3916,997 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_ne:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the two operands are not equal. Unordered
+                    // values are considered unequal.
+                    lhs = lhs.compare_partial(rhs) != compare_equal;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_un:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the two operands are unordered.
+                    lhs = lhs.compare_partial(rhs) == compare_unordered;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_lt:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the LHS operand is less than the RHS operand.
+                    // If they are unordered, an exception shall be thrown.
+                    lhs = lhs.compare_total(rhs) == compare_less;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_gt:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the LHS operand is greater than the RHS operand.
+                    // If they are unordered, an exception shall be thrown.
+                    lhs = lhs.compare_total(rhs) == compare_greater;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_lte:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the LHS operand is less than or equal to the
+                    // RHS operand. If they are unordered, an exception shall be
+                    // thrown.
+                    lhs = lhs.compare_total(rhs) != compare_greater;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_gte:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Check whether the LHS operand is greater than or equal to
+                    // the RHS operand. If they are unordered, an exception shall
+                    // be thrown.
+                    lhs = lhs.compare_total(rhs) != compare_less;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_cmp_3way:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Defines a partial ordering on all values. For unordered
+                    // operands, a string is returned, so `x <=> y` and
+                    // `(x <=> y) <=> 0` produces the same result.
+                    int64_t cmp = lhs.compare_partial(rhs);
+                    if(ROCKET_UNEXPECT(cmp == compare_unordered))
+                      lhs = &"[unordered]";
+                    else
+                      lhs = cmp - compare_equal;
+                    ctx.stack().pop();
+                    return air_status_next;
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_add:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform logical OR on two boolean values, or get the sum
+                    // of two arithmetic values, or concatenate two strings.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      int64_t result;
+                      if(ROCKET_ADD_OVERFLOW(val, other, &result))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer addition overflow (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      val = result;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_real() && rhs.is_real()) {
+                      V_real& val = lhs.mut_real();
+                      V_real other = rhs.as_real();
+
+                      val += other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string() && rhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+                      const V_string& other = rhs.as_string();
+
+                      val.append(other);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val |= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Addition not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_sub:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform logical XOR on two boolean values, or get the
+                    // difference of two arithmetic values.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      // Perform arithmetic subtraction with overflow checking.
+                      int64_t result;
+                      if(ROCKET_SUB_OVERFLOW(val, other, &result))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer subtraction overflow (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      val = result;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_real() && rhs.is_real()) {
+                      V_real& val = lhs.mut_real();
+                      V_real other = rhs.as_real();
+
+                      // Overflow will result in an infinity, so this is safe.
+                      val -= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      // Perform logical XOR of the operands.
+                      val ^= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Subtraction not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_mul:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform logical AND on two boolean values, or get the product
+                    // of two arithmetic values, or duplicate a string or array by
+                    // the given times.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      int64_t result;
+                      if(ROCKET_MUL_OVERFLOW(val, other, &result))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer multiplication overflow (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      val = result;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_real() && rhs.is_real()) {
+                      V_real& val = lhs.mut_real();
+                      V_real other = rhs.as_real();
+
+                      val *= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_integer() && rhs.is_string()) {
+                      V_integer count = lhs.as_integer();
+                      lhs = rhs.as_string();
+                      V_string& val = lhs.mut_string();
+
+                      do_duplicate_sequence(val, count);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string() && rhs.is_integer()) {
+                      V_string& val = lhs.mut_string();
+                      V_integer count = rhs.as_integer();
+
+                      do_duplicate_sequence(val, count);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_integer() && rhs.is_array()) {
+                      V_integer count = lhs.as_integer();
+                      lhs = rhs.as_array();
+                      V_array& val = lhs.mut_array();
+
+                      do_duplicate_sequence(val, count);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_array() && rhs.is_integer()) {
+                      V_array& val = lhs.mut_array();
+                      V_integer count = rhs.as_integer();
+
+                      do_duplicate_sequence(val, count);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val &= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Multiplication not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_div:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the quotient of two arithmetic values. If both operands
+                    // are integers, the result is also an integer, truncated
+                    // towards zero.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      if(other == 0)
+                        throw Runtime_Error(xtc_format,
+                                 "Zero as divisor (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      if((val == INT64_MIN) && (other == -1))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer division overflow (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      val /= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_real() && rhs.is_real()) {
+                      V_real& val = lhs.mut_real();
+                      V_real other = rhs.as_real();
+
+                      val /= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Division not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_mod:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Get the remainder of two arithmetic values. The quotient is
+                    // truncated towards zero. If both operands are integers, the
+                    // result is also an integer.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      if(other == 0)
+                        throw Runtime_Error(xtc_format,
+                                 "Zero as divisor (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      if((val == INT64_MIN) && (other == -1))
+                        throw Runtime_Error(xtc_format,
+                                 "Integer division overflow (operands were `$1` and `$2`)",
+                                 val, other);
+
+                      val %= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_real() && rhs.is_real()) {
+                      V_real& val = lhs.mut_real();
+                      V_real other = rhs.as_real();
+
+                      val = ::std::fmod(val, other);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Modulo not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_andb:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform the bitwise AND operation on all bits of the operands.
+                    // If the two operands have different lengths, the result is
+                    // truncated to the same length as the shorter one.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      val &= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string() && rhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+                      const V_string& mask = rhs.as_string();
+
+                      if(val.size() > mask.size())
+                        val.erase(mask.size());
+                      auto maskp = mask.begin();
+                      for(auto it = val.mut_begin();  it != val.end();  ++it, ++maskp)
+                        *it = static_cast<char>(*it & *maskp);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val &= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Bitwise AND not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_orb:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform the bitwise OR operation on all bits of the operands.
+                    // If the two operands have different lengths, the result is
+                    // padded to the same length as the longer one, with zeroes.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      val |= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string() && rhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+                      const V_string& mask = rhs.as_string();
+
+                      if(val.size() < mask.size())
+                        val.append(mask.size() - val.size(), 0);
+                      auto valp = val.mut_begin();
+                      for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
+                        *valp = static_cast<char>(*valp | *it);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val |= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Bitwise OR not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_xorb:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform the bitwise XOR operation on all bits of the operands.
+                    // If the two operands have different lengths, the result is
+                    // padded to the same length as the longer one, with zeroes.
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      val ^= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string() && rhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+                      const V_string& mask = rhs.as_string();
+
+                      if(val.size() < mask.size())
+                        val.append(mask.size() - val.size(), 0);
+                      auto valp = val.mut_begin();
+                      for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
+                        *valp = static_cast<char>(*valp ^ *it);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean other = rhs.as_boolean();
+
+                      val ^= other;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Bitwise XOR not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_addm:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform modular addition on two integers.
+                    if(lhs.is_integer() && rhs.as_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      ROCKET_ADD_OVERFLOW(val, other, &val);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Modular addition not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_subm:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform modular subtraction on two integers.
+                    if(lhs.is_integer() && rhs.as_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      ROCKET_SUB_OVERFLOW(val, other, &val);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Modular subtraction not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_mulm:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform modular multiplication on two integers.
+                    if(lhs.is_integer() && rhs.as_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      ROCKET_MUL_OVERFLOW(val, other, &val);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Modular multiplication not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_adds:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform saturating addition on two integers.
+                    if(lhs.is_integer() && rhs.as_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      if(ROCKET_ADD_OVERFLOW(val, other, &val))
+                        val = (other >> 63) ^ INT64_MAX;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Saturating addition not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_subs:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    // Perform saturating subtraction on two integers.
+                    if(lhs.is_integer() && rhs.as_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+
+                      if(ROCKET_SUB_OVERFLOW(val, other, &val))
+                        val = (other >> 63) ^ INT64_MIN;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Saturating subtraction not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
             case xop_muls:
               // binary
               rod.append(
@@ -4296,16 +4914,25 @@ solidify(AVM_Rod& rod) const
                   __attribute__((__always_inline__, __flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint32_t uxop = head->uparam.u1;
-                    const auto& rhs = ctx.stack().top().dereference_readonly();
-                    ctx.stack().pop();
-                    auto& top = ctx.stack().mut_top();
-                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    if(rhs.type() != type_integer)
-                      return do_apply_binary_operator_with_noninteger(uxop, lhs, rhs);
+                    // Perform saturating multiplication on two integers.
+                    if(lhs.is_integer() && rhs.as_integer()) {
+                      V_integer& val = lhs.mut_integer();
+                      V_integer other = rhs.as_integer();
+                      V_integer sign = val ^ other;
 
-                    return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
+                      if(ROCKET_MUL_OVERFLOW(val, other, &val))
+                        val = (sign >> 63) ^ INT64_MAX;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Saturating multiplication not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                 // Uparam
@@ -4323,27 +4950,280 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sll:
-            case xop_srl:
-            case xop_sla:
-            case xop_sra:
-              // shift
+              // binary
               rod.append(
                 +[](Executive_Context& ctx, const Header* head)
                   __attribute__((__always_inline__, __flatten__)) -> AIR_Status
                   {
                     const bool assign = head->uparam.b0;
-                    const uint32_t uxop = head->uparam.u1;
-                    const auto& rhs = ctx.stack().top().dereference_readonly();
-                    ctx.stack().pop();
-                    auto& top = ctx.stack().mut_top();
-                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     if(rhs.type() != type_integer)
                       throw Runtime_Error(xtc_format,
                                "Invalid shift count (operands were `$1` and `$2`)",
                                lhs, rhs);
 
-                    return do_apply_binary_operator_with_integer(uxop, lhs, rhs.as_integer());
+                    if(rhs.as_integer() < 0)
+                      throw Runtime_Error(xtc_format,
+                               "Negative shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    // Shift the operand to the left. Elements that get shifted out
+                    // are discarded. Vacuum elements are filled with default values.
+                    // The width of the operand is unchanged.
+                    if(lhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+
+                      int64_t count = rhs.as_integer();
+                      val = (int64_t) ((uint64_t) val << (count & 63));
+                      val &= ((count - 64) >> 63);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
+                      val.erase(0, tlen);
+                      val.append(tlen, '\0');
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_array()) {
+                      V_array& val = lhs.mut_array();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
+                      val.erase(0, tlen);
+                      val.append(tlen);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Logical left shift not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_srl:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    if(rhs.type() != type_integer)
+                      throw Runtime_Error(xtc_format,
+                               "Invalid shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    if(rhs.as_integer() < 0)
+                      throw Runtime_Error(xtc_format,
+                               "Negative shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    // Shift the operand to the right. Elements that get shifted out
+                    // are discarded. Vacuum elements are filled with default values.
+                    // The width of the operand is unchanged.
+                    if(lhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+
+                      int64_t count = rhs.as_integer();
+                      val = (int64_t) ((uint64_t) val >> (count & 63));
+                      val &= ((count - 64) >> 63);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
+                      val.pop_back(tlen);
+                      val.insert(0, tlen, '\0');
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_array()) {
+                      V_array& val = lhs.mut_array();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
+                      val.pop_back(tlen);
+                      val.insert(0, tlen);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Logical right shift not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_sla:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    if(rhs.type() != type_integer)
+                      throw Runtime_Error(xtc_format,
+                               "Invalid shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    if(rhs.as_integer() < 0)
+                      throw Runtime_Error(xtc_format,
+                               "Negative shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    // Shift the operand to the left. No element is discarded from
+                    // the left (for integers this means that bits which get shifted
+                    // out shall all be the same with the sign bit). Vacuum elements
+                    // are filled with default values.
+                    if(lhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+
+                      int64_t count = ::rocket::min(rhs.as_integer(), 63);
+                      if((val != 0) && ((count != rhs.as_integer()) || (val >> (63 - count) != val >> 63)))
+                        throw Runtime_Error(xtc_format,
+                                 "Arithmetic left shift overflow (operands were `$1` and `$2`)",
+                                 lhs, rhs);
+
+                      reinterpret_cast<uint64_t&>(val) <<= count;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
+                      val.append(tlen, '\0');
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_array()) {
+                      V_array& val = lhs.mut_array();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
+                      val.append(tlen);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
+                  }
+
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
+              );
+              return;
+
+            case xop_sra:
+              // binary
+              rod.append(
+                +[](Executive_Context& ctx, const Header* head)
+                  __attribute__((__always_inline__, __flatten__)) -> AIR_Status
+                  {
+                    const bool assign = head->uparam.b0;
+                    const Value& rhs = ctx.stack().top().dereference_readonly();
+                    Reference& top = ctx.stack().mut_top(1);
+                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
+                    if(rhs.type() != type_integer)
+                      throw Runtime_Error(xtc_format,
+                               "Invalid shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    if(rhs.as_integer() < 0)
+                      throw Runtime_Error(xtc_format,
+                               "Negative shift count (operands were `$1` and `$2`)",
+                               lhs, rhs);
+
+                    // Shift the operand to the right. Elements that get shifted
+                    // out are discarded. No element is filled in the left.
+                    if(lhs.is_integer()) {
+                      V_integer& val = lhs.mut_integer();
+
+                      int64_t count = ::rocket::min(rhs.as_integer(), 63);
+                      val >>= count;
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_string()) {
+                      V_string& val = lhs.mut_string();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), PTRDIFF_MAX);
+                      val.pop_back(tlen);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    if(lhs.is_array()) {
+                      V_array& val = lhs.mut_array();
+
+                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), PTRDIFF_MAX);
+                      val.pop_back(tlen);
+                      ctx.stack().pop();
+                      return air_status_next;
+                    }
+
+                    throw Runtime_Error(xtc_format,
+                             "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
+                             lhs, rhs);
                   }
 
                 // Uparam
