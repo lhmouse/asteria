@@ -46,26 +46,26 @@ class Variable_HashMap
     do_reallocate(uint32_t nbkt);
 
     void
-    do_deallocate() noexcept;
-
-    void
-    do_erase_range(uint32_t tpos, uint32_t tn) noexcept;
+    do_clear(bool free_storage) noexcept;
 
   public:
     ~Variable_HashMap()
       {
         if(this->m_bptr)
-          this->do_deallocate();
+          this->do_clear(true);
       }
 
     uint32_t
     size() const noexcept
-      { return this->m_size;  }
+      {
+        return this->m_size;
+      }
 
     void
     clear() noexcept
       {
-        this->do_erase_range(0, this->m_nbkt);
+        if(this->m_size != 0)
+          this->do_clear(false);
       }
 
     bool
