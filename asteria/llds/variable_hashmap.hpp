@@ -58,10 +58,6 @@ class Variable_HashMap
           this->do_deallocate();
       }
 
-    bool
-    empty() const noexcept
-      { return this->m_size == 0;  }
-
     uint32_t
     size() const noexcept
       { return this->m_size;  }

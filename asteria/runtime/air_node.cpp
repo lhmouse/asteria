@@ -1412,7 +1412,7 @@ solidify(AVM_Rod& rod) const
                     // is empty then the loop is infinite.
                     AIR_Status next_status = sp.rod_cond.execute(ctx_for);
                     ROCKET_ASSERT(next_status == air_status_next);
-                    if(!ctx_for.stack().empty() && !ctx_for.stack().top().dereference_readonly().test())
+                    if((ctx_for.stack().size() != 0) && !ctx_for.stack().top().dereference_readonly().test())
                       break;
 
                     // Execute the body.
