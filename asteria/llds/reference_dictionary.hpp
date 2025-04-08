@@ -46,45 +46,29 @@ class Reference_Dictionary
     do_reallocate(uint32_t nbkt);
 
     void
-    do_deallocate() noexcept;
-
-    void
-    do_erase_range(uint32_t tpos, uint32_t tn) noexcept;
+    do_clear(bool free_storage) noexcept;
 
     Reference*
-    do_xfind_opt(phsh_stringR key) const noexcept
-      {
-        if(this->m_nbkt == 0)
-          return nullptr;
-
-        // Find a bucket using linear probing. The load factor is kept <= 0.5
-        // so a bucket is always returned. If probing has stopped on an empty
-        // bucket, then there is no match.
-        size_t orig = ::rocket::probe_origin(this->m_nbkt, key.rdhash());
-        auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-                    [&](const Bucket& r) { return r.key == key;  });
-
-        if(!*qbkt)
-          return nullptr;
-
-        return &(qbkt->ref);
-      }
+    do_xfind_opt(phsh_stringR key) const noexcept;
 
   public:
     ~Reference_Dictionary()
       {
         if(this->m_bptr)
-          this->do_deallocate();
+          this->do_clear(true);
       }
 
     uint32_t
     size() const noexcept
-      { return this->m_size;  }
+      {
+        return this->m_size;
+      }
 
     void
     clear() noexcept
       {
-        this->do_erase_range(0, this->m_nbkt);
+        if(this->m_size != 0)
+          this->do_clear(false);
       }
 
     const Reference*

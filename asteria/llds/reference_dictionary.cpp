@@ -63,62 +63,48 @@ do_reallocate(uint32_t nbkt)
 ROCKET_FLATTEN
 void
 Reference_Dictionary::
-do_deallocate() noexcept
+do_clear(bool free_storage) noexcept
   {
     auto eptr = this->m_bptr + this->m_nbkt;
     while(eptr->next != eptr) {
-      // Destroy this bucket.
       this->m_size --;
       ::rocket::destroy(&(eptr->next->key));
       ::rocket::destroy(&(eptr->next->ref));
       eptr->next->detach();
     }
 
-    ::rocket::xmeminfo rinfo;
-    rinfo.element_size = sizeof(Bucket);
-    rinfo.data = this->m_bptr;
-    rinfo.count = this->m_nbkt;
-    ::rocket::xmemfree(rinfo);
+    if(free_storage) {
+      ::rocket::xmeminfo rinfo;
+      rinfo.element_size = sizeof(Bucket);
+      rinfo.data = this->m_bptr;
+      rinfo.count = this->m_nbkt;
+      ::rocket::xmemfree(rinfo);
 
-    this->m_bptr = nullptr;
-    this->m_nbkt = 0;
+      this->m_bptr = nullptr;
+      this->m_nbkt = 0;
+    }
+
     ROCKET_ASSERT(this->m_size == 0);
   }
 
-void
+Reference*
 Reference_Dictionary::
-do_erase_range(uint32_t tpos, uint32_t tn) noexcept
+do_xfind_opt(phsh_stringR key) const noexcept
   {
-    auto eptr = this->m_bptr + this->m_nbkt;
-    for(auto qbkt = this->m_bptr + tpos;  qbkt != this->m_bptr + tpos + tn;  ++qbkt)
-      if(*qbkt) {
-        // Destroy this bucket.
-        this->m_size --;
-        qbkt->detach();
-        ::rocket::destroy(&(qbkt->key));
-        ::rocket::destroy(&(qbkt->ref));
-      }
+    if(this->m_nbkt == 0)
+      return nullptr;
 
-    // Relocate elements that are not placed in their immediate locations.
-    ::rocket::linear_probe(
-      this->m_bptr, tpos, tpos + tn, this->m_nbkt,
-      [&](Bucket& r) {
-        // Clear this bucket temporarily.
-        ROCKET_ASSERT(r);
-        r.detach();
+    // Find a bucket using linear probing. The load factor is kept <= 0.5
+    // so a bucket is always returned. If probing has stopped on an empty
+    // bucket, then there is no match.
+    size_t orig = ::rocket::probe_origin(this->m_nbkt, key.rdhash());
+    auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
+                [&](const Bucket& r) { return r.key == key;  });
 
-        // Look for a new bucket for this element. Uniqueness is implied.
-        size_t orel = ::rocket::probe_origin(this->m_nbkt, r.key.rdhash());
-        auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
-                        [&](const Bucket&) { return false;  });
+    if(!*qbkt)
+      return nullptr;
 
-        // Relocate the value into the new bucket.
-        ROCKET_ASSERT(qrel);
-        bcopy(qrel->key, r.key);
-        bcopy(qrel->ref, r.ref);
-        qrel->attach(*eptr);
-        return false;
-      });
+    return &(qbkt->ref);
   }
 
 Reference&
@@ -140,10 +126,9 @@ insert(phsh_stringR key, bool* newly_opt)
       return qbkt->ref;
 
     // Construct a new element.
-    auto eptr = this->m_bptr + this->m_nbkt;
     ::rocket::construct(&(qbkt->key), key);
     ::rocket::construct(&(qbkt->ref));
-    qbkt->attach(*eptr);
+    qbkt->attach(*(this->m_bptr + this->m_nbkt));
     this->m_size ++;
     return qbkt->ref;
   }
@@ -164,10 +149,38 @@ erase(phsh_stringR key, Reference* refp_opt) noexcept
       return false;
 
     if(refp_opt)
-      *refp_opt = move(qbkt->ref);
+      refp_opt->swap(qbkt->ref);
 
-    // Destroy this element.
-    this->do_erase_range(static_cast<uint32_t>(qbkt - this->m_bptr), 1);
+    // Destroy this bucket.
+    this->m_size --;
+    qbkt->detach();
+    ::rocket::destroy(&(qbkt->key));
+    ::rocket::destroy(&(qbkt->ref));
+
+    // Relocate elements that are not placed in their immediate locations.
+    ::rocket::linear_probe(
+      this->m_bptr,
+      (size_t) (qbkt - this->m_bptr),
+      (size_t) (qbkt - this->m_bptr + 1),
+      this->m_nbkt,
+      [&](Bucket& r) {
+        // Clear this bucket temporarily.
+        ROCKET_ASSERT(r);
+        r.detach();
+
+        // Look for a new bucket for this element. Uniqueness is implied.
+        size_t orel = ::rocket::probe_origin(this->m_nbkt, r.key.rdhash());
+        auto qrel = ::rocket::linear_probe(this->m_bptr, orel, orel, this->m_nbkt,
+                        [&](const Bucket&) { return false;  });
+
+        // Relocate the value into the new bucket.
+        ROCKET_ASSERT(qrel);
+        bcopy(qrel->key, r.key);
+        bcopy(qrel->ref, r.ref);
+        qrel->attach(*(this->m_bptr + this->m_nbkt));
+        return false;
+      });
+
     return true;
   }
 
