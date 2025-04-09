@@ -102,7 +102,7 @@ do_xfind_opt(phsh_stringR key) const noexcept
                     [&](const Bucket& r) __attribute__((__flatten__)) {
                       return (r.key.rdhash() == key.rdhash())
                           && (r.key.length() == key.length())
-                          && ((r.key.c_str() == key.c_str())
+                          && (ROCKET_EXPECT(r.key.c_str() == key.c_str())
                               || ::std::equal(r.key.rbegin(), r.key.rend(), key.rbegin()));
                     });
 
