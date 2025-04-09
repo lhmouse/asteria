@@ -99,7 +99,12 @@ do_xfind_opt(phsh_stringR key) const noexcept
     // bucket, then there is no match.
     size_t orig = ::rocket::probe_origin(this->m_nbkt, key.rdhash());
     auto qbkt = ::rocket::linear_probe(this->m_bptr, orig, orig, this->m_nbkt,
-                [&](const Bucket& r) { return r.key == key;  });
+                    [&](const Bucket& r) __attribute__((__flatten__)) {
+                      return (r.key.rdhash() == key.rdhash())
+                          && (r.key.length() == key.length())
+                          && ((r.key.c_str() == key.c_str())
+                              || ::std::equal(r.key.rbegin(), r.key.rend(), key.rbegin()));
+                    });
 
     if(!*qbkt)
       return nullptr;
