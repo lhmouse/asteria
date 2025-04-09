@@ -119,8 +119,7 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
       // The result value has to be copied, in case that a reference to an element
       // of the LHS operand is returned.
       rod.execute(ctx);
-      auto& val = ctx.stack().mut_top().dereference_copy();
-      ctx.stack().top(1).dereference_mutable().swap(val);
+      ctx.stack().top(1).dereference_mutable() = move(ctx.stack().mut_top().dereference_copy());
       ctx.stack().pop();
       return air_status_next;
     }
@@ -915,7 +914,7 @@ solidify(AVM_Rod& rod) const
 
                 // Read the value of the initializer. The initializer must not have
                 // been empty for this function.
-                const auto& val = ctx.stack().top().dereference_readonly();
+                const Value& val = ctx.stack().top().dereference_readonly();
                 auto var = ctx.stack().top(1).unphase_variable_opt();
                 ROCKET_ASSERT(var && !var->is_initialized());
 
@@ -1592,7 +1591,7 @@ solidify(AVM_Rod& rod) const
 
                 // Read a value and throw it. The operand expression must not have
                 // been empty for this function.
-                auto val = ctx.stack().mut_top().dereference_copy();
+                Value val = ctx.stack().mut_top().dereference_copy();
                 if(val.is_null())
                   throw Runtime_Error(xtc_assert, sp.sloc, &"`null` not throwable");
 
