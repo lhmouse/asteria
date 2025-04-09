@@ -62,7 +62,7 @@ struct Verbose_Hooks
     void
     on_call(const Source_Location& sloc, const cow_function& target) override
       {
-        this->do_verbose_trace(sloc, "Calling `$1`", target);
+        this->do_verbose_trace(sloc, "Calling $1", target);
       }
 
     void
