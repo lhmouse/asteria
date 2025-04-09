@@ -81,14 +81,17 @@ template<typename xSparam>
 void
 do_sparam_ctor(Header* head, void* arg)
   {
-    ::rocket::details_variant::wrapped_move_construct<xSparam>(head->sparam, arg);
+    auto sp = reinterpret_cast<xSparam*>(head->sparam);
+    auto src = static_cast<xSparam*>(arg);
+    ::rocket::construct(sp, move(*src));
   }
 
 template<typename xSparam>
 void
 do_sparam_dtor(Header* head)
   {
-    ::rocket::details_variant::wrapped_destroy<xSparam>(head->sparam);
+    auto sp = reinterpret_cast<xSparam*>(head->sparam);
+    ::rocket::destroy(sp);
   }
 
 AIR_Status
