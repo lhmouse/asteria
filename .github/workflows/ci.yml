@@ -17,7 +17,7 @@ on:
 jobs:
   ubuntu:
     name: Ubuntu native build (x86-64)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -25,14 +25,13 @@ jobs:
     - name: Install dependencies
       run: >-
            sudo apt-get update &&
-           sudo apt-get install -y --no-install-recommends g++-7 python3
+           sudo apt-get install -y --no-install-recommends g++ python3
            pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
            ninja-build python3-pip &&
            sudo PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install meson
 
     - name: Configure
       run: >-
-           export CXX='g++-7';
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
 
     - name: Build
@@ -51,14 +50,13 @@ jobs:
     - name: Install dependencies
       run: >-
            sudo apt-get update &&
-           sudo apt-get install -y --no-install-recommends g++-13 python3
+           sudo apt-get install -y --no-install-recommends g++ python3
            pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
            ninja-build python3-pip &&
            sudo PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install meson
 
     - name: Configure
       run: >-
-           export CXX='g++-13';
            meson setup -Denable-debug-checks=true -Doptimization=1 build_ci
 
     - name: Build
