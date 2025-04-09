@@ -1039,7 +1039,6 @@ solidify(AVM_Rod& rod) const
                     // Expect an exact match of one value.
                     AIR_Status status = sp.at(k).rod_labels.execute(ctx);
                     ROCKET_ASSERT(status == air_status_next);
-
                     if(cond.compare_partial(ctx.stack().top().dereference_readonly()) != compare_equal)
                       continue;
 
@@ -1050,13 +1049,10 @@ solidify(AVM_Rod& rod) const
                     // Expect an interval of two values.
                     AIR_Status status = sp.at(k).rod_labels.execute(ctx);
                     ROCKET_ASSERT(status == air_status_next);
-
                     if(::rocket::is_none_of(cond.compare_partial(ctx.stack().top(1).dereference_readonly()),
-                                            { compare_greater, sp.at(k).cmp2_lower }))
-                      continue;
-
-                    if(::rocket::is_none_of(cond.compare_partial(ctx.stack().top(0).dereference_readonly()),
-                                            { compare_less, sp.at(k).cmp2_upper }))
+                                            { compare_greater, sp.at(k).cmp2_lower })
+                       || ::rocket::is_none_of(cond.compare_partial(ctx.stack().top(0).dereference_readonly()),
+                                               { compare_less, sp.at(k).cmp2_upper }))
                       continue;
 
                     target_index = k;
@@ -4890,6 +4886,8 @@ solidify(AVM_Rod& rod) const
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
                 const auto& sloc = head->pv_meta->sloc;
+
+                // This is for debugging only.
                 ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
                 return air_status_next;
               }
