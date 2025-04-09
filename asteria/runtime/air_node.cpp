@@ -1321,7 +1321,7 @@ solidify(AVM_Rod& rod) const
                       if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
                         status = air_status_next;
                       else if(status != air_status_next) {
-                        if(::rocket::is_none_of(status, { air_status_break_unspec, air_status_break_for }))
+                        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                           status = air_status_next;
                         break;
                       }
@@ -1353,7 +1353,7 @@ solidify(AVM_Rod& rod) const
                       if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
                         status = air_status_next;
                       else if(status != air_status_next) {
-                        if(::rocket::is_none_of(status, { air_status_break_unspec, air_status_break_for }))
+                        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                           status = air_status_next;
                         break;
                       }
@@ -1438,7 +1438,7 @@ solidify(AVM_Rod& rod) const
                     if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
                       status = air_status_next;
                     else if(status != air_status_next) {
-                      if(::rocket::is_none_of(status, { air_status_break_unspec, air_status_break_for }))
+                      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
                         status = air_status_next;
                       break;
                     }
