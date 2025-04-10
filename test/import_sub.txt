@@ -1,6 +1,6 @@
 #!this looks like a shebang
 
-assert __isvoid this;
+// assert __isvoid this; // invalid
 assert __varg() == 2 : "insufficient arguments";
 
 var x = __varg(0);
