@@ -135,7 +135,6 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
     }
   }
 
-ROCKET_NEVER_INLINE
 cow_function
 do_get_target_function(const Reference& top)
   {
@@ -150,7 +149,6 @@ do_get_target_function(const Reference& top)
     return value.as_function();
   }
 
-ROCKET_NEVER_INLINE
 AIR_Status
 do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location& sloc,
                   PTC_Aware ptc, const cow_function& target)
