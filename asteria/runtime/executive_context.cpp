@@ -39,7 +39,7 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
         if(nargs == 0)
           param.set_temporary(nullopt);
         else
-          param.swap(this->m_stack->mut_top(--nargs));
+          param = move(this->m_stack->mut_top(--nargs));
       }
 
     if(!has_ellipsis && (nargs != 0))
