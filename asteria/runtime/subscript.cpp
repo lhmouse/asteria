@@ -2,14 +2,14 @@
 // Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
 #include "../xprecompiled.hpp"
-#include "reference_modifier.hpp"
+#include "subscript.hpp"
 #include "runtime_error.hpp"
 #include "../value.hpp"
 #include "../utils.hpp"
 namespace asteria {
 
 const Value*
-Reference_Modifier::
+Subscript::
 apply_read_opt(const Value& parent) const
   {
     switch(static_cast<Index>(this->m_stor.index()))
@@ -112,7 +112,7 @@ apply_read_opt(const Value& parent) const
   }
 
 Value*
-Reference_Modifier::
+Subscript::
 apply_write_opt(Value& parent) const
   {
     switch(static_cast<Index>(this->m_stor.index()))
@@ -215,7 +215,7 @@ apply_write_opt(Value& parent) const
   }
 
 Value&
-Reference_Modifier::
+Subscript::
 apply_open(Value& parent) const
   {
     switch(static_cast<Index>(this->m_stor.index()))
@@ -326,7 +326,7 @@ apply_open(Value& parent) const
   }
 
 Value
-Reference_Modifier::
+Subscript::
 apply_unset(Value& parent) const
   {
     switch(static_cast<Index>(this->m_stor.index()))

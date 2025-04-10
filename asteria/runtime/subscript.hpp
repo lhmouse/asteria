@@ -1,13 +1,13 @@
 // This file is part of Asteria.
 // Copyright (C) 2018-2025, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_REFERENCE_MODIFIER_
-#define ASTERIA_RUNTIME_REFERENCE_MODIFIER_
+#ifndef ASTERIA_RUNTIME_SUBSCRIPT_
+#define ASTERIA_RUNTIME_SUBSCRIPT_
 
 #include "../fwd.hpp"
 namespace asteria {
 
-class Reference_Modifier
+class Subscript
   {
   public:
     struct S_array_index
@@ -54,26 +54,26 @@ class Reference_Modifier
 
   public:
     // Constructors and assignment operators
-    template<typename xModifier,
-    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xModifier&&>::value)>
-    constexpr Reference_Modifier(xModifier&& xmod)
-      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xModifier&&>::value)
+    template<typename xSubscript,
+    ROCKET_ENABLE_IF(::std::is_constructible<decltype(m_stor), xSubscript&&>::value)>
+    constexpr Subscript(xSubscript&& xsub)
+      noexcept(::std::is_nothrow_constructible<decltype(m_stor), xSubscript&&>::value)
       :
-        m_stor(forward<xModifier>(xmod))
+        m_stor(forward<xSubscript>(xsub))
       { }
 
-    template<typename xModifier,
-    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xModifier&&>::value)>
-    Reference_Modifier&
-    operator=(xModifier&& xmod) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xModifier&&>::value)
+    template<typename xSubscript,
+    ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xSubscript&&>::value)>
+    Subscript&
+    operator=(xSubscript&& xsub) &
+      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xSubscript&&>::value)
       {
-        this->m_stor = forward<xModifier>(xmod);
+        this->m_stor = forward<xSubscript>(xsub);
         return *this;
       }
 
-    Reference_Modifier&
-    swap(Reference_Modifier& other) noexcept
+    Subscript&
+    swap(Subscript& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -108,7 +108,7 @@ class Reference_Modifier
     is_array_random() const noexcept
       { return this->m_stor.index() == index_array_random;  }
 
-    // Apply this modifier on a value.
+    // Apply this subscript on a value.
     const Value*
     apply_read_opt(const Value& parent) const;
 
@@ -124,7 +124,7 @@ class Reference_Modifier
 
 inline
 void
-swap(Reference_Modifier& lhs, Reference_Modifier& rhs) noexcept
+swap(Subscript& lhs, Subscript& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

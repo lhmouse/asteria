@@ -78,8 +78,8 @@ do_dereference_readonly_slow() const
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
     }
 
-    while(valp && (mi != this->m_mods.size()))
-      valp = this->m_mods[mi++].apply_read_opt(*valp);
+    while(valp && (mi != this->m_subscripts.size()))
+      valp = this->m_subscripts[mi++].apply_read_opt(*valp);
 
     if(!valp)
       return null;
@@ -133,8 +133,8 @@ dereference_mutable() const
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
     }
 
-    while(valp && (mi != this->m_mods.size()))
-      valp = &(this->m_mods[mi++].apply_open(*valp));
+    while(valp && (mi != this->m_subscripts.size()))
+      valp = &(this->m_subscripts[mi++].apply_open(*valp));
 
     return *valp;
   }
@@ -185,17 +185,17 @@ dereference_unset() const
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
     }
 
-    if(this->m_mods.size() == 0)
+    if(this->m_subscripts.size() == 0)
       throw Runtime_Error(xtc_format,
                "Only elements of an array or object may be unset");
 
-    while(valp && (mi != this->m_mods.size() - 1))
-      valp = this->m_mods[mi++].apply_write_opt(*valp);
+    while(valp && (mi != this->m_subscripts.size() - 1))
+      valp = this->m_subscripts[mi++].apply_write_opt(*valp);
 
     if(!valp)
       return null;
 
-    return this->m_mods[mi].apply_unset(*valp);
+    return this->m_subscripts[mi].apply_unset(*valp);
   }
 
 void
@@ -236,7 +236,7 @@ do_use_function_result_slow(Global_Context& global)
           // Convert the result.
           this->m_value = move(*result_value);
           result_value.reset();
-          this->m_mods.clear();
+          this->m_subscripts.clear();
           this->m_xref = xref_temporary;
         }
 

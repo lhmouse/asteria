@@ -141,7 +141,7 @@ enum PTC_Aware : uint8_t;
 struct Abstract_Hooks;
 class Runtime_Error;
 class Reference;
-class Reference_Modifier;
+class Subscript;
 class Variable;
 class PTC_Arguments;
 class Collector;

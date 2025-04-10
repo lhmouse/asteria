@@ -66,11 +66,11 @@ do_solidify_nodes(AVM_Rod& rod, const cow_vector<AIR_Node>& code)
     rod.finalize();
   }
 
-template<typename xModifier>
+template<typename xSubscript>
 void
-do_push_modifier_and_check(Reference& ref, xModifier&& xmod)
+do_push_subscript_and_check(Reference& ref, xSubscript&& xsub)
   {
-    ref.push_modifier(forward<xModifier>(xmod));
+    ref.push_subscript(forward<xSubscript>(xsub));
     ref.dereference_readonly();
   }
 
@@ -1299,7 +1299,7 @@ solidify(AVM_Rod& rod) const
                   auto range = mapped_ref->dereference_readonly();
                   if(range.is_array()) {
                     const auto& arr = range.as_array();
-                    mapped_ref->push_modifier(Reference_Modifier::S_array_head());  // placeholder
+                    mapped_ref->push_subscript(Subscript::S_array_head());  // placeholder
                     for(int64_t i = 0;  i < arr.ssize();  ++i) {
                       // Set the key variable which is the subscript of the mapped
                       // element in the array.
@@ -1314,9 +1314,9 @@ solidify(AVM_Rod& rod) const
                       }
 
                       // Set the mapped reference.
-                      mapped_ref->pop_modifier();
-                      Reference_Modifier::S_array_index xmod = { i };
-                      do_push_modifier_and_check(*mapped_ref, move(xmod));
+                      mapped_ref->pop_subscript();
+                      Subscript::S_array_index xsub = { i };
+                      do_push_subscript_and_check(*mapped_ref, move(xsub));
 
                       // Execute the loop body.
                       status = do_execute_block(sp.rod_body, ctx_for);
@@ -1331,7 +1331,7 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(range.is_object()) {
                     const auto& obj = range.as_object();
-                    mapped_ref->push_modifier(Reference_Modifier::S_array_head());  // placeholder
+                    mapped_ref->push_subscript(Subscript::S_array_head());  // placeholder
                     for(auto it = obj.begin();  it != obj.end();  ++it) {
                       // Set the key variable which is the name of the mapped element
                       // in the object.
@@ -1346,9 +1346,9 @@ solidify(AVM_Rod& rod) const
                       }
 
                       // Set the mapped reference.
-                      mapped_ref->pop_modifier();
-                      Reference_Modifier::S_object_key xmod = { it->first };
-                      do_push_modifier_and_check(*mapped_ref, move(xmod));
+                      mapped_ref->pop_subscript();
+                      Subscript::S_object_key xsub = { it->first };
+                      do_push_subscript_and_check(*mapped_ref, move(xsub));
 
                       // Execute the loop body.
                       status = do_execute_block(sp.rod_body, ctx_for);
@@ -2007,7 +2007,7 @@ solidify(AVM_Rod& rod) const
 
                 // Invoke the target function.
                 auto target = do_get_target_function(ctx.stack().top());
-                ctx.stack().mut_top().pop_modifier();
+                ctx.stack().mut_top().pop_subscript();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
@@ -2278,9 +2278,9 @@ solidify(AVM_Rod& rod) const
                   {
                     Reference& top = ctx.stack().mut_top();
 
-                    // Push an array head modifier. `assign` is ignored.
-                    Reference_Modifier::S_array_head xmod = { };
-                    do_push_modifier_and_check(top, move(xmod));
+                    // Push an array head subscript. `assign` is ignored.
+                    Subscript::S_array_head xsub = { };
+                    do_push_subscript_and_check(top, move(xsub));
                     return air_status_next;
                   }
 
@@ -2306,9 +2306,9 @@ solidify(AVM_Rod& rod) const
                   {
                     Reference& top = ctx.stack().mut_top();
 
-                    // Push an array tail modifier. `assign` is ignored.
-                    Reference_Modifier::S_array_tail xmod = { };
-                    do_push_modifier_and_check(top, move(xmod));
+                    // Push an array tail subscript. `assign` is ignored.
+                    Subscript::S_array_tail xsub = { };
+                    do_push_subscript_and_check(top, move(xsub));
                     return air_status_next;
                   }
 
@@ -2336,8 +2336,8 @@ solidify(AVM_Rod& rod) const
 
                     // Push a random subscript.
                     uint32_t seed = ctx.global().random_engine()->bump();
-                    Reference_Modifier::S_array_random xmod = { seed };
-                    do_push_modifier_and_check(top, move(xmod));
+                    Subscript::S_array_random xsub = { seed };
+                    do_push_subscript_and_check(top, move(xsub));
                     return air_status_next;
                   }
 
@@ -2424,15 +2424,15 @@ solidify(AVM_Rod& rod) const
 
                     // Push a subscript.
                     if(rhs.type() == type_integer) {
-                      Reference_Modifier::S_array_index xmod = { rhs.as_integer() };
-                      do_push_modifier_and_check(top, move(xmod));
+                      Subscript::S_array_index xsub = { rhs.as_integer() };
+                      do_push_subscript_and_check(top, move(xsub));
                       ctx.stack().pop();
                       return air_status_next;
                     }
 
                     if(rhs.type() == type_string) {
-                      Reference_Modifier::S_object_key xmod = { rhs.as_string() };
-                      do_push_modifier_and_check(top, move(xmod));
+                      Subscript::S_object_key xsub = { rhs.as_string() };
+                      do_push_subscript_and_check(top, move(xsub));
                       ctx.stack().pop();
                       return air_status_next;
                     }
@@ -4942,7 +4942,7 @@ solidify(AVM_Rod& rod) const
                   // of variadic arguments. This destroys its self reference, so we have
                   // to stash it first.
                   auto va_generator = temp_value.as_function();
-                  ctx.stack().mut_top().pop_modifier();
+                  ctx.stack().mut_top().pop_subscript();
                   ctx.stack().push();
                   ctx.stack().mut_top() = ctx.stack().mut_top(1);
                   ctx.alt_stack().clear();
@@ -4993,7 +4993,7 @@ solidify(AVM_Rod& rod) const
 
                 // Invoke the target function.
                 auto target = do_get_target_function(ctx.stack().top());
-                ctx.stack().mut_top().pop_modifier();
+                ctx.stack().mut_top().pop_subscript();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
@@ -5426,7 +5426,7 @@ solidify(AVM_Rod& rod) const
 
                 // Invoke the target function.
                 auto target = do_get_target_function(ctx.stack().top());
-                ctx.stack().mut_top().pop_modifier();
+                ctx.stack().mut_top().pop_subscript();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
@@ -5510,9 +5510,9 @@ solidify(AVM_Rod& rod) const
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // Push a modifier.
-                Reference_Modifier::S_object_key xmod = { sp.key };
-                do_push_modifier_and_check(ctx.stack().mut_top(), move(xmod));
+                // Push a subscript.
+                Subscript::S_object_key xsub = { sp.key };
+                do_push_subscript_and_check(ctx.stack().mut_top(), move(xsub));
                 return air_status_next;
               }
 
@@ -5611,8 +5611,8 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
 
                     // Push a subscript.
-                    Reference_Modifier::S_array_index xmod = { irhs };
-                    do_push_modifier_and_check(top, move(xmod));
+                    Subscript::S_array_index xsub = { irhs };
+                    do_push_subscript_and_check(top, move(xsub));
                     return air_status_next;
                   }
 

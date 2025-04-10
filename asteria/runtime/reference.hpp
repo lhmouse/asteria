@@ -6,14 +6,14 @@
 
 #include "../fwd.hpp"
 #include "../value.hpp"
-#include "reference_modifier.hpp"
+#include "subscript.hpp"
 namespace asteria {
 
 class Reference
   {
   private:
     Value m_value;
-    cow_vector<Reference_Modifier> m_mods;
+    cow_vector<Subscript> m_subscripts;
     union {
       Xref m_xref;
       void* m_xref_st;
@@ -29,7 +29,7 @@ class Reference
 
     Reference(const Reference& other) noexcept
       :
-        m_mods(other.m_mods),
+        m_subscripts(other.m_subscripts),
         m_xref(other.m_xref),
         m_var(other.m_var),
         m_ptc(other.m_ptc)
@@ -48,14 +48,14 @@ class Reference
         else if(other.m_xref == xref_ptc)
           this->m_ptc = other.m_ptc;
 
-        this->m_mods = other.m_mods;
+        this->m_subscripts = other.m_subscripts;
         this->m_xref = other.m_xref;
         return *this;
       }
 
     Reference(Reference&& other) noexcept
       :
-        m_mods(move(other.m_mods)),
+        m_subscripts(move(other.m_subscripts)),
         m_xref(::rocket::exchange(other.m_xref)),
         m_var(move(other.m_var)),
         m_ptc(move(other.m_ptc))
@@ -74,7 +74,7 @@ class Reference
         else if(other.m_xref == xref_ptc)
           this->m_ptc.swap(other.m_ptc);
 
-        this->m_mods.swap(other.m_mods);
+        this->m_subscripts.swap(other.m_subscripts);
         this->m_xref = ::rocket::exchange(other.m_xref);
         return *this;
       }
@@ -85,7 +85,7 @@ class Reference
         this->m_value.swap(other.m_value);
         this->m_var.swap(other.m_var);
         this->m_ptc.swap(other.m_ptc);
-        this->m_mods.swap(other.m_mods);
+        this->m_subscripts.swap(other.m_subscripts);
         ::std::swap(this->m_xref_st, other.m_xref_st);
         return *this;
       }
@@ -113,7 +113,7 @@ class Reference
         this->m_value = nullopt;
         this->m_var.reset();
         this->m_ptc.reset();
-        this->m_mods.clear();
+        this->m_subscripts.clear();
         this->m_xref = xref_invalid;
         return *this;
       }
@@ -139,7 +139,7 @@ class Reference
     set_temporary(xValue&& xval)
       {
         this->m_value = forward<xValue>(xval);
-        this->m_mods.clear();
+        this->m_subscripts.clear();
         this->m_xref = xref_temporary;
         return *this;
       }
@@ -154,7 +154,7 @@ class Reference
       {
         ROCKET_ASSERT(var != nullptr);
         this->m_var = var;
-        this->m_mods.clear();
+        this->m_subscripts.clear();
         this->m_xref = xref_variable;
         return *this;
       }
@@ -169,43 +169,43 @@ class Reference
       {
         ROCKET_ASSERT(ptc != nullptr);
         this->m_ptc = ptc;
-        this->m_mods.clear();
+        this->m_subscripts.clear();
         this->m_xref = xref_ptc;
         return *this;
       }
 
     size_t
-    count_modifiers() const noexcept
-      { return this->m_mods.size();  }
+    count_subscripts() const noexcept
+      { return this->m_subscripts.size();  }
 
     void
-    clear_modifiers() noexcept
-      { this->m_mods.clear();  }
+    clear_subscripts() noexcept
+      { this->m_subscripts.clear();  }
 
-    template<typename xModifier,
-    ROCKET_ENABLE_IF(::std::is_constructible<Reference_Modifier, xModifier&&>::value)>
+    template<typename xSubscript,
+    ROCKET_ENABLE_IF(::std::is_constructible<Subscript, xSubscript&&>::value)>
     Reference&
-    push_modifier(xModifier&& xmod)
+    push_subscript(xSubscript&& xsub)
       {
         if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
           this->do_throw_not_dereferenceable();
 
-        this->m_mods.emplace_back(forward<xModifier>(xmod));
+        this->m_subscripts.emplace_back(forward<xSubscript>(xsub));
         return *this;
       }
 
     Reference&
-    pop_modifier(size_t count = 1) noexcept
+    pop_subscript(size_t count = 1) noexcept
       {
         if((this->m_xref != xref_temporary) && (this->m_xref != xref_variable))
           this->do_throw_not_dereferenceable();
 
-        if(count > this->m_mods.size()) {
+        if(count > this->m_subscripts.size()) {
           this->m_xref = xref_invalid;
           return *this;
         }
 
-        this->m_mods.pop_back(count);
+        this->m_subscripts.pop_back(count);
         return *this;
       }
 
@@ -239,7 +239,7 @@ class Reference
     const Value&
     dereference_readonly() const
       {
-        if(ROCKET_EXPECT(this->m_xref == xref_temporary) && ROCKET_EXPECT(this->m_mods.empty()))
+        if(ROCKET_EXPECT(this->m_xref == xref_temporary) && ROCKET_EXPECT(this->m_subscripts.empty()))
           return this->m_value;
 
         return this->do_dereference_readonly_slow();
@@ -251,7 +251,7 @@ class Reference
     Value&
     dereference_copy()
       {
-        if(ROCKET_EXPECT(this->m_xref == xref_temporary) && ROCKET_EXPECT(this->m_mods.empty()))
+        if(ROCKET_EXPECT(this->m_xref == xref_temporary) && ROCKET_EXPECT(this->m_subscripts.empty()))
           return this->m_value;
 
         if(this->m_xref == xref_temporary) {
@@ -259,12 +259,12 @@ class Reference
           // an element into its own container.
           auto val = this->do_dereference_readonly_slow();
           this->m_value.swap(val);
-          this->m_mods.clear();
+          this->m_subscripts.clear();
           return this->m_value;
         }
 
         this->m_value = this->do_dereference_readonly_slow();
-        this->m_mods.clear();
+        this->m_subscripts.clear();
         this->m_xref = xref_temporary;
         return this->m_value;
       }
