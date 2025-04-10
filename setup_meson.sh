@@ -3,7 +3,7 @@
 meson setup  \
   -Ddebug=true -Doptimization=0  \
   -Denable-debug-checks=true  \
-  -Db_sanitize=undefined  \
+  -Db_sanitize=address,undefined  \
   build_debug
 
 meson setup  \
