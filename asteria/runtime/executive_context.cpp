@@ -14,15 +14,18 @@
 namespace asteria {
 
 Executive_Context::
-Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack, Reference_Stack& ystack,
-                  const Instantiated_Function& xfunc, Reference&& xself)
+Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack,
+                  Reference_Stack& ystack, const Instantiated_Function& xfunc,
+                  Reference&& xself)
   :
-    m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack), m_func(&xfunc)
+    m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack),
+    m_alt_stack(&ystack), m_func(&xfunc)
   {
-    // Set the `this` reference, but only if it is a variable or non-null. When
-    // `this` is null, it is likely that it is never referenced in the function,
-    // so lazy initialization is performed to avoid the overhead here.
-    if(!xself.is_invalid())
+    // Set the `this` reference, but only if it is a temporary value or a
+    // variable. When `this` is void, it is likely that it is never
+    // referenced in the function, so lazy initialization is performed to
+    // avoid the overhead.
+    if(xself.is_temporary() || xself.is_variable())
       this->do_mut_named_reference(nullptr, &"__this") = move(xself);
 
     // Set arguments. Because arguments are evaluated from left to right, the
@@ -63,8 +66,11 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update
     // 'analytic_context.cpp' as well.
-    if(name == "__this")
-      return &(this->do_mut_named_reference(hint_opt, name));
+    if(name == "__this") {
+      auto& ref = this->do_mut_named_reference(hint_opt, name);
+      ROCKET_ASSERT(ref.is_invalid());
+      return &ref;
+    }
 
     if(name == "__func") {
       ROCKET_ASSERT(this->m_func);
@@ -76,7 +82,8 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
     if(name == "__varg") {
       ROCKET_ASSERT(this->m_func);
       auto& ref = this->do_mut_named_reference(hint_opt, name);
-      ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(*(this->m_func), this->m_lazy_args));
+      ref.set_temporary(::rocket::make_refcnt<Variadic_Arguer>(
+                                     *(this->m_func), this->m_lazy_args));
       return &ref;
     }
 
