@@ -11,6 +11,14 @@ namespace asteria {
 
 class Reference
   {
+    enum Xref : uint8_t
+      {
+        xref_invalid    = 0,
+        xref_void       = 1,
+        xref_temporary  = 2,
+        xref_variable   = 3,
+        xref_ptc        = 4,
+      };
   private:
     Value m_value;
     cow_vector<Subscript> m_subscripts;

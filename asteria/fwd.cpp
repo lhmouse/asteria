@@ -116,31 +116,6 @@ describe_type(Type type) noexcept
   }
 
 const char*
-describe_xref(Xref xref) noexcept
-  {
-    switch(xref)
-      {
-      case xref_invalid:
-        return "uninitialized reference";
-
-      case xref_void:
-        return "void";
-
-      case xref_temporary:
-        return "temporary value";
-
-      case xref_variable:
-        return "variable";
-
-      case xref_ptc:
-        return "pending proper tail call";
-
-      default:
-        return "[unknown reference type]";
-    }
-  }
-
-const char*
 describe_frame_type(Frame_Type type) noexcept
   {
     switch(type)

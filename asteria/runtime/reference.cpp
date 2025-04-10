@@ -20,7 +20,31 @@ void
 Reference::
 do_throw_not_dereferenceable() const
   {
-    throw Runtime_Error(xtc_format,
+
+auto describe_xref = [&](Xref xref)
+  {
+    switch(xref)
+      {
+      case xref_invalid:
+        return "uninitialized reference";
+
+      case xref_void:
+        return "void";
+
+      case xref_temporary:
+        return "temporary value";
+
+      case xref_variable:
+        return "variable";
+
+      case xref_ptc:
+        return "pending proper tail call";
+
+      default:
+        return "[unknown reference type]";
+    }
+  };
+      throw Runtime_Error(xtc_format,
              "Reference type `$1` not dereferenceable",
              describe_xref(this->m_xref));
   }

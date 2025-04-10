@@ -635,20 +635,6 @@ ROCKET_CONST
 const char*
 describe_type(Type type) noexcept;
 
-// Reference types
-enum Xref : uint8_t
-  {
-    xref_invalid    = 0,
-    xref_void       = 1,
-    xref_temporary  = 2,
-    xref_variable   = 3,
-    xref_ptc        = 4,
-  };
-
-ROCKET_CONST
-const char*
-describe_xref(Xref xref) noexcept;
-
 // Stack frame types
 enum Frame_Type : uint8_t
   {
