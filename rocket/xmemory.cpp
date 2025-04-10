@@ -3,13 +3,16 @@
 
 #include "xmemory.hpp"
 #include "atomic.hpp"
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/asan_interface.h>
+#endif
 namespace rocket {
 namespace {
 
 struct free_block
   {
-    size_t size;
     free_block* next;
+    size_t size;
   };
 
 struct alignas(64) pool
@@ -76,9 +79,13 @@ xmemalloc(xmeminfo& info, xmemopt opt)
     else
       do_deallocate_list(b->next);
 
+#ifdef __SANITIZE_ADDRESS__
+    ::__asan_unpoison_memory_region(&(b->next) + 1, rsize - sizeof(b->next));
+#endif
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xB5, rsize);
 #endif
+
     info.data = b;
     info.count = (info.element_size > 1) ? (rsize / info.element_size) : rsize;
   }
@@ -96,8 +103,11 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xCB, rsize);
 #endif
-    b->size = rsize;
     b->next = nullptr;
+    b->size = rsize;
+#ifdef __SANITIZE_ADDRESS__
+    ::__asan_poison_memory_region(&(b->next) + 1, rsize - sizeof(b->next));
+#endif
 
     if(opt == xmemopt_use_cache) {
       // Put the block into the cache.
