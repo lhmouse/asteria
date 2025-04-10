@@ -20,6 +20,7 @@ ROCKET_FLATTEN
 Reference::
 ~Reference()
   {
+    this->m_stor.~variant_type();
   }
 
 void

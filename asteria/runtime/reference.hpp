@@ -28,7 +28,13 @@ class Reference
         cow_vector<Subscript> subs;
       };
 
-    ::rocket::variant<St_invalid, St_void, St_temp, St_var, St_ptc> m_stor;
+    using variant_type = ::rocket::variant<St_invalid, St_void, St_temp, St_var, St_ptc>;
+    using bytes_type = ::std::aligned_storage<sizeof(variant_type), 16>::type;
+
+    union {
+      bytes_type m_bytes = { };
+      variant_type m_stor;
+    };
 
   public:
     // Constructors and assignment operators
@@ -48,20 +54,20 @@ class Reference
 
     Reference(Reference&& other) noexcept
       :
-        m_stor(move(other.m_stor))
+        m_bytes(::rocket::exchange(other.m_bytes))  // HACK
       { }
 
     Reference&
     operator=(Reference&& other) & noexcept
       {
-        this->m_stor = move(other.m_stor);
+        ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
       }
 
     Reference&
     swap(Reference& other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
       }
 
