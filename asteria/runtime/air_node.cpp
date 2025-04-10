@@ -2000,7 +2000,7 @@ solidify(AVM_Rod& rod) const
                 // Collect arguments from left to right.
                 ctx.alt_stack().clear();
                 for(uint32_t k = 0;  k != nargs;  ++k)
-                  ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 1 - k));
+                  ctx.alt_stack().push().swap(ctx.stack().mut_top(nargs - 1 - k));
                 ctx.stack().pop(nargs);
 
                 // Invoke the target function.
@@ -4981,7 +4981,7 @@ solidify(AVM_Rod& rod) const
                     // Move arguments into `alt_stack` from left to right.
                     ctx.alt_stack().clear();
                     for(uint32_t k = 0;  k != nargs;  ++k)
-                      ctx.alt_stack().push() = move(ctx.stack().mut_top(k));
+                      ctx.alt_stack().push().swap(ctx.stack().mut_top(k));
                     ctx.stack().pop(nargs);
                   }
                 }
@@ -5087,7 +5087,7 @@ solidify(AVM_Rod& rod) const
                 // Collect arguments from left to right.
                 ctx.alt_stack().clear();
                 for(uint32_t k = 0;  k != nargs - 1;  ++k)
-                  ctx.alt_stack().push() = move(ctx.stack().mut_top(nargs - 2 - k));
+                  ctx.alt_stack().push().swap(ctx.stack().mut_top(nargs - 2 - k));
                 ctx.stack().pop(nargs - 1);
 
                 // Get the path to import.
