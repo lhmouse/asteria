@@ -4629,7 +4629,7 @@ solidify(AVM_Rod& rod) const
                     if(lhs.is_string()) {
                       V_string& val = lhs.mut_string();
 
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), PTRDIFF_MAX);
+                      size_t tlen = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
                       ctx.stack().pop();
                       return air_status_next;
@@ -4638,7 +4638,7 @@ solidify(AVM_Rod& rod) const
                     if(lhs.is_array()) {
                       V_array& val = lhs.mut_array();
 
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), PTRDIFF_MAX);
+                      size_t tlen = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
                       ctx.stack().pop();
                       return air_status_next;
@@ -6763,7 +6763,7 @@ solidify(AVM_Rod& rod) const
                     if(lhs.is_string()) {
                       V_string& val = lhs.mut_string();
 
-                      size_t tlen = (size_t) ::rocket::min(irhs, PTRDIFF_MAX);
+                      size_t tlen = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
                       return air_status_next;
                     }
@@ -6771,7 +6771,7 @@ solidify(AVM_Rod& rod) const
                     if(lhs.is_array()) {
                       V_array& val = lhs.mut_array();
 
-                      size_t tlen = (size_t) ::rocket::min(irhs, PTRDIFF_MAX);
+                      size_t tlen = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
                       return air_status_next;
                     }
