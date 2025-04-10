@@ -123,6 +123,7 @@ do_dereference_copy_slow()
         if(!valp) {
           // If a subvalue is not found, clear the current value.
           st1->val = V_null();
+          st1->subs.clear();
           return st1->val;
         }
       }
@@ -131,6 +132,7 @@ do_dereference_copy_slow()
       // assigning an element into its own container.
       Value saved_val = move(*valp);
       st1->val = move(saved_val);
+      st1->subs.clear();
       return st1->val;
     }
 
