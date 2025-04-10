@@ -16,210 +16,229 @@
 #include "../utils.hpp"
 namespace asteria {
 
+ROCKET_FLATTEN
+Reference::
+~Reference()
+  {
+  }
+
 void
 Reference::
 do_throw_not_dereferenceable() const
   {
-
-auto describe_xref = [&](Xref xref)
-  {
-    switch(xref)
-      {
-      case xref_invalid:
-        return "uninitialized reference";
-
-      case xref_void:
-        return "void";
-
-      case xref_temporary:
-        return "temporary value";
-
-      case xref_variable:
-        return "variable";
-
-      case xref_ptc:
-        return "pending proper tail call";
-
-      default:
-        return "[unknown reference type]";
-    }
-  };
+    if(this->m_stor.ptr<St_invalid>())
       throw Runtime_Error(xtc_format,
-             "Reference type `$1` not dereferenceable",
-             describe_xref(this->m_xref));
+               "Reference not initialized");
+
+    if(this->m_stor.ptr<St_void>())
+      throw Runtime_Error(xtc_format,
+               "Void reference not dereferenceable");
+
+    if(this->m_stor.ptr<St_ptc>())
+      throw Runtime_Error(xtc_format,
+               "Proper tail call (PTC) not dereferenceable");
+
+    ROCKET_ASSERT(false);
   }
 
 void
 Reference::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    this->m_value.collect_variables(staged, temp);
+    if(auto st1 = this->m_stor.ptr<St_temp>())
+      st1->val.collect_variables(staged, temp);
 
-    if(auto var = unerase_pointer_cast<Variable>(this->m_var))
-      if(staged.insert(&(this->m_var), var))
+    if(auto st2 = this->m_stor.ptr<St_var>()) {
+      // For a variable, we must record the identity of the pointer.
+      auto var = unerase_pointer_cast<Variable>(st2->var);
+      if(staged.insert(&(st2->var), var))
         temp.insert(var.get(), var);
+    }
   }
 
+ROCKET_FLATTEN
 const Value&
 Reference::
 do_dereference_readonly_slow() const
   {
-    const Value* valp = nullptr;
-    size_t mi = 0;
+    if(auto st1 = this->m_stor.ptr<St_temp>()) {
+      // Read this temporary value.
+      if(ROCKET_EXPECT(st1->subs.size() == 0))
+        return st1->val;
 
-    switch(this->m_xref)
-      {
-      case xref_invalid:
-        throw Runtime_Error(xtc_format,
-                 "Reference not initialized");
-
-      case xref_void:
-        throw Runtime_Error(xtc_format,
-                 "Void reference not dereferenceable");
-
-      case xref_temporary:
-        valp = &(this->m_value);
-        break;
-
-      case xref_variable:
-        {
-          auto var = unerase_cast<Variable*>(this->m_var.get());
-          ROCKET_ASSERT(var);
-
-          if(!var->is_initialized())
-            throw Runtime_Error(xtc_format,
-                     "Reference not initialized");
-
-          valp = &(var->get_value());
-          break;
+      // Apply subscripts.
+      auto valp = &(st1->val);
+      for(auto it = st1->subs.begin();  it != st1->subs.end();  ++it) {
+        valp = it->apply_read_opt(*valp);
+        if(!valp) {
+          // If a subvalue is not found, a reference to the static null
+          // value shall be returned.
+          return null;
         }
+      }
 
-      case xref_ptc:
-        throw Runtime_Error(xtc_format,
-                 "Proper tail call not expanded");
-
-      default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
+      // Return a reference to the subelement.
+      return *valp;
     }
 
-    while(valp && (mi != this->m_subscripts.size()))
-      valp = this->m_subscripts[mi++].apply_read_opt(*valp);
+    if(auto st2 = this->m_stor.ptr<St_var>()) {
+      // Check whether initialization was skipped, which may happen if its
+      // initializer references itself like in `var n = n + 1;`.
+      auto var = unerase_cast<Variable*>(st2->var.get());
+      if(!var->is_initialized())
+        throw Runtime_Error(xtc_format, "Variable not initialized");
 
-    if(!valp)
-      return null;
+      // Apply subscripts.
+      auto valp = &(var->get_value());
+      for(auto it = st2->subs.begin();  it != st2->subs.end();  ++it) {
+        valp = it->apply_read_opt(*valp);
+        if(!valp) {
+          // If a subvalue is not found, a reference to the static null
+          // value shall be returned.
+          return null;
+        }
+      }
 
-    return *valp;
+      // Return a reference to the subelement.
+      return *valp;
+    }
+
+    this->do_throw_not_dereferenceable();
   }
 
+ROCKET_FLATTEN
+Value&
+Reference::
+do_dereference_copy_slow()
+  {
+    if(auto st1 = this->m_stor.mut_ptr<St_temp>()) {
+      // Read this temporary value.
+      if(ROCKET_EXPECT(st1->subs.size() == 0))
+        return st1->val;
+
+      // Apply subscripts.
+      auto valp = &(st1->val);
+      for(auto it = st1->subs.begin();  it != st1->subs.end();  ++it) {
+        valp = it->apply_write_opt(*valp);
+        if(!valp) {
+          // If a subvalue is not found, clear the current value.
+          st1->val = V_null();
+          return st1->val;
+        }
+      }
+
+      // Ensure the value is copied before being moved, so we are never
+      // assigning an element into its own container.
+      Value saved_val = move(*valp);
+      st1->val = move(saved_val);
+      return st1->val;
+    }
+
+    if(auto st2 = this->m_stor.ptr<St_var>()) {
+      // Check whether initialization was skipped, which may happen if its
+      // initializer references itself like in `var n = n + 1;`.
+      auto var = unerase_cast<Variable*>(st2->var.get());
+      if(!var->is_initialized())
+        throw Runtime_Error(xtc_format, "Variable not initialized");
+
+      // Apply subscripts.
+      auto valp = &(var->get_value());
+      for(auto it = st2->subs.begin();  it != st2->subs.end();  ++it) {
+        valp = it->apply_read_opt(*valp);
+        if(!valp) {
+          // If a subvalue is not found, clear the current value.
+          auto& st1 = this->m_stor.emplace<St_temp>();
+          return st1.val;
+        }
+      }
+
+      // Replace the current value with the one from the variable, which
+      // can't alias `m_stor`.
+      auto& st1 = this->m_stor.emplace<St_temp>();
+      st1.val = *valp;
+      return st1.val;
+    }
+
+    this->do_throw_not_dereferenceable();
+  }
+
+ROCKET_FLATTEN
 Value&
 Reference::
 dereference_mutable() const
   {
-    Value* valp = nullptr;
-    size_t mi = 0;
-
-    switch(this->m_xref)
-      {
-      case xref_invalid:
-        throw Runtime_Error(xtc_format,
-                 "Reference not initialized");
-
-      case xref_void:
-        throw Runtime_Error(xtc_format,
-                 "Void reference not dereferenceable");
-
-      case xref_temporary:
-        throw Runtime_Error(xtc_format,
-                 "Attempt to modify a temporary value");
-
-      case xref_variable:
-        {
-          auto var = unerase_cast<Variable*>(this->m_var.get());
-          ROCKET_ASSERT(var);
-
-          if(!var->is_initialized())
-            throw Runtime_Error(xtc_format,
-                     "Reference not initialized");
-
-          if(var->is_immutable())
-            throw Runtime_Error(xtc_format,
-                     "Attempt to modify a `const` variable");
-
-          valp = &(var->mut_value());
-          break;
-        }
-
-      case xref_ptc:
-        throw Runtime_Error(xtc_format,
-                 "Proper tail call not expanded");
-
-      default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
+    if(this->m_stor.ptr<St_temp>()) {
+      // The user is attempting to modify a temporary value. Unlike
+      // `dereference_copy()` which is for our internal use, this is a user
+      // function, so fail.
+      throw Runtime_Error(xtc_format, "Temporary value not modifiable");
     }
 
-    while(valp && (mi != this->m_subscripts.size()))
-      valp = &(this->m_subscripts[mi++].apply_open(*valp));
+    if(auto st2 = this->m_stor.ptr<St_var>()) {
+      // Check whether initialization was skipped, which may happen if its
+      // initializer references itself like in `var n = n + 1;`.
+      auto var = unerase_cast<Variable*>(st2->var.get());
+      if(!var->is_initialized())
+        throw Runtime_Error(xtc_format, "Variable not initialized");
 
-    return *valp;
+      if(var->is_immutable())
+        throw Runtime_Error(xtc_format, "`const` variable not modifiable");
+
+      // Apply subscripts.
+      auto valp = &(var->mut_value());
+      for(auto it = st2->subs.begin();  it != st2->subs.end();  ++it) {
+        auto& sub = it->apply_open(*valp);
+        valp = &sub;
+      }
+
+      // Return a reference to the subelement.
+      return *valp;
+    }
+
+    this->do_throw_not_dereferenceable();
   }
 
+ROCKET_FLATTEN
 Value
 Reference::
 dereference_unset() const
   {
-    Value* valp = nullptr;
-    size_t mi = 0;
-
-    switch(this->m_xref)
-      {
-      case xref_invalid:
-        throw Runtime_Error(xtc_format,
-                 "Reference not initialized");
-
-      case xref_void:
-        throw Runtime_Error(xtc_format,
-                 "Void reference not dereferenceable");
-
-      case xref_temporary:
-        throw Runtime_Error(xtc_format,
-                 "Attempt to modify a temporary value");
-
-      case xref_variable:
-        {
-          auto var = unerase_cast<Variable*>(this->m_var.get());
-          ROCKET_ASSERT(var);
-
-          if(!var->is_initialized())
-            throw Runtime_Error(xtc_format,
-                     "Reference not initialized");
-
-          if(var->is_immutable())
-            throw Runtime_Error(xtc_format,
-                     "Attempt to modify a `const` variable");
-
-          valp = &(var->mut_value());
-          break;
-        }
-
-      case xref_ptc:
-        throw Runtime_Error(xtc_format,
-                 "Proper tail call not expanded");
-
-      default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_xref);
+    if(this->m_stor.ptr<St_temp>()) {
+      // The user is attempting to modify a temporary value. Unlike
+      // `dereference_copy()` which is for our internal use, this is a user
+      // function, so fail.
+      throw Runtime_Error(xtc_format, "Temporary value not modifiable");
     }
 
-    if(this->m_subscripts.size() == 0)
-      throw Runtime_Error(xtc_format,
-               "Only elements of an array or object may be unset");
+    if(auto st2 = this->m_stor.ptr<St_var>()) {
+      // Check whether initialization was skipped, which may happen if its
+      // initializer references itself like in `var n = n + 1;`.
+      auto var = unerase_cast<Variable*>(st2->var.get());
+      if(!var->is_initialized())
+        throw Runtime_Error(xtc_format, "Variable not initialized");
 
-    while(valp && (mi != this->m_subscripts.size() - 1))
-      valp = this->m_subscripts[mi++].apply_write_opt(*valp);
+      if(var->is_immutable())
+        throw Runtime_Error(xtc_format, "`const` variable not modifiable");
 
-    if(!valp)
-      return null;
+      // Get the parent value of the final subelement.
+      if(st2->subs.empty())
+        throw Runtime_Error(xtc_format,
+                 "Only an element of an array or object may be unset");
 
-    return this->m_subscripts[mi].apply_unset(*valp);
+      auto valp = &(var->mut_value());
+      for(auto it = st2->subs.begin();  it != st2->subs.end() - 1;  ++it) {
+        valp = it->apply_write_opt(*valp);
+        if(!valp) {
+          // If a subvalue is not found, return a null value.
+          return V_null();
+        }
+      }
+
+      // Delete the subelement.
+      return st2->subs.back().apply_unset(*valp);
+    }
+
+    this->do_throw_not_dereferenceable();
   }
 
 void
@@ -234,9 +253,10 @@ do_use_function_result_slow(Global_Context& global)
 
     try {
       // Unpack frames until a non-PTC result is encountered.
-      while(this->m_xref == xref_ptc) {
-        ptcg.reset(unerase_cast<PTC_Arguments*>(this->m_ptc.release()));
+      while(auto st = this->m_stor.mut_ptr<St_ptc>()) {
+        ptcg.reset(unerase_cast<PTC_Arguments*>(st->release()));
         ROCKET_ASSERT(ptcg.use_count() == 1);
+        this->m_stor = St_invalid();
 
         global.call_hook(&Abstract_Hooks::on_call, ptcg->sloc(), ptcg->target());
         frames.emplace_back(ptcg);
@@ -246,8 +266,8 @@ do_use_function_result_slow(Global_Context& global)
 
       // Check the result.
       if(ptcg->ptc_aware() == ptc_aware_void)
-        this->m_xref = xref_void;
-      else if(this->m_xref != xref_void)
+        this->m_stor = St_void();
+      else if(!this->m_stor.ptr<St_void>())
         result_value = this->dereference_readonly();
 
       // This is the normal return path.
@@ -258,10 +278,9 @@ do_use_function_result_slow(Global_Context& global)
 
         if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
           // Convert the result.
-          this->m_value = move(*result_value);
+          auto& st = this->m_stor.emplace<St_temp>();
+          st.val = move(*result_value);
           result_value.reset();
-          this->m_subscripts.clear();
-          this->m_xref = xref_temporary;
         }
 
         // Evaluate deferred expressions.
