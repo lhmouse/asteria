@@ -24,7 +24,6 @@ do_reallocate(uint32_t nbkt)
     // written to, and needs no cleanup.
     minfo.count --;
     auto new_eptr = (Bucket*) minfo.data + minfo.count;
-    bfill(*new_eptr, 0);
     new_eptr->prev = new_eptr;
     new_eptr->next = new_eptr;
 
