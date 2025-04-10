@@ -121,7 +121,7 @@ do_on_scope_exit_normal_slow(AIR_Status status)
 
     // Restore the result reference.
     if(!self.is_invalid())
-      this->m_stack->push().swap(self);
+      this->m_stack->push() = move(self);
   }
 
 void
