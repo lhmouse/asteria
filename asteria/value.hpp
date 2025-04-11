@@ -37,6 +37,8 @@ class Value
     template<typename xValue,
     ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
     Value(xValue&& xval) noexcept(my_Valuable<xValue>::is_noexcept)
+      :
+        m_bytes()
       {
         ROCKET_ASSERT(this->m_stor.index() == 0);
         my_Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
