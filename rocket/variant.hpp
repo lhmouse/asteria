@@ -22,21 +22,15 @@ class variant
                   "move constructors of alternative types must not throw exceptions");
 
   public:
+    static constexpr size_t alternative_size = sizeof...(altsT);
+
     template<typename targetT>
     struct index_of
-      :
-        details_variant::type_finder<0, targetT, altsT...>
-      {
-      };
+      :  details_variant::type_finder<0, targetT, altsT...> { };
 
     template<size_t indexT>
     struct alternative_at
-      :
-        details_variant::type_getter<indexT, altsT...>
-      {
-      };
-
-    static constexpr size_t alternative_size = sizeof...(altsT);
+      : details_variant::type_getter<indexT, altsT...> { };
 
   private:
     using my_storage = typename aligned_union<0, altsT...>::type;
