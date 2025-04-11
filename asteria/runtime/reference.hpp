@@ -38,10 +38,9 @@ class Reference
 
   public:
     // Constructors and assignment operators
-    constexpr
     Reference() noexcept
       :
-        m_bytes()
+        m_stor(St_bad())
       { }
 
     Reference(const Reference& other) noexcept
