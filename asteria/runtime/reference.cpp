@@ -139,8 +139,10 @@ do_dereference_copy_slow()
 
     if(auto st2 = this->m_stor.ptr<St_var>()) {
       // Check whether initialization was skipped, which may happen if its
-      // initializer references itself like in `var n = n + 1;`.
-      auto var = unerase_cast<Variable*>(st2->var.get());
+      // initializer references itself like in `var n = n + 1;`. We also
+      // have to ensure that the variable doesn't get destroyed by
+      // `m_stor.emplace<St_temp()`.
+      auto var = unerase_pointer_cast<Variable>(st2->var);
       if(!var->is_initialized())
         throw Runtime_Error(xtc_format, "Variable not initialized");
 
