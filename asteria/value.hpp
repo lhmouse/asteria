@@ -22,13 +22,17 @@ class Value
     using bytes_type = ::std::aligned_storage<sizeof(variant_type), 16>::type;
 
     union {
-      bytes_type m_bytes = { };
+      bytes_type m_bytes;
       variant_type m_stor;
     };
 
   public:
     // Constructors and assignment operators
-    constexpr Value(nullopt_t = nullopt) noexcept { }
+    constexpr
+    Value(nullopt_t = nullopt) noexcept
+      :
+        m_bytes()
+      { }
 
     template<typename xValue,
     ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>

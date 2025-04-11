@@ -27,7 +27,7 @@ void
 Reference::
 do_throw_not_dereferenceable() const
   {
-    if(this->m_stor.ptr<St_invalid>())
+    if(this->m_stor.ptr<St_bad>())
       throw Runtime_Error(xtc_format,
                "Reference not initialized");
 
@@ -259,7 +259,7 @@ do_use_function_result_slow(Global_Context& global)
       while(auto st = this->m_stor.mut_ptr<St_ptc>()) {
         ptcg.reset(unerase_cast<PTC_Arguments*>(st->release()));
         ROCKET_ASSERT(ptcg.use_count() == 1);
-        this->m_stor = St_invalid();
+        this->m_stor = St_bad();
 
         global.call_hook(&Abstract_Hooks::on_call, ptcg->sloc(), ptcg->target());
         frames.emplace_back(ptcg);

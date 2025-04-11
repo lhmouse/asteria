@@ -12,7 +12,7 @@ namespace asteria {
 class Reference
   {
   private:
-    struct St_invalid  { };
+    struct St_bad  { };
     struct St_void  { };
     using St_ptc = rcfwd_ptr<PTC_Arguments>;
 
@@ -28,17 +28,21 @@ class Reference
         cow_vector<Subscript> subs;
       };
 
-    using variant_type = ::rocket::variant<St_invalid, St_void, St_temp, St_var, St_ptc>;
+    using variant_type = ::rocket::variant<St_bad, St_void, St_temp, St_var, St_ptc>;
     using bytes_type = ::std::aligned_storage<sizeof(variant_type), 16>::type;
 
     union {
-      bytes_type m_bytes = { };
+      bytes_type m_bytes;
       variant_type m_stor;
     };
 
   public:
     // Constructors and assignment operators
-    constexpr Reference() noexcept { }
+    constexpr
+    Reference() noexcept
+      :
+        m_bytes()
+      { }
 
     Reference(const Reference& other) noexcept
       :
@@ -91,12 +95,12 @@ class Reference
     // Accessors
     bool
     is_invalid() const noexcept
-      { return this->m_stor.ptr<St_invalid>() != nullptr;  }
+      { return this->m_stor.ptr<St_bad>() != nullptr;  }
 
     Reference&
     clear() noexcept
       {
-        this->m_stor.emplace<St_invalid>();
+        this->m_stor.emplace<St_bad>();
         return *this;
       }
 
