@@ -105,40 +105,40 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     for(char c : msg)
       switch(c)
         {
-        break; case 0x00U:  data += "[NUL]";
-        break; case 0x01U:  data += "[SOH]";
-        break; case 0x02U:  data += "[STX]";
-        break; case 0x03U:  data += "[ETX]";
-        break; case 0x04U:  data += "[EOT]";
-        break; case 0x05U:  data += "[ENQ]";
-        break; case 0x06U:  data += "[ACK]";
-        break; case 0x07U:  data += "[BEL]";
-        break; case 0x08U:  data += "[BS]";
-        break; case 0x09U:  data += "\t";    // HT
-        break; case 0x0AU:  data += "\x1B\x45\t";  // LF
-        break; case 0x0BU:  data += "[VT]";
-        break; case 0x0CU:  data += "[FF]";
-        break; case 0x0DU:                   // CR
-        break; case 0x0EU:  data += "[SO]";
-        break; case 0x0FU:  data += "[SI]";
-        break; case 0x10U:  data += "[DLE]";
-        break; case 0x11U:  data += "[DC1]";
-        break; case 0x12U:  data += "[DC2]";
-        break; case 0x13U:  data += "[DC3]";
-        break; case 0x14U:  data += "[DC4]";
-        break; case 0x15U:  data += "[NAK]";
-        break; case 0x16U:  data += "[SYN]";
-        break; case 0x17U:  data += "[ETB]";
-        break; case 0x18U:  data += "[CAN]";
-        break; case 0x19U:  data += "[EM]";
-        break; case 0x1AU:  data += "[SUB]";
-        break; case 0x1BU:  data += "[ESC]";
-        break; case 0x1CU:  data += "[FS]";
-        break; case 0x1DU:  data += "[GS]";
-        break; case 0x1EU:  data += "[RS]";
-        break; case 0x1FU:  data += "[US]";
-        break; default:    data += c;       // verbatim
-        break; case 0x7FU:  data += "[DEL]";
+        break;  case 0x00U:  data += "[NUL]";
+        break;  case 0x01U:  data += "[SOH]";
+        break;  case 0x02U:  data += "[STX]";
+        break;  case 0x03U:  data += "[ETX]";
+        break;  case 0x04U:  data += "[EOT]";
+        break;  case 0x05U:  data += "[ENQ]";
+        break;  case 0x06U:  data += "[ACK]";
+        break;  case 0x07U:  data += "[BEL]";
+        break;  case 0x08U:  data += "[BS]";
+        break;  case 0x09U:  data += "\t";    // HT
+        break;  case 0x0AU:  data += "\x1B\x45\t";  // LF
+        break;  case 0x0BU:  data += "[VT]";
+        break;  case 0x0CU:  data += "[FF]";
+        break;  case 0x0DU:                   // CR
+        break;  case 0x0EU:  data += "[SO]";
+        break;  case 0x0FU:  data += "[SI]";
+        break;  case 0x10U:  data += "[DLE]";
+        break;  case 0x11U:  data += "[DC1]";
+        break;  case 0x12U:  data += "[DC2]";
+        break;  case 0x13U:  data += "[DC3]";
+        break;  case 0x14U:  data += "[DC4]";
+        break;  case 0x15U:  data += "[NAK]";
+        break;  case 0x16U:  data += "[SYN]";
+        break;  case 0x17U:  data += "[ETB]";
+        break;  case 0x18U:  data += "[CAN]";
+        break;  case 0x19U:  data += "[EM]";
+        break;  case 0x1AU:  data += "[SUB]";
+        break;  case 0x1BU:  data += "[ESC]";
+        break;  case 0x1CU:  data += "[FS]";
+        break;  case 0x1DU:  data += "[GS]";
+        break;  case 0x1EU:  data += "[RS]";
+        break;  case 0x1FU:  data += "[US]";
+        break;  default:     data += c;       // verbatim
+        break;  case 0x7FU:  data += "[DEL]";
       }
 
     // Remove trailing space characters.
