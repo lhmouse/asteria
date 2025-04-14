@@ -31,11 +31,10 @@ class condition_variable
 
         // Release `lock.m_mtx` before the wait operation, as it might get
         // modified by other threads.
-        ::pthread_mutex_t* saved_mtx = lock.m_mtx;
-        lock.m_mtx = nullptr;
-        ::pthread_cond_wait(this->m_std_cond.native_handle(), saved_mtx);
-        lock.unlock();
-        lock.m_mtx = saved_mtx;
+        mutex::unique_lock local_lock;
+        local_lock.swap(lock);
+        ::pthread_cond_wait(this->m_std_cond.native_handle(), local_lock.m_mtx);
+        local_lock.swap(lock);
       }
 
     template<typename durationT>
@@ -49,12 +48,10 @@ class condition_variable
         ::clock_gettime(CLOCK_REALTIME, &ts);
         double secs = (double) ts.tv_sec + (double) ts.tv_nsec * 0.000000001;
 
-        using hires_secs = ::std::chrono::duration<double>;
-        secs += ::std::chrono::duration_cast<hires_secs>(timeout).count();
-        constexpr int64_t tm_max = 0x7FFFFFFFFFFFFC00;
-
-        if(secs >= tm_max) {
-          ts.tv_sec = tm_max;
+        using ::std::chrono::duration_cast;
+        secs += duration_cast<::std::chrono::duration<double>>(timeout).count();
+        if(secs >= 0x7FFFFFFFFFFFFC00) {
+          ts.tv_sec = 0x7FFFFFFFFFFFFC00;
           ts.tv_nsec = 0;
         }
         else if(secs <= 0) {
@@ -69,11 +66,10 @@ class condition_variable
 
         // Release `lock.m_mtx` before the wait operation, as it might get
         // modified by other threads.
-        ::pthread_mutex_t* saved_mtx = lock.m_mtx;
-        lock.m_mtx = nullptr;
-        ::pthread_cond_timedwait(this->m_std_cond.native_handle(), saved_mtx, &ts);
-        lock.unlock();
-        lock.m_mtx = saved_mtx;
+        mutex::unique_lock local_lock;
+        local_lock.swap(lock);
+        ::pthread_cond_timedwait(this->m_std_cond.native_handle(), local_lock.m_mtx, &ts);
+        local_lock.swap(lock);
       }
 
     void
