@@ -105,41 +105,41 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     for(char c : msg)
       switch(c)
         {
-        break;  case 0x00U:  data += "[NUL]";
-        break;  case 0x01U:  data += "[SOH]";
-        break;  case 0x02U:  data += "[STX]";
-        break;  case 0x03U:  data += "[ETX]";
-        break;  case 0x04U:  data += "[EOT]";
-        break;  case 0x05U:  data += "[ENQ]";
-        break;  case 0x06U:  data += "[ACK]";
-        break;  case 0x07U:  data += "[BEL]";
-        break;  case 0x08U:  data += "[BS]";
-        break;  case 0x09U:  data += "\t";    // HT
-        break;  case 0x0AU:  data += "\x1B\x45\t";  // LF
-        break;  case 0x0BU:  data += "[VT]";
-        break;  case 0x0CU:  data += "[FF]";
-        break;  case 0x0DU:                   // CR
-        break;  case 0x0EU:  data += "[SO]";
-        break;  case 0x0FU:  data += "[SI]";
-        break;  case 0x10U:  data += "[DLE]";
-        break;  case 0x11U:  data += "[DC1]";
-        break;  case 0x12U:  data += "[DC2]";
-        break;  case 0x13U:  data += "[DC3]";
-        break;  case 0x14U:  data += "[DC4]";
-        break;  case 0x15U:  data += "[NAK]";
-        break;  case 0x16U:  data += "[SYN]";
-        break;  case 0x17U:  data += "[ETB]";
-        break;  case 0x18U:  data += "[CAN]";
-        break;  case 0x19U:  data += "[EM]";
-        break;  case 0x1AU:  data += "[SUB]";
-        break;  case 0x1BU:  data += "[ESC]";
-        break;  case 0x1CU:  data += "[FS]";
-        break;  case 0x1DU:  data += "[GS]";
-        break;  case 0x1EU:  data += "[RS]";
-        break;  case 0x1FU:  data += "[US]";
-        break;  default:     data += c;       // verbatim
-        break;  case 0x7FU:  data += "[DEL]";
-      }
+        case '\x00':  data += "[NUL]";       break;
+        case '\x01':  data += "[SOH]";       break;
+        case '\x02':  data += "[STX]";       break;
+        case '\x03':  data += "[ETX]";       break;
+        case '\x04':  data += "[EOT]";       break;
+        case '\x05':  data += "[ENQ]";       break;
+        case '\x06':  data += "[ACK]";       break;
+        case '\x07':  data += "[BEL]";       break;
+        case '\x08':  data += "[BS]";        break;
+        case '\x09':  data += "\t";          break;
+        case '\x0A':  data += "\x1B\x45\t";  break;
+        case '\x0B':  data += "[VT]";        break;
+        case '\x0C':  data += "[FF]";        break;
+        case '\x0D':                         break;
+        case '\x0E':  data += "[SO]";        break;
+        case '\x0F':  data += "[SI]";        break;
+        case '\x10':  data += "[DLE]";       break;
+        case '\x11':  data += "[DC1]";       break;
+        case '\x12':  data += "[DC2]";       break;
+        case '\x13':  data += "[DC3]";       break;
+        case '\x14':  data += "[DC4]";       break;
+        case '\x15':  data += "[NAK]";       break;
+        case '\x16':  data += "[SYN]";       break;
+        case '\x17':  data += "[ETB]";       break;
+        case '\x18':  data += "[CAN]";       break;
+        case '\x19':  data += "[EM]";        break;
+        case '\x1A':  data += "[SUB]";       break;
+        case '\x1B':  data += "[ESC]";       break;
+        case '\x1C':  data += "[FS]";        break;
+        case '\x1D':  data += "[GS]";        break;
+        case '\x1E':  data += "[RS]";        break;
+        case '\x1F':  data += "[US]";        break;
+        case '\x7F':  data += "[DEL]";       break;
+        default:      data += c;             break;
+        }
 
     // Remove trailing space characters.
     data.erase(data.rfind_not_of(" \f\n\r\t\v") + 1);
