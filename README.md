@@ -34,13 +34,15 @@ sudo apt-get install ninja-build python3 python3-pip pkgconf g++  \
         libpcre2-dev libssl-dev zlib1g-dev libedit-dev
 sudo pip3 install meson
 ```
+
 ```sh
 # For MSYS2 on Windows:
 # The `iconv_open()` etc. functions are provided by libiconv. Only the MSYS
 # shell is supported. Do not try building in the MINGW64 or UCRT64 shell.
 pacman -S meson gcc pkgconf pcre2-devel openssl-devel zlib-devel  \
-        libiconv-devel libedit-devel libutil-linux-devel
+        libiconv-devel libedit-devel
 ```
+
 ```sh
 # For macOS:
 # The `gcc` command actually denotes Clang, so ask for a specific version

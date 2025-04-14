@@ -80,7 +80,6 @@ jobs:
       run: >-
            pacman -S --noconfirm gcc meson python pkgconf libedit-devel
            pcre2-devel openssl-devel zlib-devel libiconv-devel
-           libutil-linux-devel
 
     - name: Configure
       run: >-
