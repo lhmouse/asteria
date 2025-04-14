@@ -14,7 +14,7 @@ class Token_Stream
   private:
     Compiler_Options m_opts;
     Recursion_Sentry m_sentry;
-    cow_vector<Token> m_rtoks;  // Tokens are stored in reverse order.
+    cow_vector<Token> m_rtoks;  // stored in reverse order
 
   public:
     explicit constexpr Token_Stream(const Compiler_Options& opts) noexcept
