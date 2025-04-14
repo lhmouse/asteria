@@ -5107,14 +5107,10 @@ solidify(AVM_Rod& rod) const
                 }
 
                 abs_path = get_real_path(abs_path);
-                Source_Location script_sloc(abs_path, 0, 0);
-
-                Module_Loader::Unique_Stream istrm;
-                istrm.reset(ctx.global().module_loader(), abs_path);
+                const Module_Loader::Unique_Stream istrm(ctx.global().module_loader(), abs_path);
 
                 Token_Stream tstrm(sp.opts);
-                tstrm.reload(abs_path, 1, move(istrm.get()));
-
+                tstrm.reload(abs_path, 1, move(istrm.file()));
                 Statement_Sequence stmtq(sp.opts);
                 stmtq.reload(move(tstrm));
 
@@ -5125,6 +5121,7 @@ solidify(AVM_Rod& rod) const
                 optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
                 // Invoke it without `this`.
+                Source_Location script_sloc(abs_path, 0, 0);
                 auto target = optmz.create_function(script_sloc, &"[file scope]");
                 ctx.stack().mut_top().set_void();
                 return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, target);

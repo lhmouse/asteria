@@ -52,10 +52,9 @@ Simple_Script::
 reload(cow_stringR name, Statement_Sequence&& stmtq)
   {
     // Instantiate the function.
+    AIR_Optimizer optmz(this->m_opts);
     cow_vector<phsh_string> script_params;
     script_params.emplace_back(&"...");
-
-    AIR_Optimizer optmz(this->m_opts);
     optmz.reload(nullptr, script_params, this->m_global, stmtq.get_statements());
 
     Source_Location script_sloc(name, 0, 0);

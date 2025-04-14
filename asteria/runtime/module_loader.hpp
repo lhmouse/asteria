@@ -76,11 +76,19 @@ class Module_Loader::Unique_Stream
         this->reset();
       }
 
-    explicit operator bool() const noexcept
+    explicit
+    operator bool() const noexcept
       { return this->m_strm != nullptr;  }
 
+    const cow_string&
+    path() const noexcept
+      {
+        ROCKET_ASSERT_MSG(this->m_strm, "no stream");
+        return this->m_strm->first.rdstr();
+      }
+
     ::rocket::tinybuf_file&
-    get() const noexcept
+    file() const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_strm, "no stream");
         return this->m_strm->second;
