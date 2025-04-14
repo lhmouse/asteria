@@ -19,18 +19,19 @@ void
 do_break_line(tinyfmt& fmt, size_t step, size_t next)
   {
     static constexpr char s_spaces[] = "                                ";
-    if(step != 0) {
-      // Terminate the current line, and indent the next one.
-      fmt.putc('\n');
-      size_t rem = next;
-      while(rem != 0) {
-        size_t n = ::std::min(rem, sizeof(s_spaces) - 1);
-        fmt.putn(s_spaces, n);
-        rem -= n;
-      }
-    }
-    else
+    if(step == 0) {
       fmt.putc(s_spaces[0]);
+      return;
+    }
+
+    // Terminate the current line, and indent the next one.
+    fmt.putc('\n');
+    size_t rem = next;
+    while(rem != 0) {
+      size_t n = ::std::min(rem, sizeof(s_spaces) - 1);
+      fmt.putn(s_spaces, n);
+      rem -= n;
+    }
   }
 
 // Recursion breaker
