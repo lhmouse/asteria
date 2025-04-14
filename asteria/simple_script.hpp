@@ -60,22 +60,22 @@ class Simple_Script
     bool
     erase_global_variable(phsh_stringR name) noexcept;
 
-    // Load something. Calling these functions directly is not recommended.
-    void
-    reload(cow_stringR name, Statement_Sequence&& stmtq);
-
-    void
-    reload(cow_stringR name, Token_Stream&& tstrm);
-
+    // Load a script, which may be either a sequence of statements or a
+    // single expression.
     void
     reload(cow_stringR name, int line, tinybuf&& cbuf);
 
-    // Load a script.
+    void
+    reload_oneline(cow_stringR name, tinybuf&& cbuf);
+
     void
     reload_string(cow_stringR name, int line, cow_stringR code);
 
     void
     reload_string(cow_stringR name, cow_stringR code);
+
+    void
+    reload_oneline(cow_stringR name, cow_stringR code);
 
     void
     reload_stdin(int line);

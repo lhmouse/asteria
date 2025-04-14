@@ -49,9 +49,13 @@ erase_global_variable(phsh_stringR name) noexcept
 
 void
 Simple_Script::
-reload(cow_stringR name, Statement_Sequence&& stmtq)
+reload(cow_stringR name, int line, tinybuf&& cbuf)
   {
-    // Instantiate the function.
+    Token_Stream tstrm(this->m_opts);
+    tstrm.reload(name, line, move(cbuf));
+    Statement_Sequence stmtq(this->m_opts);
+    stmtq.reload(move(tstrm));
+
     AIR_Optimizer optmz(this->m_opts);
     cow_vector<phsh_string> script_params;
     script_params.emplace_back(&"...");
@@ -63,20 +67,20 @@ reload(cow_stringR name, Statement_Sequence&& stmtq)
 
 void
 Simple_Script::
-reload(cow_stringR name, Token_Stream&& tstrm)
-  {
-    Statement_Sequence stmtq(this->m_opts);
-    stmtq.reload(move(tstrm));
-    this->reload(name, move(stmtq));
-  }
-
-void
-Simple_Script::
-reload(cow_stringR name, int line, tinybuf&& cbuf)
+reload_oneline(cow_stringR name, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
-    tstrm.reload(name, line, move(cbuf));
-    this->reload(name, move(tstrm));
+    tstrm.reload(name, 1, move(cbuf));
+    Statement_Sequence stmtq(this->m_opts);
+    stmtq.reload_oneline(move(tstrm));
+
+    AIR_Optimizer optmz(this->m_opts);
+    cow_vector<phsh_string> script_params;
+    script_params.emplace_back(&"...");
+    optmz.reload(nullptr, script_params, this->m_global, stmtq.get_statements());
+
+    Source_Location script_sloc(name, 0, 0);
+    this->m_func = optmz.create_function(script_sloc, &"[file scope]");
   }
 
 void
@@ -93,6 +97,15 @@ Simple_Script::
 reload_string(cow_stringR name, cow_stringR code)
   {
     this->reload_string(name, 1, code);
+  }
+
+void
+Simple_Script::
+reload_oneline(cow_stringR name, cow_stringR code)
+  {
+    ::rocket::tinybuf_str cbuf;
+    cbuf.set_string(code, tinybuf::open_read);
+    this->reload_oneline(name, move(cbuf));
   }
 
 void

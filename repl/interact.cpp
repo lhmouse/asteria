@@ -123,11 +123,8 @@ read_execute_print_single()
 
     // Tokenize source code.
     cow_string real_name;
-    Token_Stream tstrm(repl_script.options());
-    Statement_Sequence stmtq(repl_script.options());
-
-    Reference ref;
     ::rocket::tinyfmt_str fmt;
+    Reference ref;
 
     try {
       // Try parsing the snippet as an expression.
@@ -138,11 +135,8 @@ read_execute_print_single()
         real_name.assign(strbuf);
       }
 
-      ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
-      tstrm.reload(real_name, 1, move(cbuf));
-      stmtq.reload_oneline(move(tstrm));
-
-      repl_script.reload(real_name, move(stmtq));
+      fmt.set_string(repl_source);
+      repl_script.reload_oneline(real_name, move(fmt.mut_buf()));
       repl_file = move(real_name);
     }
     catch(Compiler_Error& except) {
@@ -158,11 +152,8 @@ read_execute_print_single()
           real_name.assign(strbuf);
         }
 
-        ::rocket::tinybuf_str cbuf(repl_source, tinybuf::open_read);
-        tstrm.reload(real_name, 1, move(cbuf));
-        stmtq.reload(move(tstrm));
-
-        repl_script.reload(real_name, move(stmtq));
+        fmt.set_string(repl_source);
+        repl_script.reload(real_name, 1, move(fmt.mut_buf()));
         repl_file = move(real_name);
       }
       catch(Compiler_Error& again) {
@@ -184,12 +175,16 @@ read_execute_print_single()
       return repl_printf("! exception: %s", stdex.what());
     }
 
+    // Print the result.
     if(ref.is_void())
-      fmt << "void";
-    else
-      ref.dereference_readonly().dump(fmt);
+      fmt.set_string(&"void");
+    else {
+      const auto& val = ref.dereference_readonly();
+      fmt.clear_string();
+      val.dump(fmt);
+    }
 
-    return repl_printf("* result #%lu: %s", repl_index, fmt.c_str());
+    repl_printf("* result #%lu: %s", repl_index, fmt.c_str());
   }
 
 }  // namespace asteria
