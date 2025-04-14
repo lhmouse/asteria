@@ -12,17 +12,19 @@ class ascii_numget
   private:
     // Configuration
     char m_rdxp = '.';
-
-    // Casting results
-    bool m_ovfl = false;  // out of range; MSB lost
-    bool m_udfl = false;  // too small; truncated to zero
-    bool m_inxct = false;  // LSB lost
-
-    // Parsing results
-    bool m_sign = false;
-    uint8_t m_cls = 0;
-    uint8_t m_base = 0;
-    bool m_more = false;
+    char m_reserved;
+    union {
+      uint16_t m_packed_bits = 0;
+      struct {
+        bool m_ovfl : 1;  // out of range; MSB lost
+        bool m_udfl : 1;  // too small; truncated to zero
+        bool m_inxct : 1;  // LSB lost
+        bool m_sign : 1;
+        uint8_t m_cls : 3;
+        bool m_more : 1;
+        uint8_t m_base;
+      };
+    };
 
     int64_t m_exp = 0;
     uint64_t m_mant = 0;
@@ -51,15 +53,9 @@ class ascii_numget
     void
     clear() noexcept
       {
-        this->m_sign = false;
-        this->m_cls = 0;
-        this->m_base = 0;
+        this->m_packed_bits = 0;
         this->m_exp = 0;
         this->m_mant = 0;
-        this->m_more = false;
-        this->m_ovfl = false;
-        this->m_udfl = false;
-        this->m_inxct = false;
       }
 
     // Gets and sets the radix point.

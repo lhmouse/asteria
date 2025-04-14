@@ -1127,7 +1127,7 @@ parse_BD(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = do_get_sign(rptr, eptr);
-    this->m_cls = do_get_special_value(rptr, eptr);
+    this->m_cls = do_get_special_value(rptr, eptr) & 0b111;
 
     if(this->m_cls != value_class_normal)
       return (size_t) (rptr - str);
@@ -1157,7 +1157,7 @@ parse_XD(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = do_get_sign(rptr, eptr);
-    this->m_cls = do_get_special_value(rptr, eptr);
+    this->m_cls = do_get_special_value(rptr, eptr) & 0b111;
 
     if(this->m_cls != value_class_normal)
       return (size_t) (rptr - str);
@@ -1187,7 +1187,7 @@ parse_DD(const char* str, size_t len) noexcept
     const char* rptr = str;
 
     this->m_sign = do_get_sign(rptr, eptr);
-    this->m_cls = do_get_special_value(rptr, eptr);
+    this->m_cls = do_get_special_value(rptr, eptr) & 0b111;
 
     if(this->m_cls != value_class_normal)
       return (size_t) (rptr - str);
