@@ -49,10 +49,10 @@ erase_global_variable(phsh_stringR name) noexcept
 
 void
 Simple_Script::
-reload(cow_stringR name, int line, tinybuf&& cbuf)
+reload(cow_stringR name, int start_line, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
-    tstrm.reload(name, line, move(cbuf));
+    tstrm.reload(name, start_line, move(cbuf));
     Statement_Sequence stmtq(this->m_opts);
     stmtq.reload(move(tstrm));
 
@@ -85,11 +85,11 @@ reload_oneline(cow_stringR name, tinybuf&& cbuf)
 
 void
 Simple_Script::
-reload_string(cow_stringR name, int line, cow_stringR code)
+reload_string(cow_stringR name, int start_line, cow_stringR code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
-    this->reload(name, line, move(cbuf));
+    this->reload(name, start_line, move(cbuf));
   }
 
 void
@@ -110,11 +110,11 @@ reload_oneline(cow_stringR name, cow_stringR code)
 
 void
 Simple_Script::
-reload_stdin(int line)
+reload_stdin(int start_line)
   {
     ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    this->reload(&"[stdin]", line, move(cbuf));
+    this->reload(&"[stdin]", start_line, move(cbuf));
   }
 
 void

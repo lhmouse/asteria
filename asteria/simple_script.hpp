@@ -63,13 +63,13 @@ class Simple_Script
     // Load a script, which may be either a sequence of statements or a
     // single expression.
     void
-    reload(cow_stringR name, int line, tinybuf&& cbuf);
+    reload(cow_stringR name, int start_line, tinybuf&& cbuf);
 
     void
     reload_oneline(cow_stringR name, tinybuf&& cbuf);
 
     void
-    reload_string(cow_stringR name, int line, cow_stringR code);
+    reload_string(cow_stringR name, int start_line, cow_stringR code);
 
     void
     reload_string(cow_stringR name, cow_stringR code);
@@ -78,7 +78,7 @@ class Simple_Script
     reload_oneline(cow_stringR name, cow_stringR code);
 
     void
-    reload_stdin(int line);
+    reload_stdin(int start_line);
 
     void
     reload_stdin();
