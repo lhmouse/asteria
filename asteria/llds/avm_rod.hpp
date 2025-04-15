@@ -12,13 +12,13 @@ namespace asteria {
 class AVM_Rod
   {
   public:
-    using Uparam              = details_avm_rod::Uparam;
-    using Header              = details_avm_rod::Header;
-    using Metadata            = details_avm_rod::Metadata;
-    using Executor            = details_avm_rod::Executor;
-    using Constructor         = details_avm_rod::Sparam_Constructor;
-    using Destructor          = details_avm_rod::Sparam_Destructor;
-    using Variable_Collector  = details_avm_rod::Variable_Collector;
+    using Uparam       = details_avm_rod::Uparam;
+    using Header       = details_avm_rod::Header;
+    using Metadata     = details_avm_rod::Metadata;
+    using Executor     = details_avm_rod::Executor;
+    using Constructor  = details_avm_rod::Sparam_Constructor;
+    using Destructor   = details_avm_rod::Sparam_Destructor;
+    using Collector    = details_avm_rod::Collector;
 
   private:
     Header* m_bptr = nullptr;
@@ -77,7 +77,7 @@ class AVM_Rod
     // need not be persistent.
     Header*
     append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
-           Destructor* dtor_opt, Variable_Collector* vcoll_opt, const Source_Location* sloc_opt);
+           Destructor* dtor_opt, Collector* coll_opt, const Source_Location* sloc_opt);
 
     // Marks this rod ready for execution. No nodes may be appended hereafter.
     // This function serves as an optimization hint.

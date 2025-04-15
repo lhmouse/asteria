@@ -83,7 +83,7 @@ clear() noexcept
 details_avm_rod::Header*
 AVM_Rod::
 append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
-       Destructor* dtor_opt, Variable_Collector* vcoll_opt, const Source_Location* sloc_opt)
+       Destructor* dtor_opt, Collector* coll_opt, const Source_Location* sloc_opt)
   {
     constexpr size_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
     if(sparam_size > max_sparam_size)
@@ -94,14 +94,14 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
     unique_ptr<Metadata> meta;
     uint8_t meta_ver = 0;
 
-    if(ctor_opt || dtor_opt || vcoll_opt || sloc_opt) {
+    if(ctor_opt || dtor_opt || coll_opt || sloc_opt) {
       meta.reset(new Metadata());
       meta_ver = 1;
 
       // ver. 1
       meta->exec = exec;
       meta->dtor_opt = dtor_opt;
-      meta->vcoll_opt = vcoll_opt;
+      meta->coll_opt = coll_opt;
 
       if(sloc_opt) {
         // ver. 2
@@ -200,8 +200,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       if(head->meta_ver == 0)
         continue;
 
-      if(head->pv_meta->vcoll_opt)
-        (* head->pv_meta->vcoll_opt) (staged, temp, head);
+      if(head->pv_meta->coll_opt)
+        (* head->pv_meta->coll_opt) (staged, temp, head);
     }
   }
 

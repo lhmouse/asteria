@@ -53,14 +53,14 @@ struct Header;
 using Executor            = AIR_Status (Executive_Context& ctx, const Header* head);
 using Sparam_Constructor  = void (Header* head, void* ctor_arg);
 using Sparam_Destructor   = void (Header* head);
-using Variable_Collector  = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
+using Collector  = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
 
 struct Metadata
   {
     // Version 1
-    Executor* exec;                 // executor function
-    Sparam_Destructor* dtor_opt;    // if null then no cleanup is performed
-    Variable_Collector* vcoll_opt;  // if null then no variable shall exist
+    Executor* exec;               // executor function
+    Sparam_Destructor* dtor_opt;  // if null then no cleanup is performed
+    Collector* coll_opt;          // if null then no variable shall exist
 
     // Version 2
     Source_Location sloc;  // symbols
