@@ -160,40 +160,29 @@ execute(Executive_Context& ctx) const
       auto head = this->m_bptr + this->m_einit + offset;
       offset += 1L + head->nheaders;
 
-      AIR_Status status;
-      switch(head->meta_ver)
-        {
-        case 0:
-          // There is no metadata or symbols.
+      try {
+        AIR_Status status;
+        if(head->meta_ver == 0)
           status = (* head->pv_exec) (ctx, head);
-          break;
-
-        case 1:
-          // There is metadata without symbols.
+        else
           status = (* head->pv_meta->exec) (ctx, head);
-          break;
 
-        default:
-          try {
-            // There is metadata and symbols.
-            status = (* head->pv_meta->exec) (ctx, head);
-          }
-          catch(Runtime_Error& except) {
-            // Modify and rethrow the exception in place without copying it.
-            except.push_frame_plain(head->pv_meta->sloc);
-            throw;
-          }
-          catch(exception& stdex) {
-            // Replace the current exception.
-            Runtime_Error except(xtc_format, "$1", stdex);
-            except.push_frame_plain(head->pv_meta->sloc);
-            throw except;
-          }
-          break;
+        if(ROCKET_UNEXPECT(status != air_status_next))
+          return status;
       }
-
-      if(ROCKET_UNEXPECT(status != air_status_next))
-        return status;
+      catch(Runtime_Error& except) {
+        // Modify and rethrow the exception in place without copying it.
+        if(head->meta_ver >= 2)
+          except.push_frame_plain(head->pv_meta->sloc);
+        throw;
+      }
+      catch(exception& stdex) {
+        // Replace the current exception.
+        Runtime_Error except(xtc_format, "$1", stdex);
+        if(head->meta_ver >= 2)
+          except.push_frame_plain(head->pv_meta->sloc);
+        throw except;
+      }
     }
 
     return air_status_next;
