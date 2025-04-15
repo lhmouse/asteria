@@ -45,7 +45,7 @@ class Instantiated_Function
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const override;
 
-    Reference&
+    void
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override;
   };
 

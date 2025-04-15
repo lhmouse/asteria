@@ -22,7 +22,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       arg.collect_variables(staged, temp);
   }
 
-Reference&
+void
 Variadic_Arguer::
 invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const
   {
@@ -37,7 +37,9 @@ invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& 
     if(!reader.end_overload())
       reader.throw_no_matching_function_call();
 
-    if(qindex) {
+    if(!qindex)
+      self.set_temporary(this->m_vargs.ssize());
+    else {
       // Wrap the index as necessary. If the index is out of range, return
       // a constant `null`.
       auto w = wrap_array_index(this->m_vargs.ssize(), *qindex);
@@ -46,11 +48,6 @@ invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& 
       else
         self = this->m_vargs.at(w.rindex);
     }
-    else {
-      // If no argument is given, return the number of variadic arguments.
-      self.set_temporary(this->m_vargs.ssize());
-    }
-    return self;
   }
 
 }  // namespace asteria

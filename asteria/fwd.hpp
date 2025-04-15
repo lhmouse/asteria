@@ -174,9 +174,9 @@ class AIR_Optimizer;
 
 // Native binding prototype
 using simple_function =
-    Reference& (Reference& self,           // `this` (in) / return (out)
-                Global_Context& global,    // global scope
-                Reference_Stack&& stack);  // positional arguments
+    void (Reference& self,           // `this` (in) / return (out)
+          Global_Context& global,    // global scope
+          Reference_Stack&& stack);  // positional arguments
 
 // Tags for constructors
 #define ASTERIA_DEFINE_TAG_(name)  \
@@ -303,7 +303,7 @@ struct Abstract_Function : rcfwd<Abstract_Function>
 
     // This function may return a proper tail call wrapper.
     virtual
-    Reference&
+    void
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const = 0;
   };
 
@@ -579,10 +579,10 @@ class cow_function
           this->m_sptr->collect_variables(staged, temp);
       }
 
-    Reference&
+    void
     invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const;
 
-    Reference&
+    void
     invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const;
   };
 

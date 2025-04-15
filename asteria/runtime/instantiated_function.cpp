@@ -44,7 +44,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
     this->m_rod.collect_variables(staged, temp);
   }
 
-Reference&
+void
 Instantiated_Function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
@@ -71,10 +71,12 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       {
       case air_status_next:
       case air_status_return_void:
-        return self.set_void();
+        self.set_void();
+        return;
 
       case air_status_return_ref:
-        return self = move(stack.mut_top());
+        self = move(stack.mut_top());
+        return;
 
       case air_status_break_unspec:
       case air_status_break_switch:

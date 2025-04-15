@@ -40,7 +40,7 @@ describe(tinyfmt& fmt) const
     return fmt << "[null function pointer]";
   }
 
-Reference&
+void
 cow_function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
@@ -48,18 +48,15 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       if(this->m_fptr) {
         // static
         this->m_fptr(self, global, move(stack));
-        return self;
+        return;
       }
 
       if(this->m_sptr) {
         // dynamic
         this->m_sptr->invoke_ptc_aware(self, global, move(stack));
-        if(ROCKET_UNEXPECT(self.is_ptc())) {
-          const auto ptc = self.unphase_ptc_opt();
-          ROCKET_ASSERT(ptc);
+        if(auto ptc = self.unphase_ptc_opt())
           ptc->set_caller(dynamic_pointer_cast<const Instantiated_Function>(this->m_sptr));
-        }
-        return self;
+        return;
       }
     }
     catch(Runtime_Error&) { throw;  }  // forward
@@ -69,13 +66,12 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
               "cow_function: attempt to call a null function");
   }
 
-Reference&
+void
 cow_function::
 invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
-    auto& result = this->invoke_ptc_aware(self, global, move(stack));
-    result.check_function_result(global);
-    return result;
+    this->invoke_ptc_aware(self, global, move(stack));
+    self.check_function_result(global);
   }
 
 const char*
