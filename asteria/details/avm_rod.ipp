@@ -53,7 +53,7 @@ struct Header;
 using Executor            = AIR_Status (Executive_Context& ctx, const Header* head);
 using Sparam_Constructor  = void (Header* head, void* ctor_arg);
 using Sparam_Destructor   = void (Header* head);
-using Collector  = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
+using Collector           = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
 
 struct Metadata
   {
