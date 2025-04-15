@@ -71,12 +71,10 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       {
       case air_status_next:
       case air_status_return_void:
-        self.set_void();
-        return self;
+        return self.set_void();
 
       case air_status_return_ref:
-        self = move(stack.mut_top());
-        return self;
+        return self = move(stack.mut_top());
 
       case air_status_break_unspec:
       case air_status_break_switch:
