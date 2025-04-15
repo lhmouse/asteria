@@ -45,13 +45,17 @@ Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstac
           param = move(this->m_stack->mut_top(--nargs));
       }
 
-    if(!has_ellipsis && (nargs != 0))
-      throw Runtime_Error(xtc_format,
-               "Too many arguments passed to `$1`", this->m_func->func());
+    if(nargs != 0) {
+      if(!has_ellipsis)
+        throw Runtime_Error(xtc_format,
+                 "Too many arguments passed to `$1`", this->m_func->func());
 
-    // Move all arguments into the variadic argument getter.
-    while(nargs != 0)
-      this->m_lazy_args.emplace_back(move(this->m_stack->mut_top(--nargs)));
+      // Move all arguments into the variadic argument getter.
+      this->m_lazy_args.reserve(nargs);
+      do
+        this->m_lazy_args.emplace_back(move(this->m_stack->mut_top(--nargs)));
+      while(nargs != 0);
+    }
   }
 
 Executive_Context::
