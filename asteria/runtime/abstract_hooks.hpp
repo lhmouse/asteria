@@ -44,16 +44,18 @@ struct Abstract_Hooks
     void
     on_throw(const Source_Location& sloc, Value& except);
 
-    // This hook is called just after control flow enters a function, and before
-    // its body. `fctx` contains all parameters.
+    // This hook is called just after control flow enters a function, just before
+    // execution of its body. `fctx` is the scope of the function, which contains
+    // all parameters. This hook is provided for instrument reasons.
     virtual
     void
     on_function_enter(const Instantiated_Function& func, Executive_Context& fctx);
 
-    // This hook is called just before control flow leaves a function, either by
-    // returning a result or by throwing an exception. A call to this hook is always
-    // paired by a preceding call to `on_enter_function()`. In the case of a proper
-    // tail call, this hook is called before entering the target function.
+    // This hook is called just before control flow leaves a function, either
+    // because control flow reaches the end of the function body, or because of
+    // a return statement or a throw statement. For proper tail calls, this hook is
+    // called before entering the target function, so it's hardly ever useful for
+    // debugging. This hook is provided for instrument reasons.
     virtual
     void
     on_function_leave(const Instantiated_Function& func, Executive_Context& fctx);
