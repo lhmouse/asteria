@@ -10,6 +10,9 @@ namespace asteria {
 Garbage_Collector::
 Garbage_Collector() noexcept
   {
+    // Set default threshold values.
+    this->m_thres.fill(100);
+    this->m_thres.at(gMax) = 500;
   }
 
 Garbage_Collector::
@@ -26,7 +29,8 @@ do_collect_generation(uint32_t gen)
       return 0;
 
     this->m_recur ++;
-    const unique_ptr<int, void (int*)> rguard(&(this->m_recur), *[](int* ptr) { -- *ptr;  });
+    const auto recur_guard = ::rocket::make_unique_handle(this,
+             [](Garbage_Collector* self) { self->m_recur --;  });
 
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/

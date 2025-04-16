@@ -18,8 +18,8 @@ class Garbage_Collector
     Variable_HashMap m_pool;  // key is a pointer to the `Variable` itself
 
     static constexpr uint32_t gMax = gc_generation_oldest;
+    ::std::array<size_t, gMax+1> m_thres;
     ::std::array<size_t, gMax+1> m_counts = { };
-    ::std::array<size_t, gMax+1> m_thres = { 10, 70, 500 };
     ::std::array<Variable_HashMap, gMax+1> m_tracked;
 
     Variable_HashMap m_staged;  // key is address of the owner of a `Variable`
