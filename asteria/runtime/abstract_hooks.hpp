@@ -48,7 +48,7 @@ struct Abstract_Hooks
     // its body. `fctx` contains all parameters.
     virtual
     void
-    on_function_enter(Executive_Context& fctx, const Instantiated_Function& func);
+    on_function_enter(const Instantiated_Function& func, Executive_Context& fctx);
 
     // This hook is called just before control flow leaves a function, either by
     // returning a result or by throwing an exception. A call to this hook is always
@@ -56,7 +56,7 @@ struct Abstract_Hooks
     // tail call, this hook is called before entering the target function.
     virtual
     void
-    on_function_leave(Executive_Context& fctx) noexcept;
+    on_function_leave(const Instantiated_Function& func, Executive_Context& fctx);
   };
 
 }  // namespace asteria

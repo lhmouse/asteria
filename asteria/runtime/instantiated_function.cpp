@@ -53,18 +53,18 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
     Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, move(self));
 
     // Execute the function body.
-    global.call_hook(&Abstract_Hooks::on_function_enter, ctx_func, *this);
+    global.call_hook(&Abstract_Hooks::on_function_enter, *this, ctx_func);
     AIR_Status status;
     try {
       status = this->m_rod.execute(ctx_func);
     }
     catch(Runtime_Error& except) {
-      global.call_hook(&Abstract_Hooks::on_function_leave, ctx_func);
+      global.call_hook(&Abstract_Hooks::on_function_leave, *this, ctx_func);
       ctx_func.on_scope_exit_exceptional(except);
       except.push_frame_function(this->m_sloc, this->m_func);
       throw;
     }
-    global.call_hook(&Abstract_Hooks::on_function_leave, ctx_func);
+    global.call_hook(&Abstract_Hooks::on_function_leave, *this, ctx_func);
     ctx_func.on_scope_exit_normal(status);
 
     switch(status)

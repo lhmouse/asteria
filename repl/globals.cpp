@@ -20,27 +20,19 @@ struct Verbose_Hooks
   :
      Abstract_Hooks
   {
-    ::rocket::tinyfmt_str m_fmt;  // reusable storage
+    ::rocket::tinyfmt_str m_fmt;
 
     template<typename... xParams>
     void
-    do_verbose_trace(const Source_Location& sloc, const char* templ, const xParams&... params)
+    do_trace(const Source_Location& sloc, const char* templ, const xParams&... params)
       {
         if(ROCKET_EXPECT(!repl_verbose))
           return;
 
-        // Compose the string to write.
         this->m_fmt.clear_string();
         format(this->m_fmt, templ, params...);
-        this->m_fmt << "\n@ " << sloc;
-
-        // Extract the string and write it to standard error.
-        // Errors are ignored.
-        auto str = this->m_fmt.extract_string();
-        ASTERIA_WRITE_STDERR(move(str));
-
-        // Reuse the storage. This is not use after move.
-        this->m_fmt.set_string(move(str));
+        this->m_fmt << " from " << sloc;
+        repl_printf("* %s", this->m_fmt.c_str());
       }
 
     void
@@ -50,31 +42,28 @@ struct Verbose_Hooks
         if(rocket::is_any_of(sig, { 0, SIGURG, SIGCHLD, SIGWINCH }))
           return;
 
-        // Does the REPL have to be thread-safe anyway?
-        const char* sigstr = ::strsignal(sig);
-        this->do_verbose_trace(sloc, "Received signal `$1: $2`", sig, sigstr);
-
-        ::rocket::sprintf_and_throw<::std::runtime_error>(
-              "Received signal `%d: %s`\n[interrupted at '%s:%d']",
-              sig, sigstr, sloc.c_file(), sloc.line());
+        char sigdesc[128];
+        ::snprintf(sigdesc, sizeof(sigdesc), "signal `%d`: %s", sig, ::strsignal(sig));
+        this->do_trace(sloc, "received $1", sigdesc);
+        ::rocket::sprintf_and_throw<::std::runtime_error>("Received %s", sigdesc);
       }
 
     void
     on_call(const Source_Location& sloc, const cow_function& target) override
       {
-        this->do_verbose_trace(sloc, "Calling $1", target);
+        this->do_trace(sloc, "calling function $1", target);
       }
 
     void
     on_return(const Source_Location& sloc, PTC_Aware /*ptc*/) override
       {
-        this->do_verbose_trace(sloc, "Returning");
+        this->do_trace(sloc, "returning from function");
       }
 
     void
     on_throw(const Source_Location& sloc, Value& except) override
       {
-        this->do_verbose_trace(sloc, "Throwing exception:\n$1", except);
+        this->do_trace(sloc, "throwing `$1`", except);
       }
   };
 

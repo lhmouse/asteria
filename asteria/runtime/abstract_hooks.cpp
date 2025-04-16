@@ -39,13 +39,13 @@ on_throw(const Source_Location& sloc, Value& except)
 
 void
 Abstract_Hooks::
-on_function_enter(Executive_Context& fctx, const Instantiated_Function& func)
+on_function_enter(const Instantiated_Function& func, Executive_Context& fctx)
   {
   }
 
 void
 Abstract_Hooks::
-on_function_leave(Executive_Context& fctx) noexcept
+on_function_leave(const Instantiated_Function& func, Executive_Context& fctx)
   {
   }
 
