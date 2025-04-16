@@ -46,13 +46,6 @@ do_find_handler_opt(cow_string&& cmd)
     return nullptr;
   }
 
-template<typename xHandler>
-void
-do_add_handler()
-  {
-    s_handlers.emplace_back(::rocket::make_unique<xHandler>());
-  }
-
 struct Handler_exit : Handler
   {
     const char*
@@ -357,15 +350,16 @@ void
 prepare_repl_commands()
   {
     s_handlers.clear();
+    s_handlers.reserve(8);
 
     // Create command interfaces. Note the list of commands is printed
     // according to this vector, so please ensure elements are sorted
     // lexicographically.
-    do_add_handler<Handler_again>();
-    do_add_handler<Handler_exit>();
-    do_add_handler<Handler_help>();
-    do_add_handler<Handler_heredoc>();
-    do_add_handler<Handler_source>();
+    s_handlers.emplace_back(::rocket::make_unique<Handler_again>());
+    s_handlers.emplace_back(::rocket::make_unique<Handler_exit>());
+    s_handlers.emplace_back(::rocket::make_unique<Handler_help>());
+    s_handlers.emplace_back(::rocket::make_unique<Handler_heredoc>());
+    s_handlers.emplace_back(::rocket::make_unique<Handler_source>());
   }
 
 void
