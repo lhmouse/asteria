@@ -112,19 +112,16 @@ append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
 
     // Round the size up to the nearest number of headers. This shall not result
     // in overflows.
-    uint32_t nheaders_p1 = (uint32_t) ((sizeof(Header) * 2 - 1 + sparam_size) / sizeof(Header));
-    if(this->m_estor - this->m_einit < nheaders_p1) {
-      // Extend the storage.
-      uint32_t size_to_reserve = this->m_einit + nheaders_p1;
-#ifndef ROCKET_DEBUG
-      size_to_reserve |= this->m_einit * 3;
+    uint32_t nheaders_p1 = (uint32_t) (1 + (sparam_size + sizeof(Header) - 1) / sizeof(Header));
+#ifdef ROCKET_DEBUG
+    this->do_reallocate(this->m_einit + nheaders_p1);
+#else
+    if(ROCKET_UNEXPECT(nheaders_p1 > this->m_estor - this->m_einit))
+      this->do_reallocate(this->m_einit * 2 + nheaders_p1 + 5);
 #endif
-      this->do_reallocate(size_to_reserve);
-      ROCKET_ASSERT(this->m_estor - this->m_einit >= nheaders_p1);
-    }
 
-    // Append a new node. `uparam` is overlapped with `nheaders` so it must
-    // be assigned first. The others can occur in any order.
+    // Append a new node. `uparam` is overlapped with `nheaders` so it must be
+    // assigned first. The others can occur in any order.
     auto head = this->m_bptr + this->m_einit;
     head->uparam = uparam;
     head->nheaders = (uint8_t) (nheaders_p1 - 1);
