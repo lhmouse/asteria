@@ -58,10 +58,8 @@ void
 Module_Loader::
 do_unlock_stream(locked_pair* qstrm) noexcept
   {
-    // Erase the strment denoted by `qstrm`.
     ROCKET_ASSERT(qstrm);
-    auto count = this->m_strms.erase(qstrm->first);
-    ROCKET_ASSERT(count == 1);
+    this->m_strms.erase(qstrm->first);
   }
 
 }  // namespace asteria
