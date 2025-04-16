@@ -189,7 +189,7 @@ main(int argc, char** argv)
     // Select the C locale.
     // UTF-8 is required for wide-oriented standard streams.
     const char* const current_locale = ::setlocale(LC_ALL, "C.UTF-8");
-    ::srandom((unsigned) ::clock());
+    ::srandom(static_cast<unsigned>(::clock()));
     ::tzset();
 
     // Note that this function shall not return in case of errors.
