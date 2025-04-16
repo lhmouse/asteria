@@ -313,7 +313,7 @@ struct Handler_again : Handler
 
     const char*
     oneline() const override
-      { return "reload last snippet compiled successfully";  }
+      { return "reload last compiled snippet";  }
 
     const char*
     help() const override
