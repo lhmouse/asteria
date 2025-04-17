@@ -15,7 +15,7 @@ class AVM_Rod
     struct Header;
 
     // These are prototypes for callbacks.
-    using Executor     = AIR_Status (Executive_Context& ctx, const Header* head);
+    using Executor     = void (Executive_Context& ctx, const Header* head);
     using Constructor  = void (Header* head, void* ctor_arg);
     using Destructor   = void (Header* head);
     using Collector    = void (Variable_HashMap& staged, Variable_HashMap& temp, const Header* head);
@@ -158,7 +158,7 @@ class AVM_Rod
 
     // These are internal interfaces that are called by the runtime.
     void
-    execute(AIR_Status& status, Executive_Context& ctx) const;
+    execute(Executive_Context& ctx) const;
 
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;

@@ -19,6 +19,7 @@ class Executive_Context
     // Store some references to the enclosing function,
     // so they are not passed here and there upon each native call.
     Global_Context* m_global;
+    AIR_Status* m_status;
     Reference_Stack* m_stack;
     Reference_Stack* m_alt_stack;  // for nested calls
 
@@ -31,26 +32,27 @@ class Executive_Context
     // Its parent context shall outlast itself.
     Executive_Context(Uxtc_plain, const Executive_Context& parent)
       :
-        m_parent_opt(&parent), m_global(parent.m_global), m_stack(parent.m_stack),
-        m_alt_stack(parent.m_alt_stack)
+        m_parent_opt(&parent), m_global(parent.m_global), m_status(parent.m_status),
+        m_stack(parent.m_stack), m_alt_stack(parent.m_alt_stack)
       { }
 
     // A defer context is used to evaluate deferred expressions.
     // They are evaluated in separated contexts, as in case of proper tail calls,
     // contexts of enclosing function will have been destroyed.
     ASTERIA_INCOMPLET(AVM_Rod)
-    Executive_Context(Uxtc_defer, Global_Context& xglobal, Reference_Stack& xstack,
-                      Reference_Stack& ystack)
+    Executive_Context(Uxtc_defer, Global_Context& xglobal, AIR_Status& xstatus,
+                      Reference_Stack& xstack, Reference_Stack& ystack)
       :
-        m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack), m_alt_stack(&ystack)
+        m_parent_opt(nullptr), m_global(&xglobal), m_status(&xstatus),
+        m_stack(&xstack), m_alt_stack(&ystack)
       { }
 
     // A function context has no parent.
     // The caller shall define a global context and evaluation stack, both of which
     // shall outlast this context.
-    Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack,
-                      Reference_Stack& ystack, const Instantiated_Function& xfunc,
-                      Reference&& xself);
+    Executive_Context(Uxtc_function, Global_Context& xglobal, AIR_Status& xstatus,
+                      Reference_Stack& xstack, Reference_Stack& ystack,
+                      const Instantiated_Function& xfunc, Reference&& xself);
 
   protected:
     Reference*
@@ -65,7 +67,7 @@ class Executive_Context
       { return this->m_parent_opt;  }
 
     void
-    do_on_scope_exit_normal_slow(AIR_Status status);
+    do_on_scope_exit_normal_slow();
 
     void
     do_on_scope_exit_exceptional_slow(Runtime_Error& except);
@@ -82,6 +84,10 @@ class Executive_Context
     Global_Context&
     global() const noexcept
       { return *(this->m_global);  }
+
+    AIR_Status&
+    status() const noexcept
+      { return *(this->m_status);  }
 
     Reference_Stack&
     stack() const noexcept
@@ -108,10 +114,10 @@ class Executive_Context
     // Note that these functions may throw arbitrary exceptions, which
     // is why RAII is inapplicable.
     void
-    on_scope_exit_normal(AIR_Status status)
+    on_scope_exit_normal()
       {
         if(!this->m_defer.empty())
-          this->do_on_scope_exit_normal_slow(status);
+          this->do_on_scope_exit_normal_slow();
       }
 
     void

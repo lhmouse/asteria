@@ -49,14 +49,14 @@ Instantiated_Function::
 invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
   {
     // Create the stack and context for this function.
+    AIR_Status status = air_status_next;
     Reference_Stack alt_stack;
-    Executive_Context fctx(xtc_function, global, stack, alt_stack, *this, move(self));
+    Executive_Context fctx(xtc_function, global, status, stack, alt_stack, *this, move(self));
 
     // Execute the function body on the new context.
     global.call_hook(&Abstract_Hooks::on_function_enter, *this, fctx);
-    AIR_Status status = air_status_next;
     try {
-      this->m_rod.execute(status, fctx);
+      this->m_rod.execute(fctx);
     }
     catch(Runtime_Error& except) {
       global.call_hook(&Abstract_Hooks::on_function_leave, *this, fctx);
@@ -65,9 +65,9 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
       throw;
     }
     global.call_hook(&Abstract_Hooks::on_function_leave, *this, fctx);
-    fctx.on_scope_exit_normal(status);
+    fctx.on_scope_exit_normal();
 
-    // Move the result into `self`.
+    // Move the result into `self`, if any.
     switch(status)
       {
       case air_status_next:
@@ -91,7 +91,7 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         throw Runtime_Error(xtc_format, "Stray `continue` statement");
 
       default:
-        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), status);
+        ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), fctx.status());
     }
   }
 

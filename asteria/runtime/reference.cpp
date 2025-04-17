@@ -253,8 +253,9 @@ do_use_function_result_slow(Global_Context& global)
     refcnt_ptr<PTC_Arguments> ptcg;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
     opt<Value> result_value;
+    AIR_Status status = air_status_next;
     Reference_Stack stack, alt_stack;
-    Executive_Context defer_ctx(xtc_defer, global, stack, alt_stack);
+    Executive_Context defer_ctx(xtc_defer, global, status, stack, alt_stack);
 
     try {
       // Unpack frames until a non-PTC result is encountered.
@@ -292,7 +293,7 @@ do_use_function_result_slow(Global_Context& global)
         // Evaluate deferred expressions.
         defer_ctx.stack() = move(ptcg->mut_stack());
         defer_ctx.mut_defer() = move(ptcg->mut_defer());
-        defer_ctx.on_scope_exit_normal(air_status_next);
+        defer_ctx.on_scope_exit_normal();
       }
     }
     catch(Runtime_Error& except) {

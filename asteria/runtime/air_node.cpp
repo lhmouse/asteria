@@ -67,14 +67,15 @@ do_solidify_nodes(AVM_Rod& rod, const cow_vector<AIR_Node>& code)
   }
 
 bool
-do_break_or_continue(AIR_Status& status, initializer_list<AIR_Status> break_on,
+do_break_or_continue(Executive_Context& ctx, initializer_list<AIR_Status> break_on,
                      initializer_list<AIR_Status> continue_on)
 
   {
-    bool is_break = ::rocket::is_any_of(status, break_on);
-    if(ROCKET_UNEXPECT(is_break) || ::rocket::is_any_of(status, continue_on))
-      status = air_status_next;
-    return (status != air_status_next) || is_break;
+    bool is_break = ::rocket::is_any_of(ctx.status(), break_on);
+    bool is_continue = ::rocket::is_any_of(ctx.status(), continue_on);
+    if(ROCKET_UNEXPECT(is_break) || is_continue)
+      ctx.status() = air_status_next;
+    return (ctx.status() != air_status_next) || is_break;
   }
 
 template<typename xSubscript>
@@ -103,35 +104,35 @@ do_sparam_dtor(AVM_Rod::Header* head)
   }
 
 void
-do_execute_block(AIR_Status& status, const AVM_Rod& rod, const Executive_Context& ctx)
+do_execute_block(const AVM_Rod& rod, const Executive_Context& ctx)
   {
     Executive_Context ctx_next(xtc_plain, ctx);
     try {
-      rod.execute(status, ctx_next);
+      rod.execute(ctx_next);
     }
     catch(Runtime_Error& except) {
       ctx_next.on_scope_exit_exceptional(except);
       throw;
     }
-    ctx_next.on_scope_exit_normal(status);
+    ctx_next.on_scope_exit_normal();
   }
 
 void
-do_evaluate_subexpression(AIR_Status& status, Executive_Context& ctx, bool assign,
-                          const AVM_Rod& rod)
+do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& rod)
   {
     if(rod.empty()) {
       // If the rod is empty, leave the condition on the top of the stack.
-      status = air_status_next;
+      ROCKET_ASSERT(ctx.status() == air_status_next);
     }
     else if(assign) {
       // Evaluate the subexpression and assign the result to the first operand.
-      rod.execute(status, ctx);
-      ROCKET_ASSERT(status == air_status_next);
+      rod.execute(ctx);
+      ROCKET_ASSERT(ctx.status() == air_status_next);
 
       // The result value really has to be copied, in case that a reference to
       // an element of the LHS operand itself is returned.
-      ctx.stack().top(1).dereference_mutable() = move(ctx.stack().mut_top().dereference_copy());
+      Value& rhs = ctx.stack().mut_top().dereference_copy();
+      ctx.stack().top(1).dereference_mutable() = move(rhs);
       ctx.stack().pop();
     }
     else {
@@ -140,7 +141,7 @@ do_evaluate_subexpression(AIR_Status& status, Executive_Context& ctx, bool assig
 
       // Evaluate the subexpression. The status code must be forwarded, because
       // a proper tail call may return `air_status_return_ref`.
-      rod.execute(status, ctx);
+      rod.execute(ctx);
     }
   }
 
@@ -158,7 +159,7 @@ do_get_target_function(const Reference& top)
     return value.as_function();
   }
 
-AIR_Status
+void
 do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location& sloc,
                   PTC_Aware ptc, const cow_function& target)
   {
@@ -168,13 +169,13 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
       // Perform a plain call.
       ctx.global().call_hook(&Abstract_Hooks::on_call, sloc, target);
       target.invoke(self, ctx.global(), move(ctx.alt_stack()));
-      return air_status_next;
+      ROCKET_ASSERT(ctx.status() == air_status_next);
     }
     else {
       // Perform a tail call.
-      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target,
-                                           move(self), move(ctx.alt_stack())));
-      return air_status_return;
+      self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc,
+                          target, move(self), move(ctx.alt_stack())));
+      ctx.status() = air_status_return;
     }
   }
 
@@ -800,10 +801,9 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 ctx.stack().clear();
-                return air_status_next;
               }
 
             // Uparam
@@ -835,15 +835,13 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Execute the block on a new context. The block may contain control
                 // statements, so the status shall be forwarded verbatim.
-                AIR_Status status = air_status_next;
-                do_execute_block(status, sp.rod_body, ctx);
-                return status;
+                do_execute_block(sp.rod_body, ctx);
               }
 
             // Uparam
@@ -879,7 +877,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = head->pv_meta->sloc;
@@ -893,7 +891,6 @@ solidify(AVM_Rod& rod) const
                 // Push a copy of the reference onto the stack, which we will get
                 // back after the initializer finishes execution.
                 ctx.stack().push().set_variable(var);
-                return air_status_next;
               }
 
             // Uparam
@@ -920,7 +917,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool immutable = head->uparam.b0;
 
@@ -934,7 +931,6 @@ solidify(AVM_Rod& rod) const
                 var->initialize(val);
                 var->set_immutable(immutable);
                 ctx.stack().pop(2);
-                return air_status_next;
               }
 
             // Uparam
@@ -971,18 +967,16 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // Read the condition and execute the corresponding branch.
-                AIR_Status status = air_status_next;
+                // Check the condition and pick a branch.
                 if(ctx.stack().top().dereference_readonly().test() != negative)
-                  do_execute_block(status, sp.rod_true, ctx);
+                  do_execute_block(sp.rod_true, ctx);
                 else
-                  do_execute_block(status, sp.rod_false, ctx);
-                return status;
+                  do_execute_block(sp.rod_false, ctx);
               }
 
             // Uparam
@@ -1035,7 +1029,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1051,9 +1045,8 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(sp.at(k).type == switch_clause_case) {
                     // Expect an exact match of one value.
-                    AIR_Status dummy = air_status_next;
-                    sp.at(k).rod_labels.execute(dummy, ctx);
-                    ROCKET_ASSERT(dummy == air_status_next);
+                    sp.at(k).rod_labels.execute(ctx);
+                    ROCKET_ASSERT(ctx.status() == air_status_next);
 
                     auto cmp = cond.compare_partial(ctx.stack().top().dereference_readonly());
                     if(cmp != compare_equal)
@@ -1064,9 +1057,8 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(sp.at(k).type == switch_clause_each) {
                     // Expect an interval of two values.
-                    AIR_Status dummy = air_status_next;
-                    sp.at(k).rod_labels.execute(dummy, ctx);
-                    ROCKET_ASSERT(dummy == air_status_next);
+                    sp.at(k).rod_labels.execute(ctx);
+                    ROCKET_ASSERT(ctx.status() == air_status_next);
 
                     auto cmp_lo = cond.compare_partial(ctx.stack().top(1).dereference_readonly());
                     auto cmp_up = cond.compare_partial(ctx.stack().top(0).dereference_readonly());
@@ -1080,11 +1072,10 @@ solidify(AVM_Rod& rod) const
 
                 // Skip this statement if no matching clause has been found.
                 if(target_index >= sp.size())
-                  return air_status_next;
+                  return;
 
                 // Jump to the target clause.
                 Executive_Context ctx_body(xtc_plain, ctx);
-                AIR_Status status = air_status_next;
                 try {
                   for(size_t i = 0;  i < sp.size();  ++i)
                     if(i < target_index) {
@@ -1094,8 +1085,8 @@ solidify(AVM_Rod& rod) const
                     }
                     else {
                       // Execute the body of this clause.
-                      sp.at(i).rod_body.execute(status, ctx_body);
-                      if(do_break_or_continue(status, { air_status_break, air_status_break_switch },
+                      sp.at(i).rod_body.execute(ctx_body);
+                      if(do_break_or_continue(ctx_body, { air_status_break, air_status_break_switch },
                                               { /* non-continueable */ }))
                         break;
                     }
@@ -1104,8 +1095,7 @@ solidify(AVM_Rod& rod) const
                   ctx_body.on_scope_exit_exceptional(except);
                   throw;
                 }
-                ctx_body.on_scope_exit_normal(status);
-                return status;
+                ctx_body.on_scope_exit_normal();
               }
 
             // Uparam
@@ -1149,7 +1139,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1157,21 +1147,17 @@ solidify(AVM_Rod& rod) const
                 // This is the same as a `do`..`while` loop in other languages.
                 // A `break while` statement shall terminate the loop and return
                 // `air_status_next` to resume execution after the loop body.
-                AIR_Status status = air_status_next;
                 for(;;) {
-                  // Execute the body.
-                  do_execute_block(status, sp.rods_body, ctx);
-                  if(do_break_or_continue(status, { air_status_break, air_status_break_while },
+                  do_execute_block(sp.rods_body, ctx);
+                  if(do_break_or_continue(ctx, { air_status_break, air_status_break_while },
                                           { air_status_continue, air_status_continue_while }))
                     break;
 
-                  // Check the condition.
-                  sp.rods_cond.execute(status, ctx);
-                  ROCKET_ASSERT(status == air_status_next);
+                  sp.rods_cond.execute(ctx);
+                  ROCKET_ASSERT(ctx.status() == air_status_next);
                   if(ctx.stack().top().dereference_readonly().test() == negative)
                     break;
                 }
-                return status;
               }
 
             // Uparam
@@ -1213,7 +1199,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1221,21 +1207,17 @@ solidify(AVM_Rod& rod) const
                 // This is the same as a `while` loop in other languages. A
                 // `break while` statement shall terminate the loop and return
                 // `air_status_next` to resume execution after the loop body.
-                AIR_Status status = air_status_next;
                 for(;;) {
-                  // Check the condition.
-                  sp.rods_cond.execute(status, ctx);
-                  ROCKET_ASSERT(status == air_status_next);
+                  sp.rods_cond.execute(ctx);
+                  ROCKET_ASSERT(ctx.status() == air_status_next);
                   if(ctx.stack().top().dereference_readonly().test() == negative)
                     break;
 
-                  // Execute the body.
-                  do_execute_block(status, sp.rods_body, ctx);
-                  if(do_break_or_continue(status, { air_status_break, air_status_break_while },
+                  do_execute_block(sp.rods_body, ctx);
+                  if(do_break_or_continue(ctx, { air_status_break, air_status_break_while },
                                           { air_status_continue, air_status_continue_while }))
                     break;
                 }
-                return status;
               }
 
             // Uparam
@@ -1280,7 +1262,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1290,7 +1272,6 @@ solidify(AVM_Rod& rod) const
                 // context oweing to the fact that the key and mapped references
                 // outlast every iteration.
                 Executive_Context ctx_for(xtc_plain, ctx);
-                AIR_Status status = air_status_next;
                 try {
                   // Create key and mapped references.
                   if(!sp.name_key.empty())
@@ -1299,8 +1280,8 @@ solidify(AVM_Rod& rod) const
 
                   // Evaluate the range initializer and set the range up, which isn't
                   // going to change for all loops.
-                  sp.rod_init.execute(status, ctx_for);
-                  ROCKET_ASSERT(status == air_status_next);
+                  sp.rod_init.execute(ctx_for);
+                  ROCKET_ASSERT(ctx_for.status() == air_status_next);
 
                   Reference* qkey_ref = nullptr;
                   if(!sp.name_key.empty())
@@ -1333,8 +1314,8 @@ solidify(AVM_Rod& rod) const
                       do_push_subscript_and_check(*mapped_ref, move(xsub));
 
                       // Execute the loop body.
-                      do_execute_block(status, sp.rod_body, ctx_for);
-                      if(do_break_or_continue(status, { air_status_break, air_status_break_for },
+                      do_execute_block(sp.rod_body, ctx_for);
+                      if(do_break_or_continue(ctx_for, { air_status_break, air_status_break_for },
                                               { air_status_continue, air_status_continue_for }))
                         break;
                     }
@@ -1361,8 +1342,8 @@ solidify(AVM_Rod& rod) const
                       do_push_subscript_and_check(*mapped_ref, move(xsub));
 
                       // Execute the loop body.
-                      do_execute_block(status, sp.rod_body, ctx_for);
-                      if(do_break_or_continue(status, { air_status_break, air_status_break_for },
+                      do_execute_block(sp.rod_body, ctx_for);
+                      if(do_break_or_continue(ctx_for, { air_status_break, air_status_break_for },
                                               { air_status_continue, air_status_continue_for }))
                         break;
                     }
@@ -1375,8 +1356,7 @@ solidify(AVM_Rod& rod) const
                   ctx_for.on_scope_exit_exceptional(except);
                   throw;
                 }
-                ctx_for.on_scope_exit_normal(status);
-                return status;
+                ctx_for.on_scope_exit_normal();
               }
 
             // Uparam
@@ -1419,7 +1399,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1429,37 +1409,35 @@ solidify(AVM_Rod& rod) const
                 // context oweing to the fact that names declared in the first segment
                 // outlast every iteration.
                 Executive_Context ctx_for(xtc_plain, ctx);
-                AIR_Status status = air_status_next;
                 try {
                   // Execute the loop initializer, which shall only be a definition or
                   // an expression statement.
-                  sp.rod_init.execute(status, ctx_for);
-                  ROCKET_ASSERT(status == air_status_next);
+                  sp.rod_init.execute(ctx_for);
+                  ROCKET_ASSERT(ctx_for.status() == air_status_next);
+
                   for(;;) {
-                    // Check the condition. There is a special case: If the condition
-                    // is empty then the loop is infinite.
-                    sp.rod_cond.execute(status, ctx_for);
-                    ROCKET_ASSERT(status == air_status_next);
+                    // Check the condition. If the condition is empty, then it is
+                    // always true, and the loop is infinite.
+                    sp.rod_cond.execute(ctx_for);
+                    ROCKET_ASSERT(ctx_for.status() == air_status_next);
                     if(ctx_for.stack().size() && !ctx_for.stack().top().dereference_readonly().test())
                       break;
 
-                    // Execute the body.
-                    do_execute_block(status, sp.rod_body, ctx_for);
-                    if(do_break_or_continue(status, { air_status_break, air_status_break_for },
+                    do_execute_block(sp.rod_body, ctx_for);
+                    if(do_break_or_continue(ctx_for, { air_status_break, air_status_break_for },
                                             { air_status_continue, air_status_continue_for }))
                       break;
 
                     // Execute the increment.
-                    sp.rod_step.execute(status, ctx_for);
-                    ROCKET_ASSERT(status == air_status_next);
+                    sp.rod_step.execute(ctx_for);
+                    ROCKET_ASSERT(ctx_for.status() == air_status_next);
                   }
                 }
                 catch(Runtime_Error& except) {
                   ctx_for.on_scope_exit_exceptional(except);
                   throw;
                 }
-                ctx_for.on_scope_exit_normal(status);
-                return status;
+                ctx_for.on_scope_exit_normal();
               }
 
             // Uparam
@@ -1504,7 +1482,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const auto& try_sloc = head->pv_meta->sloc;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1512,11 +1490,9 @@ solidify(AVM_Rod& rod) const
                 // This is almost identical to JavaScript but not to C++. Only one
                 // `catch` clause is allowed.
                 try {
-                  AIR_Status status = air_status_next;
-                  do_execute_block(status, sp.rod_try, ctx);
-                  if(status == air_status_return)
+                  do_execute_block(sp.rod_try, ctx);
+                  if(ctx.status() == air_status_return)
                     ctx.stack().mut_top().check_function_result(ctx.global());
-                  return status;
                 }
                 catch(Runtime_Error& except) {
                   // Append a frame due to exit of the `try` clause.
@@ -1527,7 +1503,6 @@ solidify(AVM_Rod& rod) const
                   // User-provided bindings may obtain the current exception using
                   // `::std::current_exception`.
                   Executive_Context ctx_catch(xtc_plain, ctx);
-                  AIR_Status status = air_status_next;
                   try {
                     // Set backtrace frames.
                     V_array backtrace;
@@ -1545,15 +1520,14 @@ solidify(AVM_Rod& rod) const
                     ctx_catch.insert_named_reference(sp.name_except).set_temporary(except.value());
 
                     // Execute the `catch` clause.
-                    sp.rod_catch.execute(status, ctx_catch);
+                    sp.rod_catch.execute(ctx_catch);
                   }
                   catch(Runtime_Error& nested) {
                     ctx_catch.on_scope_exit_exceptional(nested);
                     nested.push_frame_catch(sp.sloc_catch, except.value());
                     throw;
                   }
-                  ctx_catch.on_scope_exit_normal(status);
-                  return status;
+                  ctx_catch.on_scope_exit_normal();
                 }
               }
 
@@ -1591,7 +1565,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__, __noreturn__)) -> AIR_Status
+              __attribute__((__cold__, __noreturn__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1637,7 +1611,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1645,7 +1619,6 @@ solidify(AVM_Rod& rod) const
                 const auto& tval = ctx.stack().top().dereference_readonly();
                 if(ROCKET_UNEXPECT(!tval.test()))
                   throw Runtime_Error(xtc_assert, sp.sloc, sp.msg);
-                return air_status_next;
               }
 
             // Uparam
@@ -1671,10 +1644,10 @@ solidify(AVM_Rod& rod) const
           up2.u0 = altr.status;
 
           rod.push_function(
-            +[](Executive_Context& /*ctx*/, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+            +[](Executive_Context& ctx, const AVM_Rod::Header* head)
+              __attribute__((__hot__, __flatten__))
               {
-                return static_cast<AIR_Status>(head->uparam.u0);
+                ctx.status() = static_cast<AIR_Status>(head->uparam.u0);
               }
 
             // Uparam
@@ -1701,21 +1674,16 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool by_ref = head->uparam.b0;
 
-                if(by_ref) {
-                  // The argument is passed by reference, so check whether it is
-                  // dereferenceable.
+                // Ensure the argument is dereferenceable. If it is to be passed
+                // by value, also convert it to a temporary value.
+                if(by_ref)
                   ctx.stack().top().dereference_readonly();
-                  return air_status_next;
-                }
-                else {
-                  // The argument is passed by copy, so convert it to a temporary.
+                else
                   ctx.stack().mut_top().dereference_copy();
-                  return air_status_next;
-                }
               }
 
             // Uparam
@@ -1747,7 +1715,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -1763,7 +1731,6 @@ solidify(AVM_Rod& rod) const
 
                 // Push a copy of the reference onto the stack.
                 ctx.stack().push() = *qref;
-                return air_status_next;
               }
 
             // Uparam
@@ -1798,7 +1765,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const uint32_t depth = head->uparam.u01;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -1820,7 +1787,6 @@ solidify(AVM_Rod& rod) const
 
                 // Push a copy of the reference onto the stack.
                 ctx.stack().push() = *qref;
-                return air_status_next;
               }
 
             // Uparam
@@ -1852,13 +1818,12 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Push a copy of the captured reference.
                 ctx.stack().push() = sp.ref;
-                return air_status_next;
               }
 
             // Uparam
@@ -1900,7 +1865,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = head->pv_meta->sloc;
@@ -1911,7 +1876,6 @@ solidify(AVM_Rod& rod) const
 
                 // Push the function as a temporary value.
                 ctx.stack().push().set_temporary(optmz.create_function(sloc, sp.func));
-                return air_status_next;
               }
 
             // Uparam
@@ -1952,18 +1916,16 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // Read the condition and evaluate the corresponding subexpression.
-                AIR_Status status = air_status_next;
+                // Check the condition and pick a branch.
                 if(ctx.stack().top().dereference_readonly().test())
-                  do_evaluate_subexpression(status, ctx, assign, sp.rod_true);
+                  do_evaluate_subexpression(ctx, assign, sp.rod_true);
                 else
-                  do_evaluate_subexpression(status, ctx, assign, sp.rod_false);
-                return status;
+                  do_evaluate_subexpression(ctx, assign, sp.rod_false);
               }
 
             // Uparam
@@ -1996,7 +1958,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const uint32_t nargs = head->uparam.u2345;
@@ -2012,7 +1974,7 @@ solidify(AVM_Rod& rod) const
                 // Invoke the target function.
                 auto target = do_get_target_function(ctx.stack().top());
                 ctx.stack().mut_top().pop_subscript();
-                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
+                do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
             // Uparam
@@ -2039,7 +2001,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const uint32_t nelems = head->uparam.u2345;
 
@@ -2053,7 +2015,6 @@ solidify(AVM_Rod& rod) const
 
                 // Push the array as a temporary.
                 ctx.stack().push().set_temporary(move(arr));
-                return air_status_next;
               }
 
             // Uparam
@@ -2085,7 +2046,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -2100,7 +2061,6 @@ solidify(AVM_Rod& rod) const
 
                 // Push the object as a temporary.
                 ctx.stack().push().set_temporary(move(obj));
-                return air_status_next;
               }
 
             // Uparam
@@ -2131,7 +2091,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2152,7 +2112,7 @@ solidify(AVM_Rod& rod) const
                         top.set_temporary(val);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
@@ -2165,7 +2125,7 @@ solidify(AVM_Rod& rod) const
                         top.set_temporary(val);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2190,7 +2150,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2211,7 +2171,7 @@ solidify(AVM_Rod& rod) const
                         top.set_temporary(val);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
@@ -2224,7 +2184,7 @@ solidify(AVM_Rod& rod) const
                         top.set_temporary(val);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2249,7 +2209,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2257,7 +2217,7 @@ solidify(AVM_Rod& rod) const
                     // `assign` is ignored.
                     Value val = top.dereference_unset();
                     top.set_temporary(move(val));
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2278,14 +2238,14 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
                     // Push an array head subscript. `assign` is ignored.
                     Subscript::S_array_head xsub = { };
                     do_push_subscript_and_check(top, move(xsub));
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2306,14 +2266,14 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
                     // Push an array tail subscript. `assign` is ignored.
                     Subscript::S_array_tail xsub = { };
                     do_push_subscript_and_check(top, move(xsub));
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2334,7 +2294,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2342,7 +2302,7 @@ solidify(AVM_Rod& rod) const
                     uint32_t seed = ctx.global().random_engine()->bump();
                     Subscript::S_array_random xsub = { seed };
                     do_push_subscript_and_check(top, move(xsub));
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2363,7 +2323,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
@@ -2371,7 +2331,7 @@ solidify(AVM_Rod& rod) const
                     // the result as a temporary boolean. `assign` is ignored.
                     bool val = top.is_void();
                     top.set_temporary(val);
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2392,7 +2352,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
@@ -2400,7 +2360,7 @@ solidify(AVM_Rod& rod) const
                     // `assign` is ignored.
                     top.dereference_mutable() = move(rhs);
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2421,7 +2381,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
@@ -2431,14 +2391,14 @@ solidify(AVM_Rod& rod) const
                       Subscript::S_array_index xsub = { rhs.as_integer() };
                       do_push_subscript_and_check(top, move(xsub));
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_string) {
                       Subscript::S_object_key xsub = { rhs.as_string() };
                       do_push_subscript_and_check(top, move(xsub));
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2462,11 +2422,16 @@ solidify(AVM_Rod& rod) const
             case xop_pos:
               // unary
               rod.push_function(
-                +[](Executive_Context& /*ctx*/, const AVM_Rod::Header* /*head*/)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                +[](Executive_Context& ctx, const AVM_Rod::Header* head)
+                  __attribute__((__hot__, __flatten__))
                   {
+                    const bool assign = head->uparam.b0;
+                    Reference& top = ctx.stack().mut_top();
+                    Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
+
                     // This operator does nothing.
-                    return air_status_next;
+                    (void) rhs;
+                    return;
                   }
 
                 // Uparam
@@ -2487,7 +2452,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2503,7 +2468,7 @@ solidify(AVM_Rod& rod) const
                                  "Integer negation overflow (operand was `$1`)", val);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
@@ -2514,7 +2479,7 @@ solidify(AVM_Rod& rod) const
                       bits ^= INT64_MIN;
 
                       bcopy(val, bits);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2539,7 +2504,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2549,20 +2514,20 @@ solidify(AVM_Rod& rod) const
                     if(rhs.type() == type_boolean) {
                       V_boolean& val = rhs.mut_boolean();
                       val = !val;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_integer) {
                       V_integer& val = rhs.mut_integer();
                       val = ~val;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_string) {
                       V_string& val = rhs.mut_string();
                       for(auto it = val.mut_begin();  it != val.end();  ++it)
                         *it = static_cast<char>(*it ^ -1);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2587,7 +2552,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2595,7 +2560,7 @@ solidify(AVM_Rod& rod) const
 
                     // Perform the builtin boolean conversion and negate the result.
                     rhs = !rhs.test();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2616,7 +2581,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2625,22 +2590,22 @@ solidify(AVM_Rod& rod) const
                     // Get the number of elements in the operand.
                     if(rhs.type() == type_null) {
                       rhs = V_integer(0);
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_string) {
                       rhs = V_integer(rhs.as_string().size());
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_array) {
                       rhs = V_integer(rhs.as_array().size());
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_object) {
                       rhs = V_integer(rhs.as_object().size());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2665,7 +2630,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2673,7 +2638,7 @@ solidify(AVM_Rod& rod) const
 
                     // Get the type of the operand as a string.
                     rhs = ::rocket::sref(describe_type(rhs.type()));
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -2694,7 +2659,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2704,7 +2669,7 @@ solidify(AVM_Rod& rod) const
                     // number always.
                     if(rhs.is_real()) {
                       rhs = ::std::sqrt(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2729,7 +2694,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2739,12 +2704,12 @@ solidify(AVM_Rod& rod) const
                     // of an arithmetic type. An integer is never a NaN.
                     if(rhs.type() == type_integer) {
                       rhs = false;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = ::std::isnan(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2769,7 +2734,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2779,12 +2744,12 @@ solidify(AVM_Rod& rod) const
                     // be of an arithmetic type. An integer is never an infinity.
                     if(rhs.type() == type_integer) {
                       rhs = false;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = ::std::isinf(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2809,7 +2774,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2825,7 +2790,7 @@ solidify(AVM_Rod& rod) const
                                  "Integer negation overflow (operand was `$1`)", val);
 
                       val ^= (val ^ neg_val) & (val >> 63);
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
@@ -2834,7 +2799,7 @@ solidify(AVM_Rod& rod) const
                       double result = ::std::fabs(val);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2859,7 +2824,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2868,12 +2833,12 @@ solidify(AVM_Rod& rod) const
                     // Get the sign bit of the operand as a boolean value.
                     if(rhs.type() == type_integer) {
                       rhs = rhs.as_integer() < 0;
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = ::std::signbit(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2898,7 +2863,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2906,12 +2871,12 @@ solidify(AVM_Rod& rod) const
 
                     // Round the operand to the nearest integer of the same type.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::round(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2936,7 +2901,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2945,12 +2910,12 @@ solidify(AVM_Rod& rod) const
                     // Round the operand to the nearest integer of the same type,
                     // towards negative infinity.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::floor(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -2975,7 +2940,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -2984,12 +2949,12 @@ solidify(AVM_Rod& rod) const
                     // Round the operand to the nearest integer of the same type,
                     // towards positive infinity.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::ceil(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3014,7 +2979,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3022,12 +2987,12 @@ solidify(AVM_Rod& rod) const
 
                     // Truncate the operand to the nearest integer towards zero.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs.mut_real() = ::std::trunc(rhs.as_real());
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3052,7 +3017,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3060,12 +3025,12 @@ solidify(AVM_Rod& rod) const
 
                     // Round the operand to the nearest integer.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::round(rhs.as_real()));
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3090,7 +3055,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3099,12 +3064,12 @@ solidify(AVM_Rod& rod) const
                     // Round the operand to the nearest integer towards negative
                     // infinity.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3129,7 +3094,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3138,12 +3103,12 @@ solidify(AVM_Rod& rod) const
                     // Round the operand to the nearest integer towards positive
                     //  infinity.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3168,7 +3133,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3176,12 +3141,12 @@ solidify(AVM_Rod& rod) const
 
                     // Truncate the operand to the nearest integer towards zero.
                     if(rhs.type() == type_integer) {
-                      return air_status_next;
+                      return;
                     }
 
                     if(rhs.type() == type_real) {
                       rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3206,7 +3171,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3217,7 +3182,7 @@ solidify(AVM_Rod& rod) const
                       V_integer& val = rhs.mut_integer();
 
                       val = (int64_t) ROCKET_LZCNT64((uint64_t) val);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3242,7 +3207,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3253,7 +3218,7 @@ solidify(AVM_Rod& rod) const
                       V_integer& val = rhs.mut_integer();
 
                       val = (int64_t) ROCKET_TZCNT64((uint64_t) val);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3278,7 +3243,7 @@ solidify(AVM_Rod& rod) const
               // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
@@ -3289,7 +3254,7 @@ solidify(AVM_Rod& rod) const
                       V_integer& val = rhs.mut_integer();
 
                       val = (int64_t) ROCKET_POPCNT64((uint64_t) val);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3314,7 +3279,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const auto& rhs = ctx.stack().top().dereference_readonly();
@@ -3325,7 +3290,7 @@ solidify(AVM_Rod& rod) const
                     // are considered unequal.
                     lhs = lhs.compare_partial(rhs) == compare_equal;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3346,7 +3311,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3357,7 +3322,7 @@ solidify(AVM_Rod& rod) const
                     // values are considered unequal.
                     lhs = lhs.compare_partial(rhs) != compare_equal;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3378,7 +3343,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3388,7 +3353,7 @@ solidify(AVM_Rod& rod) const
                     // Check whether the two operands are unordered.
                     lhs = lhs.compare_partial(rhs) == compare_unordered;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3409,7 +3374,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3420,7 +3385,7 @@ solidify(AVM_Rod& rod) const
                     // If they are unordered, an exception shall be thrown.
                     lhs = lhs.compare_total(rhs) == compare_less;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3441,7 +3406,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3452,7 +3417,7 @@ solidify(AVM_Rod& rod) const
                     // If they are unordered, an exception shall be thrown.
                     lhs = lhs.compare_total(rhs) == compare_greater;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3473,7 +3438,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3485,7 +3450,7 @@ solidify(AVM_Rod& rod) const
                     // thrown.
                     lhs = lhs.compare_total(rhs) != compare_greater;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3506,7 +3471,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3518,7 +3483,7 @@ solidify(AVM_Rod& rod) const
                     // be thrown.
                     lhs = lhs.compare_total(rhs) != compare_less;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3539,7 +3504,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3555,7 +3520,7 @@ solidify(AVM_Rod& rod) const
                     else
                       lhs = cmp - compare_equal;
                     ctx.stack().pop();
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -3576,7 +3541,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3597,7 +3562,7 @@ solidify(AVM_Rod& rod) const
 
                       val = result;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real() && rhs.is_real()) {
@@ -3606,7 +3571,7 @@ solidify(AVM_Rod& rod) const
 
                       val += other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string() && rhs.is_string()) {
@@ -3615,7 +3580,7 @@ solidify(AVM_Rod& rod) const
 
                       val.append(other);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -3624,7 +3589,7 @@ solidify(AVM_Rod& rod) const
 
                       val |= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3650,7 +3615,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3672,7 +3637,7 @@ solidify(AVM_Rod& rod) const
 
                       val = result;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real() && rhs.is_real()) {
@@ -3682,7 +3647,7 @@ solidify(AVM_Rod& rod) const
                       // Overflow will result in an infinity, so this is safe.
                       val -= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -3692,7 +3657,7 @@ solidify(AVM_Rod& rod) const
                       // Perform logical XOR of the operands.
                       val ^= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3718,7 +3683,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3740,7 +3705,7 @@ solidify(AVM_Rod& rod) const
 
                       val = result;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real() && rhs.is_real()) {
@@ -3749,7 +3714,7 @@ solidify(AVM_Rod& rod) const
 
                       val *= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_integer() && rhs.is_string()) {
@@ -3759,7 +3724,7 @@ solidify(AVM_Rod& rod) const
 
                       do_duplicate_sequence(val, count);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string() && rhs.is_integer()) {
@@ -3768,7 +3733,7 @@ solidify(AVM_Rod& rod) const
 
                       do_duplicate_sequence(val, count);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_integer() && rhs.is_array()) {
@@ -3778,7 +3743,7 @@ solidify(AVM_Rod& rod) const
 
                       do_duplicate_sequence(val, count);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array() && rhs.is_integer()) {
@@ -3787,7 +3752,7 @@ solidify(AVM_Rod& rod) const
 
                       do_duplicate_sequence(val, count);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -3796,7 +3761,7 @@ solidify(AVM_Rod& rod) const
 
                       val &= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3822,7 +3787,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3848,7 +3813,7 @@ solidify(AVM_Rod& rod) const
 
                       val /= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real() && rhs.is_real()) {
@@ -3857,7 +3822,7 @@ solidify(AVM_Rod& rod) const
 
                       val /= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3883,7 +3848,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3909,7 +3874,7 @@ solidify(AVM_Rod& rod) const
 
                       val %= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real() && rhs.is_real()) {
@@ -3918,7 +3883,7 @@ solidify(AVM_Rod& rod) const
 
                       val = ::std::fmod(val, other);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -3944,7 +3909,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -3960,7 +3925,7 @@ solidify(AVM_Rod& rod) const
 
                       val &= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string() && rhs.is_string()) {
@@ -3973,7 +3938,7 @@ solidify(AVM_Rod& rod) const
                       for(auto it = val.mut_begin();  it != val.end();  ++it, ++maskp)
                         *it = static_cast<char>(*it & *maskp);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -3982,7 +3947,7 @@ solidify(AVM_Rod& rod) const
 
                       val &= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4008,7 +3973,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4024,7 +3989,7 @@ solidify(AVM_Rod& rod) const
 
                       val |= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string() && rhs.is_string()) {
@@ -4037,7 +4002,7 @@ solidify(AVM_Rod& rod) const
                       for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
                         *valp = static_cast<char>(*valp | *it);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -4046,7 +4011,7 @@ solidify(AVM_Rod& rod) const
 
                       val |= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4072,7 +4037,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4088,7 +4053,7 @@ solidify(AVM_Rod& rod) const
 
                       val ^= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string() && rhs.is_string()) {
@@ -4101,7 +4066,7 @@ solidify(AVM_Rod& rod) const
                       for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
                         *valp = static_cast<char>(*valp ^ *it);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_boolean() && rhs.is_boolean()) {
@@ -4110,7 +4075,7 @@ solidify(AVM_Rod& rod) const
 
                       val ^= other;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4136,7 +4101,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4150,7 +4115,7 @@ solidify(AVM_Rod& rod) const
 
                       ROCKET_ADD_OVERFLOW(val, other, &val);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4176,7 +4141,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4190,7 +4155,7 @@ solidify(AVM_Rod& rod) const
 
                       ROCKET_SUB_OVERFLOW(val, other, &val);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4216,7 +4181,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4230,7 +4195,7 @@ solidify(AVM_Rod& rod) const
 
                       ROCKET_MUL_OVERFLOW(val, other, &val);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4256,7 +4221,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4271,7 +4236,7 @@ solidify(AVM_Rod& rod) const
                       if(ROCKET_ADD_OVERFLOW(val, other, &val))
                         val = (other >> 63) ^ INT64_MAX;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4297,7 +4262,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4312,7 +4277,7 @@ solidify(AVM_Rod& rod) const
                       if(ROCKET_SUB_OVERFLOW(val, other, &val))
                         val = (other >> 63) ^ INT64_MIN;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4338,7 +4303,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4354,7 +4319,7 @@ solidify(AVM_Rod& rod) const
                       if(ROCKET_MUL_OVERFLOW(val, other, &val))
                         val = (sign >> 63) ^ INT64_MAX;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4380,7 +4345,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4407,7 +4372,7 @@ solidify(AVM_Rod& rod) const
                       val = (int64_t) ((uint64_t) val << (count & 63));
                       val &= ((count - 64) >> 63);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -4417,7 +4382,7 @@ solidify(AVM_Rod& rod) const
                       val.erase(0, tlen);
                       val.append(tlen, '\0');
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -4427,7 +4392,7 @@ solidify(AVM_Rod& rod) const
                       val.erase(0, tlen);
                       val.append(tlen);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4453,7 +4418,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4480,7 +4445,7 @@ solidify(AVM_Rod& rod) const
                       val = (int64_t) ((uint64_t) val >> (count & 63));
                       val &= ((count - 64) >> 63);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -4490,7 +4455,7 @@ solidify(AVM_Rod& rod) const
                       val.pop_back(tlen);
                       val.insert(0, tlen, '\0');
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -4500,7 +4465,7 @@ solidify(AVM_Rod& rod) const
                       val.pop_back(tlen);
                       val.insert(0, tlen);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4526,7 +4491,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4558,7 +4523,7 @@ solidify(AVM_Rod& rod) const
 
                       reinterpret_cast<uint64_t&>(val) <<= count;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -4567,7 +4532,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
                       val.append(tlen, '\0');
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -4576,7 +4541,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
                       val.append(tlen);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4602,7 +4567,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4627,7 +4592,7 @@ solidify(AVM_Rod& rod) const
                       int64_t count = ::rocket::min(rhs.as_integer(), 63);
                       val >>= count;
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -4636,7 +4601,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -4645,7 +4610,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
                       ctx.stack().pop();
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4671,7 +4636,7 @@ solidify(AVM_Rod& rod) const
               // fused multiply-add; ternary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const Value& rhs = ctx.stack().top().dereference_readonly();
@@ -4687,7 +4652,7 @@ solidify(AVM_Rod& rod) const
 
                       val = ::std::fma(val, y_mul, z_add);
                       ctx.stack().pop(2);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -4724,7 +4689,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const bool immutable = head->uparam.b0;
                 const uint32_t nelems = head->uparam.u2345;
@@ -4751,7 +4716,6 @@ solidify(AVM_Rod& rod) const
 
                   var->set_immutable(immutable);
                 }
-                return air_status_next;
               }
 
             // Uparam
@@ -4786,7 +4750,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const bool immutable = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4813,7 +4777,6 @@ solidify(AVM_Rod& rod) const
 
                   var->set_immutable(immutable);
                 }
-                return air_status_next;
               }
 
             // Uparam
@@ -4848,7 +4811,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool immutable = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -4863,7 +4826,6 @@ solidify(AVM_Rod& rod) const
                 // Initialize it to null.
                 var->initialize(nullopt);
                 var->set_immutable(immutable);
-                return air_status_next;
               }
 
             // Uparam
@@ -4889,13 +4851,9 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
-                const auto& sloc = head->pv_meta->sloc;
-
-                // This is for debugging only.
-                ctx.global().call_hook(&Abstract_Hooks::on_trap, sloc, ctx);
-                return air_status_next;
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, head->pv_meta->sloc, ctx);
               }
 
             // Uparam
@@ -4922,7 +4880,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const auto& sloc = head->pv_meta->sloc;
@@ -4998,7 +4956,7 @@ solidify(AVM_Rod& rod) const
                 // Invoke the target function.
                 auto target = do_get_target_function(ctx.stack().top());
                 ctx.stack().mut_top().pop_subscript();
-                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
+                do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
             // Uparam
@@ -5030,7 +4988,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 const auto& sloc = head->pv_meta->sloc;
@@ -5044,7 +5002,6 @@ solidify(AVM_Rod& rod) const
                 AVM_Rod rod_body;
                 do_solidify_nodes(rod_body, bound_body);
                 ctx.mut_defer().emplace_back(sloc, move(rod_body));
-                return air_status_next;
               }
 
             // Uparam
@@ -5083,7 +5040,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const uint32_t nargs = head->uparam.u2345;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
@@ -5165,13 +5122,12 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Declare a void reference.
                 ctx.insert_named_reference(sp.name).clear();
-                return air_status_next;
               }
 
             // Uparam
@@ -5203,14 +5159,13 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Move a reference from the stack into the current context.
                 ctx.insert_named_reference(sp.name) = move(ctx.stack().mut_top());
                 ctx.stack().pop();
-                return air_status_next;
               }
 
             // Uparam
@@ -5242,7 +5197,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__cold__)) -> AIR_Status
+              __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
@@ -5253,18 +5208,18 @@ solidify(AVM_Rod& rod) const
                 // Evaluate the operand in a `try` block.
                 Value exval;
                 try {
-                  AIR_Status dummy = air_status_next;
-                  sp.rod_body.execute(dummy, ctx);
-                  ROCKET_ASSERT(dummy == air_status_next);
+                  sp.rod_body.execute(ctx);
+                  ROCKET_ASSERT(ctx.status() == air_status_next);
                 }
                 catch(Runtime_Error& except) {
                   exval = except.value();
                 }
 
-                // Push the exception value onto the original partial expression.
+                // Restore the original partial expression, then push the exception
+                // value back onto it.
                 ctx.stack().swap(saved_stack);
                 ctx.stack().push().set_temporary(move(exval));
-                return air_status_next;
+                ctx.status() = air_status_next;
               }
 
             // Uparam
@@ -5296,30 +5251,23 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool by_ref = head->uparam.b0;
                 const bool is_void = head->uparam.b1;
                 const auto& sloc = head->pv_meta->sloc;
 
-                if(is_void || ctx.stack().top().is_void()) {
-                  // Discard the result.
-                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return_void;
+                if(!is_void && !ctx.stack().top().is_void()) {
+                  // Ensure the result is dereferenceable. If it is to be
+                  // returned by value, also convert it to a temporary value.
+                  if(by_ref)
+                    ctx.stack().top().dereference_readonly();
+                  else
+                    ctx.stack().mut_top().dereference_copy();
                 }
-                else if(by_ref) {
-                  // The result is passed by reference, so check whether it is
-                  // dereferenceable.
-                  ctx.stack().top().dereference_readonly();
-                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return;
-                }
-                else {
-                  // The result is passed by copy, so convert it to a temporary.
-                  ctx.stack().mut_top().dereference_copy();
-                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return;
-                }
+
+                ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
+                ctx.status() = is_void ? air_status_return_void : air_status_return;
               }
 
             // Uparam
@@ -5351,13 +5299,12 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Push a temporary copy of the constant.
                 ctx.stack().push().set_temporary(sp.val);
-                return air_status_next;
               }
 
             // Uparam
@@ -5387,11 +5334,10 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 ctx.swap_stacks();
                 ctx.stack().clear();
-                return air_status_next;
               }
 
             // Uparam
@@ -5418,7 +5364,7 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const auto& sloc = head->pv_meta->sloc;
@@ -5464,16 +5410,14 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Read the condition, and if it is null, evaluate the backup.
-                AIR_Status status = air_status_next;
                 if(ctx.stack().top().dereference_readonly().is_null())
-                  do_evaluate_subexpression(status, ctx, assign, sp.rod_null);
-                return status;
+                  do_evaluate_subexpression(ctx, assign, sp.rod_null);
               }
 
             // Uparam
@@ -5509,14 +5453,13 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Push a subscript.
                 Subscript::S_object_key xsub = { sp.key };
                 do_push_subscript_and_check(ctx.stack().mut_top(), move(xsub));
-                return air_status_next;
               }
 
             // Uparam
@@ -5580,14 +5523,14 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
 
                     // `assign` is ignored.
                     top.dereference_mutable() = irhs;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5608,7 +5551,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
@@ -5616,7 +5559,7 @@ solidify(AVM_Rod& rod) const
                     // Push a subscript.
                     Subscript::S_array_index xsub = { irhs };
                     do_push_subscript_and_check(top, move(xsub));
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5637,7 +5580,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5647,7 +5590,7 @@ solidify(AVM_Rod& rod) const
                     // Check whether the two operands are equal. Unordered values
                     // are considered to be unequal.
                     lhs = lhs.compare_numeric_partial(irhs) == compare_equal;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5668,7 +5611,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5678,7 +5621,7 @@ solidify(AVM_Rod& rod) const
                     // Check whether the two operands are not equal. Unordered values are
                     // considered to be unequal.
                     lhs = lhs.compare_numeric_partial(irhs) != compare_equal;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5699,7 +5642,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5708,7 +5651,7 @@ solidify(AVM_Rod& rod) const
 
                     // Check whether the two operands are unordered.
                     lhs = lhs.compare_numeric_partial(irhs) == compare_unordered;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5729,7 +5672,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5739,7 +5682,7 @@ solidify(AVM_Rod& rod) const
                     // Check whether the LHS operand is less than the RHS operand.
                     // If they are unordered, an exception shall be thrown.
                     lhs = lhs.compare_numeric_total(irhs) == compare_less;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5760,7 +5703,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5770,7 +5713,7 @@ solidify(AVM_Rod& rod) const
                     // Check whether the LHS operand is greater than the RHS operand.
                     // If they are unordered, an exception shall be thrown.
                     lhs = lhs.compare_numeric_total(irhs) == compare_greater;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5791,7 +5734,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5802,7 +5745,7 @@ solidify(AVM_Rod& rod) const
                     // RHS operand. If they are unordered, an exception shall be
                     // thrown.
                     lhs = lhs.compare_numeric_total(irhs) != compare_greater;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5823,7 +5766,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5834,7 +5777,7 @@ solidify(AVM_Rod& rod) const
                     // the RHS operand. If they are unordered, an exception shall
                     // be thrown.
                     lhs = lhs.compare_numeric_total(irhs) != compare_less;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5855,7 +5798,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5870,7 +5813,7 @@ solidify(AVM_Rod& rod) const
                       lhs = &"[unordered]";
                     else
                       lhs = cmp - compare_equal;
-                    return air_status_next;
+                    return;
                   }
 
                 // Uparam
@@ -5891,7 +5834,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5911,7 +5854,7 @@ solidify(AVM_Rod& rod) const
                                  val, other);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real()) {
@@ -5919,7 +5862,7 @@ solidify(AVM_Rod& rod) const
                       V_real other = static_cast<V_real>(irhs);
 
                       val += other;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -5945,7 +5888,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -5965,7 +5908,7 @@ solidify(AVM_Rod& rod) const
                                  val, other);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real()) {
@@ -5973,7 +5916,7 @@ solidify(AVM_Rod& rod) const
                       V_real other = static_cast<V_real>(irhs);
 
                       val -= other;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -5999,7 +5942,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6020,7 +5963,7 @@ solidify(AVM_Rod& rod) const
                                  val, other);
 
                       val = result;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real()) {
@@ -6028,7 +5971,7 @@ solidify(AVM_Rod& rod) const
                       V_real other = static_cast<V_real>(irhs);
 
                       val *= other;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -6036,7 +5979,7 @@ solidify(AVM_Rod& rod) const
                       V_integer count = irhs;
 
                       do_duplicate_sequence(val, count);
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -6044,7 +5987,7 @@ solidify(AVM_Rod& rod) const
                       V_integer count = irhs;
 
                       do_duplicate_sequence(val, count);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6070,7 +6013,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6095,7 +6038,7 @@ solidify(AVM_Rod& rod) const
                                  val, other);
 
                       val /= other;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real()) {
@@ -6103,7 +6046,7 @@ solidify(AVM_Rod& rod) const
                       V_real other = static_cast<V_real>(irhs);
 
                       val /= other;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6129,7 +6072,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6154,7 +6097,7 @@ solidify(AVM_Rod& rod) const
                                  val, other);
 
                       val %= other;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_real()) {
@@ -6162,7 +6105,7 @@ solidify(AVM_Rod& rod) const
                       V_real other = static_cast<V_real>(irhs);
 
                       val = ::std::fmod(val, other);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6188,7 +6131,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6201,7 +6144,7 @@ solidify(AVM_Rod& rod) const
                       V_integer other = irhs;
 
                       val &= other;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6227,7 +6170,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6240,7 +6183,7 @@ solidify(AVM_Rod& rod) const
                       V_integer other = irhs;
 
                       val |= other;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6266,7 +6209,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6279,7 +6222,7 @@ solidify(AVM_Rod& rod) const
                       V_integer other = irhs;
 
                       val ^= other;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6305,7 +6248,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6318,7 +6261,7 @@ solidify(AVM_Rod& rod) const
                       V_integer other = irhs;
 
                       ROCKET_ADD_OVERFLOW(val, other, &val);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6344,7 +6287,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6357,7 +6300,7 @@ solidify(AVM_Rod& rod) const
                       V_integer other = irhs;
 
                       ROCKET_SUB_OVERFLOW(val, other, &val);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6383,7 +6326,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6396,7 +6339,7 @@ solidify(AVM_Rod& rod) const
                       V_integer other = irhs;
 
                       ROCKET_MUL_OVERFLOW(val, other, &val);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6422,7 +6365,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6436,7 +6379,7 @@ solidify(AVM_Rod& rod) const
 
                       if(ROCKET_ADD_OVERFLOW(val, other, &val))
                         val = (other >> 63) ^ INT64_MAX;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6462,7 +6405,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6476,7 +6419,7 @@ solidify(AVM_Rod& rod) const
 
                       if(ROCKET_SUB_OVERFLOW(val, other, &val))
                         val = (other >> 63) ^ INT64_MIN;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6502,7 +6445,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6517,7 +6460,7 @@ solidify(AVM_Rod& rod) const
 
                       if(ROCKET_MUL_OVERFLOW(val, other, &val))
                         val = (sign >> 63) ^ INT64_MAX;
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6543,7 +6486,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6564,7 +6507,7 @@ solidify(AVM_Rod& rod) const
                       int64_t count = irhs;
                       val = (int64_t) ((uint64_t) val << (count & 63));
                       val &= ((count - 64) >> 63);
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -6573,7 +6516,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
                       val.erase(0, tlen);
                       val.append(tlen, '\0');
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -6582,7 +6525,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
                       val.erase(0, tlen);
                       val.append(tlen);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6608,7 +6551,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6629,7 +6572,7 @@ solidify(AVM_Rod& rod) const
                       int64_t count = irhs;
                       val = (int64_t) ((uint64_t) val >> (count & 63));
                       val &= ((count - 64) >> 63);
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -6638,7 +6581,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
                       val.pop_back(tlen);
                       val.insert(0, tlen, '\0');
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -6647,7 +6590,7 @@ solidify(AVM_Rod& rod) const
                       size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
                       val.pop_back(tlen);
                       val.insert(0, tlen);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6673,7 +6616,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6699,7 +6642,7 @@ solidify(AVM_Rod& rod) const
                                  lhs, irhs);
 
                       reinterpret_cast<uint64_t&>(val) <<= count;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -6707,7 +6650,7 @@ solidify(AVM_Rod& rod) const
 
                       size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
                       val.append(tlen, '\0');
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -6715,7 +6658,7 @@ solidify(AVM_Rod& rod) const
 
                       size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
                       val.append(tlen);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6741,7 +6684,7 @@ solidify(AVM_Rod& rod) const
               // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-                  __attribute__((__hot__, __flatten__)) -> AIR_Status
+                  __attribute__((__hot__, __flatten__))
                   {
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
@@ -6760,7 +6703,7 @@ solidify(AVM_Rod& rod) const
 
                       int64_t count = ::rocket::min(irhs, 63);
                       val >>= count;
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_string()) {
@@ -6768,7 +6711,7 @@ solidify(AVM_Rod& rod) const
 
                       size_t tlen = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
-                      return air_status_next;
+                      return;
                     }
 
                     if(lhs.is_array()) {
@@ -6776,7 +6719,7 @@ solidify(AVM_Rod& rod) const
 
                       size_t tlen = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.pop_back(tlen);
-                      return air_status_next;
+                      return;
                     }
 
                     throw Runtime_Error(xtc_format,
@@ -6813,30 +6756,22 @@ solidify(AVM_Rod& rod) const
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
-              __attribute__((__hot__, __flatten__)) -> AIR_Status
+              __attribute__((__hot__, __flatten__))
               {
                 const Type type = static_cast<Type>(head->uparam.u0);
                 const V_integer irhs = head->uparam.i2345;
                 const auto& sloc = head->pv_meta->sloc;
 
-                if(type == type_null) {
-                  // null
+                // Push the result as a temporary value.
+                if(type == type_null)
                   ctx.stack().push().set_temporary(nullopt);
-                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return;
-                }
-                else if(type == type_boolean) {
-                  // boolean; unnormalized
+                else if(type == type_boolean)
                   ctx.stack().push().set_temporary(-irhs < 0);
-                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return;
-                }
-                else {
-                  // integer
+                else
                   ctx.stack().push().set_temporary(irhs);
-                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return;
-                }
+
+                ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
+                ctx.status() = air_status_return;
               }
 
             // Uparam

@@ -14,12 +14,12 @@
 namespace asteria {
 
 Executive_Context::
-Executive_Context(Uxtc_function, Global_Context& xglobal, Reference_Stack& xstack,
-                  Reference_Stack& ystack, const Instantiated_Function& xfunc,
-                  Reference&& xself)
+Executive_Context(Uxtc_function, Global_Context& xglobal, AIR_Status& xstatus,
+                  Reference_Stack& xstack, Reference_Stack& ystack,
+                  const Instantiated_Function& xfunc, Reference&& xself)
   :
-    m_parent_opt(nullptr), m_global(&xglobal), m_stack(&xstack),
-    m_alt_stack(&ystack), m_func(&xfunc)
+    m_parent_opt(nullptr), m_global(&xglobal), m_status(&xstatus),
+    m_stack(&xstack), m_alt_stack(&ystack), m_func(&xfunc)
   {
     // Set the `this` reference, but only if it is a temporary value or a
     // variable. When `this` is void, it is likely that it is never
@@ -96,10 +96,11 @@ do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
 
 void
 Executive_Context::
-do_on_scope_exit_normal_slow(AIR_Status status)
+do_on_scope_exit_normal_slow()
   {
-    Reference self;
-    if(status == air_status_return) {
+    Reference saved_result;
+    AIR_Status saved_status = *(this->m_status);
+    if(saved_status == air_status_return) {
       // If a PTC wrapper was returned, append all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
       if(this->m_stack->top().is_ptc()) {
@@ -110,7 +111,8 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       }
 
       // Stash the result reference.
-      self = move(this->m_stack->mut_top());
+      saved_result = move(this->m_stack->mut_top());
+      ROCKET_ASSERT(!saved_result.is_invalid());
     }
 
     // Execute all deferred expressions backwards. If an exception is thrown,
@@ -120,9 +122,8 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       this->m_defer.pop_back();
 
       try {
-        AIR_Status dummy = air_status_next;
-        pair.second.execute(dummy, *this);
-        ROCKET_ASSERT(dummy == air_status_next);
+        pair.second.execute(*this);
+        ROCKET_ASSERT(*(this->m_status) == air_status_next);
       }
       catch(Runtime_Error& except) {
         except.push_frame_defer(pair.first);
@@ -132,8 +133,9 @@ do_on_scope_exit_normal_slow(AIR_Status status)
     }
 
     // Restore the result reference.
-    if(!self.is_invalid())
-      this->m_stack->push() = move(self);
+    if(!saved_result.is_invalid())
+      this->m_stack->push() = move(saved_result);
+    *(this->m_status) = saved_status;
   }
 
 void
@@ -147,9 +149,8 @@ do_on_scope_exit_exceptional_slow(Runtime_Error& except)
       this->m_defer.pop_back();
 
       try {
-        AIR_Status dummy = air_status_next;
-        pair.second.execute(dummy, *this);
-        ROCKET_ASSERT(dummy == air_status_next);
+        pair.second.execute(*this);
+        ROCKET_ASSERT(*(this->m_status) == air_status_next);
       }
       catch(Runtime_Error& nested) {
         except = nested;

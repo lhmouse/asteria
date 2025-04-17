@@ -4,6 +4,7 @@
 #include "../xprecompiled.hpp"
 #include "avm_rod.hpp"
 #include "../runtime/air_node.hpp"
+#include "../runtime/executive_context.hpp"
 #include "../runtime/runtime_error.hpp"
 #include "../runtime/enums.hpp"
 #include "../utils.hpp"
@@ -151,19 +152,19 @@ finalize()
 
 void
 AVM_Rod::
-execute(AIR_Status& status, Executive_Context& ctx) const
+execute(Executive_Context& ctx) const
   {
-    status = air_status_next;
+    ctx.status() = air_status_next;
     ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(ROCKET_EXPECT(status == air_status_next) && (offset != 0)) {
+    while(ROCKET_EXPECT(ctx.status() == air_status_next) && (offset != 0)) {
       auto head = this->m_bptr + this->m_einit + offset;
       offset += 1L + head->nheaders;
 
       try {
         if(head->meta_ver == 0)
-          status = (* head->pv_exec) (ctx, head);
+          (* head->pv_exec) (ctx, head);
         else
-          status = (* head->pv_meta->exec) (ctx, head);
+          (* head->pv_meta->exec) (ctx, head);
       }
       catch(Runtime_Error& except) {
         // Modify and rethrow the exception in place without copying it.
