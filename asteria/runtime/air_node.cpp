@@ -1142,6 +1142,9 @@ solidify(AVM_Rod& rod) const
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
+                // This is the same as a `do`..`while` loop in other languages.
+                // A `break while` statement shall terminate the loop and return
+                // `air_status_next` to resume execution after the loop body.
                 AIR_Status status = air_status_next;
                 for(;;) {
                   // Execute the body.
@@ -1207,6 +1210,9 @@ solidify(AVM_Rod& rod) const
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
+                // This is the same as a `while` loop in other languages. A
+                // `break while` statement shall terminate the loop and return
+                // `air_status_next` to resume execution after the loop body.
                 AIR_Status status = air_status_next;
                 for(;;) {
                   // Check the condition.
@@ -1274,8 +1280,11 @@ solidify(AVM_Rod& rod) const
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // We have to create an outer context due to the fact that the key
-                // and mapped references outlast every iteration.
+                // This is the same as a `for` loop in other languages. A `break for`
+                // statement shall terminate the loop and return  `air_status_next`
+                // to resume execution after the loop body. We have to create an outer
+                // context oweing to the fact that the key and mapped references
+                // outlast every iteration.
                 Executive_Context ctx_for(xtc_plain, ctx);
                 AIR_Status status = air_status_next;
                 try {
@@ -1418,9 +1427,11 @@ solidify(AVM_Rod& rod) const
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // This is the same as the `for` statement in C. We have to create
-                // an outer context due to the fact that names declared in the first
-                // segment outlast every iteration.
+                // This is the same as a `for` loop in other languages. A `break for`
+                // statement shall terminate the loop and return  `air_status_next`
+                // to resume execution after the loop body. We have to create an outer
+                // context oweing to the fact that names declared in the first segment
+                // outlast every iteration.
                 Executive_Context ctx_for(xtc_plain, ctx);
                 AIR_Status status = air_status_next;
                 try {
