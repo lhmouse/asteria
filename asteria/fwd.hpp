@@ -192,7 +192,9 @@ ASTERIA_DEFINE_TAG_(xtc_assert);
 ASTERIA_DEFINE_TAG_(xtc_throw);
 
 // Type erasure
-struct Rcbase : ::rocket::refcnt_base<Rcbase>
+struct Rcbase
+  :
+    ::rocket::refcnt_base<Rcbase>
   {
     virtual ~Rcbase() = default;
 
@@ -202,7 +204,9 @@ struct Rcbase : ::rocket::refcnt_base<Rcbase>
   };
 
 template<typename xReal>
-struct rcfwd : virtual Rcbase
+struct rcfwd
+  :
+    virtual Rcbase
   {
     virtual
     void
@@ -254,8 +258,10 @@ template<typename xReal>
 using rcfwd_ptr = refcnt_ptr<typename ::rocket::copy_cv<
     rcfwd<typename ::std::remove_cv<xReal>::type>, xReal>::type>;
 
-// Opaque (user-defined) type support
-struct Abstract_Opaque : rcfwd<Abstract_Opaque>
+// Abstract base for opaque (user-defined) types
+struct Abstract_Opaque
+  :
+    rcfwd<Abstract_Opaque>
   {
     // This function is called to convert this object to a human-readable string.
     virtual
@@ -286,7 +292,9 @@ operator<<(tinyfmt& fmt, const Abstract_Opaque& opaq)
   { return opaq.describe(fmt);  }
 
 // Native function support
-struct Abstract_Function : rcfwd<Abstract_Function>
+struct Abstract_Function
+  :
+    rcfwd<Abstract_Function>
   {
     // This function is called to convert this object to a human-readable string.
     virtual
@@ -470,7 +478,7 @@ tinyfmt&
 operator<<(tinyfmt& fmt, const cow_opaque& opaq)
   { return opaq.describe(fmt);  }
 
-// Function type support
+// Abstract base for functions
 class cow_function
   {
   private:
