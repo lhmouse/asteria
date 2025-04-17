@@ -156,7 +156,7 @@ class AVM_Rod
     void
     finalize();
 
-    // These are interfaces called by the runtime.
+    // These are internal interfaces that are called by the runtime.
     void
     execute(AIR_Status& status, Executive_Context& ctx) const;
 
