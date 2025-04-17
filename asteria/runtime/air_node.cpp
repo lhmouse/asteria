@@ -5237,25 +5237,22 @@ solidify(AVM_Rod& rod) const
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // Save the stack.
-                Reference_Stack saved_stack = move(ctx.stack());
-                ctx.swap_stacks();
+                // Save the current partial expression.
+                Reference_Stack saved_stack;
+                ctx.stack().swap(saved_stack);
 
-                // Evaluate the expression in a `try` block.
+                // Evaluate the operand in a `try` block.
                 Value exval;
                 try {
-                  AIR_Status status = sp.rod_body.execute(ctx);
-                  ROCKET_ASSERT(status == air_status_next);
+                  AIR_Status dummy = sp.rod_body.execute(ctx);
+                  ROCKET_ASSERT(dummy == air_status_next);
                 }
                 catch(Runtime_Error& except) {
                   exval = except.value();
                 }
 
-                // Restore the stack after the evaluation completes.
-                ctx.swap_stacks();
-                ctx.stack() = move(saved_stack);
-
-                // Push the exception object.
+                // Push the exception value onto the original partial expression.
+                ctx.stack().swap(saved_stack);
                 ctx.stack().push().set_temporary(move(exval));
                 return air_status_next;
               }
