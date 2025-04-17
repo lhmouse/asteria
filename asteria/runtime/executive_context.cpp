@@ -113,15 +113,15 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       self = move(this->m_stack->mut_top());
     }
 
-    // Execute all deferred expressions backwards.
+    // Execute all deferred expressions backwards. If an exception is thrown,
+    // append a frame and rethrow it.
     while(!this->m_defer.empty()) {
       auto pair = move(this->m_defer.mut_back());
       this->m_defer.pop_back();
 
-      // Execute it.
-      // If an exception is thrown, append a frame and rethrow it.
       try {
-        pair.second.execute(*this);
+        AIR_Status dummy = pair.second.execute(*this);
+        ROCKET_ASSERT(dummy == air_status_next);
       }
       catch(Runtime_Error& except) {
         except.push_frame_defer(pair.first);
@@ -139,15 +139,15 @@ void
 Executive_Context::
 do_on_scope_exit_exceptional_slow(Runtime_Error& except)
   {
-    // Execute all deferred expressions backwards.
+    // Execute all deferred expressions backwards. If an exception is thrown,
+    // replace `except` with it.
     while(!this->m_defer.empty()) {
       auto pair = move(this->m_defer.mut_back());
       this->m_defer.pop_back();
 
-      // Execute it.
-      // If an exception is thrown, replace `except` with it.
       try {
-        pair.second.execute(*this);
+        AIR_Status dummy = pair.second.execute(*this);
+        ROCKET_ASSERT(dummy == air_status_next);
       }
       catch(Runtime_Error& nested) {
         except = nested;
