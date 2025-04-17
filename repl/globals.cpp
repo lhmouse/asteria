@@ -43,7 +43,7 @@ struct Verbose_Hooks
           return;
 
         char sigdesc[128];
-        ::snprintf(sigdesc, sizeof(sigdesc), "signal `%d`: %s", sig, ::strsignal(sig));
+        ::snprintf(sigdesc, sizeof(sigdesc), "signal %d (%s)", sig, ::strsignal(sig));
         this->do_trace(sloc, "received $1", sigdesc);
         ::rocket::sprintf_and_throw<::std::runtime_error>("Received %s", sigdesc);
       }
