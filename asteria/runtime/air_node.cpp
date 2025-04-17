@@ -1519,10 +1519,8 @@ solidify(AVM_Rod& rod) const
 
                 // This is almost identical to JavaScript but not to C++. Only one
                 // `catch` clause is allowed.
-                AIR_Status status;
+                AIR_Status status = air_status_next;
                 try {
-                  // Execute the `try` block. If no exception is thrown, this will
-                  // have little overhead.
                   do_execute_block(status, sp.rod_try, ctx);
                   if(status == air_status_return_ref)
                     ctx.stack().mut_top().check_function_result(ctx.global());
