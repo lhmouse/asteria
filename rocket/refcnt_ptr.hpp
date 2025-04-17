@@ -71,6 +71,9 @@ class refcnt_base
     drop_reference() const noexcept
       { return this->refcnt_cJveMKH5bI7L::drop_reference();  }
 
+    // Get a smart pointer to myself, like
+    //  `std::enable_shared_from_this<T>::shared_from_this()`, with type
+    // checking.
     template<typename yelementT = elementT, typename selfT = refcnt_base>
     refcnt_ptr<const yelementT>
     share_this() const
@@ -79,7 +82,7 @@ class refcnt_base
         if(!yptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
 
-        yptr->refcnt_cJveMKH5bI7L::add_reference();
+        this->refcnt_cJveMKH5bI7L::add_reference();
         return refcnt_ptr<const yelementT>(yptr);
       }
 
@@ -91,7 +94,7 @@ class refcnt_base
         if(!yptr)
           this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
 
-        yptr->refcnt_cJveMKH5bI7L::add_reference();
+        this->refcnt_cJveMKH5bI7L::add_reference();
         return refcnt_ptr<yelementT>(yptr);
       }
   };
