@@ -10,7 +10,7 @@ namespace rocket {
 // This is always declared even when assertions are disabled.
 [[noreturn]]
 void
-assert_fail(const char* expr, const char* file, long line, const char* msg) noexcept;
+assert_fail(const char* expr, const char* file, long line, const char* msg_opt) noexcept;
 
 #ifdef ROCKET_DEBUG
 #  define ROCKET_ASSERT_FAIL(...)    ::rocket::assert_fail(__VA_ARGS__)
