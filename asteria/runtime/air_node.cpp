@@ -91,44 +91,45 @@ do_sparam_dtor(AVM_Rod::Header* head)
     ::rocket::destroy(sp);
   }
 
-AIR_Status
-do_execute_block(const AVM_Rod& rod, const Executive_Context& ctx)
+void
+do_execute_block(AIR_Status& status, const AVM_Rod& rod, const Executive_Context& ctx)
   {
     Executive_Context ctx_next(xtc_plain, ctx);
-    AIR_Status status;
     try {
-      status = rod.execute(ctx_next);
+      rod.execute(status, ctx_next);
     }
     catch(Runtime_Error& except) {
       ctx_next.on_scope_exit_exceptional(except);
       throw;
     }
     ctx_next.on_scope_exit_normal(status);
-    return status;
   }
 
-AIR_Status
-do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& rod)
+void
+do_evaluate_subexpression(AIR_Status& status, Executive_Context& ctx, bool assign,
+                          const AVM_Rod& rod)
   {
     if(rod.empty()) {
       // If the rod is empty, leave the condition on the top of the stack.
-      return air_status_next;
+      status = air_status_next;
     }
     else if(assign) {
       // Evaluate the subexpression and assign the result to the first operand.
-      // The result value has to be copied, in case that a reference to an element
-      // of the LHS operand is returned.
-      rod.execute(ctx);
+      rod.execute(status, ctx);
+      ROCKET_ASSERT(status == air_status_next);
+
+      // The result value really has to be copied, in case that a reference to
+      // an element of the LHS operand itself is returned.
       ctx.stack().top(1).dereference_mutable() = move(ctx.stack().mut_top().dereference_copy());
       ctx.stack().pop();
-      return air_status_next;
     }
     else {
-      // Discard the top which will be overwritten anyway, then evaluate the
-      // subexpression. The status code must be forwarded, as PTCs may return
-      // `air_status_return_ref`.
+      // Discard the top which will be overwritten anyway.
       ctx.stack().pop();
-      return rod.execute(ctx);
+
+      // Evaluate the subexpression. The status code must be forwarded, because
+      // a proper tail call may return `air_status_return_ref`.
+      rod.execute(status, ctx);
     }
   }
 
@@ -829,7 +830,9 @@ solidify(AVM_Rod& rod) const
 
                 // Execute the block on a new context. The block may contain control
                 // statements, so the status shall be forwarded verbatim.
-                return do_execute_block(sp.rod_body, ctx);
+                AIR_Status status = air_status_next;
+                do_execute_block(status, sp.rod_body, ctx);
+                return status;
               }
 
             // Uparam
@@ -962,10 +965,13 @@ solidify(AVM_Rod& rod) const
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // Read the condition and execute the corresponding branch as a block.
-                return (ctx.stack().top().dereference_readonly().test() != negative)
-                          ? do_execute_block(sp.rod_true, ctx)
-                          : do_execute_block(sp.rod_false, ctx);
+                // Read the condition and execute the corresponding branch.
+                AIR_Status status = air_status_next;
+                if(ctx.stack().top().dereference_readonly().test() != negative)
+                  do_execute_block(status, sp.rod_true, ctx);
+                else
+                  do_execute_block(status, sp.rod_false, ctx);
+                return status;
               }
 
             // Uparam
@@ -1034,8 +1040,9 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(sp.at(k).type == switch_clause_case) {
                     // Expect an exact match of one value.
-                    AIR_Status status = sp.at(k).rod_labels.execute(ctx);
-                    ROCKET_ASSERT(status == air_status_next);
+                    AIR_Status dummy = air_status_next;
+                    sp.at(k).rod_labels.execute(dummy, ctx);
+                    ROCKET_ASSERT(dummy == air_status_next);
                     if(cond.compare_partial(ctx.stack().top().dereference_readonly()) != compare_equal)
                       continue;
 
@@ -1044,8 +1051,9 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(sp.at(k).type == switch_clause_each) {
                     // Expect an interval of two values.
-                    AIR_Status status = sp.at(k).rod_labels.execute(ctx);
-                    ROCKET_ASSERT(status == air_status_next);
+                    AIR_Status dummy = air_status_next;
+                    sp.at(k).rod_labels.execute(dummy, ctx);
+                    ROCKET_ASSERT(dummy == air_status_next);
                     if(::rocket::is_none_of(cond.compare_partial(ctx.stack().top(1).dereference_readonly()),
                                             { compare_greater, sp.at(k).cmp2_lower })
                        || ::rocket::is_none_of(cond.compare_partial(ctx.stack().top(0).dereference_readonly()),
@@ -1072,7 +1080,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else {
                       // Execute the body of this clause.
-                      status = sp.at(i).rod_body.execute(ctx_body);
+                      sp.at(i).rod_body.execute(status, ctx_body);
                       if(status != air_status_next) {
                         if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
                           status = air_status_next;
@@ -1134,11 +1142,10 @@ solidify(AVM_Rod& rod) const
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // This is identical to C.
                 AIR_Status status = air_status_next;
                 for(;;) {
                   // Execute the body.
-                  status = do_execute_block(sp.rods_body, ctx);
+                  do_execute_block(status, sp.rods_body, ctx);
                   if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_while}))
                     status = air_status_next;
                   else if(status != air_status_next) {
@@ -1148,7 +1155,7 @@ solidify(AVM_Rod& rod) const
                   }
 
                   // Check the condition.
-                  status = sp.rods_cond.execute(ctx);
+                  sp.rods_cond.execute(status, ctx);
                   ROCKET_ASSERT(status == air_status_next);
                   if(ctx.stack().top().dereference_readonly().test() == negative)
                     break;
@@ -1200,17 +1207,16 @@ solidify(AVM_Rod& rod) const
                 const bool negative = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // This is identical to C.
                 AIR_Status status = air_status_next;
                 for(;;) {
                   // Check the condition.
-                  status = sp.rods_cond.execute(ctx);
+                  sp.rods_cond.execute(status, ctx);
                   ROCKET_ASSERT(status == air_status_next);
                   if(ctx.stack().top().dereference_readonly().test() == negative)
                     break;
 
                   // Execute the body.
-                  status = do_execute_block(sp.rods_body, ctx);
+                  do_execute_block(status, sp.rods_body, ctx);
                   if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_while}))
                     status = air_status_next;
                   else if(status != air_status_next) {
@@ -1280,7 +1286,7 @@ solidify(AVM_Rod& rod) const
 
                   // Evaluate the range initializer and set the range up, which isn't
                   // going to change for all loops.
-                  status = sp.rod_init.execute(ctx_for);
+                  sp.rod_init.execute(status, ctx_for);
                   ROCKET_ASSERT(status == air_status_next);
 
                   Reference* qkey_ref = nullptr;
@@ -1314,7 +1320,7 @@ solidify(AVM_Rod& rod) const
                       do_push_subscript_and_check(*mapped_ref, move(xsub));
 
                       // Execute the loop body.
-                      status = do_execute_block(sp.rod_body, ctx_for);
+                      do_execute_block(status, sp.rod_body, ctx_for);
                       if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
                         status = air_status_next;
                       else if(status != air_status_next) {
@@ -1346,7 +1352,7 @@ solidify(AVM_Rod& rod) const
                       do_push_subscript_and_check(*mapped_ref, move(xsub));
 
                       // Execute the loop body.
-                      status = do_execute_block(sp.rod_body, ctx_for);
+                      do_execute_block(status, sp.rod_body, ctx_for);
                       if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
                         status = air_status_next;
                       else if(status != air_status_next) {
@@ -1420,18 +1426,18 @@ solidify(AVM_Rod& rod) const
                 try {
                   // Execute the loop initializer, which shall only be a definition or
                   // an expression statement.
-                  status = sp.rod_init.execute(ctx_for);
+                  sp.rod_init.execute(status, ctx_for);
                   ROCKET_ASSERT(status == air_status_next);
                   for(;;) {
                     // Check the condition. There is a special case: If the condition
                     // is empty then the loop is infinite.
-                    status = sp.rod_cond.execute(ctx_for);
+                    sp.rod_cond.execute(status, ctx_for);
                     ROCKET_ASSERT(status == air_status_next);
                     if((ctx_for.stack().size() != 0) && !ctx_for.stack().top().dereference_readonly().test())
                       break;
 
                     // Execute the body.
-                    status = do_execute_block(sp.rod_body, ctx_for);
+                    do_execute_block(status, sp.rod_body, ctx_for);
                     if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
                       status = air_status_next;
                     else if(status != air_status_next) {
@@ -1441,7 +1447,7 @@ solidify(AVM_Rod& rod) const
                     }
 
                     // Execute the increment.
-                    status = sp.rod_step.execute(ctx_for);
+                    sp.rod_step.execute(status, ctx_for);
                     ROCKET_ASSERT(status == air_status_next);
                   }
                 }
@@ -1506,7 +1512,7 @@ solidify(AVM_Rod& rod) const
                 try {
                   // Execute the `try` block. If no exception is thrown, this will
                   // have little overhead.
-                  status = do_execute_block(sp.rod_try, ctx);
+                  do_execute_block(status, sp.rod_try, ctx);
                   if(status == air_status_return_ref)
                     ctx.stack().mut_top().check_function_result(ctx.global());
                   return status;
@@ -1537,7 +1543,7 @@ solidify(AVM_Rod& rod) const
                     ctx_catch.insert_named_reference(sp.name_except).set_temporary(except.value());
 
                     // Execute the `catch` clause.
-                    status = sp.rod_catch.execute(ctx_catch);
+                    sp.rod_catch.execute(status, ctx_catch);
                   }
                   catch(Runtime_Error& nested) {
                     ctx_catch.on_scope_exit_exceptional(nested);
@@ -1952,9 +1958,12 @@ solidify(AVM_Rod& rod) const
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // Read the condition and evaluate the corresponding subexpression.
-                return ctx.stack().top().dereference_readonly().test()
-                         ? do_evaluate_subexpression(ctx, assign, sp.rod_true)
-                         : do_evaluate_subexpression(ctx, assign, sp.rod_false);
+                AIR_Status status = air_status_next;
+                if(ctx.stack().top().dereference_readonly().test())
+                  do_evaluate_subexpression(status, ctx, assign, sp.rod_true);
+                else
+                  do_evaluate_subexpression(status, ctx, assign, sp.rod_false);
+                return status;
               }
 
             // Uparam
@@ -5244,7 +5253,8 @@ solidify(AVM_Rod& rod) const
                 // Evaluate the operand in a `try` block.
                 Value exval;
                 try {
-                  AIR_Status dummy = sp.rod_body.execute(ctx);
+                  AIR_Status dummy = air_status_next;
+                  sp.rod_body.execute(dummy, ctx);
                   ROCKET_ASSERT(dummy == air_status_next);
                 }
                 catch(Runtime_Error& except) {
@@ -5292,21 +5302,22 @@ solidify(AVM_Rod& rod) const
                 const bool is_void = head->uparam.b1;
                 const auto& sloc = head->pv_meta->sloc;
 
-                ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-
                 if(is_void || ctx.stack().top().is_void()) {
                   // Discard the result.
+                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                   return air_status_return_void;
                 }
                 else if(by_ref) {
                   // The result is passed by reference, so check whether it is
                   // dereferenceable.
                   ctx.stack().top().dereference_readonly();
+                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                   return air_status_return_ref;
                 }
                 else {
                   // The result is passed by copy, so convert it to a temporary.
                   ctx.stack().mut_top().dereference_copy();
+                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                   return air_status_return_ref;
                 }
               }
@@ -5456,10 +5467,11 @@ solidify(AVM_Rod& rod) const
                 const bool assign = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
-                // Read the condition and evaluate the corresponding subexpression.
-                return ctx.stack().top().dereference_readonly().is_null()
-                         ? do_evaluate_subexpression(ctx, assign, sp.rod_null)
-                         : air_status_next;
+                // Read the condition, and if it is null, evaluate the backup.
+                AIR_Status status = air_status_next;
+                if(ctx.stack().top().dereference_readonly().is_null())
+                  do_evaluate_subexpression(status, ctx, assign, sp.rod_null);
+                return status;
               }
 
             // Uparam
@@ -6805,21 +6817,22 @@ solidify(AVM_Rod& rod) const
                 const V_integer irhs = head->uparam.i2345;
                 const auto& sloc = head->pv_meta->sloc;
 
-                ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-
                 if(type == type_null) {
                   // null
                   ctx.stack().push().set_temporary(nullopt);
+                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                   return air_status_return_ref;
                 }
                 else if(type == type_boolean) {
                   // boolean; unnormalized
                   ctx.stack().push().set_temporary(-irhs < 0);
+                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                   return air_status_return_ref;
                 }
                 else {
                   // integer
                   ctx.stack().push().set_temporary(irhs);
+                  ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                   return air_status_return_ref;
                 }
               }

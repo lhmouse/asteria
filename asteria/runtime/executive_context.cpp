@@ -120,7 +120,8 @@ do_on_scope_exit_normal_slow(AIR_Status status)
       this->m_defer.pop_back();
 
       try {
-        AIR_Status dummy = pair.second.execute(*this);
+        AIR_Status dummy = air_status_next;
+        pair.second.execute(dummy, *this);
         ROCKET_ASSERT(dummy == air_status_next);
       }
       catch(Runtime_Error& except) {
@@ -146,7 +147,8 @@ do_on_scope_exit_exceptional_slow(Runtime_Error& except)
       this->m_defer.pop_back();
 
       try {
-        AIR_Status dummy = pair.second.execute(*this);
+        AIR_Status dummy = air_status_next;
+        pair.second.execute(dummy, *this);
         ROCKET_ASSERT(dummy == air_status_next);
       }
       catch(Runtime_Error& nested) {

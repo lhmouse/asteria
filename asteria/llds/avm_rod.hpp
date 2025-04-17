@@ -157,8 +157,8 @@ class AVM_Rod
     finalize();
 
     // These are interfaces called by the runtime.
-    AIR_Status
-    execute(Executive_Context& ctx) const;
+    void
+    execute(AIR_Status& status, Executive_Context& ctx) const;
 
     void
     collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;

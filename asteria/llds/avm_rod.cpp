@@ -149,24 +149,21 @@ finalize()
     // TODO: Add JIT support.
   }
 
-AIR_Status
+void
 AVM_Rod::
-execute(Executive_Context& ctx) const
+execute(AIR_Status& status, Executive_Context& ctx) const
   {
+    status = air_status_next;
     ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(offset != 0) {
+    while(ROCKET_EXPECT(status == air_status_next) && (offset != 0)) {
       auto head = this->m_bptr + this->m_einit + offset;
       offset += 1L + head->nheaders;
 
       try {
-        AIR_Status status;
         if(head->meta_ver == 0)
           status = (* head->pv_exec) (ctx, head);
         else
           status = (* head->pv_meta->exec) (ctx, head);
-
-        if(ROCKET_UNEXPECT(status != air_status_next))
-          return status;
       }
       catch(Runtime_Error& except) {
         // Modify and rethrow the exception in place without copying it.
@@ -182,8 +179,6 @@ execute(Executive_Context& ctx) const
         throw except;
       }
     }
-
-    return air_status_next;
   }
 
 void
