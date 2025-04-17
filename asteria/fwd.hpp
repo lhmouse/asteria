@@ -208,10 +208,6 @@ struct rcfwd
   :
     virtual Rcbase
   {
-    virtual
-    void
-    vtable_key_function_GklPAslB() noexcept;
-
     template<typename xTarget = xReal>
     refcnt_ptr<const xTarget>
     share_this() const
@@ -222,13 +218,6 @@ struct rcfwd
     share_this()
       { return this->Rcbase::template share_this<xTarget, rcfwd>();  }
   };
-
-template<typename xReal>
-void
-rcfwd<xReal>::
-vtable_key_function_GklPAslB() noexcept
-  {
-  }
 
 template<typename xTarget, typename xReal>
 constexpr
