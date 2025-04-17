@@ -1043,7 +1043,8 @@ solidify(AVM_Rod& rod) const
                     AIR_Status dummy = air_status_next;
                     sp.at(k).rod_labels.execute(dummy, ctx);
                     ROCKET_ASSERT(dummy == air_status_next);
-                    if(cond.compare_partial(ctx.stack().top().dereference_readonly()) != compare_equal)
+                    auto cmp = cond.compare_partial(ctx.stack().top().dereference_readonly());
+                    if(cmp != compare_equal)
                       continue;
 
                     target_index = k;
@@ -1054,10 +1055,10 @@ solidify(AVM_Rod& rod) const
                     AIR_Status dummy = air_status_next;
                     sp.at(k).rod_labels.execute(dummy, ctx);
                     ROCKET_ASSERT(dummy == air_status_next);
-                    if(::rocket::is_none_of(cond.compare_partial(ctx.stack().top(1).dereference_readonly()),
-                                            { compare_greater, sp.at(k).cmp2_lower })
-                       || ::rocket::is_none_of(cond.compare_partial(ctx.stack().top(0).dereference_readonly()),
-                                               { compare_less, sp.at(k).cmp2_upper }))
+                    auto cmp_lo = cond.compare_partial(ctx.stack().top(1).dereference_readonly());
+                    auto cmp_up = cond.compare_partial(ctx.stack().top(0).dereference_readonly());
+                    if(::rocket::is_none_of(cmp_lo, { compare_greater, sp.at(k).cmp2_lower })
+                       || ::rocket::is_none_of(cmp_up, { compare_less, sp.at(k).cmp2_upper }))
                       continue;
 
                     target_index = k;
@@ -1106,10 +1107,10 @@ solidify(AVM_Rod& rod) const
             , +[](Variable_HashMap& staged, Variable_HashMap& temp, const AVM_Rod::Header* head)
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                for(const auto& r : sp) {
+                for(const auto& r : sp)
                   r.rod_labels.collect_variables(staged, temp);
+                for(const auto& r : sp)
                   r.rod_body.collect_variables(staged, temp);
-                }
               }
 
             // Symbols
@@ -1652,8 +1653,6 @@ solidify(AVM_Rod& rod) const
                 const auto& tval = ctx.stack().top().dereference_readonly();
                 if(ROCKET_UNEXPECT(!tval.test()))
                   throw Runtime_Error(xtc_assert, sp.sloc, sp.msg);
-
-                ctx.stack().pop();
                 return air_status_next;
               }
 
@@ -5363,6 +5362,8 @@ solidify(AVM_Rod& rod) const
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
+
+                // Push a temporary copy of the constant.
                 ctx.stack().push().set_temporary(sp.val);
                 return air_status_next;
               }
