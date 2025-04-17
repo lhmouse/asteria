@@ -258,11 +258,11 @@ is_terminator() const noexcept
       case index_coalesce_expression:
       case index_member_access:
       case index_apply_operator_bi32:
-      case index_return_statement_bi32:
         return false;
 
       case index_throw_statement:
       case index_return_statement:
+      case index_return_statement_bi32:
         return true;
 
       case index_simple_status:
