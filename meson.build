@@ -50,7 +50,7 @@ rocket_include = [
 
 asteria_include = [
   'asteria/details/value.ipp', 'asteria/details/variable_hashmap.ipp',
-  'asteria/details/reference_dictionary.ipp', 'asteria/details/avm_rod.ipp',
+  'asteria/details/reference_dictionary.ipp',
   'asteria/fwd.hpp', 'asteria/utils.hpp', 'asteria/recursion_sentry.hpp',
   'asteria/value.hpp', 'asteria/source_location.hpp', 'asteria/simple_script.hpp',
   'asteria/llds/variable_hashmap.hpp', 'asteria/llds/reference_dictionary.hpp',

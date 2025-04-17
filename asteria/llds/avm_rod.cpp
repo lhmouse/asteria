@@ -80,10 +80,11 @@ clear() noexcept
     this->m_einit = 0;
   }
 
-details_avm_rod::Header*
+AVM_Rod::Header*
 AVM_Rod::
-append(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt, void* ctor_arg,
-       Destructor* dtor_opt, Collector* coll_opt, const Source_Location* sloc_opt)
+push_function(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ctor_opt,
+              void* ctor_arg, Destructor* dtor_opt, Collector* coll_opt,
+              const Source_Location* sloc_opt)
   {
     constexpr size_t max_sparam_size = UINT8_MAX * sizeof(Header) - 1;
     if(sparam_size > max_sparam_size)

@@ -786,7 +786,7 @@ solidify(AVM_Rod& rod) const
 
           (void) altr;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -821,7 +821,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -863,7 +863,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.name = altr.name;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -904,7 +904,7 @@ solidify(AVM_Rod& rod) const
           AVM_Rod::Uparam up2;
           up2.b0 = altr.immutable;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -955,7 +955,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rod_true, altr.code_true);
           do_solidify_nodes(sp2.rod_false, altr.code_false);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1016,7 +1016,7 @@ solidify(AVM_Rod& rod) const
             r.names_added = clause.names_added;
           }
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -1127,7 +1127,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rods_body, altr.code_body);
           do_solidify_nodes(sp2.rods_cond, altr.code_cond);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1193,7 +1193,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rods_cond, altr.code_cond);
           do_solidify_nodes(sp2.rods_body, altr.code_body);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1262,7 +1262,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rod_init, altr.code_init);
           do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1406,7 +1406,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rod_step, altr.code_step);
           do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1493,7 +1493,7 @@ solidify(AVM_Rod& rod) const
           sp2.name_except = altr.name_except;
           do_solidify_nodes(sp2.rod_catch, altr.code_catch);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -1581,7 +1581,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.sloc = altr.sloc;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__, __noreturn__)) -> AIR_Status
               {
@@ -1627,7 +1627,7 @@ solidify(AVM_Rod& rod) const
           sp2.sloc = altr.sloc;
           sp2.msg = altr.msg;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1664,7 +1664,7 @@ solidify(AVM_Rod& rod) const
           AVM_Rod::Uparam up2;
           up2.u0 = altr.status;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& /*ctx*/, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1693,7 +1693,7 @@ solidify(AVM_Rod& rod) const
           AVM_Rod::Uparam up2;
           up2.b0 = altr.by_ref;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1739,7 +1739,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.name = altr.name;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1790,7 +1790,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.name = altr.name;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1844,7 +1844,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.ref = altr.ref;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1892,7 +1892,7 @@ solidify(AVM_Rod& rod) const
           sp2.params = altr.params;
           sp2.code_body = altr.code_body;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -1944,7 +1944,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rod_true, altr.code_true);
           do_solidify_nodes(sp2.rod_false, altr.code_false);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -1985,7 +1985,7 @@ solidify(AVM_Rod& rod) const
           up2.u0 = altr.ptc;
           up2.u2345 = altr.nargs;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -2028,7 +2028,7 @@ solidify(AVM_Rod& rod) const
           AVM_Rod::Uparam up2;
           up2.u2345 = altr.nelems;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -2074,7 +2074,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.keys = altr.keys;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -2120,7 +2120,7 @@ solidify(AVM_Rod& rod) const
             {
             case xop_inc:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2179,7 +2179,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_dec:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2238,7 +2238,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_unset:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2267,7 +2267,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_head:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2295,7 +2295,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_tail:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2323,7 +2323,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_random:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2352,7 +2352,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_isvoid:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2381,7 +2381,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_assign:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2410,7 +2410,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_index:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2452,7 +2452,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_pos:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& /*ctx*/, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2476,7 +2476,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_neg:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2528,7 +2528,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_notb:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2576,7 +2576,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_notl:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2605,7 +2605,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_countof:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2654,7 +2654,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_typeof:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2683,7 +2683,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sqrt:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2718,7 +2718,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_isnan:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2758,7 +2758,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_isinf:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2798,7 +2798,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_abs:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2848,7 +2848,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sign:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2887,7 +2887,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_round:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2925,7 +2925,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_floor:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -2964,7 +2964,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_ceil:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3003,7 +3003,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_trunc:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3041,7 +3041,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_iround:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3079,7 +3079,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_ifloor:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3118,7 +3118,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_iceil:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3157,7 +3157,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_itrunc:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3195,7 +3195,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_lzcnt:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3231,7 +3231,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_tzcnt:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3267,7 +3267,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_popcnt:
               // unary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3303,7 +3303,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_eq:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3335,7 +3335,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_ne:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3367,7 +3367,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_un:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3398,7 +3398,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_lt:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3430,7 +3430,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_gt:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3462,7 +3462,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_lte:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3495,7 +3495,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_gte:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3528,7 +3528,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_3way:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3565,7 +3565,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_add:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3639,7 +3639,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sub:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3707,7 +3707,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_mul:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3811,7 +3811,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_div:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3872,7 +3872,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_mod:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3933,7 +3933,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_andb:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -3997,7 +3997,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_orb:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4061,7 +4061,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_xorb:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4125,7 +4125,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_addm:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4165,7 +4165,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_subm:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4205,7 +4205,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_mulm:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4245,7 +4245,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_adds:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4286,7 +4286,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_subs:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4327,7 +4327,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_muls:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4369,7 +4369,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sll:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4442,7 +4442,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_srl:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4515,7 +4515,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sla:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4591,7 +4591,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sra:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4660,7 +4660,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_fma:
               // fused multiply-add; ternary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -4713,7 +4713,7 @@ solidify(AVM_Rod& rod) const
           up2.b0 = altr.immutable;
           up2.u2345 = altr.nelems;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -4775,7 +4775,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.keys = altr.keys;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -4837,7 +4837,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.name = altr.name;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -4878,7 +4878,7 @@ solidify(AVM_Rod& rod) const
 
           (void) altr;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -4911,7 +4911,7 @@ solidify(AVM_Rod& rod) const
           AVM_Rod::Uparam up2;
           up2.u0 = altr.ptc;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -5019,7 +5019,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.code_body = altr.code_body;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -5072,7 +5072,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.opts = altr.opts;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -5154,7 +5154,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.name = altr.name;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5192,7 +5192,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.name = altr.name;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5231,7 +5231,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           do_solidify_nodes(sp2.rod_body, altr.code_body);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__)) -> AIR_Status
               {
@@ -5284,7 +5284,7 @@ solidify(AVM_Rod& rod) const
           up2.b0 = altr.by_ref;
           up2.b1 = altr.is_void;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5338,7 +5338,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.val = altr.val;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5372,7 +5372,7 @@ solidify(AVM_Rod& rod) const
 
           (void) altr;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5403,7 +5403,7 @@ solidify(AVM_Rod& rod) const
           AVM_Rod::Uparam up2;
           up2.u0 = altr.ptc;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5449,7 +5449,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           do_solidify_nodes(sp2.rod_null, altr.code_null);
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5493,7 +5493,7 @@ solidify(AVM_Rod& rod) const
           Sparam sp2;
           sp2.key = altr.key;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
@@ -5564,7 +5564,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_assign:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5592,7 +5592,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_index:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5621,7 +5621,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_eq:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5652,7 +5652,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_ne:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5683,7 +5683,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_un:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5713,7 +5713,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_lt:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5744,7 +5744,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_gt:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5775,7 +5775,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_lte:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5807,7 +5807,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_gte:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5839,7 +5839,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_cmp_3way:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5875,7 +5875,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_add:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5929,7 +5929,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sub:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -5983,7 +5983,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_mul:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6054,7 +6054,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_div:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6113,7 +6113,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_mod:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6172,7 +6172,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_andb:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6211,7 +6211,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_orb:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6250,7 +6250,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_xorb:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6289,7 +6289,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_addm:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6328,7 +6328,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_subm:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6367,7 +6367,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_mulm:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6406,7 +6406,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_adds:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6446,7 +6446,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_subs:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6486,7 +6486,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_muls:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6527,7 +6527,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sll:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6592,7 +6592,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_srl:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6657,7 +6657,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sla:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6725,7 +6725,7 @@ solidify(AVM_Rod& rod) const
 
             case xop_sra:
               // binary
-              rod.append(
+              rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__)) -> AIR_Status
                   {
@@ -6797,7 +6797,7 @@ solidify(AVM_Rod& rod) const
           up2.u0 = altr.type;
           up2.i2345 = altr.irhs;
 
-          rod.append(
+          rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__)) -> AIR_Status
               {
