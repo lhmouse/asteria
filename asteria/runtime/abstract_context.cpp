@@ -4,12 +4,14 @@
 #include "../xprecompiled.hpp"
 #include "abstract_context.hpp"
 #include "../utils.hpp"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 namespace asteria {
 
-void
+Reference*
 Abstract_Context::
-vtable_key_function_sLBHstEX() noexcept
+do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
   {
+    return nullptr;
   }
 
 }  // namespace asteria
