@@ -153,7 +153,7 @@ void
 AVM_Rod::
 execute(AIR_Status& status, Executive_Context& ctx) const
   {
-    ROCKET_ASSERT(status == air_status_next);
+    status = air_status_next;
     ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
     while(ROCKET_EXPECT(status == air_status_next) && (offset != 0)) {
       auto head = this->m_bptr + this->m_einit + offset;
