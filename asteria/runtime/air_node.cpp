@@ -129,8 +129,8 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
       rod.execute(ctx);
       ROCKET_ASSERT(ctx.status() == air_status_next);
 
-      // The result value really has to be copied, in case that a reference to
-      // an element of the LHS operand itself is returned.
+      // The result really has to be copied, in case that a reference to an
+      // element of the LHS operand itself is returned.
       Value& rhs = ctx.stack().mut_top().dereference_copy();
       ctx.stack().top(1).dereference_mutable() = move(rhs);
       ctx.stack().pop();
