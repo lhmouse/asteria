@@ -75,6 +75,9 @@ class Reference
       }
 
   private:
+    void
+    do_destroy_variant_slow() noexcept;
+
     [[noreturn]]
     void
     do_throw_not_dereferenceable() const;
@@ -89,7 +92,11 @@ class Reference
     do_use_function_result_slow(Global_Context& global);
 
   public:
-    ~Reference();
+    ~Reference()
+      {
+        if(this->m_stor.index() >= variant_type::index_of<St_temp>::value)
+          this->do_destroy_variant_slow();
+      }
 
     // Accessors
     bool

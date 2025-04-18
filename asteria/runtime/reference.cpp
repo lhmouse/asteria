@@ -17,8 +17,9 @@
 namespace asteria {
 
 ROCKET_FLATTEN
+void
 Reference::
-~Reference()
+do_destroy_variant_slow() noexcept
   {
     this->m_stor.~variant_type();
   }
