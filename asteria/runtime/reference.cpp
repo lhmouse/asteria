@@ -284,11 +284,12 @@ do_use_function_result_slow(Global_Context& global)
           // Convert the result.
           auto& st = this->m_stor.emplace<St_temp>();
           st.val = move(*result_value);
-          result_value.reset();
         }
 
-        // Evaluate deferred expressions.
+        result_value.reset();
         global.call_hook(&Abstract_Hooks::on_return, ptcg->sloc(), ptcg->ptc_aware());
+
+        // Evaluate deferred expressions.
         defer_ctx.stack() = move(ptcg->mut_stack());
         defer_ctx.mut_defer() = move(ptcg->mut_defer());
         defer_ctx.on_scope_exit_normal(air_status_next);
