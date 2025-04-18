@@ -49,7 +49,7 @@ clobbers_alt_stack() const noexcept
 
 bool
 Expression_Unit::
-maybe_unreadable() const noexcept
+may_be_void() const noexcept
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -72,7 +72,7 @@ maybe_unreadable() const noexcept
       case index_branch:
         return ::rocket::any_of(this->m_stor.as<S_branch>().branches,
             [](const branch& br) {
-              return br.units.size() && br.units.back().maybe_unreadable();
+              return br.units.size() && br.units.back().may_be_void();
             });
 
       default:

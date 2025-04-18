@@ -179,7 +179,7 @@ class Expression_Unit
 
     // Checks whether this operation may produce a void reference.
     bool
-    maybe_unreadable() const noexcept;
+    may_be_void() const noexcept;
 
     // Generate IR nodes into `code`.
     void

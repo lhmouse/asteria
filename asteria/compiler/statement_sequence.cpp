@@ -373,7 +373,7 @@ do_accept_expression_and_check(cow_vector<Expression_Unit>& units, Token_Stream&
     if(!do_accept_expression(units, tstrm))
       return false;
 
-    if(by_ref || units.back().maybe_unreadable()) {
+    if(by_ref || units.back().may_be_void()) {
       // XXX: This may convert the result to an rvalue.
       Expression_Unit::S_check_argument xunit = { move(sloc), by_ref };
       units.emplace_back(move(xunit));
