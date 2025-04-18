@@ -36,10 +36,10 @@ reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
       return;
 
     // Generate code for the function body.
-    Analytic_Context ctx_func(xtc_function, ctx_opt, this->m_params);
+    Analytic_Context fctx(xtc_function, ctx_opt, this->m_params);
 
     for(size_t i = 0;  i < stmts.size();  ++i)
-      stmts.at(i).generate_code(this->m_code, ctx_func, nullptr, global, this->m_opts,
+      stmts.at(i).generate_code(this->m_code, fctx, nullptr, global, this->m_opts,
                     ((i != stmts.size() - 1) && !stmts.at(i + 1).is_empty_return())
                     ? ptc_aware_none : ptc_aware_void);
 
@@ -61,10 +61,10 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
       return;
 
     // Rebind all nodes recursively.
-    Analytic_Context ctx_func(xtc_function, ctx_opt, this->m_params);
+    Analytic_Context fctx(xtc_function, ctx_opt, this->m_params);
 
     for(size_t k = 0;  k < code.size();  ++k)
-      if(auto qnode = code.at(k).rebind_opt(ctx_func))
+      if(auto qnode = code.at(k).rebind_opt(fctx))
         this->m_code.mut(k) = move(*qnode);
   }
 

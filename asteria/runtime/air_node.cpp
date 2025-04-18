@@ -538,8 +538,8 @@ rebind_opt(Abstract_Context& ctx) const
           bool dirty = false;
           auto bound = altr;
 
-          Analytic_Context ctx_func(xtc_function, &ctx, altr.params);
-          do_rebind_nodes(dirty, bound.code_body, ctx_func);
+          Analytic_Context fctx(xtc_function, &ctx, altr.params);
+          do_rebind_nodes(dirty, bound.code_body, fctx);
 
           return do_return_rebound_opt(dirty, move(bound));
         }

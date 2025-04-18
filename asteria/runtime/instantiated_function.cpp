@@ -50,22 +50,22 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
   {
     // Create the stack and context for this function.
     Reference_Stack alt_stack;
-    Executive_Context ctx_func(xtc_function, global, stack, alt_stack, *this, move(self));
+    Executive_Context fctx(xtc_function, global, stack, alt_stack, *this, move(self));
 
     // Execute the function body on the new context.
-    global.call_hook(&Abstract_Hooks::on_function_enter, *this, ctx_func);
+    global.call_hook(&Abstract_Hooks::on_function_enter, *this, fctx);
     AIR_Status status = air_status_next;
     try {
-      this->m_rod.execute(status, ctx_func);
+      this->m_rod.execute(status, fctx);
     }
     catch(Runtime_Error& except) {
-      global.call_hook(&Abstract_Hooks::on_function_leave, *this, ctx_func);
-      ctx_func.on_scope_exit_exceptional(except);
+      global.call_hook(&Abstract_Hooks::on_function_leave, *this, fctx);
+      fctx.on_scope_exit_exceptional(except);
       except.push_frame_function(this->m_sloc, this->m_func);
       throw;
     }
-    global.call_hook(&Abstract_Hooks::on_function_leave, *this, ctx_func);
-    ctx_func.on_scope_exit_normal(status);
+    global.call_hook(&Abstract_Hooks::on_function_leave, *this, fctx);
+    fctx.on_scope_exit_normal(status);
 
     // Move the result into `self`.
     switch(status)
