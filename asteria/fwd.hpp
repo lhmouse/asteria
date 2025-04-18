@@ -815,7 +815,7 @@ struct Compiler_Options_fragment<1>
     bool implicit_global_names = false;
 
     // Enable optimization.
-    uint8_t optimization_level = 2;
+    uint8_t optimization_level = 1;
   };
 
 template<>

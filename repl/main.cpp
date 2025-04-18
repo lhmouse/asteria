@@ -27,7 +27,7 @@ Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]
   -h      show help message then exit
   -I      suppress interactive mode [default = auto]
   -i      force interactive mode [default = auto]
-  -O[n]   set optimization level to `n` [default = 2]
+  -O[n]   set optimization level to `n` [default = 1]
   -V      show version information then exit
   -v      enable verbose mode
 
