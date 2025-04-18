@@ -253,8 +253,8 @@ do_use_function_result_slow(Global_Context& global)
     refcnt_ptr<PTC_Arguments> ptcg;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
     opt<Value> result_value;
-    Reference_Stack defer_stack, defer_alt_stack;
-    Executive_Context defer_ctx(xtc_defer, global, defer_stack, defer_alt_stack);
+    Reference_Stack stack, alt_stack;
+    Executive_Context defer_ctx(xtc_defer, global, stack, alt_stack);
 
     try {
       // Unpack frames until a non-PTC result is encountered.
