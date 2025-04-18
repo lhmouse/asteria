@@ -14,7 +14,7 @@
 
 project('asteria',
         'cpp',
-        version: '1.1.alpha',
+        version: '2.0.alpha',
         license: 'BSD-3-Clause',
         meson_version: '>= 1.3.0')
 
