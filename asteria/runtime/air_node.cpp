@@ -185,7 +185,7 @@ do_duplicate_sequence(xContainer& src, int64_t count)
   {
     if(count < 0)
       throw Runtime_Error(xtc_format,
-               "Negative duplication count (value was `$2`)", count);
+         "Negative duplication count (value was `$2`)", count);
 
     if(src.empty() || (count == 1))
       return;
@@ -195,17 +195,14 @@ do_duplicate_sequence(xContainer& src, int64_t count)
       return;
     }
 
-    // Calculate the result length with overflow checking.
     int64_t rlen;
-    if(ROCKET_MUL_OVERFLOW((int64_t) src.size(), count, &rlen) || (rlen > PTRDIFF_MAX))
+    if(ROCKET_MUL_OVERFLOW(src.ssize(), count, &rlen) || (rlen > PTRDIFF_MAX))
       throw Runtime_Error(xtc_format,
-               "Data length overflow (`$1` * `$2` > `$3`)",
-               src.size(), count, PTRDIFF_MAX);
+         "Data length overflow (`$1` * `$2` > `$3`)", src.size(), count, PTRDIFF_MAX);
 
-    // Duplicate elements, using binary exponential backoff.
-    src.reserve((size_t) rlen);
+    src.reserve(static_cast<size_t>(rlen));
     while(src.ssize() < rlen)
-      src.append(src.begin(), src.begin() + ::rocket::min(rlen - src.ssize(), src.ssize()));
+      src.append(src.begin(), src.begin() + ::std::min(rlen - src.ssize(), src.ssize()));
   }
 
 }  // namespace
@@ -935,11 +932,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -1652,11 +1645,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -1688,11 +1677,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -1979,11 +1964,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -2019,11 +2000,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -2088,57 +2065,40 @@ solidify(AVM_Rod& rod) const
           switch(altr.xop)
             {
             case xop_inc:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
                   {
-                    const bool assign = head->uparam.b0;
+                    const bool postfix = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = top.dereference_mutable();
 
-                    // `assign` is `true` for the postfix variant and `false` for
-                    // the prefix variant.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // ++ integer ; may overflow
                       V_integer& val = rhs.mut_integer();
-
-                      // Increment the value with overflow checking.
-                      int64_t result;
+                      V_integer result;
                       if(ROCKET_ADD_OVERFLOW(val, 1, &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer increment overflow (operand was `$1`)", val);
-
-                      if(assign)
+                           "Integer increment overflow (operand was `$1`)", val);
+                      if(postfix)
                         top.set_temporary(val);
-
                       val = result;
-                      return;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // ++ real ; can't overflow
                       V_real& val = rhs.mut_real();
-
-                      // Overflow will result in an infinity, so this is safe.
-                      double result = val + 1;
-
-                      if(assign)
+                      V_real result = val + 1;
+                      if(postfix)
                         top.set_temporary(val);
-
                       val = result;
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Increment not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Increment not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2147,57 +2107,40 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_dec:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
                   {
-                    const bool assign = head->uparam.b0;
+                    const bool postfix = head->uparam.b0;
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = top.dereference_mutable();
 
-                    // `assign` is `true` for the postfix variant and `false` for
-                    // the prefix variant.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // -- integer ; may overflow
                       V_integer& val = rhs.mut_integer();
-
-                      // Decrement the value with overflow checking.
-                      int64_t result;
+                      V_integer result;
                       if(ROCKET_SUB_OVERFLOW(val, 1, &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer decrement overflow (operand was `$1`)", val);
-
-                      if(assign)
+                           "Integer increment overflow (operand was `$1`)", val);
+                      if(postfix)
                         top.set_temporary(val);
-
                       val = result;
-                      return;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // -- real ; can't overflow
                       V_real& val = rhs.mut_real();
-
-                      // Overflow will result in an infinity, so this is safe.
-                      double result = val - 1;
-
-                      if(assign)
+                      V_real result = val - 1;
+                      if(postfix)
                         top.set_temporary(val);
-
                       val = result;
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Decrement not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2206,27 +2149,20 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_unset:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
-                    // Unset the last element and return it as a temporary.
-                    // `assign` is ignored.
+                    // unset ; `assign` ignored
                     Value val = top.dereference_unset();
                     top.set_temporary(move(val));
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2235,26 +2171,20 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_head:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
-                    // Push an array head subscript. `assign` is ignored.
+                    // array [^] ; `assign` ignored
                     Subscript::S_array_head xsub = { };
                     do_push_subscript_and_check(top, move(xsub));
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2263,26 +2193,20 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_tail:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
-                    // Push an array tail subscript. `assign` is ignored.
+                    // array [$] ; `assign` ignored
                     Subscript::S_array_tail xsub = { };
                     do_push_subscript_and_check(top, move(xsub));
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2291,27 +2215,21 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_random:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
+                    const auto prng = ctx.global().random_engine();
 
-                    // Push a random subscript.
-                    uint32_t seed = ctx.global().random_engine()->bump();
-                    Subscript::S_array_random xsub = { seed };
+                    // array [?] ; `assign` ignored
+                    Subscript::S_array_random xsub = { prng->bump() };
                     do_push_subscript_and_check(top, move(xsub));
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2320,27 +2238,19 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_isvoid:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
                   {
                     Reference& top = ctx.stack().mut_top();
 
-                    // Check whether the argument is a void reference and save
-                    // the result as a temporary boolean. `assign` is ignored.
-                    bool val = top.is_void();
-                    top.set_temporary(val);
-                    return;
+                    // __isvoid ; `assign` ignored
+                    top.set_temporary(top.is_void());
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2349,7 +2259,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_assign:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
@@ -2357,19 +2266,14 @@ solidify(AVM_Rod& rod) const
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
 
-                    // `assign` is ignored.
+                    // x = y ; `assign` ignored
                     top.dereference_mutable() = move(rhs);
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2378,7 +2282,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_index:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* /*head*/)
                   __attribute__((__hot__, __flatten__))
@@ -2386,32 +2289,23 @@ solidify(AVM_Rod& rod) const
                     Value& rhs = ctx.stack().mut_top().dereference_copy();
                     Reference& top = ctx.stack().mut_top(1);
 
-                    // Push a subscript.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
                       Subscript::S_array_index xsub = { rhs.as_integer() };
                       do_push_subscript_and_check(top, move(xsub));
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(rhs.type() == type_string) {
-                      Subscript::S_object_key xsub = { rhs.as_string() };
+                    else if(rhs.is_string()) {
+                      Subscript::S_object_key xsub = { move(rhs.mut_string()) };
                       do_push_subscript_and_check(top, move(xsub));
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Subscript value not valid (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Subscript value not valid (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2420,7 +2314,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_pos:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2429,18 +2322,13 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // This operator does nothing.
+                    // no-op
                     (void) rhs;
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2449,7 +2337,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_neg:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2458,41 +2345,27 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the additive inverse of the operand.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // - integer ; may overflow
                       V_integer& val = rhs.mut_integer();
-
-                      int64_t result;
+                      V_integer result;
                       if(ROCKET_SUB_OVERFLOW(0, val, &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer negation overflow (operand was `$1`)", val);
-
+                           "Integer negation overflow (operand was `$1`)", val);
                       val = result;
-                      return;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // - real ; can't overflow
                       V_real& val = rhs.mut_real();
-
-                      int64_t bits;
-                      bcopy(bits, val);
-                      bits ^= INT64_MIN;
-
-                      bcopy(val, bits);
-                      return;
+                      val = -val;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Arithmetic negation not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2501,7 +2374,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_notb:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2510,37 +2382,29 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Flip all bits (of all bytes) in the operand.
-                    if(rhs.type() == type_boolean) {
-                      V_boolean& val = rhs.mut_boolean();
-                      val = !val;
-                      return;
-                    }
-
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // ~ integer
                       V_integer& val = rhs.mut_integer();
                       val = ~val;
-                      return;
                     }
-
-                    if(rhs.type() == type_string) {
+                    else if(rhs.is_boolean()) {
+                      // ~ boolean ; same as !
+                      V_boolean& val = rhs.mut_boolean();
+                      val = !val;
+                    }
+                    else if(rhs.is_string()) {
+                      // ~ string ; bitwise
                       V_string& val = rhs.mut_string();
                       for(auto it = val.mut_begin();  it != val.end();  ++it)
-                        *it = static_cast<char>(*it ^ -1);
-                      return;
+                        *it = static_cast<char>(~*it);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise NOT not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2549,7 +2413,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_notl:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2558,18 +2421,13 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the builtin boolean conversion and negate the result.
+                    // ! ; logical
                     rhs = !rhs.test();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2578,7 +2436,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_countof:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2587,38 +2444,25 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the number of elements in the operand.
-                    if(rhs.type() == type_null) {
+                    if(rhs.is_null()) {
                       rhs = V_integer(0);
-                      return;
                     }
-
-                    if(rhs.type() == type_string) {
+                    else if(rhs.is_string()) {
                       rhs = V_integer(rhs.as_string().size());
-                      return;
                     }
-
-                    if(rhs.type() == type_array) {
+                    else if(rhs.is_array()) {
                       rhs = V_integer(rhs.as_array().size());
-                      return;
                     }
-
-                    if(rhs.type() == type_object) {
+                    else if(rhs.is_object()) {
                       rhs = V_integer(rhs.as_object().size());
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`countof` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2627,7 +2471,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_typeof:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2636,18 +2479,13 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the type of the operand as a string.
-                    rhs = ::rocket::sref(describe_type(rhs.type()));
-                    return;
+                    // typeof
+                    rhs = V_string(::rocket::sref(describe_type(rhs.type())));
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2656,7 +2494,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sqrt:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2665,24 +2502,17 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the arithmetic square root of the operand, as a real
-                    // number always.
                     if(rhs.is_real()) {
+                      // __sqrt; always real
                       rhs = ::std::sqrt(rhs.as_real());
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__sqrt` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2691,7 +2521,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_isnan:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2700,29 +2529,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Checks whether the operand is a NaN. The operand must be
-                    // of an arithmetic type. An integer is never a NaN.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __isnan integer ; always false
                       rhs = false;
-                      return;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __isnan real
                       rhs = ::std::isnan(rhs.as_real());
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__isnan` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2731,7 +2552,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_isinf:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2740,29 +2560,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Checks whether the operand is an infinity. The operand must
-                    // be of an arithmetic type. An integer is never an infinity.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __isinf integer ; always false
                       rhs = false;
-                      return;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __isinf real
                       rhs = ::std::isinf(rhs.as_real());
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__isinf` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2771,7 +2583,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_abs:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2780,39 +2591,27 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the absolute value of the operand.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __abs integer ; may overflow
                       V_integer& val = rhs.mut_integer();
-
-                      V_integer neg_val;
-                      if(ROCKET_SUB_OVERFLOW(0, val, &neg_val))
+                      V_integer negv;
+                      if(ROCKET_SUB_OVERFLOW(0, val, &negv))
                         throw Runtime_Error(xtc_format,
-                                 "Integer negation overflow (operand was `$1`)", val);
-
-                      val ^= (val ^ neg_val) & (val >> 63);
-                      return;
+                           "Integer absolute value overflow (operand was `$1`)", val);
+                      val = ::std::max(val, negv);
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __abs real
                       V_real& val = rhs.mut_real();
-
-                      double result = ::std::fabs(val);
-
-                      val = result;
-                      return;
+                      val = ::std::fabs(val);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__abs` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2821,7 +2620,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sign:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2830,28 +2628,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the sign bit of the operand as a boolean value.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __sign integer
                       rhs = rhs.as_integer() < 0;
-                      return;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __sign real
                       rhs = ::std::signbit(rhs.as_real());
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__sign` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2860,7 +2651,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_round:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2869,27 +2659,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Round the operand to the nearest integer of the same type.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __round integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
-                      rhs.mut_real() = ::std::round(rhs.as_real());
-                      return;
+                    else if(rhs.is_real()) {
+                      // __round real
+                      rhs = ::std::round(rhs.as_real());
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__round` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2898,7 +2682,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_floor:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2907,28 +2690,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Round the operand to the nearest integer of the same type,
-                    // towards negative infinity.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __floor integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
-                      rhs.mut_real() = ::std::floor(rhs.as_real());
-                      return;
+                    else if(rhs.is_real()) {
+                      // __floor real
+                      rhs = ::std::floor(rhs.as_real());
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__floor` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2937,7 +2713,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_ceil:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2946,28 +2721,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Round the operand to the nearest integer of the same type,
-                    // towards positive infinity.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __ceil integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
-                      rhs.mut_real() = ::std::ceil(rhs.as_real());
-                      return;
+                    else if(rhs.is_real()) {
+                      // __ceil real
+                      rhs = ::std::ceil(rhs.as_real());
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__ceil` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -2976,7 +2744,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_trunc:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -2985,27 +2752,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Truncate the operand to the nearest integer towards zero.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __trunc integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
-                      rhs.mut_real() = ::std::trunc(rhs.as_real());
-                      return;
+                    else if(rhs.is_real()) {
+                      // __trunc real
+                      rhs = ::std::trunc(rhs.as_real());
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__trunc` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3014,7 +2775,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_iround:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3023,27 +2783,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Round the operand to the nearest integer.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __iround integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __iround real
                       rhs = safe_double_to_int64(::std::round(rhs.as_real()));
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__iround` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3052,7 +2806,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_ifloor:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3061,28 +2814,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Round the operand to the nearest integer towards negative
-                    // infinity.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __ifloor integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __ifloor real
                       rhs = safe_double_to_int64(::std::floor(rhs.as_real()));
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
+                    else throw Runtime_Error(xtc_format,
                              "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3091,7 +2837,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_iceil:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3100,28 +2845,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Round the operand to the nearest integer towards positive
-                    //  infinity.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __iceil integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __iceil real
                       rhs = safe_double_to_int64(::std::ceil(rhs.as_real()));
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__iceil` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3130,7 +2868,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_itrunc:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3139,27 +2876,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Truncate the operand to the nearest integer towards zero.
-                    if(rhs.type() == type_integer) {
-                      return;
+                    if(rhs.is_integer()) {
+                      // __itrunc integer ; no-op
+                      (void) rhs;
                     }
-
-                    if(rhs.type() == type_real) {
+                    else if(rhs.is_real()) {
+                      // __itrunc real
                       rhs = safe_double_to_int64(::std::trunc(rhs.as_real()));
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__itrunc` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3168,7 +2899,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_lzcnt:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3177,25 +2907,18 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the number of leading zeroes in the operand.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __lzcnt integer
                       V_integer& val = rhs.mut_integer();
-
-                      val = (int64_t) ROCKET_LZCNT64((uint64_t) val);
-                      return;
+                      val = ROCKET_LZCNT64(static_cast<uint64_t>(val));
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__lzcnt` not applicable (operand was `$1`)", rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3204,7 +2927,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_tzcnt:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3213,25 +2935,18 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the number of trailing zeroes in the operand.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __tzcnt integer
                       V_integer& val = rhs.mut_integer();
-
-                      val = (int64_t) ROCKET_TZCNT64((uint64_t) val);
-                      return;
+                      val = ROCKET_TZCNT64(static_cast<uint64_t>(val));
                     }
-
-                    throw Runtime_Error(xtc_format,
+                    else throw Runtime_Error(xtc_format,
                              "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3240,7 +2955,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_popcnt:
-              // unary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3249,25 +2963,18 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top();
                     Value& rhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the number of ones in the operand.
-                    if(rhs.type() == type_integer) {
+                    if(rhs.is_integer()) {
+                      // __popcnt integer
                       V_integer& val = rhs.mut_integer();
-
-                      val = (int64_t) ROCKET_POPCNT64((uint64_t) val);
-                      return;
+                      val = ROCKET_POPCNT64(static_cast<uint64_t>(val));
                     }
-
-                    throw Runtime_Error(xtc_format,
+                    else throw Runtime_Error(xtc_format,
                              "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3276,7 +2983,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_eq:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3286,20 +2992,15 @@ solidify(AVM_Rod& rod) const
                     auto& top = ctx.stack().mut_top(1);
                     auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are equal. Unordered values
-                    // are considered unequal.
-                    lhs = lhs.compare_partial(rhs) == compare_equal;
+                    // ==
+                    Compare cmp = lhs.compare_partial(rhs);
+                    lhs = cmp == compare_equal;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3308,7 +3009,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_ne:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3318,20 +3018,15 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are not equal. Unordered
-                    // values are considered unequal.
-                    lhs = lhs.compare_partial(rhs) != compare_equal;
+                    // != ; not ==
+                    Compare cmp = lhs.compare_partial(rhs);
+                    lhs = cmp != compare_equal;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3340,7 +3035,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_un:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3350,19 +3044,15 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are unordered.
-                    lhs = lhs.compare_partial(rhs) == compare_unordered;
+                    // </> ; not <= and not >=
+                    Compare cmp = lhs.compare_partial(rhs);
+                    lhs = cmp == compare_unordered;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3371,7 +3061,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_lt:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3381,20 +3070,15 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is less than the RHS operand.
-                    // If they are unordered, an exception shall be thrown.
-                    lhs = lhs.compare_total(rhs) == compare_less;
+                    // <
+                    Compare cmp = lhs.compare_total(rhs);
+                    lhs = cmp == compare_less;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3403,7 +3087,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_gt:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3413,20 +3096,15 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is greater than the RHS operand.
-                    // If they are unordered, an exception shall be thrown.
-                    lhs = lhs.compare_total(rhs) == compare_greater;
+                    // >
+                    Compare cmp = lhs.compare_total(rhs);
+                    lhs = cmp == compare_greater;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3435,7 +3113,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_lte:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3445,21 +3122,15 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is less than or equal to the
-                    // RHS operand. If they are unordered, an exception shall be
-                    // thrown.
-                    lhs = lhs.compare_total(rhs) != compare_greater;
+                    // <= ; not >
+                    Compare cmp = lhs.compare_total(rhs);
+                    lhs = cmp != compare_greater;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3468,7 +3139,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_gte:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3478,21 +3148,15 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is greater than or equal to
-                    // the RHS operand. If they are unordered, an exception shall
-                    // be thrown.
-                    lhs = lhs.compare_total(rhs) != compare_less;
+                    // < ; not >=
+                    Compare cmp = lhs.compare_total(rhs);
+                    lhs = cmp != compare_less;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3501,7 +3165,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_3way:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3511,25 +3174,18 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Defines a partial ordering on all values. For unordered
-                    // operands, a string is returned, so `x <=> y` and
-                    // `(x <=> y) <=> 0` produces the same result.
-                    int64_t cmp = lhs.compare_partial(rhs);
-                    if(ROCKET_UNEXPECT(cmp == compare_unordered))
+                    // <=>
+                    Compare cmp = lhs.compare_partial(rhs);
+                    if(cmp == compare_unordered)
                       lhs = &"[unordered]";
                     else
-                      lhs = cmp - compare_equal;
+                      lhs = static_cast<int64_t>(cmp) - compare_equal;
                     ctx.stack().pop();
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3538,7 +3194,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_add:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3548,62 +3203,41 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform logical OR on two boolean values, or get the sum
-                    // of two arithmetic values, or concatenate two strings.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer + integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      int64_t result;
-                      if(ROCKET_ADD_OVERFLOW(val, other, &result))
+                      V_integer result;
+                      if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer addition overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
+                           "Integer addition overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_real() && rhs.is_real()) {
+                    else if(lhs.is_real() && rhs.is_real()) {
+                      // real + real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = rhs.as_real();
-
-                      val += other;
+                      val += rhs.as_real();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string() && rhs.is_string()) {
-                      V_string& val = lhs.mut_string();
-                      const V_string& other = rhs.as_string();
-
-                      val.append(other);
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      // boolean + boolean ; same as |
                       V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val |= other;
+                      val |= rhs.as_boolean();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Addition not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else if(lhs.is_string() && rhs.is_string()) {
+                      // string + string
+                      V_string& val = lhs.mut_string();
+                      val += rhs.as_string();
+                      ctx.stack().pop();
+                    }
+                    else throw Runtime_Error(xtc_format,
+                            "Addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3612,7 +3246,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sub:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3622,56 +3255,35 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform logical XOR on two boolean values, or get the
-                    // difference of two arithmetic values.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer - integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      // Perform arithmetic subtraction with overflow checking.
-                      int64_t result;
-                      if(ROCKET_SUB_OVERFLOW(val, other, &result))
+                      V_integer result;
+                      if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer subtraction overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
+                           "Integer subtraction overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_real() && rhs.is_real()) {
+                    else if(lhs.is_real() && rhs.is_real()) {
+                      // real - real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = rhs.as_real();
-
-                      // Overflow will result in an infinity, so this is safe.
-                      val -= other;
+                      val -= rhs.as_real();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      // boolean - boolean ; same as ^
                       V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      // Perform logical XOR of the operands.
-                      val ^= other;
+                      val ^= rhs.as_boolean();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Subtraction not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3680,7 +3292,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_mul:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3690,92 +3301,61 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform logical AND on two boolean values, or get the product
-                    // of two arithmetic values, or duplicate a string or array by
-                    // the given times.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer * integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      int64_t result;
-                      if(ROCKET_MUL_OVERFLOW(val, other, &result))
+                      V_integer result;
+                      if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer multiplication overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
+                           "Integer multiplication overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_real() && rhs.is_real()) {
+                    else if(lhs.is_real() && rhs.is_real()) {
+                      // real * real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = rhs.as_real();
-
-                      val *= other;
+                      val *= rhs.as_real();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_integer() && rhs.is_string()) {
-                      V_integer count = lhs.as_integer();
-                      lhs = rhs.as_string();
-                      V_string& val = lhs.mut_string();
-
-                      do_duplicate_sequence(val, count);
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    if(lhs.is_string() && rhs.is_integer()) {
-                      V_string& val = lhs.mut_string();
-                      V_integer count = rhs.as_integer();
-
-                      do_duplicate_sequence(val, count);
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    if(lhs.is_integer() && rhs.is_array()) {
-                      V_integer count = lhs.as_integer();
-                      lhs = rhs.as_array();
-                      V_array& val = lhs.mut_array();
-
-                      do_duplicate_sequence(val, count);
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    if(lhs.is_array() && rhs.is_integer()) {
-                      V_array& val = lhs.mut_array();
-                      V_integer count = rhs.as_integer();
-
-                      do_duplicate_sequence(val, count);
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      // boolean * boolean ; same as &
                       V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val &= other;
+                      val &= rhs.as_boolean();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Multiplication not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else if(lhs.is_integer() && rhs.is_string()) {
+                      // integer * string
+                      V_string str = rhs.as_string();
+                      do_duplicate_sequence(str, lhs.as_integer());
+                      lhs = move(str);
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_string() && rhs.is_integer()) {
+                      // str * integer
+                      V_string& str = lhs.mut_string();
+                      do_duplicate_sequence(str, rhs.as_integer());
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_integer() && rhs.is_array()) {
+                      // integer * array
+                      V_array str = rhs.as_array();
+                      do_duplicate_sequence(str, lhs.as_integer());
+                      lhs = move(str);
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_array() && rhs.is_integer()) {
+                      // str * integer
+                      V_array& str = lhs.mut_array();
+                      do_duplicate_sequence(str, rhs.as_integer());
+                      ctx.stack().pop();
+                    }
+                    else throw Runtime_Error(xtc_format,
+                            "Multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3784,7 +3364,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_div:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3794,49 +3373,31 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the quotient of two arithmetic values. If both operands
-                    // are integers, the result is also an integer, truncated
-                    // towards zero.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer / integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(other == 0)
+                      if(rhs.as_integer() == 0)
                         throw Runtime_Error(xtc_format,
-                                 "Zero as divisor (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      if((val == INT64_MIN) && (other == -1))
+                           "Integer division by zero (operands were `$1` and `$2`)", val, rhs.as_integer());
+                      if((val == INT64_MIN) && (rhs.as_integer() == -1))
                         throw Runtime_Error(xtc_format,
-                                 "Integer division overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val /= other;
+                           "Integer division overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
+                      val /= rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_real() && rhs.is_real()) {
+                    else if(lhs.is_real() && rhs.is_real()) {
+                      // real / real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = rhs.as_real();
-
-                      val /= other;
+                      val /= rhs.as_real();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Division not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Division not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3845,7 +3406,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_mod:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3855,49 +3415,31 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the remainder of two arithmetic values. The quotient is
-                    // truncated towards zero. If both operands are integers, the
-                    // result is also an integer.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer % integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(other == 0)
+                      if(rhs.as_integer() == 0)
                         throw Runtime_Error(xtc_format,
-                                 "Zero as divisor (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      if((val == INT64_MIN) && (other == -1))
+                           "Integer division by zero (operands were `$1` and `$2`)", val, rhs.as_integer());
+                      if((val == INT64_MIN) && (rhs.as_integer() == -1))
                         throw Runtime_Error(xtc_format,
-                                 "Integer division overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val %= other;
+                           "Integer division overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
+                      val %= rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_real() && rhs.is_real()) {
+                    else if(lhs.is_real() && rhs.is_real()) {
+                      // real % real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = rhs.as_real();
-
-                      val = ::std::fmod(val, other);
+                      val = ::std::fmod(val, rhs.as_real());
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modulo not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3906,7 +3448,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_andb:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3916,52 +3457,36 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the bitwise AND operation on all bits of the operands.
-                    // If the two operands have different lengths, the result is
-                    // truncated to the same length as the shorter one.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer & integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      val &= other;
+                      val &= rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string() && rhs.is_string()) {
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      // boolean & boolean
+                      V_boolean& val = lhs.mut_boolean();
+                      val &= rhs.as_boolean();
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_string() && rhs.is_string()) {
+                      // string & string ; bitwise truncation
                       V_string& val = lhs.mut_string();
                       const V_string& mask = rhs.as_string();
-
                       if(val.size() > mask.size())
                         val.erase(mask.size());
-                      auto maskp = mask.begin();
-                      for(auto it = val.mut_begin();  it != val.end();  ++it, ++maskp)
-                        *it = static_cast<char>(*it & *maskp);
+                      auto mc = mask.begin();
+                      for(auto it = val.mut_begin();  it != val.end();  ++it, ++mc)
+                        *it = static_cast<char>(*it & *mc);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val &= other;
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise AND not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -3970,7 +3495,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_orb:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -3980,52 +3504,36 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the bitwise OR operation on all bits of the operands.
-                    // If the two operands have different lengths, the result is
-                    // padded to the same length as the longer one, with zeroes.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer | integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      val |= other;
+                      val |= rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string() && rhs.is_string()) {
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      // boolean & boolean
+                      V_boolean& val = lhs.mut_boolean();
+                      val |= rhs.as_boolean();
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_string() && rhs.is_string()) {
+                      // string | string ; bitwise extension
                       V_string& val = lhs.mut_string();
                       const V_string& mask = rhs.as_string();
-
                       if(val.size() < mask.size())
                         val.append(mask.size() - val.size(), 0);
-                      auto valp = val.mut_begin();
-                      for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
-                        *valp = static_cast<char>(*valp | *it);
+                      auto it = val.mut_begin();
+                      for(auto mc = mask.begin();  mc != mask.end();  ++it, ++mc)
+                        *it = static_cast<char>(*it | *mc);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val |= other;
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise OR not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4034,7 +3542,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_xorb:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4044,52 +3551,36 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the bitwise XOR operation on all bits of the operands.
-                    // If the two operands have different lengths, the result is
-                    // padded to the same length as the longer one, with zeroes.
                     if(lhs.is_integer() && rhs.is_integer()) {
+                      // integer ^ integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      val ^= other;
+                      val ^= rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string() && rhs.is_string()) {
+                    else if(lhs.is_boolean() && rhs.is_boolean()) {
+                      // boolean ^ boolean
+                      V_boolean& val = lhs.mut_boolean();
+                      val ^= rhs.as_boolean();
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_string() && rhs.is_string()) {
+                      // string ^ string ; bitwise flipping
                       V_string& val = lhs.mut_string();
                       const V_string& mask = rhs.as_string();
-
                       if(val.size() < mask.size())
                         val.append(mask.size() - val.size(), 0);
-                      auto valp = val.mut_begin();
-                      for(auto it = mask.begin();  it != mask.end();  ++it, ++valp)
-                        *valp = static_cast<char>(*valp ^ *it);
+                      auto it = val.mut_begin();
+                      for(auto mc = mask.begin();  mc != mask.end();  ++it, ++mc)
+                        *it = static_cast<char>(*it ^ *mc);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_boolean() && rhs.is_boolean()) {
-                      V_boolean& val = lhs.mut_boolean();
-                      V_boolean other = rhs.as_boolean();
-
-                      val ^= other;
-                      ctx.stack().pop();
-                      return;
-                    }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise XOR not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4098,7 +3589,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_addm:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4108,28 +3598,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform modular addition on two integers.
-                    if(lhs.is_integer() && rhs.as_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      // __addm integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      ROCKET_ADD_OVERFLOW(val, other, &val);
+                      V_integer result;
+                      ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result);
+                      val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modular addition not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modular addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4138,7 +3621,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_subm:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4148,28 +3630,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform modular subtraction on two integers.
-                    if(lhs.is_integer() && rhs.as_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      // __subm integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      ROCKET_SUB_OVERFLOW(val, other, &val);
+                      V_integer result;
+                      ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result);
+                      val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modular subtraction not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4178,7 +3653,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_mulm:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4188,28 +3662,21 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform modular multiplication on two integers.
-                    if(lhs.is_integer() && rhs.as_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      // __mulm integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      ROCKET_MUL_OVERFLOW(val, other, &val);
+                      V_integer result;
+                      ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result);
+                      val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modular multiplication not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4218,7 +3685,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_adds:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4228,29 +3694,22 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform saturating addition on two integers.
-                    if(lhs.is_integer() && rhs.as_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      // __adds integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(ROCKET_ADD_OVERFLOW(val, other, &val))
-                        val = (other >> 63) ^ INT64_MAX;
+                      V_integer result;
+                      if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
+                        result = (val >> 63) ^ INT64_MAX;
+                      val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Saturating addition not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4259,7 +3718,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_subs:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4269,29 +3727,22 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform saturating subtraction on two integers.
-                    if(lhs.is_integer() && rhs.as_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      // __subs integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-
-                      if(ROCKET_SUB_OVERFLOW(val, other, &val))
-                        val = (other >> 63) ^ INT64_MIN;
+                      V_integer result;
+                      if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
+                        result = (val >> 63) ^ INT64_MAX;
+                      val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Saturating subtraction not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4300,7 +3751,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_muls:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4310,30 +3760,22 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(1);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform saturating multiplication on two integers.
-                    if(lhs.is_integer() && rhs.as_integer()) {
+                    if(lhs.is_integer() && rhs.is_integer()) {
+                      // __muls integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = rhs.as_integer();
-                      V_integer sign = val ^ other;
-
-                      if(ROCKET_MUL_OVERFLOW(val, other, &val))
-                        val = (sign >> 63) ^ INT64_MAX;
+                      V_integer result;
+                      if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
+                        result = (val >> 63) ^ (rhs.as_integer() >> 63) ^ INT64_MAX;
+                      val = result;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Saturating multiplication not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4342,7 +3784,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sll:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4354,59 +3795,43 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.type() != type_integer)
                       throw Runtime_Error(xtc_format,
-                               "Invalid shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Invalid shift count (operands were `$1` and `$2`)", lhs, rhs);
 
                     if(rhs.as_integer() < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-                    // Shift the operand to the left. Elements that get shifted out
-                    // are discarded. Vacuum elements are filled with default values.
-                    // The width of the operand is unchanged.
                     if(lhs.is_integer()) {
+                      // integer <<< ; bitwise, fixed-width
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = rhs.as_integer();
-                      val = (int64_t) ((uint64_t) val << (count & 63));
-                      val &= ((count - 64) >> 63);
+                      int64_t n = rhs.as_integer();
+                      reinterpret_cast<uint64_t&>(val) <<= n;
+                      reinterpret_cast<uint64_t&>(val) <<= n != rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string <<< ; bytewise, fixed-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
-                      val.erase(0, tlen);
-                      val.append(tlen, '\0');
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
+                      val.erase(0, n);
+                      val.append(n, '\0');
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array <<< ; element-wise, fixed-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
-                      val.erase(0, tlen);
-                      val.append(tlen);
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
+                      val.erase(0, n);
+                      val.append(n);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Logical left shift not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4415,7 +3840,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_srl:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4427,59 +3851,43 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.type() != type_integer)
                       throw Runtime_Error(xtc_format,
-                               "Invalid shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Invalid shift count (operands were `$1` and `$2`)", lhs, rhs);
 
                     if(rhs.as_integer() < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-                    // Shift the operand to the right. Elements that get shifted out
-                    // are discarded. Vacuum elements are filled with default values.
-                    // The width of the operand is unchanged.
                     if(lhs.is_integer()) {
+                      // integer >>> ; bitwise, fixed-width
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = rhs.as_integer();
-                      val = (int64_t) ((uint64_t) val >> (count & 63));
-                      val &= ((count - 64) >> 63);
+                      int64_t n = ::rocket::min(rhs.as_integer(), 63);
+                      reinterpret_cast<uint64_t&>(val) >>= n;
+                      reinterpret_cast<uint64_t&>(val) >>= n != rhs.as_integer();
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string >>> ; bytewise, fixed-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
-                      val.pop_back(tlen);
-                      val.insert(0, tlen, '\0');
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
+                      val.pop_back(n);
+                      val.insert(0, n, '\0');
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array >>> ; element-wise, fixed-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
-                      val.pop_back(tlen);
-                      val.insert(0, tlen);
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
+                      val.pop_back(n);
+                      val.insert(0, n);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Logical right shift not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4488,7 +3896,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sla:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4500,62 +3907,43 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.type() != type_integer)
                       throw Runtime_Error(xtc_format,
-                               "Invalid shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Invalid shift count (operands were `$1` and `$2`)", lhs, rhs);
 
                     if(rhs.as_integer() < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-                    // Shift the operand to the left. No element is discarded from
-                    // the left (for integers this means that bits which get shifted
-                    // out shall all be the same with the sign bit). Vacuum elements
-                    // are filled with default values.
                     if(lhs.is_integer()) {
+                      // integer <<< ; bitwise, variable-width, may overflow
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = ::rocket::min(rhs.as_integer(), 63);
-                      if((val != 0) && ((count != rhs.as_integer()) || (val >> (63 - count) != val >> 63)))
+                      int64_t n = ::rocket::min(rhs.as_integer(), 63);
+                      if((val != 0) && ((n != rhs.as_integer()) || (val >> (63 - n) != val >> 63)))
                         throw Runtime_Error(xtc_format,
-                                 "Arithmetic left shift overflow (operands were `$1` and `$2`)",
-                                 lhs, rhs);
-
-                      reinterpret_cast<uint64_t&>(val) <<= count;
+                           "Arithmetic left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
+                      reinterpret_cast<uint64_t&>(val) <<= n;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string <<< ; bytewise, variable-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
-                      val.append(tlen, '\0');
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
+                      val.append(n, '\0');
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array <<< ; element-wise, variable-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = (size_t) ::rocket::min(rhs.as_integer(), val.ssize());
-                      val.append(tlen);
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
+                      val.append(n);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4564,7 +3952,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sra:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -4576,55 +3963,40 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.type() != type_integer)
                       throw Runtime_Error(xtc_format,
-                               "Invalid shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Invalid shift count (operands were `$1` and `$2`)", lhs, rhs);
 
                     if(rhs.as_integer() < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, rhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, rhs);
 
-                    // Shift the operand to the right. Elements that get shifted
-                    // out are discarded. No element is filled in the left.
                     if(lhs.is_integer()) {
+                      // integer <<< ; bitwise, variable-width, may overflow
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = ::rocket::min(rhs.as_integer(), 63);
-                      val >>= count;
+                      int64_t n = ::rocket::min(rhs.as_integer(), 63);
+                      val >>= n;
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string <<< ; bytewise, variable-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
-                      val.pop_back(tlen);
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
+                      val.pop_back(n);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array <<< ; element-wise, variable-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
-                      val.pop_back(tlen);
+                      size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
+                      val.pop_back(n);
                       ctx.stack().pop();
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
-                             lhs, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4644,29 +4016,19 @@ solidify(AVM_Rod& rod) const
                     Reference& top = ctx.stack().mut_top(2);
                     Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform floating-point fused multiply-add.
                     if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
+                      // __fma ; always real
                       V_real& val = lhs.mut_real();
-                      V_real y_mul = mid.as_real();
-                      V_real z_add = rhs.as_real();
-
-                      val = ::std::fma(val, y_mul, z_add);
+                      val = ::std::fma(val, mid.as_real(), rhs.as_real());
                       ctx.stack().pop(2);
-                      return;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "`__fma` not applicable (operands were `$1`, `$2` and `$3`)",
-                             lhs, mid, rhs);
+                    else throw Runtime_Error(xtc_format,
+                            "`__fma` not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -4720,11 +4082,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -4961,11 +4319,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -5272,11 +4626,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -5380,11 +4730,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
@@ -5520,7 +4866,6 @@ solidify(AVM_Rod& rod) const
               ASTERIA_TERMINATE(("Constant folding not implemented for `$1`"), altr.xop);
 
             case xop_assign:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5528,18 +4873,13 @@ solidify(AVM_Rod& rod) const
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
 
-                    // `assign` is ignored.
+                    // x = y ; `assign` ignored
                     top.dereference_mutable() = irhs;
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5548,7 +4888,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_index:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5556,19 +4895,13 @@ solidify(AVM_Rod& rod) const
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
 
-                    // Push a subscript.
                     Subscript::S_array_index xsub = { irhs };
                     do_push_subscript_and_check(top, move(xsub));
-                    return;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5577,7 +4910,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_eq:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5585,21 +4917,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are equal. Unordered values
-                    // are considered to be unequal.
-                    lhs = lhs.compare_numeric_partial(irhs) == compare_equal;
-                    return;
+                    // ==
+                    Compare cmp = lhs.compare_numeric_partial(irhs);
+                    lhs = cmp == compare_equal;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5608,7 +4935,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_ne:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5616,21 +4942,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are not equal. Unordered values are
-                    // considered to be unequal.
-                    lhs = lhs.compare_numeric_partial(irhs) != compare_equal;
-                    return;
+                    // != ; not ==
+                    Compare cmp = lhs.compare_numeric_partial(irhs);
+                    lhs = cmp != compare_equal;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5639,7 +4960,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_un:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5647,20 +4967,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the two operands are unordered.
-                    lhs = lhs.compare_numeric_partial(irhs) == compare_unordered;
-                    return;
+                    // </> ; not <= and not >=
+                    Compare cmp = lhs.compare_numeric_partial(irhs);
+                    lhs = cmp == compare_unordered;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5669,7 +4985,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_lt:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5677,21 +4992,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is less than the RHS operand.
-                    // If they are unordered, an exception shall be thrown.
-                    lhs = lhs.compare_numeric_total(irhs) == compare_less;
-                    return;
+                    // <
+                    Compare cmp = lhs.compare_numeric_total(irhs);
+                    lhs = cmp == compare_less;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5700,7 +5010,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_gt:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5708,21 +5017,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is greater than the RHS operand.
-                    // If they are unordered, an exception shall be thrown.
-                    lhs = lhs.compare_numeric_total(irhs) == compare_greater;
-                    return;
+                    // >
+                    Compare cmp = lhs.compare_numeric_total(irhs);
+                    lhs = cmp == compare_greater;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5731,7 +5035,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_lte:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5739,22 +5042,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is less than or equal to the
-                    // RHS operand. If they are unordered, an exception shall be
-                    // thrown.
-                    lhs = lhs.compare_numeric_total(irhs) != compare_greater;
-                    return;
+                    // <= ; not >
+                    Compare cmp = lhs.compare_numeric_total(irhs);
+                    lhs = cmp != compare_greater;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5763,7 +5060,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_gte:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5771,22 +5067,16 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Check whether the LHS operand is greater than or equal to
-                    // the RHS operand. If they are unordered, an exception shall
-                    // be thrown.
-                    lhs = lhs.compare_numeric_total(irhs) != compare_less;
-                    return;
+                    // < ; not >=
+                    Compare cmp = lhs.compare_numeric_total(irhs);
+                    lhs = cmp != compare_less;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5795,7 +5085,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_cmp_3way:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5803,26 +5092,19 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Defines a partial ordering on all values. For unordered
-                    // operands, a string is returned, so `x <=> y` and
-                    // `(x <=> y) <=> 0` produces the same result.
-                    int64_t cmp = lhs.compare_numeric_partial(irhs);
-                    if(ROCKET_UNEXPECT(cmp == compare_unordered))
+                    // <=>
+                    Compare cmp = lhs.compare_numeric_partial(irhs);
+                    if(cmp == compare_unordered)
                       lhs = &"[unordered]";
                     else
-                      lhs = cmp - compare_equal;
-                    return;
+                      lhs = static_cast<int64_t>(cmp) - compare_equal;
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5831,7 +5113,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_add:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5839,44 +5120,29 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform logical OR on two boolean values, or get the sum of
-                    // two arithmetic values, or concatenate two strings.
                     if(lhs.is_integer()) {
+                      // integer + integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      int64_t result;
-                      if(ROCKET_ADD_OVERFLOW(val, other, &result))
+                      V_integer result;
+                      if(ROCKET_ADD_OVERFLOW(val, irhs, &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer addition overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
+                           "Integer addition overflow (operands were `$1` and `$2`)", val, irhs);
                       val = result;
-                      return;
                     }
-
-                    if(lhs.is_real()) {
+                    else if(lhs.is_real()) {
+                      // real + real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = static_cast<V_real>(irhs);
-
-                      val += other;
-                      return;
+                      val += static_cast<V_real>(irhs);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Addition not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5885,7 +5151,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sub:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5893,44 +5158,29 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform logical XOR on two boolean values, or get the
-                    // difference of two arithmetic values.
                     if(lhs.is_integer()) {
+                      // integer - integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      int64_t result;
-                      if(ROCKET_SUB_OVERFLOW(val, other, &result))
+                      V_integer result;
+                      if(ROCKET_SUB_OVERFLOW(val, irhs, &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer subtraction overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
+                           "Integer subtraction overflow (operands were `$1` and `$2`)", val, irhs);
                       val = result;
-                      return;
                     }
-
-                    if(lhs.is_real()) {
+                    else if(lhs.is_real()) {
+                      // real - real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = static_cast<V_real>(irhs);
-
-                      val -= other;
-                      return;
+                      val -= static_cast<V_real>(irhs);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Subtraction not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -5939,7 +5189,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_mul:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -5947,61 +5196,39 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                     // Perform logical AND on two boolean values, or get the product
-                     // of two arithmetic values, or duplicate a string or array by a
-                     // given times.
                     if(lhs.is_integer()) {
+                      // integer * integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      int64_t result;
-                      if(ROCKET_MUL_OVERFLOW(val, other, &result))
+                      V_integer result;
+                      if(ROCKET_MUL_OVERFLOW(val, irhs, &result))
                         throw Runtime_Error(xtc_format,
-                                 "Integer multiplication overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
+                           "Integer multiplication overflow (operands were `$1` and `$2`)", val, irhs);
                       val = result;
-                      return;
                     }
-
-                    if(lhs.is_real()) {
+                    else if(lhs.is_real()) {
+                      // real * real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = static_cast<V_real>(irhs);
-
-                      val *= other;
-                      return;
+                      val *= static_cast<V_real>(irhs);
                     }
-
-                    if(lhs.is_string()) {
-                      V_string& val = lhs.mut_string();
-                      V_integer count = irhs;
-
-                      do_duplicate_sequence(val, count);
-                      return;
+                    else if(lhs.is_string()) {
+                      // str * integer
+                      V_string& str = lhs.mut_string();
+                      do_duplicate_sequence(str, irhs);
                     }
-
-                    if(lhs.is_array()) {
-                      V_array& val = lhs.mut_array();
-                      V_integer count = irhs;
-
-                      do_duplicate_sequence(val, count);
-                      return;
+                    else if(lhs.is_array()) {
+                      // str * integer
+                      V_array& str = lhs.mut_array();
+                      do_duplicate_sequence(str, irhs);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Multiplication not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6010,7 +5237,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_div:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6018,49 +5244,31 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the quotient of two arithmetic values. If both operands
-                    // are integers, the result is also an integer, truncated towards
-                    // zero.
                     if(lhs.is_integer()) {
+                      // integer / integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      if(other == 0)
+                      if(irhs == 0)
                         throw Runtime_Error(xtc_format,
-                                 "Zero as divisor (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      if((val == INT64_MIN) && (other == -1))
+                           "Integer division by zero (operands were `$1` and `$2`)", val, irhs);
+                      if((val == INT64_MIN) && (irhs == -1))
                         throw Runtime_Error(xtc_format,
-                                 "Integer division overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val /= other;
-                      return;
+                           "Integer division overflow (operands were `$1` and `$2`)", val, irhs);
+                      val /= irhs;
                     }
-
-                    if(lhs.is_real()) {
+                    else if(lhs.is_real()) {
+                      // real / real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = static_cast<V_real>(irhs);
-
-                      val /= other;
-                      return;
+                      val /= static_cast<V_real>(irhs);;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Division not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Division not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6069,7 +5277,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_mod:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6077,49 +5284,31 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Get the remainder of two arithmetic values. The quotient is
-                    // truncated towards zero. If both operands are integers, the
-                    // result is also an integer.
                     if(lhs.is_integer()) {
+                      // integer % integer ; may overflow
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      if(other == 0)
+                      if(irhs == 0)
                         throw Runtime_Error(xtc_format,
-                                 "Zero as divisor (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      if((val == INT64_MIN) && (other == -1))
+                           "Integer division by zero (operands were `$1` and `$2`)", val, irhs);
+                      if((val == INT64_MIN) && (irhs == -1))
                         throw Runtime_Error(xtc_format,
-                                 "Integer division overflow (operands were `$1` and `$2`)",
-                                 val, other);
-
-                      val %= other;
-                      return;
+                           "Integer division overflow (operands were `$1` and `$2`)", val, irhs);
+                      val %= irhs;
                     }
-
-                    if(lhs.is_real()) {
+                    else if(lhs.is_real()) {
+                      // real % real ; can't overflow
                       V_real& val = lhs.mut_real();
-                      V_real other = static_cast<V_real>(irhs);
-
-                      val = ::std::fmod(val, other);
-                      return;
+                      val = ::std::fmod(val, static_cast<V_real>(irhs));
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modulo not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modulo not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6128,7 +5317,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_andb:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6136,29 +5324,20 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the bitwise AND operation on all bits of the operands.
                     if(lhs.is_integer()) {
+                      // integer & integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      val &= other;
-                      return;
+                      val &= irhs;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise AND not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6167,7 +5346,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_orb:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6175,29 +5353,20 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the bitwise OR operation on all bits of the operands.
                     if(lhs.is_integer()) {
+                      // integer | integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      val |= other;
-                      return;
+                      val |= irhs;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise OR not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6206,7 +5375,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_xorb:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6214,29 +5382,20 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform the bitwise XOR operation on all bits of the operands.
                     if(lhs.is_integer()) {
+                      // integer ^ integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      val ^= other;
-                      return;
+                      val ^= irhs;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Bitwise XOR not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6245,7 +5404,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_addm:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6253,29 +5411,22 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform modular addition on two integers.
                     if(lhs.is_integer()) {
+                      // __addm integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      ROCKET_ADD_OVERFLOW(val, other, &val);
-                      return;
+                      V_integer result;
+                      ROCKET_ADD_OVERFLOW(val, irhs, &result);
+                      val = result;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modular addition not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modular addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6284,7 +5435,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_subm:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6292,29 +5442,22 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform modular subtraction on two integers.
                     if(lhs.is_integer()) {
+                      // __subm integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      ROCKET_SUB_OVERFLOW(val, other, &val);
-                      return;
+                      V_integer result;
+                      ROCKET_SUB_OVERFLOW(val, irhs, &result);
+                      val = result;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modular subtraction not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6323,7 +5466,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_mulm:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6331,29 +5473,22 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform modular multiplication on two integers.
                     if(lhs.is_integer()) {
+                      // __mulm integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      ROCKET_MUL_OVERFLOW(val, other, &val);
-                      return;
+                      V_integer result;
+                      ROCKET_MUL_OVERFLOW(val, irhs, &result);
+                      val = result;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Modular multiplication not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6362,7 +5497,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_adds:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6370,30 +5504,23 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform saturating addition on two integers.
                     if(lhs.is_integer()) {
+                      // __adds integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      if(ROCKET_ADD_OVERFLOW(val, other, &val))
-                        val = (other >> 63) ^ INT64_MAX;
-                      return;
+                      V_integer result;
+                      if(ROCKET_ADD_OVERFLOW(val, irhs, &result))
+                        result = (val >> 63) ^ INT64_MAX;
+                      val = result;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Saturating addition not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6402,7 +5529,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_subs:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6410,30 +5536,23 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform saturating subtraction on two integers.
                     if(lhs.is_integer()) {
+                      // __subs integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-
-                      if(ROCKET_SUB_OVERFLOW(val, other, &val))
-                        val = (other >> 63) ^ INT64_MIN;
-                      return;
+                      V_integer result;
+                      if(ROCKET_SUB_OVERFLOW(val, irhs, &result))
+                        result = (val >> 63) ^ INT64_MAX;
+                      val = result;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Saturating subtraction not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6442,7 +5561,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_muls:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6450,31 +5568,23 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
-                    // Perform saturating multiplication on two integers.
                     if(lhs.is_integer()) {
+                      // __muls integer
                       V_integer& val = lhs.mut_integer();
-                      V_integer other = irhs;
-                      V_integer sign = val ^ other;
-
-                      if(ROCKET_MUL_OVERFLOW(val, other, &val))
-                        val = (sign >> 63) ^ INT64_MAX;
-                      return;
+                      V_integer result;
+                      if(ROCKET_MUL_OVERFLOW(val, irhs, &result))
+                        result = (val >> 63) ^ (irhs >> 63) ^ INT64_MAX;
+                      val = result;
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Saturating multiplication not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6483,7 +5593,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sll:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6491,55 +5600,40 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     if(irhs < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, irhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, irhs);
 
-                    // Shift the operand to the left. Elements that get shifted out
-                    // are discarded. Vacuum elements are filled with default values.
-                    // The width of the operand is unchanged.
                     if(lhs.is_integer()) {
+                      // integer <<< ; bitwise, fixed-width
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = irhs;
-                      val = (int64_t) ((uint64_t) val << (count & 63));
-                      val &= ((count - 64) >> 63);
-                      return;
+                      int64_t n = irhs;
+                      reinterpret_cast<uint64_t&>(val) <<= n;
+                      reinterpret_cast<uint64_t&>(val) <<= n != irhs;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string <<< ; bytewise, fixed-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
-                      val.erase(0, tlen);
-                      val.append(tlen, '\0');
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
+                      val.erase(0, n);
+                      val.append(n, '\0');
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array <<< ; element-wise, fixed-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
-                      val.erase(0, tlen);
-                      val.append(tlen);
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
+                      val.erase(0, n);
+                      val.append(n);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Logical left shift not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6548,7 +5642,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_srl:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6556,55 +5649,40 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     if(irhs < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, irhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, irhs);
 
-                    // Shift the operand to the right. Elements that get shifted out
-                    // are discarded. Vacuum elements are filled with default values.
-                    // The width of the operand is unchanged.
                     if(lhs.is_integer()) {
+                      // integer >>> ; bitwise, fixed-width
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = irhs;
-                      val = (int64_t) ((uint64_t) val >> (count & 63));
-                      val &= ((count - 64) >> 63);
-                      return;
+                      int64_t n = ::rocket::min(irhs, 63);
+                      reinterpret_cast<uint64_t&>(val) >>= n;
+                      reinterpret_cast<uint64_t&>(val) >>= n != irhs;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string >>> ; bytewise, fixed-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
-                      val.pop_back(tlen);
-                      val.insert(0, tlen, '\0');
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
+                      val.pop_back(n);
+                      val.insert(0, n, '\0');
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array >>> ; element-wise, fixed-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
-                      val.pop_back(tlen);
-                      val.insert(0, tlen);
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
+                      val.pop_back(n);
+                      val.insert(0, n);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Logical right shift not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6613,7 +5691,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sla:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6621,58 +5698,40 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     if(irhs < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, irhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, irhs);
 
-                    // Shift the operand to the left. No element is discarded from
-                    // the left (for integers this means that bits which get shifted
-                    // out shall all be the same with the sign bit). Vacuum elements
-                    // are filled with default values.
                     if(lhs.is_integer()) {
+                      // integer <<< ; bitwise, variable-width, may overflow
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = ::rocket::min(irhs, 63);
-                      if((val != 0) && ((count != irhs) || (val >> (63 - count) != val >> 63)))
+                      int64_t n = ::rocket::min(irhs, 63);
+                      if((val != 0) && ((n != irhs) || (val >> (63 - n) != val >> 63)))
                         throw Runtime_Error(xtc_format,
-                                 "Arithmetic left shift overflow (operands were `$1` and `$2`)",
-                                 lhs, irhs);
-
-                      reinterpret_cast<uint64_t&>(val) <<= count;
-                      return;
+                           "Arithmetic left shift overflow (operands were `$1` and `$2`)", lhs, irhs);
+                      reinterpret_cast<uint64_t&>(val) <<= n;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string <<< ; bytewise, variable-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
-                      val.append(tlen, '\0');
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
+                      val.append(n, '\0');
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array <<< ; element-wise, variable-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = (size_t) ::rocket::min(irhs, val.ssize());
-                      val.append(tlen);
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
+                      val.append(n);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Arithmetic left shift not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6681,7 +5740,6 @@ solidify(AVM_Rod& rod) const
               return;
 
             case xop_sra:
-              // binary
               rod.push_function(
                 +[](Executive_Context& ctx, const AVM_Rod::Header* head)
                   __attribute__((__hot__, __flatten__))
@@ -6689,51 +5747,37 @@ solidify(AVM_Rod& rod) const
                     const bool assign = head->uparam.b0;
                     const V_integer irhs = head->uparam.i2345;
                     Reference& top = ctx.stack().mut_top();
-                    Value& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
+                    auto& lhs = assign ? top.dereference_mutable() : top.dereference_copy();
 
                     if(irhs < 0)
                       throw Runtime_Error(xtc_format,
-                               "Negative shift count (operands were `$1` and `$2`)",
-                               lhs, irhs);
+                         "Negative shift count (operands were `$1` and `$2`)", lhs, irhs);
 
-                    // Shift the operand to the right. Elements that get shifted
-                    // out are discarded. No element is filled in the left.
                     if(lhs.is_integer()) {
+                      // integer <<< ; bitwise, variable-width, may overflow
                       V_integer& val = lhs.mut_integer();
-
-                      int64_t count = ::rocket::min(irhs, 63);
-                      val >>= count;
-                      return;
+                      int64_t n = ::rocket::min(irhs, 63);
+                      val >>= n;
                     }
-
-                    if(lhs.is_string()) {
+                    else if(lhs.is_string()) {
+                      // string <<< ; bytewise, variable-width
                       V_string& val = lhs.mut_string();
-
-                      size_t tlen = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
-                      val.pop_back(tlen);
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
+                      val.pop_back(n);
                     }
-
-                    if(lhs.is_array()) {
+                    else if(lhs.is_array()) {
+                      // array <<< ; element-wise, variable-width
                       V_array& val = lhs.mut_array();
-
-                      size_t tlen = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
-                      val.pop_back(tlen);
-                      return;
+                      size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
+                      val.pop_back(n);
                     }
-
-                    throw Runtime_Error(xtc_format,
-                             "Arithmetic right shift not applicable (operands were `$1` and `$2`)",
-                             lhs, irhs);
+                    else throw Runtime_Error(xtc_format,
+                            "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, irhs);
                   }
 
                 // Uparam
                 , up2
-
-                // Sparam
                 , 0, nullptr, nullptr, nullptr
-
-                // Collector
                 , nullptr
 
                 // Symbols
@@ -6742,7 +5786,7 @@ solidify(AVM_Rod& rod) const
               return;
 
             default:
-              ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), this->m_stor.index());
+              ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), altr.xop);
             }
         }
 
@@ -6776,11 +5820,7 @@ solidify(AVM_Rod& rod) const
 
             // Uparam
             , up2
-
-            // Sparam
             , 0, nullptr, nullptr, nullptr
-
-            // Collector
             , nullptr
 
             // Symbols
