@@ -129,8 +129,8 @@ do_evaluate_subexpression(Executive_Context& ctx, bool assign, const AVM_Rod& ro
       rod.execute(ctx);
       ROCKET_ASSERT(ctx.status() == air_status_next);
 
-      // The result really has to be copied, in case that a reference to an
-      // element of the LHS operand itself is returned.
+      // The result value really has to be copied, in case that a reference to
+      // an element of the LHS operand itself is returned.
       Value& rhs = ctx.stack().mut_top().dereference_copy();
       ctx.stack().top(1).dereference_mutable() = move(rhs);
       ctx.stack().pop();
@@ -2132,8 +2132,17 @@ solidify(AVM_Rod& rod) const
                              "Increment not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2182,8 +2191,17 @@ solidify(AVM_Rod& rod) const
                              "Decrement not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2202,8 +2220,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2221,8 +2248,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2240,8 +2276,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2260,8 +2305,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2280,8 +2334,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2300,8 +2363,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2333,8 +2405,17 @@ solidify(AVM_Rod& rod) const
                              "Subscript value not valid (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2353,8 +2434,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2396,8 +2486,17 @@ solidify(AVM_Rod& rod) const
                              "Arithmetic negation not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2435,8 +2534,17 @@ solidify(AVM_Rod& rod) const
                              "Bitwise NOT not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2455,8 +2563,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2495,8 +2612,17 @@ solidify(AVM_Rod& rod) const
                              "`countof` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2515,8 +2641,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2541,8 +2676,17 @@ solidify(AVM_Rod& rod) const
                              "`__sqrt` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2572,8 +2716,17 @@ solidify(AVM_Rod& rod) const
                              "`__isnan` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2603,8 +2756,17 @@ solidify(AVM_Rod& rod) const
                              "`__isinf` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2644,8 +2806,17 @@ solidify(AVM_Rod& rod) const
                              "`__abs` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2674,8 +2845,17 @@ solidify(AVM_Rod& rod) const
                              "`__sign` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2703,8 +2883,17 @@ solidify(AVM_Rod& rod) const
                              "`__round` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2733,8 +2922,17 @@ solidify(AVM_Rod& rod) const
                              "`__floor` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2763,8 +2961,17 @@ solidify(AVM_Rod& rod) const
                              "`__ceil` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2792,8 +2999,17 @@ solidify(AVM_Rod& rod) const
                              "`__trunc` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2821,8 +3037,17 @@ solidify(AVM_Rod& rod) const
                              "`__iround` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2851,8 +3076,17 @@ solidify(AVM_Rod& rod) const
                              "`__ifloor` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2881,8 +3115,17 @@ solidify(AVM_Rod& rod) const
                              "`__iceil` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2910,8 +3153,17 @@ solidify(AVM_Rod& rod) const
                              "`__itrunc` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2937,8 +3189,17 @@ solidify(AVM_Rod& rod) const
                              "`__lzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2964,8 +3225,17 @@ solidify(AVM_Rod& rod) const
                              "`__tzcnt` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -2991,8 +3261,17 @@ solidify(AVM_Rod& rod) const
                              "`__popcnt` not applicable (operand was `$1`)", rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3014,8 +3293,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3037,8 +3325,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3059,8 +3356,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3082,8 +3388,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3105,8 +3420,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3129,8 +3453,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3153,8 +3486,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3181,8 +3523,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3246,8 +3597,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3305,8 +3665,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3400,8 +3769,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3452,8 +3830,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3504,8 +3891,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3559,8 +3955,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3614,8 +4019,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3669,8 +4083,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3700,8 +4123,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3731,8 +4163,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3762,8 +4203,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3794,8 +4244,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3826,8 +4285,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3859,8 +4327,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3923,8 +4400,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -3987,8 +4473,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -4054,8 +4549,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -4114,8 +4618,17 @@ solidify(AVM_Rod& rod) const
                              lhs, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -4147,8 +4660,17 @@ solidify(AVM_Rod& rod) const
                              lhs, mid, rhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5011,8 +5533,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5031,8 +5562,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5053,8 +5593,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5075,8 +5624,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5096,8 +5654,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5118,8 +5685,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5140,8 +5716,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5163,8 +5748,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5186,8 +5780,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5213,8 +5816,17 @@ solidify(AVM_Rod& rod) const
                     return;
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5258,8 +5870,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5303,8 +5924,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5365,8 +5995,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5415,8 +6054,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5465,8 +6113,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5495,8 +6152,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5525,8 +6191,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5555,8 +6230,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5585,8 +6269,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5615,8 +6308,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5645,8 +6347,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5676,8 +6387,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5707,8 +6427,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5739,8 +6468,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5795,8 +6533,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5851,8 +6598,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5910,8 +6666,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
@@ -5962,8 +6727,17 @@ solidify(AVM_Rod& rod) const
                              lhs, irhs);
                   }
 
-                // Uparam, Sparam,                  Collector, Symbols
-                , up2, 0, nullptr, nullptr, nullptr, nullptr, &(altr.sloc)
+                // Uparam
+                , up2
+
+                // Sparam
+                , 0, nullptr, nullptr, nullptr
+
+                // Collector
+                , nullptr
+
+                // Symbols
+                , &(altr.sloc)
               );
               return;
 
