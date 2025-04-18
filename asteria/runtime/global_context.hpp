@@ -69,7 +69,7 @@ class Global_Context
     void
     call_hook(xMemfn xHooks::* mfn, xArgs&&... args)
       {
-        if(const auto hooks = unerase_pointer_cast<xHooks>(this->m_qhooks))
+        if(auto hooks = unerase_pointer_cast<xHooks>(this->m_qhooks))
           (hooks->*mfn) (forward<xArgs>(args)...);
       }
 
