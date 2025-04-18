@@ -367,17 +367,18 @@ do_accept_expression_opt(Token_Stream& tstrm)
   }
 
 bool
-do_accept_expression_and_check(cow_vector<Expression_Unit>& units, Token_Stream& tstrm, bool by_ref)
+do_accept_expression_and_check(cow_vector<Expression_Unit>& units, Token_Stream& tstrm,
+                               bool by_ref)
   {
     auto sloc = tstrm.next_sloc();
     if(!do_accept_expression(units, tstrm))
       return false;
 
-    if(by_ref || units.back().may_be_void()) {
-      // XXX: This may convert the result to an rvalue.
-      Expression_Unit::S_check_argument xunit = { move(sloc), by_ref };
-      units.emplace_back(move(xunit));
-    }
+    if(!units.back().may_be_void())
+      return true;
+
+    Expression_Unit::S_check_argument xunit = { move(sloc), by_ref };
+    units.emplace_back(move(xunit));
     return true;
   }
 

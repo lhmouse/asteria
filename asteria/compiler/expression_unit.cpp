@@ -337,6 +337,9 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
         {
           const auto& altr = this->m_stor.as<S_check_argument>();
 
+          if(opts.optimization_level >= 2)
+            return;
+
           AIR_Node::S_check_argument xnode = { altr.sloc, altr.by_ref };
           code.emplace_back(move(xnode));
           return;
