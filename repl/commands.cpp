@@ -240,7 +240,7 @@ struct Handler_source : Handler
           // I am too lazy to add support for `~+` or `~-` here.
           args.mut(0).erase(0, 1);
 
-          if(const char* home = ::getenv("HOME"))
+          if(auto home = ::getenv("HOME"))
             args.mut(0).insert(0, home);
         }
 
