@@ -99,7 +99,7 @@ Executive_Context::
 do_on_scope_exit_normal_slow(AIR_Status status)
   {
     Reference self;
-    if(status == air_status_return_ref) {
+    if(status == air_status_return) {
       // If a PTC wrapper was returned, append all deferred expressions to it.
       // These callbacks will be unpacked later, so we just return.
       if(this->m_stack->top().is_ptc()) {

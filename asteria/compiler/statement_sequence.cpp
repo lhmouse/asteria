@@ -1136,7 +1136,7 @@ do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
       return nullopt;
 
     scope_flags scope_check = scope_switch | scope_while | scope_for;
-    Jump_Target target = jump_target_unspec;
+    Jump_Target target = jump_target_none;
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch, keyword_while, keyword_for });
     if(qkwrd && (*qkwrd == keyword_switch)) {
@@ -1181,7 +1181,7 @@ do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
       return nullopt;
 
     scope_flags scope_check = scope_while | scope_for;
-    Jump_Target target = jump_target_unspec;
+    Jump_Target target = jump_target_none;
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while, keyword_for });
     if(qkwrd && (*qkwrd == keyword_while)) {

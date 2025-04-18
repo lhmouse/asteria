@@ -78,16 +78,16 @@ enum Xop : uint8_t
 
 enum AIR_Status : uint8_t
   {
-    air_status_next             = 0,
-    air_status_return_void      = 1,
-    air_status_return_ref       = 2,
-    air_status_break_unspec     = 3,
-    air_status_break_switch     = 4,
-    air_status_break_while      = 5,
-    air_status_break_for        = 6,
-    air_status_continue_unspec  = 7,
-    air_status_continue_while   = 8,
-    air_status_continue_for     = 9,
+    air_status_next            = 0,
+    air_status_return_void     = 1,
+    air_status_return          = 2,
+    air_status_break           = 3,
+    air_status_break_switch    = 4,
+    air_status_break_while     = 5,
+    air_status_break_for       = 6,
+    air_status_continue        = 7,
+    air_status_continue_while  = 8,
+    air_status_continue_for    = 9,
   };
 
 enum PTC_Aware : uint8_t

@@ -440,9 +440,9 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           // Translate jump targets to AIR status codes.
           switch(altr.target)
             {
-            case jump_target_unspec:
+            case jump_target_none:
               {
-                AIR_Node::S_simple_status xnode = { air_status_break_unspec };
+                AIR_Node::S_simple_status xnode = { air_status_break };
                 code.emplace_back(move(xnode));
                 return;
               }
@@ -480,9 +480,9 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           // Translate jump targets to AIR status codes.
           switch(altr.target)
             {
-            case jump_target_unspec:
+            case jump_target_none:
               {
-                AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
+                AIR_Node::S_simple_status xnode = { air_status_continue };
                 code.emplace_back(move(xnode));
                 return;
               }

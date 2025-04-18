@@ -75,17 +75,17 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
         self.set_void();
         return;
 
-      case air_status_return_ref:
+      case air_status_return:
         self = move(stack.mut_top());
         return;
 
-      case air_status_break_unspec:
+      case air_status_break:
       case air_status_break_switch:
       case air_status_break_while:
       case air_status_break_for:
         throw Runtime_Error(xtc_format, "Stray `break` statement");
 
-      case air_status_continue_unspec:
+      case air_status_continue:
       case air_status_continue_while:
       case air_status_continue_for:
         throw Runtime_Error(xtc_format, "Stray `continue` statement");

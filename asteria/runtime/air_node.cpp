@@ -162,8 +162,8 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
     else {
       // Perform a tail call.
       self.set_ptc(::rocket::make_refcnt<PTC_Arguments>(sloc, ptc, target,
-                                              move(self), move(ctx.alt_stack())));
-      return air_status_return_ref;
+                                           move(self), move(ctx.alt_stack())));
+      return air_status_return;
     }
   }
 
@@ -1083,7 +1083,7 @@ solidify(AVM_Rod& rod) const
                       // Execute the body of this clause.
                       sp.at(i).rod_body.execute(status, ctx_body);
                       if(status != air_status_next) {
-                        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch }))
+                        if(::rocket::is_any_of(status, { air_status_break, air_status_break_switch }))
                           status = air_status_next;
                         break;
                       }
@@ -1150,10 +1150,10 @@ solidify(AVM_Rod& rod) const
                 for(;;) {
                   // Execute the body.
                   do_execute_block(status, sp.rods_body, ctx);
-                  if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_while}))
+                  if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_while }))
                     status = air_status_next;
                   else if(status != air_status_next) {
-                    if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
+                    if(::rocket::is_any_of(status, { air_status_break, air_status_break_while }))
                       status = air_status_next;
                     break;
                   }
@@ -1224,10 +1224,10 @@ solidify(AVM_Rod& rod) const
 
                   // Execute the body.
                   do_execute_block(status, sp.rods_body, ctx);
-                  if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_while}))
+                  if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_while }))
                     status = air_status_next;
                   else if(status != air_status_next) {
-                    if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while }))
+                    if(::rocket::is_any_of(status, { air_status_break, air_status_break_while }))
                       status = air_status_next;
                     break;
                   }
@@ -1331,10 +1331,10 @@ solidify(AVM_Rod& rod) const
 
                       // Execute the loop body.
                       do_execute_block(status, sp.rod_body, ctx_for);
-                      if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
+                      if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_for }))
                         status = air_status_next;
                       else if(status != air_status_next) {
-                        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+                        if(::rocket::is_any_of(status, { air_status_break, air_status_break_for }))
                           status = air_status_next;
                         break;
                       }
@@ -1363,10 +1363,10 @@ solidify(AVM_Rod& rod) const
 
                       // Execute the loop body.
                       do_execute_block(status, sp.rod_body, ctx_for);
-                      if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
+                      if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_for }))
                         status = air_status_next;
                       else if(status != air_status_next) {
-                        if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+                        if(::rocket::is_any_of(status, { air_status_break, air_status_break_for }))
                           status = air_status_next;
                         break;
                       }
@@ -1445,15 +1445,15 @@ solidify(AVM_Rod& rod) const
                     // is empty then the loop is infinite.
                     sp.rod_cond.execute(status, ctx_for);
                     ROCKET_ASSERT(status == air_status_next);
-                    if((ctx_for.stack().size() != 0) && !ctx_for.stack().top().dereference_readonly().test())
+                    if(ctx_for.stack().size() && !ctx_for.stack().top().dereference_readonly().test())
                       break;
 
                     // Execute the body.
                     do_execute_block(status, sp.rod_body, ctx_for);
-                    if(::rocket::is_any_of(status, { air_status_continue_unspec, air_status_continue_for }))
+                    if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_for }))
                       status = air_status_next;
                     else if(status != air_status_next) {
-                      if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for }))
+                      if(::rocket::is_any_of(status, { air_status_break, air_status_break_for }))
                         status = air_status_next;
                       break;
                     }
@@ -1520,10 +1520,10 @@ solidify(AVM_Rod& rod) const
 
                 // This is almost identical to JavaScript but not to C++. Only one
                 // `catch` clause is allowed.
-                AIR_Status status = air_status_next;
                 try {
+                  AIR_Status status = air_status_next;
                   do_execute_block(status, sp.rod_try, ctx);
-                  if(status == air_status_return_ref)
+                  if(status == air_status_return)
                     ctx.stack().mut_top().check_function_result(ctx.global());
                   return status;
                 }
@@ -1536,6 +1536,7 @@ solidify(AVM_Rod& rod) const
                   // User-provided bindings may obtain the current exception using
                   // `::std::current_exception`.
                   Executive_Context ctx_catch(xtc_plain, ctx);
+                  AIR_Status status = air_status_next;
                   try {
                     // Set backtrace frames.
                     V_array backtrace;
@@ -5320,13 +5321,13 @@ solidify(AVM_Rod& rod) const
                   // dereferenceable.
                   ctx.stack().top().dereference_readonly();
                   ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return_ref;
+                  return air_status_return;
                 }
                 else {
                   // The result is passed by copy, so convert it to a temporary.
                   ctx.stack().mut_top().dereference_copy();
                   ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return_ref;
+                  return air_status_return;
                 }
               }
 
@@ -6831,19 +6832,19 @@ solidify(AVM_Rod& rod) const
                   // null
                   ctx.stack().push().set_temporary(nullopt);
                   ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return_ref;
+                  return air_status_return;
                 }
                 else if(type == type_boolean) {
                   // boolean; unnormalized
                   ctx.stack().push().set_temporary(-irhs < 0);
                   ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return_ref;
+                  return air_status_return;
                 }
                 else {
                   // integer
                   ctx.stack().push().set_temporary(irhs);
                   ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
-                  return air_status_return_ref;
+                  return air_status_return;
                 }
               }
 
