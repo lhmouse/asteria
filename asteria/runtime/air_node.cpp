@@ -180,29 +180,30 @@ do_invoke_partial(Reference& self, Executive_Context& ctx, const Source_Location
   }
 
 template<typename xContainer>
-void
-do_duplicate_sequence(xContainer& src, int64_t count)
+xContainer
+do_duplicate_sequence(const xContainer& src, int64_t count)
   {
+    xContainer dst;
+    int64_t rlen;
+
     if(count < 0)
       throw Runtime_Error(xtc_format,
-         "Negative duplication count (value was `$2`)", count);
+               "Negative duplication count (value was `$2`)", count);
 
-    if(src.empty() || (count == 1))
-      return;
-
-    if(count == 0) {
-      src.clear();
-      return;
-    }
-
-    int64_t rlen;
     if(ROCKET_MUL_OVERFLOW(src.ssize(), count, &rlen) || (rlen > PTRDIFF_MAX))
       throw Runtime_Error(xtc_format,
-         "Data length overflow (`$1` * `$2` > `$3`)", src.size(), count, PTRDIFF_MAX);
+               "Length overflow (`$1` * `$2` > `$3`)", src.size(), count, PTRDIFF_MAX);
 
-    src.reserve(static_cast<size_t>(rlen));
-    while(src.ssize() < rlen)
-      src.append(src.begin(), src.begin() + ::std::min(rlen - src.ssize(), src.ssize()));
+    if(ROCKET_UNEXPECT(rlen == 0))
+      return dst;
+
+    size_t ntotal = static_cast<size_t>(rlen);
+    dst.reserve(ntotal);
+    dst.append(src.begin(), src.end());
+    while(dst.size() * 2 <= ntotal)
+      dst.append(dst.begin(), dst.end());
+    dst.append(dst.begin(), dst.begin() + static_cast<ptrdiff_t>(ntotal - dst.size()));
+    return dst;
   }
 
 }  // namespace
@@ -3323,30 +3324,28 @@ solidify(AVM_Rod& rod) const
                       val &= rhs.as_boolean();
                       ctx.stack().pop();
                     }
-                    else if(lhs.is_integer() && rhs.is_string()) {
-                      // integer * string
-                      V_string str = rhs.as_string();
-                      do_duplicate_sequence(str, lhs.as_integer());
-                      lhs = move(str);
+                    else if(lhs.is_string() && rhs.is_integer()) {
+                      // string * integer
+                      V_string& val = lhs.mut_string();
+                      val = do_duplicate_sequence(val, rhs.as_integer());
                       ctx.stack().pop();
                     }
-                    else if(lhs.is_string() && rhs.is_integer()) {
-                      // str * integer
-                      V_string& str = lhs.mut_string();
-                      do_duplicate_sequence(str, rhs.as_integer());
+                    else if(lhs.is_array() && rhs.is_integer()) {
+                      // array * integer
+                      V_array& val = lhs.mut_array();
+                      val = do_duplicate_sequence(val, rhs.as_integer());
+                      ctx.stack().pop();
+                    }
+                    else if(lhs.is_integer() && rhs.is_string()) {
+                      // integer * string
+                      V_string temp = do_duplicate_sequence(rhs.as_string(), lhs.as_integer());
+                      lhs = move(temp);
                       ctx.stack().pop();
                     }
                     else if(lhs.is_integer() && rhs.is_array()) {
                       // integer * array
-                      V_array str = rhs.as_array();
-                      do_duplicate_sequence(str, lhs.as_integer());
-                      lhs = move(str);
-                      ctx.stack().pop();
-                    }
-                    else if(lhs.is_array() && rhs.is_integer()) {
-                      // str * integer
-                      V_array& str = lhs.mut_array();
-                      do_duplicate_sequence(str, rhs.as_integer());
+                      V_array temp = do_duplicate_sequence(rhs.as_array(), lhs.as_integer());
+                      lhs = move(temp);
                       ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5213,14 +5212,14 @@ solidify(AVM_Rod& rod) const
                       val *= static_cast<V_real>(irhs);
                     }
                     else if(lhs.is_string()) {
-                      // str * integer
-                      V_string& str = lhs.mut_string();
-                      do_duplicate_sequence(str, irhs);
+                      // string * integer
+                      V_string& val = lhs.mut_string();
+                      val = do_duplicate_sequence(val, irhs);
                     }
                     else if(lhs.is_array()) {
-                      // str * integer
-                      V_array& str = lhs.mut_array();
-                      do_duplicate_sequence(str, irhs);
+                      // array * integer
+                      V_array& val = lhs.mut_array();
+                      val = do_duplicate_sequence(val, irhs);
                     }
                     else throw Runtime_Error(xtc_format,
                             "Multiplication not applicable (operands were `$1` and `$2`)", lhs, irhs);
