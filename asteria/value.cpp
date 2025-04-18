@@ -51,7 +51,8 @@ using Rbr_Element = ::rocket::variant<Rbr_array, Rbr_object>;
 
 }  // namespace
 
-ROCKET_NEVER_INLINE void
+ROCKET_FLATTEN
+void
 Value::
 do_destroy_variant_slow() noexcept
   try {

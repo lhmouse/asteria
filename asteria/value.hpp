@@ -102,7 +102,7 @@ class Value
   public:
     ~Value()
       {
-        if(ROCKET_UNEXPECT(this->type() >= type_string))
+        if(ROCKET_UNEXPECT(this->m_stor.index() > type_real))
           this->do_destroy_variant_slow();
       }
 
