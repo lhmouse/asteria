@@ -279,7 +279,6 @@ do_use_function_result_slow(Global_Context& global)
       while(!frames.empty()) {
         ptcg = move(frames.mut_back());
         frames.pop_back();
-        const auto caller = ptcg->caller_opt();
 
         if((ptcg->ptc_aware() == ptc_aware_by_val) && result_value) {
           // Convert the result.
@@ -300,14 +299,13 @@ do_use_function_result_slow(Global_Context& global)
       while(!frames.empty()) {
         ptcg = move(frames.mut_back());
         frames.pop_back();
-        const auto caller = ptcg->caller_opt();
 
         // Note that if we arrive here, there must have been an exception thrown
         // when unpacking the last frame (i.e. the last call did not return), so
         // the last frame does not have its enclosing function set.
         except.push_frame_plain(ptcg->sloc(), &"[proper tail call]");
 
-        if(caller)
+        if(auto caller = ptcg->caller_opt())
           except.push_frame_function(caller->sloc(), caller->func());
 
         // Evaluate deferred expressions.
