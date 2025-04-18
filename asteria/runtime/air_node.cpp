@@ -66,6 +66,20 @@ do_solidify_nodes(AVM_Rod& rod, const cow_vector<AIR_Node>& code)
     rod.finalize();
   }
 
+bool
+do_continue_or_break(AIR_Status& status, initializer_list<AIR_Status> continue_on,
+                     initializer_list<AIR_Status> break_on)
+  {
+    if(::rocket::is_any_of(status, continue_on))
+      status = air_status_next;
+    if(status == air_status_next)
+      return true;
+
+    if(::rocket::is_any_of(status, break_on))
+      status = air_status_next;
+    return false;
+  }
+
 template<typename xSubscript>
 void
 do_push_subscript_and_check(Reference& ref, xSubscript&& xsub)
@@ -1043,6 +1057,7 @@ solidify(AVM_Rod& rod) const
                     AIR_Status dummy = air_status_next;
                     sp.at(k).rod_labels.execute(dummy, ctx);
                     ROCKET_ASSERT(dummy == air_status_next);
+
                     auto cmp = cond.compare_partial(ctx.stack().top().dereference_readonly());
                     if(cmp != compare_equal)
                       continue;
@@ -1055,6 +1070,7 @@ solidify(AVM_Rod& rod) const
                     AIR_Status dummy = air_status_next;
                     sp.at(k).rod_labels.execute(dummy, ctx);
                     ROCKET_ASSERT(dummy == air_status_next);
+
                     auto cmp_lo = cond.compare_partial(ctx.stack().top(1).dereference_readonly());
                     auto cmp_up = cond.compare_partial(ctx.stack().top(0).dereference_readonly());
                     if(::rocket::is_none_of(cmp_lo, { compare_greater, sp.at(k).cmp2_lower })
@@ -1082,11 +1098,9 @@ solidify(AVM_Rod& rod) const
                     else {
                       // Execute the body of this clause.
                       sp.at(i).rod_body.execute(status, ctx_body);
-                      if(status != air_status_next) {
-                        if(::rocket::is_any_of(status, { air_status_break, air_status_break_switch }))
-                          status = air_status_next;
+                      if(!do_continue_or_break(status, { /* non-continueable */ },
+                                               { air_status_break, air_status_break_switch }))
                         break;
-                      }
                     }
                 }
                 catch(Runtime_Error& except) {
@@ -1150,13 +1164,10 @@ solidify(AVM_Rod& rod) const
                 for(;;) {
                   // Execute the body.
                   do_execute_block(status, sp.rods_body, ctx);
-                  if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_while }))
-                    status = air_status_next;
-                  else if(status != air_status_next) {
-                    if(::rocket::is_any_of(status, { air_status_break, air_status_break_while }))
-                      status = air_status_next;
+                  if(!do_continue_or_break(status,
+                                           { air_status_continue, air_status_continue_while },
+                                           { air_status_break, air_status_break_while }))
                     break;
-                  }
 
                   // Check the condition.
                   sp.rods_cond.execute(status, ctx);
@@ -1224,13 +1235,10 @@ solidify(AVM_Rod& rod) const
 
                   // Execute the body.
                   do_execute_block(status, sp.rods_body, ctx);
-                  if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_while }))
-                    status = air_status_next;
-                  else if(status != air_status_next) {
-                    if(::rocket::is_any_of(status, { air_status_break, air_status_break_while }))
-                      status = air_status_next;
+                  if(!do_continue_or_break(status,
+                                           { air_status_continue, air_status_continue_while },
+                                           { air_status_break, air_status_break_while }))
                     break;
-                  }
                 }
                 return status;
               }
@@ -1331,13 +1339,10 @@ solidify(AVM_Rod& rod) const
 
                       // Execute the loop body.
                       do_execute_block(status, sp.rod_body, ctx_for);
-                      if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_for }))
-                        status = air_status_next;
-                      else if(status != air_status_next) {
-                        if(::rocket::is_any_of(status, { air_status_break, air_status_break_for }))
-                          status = air_status_next;
+                      if(!do_continue_or_break(status,
+                                               { air_status_continue, air_status_continue_for },
+                                               { air_status_break, air_status_break_for }))
                         break;
-                      }
                     }
                   }
                   else if(range.is_object()) {
@@ -1363,13 +1368,10 @@ solidify(AVM_Rod& rod) const
 
                       // Execute the loop body.
                       do_execute_block(status, sp.rod_body, ctx_for);
-                      if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_for }))
-                        status = air_status_next;
-                      else if(status != air_status_next) {
-                        if(::rocket::is_any_of(status, { air_status_break, air_status_break_for }))
-                          status = air_status_next;
+                      if(!do_continue_or_break(status,
+                                               { air_status_continue, air_status_continue_for },
+                                               { air_status_break, air_status_break_for }))
                         break;
-                      }
                     }
                   }
                   else if(!range.is_null())
@@ -1450,13 +1452,10 @@ solidify(AVM_Rod& rod) const
 
                     // Execute the body.
                     do_execute_block(status, sp.rod_body, ctx_for);
-                    if(::rocket::is_any_of(status, { air_status_continue, air_status_continue_for }))
-                      status = air_status_next;
-                    else if(status != air_status_next) {
-                      if(::rocket::is_any_of(status, { air_status_break, air_status_break_for }))
-                        status = air_status_next;
+                    if(!do_continue_or_break(status,
+                                             { air_status_continue, air_status_continue_for },
+                                             { air_status_break, air_status_break_for }))
                       break;
-                    }
 
                     // Execute the increment.
                     sp.rod_step.execute(status, ctx_for);
