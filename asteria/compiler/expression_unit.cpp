@@ -72,7 +72,7 @@ maybe_unreadable() const noexcept
       case index_branch:
         return ::rocket::any_of(this->m_stor.as<S_branch>().branches,
             [](const branch& br) {
-              return !br.units.empty() && br.units.back().maybe_unreadable();
+              return br.units.size() && br.units.back().maybe_unreadable();
             });
 
       default:
