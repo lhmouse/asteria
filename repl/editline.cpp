@@ -102,8 +102,9 @@ do_init_once()
     ::el_set(s_editor, EL_BIND, R"(\e[5D)", "ed-prev-word", nullptr);
     ::el_set(s_editor, EL_BIND, R"(\e\e[D)", "ed-prev-word", nullptr);
 
-    if(const char* home = ::getenv("HOME")) {
-      auto path = cow_string(home) + "/.editrc";
+    if(auto home = ::getenv("HOME")) {
+      cow_string path = &"/.editrc";
+      path.insert(0, home);
       repl_printf("* loading settings from `%s`...", path.c_str());
 
       if(::access(path.c_str(), R_OK) == 0) {
