@@ -2293,15 +2293,15 @@ solidify(AVM_Rod& rod) const
                     if(rhs.is_integer()) {
                       Subscript::S_array_index xsub = { rhs.as_integer() };
                       do_push_subscript_and_check(top, move(xsub));
-                      ctx.stack().pop();
                     }
                     else if(rhs.is_string()) {
                       Subscript::S_object_key xsub = { move(rhs.mut_string()) };
                       do_push_subscript_and_check(top, move(xsub));
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Subscript value not valid (operand was `$1`)", rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -2996,6 +2996,7 @@ solidify(AVM_Rod& rod) const
                     // ==
                     Compare cmp = lhs.compare_partial(rhs);
                     lhs = cmp == compare_equal;
+
                     ctx.stack().pop();
                   }
 
@@ -3022,6 +3023,7 @@ solidify(AVM_Rod& rod) const
                     // != ; not ==
                     Compare cmp = lhs.compare_partial(rhs);
                     lhs = cmp != compare_equal;
+
                     ctx.stack().pop();
                   }
 
@@ -3048,6 +3050,7 @@ solidify(AVM_Rod& rod) const
                     // </> ; not <= and not >=
                     Compare cmp = lhs.compare_partial(rhs);
                     lhs = cmp == compare_unordered;
+
                     ctx.stack().pop();
                   }
 
@@ -3074,6 +3077,7 @@ solidify(AVM_Rod& rod) const
                     // <
                     Compare cmp = lhs.compare_total(rhs);
                     lhs = cmp == compare_less;
+
                     ctx.stack().pop();
                   }
 
@@ -3100,6 +3104,7 @@ solidify(AVM_Rod& rod) const
                     // >
                     Compare cmp = lhs.compare_total(rhs);
                     lhs = cmp == compare_greater;
+
                     ctx.stack().pop();
                   }
 
@@ -3126,6 +3131,7 @@ solidify(AVM_Rod& rod) const
                     // <= ; not >
                     Compare cmp = lhs.compare_total(rhs);
                     lhs = cmp != compare_greater;
+
                     ctx.stack().pop();
                   }
 
@@ -3152,6 +3158,7 @@ solidify(AVM_Rod& rod) const
                     // < ; not >=
                     Compare cmp = lhs.compare_total(rhs);
                     lhs = cmp != compare_less;
+
                     ctx.stack().pop();
                   }
 
@@ -3181,6 +3188,7 @@ solidify(AVM_Rod& rod) const
                       lhs = &"[unordered]";
                     else
                       lhs = static_cast<int64_t>(cmp) - compare_equal;
+
                     ctx.stack().pop();
                   }
 
@@ -3212,28 +3220,26 @@ solidify(AVM_Rod& rod) const
                         throw Runtime_Error(xtc_format,
                            "Integer addition overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real + real ; can't overflow
                       V_real& val = lhs.mut_real();
                       val += rhs.as_real();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean + boolean ; same as |
                       V_boolean& val = lhs.mut_boolean();
                       val |= rhs.as_boolean();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string + string
                       V_string& val = lhs.mut_string();
                       val += rhs.as_string();
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3264,22 +3270,21 @@ solidify(AVM_Rod& rod) const
                         throw Runtime_Error(xtc_format,
                            "Integer subtraction overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real - real ; can't overflow
                       V_real& val = lhs.mut_real();
                       val -= rhs.as_real();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean - boolean ; same as ^
                       V_boolean& val = lhs.mut_boolean();
                       val ^= rhs.as_boolean();
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3310,46 +3315,41 @@ solidify(AVM_Rod& rod) const
                         throw Runtime_Error(xtc_format,
                            "Integer multiplication overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val = result;
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real * real ; can't overflow
                       V_real& val = lhs.mut_real();
                       val *= rhs.as_real();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean * boolean ; same as &
                       V_boolean& val = lhs.mut_boolean();
                       val &= rhs.as_boolean();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string() && rhs.is_integer()) {
                       // string * integer
                       V_string& val = lhs.mut_string();
                       val = do_duplicate_sequence(val, rhs.as_integer());
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_array() && rhs.is_integer()) {
                       // array * integer
                       V_array& val = lhs.mut_array();
                       val = do_duplicate_sequence(val, rhs.as_integer());
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_integer() && rhs.is_string()) {
                       // integer * string
                       V_string temp = do_duplicate_sequence(rhs.as_string(), lhs.as_integer());
                       lhs = move(temp);
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_integer() && rhs.is_array()) {
                       // integer * array
                       V_array temp = do_duplicate_sequence(rhs.as_array(), lhs.as_integer());
                       lhs = move(temp);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3382,16 +3382,16 @@ solidify(AVM_Rod& rod) const
                         throw Runtime_Error(xtc_format,
                            "Integer division overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val /= rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real / real ; can't overflow
                       V_real& val = lhs.mut_real();
                       val /= rhs.as_real();
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Division not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3424,16 +3424,16 @@ solidify(AVM_Rod& rod) const
                         throw Runtime_Error(xtc_format,
                            "Integer division overflow (operands were `$1` and `$2`)", val, rhs.as_integer());
                       val %= rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real % real ; can't overflow
                       V_real& val = lhs.mut_real();
                       val = ::std::fmod(val, rhs.as_real());
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Modulo not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3460,13 +3460,11 @@ solidify(AVM_Rod& rod) const
                       // integer & integer
                       V_integer& val = lhs.mut_integer();
                       val &= rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean & boolean
                       V_boolean& val = lhs.mut_boolean();
                       val &= rhs.as_boolean();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string & string ; bitwise truncation
@@ -3477,10 +3475,11 @@ solidify(AVM_Rod& rod) const
                       auto mc = mask.begin();
                       for(auto it = val.mut_begin();  it != val.end();  ++it, ++mc)
                         *it = static_cast<char>(*it & *mc);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Bitwise AND not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3507,13 +3506,11 @@ solidify(AVM_Rod& rod) const
                       // integer | integer
                       V_integer& val = lhs.mut_integer();
                       val |= rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean & boolean
                       V_boolean& val = lhs.mut_boolean();
                       val |= rhs.as_boolean();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string | string ; bitwise extension
@@ -3524,10 +3521,11 @@ solidify(AVM_Rod& rod) const
                       auto it = val.mut_begin();
                       for(auto mc = mask.begin();  mc != mask.end();  ++it, ++mc)
                         *it = static_cast<char>(*it | *mc);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Bitwise OR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3554,13 +3552,11 @@ solidify(AVM_Rod& rod) const
                       // integer ^ integer
                       V_integer& val = lhs.mut_integer();
                       val ^= rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean ^ boolean
                       V_boolean& val = lhs.mut_boolean();
                       val ^= rhs.as_boolean();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string ^ string ; bitwise flipping
@@ -3571,10 +3567,11 @@ solidify(AVM_Rod& rod) const
                       auto it = val.mut_begin();
                       for(auto mc = mask.begin();  mc != mask.end();  ++it, ++mc)
                         *it = static_cast<char>(*it ^ *mc);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Bitwise XOR not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3603,10 +3600,11 @@ solidify(AVM_Rod& rod) const
                       V_integer result;
                       ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result);
                       val = result;
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Modular addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3635,10 +3633,11 @@ solidify(AVM_Rod& rod) const
                       V_integer result;
                       ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result);
                       val = result;
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Modular subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3667,10 +3666,11 @@ solidify(AVM_Rod& rod) const
                       V_integer result;
                       ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result);
                       val = result;
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Modular multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3700,10 +3700,11 @@ solidify(AVM_Rod& rod) const
                       if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Saturating addition not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3733,10 +3734,11 @@ solidify(AVM_Rod& rod) const
                       if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
                         result = (val >> 63) ^ INT64_MAX;
                       val = result;
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Saturating subtraction not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3766,10 +3768,11 @@ solidify(AVM_Rod& rod) const
                       if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
                         result = (val >> 63) ^ (rhs.as_integer() >> 63) ^ INT64_MAX;
                       val = result;
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Saturating multiplication not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3806,7 +3809,6 @@ solidify(AVM_Rod& rod) const
                       int64_t n = rhs.as_integer();
                       reinterpret_cast<uint64_t&>(val) <<= n;
                       reinterpret_cast<uint64_t&>(val) <<= n != rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, fixed-width
@@ -3814,7 +3816,6 @@ solidify(AVM_Rod& rod) const
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.erase(0, n);
                       val.append(n, '\0');
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, fixed-width
@@ -3822,10 +3823,11 @@ solidify(AVM_Rod& rod) const
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.erase(0, n);
                       val.append(n);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Logical left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3862,7 +3864,6 @@ solidify(AVM_Rod& rod) const
                       int64_t n = ::rocket::min(rhs.as_integer(), 63);
                       reinterpret_cast<uint64_t&>(val) >>= n;
                       reinterpret_cast<uint64_t&>(val) >>= n != rhs.as_integer();
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string()) {
                       // string >>> ; bytewise, fixed-width
@@ -3870,7 +3871,6 @@ solidify(AVM_Rod& rod) const
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                       val.insert(0, n, '\0');
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_array()) {
                       // array >>> ; element-wise, fixed-width
@@ -3878,10 +3878,11 @@ solidify(AVM_Rod& rod) const
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                       val.insert(0, n);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Logical right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3920,24 +3921,23 @@ solidify(AVM_Rod& rod) const
                         throw Runtime_Error(xtc_format,
                            "Arithmetic left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
                       reinterpret_cast<uint64_t&>(val) <<= n;
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, variable-width
                       V_string& val = lhs.mut_string();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.append(n, '\0');
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, variable-width
                       V_array& val = lhs.mut_array();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.append(n);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Arithmetic left shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -3973,24 +3973,23 @@ solidify(AVM_Rod& rod) const
                       V_integer& val = lhs.mut_integer();
                       int64_t n = ::rocket::min(rhs.as_integer(), 63);
                       val >>= n;
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, variable-width
                       V_string& val = lhs.mut_string();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
-                      ctx.stack().pop();
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, variable-width
                       V_array& val = lhs.mut_array();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
-                      ctx.stack().pop();
                     }
                     else throw Runtime_Error(xtc_format,
                             "Arithmetic right shift not applicable (operands were `$1` and `$2`)", lhs, rhs);
+
+                    ctx.stack().pop();
                   }
 
                 // Uparam
@@ -4019,10 +4018,11 @@ solidify(AVM_Rod& rod) const
                       // __fma ; always real
                       V_real& val = lhs.mut_real();
                       val = ::std::fma(val, mid.as_real(), rhs.as_real());
-                      ctx.stack().pop(2);
                     }
                     else throw Runtime_Error(xtc_format,
                             "`__fma` not applicable (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
+
+                    ctx.stack().pop(2);
                   }
 
                 // Uparam
