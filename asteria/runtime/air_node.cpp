@@ -4443,7 +4443,7 @@ solidify(AVM_Rod& rod) const
                 Source_Location script_sloc(abs_path, 0, 0);
                 auto target = optmz.create_function(script_sloc, &"[file scope]");
                 ctx.stack().mut_top().set_void();
-                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, target);
+                do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc_aware_none, target);
               }
 
             // Uparam
@@ -4724,7 +4724,7 @@ solidify(AVM_Rod& rod) const
                 // Invoke the target function.
                 auto target = do_get_target_function(ctx.stack().top());
                 ctx.stack().mut_top().pop_subscript();
-                return do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
+                do_invoke_partial(ctx.stack().mut_top(), ctx, sloc, ptc, target);
               }
 
             // Uparam
