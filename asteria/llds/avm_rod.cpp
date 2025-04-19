@@ -155,7 +155,7 @@ execute(Executive_Context& ctx) const
     const auto eptr = this->m_bptr + this->m_einit;
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
       try {
-        if(head->meta_ver == 0)
+        if(ROCKET_UNEXPECT(head->meta_ver == 0))
           (* head->pv_exec) (ctx, head);
         else
           (* head->pv_meta->exec) (ctx, head);
