@@ -60,11 +60,8 @@ void
 AVM_Rod::
 clear() noexcept
   {
-    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(offset != 0) {
-      auto head = this->m_bptr + this->m_einit + offset;
-      offset += 1L + head->nheaders;
-
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
       if(head->meta_ver == 0)
         continue;
 
@@ -155,11 +152,8 @@ AVM_Rod::
 execute(Executive_Context& ctx) const
   {
     ctx.status() = air_status_next;
-    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(ROCKET_EXPECT(ctx.status() == air_status_next) && (offset != 0)) {
-      auto head = this->m_bptr + this->m_einit + offset;
-      offset += 1L + head->nheaders;
-
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
       try {
         if(head->meta_ver == 0)
           (* head->pv_exec) (ctx, head);
@@ -179,6 +173,9 @@ execute(Executive_Context& ctx) const
           except.push_frame_plain(head->pv_meta->sloc);
         throw except;
       }
+
+      if(ROCKET_UNEXPECT(ctx.status() != air_status_next))
+        break;
     }
   }
 
@@ -186,11 +183,8 @@ void
 AVM_Rod::
 collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
-    ptrdiff_t offset = -(ptrdiff_t) this->m_einit;
-    while(offset != 0) {
-      auto head = this->m_bptr + this->m_einit + offset;
-      offset += 1L + head->nheaders;
-
+    const auto eptr = this->m_bptr + this->m_einit;
+    for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
       if(head->meta_ver == 0)
         continue;
 
