@@ -61,13 +61,10 @@ class AVM_Rod
 
     struct Metadata
       {
-        // Version 1
-        Executor* exec;        // executor function
-        Destructor* dtor_opt;  // if null then no cleanup is performed
-        Collector* coll_opt;   // if null then no variable shall exist
-
-        // Version 2
-        Source_Location sloc;  // symbols
+        Executor* exec;
+        Destructor* dtor_opt;
+        Collector* coll_opt;
+        opt<Source_Location> sloc_opt;
       };
 
     // This is the header of each variable-length element that is stored in an
@@ -78,7 +75,8 @@ class AVM_Rod
         union {
           struct {
             uint8_t nheaders;  // size of `sparam`, in number of headers [!]
-            uint8_t meta_ver;  // version of `Metadata`; `pv_meta` active
+            uint8_t has_pv_meta : 1;
+            uint8_t reserved : 7;
           };
           Uparam uparam;
         };

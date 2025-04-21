@@ -62,7 +62,7 @@ clear() noexcept
   {
     const auto eptr = this->m_bptr + this->m_einit;
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
-      if(head->meta_ver == 0)
+      if(!head->has_pv_meta)
         continue;
 
       if(head->pv_meta->dtor_opt)
@@ -91,22 +91,14 @@ push_function(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ct
              sparam_size, max_sparam_size);
 
     unique_ptr<Metadata> meta;
-    uint8_t meta_ver = 0;
-
     if(ctor_opt || dtor_opt || coll_opt || sloc_opt) {
-      meta.reset(new Metadata());
-      meta_ver = 1;
-
-      // ver. 1
+      meta.reset(new Metadata);
       meta->exec = exec;
       meta->dtor_opt = dtor_opt;
       meta->coll_opt = coll_opt;
 
-      if(sloc_opt) {
-        // ver. 2
-        meta->sloc = *sloc_opt;
-        meta_ver = 2;
-      }
+      if(sloc_opt)
+        meta->sloc_opt.emplace(*sloc_opt);
     }
 
     // Round the size up to the nearest number of headers. This shall not result
@@ -125,17 +117,18 @@ push_function(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ct
     head->uparam = uparam;
     head->nheaders = (uint8_t) (nheaders_p1 - 1);
 
+    if(!meta)
+      head->pv_exec = exec;
+    else {
+      head->has_pv_meta = 1;
+      head->pv_meta = meta.release();
+    }
+
     if(ctor_opt)
       (*ctor_opt) (head, ctor_arg);
     else if(sparam_size != 0)
       ::memset(head->sparam, 0, sparam_size);
 
-    if(meta)
-      head->pv_meta = meta.release();
-    else
-      head->pv_exec = exec;
-
-    head->meta_ver = meta_ver;
     this->m_einit += nheaders_p1;
     return head;
   }
@@ -155,22 +148,22 @@ execute(Executive_Context& ctx) const
     const auto eptr = this->m_bptr + this->m_einit;
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
       try {
-        if(ROCKET_UNEXPECT(head->meta_ver == 0))
+        if(!head->has_pv_meta)
           (* head->pv_exec) (ctx, head);
         else
           (* head->pv_meta->exec) (ctx, head);
       }
       catch(Runtime_Error& except) {
         // Modify and rethrow the exception in place without copying it.
-        if(head->meta_ver >= 2)
-          except.push_frame_plain(head->pv_meta->sloc);
+        if(head->has_pv_meta && head->pv_meta->sloc_opt)
+          except.push_frame_plain(*(head->pv_meta->sloc_opt));
         throw;
       }
       catch(exception& stdex) {
-        // Replace the current exception.
+        // Replace the current exception object.
         Runtime_Error except(xtc_format, "$1", stdex);
-        if(head->meta_ver >= 2)
-          except.push_frame_plain(head->pv_meta->sloc);
+        if(head->has_pv_meta && head->pv_meta->sloc_opt)
+          except.push_frame_plain(*(head->pv_meta->sloc_opt));
         throw except;
       }
 
@@ -185,7 +178,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
   {
     const auto eptr = this->m_bptr + this->m_einit;
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
-      if(head->meta_ver == 0)
+      if(!head->has_pv_meta)
         continue;
 
       if(head->pv_meta->coll_opt)

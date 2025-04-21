@@ -878,7 +878,7 @@ solidify(AVM_Rod& rod) const
               __attribute__((__hot__, __flatten__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
 
                 // Allocate a variable and inject it into the current context.
                 const auto gcoll = ctx.global().garbage_collector();
@@ -1478,7 +1478,7 @@ solidify(AVM_Rod& rod) const
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__cold__))
               {
-                const auto& try_sloc = head->pv_meta->sloc;
+                const auto& try_sloc = *(head->pv_meta->sloc_opt);
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
 
                 // This is almost identical to JavaScript but not to C++. Only one
@@ -1854,7 +1854,7 @@ solidify(AVM_Rod& rod) const
               __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
 
                 // Instantiate the function.
                 AIR_Optimizer optmz(sp.opts);
@@ -1948,7 +1948,7 @@ solidify(AVM_Rod& rod) const
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
                 const uint32_t nargs = head->uparam.u2345;
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
                 const auto sentry = ctx.global().copy_recursion_sentry();
 
                 // Collect arguments from left to right.
@@ -4172,7 +4172,7 @@ solidify(AVM_Rod& rod) const
               {
                 const bool immutable = head->uparam.b0;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
 
                 // Allocate a variable and inject it into the current context.
                 const auto gcoll = ctx.global().garbage_collector();
@@ -4210,7 +4210,7 @@ solidify(AVM_Rod& rod) const
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
               __attribute__((__hot__, __flatten__))
               {
-                ctx.global().call_hook(&Abstract_Hooks::on_trap, head->pv_meta->sloc, ctx);
+                ctx.global().call_hook(&Abstract_Hooks::on_trap, *(head->pv_meta->sloc_opt), ctx);
               }
 
             // Uparam
@@ -4240,7 +4240,7 @@ solidify(AVM_Rod& rod) const
               __attribute__((__cold__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
                 const auto sentry = ctx.global().copy_recursion_sentry();
 
                 auto temp_value = ctx.stack().top().dereference_readonly();
@@ -4344,7 +4344,7 @@ solidify(AVM_Rod& rod) const
               __attribute__((__cold__))
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
 
                 // Capture local references at this time.
                 bool dirty = false;
@@ -4397,7 +4397,7 @@ solidify(AVM_Rod& rod) const
               {
                 const uint32_t nargs = head->uparam.u2345;
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
                 const auto sentry = ctx.global().copy_recursion_sentry();
 
                 // Collect arguments from left to right.
@@ -4608,7 +4608,7 @@ solidify(AVM_Rod& rod) const
               {
                 const bool by_ref = head->uparam.b0;
                 const bool is_void = head->uparam.b1;
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
 
                 if(!is_void && !ctx.stack().top().is_void()) {
                   // Ensure the result is dereferenceable. If it is to be
@@ -4716,7 +4716,7 @@ solidify(AVM_Rod& rod) const
               __attribute__((__hot__, __flatten__))
               {
                 const PTC_Aware ptc = static_cast<PTC_Aware>(head->uparam.u0);
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
                 const auto sentry = ctx.global().copy_recursion_sentry();
 
                 ctx.swap_stacks();
@@ -5803,7 +5803,7 @@ solidify(AVM_Rod& rod) const
               {
                 const Type type = static_cast<Type>(head->uparam.u0);
                 const V_integer irhs = head->uparam.i2345;
-                const auto& sloc = head->pv_meta->sloc;
+                const auto& sloc = *(head->pv_meta->sloc_opt);
 
                 // Push the result as a temporary value.
                 if(type == type_null)
