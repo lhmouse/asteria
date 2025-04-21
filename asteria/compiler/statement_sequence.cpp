@@ -1249,7 +1249,7 @@ do_accept_return_statement_opt(Token_Stream& tstrm)
     // return-statement ::=
     //   `return` ( argument )? `;`
     // argument ::=
-    //   [ `ref` `->` ] ? expression
+    //   [ `ref` `->` ]? expression
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
     if(!qkwrd)

@@ -142,7 +142,7 @@
   - `return` ( _argument_ )? `;`
 
 * _argument_ ::=
-  - [ `ref` `->` ] ? _expression_
+  - [ `ref` `->` ]? _expression_
 
 * _assert-statement_ ::=
   - `assert` _expression_ ( `:` _string-literal_ )? `;`
