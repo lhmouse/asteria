@@ -179,22 +179,13 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
                           bool integers_as_reals)
   {
     // numeric-literal ::=
-    //   number-sign ( binary-literal | decimal-literal | hexadecimal-literal )
-    //   exponent-suffix
-    // number-sign ::=
-    //   PCRE([+-])
-    // binary-literal ::=
-    //   PCRE(0[bB]([01]`?)+(\.([01]`?)+))
-    // decimal-literal ::=
-    //   PCRE(([0-9]`?)+(\.([0-9]`?)+))
-    // hexadecimal-literal ::=
-    //   PCRE(0[xX]([0-9A-Fa-f]`?)+(\.([0-9A-Fa-f]`?)+))
-    // exponent-suffix ::=
-    //   decimal-exponent-suffix | binary-exponent-suffix
-    // decimal-exponent-suffix ::=
-    //   PCRE([eE][-+]?([0-9]`?)+)
-    // binary-exponent-suffix ::=
-    //   PCRE([pP][-+]?([0-9]`?)+)
+    //   ``[+-]?nan``
+    //   ``[+-]?NaN``
+    //   ``[+-]?infinity``
+    //   ``[+-]?Infinity``
+    //   ``[+-]?0[bB][01`]+(\.[01`]+)?[pP][+-]?[0-9`]+``
+    //   ``[+-]?[0-9][0-9`]*(\.[0-9`]+)?[eEpP][+-]?[0-9`]+``
+    //   ``[+-]?0[xX][0-9a-fA-F`]+(\.[0-9a-fA-F`]+)?[pP][+-]?[0-9`]+``
     cow_string tstr;
     size_t tlen = 0;
 
@@ -497,10 +488,9 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
     // string-literal ::=
     //   ( escape-string-literal | noescape-string-literal ) string-literal ?
     // escape-string-literal ::=
-    //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|
-    //         (U[0-9A-Fa-f]{6}))))*?")
+    //   `"([^"\\]|\\([abfnrtveZ0'"?\\/]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{6}))*"`
     // noescape-string-literal ::=
-    //   PCRE('[^']*?')
+    //   `'[^']*'`
     if(reader.peek() != head)
       return false;
 
@@ -714,7 +704,7 @@ do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Text_Reader& reader,
                                 bool keywords_as_identifiers)
   {
     // identifier ::=
-    //   PCRE([A-Za-z_][A-Za-z_0-9]*)
+    //   [A-Za-z_][A-Za-z_0-9]*
     if(!is_cmask(reader.peek(), cmask_namei))
       return false;
 

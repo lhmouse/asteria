@@ -82,25 +82,6 @@ do_accept_identifier_opt(Token_Stream& tstrm, bool user_decl)
     return name;
   }
 
-cow_string&
-do_concatenate_string_literal_sequence(cow_string& val, Token_Stream& tstrm)
-  {
-    for(;;) {
-      auto qtok = tstrm.peek_opt();
-      if(!qtok)
-        break;
-
-      // See whether it is a string literal.
-      if(!qtok->is_string_literal())
-        break;
-
-      // Append the string literal and discard this token.
-      val += qtok->as_string_literal();
-      tstrm.shift();
-    }
-    return val;
-  }
-
 opt<cow_string>
 do_accept_string_literal_opt(Token_Stream& tstrm)
   {
@@ -115,7 +96,6 @@ do_accept_string_literal_opt(Token_Stream& tstrm)
     // Return the string literal and discard this token.
     auto val = qtok->as_string_literal();
     tstrm.shift();
-    do_concatenate_string_literal_sequence(val, tstrm);
     return val;
   }
 
@@ -154,7 +134,11 @@ opt<Value>
 do_accept_literal_opt(Token_Stream& tstrm)
   {
     // literal ::=
-    //   "null" | "false" | "true" | string-literal | numeric-literal
+    //   null
+    //   false
+    //   true
+    //   numeric-literal
+    //   ( string-literal )*
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
@@ -192,10 +176,15 @@ do_accept_literal_opt(Token_Stream& tstrm)
     }
 
     if(qtok->is_string_literal()) {
-      // Copy the value and discard this token.
+      // Concatenate adjacent string literals.
       cow_string val = qtok->as_string_literal();
-      tstrm.shift();
-      do_concatenate_string_literal_sequence(val, tstrm);
+      for(;;) {
+        tstrm.shift();
+        qtok = tstrm.peek_opt();
+        if(!qtok || !qtok->is_string_literal())
+          break;
+        val += qtok->as_string_literal();
+      }
       return val;
     }
 
@@ -206,7 +195,8 @@ opt<bool>
 do_accept_negation_opt(Token_Stream& tstrm)
   {
     // negation ::=
-    //   "!" | "not"
+    //   `!`
+    //   `not`
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_notl });
     if(kpunct)
       return true;
@@ -222,16 +212,12 @@ opt<cow_vector<phsh_string>>
 do_accept_variable_declarator_opt(Token_Stream& tstrm)
   {
     // variable-declarator ::=
-    //   identifier | structured-binding-array | structured-binding-object
-    //  identifier-list ::=
-    //    identifier ( "," identifier-list ? ) ?
-    //  structured-binding-array ::=
-    //    "[" identifier-list "]"
-    //  structured-binding-object ::=
-    //    "{" identifier-list "}"
+    //   identifier
+    //   [ identifier-list ]
+    //   { identifier-list }
+    // identifier-list ::=
+    //   identifier ( `,` identifier )* `,` ?
     cow_vector<phsh_string> names;
-    bool comma_allowed = false;
-
     auto op_sloc = tstrm.next_sloc();
     auto qname = do_accept_identifier_opt(tstrm, true);
     if(qname) {
@@ -245,6 +231,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       // Accept a list of identifiers wrapped in a pair of brackets and separated
       // by commas. There must be at least one identifier.
       names.emplace_back(&"[");
+      Compiler_Status status_if_unmatched = compiler_status_identifier_expected;
 
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
@@ -257,12 +244,14 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                     compiler_status_duplicate_name_in_structured_binding, name_sloc);
 
         names.emplace_back(move(*qname));
+        status_if_unmatched = compiler_status_closing_bracket_or_comma_expected;
 
         // Look for the separator.
         kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-        comma_allowed = !kpunct;
         if(!kpunct)
           break;
+
+        status_if_unmatched = compiler_status_closing_bracket_or_identifier_expected;
       }
 
       if(names.size() < 1)
@@ -272,9 +261,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
       if(!kpunct)
         throw Compiler_Error(xtc_status_format,
-                  comma_allowed ? compiler_status_closing_bracket_or_comma_expected
-                                : compiler_status_closing_bracket_or_identifier_expected,
-                  tstrm.next_sloc(),
+                  status_if_unmatched, tstrm.next_sloc(),
                   "[unmatched `[` at '$1']", op_sloc);
 
       names.emplace_back(&"]");
@@ -286,6 +273,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       // Accept a list of identifiers wrapped in a pair of braces and separated
       // by commas. There must be at least one identifier.
       names.emplace_back(&"{");
+      Compiler_Status status_if_unmatched = compiler_status_identifier_expected;
 
       for(;;) {
         auto name_sloc = tstrm.next_sloc();
@@ -298,12 +286,14 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
                     compiler_status_duplicate_name_in_structured_binding, name_sloc);
 
         names.emplace_back(move(*qname));
+        status_if_unmatched = compiler_status_closing_brace_or_comma_expected;
 
         // Look for the separator.
         kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-        comma_allowed = !kpunct;
         if(!kpunct)
           break;
+
+        status_if_unmatched = compiler_status_closing_brace_or_identifier_expected;
       }
 
       if(names.size() < 1)
@@ -313,9 +303,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
       if(!kpunct)
         throw Compiler_Error(xtc_status_format,
-                  comma_allowed ? compiler_status_closing_brace_or_comma_expected
-                                : compiler_status_closing_brace_or_identifier_expected,
-                  tstrm.next_sloc(),
+                  status_if_unmatched, tstrm.next_sloc(),
                   "[unmatched `{` at '$1']", op_sloc);
 
       names.emplace_back(&"}");
@@ -349,7 +337,7 @@ opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope);
 
 opt<Statement::S_block>
-do_accept_nondeclaration_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope);
+do_accept_nondeclarative_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope);
 
 bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm);
@@ -394,29 +382,21 @@ do_accept_expression_as_rvalue_opt(Token_Stream& tstrm)
     return move(xexpr);
   }
 
-opt<Statement::S_block>
-do_accept_statement_block_opt(Token_Stream& tstrm, scope_flags scope)
+opt<Statement>
+do_accept_expression_statement_opt(Token_Stream& tstrm)
   {
-    // statement-block ::=
-    //   "{" statement * "}"
-    // statement-list ::=
-    //   statement *
-    auto op_sloc = tstrm.next_sloc();
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
-    if(!kpunct)
+    // expression-statement ::=
+    //   expression `;`
+    auto kexpr = do_accept_expression_opt(tstrm);
+    if(!kexpr)
       return nullopt;
 
-    cow_vector<Statement> body;
-    while(auto qstmt = do_accept_statement_opt(tstrm, scope))
-      body.emplace_back(move(*qstmt));
-
-    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
-      throw Compiler_Error(xtc_status_format,
-                compiler_status_closing_brace_or_statement_expected, tstrm.next_sloc(),
-                "[unmatched `{` at '$1']", op_sloc);
+      throw Compiler_Error(xtc_status,
+                compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_block xstmt = { move(body) };
+    Statement::S_expression xstmt = { move(*kexpr) };
     return move(xstmt);
   }
 
@@ -424,7 +404,7 @@ opt<Statement::S_block>
 do_accept_null_statement_opt(Token_Stream& tstrm)
   {
     // null-statement ::=
-    //   ";"
+    //   `;`
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       return nullopt;
@@ -471,8 +451,10 @@ opt<Statement>
 do_accept_variable_definition_opt(Token_Stream& tstrm)
   {
     // variable-definition ::=
-    //   "var" variable-declarator equal-initializer ? ( "," variable-declarator
-    //   equal-initializer ? ) ?  ";"
+    //   `var` variable-declarator equal-initializer ? ( `,` variable-declarator
+    //       equal-initializer ? )* `;`
+    // equal-initializer ::=
+    //   `=` expression
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var });
     if(!qkwrd)
       return nullopt;
@@ -515,8 +497,8 @@ opt<Statement>
 do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
   {
     // immutable-variable-definition ::=
-    //   "const" variable-declarator equal-initializer ( "," variable-declarator
-    //   equal-initializer ) ? ";"
+    //   `const` variable-declarator equal-initializer ( `,` variable-declarator
+    //       equal-initializer )* `;`
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
     if(!qkwrd)
       return nullopt;
@@ -560,7 +542,9 @@ opt<Statement>
 do_accept_reference_definition_opt(Token_Stream& tstrm)
   {
     // reference-definition ::=
-    //   "ref" identifier ref-initializer ( "," identifier ref-initializer ) ? ";"
+    //   `ref` identifier arrow-initializer ( `,` identifier arrow-initializer )* `;`
+    // arrow-initializer ::=
+    //   `->` expression
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_ref });
     if(!qkwrd)
       return nullopt;
@@ -603,9 +587,10 @@ opt<Statement>
 do_accept_function_definition_opt(Token_Stream& tstrm)
   {
     // function-definition ::=
-    //   "func" identifier "(" parameter-list ? ")" statement-block
+    //   func identifier ( ( parameter-list )? ) statement-block
     // parameter-list ::=
-    //   "..." | identifier ( "," parameter-list ? ) ?
+    //   `...`
+    //   identifier ( `,` identifier )* ( `,` ( `...` )? )?
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd)
@@ -623,12 +608,13 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
     cow_vector<phsh_string> params;
-    bool comma_allowed = false;
+    Compiler_Status status_if_unmatched = compiler_status_closing_parenthesis_or_parameter_expected;
 
     for(;;) {
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
         params.emplace_back(&"...");
+        status_if_unmatched = compiler_status_closing_parenthesis_expected;
         break;
       }
 
@@ -642,20 +628,20 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
                   compiler_status_duplicate_name_in_parameter_list, param_sloc);
 
       params.emplace_back(move(*kparam));
+      status_if_unmatched = compiler_status_closing_parenthesis_or_comma_expected;
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      comma_allowed = !kpunct;
       if(!kpunct)
         break;
+
+      status_if_unmatched = compiler_status_closing_parenthesis_or_parameter_expected;
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
-                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
-                              : compiler_status_closing_parenthesis_or_parameter_expected,
-                tstrm.next_sloc(),
+                status_if_unmatched, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     // Parse the function body. This is not the same as a block due to the implicit
@@ -686,20 +672,26 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
   }
 
 opt<Statement>
-do_accept_expression_statement_opt(Token_Stream& tstrm)
+do_accept_defer_statement_opt(Token_Stream& tstrm)
   {
-    // expression-statement ::=
-    //   expression ";"
+    // defer-statement ::=
+    //   `defer` expression `;`
+    auto sloc = tstrm.next_sloc();
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_defer });
+    if(!qkwrd)
+      return nullopt;
+
     auto kexpr = do_accept_expression_opt(tstrm);
     if(!kexpr)
-      return nullopt;
+      throw Compiler_Error(xtc_status,
+                compiler_status_expression_expected, tstrm.next_sloc());
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(xtc_status,
                 compiler_status_semicolon_expected, tstrm.next_sloc());
 
-    Statement::S_expression xstmt = { move(*kexpr) };
+    Statement::S_defer xstmt = { move(sloc), move(*kexpr) };
     return move(xstmt);
   }
 
@@ -707,8 +699,8 @@ opt<Statement>
 do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // if-statement ::=
-    //   "if" negation ? "(" expression ")" nondeclaration-statement ( "else"
-    //   nondeclaration-statement ) ?
+    //  `if` ( negation )? `(` expression `)` nondeclarative-statement ( `else`
+    //    nondeclarative_statement )?
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_if });
     if(!qkwrd)
       return nullopt;
@@ -734,19 +726,19 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbtrue = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
+    auto qbtrue = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
     if(!qbtrue)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     decltype(qbtrue) qbfalse;
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
     if(qkwrd)
-      qbfalse = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
+      qbfalse = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
 
     if(qkwrd && !qbfalse)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     if(!qbfalse)
       qbfalse.emplace();  // empty `else` block
@@ -759,10 +751,11 @@ opt<Statement>
 do_accept_switch_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // switch-statement ::=
-    //   "switch" "(" expression ")" "{" switch-clause * "}"
+    //   `switch` `(` expression `)` `{` ( switch-clause )* `}`
     // switch-clause ::=
-    //   ( "default" | "case" expression | "each" ( "[" | "(" ) expression ","
-    //   expression ( "]" | ")" ) ) ":" statement *
+    //   `default` `:` ( statement )*
+    //   `case` expression `:` ( statement )*
+    //   `each` [ `[` `(` ] expression `,` expression [ `]` `)` ] `:` ( statement )*
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
     if(!qkwrd)
       return nullopt;
@@ -884,15 +877,15 @@ opt<Statement>
 do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // do-while-statement ::=
-    //   "do" nondeclaration-statement "while" negation ? "(" expression ")" ";"
+    //   `do` nondeclarative-statement `while` ( negation )? `(` expression `)` `;`
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_do });
     if(!qkwrd)
       return nullopt;
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_while);
+    auto qblock = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope | scope_while);
     if(!qblock)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
@@ -933,7 +926,7 @@ opt<Statement>
 do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // while-statement ::=
-    //   "while" negation ? "(" expression ")" nondeclaration-statement
+    //   `while` ( negation )? `(` expression `)` nondeclarative-statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
       return nullopt;
@@ -959,10 +952,10 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_while);
+    auto qblock = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope | scope_while);
     if(!qblock)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     Statement::S_while xstmt = { *kneg, move(*qcond), move(*qblock) };
     return move(xstmt);
@@ -973,8 +966,8 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                                    scope_flags scope)
   {
     // for-complement-range ::=
-    //   "each" identifier ( ( "," | ":" | "=" ) identifier ) ? "->" expression ")"
-    //   nondeclaration-statement
+    //   `each` identifier ( [ `,` `:` `=` ] identifier )? arrow-initializer `)`
+    //       nondeclarative-statement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
     if(!qkwrd)
       return nullopt;
@@ -1014,10 +1007,10 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_for);
+    auto qblock = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope | scope_for);
     if(!qblock)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     Statement::S_for_each xstmt = { move(key), move(*qmapped), move(sloc_init), move(*qinit),
                                     move(*qblock) };
@@ -1028,7 +1021,10 @@ opt<Statement>
 do_accept_for_initializer_opt(Token_Stream& tstrm)
   {
     // for-initializer ::=
-    //   null-statement | variable-definition | immutable-variable-definition |
+    //   null-statement
+    //   variable-definition
+    //   immutable-variable-definition
+    //   reference-definition
     //   expression-statement
     if(auto qblock = do_accept_null_statement_opt(tstrm))
       return move(*qblock);
@@ -1050,7 +1046,8 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
                                      scope_flags scope)
   {
     // for-complement-triplet ::=
-    //   for-initializer expression ? ";" expression ? ")" nondeclaration-statement
+    //   for-initializer ( expression )? `;` ( expression )? `)`
+    //       nondeclarative-statement
     auto qstmt = do_accept_for_initializer_opt(tstrm);
     if(!qstmt)
       return nullopt;
@@ -1077,10 +1074,10 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qblock = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope | scope_for);
+    auto qblock = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope | scope_for);
     if(!qblock)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     Statement::S_for xstmt = { move(init), move(cond), move(step), move(*qblock) };
     return move(xstmt);
@@ -1091,7 +1088,8 @@ do_accept_for_complement_opt(Token_Stream& tstrm, const Source_Location& op_sloc
                              scope_flags scope)
   {
     // for-complement ::=
-    //   for-complement-range | for-complement-triplet
+    //   for-complement-range
+    //   for-complement-triplet
     if(auto qcompl = do_accept_for_complement_range_opt(tstrm, op_sloc, scope))
       return move(*qcompl);
 
@@ -1105,7 +1103,7 @@ opt<Statement>
 do_accept_for_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // for-statement ::=
-    //   "for" "(" for-complement
+    //   `for` `(` for-complement
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_for });
     if(!qkwrd)
       return nullopt;
@@ -1128,9 +1126,7 @@ opt<Statement>
 do_accept_break_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // break-statement ::=
-    //   "break" break-target ? ";"
-    // break-target ::=
-    //   "switch" | "while" | "for"
+    //   `break` [ `switch` `while` `for` ]? `;`
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_break });
     if(!qkwrd)
@@ -1173,9 +1169,7 @@ opt<Statement>
 do_accept_continue_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // continue-statement ::=
-    //   "continue" continue-target ? ";"
-    // continue-target ::=
-    //   "while" | "for"
+    //   `continue` [ `while` `for` ]? `;`
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_continue });
     if(!qkwrd)
@@ -1213,7 +1207,7 @@ opt<Statement>
 do_accept_throw_statement_opt(Token_Stream& tstrm)
   {
     // throw-statement ::=
-    //   "throw" expression ";"
+    //   `throw` expression `;`
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_throw });
     if(!qkwrd)
@@ -1237,7 +1231,7 @@ opt<bool>
 do_accept_reference_specifier_opt(Token_Stream& tstrm)
   {
     // reference-specifier ::=
-    //   "ref" | "->"
+    //   `ref` | `->`
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_ref });
     if(qkwrd)
       return true;
@@ -1253,9 +1247,9 @@ opt<Statement>
 do_accept_return_statement_opt(Token_Stream& tstrm)
   {
     // return-statement ::=
-    //   "return" argument ? ";"
+    //   `return` ( argument )? `;`
     // argument ::=
-    //   reference-specifier ? expression | expression
+    //   [ `ref` `->` ] ? expression
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
     if(!qkwrd)
@@ -1264,15 +1258,16 @@ do_accept_return_statement_opt(Token_Stream& tstrm)
     auto arg_sloc = tstrm.next_sloc();
     auto refsp = do_accept_reference_specifier_opt(tstrm);
     Statement::S_expression xexpr;
-    bool succ = do_accept_expression(xexpr.units, tstrm);
-    if(refsp && !succ)
+    bool has_arg = do_accept_expression(xexpr.units, tstrm);
+    if(refsp && !has_arg)
       throw Compiler_Error(xtc_status,
                 compiler_status_expression_expected, tstrm.next_sloc());
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
     if(!kpunct)
       throw Compiler_Error(xtc_status,
-                succ ? compiler_status_semicolon_expected : compiler_status_expression_expected,
+                has_arg ? compiler_status_semicolon_expected
+                        : compiler_status_expression_expected,
                 tstrm.next_sloc());
 
     xexpr.sloc = move(arg_sloc);
@@ -1284,7 +1279,7 @@ opt<Statement>
 do_accept_assert_statement_opt(Token_Stream& tstrm)
   {
     // assert-statement ::=
-    //   "assert" expression ( ":" string-literal ) ? ";"
+    //   `assert` expression ( `:` string-literal )? `;`
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
     if(!qkwrd)
@@ -1320,17 +1315,17 @@ opt<Statement>
 do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // try-statement ::=
-    //   "try" nondeclaration-statement "catch" "(" identifier ")"
-    //   nondeclaration-statement
+    //   `try` nondeclarative-statement `catch` `(` identifier `)`
+    //       nondeclarative-statement
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_try });
     if(!qkwrd)
       return nullopt;
 
-    auto qbtry = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
+    auto qbtry = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
     if(!qbtry)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     // Note that this is the location of the `catch` block.
     auto sloc_catch = tstrm.next_sloc();
@@ -1356,37 +1351,37 @@ do_accept_try_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    auto qbcatch = do_accept_nondeclaration_statement_as_block_opt(tstrm, scope);
+    auto qbcatch = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
     if(!qbcatch)
       throw Compiler_Error(xtc_status,
-                compiler_status_nondeclaration_statement_expected, tstrm.next_sloc());
+                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
     Statement::S_try xstmt = { move(sloc), move(*qbtry), move(sloc_catch), move(*kexcept),
                                move(*qbcatch) };
     return move(xstmt);
   }
 
-opt<Statement>
-do_accept_defer_statement_opt(Token_Stream& tstrm)
+opt<Statement::S_block>
+do_accept_statement_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
-    // defer-statement ::=
-    //  "defer" expression ";"
-    auto sloc = tstrm.next_sloc();
-    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_defer });
-    if(!qkwrd)
+    // statement-block ::=
+    //   `{` ( statement )* `}`
+    auto op_sloc = tstrm.next_sloc();
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
+    if(!kpunct)
       return nullopt;
 
-    auto kexpr = do_accept_expression_opt(tstrm);
-    if(!kexpr)
-      throw Compiler_Error(xtc_status,
-                compiler_status_expression_expected, tstrm.next_sloc());
+    cow_vector<Statement> body;
+    while(auto qstmt = do_accept_statement_opt(tstrm, scope))
+      body.emplace_back(move(*qstmt));
 
-    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
+    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
-      throw Compiler_Error(xtc_status,
-                compiler_status_semicolon_expected, tstrm.next_sloc());
+      throw Compiler_Error(xtc_status_format,
+                compiler_status_closing_brace_or_statement_expected, tstrm.next_sloc(),
+                "[unmatched `{` at '$1']", op_sloc);
 
-    Statement::S_defer xstmt = { move(sloc), move(*kexpr) };
+    Statement::S_block xstmt = { move(body) };
     return move(xstmt);
   }
 
@@ -1394,13 +1389,26 @@ opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
-    //   variable-definition | immutable-variable-definition | reference-definition |
-    //   function-definition | defer-statement | null-statement |
-    //   nondeclaration-statement
-    // nondeclaration-statement ::=
-    //   if-statement | switch-statement | do-while-statement | while-statement |
-    //   for-statement | break-statement | continue-statement | throw-statement |
-    //   return-statement | assert-statement | try-statement | statement-block |
+    //   nondeclarative-statement
+    //   null-statement
+    //   variable-definition
+    //   immutable-variable-definition
+    //   reference-definition
+    //   function-definition
+    //   defer-statement
+    // nondeclarative-statement ::=
+    //   if-statement
+    //   switch-statement
+    //   do-while-statement
+    //   while-statement
+    //   for-statement
+    //   break-statement
+    //   continue-statement
+    //   throw-statement
+    //   return-statement
+    //   assert-statement
+    //   try-statement
+    //   statement-block
     //   expression-statement
     const auto sentry = tstrm.copy_recursion_sentry();
 
@@ -1467,7 +1475,7 @@ do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
 Statement::S_block
 do_blockify_statement(Statement&& stmt)
   {
-    // Make a block consisting of a single statement.
+    // Make a block of a single statement.
     cow_vector<Statement> stmts;
     stmts.emplace_back(move(stmt));
     Statement::S_block xblock = { move(stmts) };
@@ -1475,13 +1483,24 @@ do_blockify_statement(Statement&& stmt)
   }
 
 opt<Statement::S_block>
-do_accept_nondeclaration_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope)
+do_accept_nondeclarative_statement_as_block_opt(Token_Stream& tstrm, scope_flags scope)
   {
-    // nondeclaration-statement ::=
-    //   if-statement | switch-statement | do-while-statement | while-statement |
-    //   for-statement | break-statement | continue-statement | throw-statement |
-    //   return-statement | assert-statement | try-statement | statement-block |
+    // nondeclarative-statement ::=
+    //   if-statement
+    //   switch-statement
+    //   do-while-statement
+    //   while-statement
+    //   for-statement
+    //   break-statement
+    //   continue-statement
+    //   throw-statement
+    //   return-statement
+    //   assert-statement
+    //   try-statement
+    //   statement-block
     //   expression-statement
+    const auto sentry = tstrm.copy_recursion_sentry();
+
     if(auto qstmt = do_accept_if_statement_opt(tstrm, scope))
       return do_blockify_statement(move(*qstmt));
 
@@ -1586,12 +1605,6 @@ operator==(const Prefix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
 bool
 do_accept_prefix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    // prefix-operator ::=
-    //   "+" | "-" | "~" | "!" | "++" | "--" |
-    //   "unset" | "countof" | "typeof" | "not" | "__abs" | "__sqrt" | "__sign" |
-    //   "__isnan" | "__isinf" | "__round" | "__floor" | "__ceil" | "__trunc" |
-    //   "__iround" | "__ifloor" | "__iceil" | "__itrunc" | "__lzcnt" | "__tzcnt" |
-    //   "__popcnt" | "__isvoid"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;
@@ -1655,7 +1668,7 @@ bool
 do_accept_global_reference(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // extern-identifier ::=
-    //   "extern" identifier
+    //   `extern` identifier
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_extern });
     if(!qkwrd)
@@ -1702,9 +1715,11 @@ bool
 do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // closure-function ::=
-    //   "func" "(" parameter-list ? ")" closure-body
+    //   `func` `(` ( parameter-list )? `)` closure-body
     // closure-body ::=
-    //   statement-block | equal-initializer | ref-initializer
+    //   equal-initializer
+    //   arrow-initializer
+    //   statement-block
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
     if(!qkwrd)
@@ -1717,12 +1732,13 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
     cow_vector<phsh_string> params;
-    bool comma_allowed = false;
+    Compiler_Status status_if_unmatched = compiler_status_closing_parenthesis_or_parameter_expected;
 
     for(;;) {
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
       if(kpunct) {
         params.emplace_back(&"...");
+        status_if_unmatched = compiler_status_closing_parenthesis_expected;
         break;
       }
 
@@ -1736,20 +1752,20 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
                   compiler_status_duplicate_name_in_parameter_list, param_sloc);
 
       params.emplace_back(move(*kparam));
+      status_if_unmatched = compiler_status_closing_parenthesis_or_comma_expected;
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      comma_allowed = !kpunct;
       if(!kpunct)
         break;
+
+      status_if_unmatched = compiler_status_closing_parenthesis_or_parameter_expected;
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
-                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
-                              : compiler_status_closing_parenthesis_or_parameter_expected,
-                tstrm.next_sloc(),
+                status_if_unmatched, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     op_sloc = tstrm.next_sloc();
@@ -1791,39 +1807,40 @@ bool
 do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // unnamed-array ::=
-    //   "[" array-element-list ? "]"
-    // array-element-list ::=
-    //   expression ( ( "," | ";" ) array-element-list ? ) ?
+    //   `[` ( unnamed-array-element-list )? `]`
+    // unnamed-array-element-list ::=
+    //   expression ( [ `,` `;` ] expression )* [ `,` `;` ]?
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(!kpunct)
       return false;
 
     uint32_t nelems = 0;
-    bool comma_allowed = false;
+    Compiler_Status status_if_unmatched = compiler_status_closing_bracket_or_expression_expected;
 
     for(;;) {
       if(!do_accept_expression_and_check(units, tstrm, false))
         break;
 
-      nelems += 1;
-      if(nelems >= 0x100000)
+      if(nelems >= 0xFFFFF)
         throw Compiler_Error(xtc_status,
                   compiler_status_too_many_elements, tstrm.next_sloc());
 
+      nelems += 1;
+      status_if_unmatched = compiler_status_closing_bracket_or_comma_expected;
+
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
-      comma_allowed = !kpunct;
       if(!kpunct)
         break;
+
+      status_if_unmatched = compiler_status_closing_bracket_or_expression_expected;
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
-                comma_allowed ? compiler_status_closing_bracket_or_comma_expected
-                              : compiler_status_closing_bracket_or_expression_expected,
-                tstrm.next_sloc(),
+                status_if_unmatched, tstrm.next_sloc(),
                 "[unmatched `[` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_array xunit = { sloc, nelems };
@@ -1834,18 +1851,19 @@ do_accept_unnamed_array(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
 bool
 do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    // unnamed-object ::=
-    //   "{" object-member-list "}"
-    // object-member-list ::=
-    //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" )
-    //   object-member-list ? ) ?
+    // unnamed-object-element-list ::=
+    //   json5-key [ `=` `:` ] expression ( [ `,` `;` ] json5-key [ `=` `:` ]
+    //       expression )* [ `,` `;` ]?
+    // json5-key ::=
+    //   string-literal
+    //   identifier
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
     if(!kpunct)
       return false;
 
     cow_vector<phsh_string> keys;
-    bool comma_allowed = false;
+    Compiler_Status status_if_unmatched = compiler_status_closing_brace_or_json5_key_expected;
 
     for(;;) {
       auto op_sloc = tstrm.next_sloc();
@@ -1867,20 +1885,21 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
         throw Compiler_Error(xtc_status,
                   compiler_status_expression_expected, tstrm.next_sloc());
 
-      // Look for the separator.
       keys.emplace_back(move(*qkey));
+      status_if_unmatched = compiler_status_closing_brace_or_comma_expected;
+
+      // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
-      comma_allowed = !kpunct;
       if(!kpunct)
         break;
+
+      status_if_unmatched = compiler_status_closing_brace_or_json5_key_expected;
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
-                comma_allowed ? compiler_status_closing_brace_or_comma_expected
-                              : compiler_status_closing_brace_or_json5_key_expected,
-                tstrm.next_sloc(),
+                status_if_unmatched, tstrm.next_sloc(),
                 "[unmatched `{` at '$1']", sloc);
 
     Expression_Unit::S_unnamed_object xunit = { sloc, move(keys) };
@@ -1892,7 +1911,7 @@ bool
 do_accept_nested_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // nested-expression ::=
-    //   "(" expression ")"
+    //   `(` expression `)`
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
@@ -1915,7 +1934,7 @@ bool
 do_accept_fused_multiply_add(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // fused-multiply-add ::=
-    //   "__fma" "(" expression "," expression "," expression ")"
+    //   `__fma` `(` expression `,` expression `,` expression `)`
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_fma });
     if(!qkwrd)
@@ -1973,8 +1992,6 @@ constexpr Prefix_Keyword_Xop s_prefix_keyword_binary_xop[] =
 opt<Expression_Unit>
 do_accept_prefix_binary_operator_opt(Token_Stream& tstrm)
   {
-    // prefix-binary-operator ::=
-    //   "__addm" | "__subm" | "__mulm" | "__adds" | "__subs" | "__muls"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
@@ -1997,7 +2014,7 @@ bool
 do_accept_prefix_binary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // prefix-binary-expression ::=
-    //   prefix-binary-operator "(" expression "," expression ")"
+    //   prefix_binary_operator ( expression , expression )
     auto qxunit = do_accept_prefix_binary_operator_opt(tstrm);
     if(!qxunit)
       return false;
@@ -2035,7 +2052,7 @@ bool
 do_accept_catch_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // catch-expression ::=
-    //   "catch" "(" expression ")"
+    //   `catch` `(` expression `)`
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_catch });
     if(!qkwrd)
       return false;
@@ -2065,7 +2082,7 @@ bool
 do_accept_variadic_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // variadic-function-call ::=
-    //   "__vcall" "(" expression "," expression ")"
+    //   `__vcall` `(` expression `,` expression `)`
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_vcall });
     if(!qkwrd)
@@ -2110,7 +2127,9 @@ bool
 do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // import-function-call ::=
-    //   "import" "(" argument-list ")"
+    //   `import` `(` argument-list `)`
+    // argument-list ::=
+    //   argument ( `,` argument )? ( `,` )?
     auto sloc = tstrm.next_sloc();
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_import });
     if(!qkwrd)
@@ -2123,7 +2142,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
     cow_vector<Expression_Unit::argument> args;
-    bool comma_allowed = false;
+    Compiler_Status status_if_unmatched = compiler_status_closing_parenthesis_or_argument_expected;
 
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
@@ -2137,12 +2156,14 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
                   compiler_status_expression_expected, tstrm.next_sloc());
 
       args.emplace_back(move(arg));
+      status_if_unmatched = compiler_status_closing_parenthesis_or_comma_expected;
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      comma_allowed = !kpunct;
       if(!kpunct)
         break;
+
+      status_if_unmatched = compiler_status_closing_parenthesis_or_argument_expected;
     }
 
     if(args.size() < 1)
@@ -2152,9 +2173,7 @@ do_accept_import_function_call(cow_vector<Expression_Unit>& units, Token_Stream&
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
-                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
-                              : compiler_status_closing_parenthesis_or_argument_expected,
-                tstrm.next_sloc(),
+                status_if_unmatched, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
     Expression_Unit::S_import_call xunit = { move(sloc), move(args) };
@@ -2166,9 +2185,18 @@ bool
 do_accept_primary_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
-    //   identifier | extern-identifier | literal | "this" | closure-function |
-    //   unnamed-array | unnamed-object | nested-expression | fused-multiply-add |
-    //   prefix-binary-expression | catch-expression | variadic-function-call |
+    //   identifier
+    //   extern-identifier
+    //   literal
+    //   `this`
+    //   closure-function
+    //   unnamed-array
+    //   unnamed-object
+    //   nested-expression
+    //   fused-multiply-add
+    //   prefix-binary-expression
+    //   catch-expression
+    //   variadic-function-call
     //   import-function-call
     if(do_accept_local_reference(units, tstrm))
       return true;
@@ -2236,9 +2264,6 @@ operator==(const Postfix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
 bool
 do_accept_postfix_operator(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
-    // postfix-operator ::=
-    //   "++" | "--" | "[^]" | "[$]" | "[?]" | postfix-function-call |
-    //   postfix-subscript | postfix-member-access | postfix-operator
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return false;
@@ -2262,16 +2287,14 @@ bool
 do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-function-call ::=
-    //   "(" argument-list ? ")"
-    // argument-list ::=
-    //    argument ( "," argument-list ? ) ?
+    //   `(` ( argument-list )? `)`
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
     if(!kpunct)
       return false;
 
     cow_vector<Expression_Unit::argument> args;
-    bool comma_allowed = false;
+    Compiler_Status status_if_unmatched = compiler_status_closing_parenthesis_or_argument_expected;
 
     for(;;) {
       auto arg_sloc = tstrm.next_sloc();
@@ -2285,20 +2308,20 @@ do_accept_postfix_function_call(cow_vector<Expression_Unit>& units, Token_Stream
                   compiler_status_expression_expected, tstrm.next_sloc());
 
       args.emplace_back(move(arg));
+      status_if_unmatched = compiler_status_closing_parenthesis_or_comma_expected;
 
       // Look for the separator.
       kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
-      comma_allowed = !kpunct;
       if(!kpunct)
         break;
+
+      status_if_unmatched = compiler_status_closing_parenthesis_or_argument_expected;
     }
 
     kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
     if(!kpunct)
       throw Compiler_Error(xtc_status_format,
-                comma_allowed ? compiler_status_closing_parenthesis_or_comma_expected
-                              : compiler_status_closing_parenthesis_or_argument_expected,
-                tstrm.next_sloc(),
+                status_if_unmatched, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", sloc);
 
     Expression_Unit::S_function_call xunit = { move(sloc), move(args) };
@@ -2310,7 +2333,7 @@ bool
 do_accept_postfix_subscript(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-subscript ::=
-    //   "[" expression "]"
+    //   `[` expression `]`
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
     if(!kpunct)
@@ -2335,7 +2358,7 @@ bool
 do_accept_postfix_member_access(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // postfix-member-access ::=
-    //   "." ( string-literal | identifier )
+    //   `.` json5-key
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_dot });
     if(!kpunct)
@@ -2358,7 +2381,17 @@ bool
 do_accept_infix_element(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // infix-element ::=
-    //   prefix-operator * primary-expression postfix-operator *
+    //   ( prefix-operator )* primary-expression ( postfix-operator )*
+    // postfix-operator ::=
+    //   `++`
+    //   `--`
+    //   `[^]`
+    //   `[$]`
+    //   `[?]`
+    //   postfix-function-call
+    //   postfix-subscript
+    //   postfix-member-access
+    //   postfix-operator
     cow_vector<Expression_Unit> prefixes;
     bool succ;
     do
@@ -2406,7 +2439,8 @@ opt<Infix_Element>
 do_accept_infix_ternary_opt(Token_Stream& tstrm)
   {
     // infix-ternary ::=
-    //   ( "?" | "?=" ) expression ":"
+    //   `?` expression `:`
+    //   `?=` expression `:`
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
     if(!kpunct)
@@ -2432,7 +2466,9 @@ opt<Infix_Element>
 do_accept_infix_logical_and_opt(Token_Stream& tstrm)
   {
     // infix-logical-and ::=
-    //   "&&" | "&&=" | "and"
+    //   `&&`
+    //   `&&=`
+    //   `and`
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andl, punctuator_andl_eq });
     if(!kpunct) {
@@ -2453,7 +2489,9 @@ opt<Infix_Element>
 do_accept_infix_logical_or_opt(Token_Stream& tstrm)
   {
     // infix-logical-or ::=
-    //   "||" | "||=" | "or"
+    //   `||`
+    //   `||=`
+    //   `or`
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_orl, punctuator_orl_eq });
     if(!kpunct) {
@@ -2474,7 +2512,8 @@ opt<Infix_Element>
 do_accept_infix_coalescence_opt(Token_Stream& tstrm)
   {
     // infix-coalescence ::=
-    //   "??" | "??="
+    //   "??"
+    //   "??="
     auto sloc = tstrm.next_sloc();
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
     if(!kpunct)
@@ -2538,11 +2577,6 @@ operator==(const Infix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
 opt<Infix_Element>
 do_accept_infix_operator_general_opt(Token_Stream& tstrm)
   {
-    // infix-operator-general ::=
-    //   "+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "<<<" | ">>>" | "&" | "|" |
-    //   "^" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" |
-    //   "&=" | "|=" | "^=" | "=" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "<=>" |
-    //   "</>"
     auto qtok = tstrm.peek_opt();
     if(!qtok)
       return nullopt;
@@ -2565,7 +2599,10 @@ opt<Infix_Element>
 do_accept_infix_operator_opt(Token_Stream& tstrm)
   {
     // infix-operator ::=
-    //   infix-ternary | infix-logical-and | infix-logical-or | infix-coalescence |
+    //   infix-ternary
+    //   infix-logical-and
+    //   infix-logical-or
+    //   infix-coalescence
     //   infix-operator-general
     if(auto qelem = do_accept_infix_ternary_opt(tstrm))
       return move(*qelem);
@@ -2589,9 +2626,7 @@ bool
 do_accept_expression(cow_vector<Expression_Unit>& units, Token_Stream& tstrm)
   {
     // expression ::=
-    //   infix-element infix-carriage *
-    // infix-carriage ::=
-    //   infix-operator infix-element
+    //   infix-element ( infix-operator infix-element )*
     const auto sentry = tstrm.copy_recursion_sentry();
 
     auto qelem = do_accept_infix_element_opt(tstrm);
@@ -2659,8 +2694,7 @@ reload(Token_Stream&& tstrm)
     this->m_stmts.clear();
     stmts.swap(this->m_stmts);
 
-    // document ::=
-    //   statement *
+    // Parse a document.
     while(auto qstmt = do_accept_statement_opt(tstrm, scope_plain))
       stmts.emplace_back(move(*qstmt));
 

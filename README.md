@@ -16,9 +16,8 @@ it is passed to a function by value or is assigned to a variable, just like
 values of primitive types.
 
 * [Quick Guide](doc/quick-guide.md)
-* [Production Rules](doc/grammar.txt)
-* [Operator Precedence](doc/operator-precedence.txt)
-* [Standard Library Reference](doc/standard-library.md)
+* [Grammar](doc/grammar.md)
+* [Standard Library](doc/standard-library.md)
 * [Highlighting Rules for GNU nano](doc/asteria.nanorc)
 
 # How to Build

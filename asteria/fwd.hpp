@@ -710,7 +710,7 @@ enum Compiler_Status : uint32_t
     compiler_status_closing_bracket_or_identifier_expected     = 2033,
     compiler_status_closing_brace_or_identifier_expected       = 2034,
     compiler_status_invalid_expression                         = 2035,
-    compiler_status_nondeclaration_statement_expected          = 2036,
+    compiler_status_nondeclarative_statement_expected          = 2036,
     compiler_status_closing_parenthesis_or_parameter_expected  = 2037,
     compiler_status_interval_expected                          = 2038,
     compiler_status_interval_closure_expected                  = 2039,
