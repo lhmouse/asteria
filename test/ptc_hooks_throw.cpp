@@ -8,25 +8,25 @@
 #include "../asteria/runtime/runtime_error.hpp"
 using namespace ::asteria;
 
+struct Test_Hooks : Abstract_Hooks
+  {
+    ::rocket::tinyfmt_str fmt;
+
+    void
+    on_call(const Source_Location& sloc, const cow_function& /*target*/) override
+      {
+        this->fmt << "call " << sloc.line() << "; ";
+      }
+
+    void
+    on_throw(const Source_Location& sloc, Value& /*except*/) override
+      {
+        this->fmt << "throw " << sloc.line() << "; ";
+      }
+  };
+
 int main()
   {
-    struct Test_Hooks : Abstract_Hooks
-      {
-        ::rocket::tinyfmt_str fmt;
-
-        void
-        on_call(const Source_Location& sloc, const cow_function& /*target*/) override
-          {
-            this->fmt << "call " << sloc.line() << "; ";
-          }
-
-        void
-        on_throw(const Source_Location& sloc, Value& /*except*/) override
-          {
-            this->fmt << "throw " << sloc.line() << "; ";
-          }
-      };
-
     const auto hooks = ::rocket::make_refcnt<Test_Hooks>();
     Simple_Script code;
     code.mut_global().set_hooks(hooks);

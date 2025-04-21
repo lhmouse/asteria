@@ -5,14 +5,14 @@
 #include "../asteria/simple_script.hpp"
 using namespace ::asteria;
 
+#ifndef ASTERIA_TEST_OPERATORS_O_
+#define ASTERIA_TEST_OPERATORS_O_  0
+#endif
+
 int main()
   {
     Simple_Script code;
-#ifdef ASTERIA_TEST_OPERATORS_O_
     code.mut_options().optimization_level = ASTERIA_TEST_OPERATORS_O_;
-#else
-    code.mut_options().optimization_level = 0;
-#endif
     code.reload_string(
       &__FILE__, __LINE__, &R"__(
 ///////////////////////////////////////////////////////////////////////////////
