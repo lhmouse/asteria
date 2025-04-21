@@ -5,13 +5,6 @@
 * _identifier_ ::=
   - `[A-Za-z_][A-Za-z_0-9]*`
 
-* _literal_ ::=
-  - `null`
-  - `false`
-  - `true`
-  - _numeric-literal_
-  - ( _string-literal_ )\*
-
 * _numeric-literal_ ::=
   - `[+-]?nan`
   - `[+-]?NaN`
@@ -200,9 +193,9 @@
   - `__isvoid`
 
 * _primary-expression_ ::=
+  - _literal_
   - _identifier_
   - _extern-identifier_
-  - _literal_
   - `this`
   - _closure-function_
   - _unnamed-array_
@@ -213,6 +206,13 @@
   - _catch-expression_
   - _variadic-function-call_
   - _import-function-call_
+
+* _literal_ ::=
+  - `null`
+  - `false`
+  - `true`
+  - _numeric-literal_
+  - ( _string-literal_ )\*
 
 * _extern-identifier_ ::=
   - `extern` _identifier_
