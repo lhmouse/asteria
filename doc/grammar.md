@@ -99,7 +99,7 @@
 * _switch-clause_ ::=
   - `default` `:` ( _statement_ )\*
   - `case` _expression_ `:` ( _statement_ )\*
-  - `each` [ `[` `(` ] _expression_ `,` _expression_ [ `]` `)` ] `:` ( _statement_ )\*
+  - `each` ( `[` | `(` ) _expression_ `,` _expression_ ( `]` | `)` ) `:` ( _statement_ )\*
 
 * _do-while-statement_ ::=
   - `do` _nondeclarative-statement_ `while` ( _negation_ )? `(` _expression_ `)` `;`
@@ -115,7 +115,7 @@
   - _for-complement-triplet_
 
 * _for-complement-range_ ::=
-  - `each` _identifier_ ( [ `,` `:` `=` ] _identifier_ )? _arrow-initializer_ `)`
+  - `each` _identifier_ ( ( `,` | `:` | `=` ) _identifier_ )? _arrow-initializer_ `)`
     _nondeclarative-statement_
 
 * _for-complement-triplet_ ::=
@@ -130,10 +130,10 @@
   - _expression-statement_
 
 * _break-statement_ ::=
-  - `break` [ `switch` `while` `for` ]? `;`
+  - `break` ( `switch` | `while` | `for` )? `;`
 
 * _continue-statement_ ::=
-  - `continue` [ `while` `for` ]? `;`
+  - `continue` ( `while` | `for` )? `;`
 
 * _throw-statement_ ::=
   - `throw` _expression_ `;`
@@ -142,7 +142,7 @@
   - `return` ( _argument_ )? `;`
 
 * _argument_ ::=
-  - [ `ref` `->` ]? _expression_
+  - ( `ref` | `->` )? _expression_
 
 * _assert-statement_ ::=
   - `assert` _expression_ ( `:` _string-literal_ )? `;`
@@ -229,14 +229,14 @@
   - `[` ( _unnamed-array-element-list_ )? `]`
 
 * _unnamed-array-element-list_ ::=
-  - _expression_ ( [ `,` `;` ] _expression_ )* [ `,` `;` ]?
+  - _expression_ ( ( `,` | `;` ) _expression_ )* ( `,` | `;` )?
 
 * _unnamed-object_ ::=
   - `{` ( _unnamed-object-element-list_ )? `}`
 
 * _unnamed-object-element-list_ ::=
-  - _json5-key_ [ `=` `:` ] _expression_ ( [ `,` `;` ] _json5-key_ [ `=` `:` ]
-    _expression_ )* [ `,` `;` ]?
+  - _json5-key_ ( `=` | `:` ) _expression_ ( ( `,` | `;` ) _json5-key_
+    ( `=` | `:` ) _expression_ )* ( `,` | `;` )?
 
 * _json5-key_ ::=
   - _string-literal_
@@ -302,21 +302,21 @@
   - `?` _expression_ `:`
   - `?=` _expression_ `:`
 
-* _infix-operator-logical-and_ ::=
+* _infix-logical-and_ ::=
   - `&&`
   - `&&=`
   - `and`
 
-* _infix-operator-logical-or_ ::=
+* _infix-logical-or_ ::=
   - `||`
   - `||=`
   - `or`
 
-* _infix-operator-logical-coalescence_ ::=
+* _infix-logical-coalescence_ ::=
   - `??`
   - `??=`
 
-* _infix-operator-general_ ::=
+* _infix-general_ ::=
   - `+`
   - `-`
   - `*`
