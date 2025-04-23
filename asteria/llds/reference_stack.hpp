@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"
+#include "../details/reference_stack.ipp"
 namespace asteria {
 
 class Reference_Stack
