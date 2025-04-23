@@ -103,11 +103,12 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xCB, rsize);
 #endif
-    b->next = nullptr;
-    b->size = rsize;
 #ifdef __SANITIZE_ADDRESS__
     ::__asan_poison_memory_region(&(b->next) + 1, rsize - sizeof(b->next));
 #endif
+
+    b->next = nullptr;
+    b->size = rsize;
 
     if(opt == xmemopt_use_cache) {
       // Put the block into the cache.
