@@ -80,7 +80,7 @@ xmemalloc(xmeminfo& info, xmemopt opt)
       do_deallocate_list(b->next);
 
 #ifdef __SANITIZE_ADDRESS__
-    ::__asan_unpoison_memory_region(&(b->next) + 1, rsize - sizeof(b->next));
+    ::__asan_unpoison_memory_region(b + 1, rsize - sizeof(*b));
 #endif
 #ifdef ROCKET_DEBUG
     ::memset(b, 0xB5, rsize);
@@ -104,7 +104,7 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
     ::memset(b, 0xCB, rsize);
 #endif
 #ifdef __SANITIZE_ADDRESS__
-    ::__asan_poison_memory_region(&(b->next) + 1, rsize - sizeof(b->next));
+    ::__asan_poison_memory_region(b + 1, rsize - sizeof(*b));
 #endif
 
     b->next = nullptr;
