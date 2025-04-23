@@ -73,12 +73,12 @@ class AVM_Rod
     struct Header
       {
         union {
+          Uparam uparam;
           struct {
             uint8_t nheaders;  // size of `sparam`, in number of headers [!]
             uint8_t has_pv_meta : 1;
             uint8_t reserved : 7;
           };
-          Uparam uparam;
         };
 
         union {

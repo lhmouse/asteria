@@ -116,6 +116,7 @@ push_function(Executor* exec, Uparam uparam, size_t sparam_size, Constructor* ct
     auto head = this->m_bptr + this->m_einit;
     head->uparam = uparam;
     head->nheaders = (uint8_t) (nheaders_p1 - 1);
+    head->uparam._xb1[1] = 0;
 
     if(!meta)
       head->pv_exec = exec;
