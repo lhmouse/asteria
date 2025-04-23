@@ -155,7 +155,7 @@ add_project_arguments(
       '-frounding-math', '-fno-math-errno', '-fno-ident', '-fno-trapping-math',
       '-fno-devirtualize-speculatively', '-fno-semantic-interposition', '-fno-plt',
       '-fnothrow-opt', '-fno-enforce-eh-specs', '-fno-omit-frame-pointer',
-      '-momit-leaf-frame-pointer', '-mno-outline-atomics',
+      '-momit-leaf-frame-pointer', '-mno-outline-atomics', '-Wno-option-ignored',
       '-Werror=conversion', '-Werror=sign-compare', '-Werror=sign-conversion',
       '-Werror=write-strings', '-Werror=return-type', '-Werror=double-promotion',
       '-Werror=non-virtual-dtor', '-Wzero-as-null-pointer-constant',
