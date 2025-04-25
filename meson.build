@@ -154,7 +154,7 @@ add_project_arguments(
       '-fno-stack-protector', '-fstrict-overflow', '-fmerge-all-constants',
       '-frounding-math', '-fno-math-errno', '-fno-ident', '-fno-trapping-math',
       '-fno-devirtualize-speculatively', '-fno-semantic-interposition', '-fno-plt',
-      '-fno-omit-frame-pointer', '-momit-leaf-frame-pointer',
+      '-fno-omit-frame-pointer', '-momit-leaf-frame-pointer', '-masm=intel',
       '-mno-outline-atomics', '-Wno-option-ignored',
       '-Werror=conversion', '-Werror=sign-compare', '-Werror=sign-conversion',
       '-Werror=write-strings', '-Werror=return-type', '-Werror=double-promotion',
@@ -173,10 +173,6 @@ endif
 
 if get_option('enable-avx') and (cxx_is_i386 or cxx_is_amd64)
   add_project_arguments('-mavx', language: 'cpp')
-endif
-
-if cxx.has_argument('-masm=intel')
-  add_project_arguments('-masm=intel', language: 'cpp')
 endif
 
 if cxx.has_header_symbol('uchar.h', 'mbrtoc16')
