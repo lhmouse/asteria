@@ -1486,7 +1486,7 @@ solidify(AVM_Rod& rod) const
                 try {
                   do_execute_block(sp.rod_try, ctx);
                   if(ctx.status() == air_status_return)
-                    ctx.stack().mut_top().check_function_result(ctx.global());
+                    ctx.stack().mut_top().check_function_result(ctx.global(), move(ctx.alt_stack()));
                 }
                 catch(Runtime_Error& except) {
                   // Append a frame due to exit of the `try` clause.

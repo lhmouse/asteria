@@ -89,7 +89,7 @@ class Reference
     do_dereference_copy_slow();
 
     void
-    do_use_function_result_slow(Global_Context& global);
+    do_use_function_result_slow(Global_Context& global, Reference_Stack&& stack);
 
   public:
     ~Reference()
@@ -249,13 +249,14 @@ class Reference
     dereference_unset() const;
 
     void
-    check_function_result(Global_Context& global)
+    check_function_result(Global_Context& global, Reference_Stack&& stack)
       {
         if(this->m_stor.ptr<St_ptc>())
-          this->do_use_function_result_slow(global);
+          this->do_use_function_result_slow(global, move(stack));
 
-        if(!(this->m_stor.ptr<St_temp>() || this->m_stor.ptr<St_var>()
-             || this->m_stor.ptr<St_void>()))
+        if(ROCKET_UNEXPECT(!(this->m_stor.ptr<St_void>()
+                             || this->m_stor.ptr<St_temp>()
+                             || this->m_stor.ptr<St_var>())))
           this->do_throw_not_dereferenceable();
       }
   };

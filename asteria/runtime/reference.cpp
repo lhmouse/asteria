@@ -249,13 +249,13 @@ dereference_unset() const
 
 void
 Reference::
-do_use_function_result_slow(Global_Context& global)
+do_use_function_result_slow(Global_Context& global, Reference_Stack&& stack)
   {
     refcnt_ptr<PTC_Arguments> ptcg;
     cow_vector<refcnt_ptr<PTC_Arguments>> frames;
     opt<Value> result_value;
     AIR_Status status = air_status_next;
-    Reference_Stack stack, alt_stack;
+    Reference_Stack alt_stack;
     Executive_Context defer_ctx(xtc_defer, global, status, stack, alt_stack);
 
     try {
