@@ -12,66 +12,8 @@ namespace asteria {
 Random_Engine::
 Random_Engine() noexcept
   {
-    // Initialize seed memory.
-    ::RAND_priv_bytes(reinterpret_cast<unsigned char*>(this->m_randrsl),
-                      sizeof(m_randrsl));
-
-    ///////////////////////////////////////////////////////
-    // Below is a direct copy with a few fixups.
-    //   https://www.burtleburtle.net/bob/c/rand.c
-    ///////////////////////////////////////////////////////
-
-#define mix(a,b,c,d,e,f,g,h) \
-    { \
-      a^=b<<11; d+=a; b+=c; \
-      b^=c>>2;  e+=b; c+=d; \
-      c^=d<<8;  f+=c; d+=e; \
-      d^=e>>16; g+=d; e+=f; \
-      e^=f<<10; h+=e; f+=g; \
-      f^=g>>4;  a+=f; g+=h; \
-      g^=h<<8;  b+=g; h+=a; \
-      h^=a>>9;  c+=h; a+=b; \
-    }
-
-    uint32_t i;
-    uint32_t a,b,c,d,e,f,g,h;
-    uint32_t *m,*r;
-    this->m_randa = this->m_randb = this->m_randc = 0;
-    m=this->m_randmem;
-    r=this->m_randrsl;
-    a=b=c=d=e=f=g=h=0x9e3779b9;  /* the golden ratio */
-
-    for (i=0; i<4; ++i)          /* scramble it */
-    {
-      mix(a,b,c,d,e,f,g,h);
-    }
-
-    /* initialize using the contents of r[] as the seed */
-    for (i=0; i<256; i+=8)
-    {
-      a+=r[i  ]; b+=r[i+1]; c+=r[i+2]; d+=r[i+3];
-      e+=r[i+4]; f+=r[i+5]; g+=r[i+6]; h+=r[i+7];
-      mix(a,b,c,d,e,f,g,h);
-      m[i  ]=a; m[i+1]=b; m[i+2]=c; m[i+3]=d;
-      m[i+4]=e; m[i+5]=f; m[i+6]=g; m[i+7]=h;
-    }
-    /* do a second pass to make all of the seed affect all of m */
-    for (i=0; i<256; i+=8)
-    {
-      a+=m[i  ]; b+=m[i+1]; c+=m[i+2]; d+=m[i+3];
-      e+=m[i+4]; f+=m[i+5]; g+=m[i+6]; h+=m[i+7];
-      mix(a,b,c,d,e,f,g,h);
-      m[i  ]=a; m[i+1]=b; m[i+2]=c; m[i+3]=d;
-      m[i+4]=e; m[i+5]=f; m[i+6]=g; m[i+7]=h;
-    }
-
-    ///////////////////////////////////////////////////////
-    // End of copied code
-    ///////////////////////////////////////////////////////
-
-    // Discard results of the first round.
-    this->do_isaac();
-    this->m_randcnt = 0;
+    ::RAND_priv_bytes(this->m_ctx_init, sizeof(this->m_ctx_init));
+    this->m_ctx.randcnt = 256;
   }
 
 Random_Engine::
@@ -79,46 +21,49 @@ Random_Engine::
   {
   }
 
-void
+uint32_t
 Random_Engine::
 do_isaac() noexcept
   {
-    ///////////////////////////////////////////////////////
-    // Below is a direct copy with a few fixups.
-    //   https://www.burtleburtle.net/bob/c/rand.c
-    ///////////////////////////////////////////////////////
-
-#define ind(mm,x)  (*(uint32_t *)((uint8_t *)(mm) + ((x) & (255<<2))))
+    // https://www.burtleburtle.net/bob/c/rand.c
+#define ctx  (&(this->m_ctx))
+#define ub1  uint8_t
+#define ub2  uint16_t
+#define ub4  uint32_t
+#define RANDSIZL   (8)
+#define RANDSIZ    (1<<RANDSIZL)
+/////////////////////////////////////////////////////////////////////////////
+#define ind(mm,x)  (*(ub4 *)((ub1 *)(mm) + ((x) & ((RANDSIZ-1)<<2))))
 #define rngstep(mix,a,b,mm,m,m2,r,x) \
-    { \
-      x = *m;  \
-      a = (a^(mix)) + *(m2++); \
-      *(m++) = y = ind(mm,x) + a + b; \
-      *(r++) = b = ind(mm,y>>8) + x; \
-    }
+{ \
+  x = *m;  \
+  a = (a^(mix)) + *(m2++); \
+  *(m++) = y = ind(mm,x) + a + b; \
+  *(r++) = b = ind(mm,y>>RANDSIZL) + x; \
+}
 
-    uint32_t a,b,x,y,*m,*mm,*m2,*r,*mend;
-    mm=this->m_randmem; r=this->m_randrsl;
-    a = this->m_randa; b = this->m_randb + (++this->m_randc);
-    for (m = mm, mend = m2 = m+128; m<mend; )
-    {
+   /*register*/ ub4 a,b,x,y,*m,*mm,*m2,*r,*mend;
+   mm=ctx->randmem; r=ctx->randrsl;
+   a = ctx->randa; b = ctx->randb + (++ctx->randc);
+   for (m = mm, mend = m2 = m+(RANDSIZ/2); m<mend; )
+   {
       rngstep( a<<13, a, b, mm, m, m2, r, x);
       rngstep( a>>6 , a, b, mm, m, m2, r, x);
       rngstep( a<<2 , a, b, mm, m, m2, r, x);
       rngstep( a>>16, a, b, mm, m, m2, r, x);
-    }
-    for (m2 = mm; m2<mend; )
-    {
+   }
+   for (m2 = mm; m2<mend; )
+   {
       rngstep( a<<13, a, b, mm, m, m2, r, x);
       rngstep( a>>6 , a, b, mm, m, m2, r, x);
       rngstep( a<<2 , a, b, mm, m, m2, r, x);
       rngstep( a>>16, a, b, mm, m, m2, r, x);
-    }
-    this->m_randb = b; this->m_randa = a;
+   }
+   ctx->randb = b; ctx->randa = a;
+/////////////////////////////////////////////////////////////////////////////
 
-    ///////////////////////////////////////////////////////
-    // End of copied code
-    ///////////////////////////////////////////////////////
+    this->m_ctx.randcnt = 256;
+    return this->m_ctx.randmem[255];
   }
 
 }  // namespace asteria

@@ -12,20 +12,29 @@ class Random_Engine
     public rcfwd<Random_Engine>
   {
   public:
-    // This implements the ISAAC PRNG that is cryptographically secure.
-    // The reference implementation assumes that `long` has 32 bits.
-    //   https://www.burtleburtle.net/bob/rand/isaac.html
+    // This implements ISAAC (indirection, shift, accumulate, add, and count),
+    // a cryptographically secure pseudorandom number generator, designed by
+    // Robert J. Jenkins Jr. in 1993. The reference implementation assumes that
+    // `long` is a 32-bit type.
+    // Reference: https://www.burtleburtle.net/bob/rand/isaac.html
     using result_type  = uint32_t;
 
   private:
-    // This matches `struct randctx` from 'rand.h'.
-    //   https://www.burtleburtle.net/bob/c/rand.h
-    uint32_t m_randcnt;
-    uint32_t m_randrsl[256];
-    uint32_t m_randmem[256];
-    uint32_t m_randa;
-    uint32_t m_randb;
-    uint32_t m_randc;
+    // https://www.burtleburtle.net/bob/c/rand.h
+    struct randctx
+      {
+        uint32_t randcnt;
+        uint32_t randrsl[256];
+        uint32_t randmem[256];
+        uint32_t randa;
+        uint32_t randb;
+        uint32_t randc;
+      };
+
+    union {
+      unsigned char m_ctx_init[sizeof(randctx)];
+      randctx m_ctx;
+    };
 
   public:
     // Creates a PRNG from some external entropy source. It is not necessary
@@ -33,7 +42,7 @@ class Random_Engine
     Random_Engine() noexcept;
 
   private:
-    void
+    uint32_t
     do_isaac() noexcept;
 
   public:
@@ -45,12 +54,9 @@ class Random_Engine
     uint32_t
     bump() noexcept
       {
-        // This matches `main()` from 'rand.c'.
-        //   https://www.burtleburtle.net/bob/c/rand.c
-        uint32_t off = this->m_randcnt ++ % 256;
-        if(off == 0)
-          this->do_isaac();
-        return this->m_randrsl[off];
+        return ROCKET_EXPECT(this->m_ctx.randcnt != 0)
+               ? *(this->m_ctx.randrsl + (-- this->m_ctx.randcnt))
+               : this->do_isaac();
       }
 
     // This class is a UniformRandomBitGenerator.
