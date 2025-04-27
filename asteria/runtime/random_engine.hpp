@@ -42,7 +42,7 @@ class Random_Engine
     Random_Engine() noexcept;
 
   private:
-    uint32_t
+    void
     do_isaac() noexcept;
 
   public:
@@ -54,9 +54,15 @@ class Random_Engine
     uint32_t
     bump() noexcept
       {
-        return ROCKET_EXPECT(this->m_ctx.randcnt != 0)
-               ? *(this->m_ctx.randrsl + (-- this->m_ctx.randcnt))
-               : this->do_isaac();
+        if(ROCKET_UNEXPECT(this->m_ctx.randcnt == 0)) {
+          // Fill in the next round of numbers.
+          this->do_isaac();
+          this->m_ctx.randcnt = 256;
+        }
+
+        uint32_t t = -- this->m_ctx.randcnt;
+        ROCKET_ASSERT(t < 256);
+        return this->m_ctx.randrsl[t];
       }
 
     // This class is a UniformRandomBitGenerator.

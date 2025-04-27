@@ -21,7 +21,7 @@ Random_Engine::
   {
   }
 
-uint32_t
+void
 Random_Engine::
 do_isaac() noexcept
   {
@@ -61,9 +61,6 @@ do_isaac() noexcept
    }
    ctx->randb = b; ctx->randa = a;
 /////////////////////////////////////////////////////////////////////////////
-
-    this->m_ctx.randcnt = 256;
-    return this->m_ctx.randmem[255];
   }
 
 }  // namespace asteria
