@@ -257,7 +257,7 @@ std_numeric_random(Global_Context& global, optV_real limit)
 
     // If a limit is specified, magnify the value.
     // The default magnitude is 1.0 so no action is taken.
-    if(limit) {
+    if(limit)
       switch(::std::fpclassify(*limit))
         {
         case FP_ZERO:
@@ -265,13 +265,12 @@ std_numeric_random(Global_Context& global, optV_real limit)
 
         case FP_INFINITE:
         case FP_NAN:
-          ASTERIA_THROW((
-              "Random number limit `$1` was not finite"), *limit);
+          ASTERIA_THROW(("Random number limit `$1` was not finite"), *limit);
 
         default:
           ratio *= *limit;
       }
-    }
+
     return ratio;
   }
 
