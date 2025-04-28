@@ -8,7 +8,7 @@
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()
-#include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>, std::unique_ptr, std::shared_ptr
+#include <memory>  // std::allocator<>, std::addressof(), std::unique_ptr, std::shared_ptr
 #include <new>  // placement new
 #include <atomic>  // std::atomic<>
 #include <initializer_list>  // std::initializer_list<>

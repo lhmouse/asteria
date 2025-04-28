@@ -176,12 +176,13 @@ struct basic_storage
     pointer
     allocate_value(paramsT&&... params)
       {
-        auto qval = allocator_traits<allocator_type>::allocate(*this, size_type(1));
+        using traits_type = allocator_traits<allocator_type>;
+        auto qval = traits_type::allocate(*this, size_type(1));
         try {
-          allocator_traits<allocator_type>::construct(*this, noadl::unfancy(qval), forward<paramsT>(params)...);
+          traits_type::construct(*this, noadl::unfancy(qval), forward<paramsT>(params)...);
         }
         catch(...) {
-          allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
+          traits_type::deallocate(*this, qval, size_type(1));
           throw;
         }
         return qval;
@@ -190,9 +191,10 @@ struct basic_storage
     void
     free_value(pointer qval) noexcept
       {
+        using traits_type = allocator_traits<allocator_type>;
         ROCKET_ASSERT(qval);
-        allocator_traits<allocator_type>::destroy(*this, noadl::unfancy(qval)),
-        allocator_traits<allocator_type>::deallocate(*this, qval, size_type(1));
+        traits_type::destroy(*this, noadl::unfancy(qval)),
+        traits_type::deallocate(*this, qval, size_type(1));
       }
 
     template<typename ykeyT>

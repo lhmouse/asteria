@@ -45,7 +45,8 @@ std_filesystem_read(V_string path, optV_integer offset, optV_integer limit);
 
 // `std.filesystem.stream`
 V_integer
-std_filesystem_stream(Global_Context& global, V_string path, V_function callback, optV_integer offset, optV_integer limit);
+std_filesystem_stream(Global_Context& global, V_string path, V_function callback,
+                      optV_integer offset, optV_integer limit);
 
 // `std.filesystem.write`
 void

@@ -13,7 +13,8 @@ std_string_slice(V_string text, V_integer from, optV_integer length);
 
 // `std.string.replace_slice`
 V_string
-std_string_replace_slice(V_string text, V_integer from, optV_integer length, V_string replacement, optV_integer rfrom, optV_integer rlength);
+std_string_replace_slice(V_string text, V_integer from, optV_integer length, V_string replacement,
+                         optV_integer rfrom, optV_integer rlength);
 
 // `std.string.compare`
 V_integer
@@ -37,7 +38,8 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
 
 // `std.string.replace`
 V_string
-std_string_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement);
+std_string_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+                   V_string replacement);
 
 // `std.string.find_any_of`
 optV_integer
@@ -176,23 +178,28 @@ optV_object
 std_string_PCRE_named_match(V_opaque& m, V_string text, V_integer from, optV_integer length);
 
 V_string
-std_string_PCRE_replace(V_opaque& m, V_string text, V_integer from, optV_integer length, V_string replacement);
+std_string_PCRE_replace(V_opaque& m, V_string text, V_integer from, optV_integer length,
+                        V_string replacement);
 
 // `std.string.pcre_find`.
 opt<pair<V_integer, V_integer>>
-std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern, optV_array options);
+std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern,
+                     optV_array options);
 
 // `std.string.pcre_match`
 optV_array
-std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern, optV_array options);
+std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern,
+                      optV_array options);
 
 // `std.string.pcre_named_match`
 optV_object
-std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern, optV_array options);
+std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern,
+                            optV_array options);
 
 // `std.string.pcre_replace`
 V_string
-std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern, V_string replacement, optV_array options);
+std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+                        V_string replacement, optV_array options);
 
 // `std.string.iconv`
 V_string

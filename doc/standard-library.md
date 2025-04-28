@@ -462,7 +462,8 @@ variable. Individual components are categorized into sub-objects.
 ### `std.string.hex_encode(data, [delim])`
 
 * Encodes all bytes in `data` as 2-digit hexadecimal numbers and concatenates
-  them. If `delim` is set to a string, it is inserted between adjacent bytes. Hexadecimal digits above nine are encoded as capital letters.
+  them. If `delim` is set to a string, it is inserted between adjacent bytes.
+  Hexadecimal digits above nine are encoded as capital letters.
 
 * Returns the encoded string.
 
