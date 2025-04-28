@@ -97,7 +97,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
 
 // `std.array.shuffle`
 V_array
-std_array_shuffle(V_array data, optV_integer seed);
+std_array_shuffle(Global_Context& global, V_array data, optV_integer seed);
 
 // `std.array.rotate`
 V_array

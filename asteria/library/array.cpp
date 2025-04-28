@@ -6,6 +6,7 @@
 #include "../runtime/argument_reader.hpp"
 #include "../runtime/binding_generator.hpp"
 #include "../runtime/global_context.hpp"
+#include "../runtime/random_engine.hpp"
 #include "../llds/reference_stack.hpp"
 #include "../utils.hpp"
 namespace asteria {
@@ -583,7 +584,7 @@ std_array_generate(Global_Context& global, V_function generator, V_integer lengt
   }
 
 V_array
-std_array_shuffle(V_array data, optV_integer seed)
+std_array_shuffle(Global_Context& global, V_array data, optV_integer seed)
   {
     // Use reference counting as our advantage.
     if(data.size() <= 1)
@@ -1183,7 +1184,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
     result.insert_or_assign(&"shuffle",
       ASTERIA_BINDING(
         "std.array.shuffle", "data, [seed]",
-        Argument_Reader&& reader)
+        Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
         optV_integer seed;
@@ -1192,7 +1193,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.optional(seed);
         if(reader.end_overload())
-          return (Value) std_array_shuffle(data, seed);
+          return (Value) std_array_shuffle(global, data, seed);
 
         reader.throw_no_matching_function_call();
       });
