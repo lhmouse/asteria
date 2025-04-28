@@ -54,7 +54,7 @@ class Token
 
   private:
     Source_Location m_sloc;
-    size_t m_length;
+    uint32_t m_length;
 
     ASTERIA_VARIANT(
       m_stor
@@ -68,7 +68,7 @@ class Token
 
   public:
     template<typename xToken>
-    constexpr Token(const Source_Location& xsloc, size_t xlen, xToken&& xtok)
+    constexpr Token(const Source_Location& xsloc, uint32_t xlen, xToken&& xtok)
       noexcept(::std::is_nothrow_constructible<decltype(m_stor), xToken&&>::value)
       :
         m_sloc(xsloc), m_length(xlen), m_stor(forward<xToken>(xtok))
@@ -107,7 +107,7 @@ class Token
     column() const noexcept
       { return this->m_sloc.column();  }
 
-    size_t
+    uint32_t
     length() const noexcept
       { return this->m_length;  }
 
