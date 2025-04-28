@@ -16,6 +16,7 @@ project('asteria',
         'cpp',
         version: '2.0.alpha',
         license: 'BSD-3-Clause',
+        default_options: [ 'cpp_std=c++17', 'warning_level=2' ],
         meson_version: '>= 1.3.0')
 
 #===========================================================
@@ -147,8 +148,8 @@ cxx_is_i386 = cxx.has_define('__i386__')
 cxx_is_amd64 = cxx.has_define('__amd64__')
 
 add_project_arguments(
-    '-Wall', '-Wextra', '-Winvalid-pch', '-std=c++17', '-D_FILE_OFFSET_BITS=64',
-    '-D_POSIX_C_SOURCE=200809', '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
+    '-Winvalid-pch', '-D_FILE_OFFSET_BITS=64', '-D_POSIX_C_SOURCE=200809',
+    '-D_DEFAULT_SOURCE', '-D_DARWIN_C_SOURCE',
     cxx.get_supported_arguments(
       '-fno-elide-constructors', '-fvisibility-inlines-hidden', '-fstrict-aliasing',
       '-fno-stack-protector', '-fstrict-overflow', '-fmerge-all-constants',
