@@ -247,9 +247,8 @@ std_numeric_itrunc(V_real value)
 V_real
 std_numeric_random(Global_Context& global, optV_real limit)
   {
-    auto prng = global.random_engine();
-
     // Generate a random `double` in the range [0.0,1.0).
+    const auto prng = global.random_engine();
     int64_t ireg = prng->bump();
     ireg <<= 21;
     ireg ^= prng->bump();
