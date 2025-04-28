@@ -200,10 +200,6 @@ wrap_array_index(ptrdiff_t ssize, int64_t sindex) noexcept
     return Wrapped_Index(ssize, sindex);
   }
 
-// Gets a random number from hardware.
-uint64_t
-generate_random_seed() noexcept;
-
 // Numeric conversion
 int64_t
 safe_double_to_int64(double val);

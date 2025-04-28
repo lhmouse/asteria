@@ -590,7 +590,16 @@ std_array_shuffle(V_array data, optV_integer seed)
       return data;
 
     // Create a linear congruential generator.
-    uint64_t lcg = seed ? (uint64_t) *seed : generate_random_seed();
+    uint64_t lcg;
+    if(seed)
+      lcg = static_cast<uint64_t>(*seed);
+    else {
+      const auto prng = global.random_engine();
+      lcg = prng->bump();
+      lcg <<= 32;
+      lcg ^= prng->bump();
+    }
+
     auto bptr = data.mut_data();
     for(size_t k = 0;  k != data.size();  ++k) {
       // These arguments are the same as glibc's `drand48()` function.
@@ -600,7 +609,7 @@ std_array_shuffle(V_array data, optV_integer seed)
       lcg &= 0xFFFFFFFFFFFF;  // m
 
       // Pick a random target to swap with.
-      size_t r = ::rocket::probe_origin(data.size(), (size_t) (lcg >> 16));
+      size_t r = ::rocket::probe_origin(data.size(), static_cast<size_t>(lcg >> 16));
       if(r != k)
         swap(bptr[r], bptr[k]);
     }
