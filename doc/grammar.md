@@ -32,24 +32,6 @@
   - _null-statement_
   - _nondeclarative-statement_
 
-* _nondeclarative-statement_ ::=
-  - _if-statement_
-  - _switch-statement_
-  - _do-while-statement_
-  - _while-statement_
-  - _for-statement_
-  - _break-statement_
-  - _continue-statement_
-  - _throw-statement_
-  - _return-statement_
-  - _assert-statement_
-  - _try-statement_
-  - _statement-block_
-  - _expression-statement_
-
-* _null-statement_ ::=
-  - `;`
-
 * _variable-definition_ ::=
   - `var` _variable-declarator_ ( _equal-initializer_ )? ( `,` _variable-declarator_
     ( _equal-initializer_ )? )\* `;`
@@ -84,6 +66,24 @@
 
 * _defer-statement_ ::=
   - `defer` _expression_ `;`
+
+* _null-statement_ ::=
+  - `;`
+
+* _nondeclarative-statement_ ::=
+  - _if-statement_
+  - _switch-statement_
+  - _do-while-statement_
+  - _while-statement_
+  - _for-statement_
+  - _break-statement_
+  - _continue-statement_
+  - _throw-statement_
+  - _return-statement_
+  - _assert-statement_
+  - _try-statement_
+  - _statement-block_
+  - _expression-statement_
 
 * `if-statement` ::=
   - `if` ( _negation_ )? `(` _expression_ `)` _nondeclarative-statement_ ( `else`
