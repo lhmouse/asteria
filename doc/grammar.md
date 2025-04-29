@@ -24,13 +24,13 @@
   - ( _statement_ )\*
 
 * _statement_ ::=
-  - _nondeclarative-statement_
-  - _null-statement_
   - _variable-definition_
   - _immutable-variable-definition_
   - _reference-definition_
   - _function-definition_
   - _defer-statement_
+  - _null-statement_
+  - _nondeclarative-statement_
 
 * _nondeclarative-statement_ ::=
   - _if-statement_
@@ -123,10 +123,10 @@
     _nondeclarative-statement_
 
 * _for-initializer_ ::=
-  - _null-statement_
   - _variable-definition_
   - _immutable-variable-definition_
   - _reference-definition_
+  - _null-statement_
   - _expression-statement_
 
 * _break-statement_ ::=

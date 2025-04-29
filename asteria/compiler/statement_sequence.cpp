@@ -1021,19 +1021,22 @@ opt<Statement>
 do_accept_for_initializer_opt(Token_Stream& tstrm)
   {
     // for-initializer ::=
-    //   null-statement
     //   variable-definition
     //   immutable-variable-definition
     //   reference-definition
+    //   null-statement
     //   expression-statement
-    if(auto qblock = do_accept_null_statement_opt(tstrm))
-      return move(*qblock);
-
     if(auto qinit = do_accept_variable_definition_opt(tstrm))
       return move(*qinit);
 
     if(auto qinit = do_accept_immutable_variable_definition_opt(tstrm))
       return move(*qinit);
+
+    if(auto qblock = do_accept_reference_definition_opt(tstrm))
+      return move(*qblock);
+
+    if(auto qblock = do_accept_null_statement_opt(tstrm))
+      return move(*qblock);
 
     if(auto qinit = do_accept_expression_statement_opt(tstrm))
       return move(*qinit);
@@ -1389,13 +1392,13 @@ opt<Statement>
 do_accept_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // statement ::=
-    //   nondeclarative-statement
-    //   null-statement
     //   variable-definition
     //   immutable-variable-definition
     //   reference-definition
     //   function-definition
     //   defer-statement
+    //   nondeclarative-statement
+    //   null-statement
     // nondeclarative-statement ::=
     //   if-statement
     //   switch-statement
