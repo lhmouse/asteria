@@ -6,7 +6,6 @@
 
 #include "../asteria/fwd.hpp"
 #include "../asteria/utils.hpp"
-#include <unistd.h>   // ::alarm()
 
 #define ASTERIA_TEST_CHECK(expr)  \
     do  \
@@ -71,8 +70,5 @@ static const auto asteria_test_terminate = ::std::set_terminate(
     ::fflush(nullptr);
     ::_Exit(1);
   });
-
-// Set kill timer.
-static const auto asteria_test_alarm = ::alarm(30);
 
 #endif
