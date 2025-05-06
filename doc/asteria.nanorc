@@ -26,10 +26,11 @@ color brightgreen "\<__(i?(round|floor|ceil|trunc)|vcall|(lz|tz|pop)cnt)\>"
 color brightcyan "\<(extern)\>"
 
 # Literals
-color yellow "'[^']*?'" ""(\\.|[^\\"])*?""
-icolor yellow "\<0b([01]`?)+(\.([01]`?)+)?([ep][-+]?([0-9]`?)+)?\>"
-icolor yellow "\<([0-9]`?)+(\.([0-9]`?)+)?([ep][-+]?([0-9]`?)+)?\>"
-icolor yellow "\<0x([0-9a-f]`?)+(\.([0-9a-f]`?)+)?(p[-+]?([0-9]`?)+)?\>"
+color yellow "'[^']*?'"
+color yellow ""(\\.|[^\\"])*?""
+icolor yellow "\<0b[01`]+(\.[01`]+)?(p[-+]?[0-9`]+)?\>"
+icolor yellow "\<[0-9][0-9`]*(\.[0-9`]+)?([ep][-+]?[0-9`]+)?\>"
+icolor yellow "\<0x[0-9a-f`]+(\.[0-9a-f`]+)?(p[-+]?[0-9`]+)?\>"
 
 # Comments
 color brightblue "//.*"
