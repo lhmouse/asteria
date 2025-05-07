@@ -208,7 +208,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
         tlen += 1;
         sign = -1;
         break;
-    }
+      }
 
     // If a sign symbol exists in a context where an infix operator is allowed, it is
     // treated as the latter.
@@ -219,38 +219,37 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       {
       case 'n':
       case 'N':
-      {
-        if(do_cmask_length(tlen, reader, cmask_name) != 3)
-          return false;
+        {
+          if(do_cmask_length(tlen, reader, cmask_name) != 3)
+            return false;
 
-        // `nan` or `NaN`
-        const char* sptr = reader.data() + tlen - 3;
-        if((sptr[1] != 'a') || (sptr[2] != sptr[0]))
-          return false;
+          // `nan` or `NaN`
+          const char* sptr = reader.data() + tlen - 3;
+          if((sptr[1] != 'a') || (sptr[2] != sptr[0]))
+            return false;
 
-        Token::S_real_literal xtoken;
-        xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::quiet_NaN(), sign);
-        return do_push_token(tokens, reader, tlen, move(xtoken));
-      }
+          Token::S_real_literal xtoken;
+          xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::quiet_NaN(), sign);
+          return do_push_token(tokens, reader, tlen, move(xtoken));
+        }
 
       case 'i':
       case 'I':
-      {
-        if(do_cmask_length(tlen, reader, cmask_name) != 8)
-          return false;
+        {
+          if(do_cmask_length(tlen, reader, cmask_name) != 8)
+            return false;
 
-        // `infinity` or `Infinity`
-        const char* sptr = reader.data() + tlen - 8;
-        if(::memcmp(sptr + 1, "nfinity", 7) != 0)
-          return false;
+          // `infinity` or `Infinity`
+          const char* sptr = reader.data() + tlen - 8;
+          if(::memcmp(sptr + 1, "nfinity", 7) != 0)
+            return false;
 
-        Token::S_real_literal xtoken;
-        xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::infinity(), sign);
-        return do_push_token(tokens, reader, tlen, move(xtoken));
-      }
+          Token::S_real_literal xtoken;
+          xtoken.val = ::std::copysign(::std::numeric_limits<V_real>::infinity(), sign);
+          return do_push_token(tokens, reader, tlen, move(xtoken));
+        }
 
       case '0':
-      {
         tstr += reader.peek(tlen);
         tlen += 1;
 
@@ -264,7 +263,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
           expch = 'p';
         }
 
-        // Fallthrough
+        // fallthrough
       case '1':
       case '2':
       case '3':
@@ -275,11 +274,10 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
       case '8':
       case '9':
         break;
-      }
 
       default:
         return false;
-    }
+      }
 
     // Accept the longest string composing the integral part.
     do_collect_digits(tstr, tlen, reader, mmask);
@@ -527,6 +525,7 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
 
       tlen += 1;
       int xcnt = 0;
+      char32_t cp;
 
       // Translate it.
       switch(next)
@@ -579,16 +578,15 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
           val.push_back('\x1B');
           break;
 
-        {
-        case 'U':     // "\U123456"
-          xcnt += 2;
-        case 'u':     // "\u1234"
-          xcnt += 2;
-        case 'x':     // "\x12"
+        case 'U':
+          xcnt += 2;  // fallthrough
+        case 'u':
+          xcnt += 2;  // fallthrough
+        case 'x':
           xcnt += 2;
 
           // Read hex digits.
-          char32_t cp = 0;
+          cp = 0;
           for(int i = 0;  i < xcnt;  ++i) {
             // Read a hex digit.
             char c = reader.peek(tlen);
@@ -620,7 +618,6 @@ do_accept_string_literal(cow_vector<Token>& tokens, Text_Reader& reader, char he
                         compiler_status_escape_utf_code_point_invalid, reader.tell());
           }
           break;
-        }
 
         default:
           throw Compiler_Error(xtc_status,
@@ -802,8 +799,8 @@ reload(cow_stringR file, int start_line, tinybuf&& cbuf)
         // Are we inside a block comment?
         if(bcomm) {
           // Search for the terminator of this block comment.
-          auto tptr = ::strstr(reader.data(), "*/");
-          if(!tptr)
+          auto tptr = ::strchr(reader.data(), '*');
+          if(!(tptr && (tptr[1] == '/')))
             break;
 
           // Finish this comment and resume from the end of it.
