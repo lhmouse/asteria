@@ -10,7 +10,7 @@ namespace asteria {
 Random_Engine::
 Random_Engine() noexcept
   {
-    ::RAND_priv_bytes(this->m_ctx_init, sizeof(this->m_ctx_init));
+    ::RAND_bytes(this->m_ctx_init, sizeof(this->m_ctx_init));
     this->m_ctx.randcnt = 256;
   }
 
