@@ -4,8 +4,6 @@
 #include "../xprecompiled.hpp"
 #include "random_engine.hpp"
 #include "../utils.hpp"
-#include <fcntl.h>  // ::open()
-#include <unistd.h>  // ::read()
 #include <openssl/rand.h>
 namespace asteria {
 
