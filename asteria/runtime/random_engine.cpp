@@ -5,12 +5,17 @@
 #include "random_engine.hpp"
 #include "../utils.hpp"
 #include <openssl/rand.h>
+#include <openssl/err.h>
 namespace asteria {
 
 Random_Engine::
 Random_Engine() noexcept
   {
-    ::RAND_bytes(this->m_ctx_init, sizeof(this->m_ctx_init));
+    if(::RAND_bytes(this->m_ctx_init, sizeof(this->m_ctx_init)) != 1)
+      ::rocket::sprintf_and_throw<::std::runtime_error>(
+            "asteria::Random_Engine: could not initialize random seed: %s",
+            ::ERR_reason_error_string(::ERR_peek_error()));
+
     this->m_ctx.randcnt = 256;
   }
 
