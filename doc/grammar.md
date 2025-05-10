@@ -87,7 +87,7 @@
 
 * `if-statement` ::=
   - `if` ( _negation_ )? `(` _expression_ `)` _nondeclarative-statement_ ( `else`
-    _nondeclarative_statement_ )?
+    _nondeclarative-statement_ )?
 
 * negation ::=
   - `!`
@@ -249,7 +249,7 @@
   - `__fma` `(` _expression_ `,` _expression_ `,` _expression_ `)`
 
 * _prefix-binary-expression_ ::=
-  - _prefix_binary_operator_ `(` _expression_ `,` _expression_ `)`
+  - _prefix-binary-operator_ `(` _expression_ `,` _expression_ `)`
 
 * _prefix-binary-operator_ ::=
   - `__addm`
