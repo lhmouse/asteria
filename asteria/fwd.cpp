@@ -334,7 +334,7 @@ describe_compiler_status(Compiler_Status status) noexcept
         return "duplicate name in parameter list";
 
       case compiler_status_nondeclarative_statement_expected:
-        return "non-declaration statement expected";
+        return "non-declarative statement expected";
 
       case compiler_status_closing_parenthesis_or_parameter_expected:
         return "`)` or parameter expected";
