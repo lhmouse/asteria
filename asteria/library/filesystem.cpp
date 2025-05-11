@@ -230,31 +230,31 @@ std_filesystem_remove_recursive(V_string path)
                 continue;
 
               // Get the name and type of this entry.
-              cow_string child = elem.path + '/' + next->d_name;
-              bool is_dir = false;
-
+              RM_Element enext = { rm_disp_unlink, elem.path + '/' + next->d_name };
   #ifdef _DIRENT_HAVE_D_TYPE
               if(next->d_type != DT_UNKNOWN) {
                 // Get the file type if it is available immediately.
-                is_dir = next->d_type == DT_DIR;
+                if(next->d_type == DT_DIR)
+                  enext.disp = rm_disp_expand;
               }
               else
   #endif
               {
                 // If the file type is unknown, ask for it.
                 struct ::stat stb;
-                if(::lstat(child.c_str(), &stb) != 0)
+                if(::lstat(enext.path.c_str(), &stb) != 0)
                   ASTERIA_THROW((
                       "Could not get information about '$1'",
                       "[`lstat()` failed: ${errno:full}]"),
-                      child);
+                      enext.path);
 
                 // Check whether the child path denotes a directory.
-                is_dir = S_ISDIR(stb.st_mode);
+                if(S_ISDIR(stb.st_mode))
+                  enext.disp = rm_disp_expand;
               }
 
               // Append this entry.
-              stack.push_back({ is_dir ? rm_disp_expand : rm_disp_unlink, move(child) });
+              stack.push_back(move(enext));
             }
             break;
           }
@@ -366,9 +366,11 @@ std_filesystem_create_directory(V_string path)
     if(::mkdir(path.safe_c_str(), 0777) == 0)
       return 1;
 
-    struct ::stat stb;
-    if((errno == EEXIST) && (::stat(path.c_str(), &stb) == 0) && S_ISDIR(stb.st_mode))
-      return 0;
+    if(errno == EEXIST) {
+      struct ::stat stb;
+      if((::stat(path.c_str(), &stb) == 0) && S_ISDIR(stb.st_mode))
+        return 0;
+    }
 
     ASTERIA_THROW((
         "Could not create directory '$1'",
