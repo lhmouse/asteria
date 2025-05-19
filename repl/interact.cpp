@@ -28,9 +28,9 @@ read_execute_print_single()
     // Prompt for the first line.
     long linenum = 0;
     int indent;
-    editline_set_prompt("#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
+    libedit_set_prompt("#%lu:%lu%n> ", ++repl_index, ++linenum, &indent);
 
-    while(editline_gets(linestr)) {
+    while(libedit_gets(linestr)) {
       // Remove trailing new line characters, if any.
       more = linestr.ends_with("\n");
       linestr.pop_back(more);
@@ -63,19 +63,17 @@ read_execute_print_single()
 
       // Prompt for the next line.
       repl_source.push_back('\n');
-      editline_set_prompt("%*lu> ", indent, ++linenum);
+      libedit_set_prompt("%*lu> ", indent, ++linenum);
 
       // Auto-indent it.
       pos = linestr.find_not_of(" \t");
       linestr.erase(::rocket::min(pos, linestr.size()));
-
-      if(!linestr.empty())
-        editline_puts(linestr);
+      libedit_puts(linestr);
     }
 
     // Discard this snippet if Ctrl-C was received.
     if(repl_signal.xchg(0) != 0) {
-      editline_reset();
+      libedit_reset();
       repl_printf("\n! interrupted (type `:exit` to quit)");
       return;
     }
@@ -98,7 +96,7 @@ read_execute_print_single()
       if(pos == cow_string::npos)
         return;
 
-      editline_add_history(repl_source);
+      libedit_add_history(repl_source);
 
       try {
         // Process the command, which may re-populate `repl_source`.
@@ -119,7 +117,7 @@ read_execute_print_single()
     // Add the snippet into history if it is from the user, i.e. if it is
     // not composited by a command.
     if(!iscmd)
-      editline_add_history(repl_source);
+      libedit_add_history(repl_source);
 
     // Tokenize source code.
     cow_string real_name;

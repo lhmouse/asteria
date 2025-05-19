@@ -112,7 +112,7 @@ asteria_src = [
 
 repl_src = [
   'repl/fwd.hpp', 'repl/globals.cpp', 'repl/single.cpp', 'repl/interact.cpp',
-  'repl/commands.cpp', 'repl/main.cpp', 'repl/editline.cpp' ]
+  'repl/commands.cpp', 'repl/main.cpp', 'repl/libedit.cpp' ]
 
 test_src = [
   'test/xstring.cpp', 'test/ascii_numget.cpp', 'test/ascii_numget_float.cpp',
@@ -191,10 +191,10 @@ dep_zlib = dependency('zlib', version: '>= 1.2.9')
 dep_pcre2 = dependency('libpcre2-8')
 dep_openssl = dependency('openssl')
 dep_iconv = dependency('iconv')
-dep_editline = disabler()
+dep_libedit = disabler()
 
 if get_option('enable-repl')
-  dep_editline = dependency('libedit',
+  dep_libedit = dependency('libedit', 'wineditline',
         not_found_message: 'libedit is required to build the REPL. If you do not '
                            + 'need it, use `meson setup -Denable-repl=false`.')
 endif
@@ -234,7 +234,7 @@ import('pkgconfig').generate(lib_asteria,
 executable('asteria',
       cpp_pch: 'asteria/xprecompiled.hpp',
       sources: [ repl_src ],
-      dependencies: [ dep_editline ],
+      dependencies: [ dep_libedit ],
       link_with: lib_asteria,
       install: true)
 

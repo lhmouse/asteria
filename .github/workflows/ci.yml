@@ -21,7 +21,7 @@ on:
 jobs:
   ubuntu:
     name: Ubuntu native build (x86-64)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
@@ -29,9 +29,8 @@ jobs:
     - name: Install dependencies
       run: >-
            sudo apt-get install -y --no-install-recommends g++ python3
-           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
-           ninja-build python3-pip &&
-           sudo PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install meson
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev meson
+           ninja-build python3-pip
 
     - name: Configure
       run: >-
@@ -53,9 +52,8 @@ jobs:
     - name: Install dependencies
       run: >-
            sudo apt-get install -y --no-install-recommends g++ python3
-           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev
-           ninja-build python3-pip &&
-           sudo PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install meson
+           pkgconf libedit-dev libpcre2-dev libssl-dev zlib1g-dev meson
+           ninja-build python3-pip
 
     - name: Configure
       run: >-

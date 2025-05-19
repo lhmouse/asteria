@@ -75,19 +75,19 @@ read_execute_print_single();
 
 // These functions are defined in 'editline.cpp'.
 void
-editline_set_prompt(const char* fmt, ...);
+libedit_set_prompt(const char* fmt, ...);
 
 bool
-editline_gets(cow_string& line);
+libedit_gets(cow_string& line);
 
 void
-editline_puts(cow_stringR text);
+libedit_puts(cow_stringR text);
 
 void
-editline_reset();
+libedit_reset();
 
 void
-editline_add_history(cow_stringR text);
+libedit_add_history(cow_stringR text);
 
 }  // namespace asteria
 #endif
