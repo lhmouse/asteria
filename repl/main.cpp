@@ -186,10 +186,8 @@ do_parse_command_line(int argc, char** argv)
 int
 main(int argc, char** argv)
   try {
-    // Select the C locale.
-    // UTF-8 is required for wide-oriented standard streams.
-    const char* const current_locale = ::setlocale(LC_ALL, "C.UTF-8");
-    ::srandom(static_cast<unsigned>(::clock()));
+    // Select the C locale. UTF-8 is required for wide standard streams.
+    ::setlocale(LC_ALL, "C.UTF-8");
     ::tzset();
 
     // Note that this function shall not return in case of errors.
@@ -230,7 +228,7 @@ main(int argc, char** argv)
 // 4567890123456789012345678901234567890123456789012345678901234567890123456|
 //       1         2         3         4         5         6         7      |
       PACKAGE_STRING, ASTERIA_ABI_VERSION_STRING,
-      current_locale,
+      ::setlocale(0, nullptr),
       repl_cmd_char, repl_cmd_char);
 
     for(;;) {
