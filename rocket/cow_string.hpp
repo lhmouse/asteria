@@ -58,9 +58,8 @@ class basic_shallow_string
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
       { }
 
-    template<typename ycharT, size_t N,
-    ROCKET_ENABLE_IF(is_same<ycharT, charT>::value)>
-    ROCKET_CONSTEXPR_INLINE basic_shallow_string(const ycharT (*ps)[N]) noexcept
+    template<size_t N>
+    ROCKET_CONSTEXPR_INLINE basic_shallow_string(const charT (*ps)[N]) noexcept
       :
         m_ptr(*ps), m_len((ROCKET_ASSERT(*(*ps + N - 1) == charT()), N - 1))
       { }
@@ -147,7 +146,8 @@ class basic_cow_string
 
   public:
     // 24.3.2.2, construct/copy/destroy
-    constexpr basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_cow_string()
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(s_zstr), m_sth()
       { }
@@ -157,7 +157,8 @@ class basic_cow_string
         m_ref(s_zstr), m_sth(alloc)
       { }
 
-    constexpr basic_cow_string(shallow_type sh) noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_cow_string(shallow_type sh)
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(sh), m_sth()
       { }
@@ -167,16 +168,15 @@ class basic_cow_string
         m_ref(sh), m_sth(alloc)
       { }
 
-    template<typename ycharT, size_t N,
-    ROCKET_ENABLE_IF(is_same<ycharT, value_type>::value)>
-    constexpr basic_cow_string(const ycharT (*ps)[N]) noexcept(is_nothrow_constructible<allocator_type>::value)
+    template<size_t N>
+    constexpr basic_cow_string(const charT (*ps)[N])
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(ps), m_sth()
       { }
 
-    template<typename ycharT, size_t N,
-    ROCKET_ENABLE_IF(is_same<ycharT, value_type>::value)>
-    constexpr basic_cow_string(const ycharT (*ps)[N], const allocator_type& alloc) noexcept
+    template<size_t N>
+    constexpr basic_cow_string(const charT (*ps)[N], const allocator_type& alloc) noexcept
       :
         m_ref(ps), m_sth(alloc)
       { }
@@ -244,10 +244,9 @@ class basic_cow_string
         return *this;
       }
 
-    template<typename ycharT, size_t N,
-    ROCKET_ENABLE_IF(is_same<ycharT, value_type>::value)>
+    template<size_t N>
     basic_cow_string&
-    operator=(const ycharT (*ps)[N]) & noexcept
+    operator=(const charT (*ps)[N]) & noexcept
       {
         this->m_ref = shallow_type(ps);
         return *this;
