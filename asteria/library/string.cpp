@@ -26,21 +26,22 @@ do_slice(const V_string& text, V_string::const_iterator tbegin, const optV_integ
   }
 
 pair<V_string::const_iterator, V_string::const_iterator>
-do_slice(const V_string& text, const V_integer& from, const optV_integer& length)
+do_slice(const V_string& text, const optV_integer& from, const optV_integer& length)
   {
     // Behave like `::std::string::substr()` except that no exception is
     // thrown when `from` is greater than `text.size()`.
-    auto slen = static_cast<int64_t>(text.size());
-    if(from >= slen)
+    int64_t sfrom = from.value_or(0);
+    int64_t slen = text.ssize();
+    if(sfrom >= slen)
       return ::std::make_pair(text.end(), text.end());
 
     // For positive offsets, return a subrange from `begin() + from`.
-    if(from >= 0)
-      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
+    if(sfrom >= 0)
+      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(sfrom), length);
 
     // Wrap `from` from the end. Notice that `from + slen` will not overflow
     // when `from` is negative and `slen` is not.
-    auto rfrom = from + slen;
+    int64_t rfrom = sfrom + slen;
     if(rfrom >= 0)
       return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
 
@@ -369,7 +370,7 @@ class PCRE2_Matcher
       }
 
     opt<size_t>
-    do_pcre2_match_opt(const V_string& text, V_integer from, optV_integer length)
+    do_pcre2_match_opt(const V_string& text, optV_integer from, optV_integer length)
       {
         auto range = do_slice(text, from, length);
         auto sub_off = static_cast<size_t>(range.first - text.begin());
@@ -413,7 +414,7 @@ class PCRE2_Matcher
       }
 
     opt<pair<V_integer, V_integer>>
-    find(const V_string& text, V_integer from, optV_integer length)
+    find(const V_string& text, optV_integer from, optV_integer length)
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -432,7 +433,7 @@ class PCRE2_Matcher
       }
 
     optV_array
-    match(const V_string& text, V_integer from, optV_integer length)
+    match(const V_string& text, optV_integer from, optV_integer length)
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -459,7 +460,7 @@ class PCRE2_Matcher
       }
 
     optV_object
-    named_match(const V_string& text, V_integer from, optV_integer length)
+    named_match(const V_string& text, optV_integer from, optV_integer length)
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -493,7 +494,7 @@ class PCRE2_Matcher
       }
 
     V_string
-    replace(const V_string& text, V_integer from, optV_integer length, const V_string& rep)
+    replace(const V_string& text, optV_integer from, optV_integer length, const V_string& rep)
       {
         auto range = do_slice(text, from, length);
         auto sub_off = static_cast<size_t>(range.first - text.begin());
@@ -553,8 +554,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -564,12 +564,12 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
           return (Value) std_string_PCRE_find(m, text, 0, nullopt);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         if(reader.end_overload())
           return (Value) std_string_PCRE_find(m, text, from, nullopt);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         if(reader.end_overload())
           return (Value) std_string_PCRE_find(m, text, from, len);
@@ -585,8 +585,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -596,12 +595,12 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
           return (Value) std_string_PCRE_match(m, text, 0, nullopt);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         if(reader.end_overload())
           return (Value) std_string_PCRE_match(m, text, from, nullopt);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         if(reader.end_overload())
           return (Value) std_string_PCRE_match(m, text, from, len);
@@ -617,8 +616,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -628,12 +626,12 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
           return (Value) std_string_PCRE_named_match(m, text, 0, nullopt);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         if(reader.end_overload())
           return (Value) std_string_PCRE_named_match(m, text, from, nullopt);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         if(reader.end_overload())
           return (Value) std_string_PCRE_named_match(m, text, from, len);
@@ -649,8 +647,7 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         auto& self_obj = self.dereference_mutable().mut_object();
         auto& m = self_obj.mut(s_private_uuid).mut_opaque();
         V_string text, rep;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -661,13 +658,13 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
           return (Value) std_string_PCRE_replace(m, text, 0, nullopt, rep);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(rep);
         if(reader.end_overload())
           return (Value) std_string_PCRE_replace(m, text, from, nullopt, rep);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(rep);
         if(reader.end_overload())
@@ -698,7 +695,7 @@ struct iconv_closer
 }  // namespace
 
 V_string
-std_string_slice(V_string text, V_integer from, optV_integer length)
+std_string_slice(V_string text, optV_integer from, optV_integer length)
   {
     // Use reference counting as our advantage.
     V_string res = text;
@@ -709,7 +706,7 @@ std_string_slice(V_string text, V_integer from, optV_integer length)
   }
 
 V_string
-std_string_replace_slice(V_string text, V_integer from, optV_integer length, V_string replacement,
+std_string_replace_slice(V_string text, optV_integer from, optV_integer length, V_string replacement,
                          optV_integer rfrom, optV_integer rlength)
   {
     V_string res = text;
@@ -749,7 +746,7 @@ std_string_ends_with(V_string text, V_string suffix)
   }
 
 optV_integer
-std_string_find(V_string text, V_integer from, optV_integer length, V_string pattern)
+std_string_find(V_string text, optV_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -757,7 +754,7 @@ std_string_find(V_string text, V_integer from, optV_integer length, V_string pat
   }
 
 optV_integer
-std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pattern)
+std_string_rfind(V_string text, optV_integer from, optV_integer length, V_string pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(::std::make_reverse_iterator(range.second),
@@ -767,7 +764,7 @@ std_string_rfind(V_string text, V_integer from, optV_integer length, V_string pa
   }
 
 V_string
-std_string_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_replace(V_string text, optV_integer from, optV_integer length, V_string pattern,
                    V_string replacement)
   {
     auto range = do_slice(text, from, length);
@@ -802,7 +799,7 @@ std_string_replace(V_string text, V_integer from, optV_integer length, V_string 
   }
 
 optV_integer
-std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_string accept)
+std_string_find_any_of(V_string text, optV_integer from, optV_integer length, V_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -810,7 +807,7 @@ std_string_find_any_of(V_string text, V_integer from, optV_integer length, V_str
   }
 
 optV_integer
-std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_string reject)
+std_string_find_not_of(V_string text, optV_integer from, optV_integer length, V_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -818,7 +815,7 @@ std_string_find_not_of(V_string text, V_integer from, optV_integer length, V_str
   }
 
 optV_integer
-std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_string accept)
+std_string_rfind_any_of(V_string text, optV_integer from, optV_integer length, V_string accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
@@ -827,7 +824,7 @@ std_string_rfind_any_of(V_string text, V_integer from, optV_integer length, V_st
   }
 
 optV_integer
-std_string_rfind_not_of(V_string text, V_integer from, optV_integer length, V_string reject)
+std_string_rfind_not_of(V_string text, optV_integer from, optV_integer length, V_string reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(::std::make_reverse_iterator(range.second),
@@ -1650,32 +1647,32 @@ std_string_PCRE_private(V_string pattern, optV_array options)
   }
 
 opt<pair<V_integer, V_integer>>
-std_string_PCRE_find(V_opaque& m, V_string text, V_integer from, optV_integer length)
+std_string_PCRE_find(V_opaque& m, V_string text, optV_integer from, optV_integer length)
   {
     return m.open<PCRE2_Matcher>().find(text, from, length);
   }
 
 optV_array
-std_string_PCRE_match(V_opaque& m, V_string text, V_integer from, optV_integer length)
+std_string_PCRE_match(V_opaque& m, V_string text, optV_integer from, optV_integer length)
   {
     return m.open<PCRE2_Matcher>().match(text, from, length);
   }
 
 optV_object
-std_string_PCRE_named_match(V_opaque& m, V_string text, V_integer from, optV_integer length)
+std_string_PCRE_named_match(V_opaque& m, V_string text, optV_integer from, optV_integer length)
   {
     return m.open<PCRE2_Matcher>().named_match(text, from, length);
   }
 
 V_string
-std_string_PCRE_replace(V_opaque& m, V_string text, V_integer from, optV_integer length,
+std_string_PCRE_replace(V_opaque& m, V_string text, optV_integer from, optV_integer length,
                         V_string replacement)
   {
     return m.open<PCRE2_Matcher>().replace(text, from, length, replacement);
   }
 
 opt<pair<V_integer, V_integer>>
-std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_pcre_find(V_string text, optV_integer from, optV_integer length, V_string pattern,
                      optV_array options)
   {
     PCRE2_Matcher m(pattern, options);
@@ -1683,7 +1680,7 @@ std_string_pcre_find(V_string text, V_integer from, optV_integer length, V_strin
   }
 
 optV_array
-std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_pcre_match(V_string text, optV_integer from, optV_integer length, V_string pattern,
                       optV_array options)
   {
     PCRE2_Matcher m(pattern, options);
@@ -1691,7 +1688,7 @@ std_string_pcre_match(V_string text, V_integer from, optV_integer length, V_stri
   }
 
 optV_object
-std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_pcre_named_match(V_string text, optV_integer from, optV_integer length, V_string pattern,
                             optV_array options)
   {
     PCRE2_Matcher m(pattern, options);
@@ -1699,7 +1696,7 @@ std_string_pcre_named_match(V_string text, V_integer from, optV_integer length, 
   }
 
 V_string
-std_string_pcre_replace(V_string text, V_integer from, optV_integer length, V_string pattern,
+std_string_pcre_replace(V_string text, optV_integer from, optV_integer length, V_string pattern,
                         V_string replacement, optV_array options)
   {
     PCRE2_Matcher m(pattern, options);
@@ -1772,10 +1769,8 @@ create_bindings_string(V_object& result, API_Version /*version*/)
       {
         V_string text;
         V_integer from;
-        optV_integer len;
+        optV_integer len, rfrom, rlen;
         V_string rep;
-        optV_integer rfrom;
-        optV_integer rlen;
 
         reader.start_overload();
         reader.required(text);
@@ -1857,8 +1852,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
 
         reader.start_overload();
         reader.required(text);
@@ -1868,13 +1862,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_find(text, 0, nullopt, patt);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(patt);
         if(reader.end_overload())
           return (Value) std_string_find(text, from, nullopt, patt);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(patt);
         if(reader.end_overload())
@@ -1889,8 +1883,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
 
         reader.start_overload();
         reader.required(text);
@@ -1900,7 +1893,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_rfind(text, 0, nullopt, patt);
 
         reader.load_state(0);
-        reader.required(from);
+        reader.optional(from);
         reader.save_state(0);
         reader.required(patt);
         if(reader.end_overload())
@@ -1921,8 +1914,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt, rep;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
 
         reader.start_overload();
         reader.required(text);
@@ -1933,14 +1925,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_replace(text, 0, nullopt, patt, rep);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(patt);
         reader.required(rep);
         if(reader.end_overload())
           return (Value) std_string_replace(text, from, nullopt, patt, rep);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(patt);
         reader.required(rep);
@@ -1956,8 +1948,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         V_string acc;
 
         reader.start_overload();
@@ -1968,13 +1959,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_find_any_of(text, 0, nullopt, acc);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(acc);
         if(reader.end_overload())
           return (Value) std_string_find_any_of(text, from, nullopt, acc);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(acc);
         if(reader.end_overload())
@@ -1989,8 +1980,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         V_string acc;
 
         reader.start_overload();
@@ -2001,13 +1991,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_rfind_any_of(text, 0, nullopt, acc);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(acc);
         if(reader.end_overload())
           return (Value) std_string_rfind_any_of(text, from, nullopt, acc);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(acc);
         if(reader.end_overload())
@@ -2022,8 +2012,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         V_string rej;
 
         reader.start_overload();
@@ -2034,13 +2023,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_find_not_of(text, 0, nullopt, rej);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(rej);
         if(reader.end_overload())
           return (Value) std_string_find_not_of(text, from, nullopt, rej);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(rej);
         if(reader.end_overload())
@@ -2055,8 +2044,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         V_string rej;
 
         reader.start_overload();
@@ -2067,13 +2055,13 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_rfind_not_of(text, 0, nullopt, rej);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(rej);
         if(reader.end_overload())
           return (Value) std_string_rfind_not_of(text, from, nullopt, rej);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(rej);
         if(reader.end_overload())
@@ -2522,8 +2510,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -2535,14 +2522,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_pcre_find(text, 0, nullopt, patt, opts);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
           return (Value) std_string_pcre_find(text, from, nullopt, patt, opts);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(patt);
         reader.optional(opts);
@@ -2558,8 +2545,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -2571,14 +2557,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_pcre_match(text, 0, nullopt, patt, opts);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
           return (Value) std_string_pcre_match(text, from, nullopt, patt, opts);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(patt);
         reader.optional(opts);
@@ -2594,8 +2580,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -2607,14 +2592,14 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_pcre_named_match(text, 0, nullopt, patt, opts);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(patt);
         reader.optional(opts);
         if(reader.end_overload())
           return (Value) std_string_pcre_named_match(text, from, nullopt, patt, opts);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(patt);
         reader.optional(opts);
@@ -2630,8 +2615,7 @@ create_bindings_string(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_string text, patt, rep;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         optV_array opts;
 
         reader.start_overload();
@@ -2644,15 +2628,15 @@ create_bindings_string(V_object& result, API_Version /*version*/)
           return (Value) std_string_pcre_replace(text, 0, nullopt, patt, rep, opts);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.required(patt);
         reader.required(rep);
         reader.optional(opts);
         if(reader.end_overload())
           return (Value) std_string_pcre_replace(text, from, nullopt, patt, rep, opts);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.required(patt);
         reader.required(rep);

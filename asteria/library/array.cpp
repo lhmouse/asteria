@@ -26,21 +26,22 @@ do_slice(const V_array& data, V_array::const_iterator tbegin, const optV_integer
   }
 
 pair<V_array::const_iterator, V_array::const_iterator>
-do_slice(const V_array& data, const V_integer& from, const optV_integer& length)
+do_slice(const V_array& data, const optV_integer& from, const optV_integer& length)
   {
     // Behave like `::std::string::substr()` except that no exception is
     // thrown when `from` is greater than `data.size()`.
-    auto slen = static_cast<int64_t>(data.size());
-    if(from >= slen)
+    int64_t sfrom = from.value_or(0);
+    int64_t slen = data.ssize();
+    if(sfrom >= slen)
       return ::std::make_pair(data.end(), data.end());
 
     // For positive offsets, return a subrange from `begin() + from`.
-    if(from >= 0)
-      return do_slice(data, data.begin() + static_cast<ptrdiff_t>(from), length);
+    if(sfrom >= 0)
+      return do_slice(data, data.begin() + static_cast<ptrdiff_t>(sfrom), length);
 
     // Wrap `from` from the end. Notice that `from + slen` will not overflow
     // when `from` is negative and `slen` is not.
-    auto rfrom = from + slen;
+    int64_t rfrom = sfrom + slen;
     if(rfrom >= 0)
       return do_slice(data, data.begin() + static_cast<ptrdiff_t>(rfrom), length);
 
@@ -241,7 +242,7 @@ do_merge_blocks(V_array& output, bool unique, V_array& input, xComparator&& comp
 }  // namespace
 
 V_array
-std_array_slice(V_array data, V_integer from, optV_integer length)
+std_array_slice(V_array data, optV_integer from, optV_integer length)
   {
     // Use reference counting as our advantage.
     V_array res = data;
@@ -252,7 +253,7 @@ std_array_slice(V_array data, V_integer from, optV_integer length)
   }
 
 V_array
-std_array_replace_slice(V_array data, V_integer from, optV_integer length, V_array replacement,
+std_array_replace_slice(V_array data, optV_integer from, optV_integer length, V_array replacement,
                         optV_integer rfrom, optV_integer rlength)
   {
     V_array res = data;
@@ -286,7 +287,7 @@ std_array_replace_slice(V_array data, V_integer from, optV_integer length, V_arr
   }
 
 optV_integer
-std_array_find(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_find(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     Reference self;
@@ -296,7 +297,7 @@ std_array_find(Global_Context& global, V_array data, V_integer from, optV_intege
   }
 
 optV_integer
-std_array_find_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_find_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     Reference self;
@@ -306,7 +307,7 @@ std_array_find_not(Global_Context& global, V_array data, V_integer from, optV_in
   }
 
 optV_integer
-std_array_rfind(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_rfind(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     Reference self;
@@ -317,7 +318,7 @@ std_array_rfind(Global_Context& global, V_array data, V_integer from, optV_integ
   }
 
 optV_integer
-std_array_rfind_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_rfind_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     Reference self;
@@ -328,7 +329,7 @@ std_array_rfind_not(Global_Context& global, V_array data, V_integer from, optV_i
   }
 
 V_integer
-std_array_count(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_count(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     V_integer count = 0;
@@ -342,7 +343,7 @@ std_array_count(Global_Context& global, V_array data, V_integer from, optV_integ
   }
 
 V_integer
-std_array_count_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_count_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     V_integer count = 0;
@@ -356,7 +357,7 @@ std_array_count_not(Global_Context& global, V_array data, V_integer from, optV_i
   }
 
 V_array
-std_array_exclude(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_exclude(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -370,7 +371,7 @@ std_array_exclude(Global_Context& global, V_array data, V_integer from, optV_int
   }
 
 V_array
-std_array_exclude_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target)
+std_array_exclude_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target)
   {
     auto range = do_slice(data, from, length);
     ptrdiff_t dist = data.end() - range.second;
@@ -681,10 +682,8 @@ create_bindings_array(V_object& result, API_Version /*version*/)
       {
         V_array text;
         V_integer from;
-        optV_integer len;
+        optV_integer len, rfrom, rlen;
         V_array rep;
-        optV_integer rfrom;
-        optV_integer rlen;
 
         reader.start_overload();
         reader.required(text);
@@ -713,8 +712,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -725,13 +723,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_find(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_find(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -746,8 +744,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -758,13 +755,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_find_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_find_not(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -779,8 +776,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -791,13 +787,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_rfind(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_rfind(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -812,8 +808,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -824,13 +819,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_rfind_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_rfind_not(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -845,8 +840,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -857,13 +851,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_count(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_count(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -878,8 +872,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -890,13 +883,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_count_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_count_not(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -911,8 +904,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -923,13 +915,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_exclude(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_exclude(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())
@@ -944,8 +936,7 @@ create_bindings_array(V_object& result, API_Version /*version*/)
         Global_Context& global, Argument_Reader&& reader)
       {
         V_array data;
-        V_integer from;
-        optV_integer len;
+        optV_integer from, len;
         Value targ;
 
         reader.start_overload();
@@ -956,13 +947,13 @@ create_bindings_array(V_object& result, API_Version /*version*/)
           return (Value) std_array_exclude_not(global, data, 0, nullopt, targ);
 
         reader.load_state(0);
-        reader.required(from);
-        reader.save_state(0);
+        reader.optional(from);
+        reader.save_state(1);
         reader.optional(targ);
         if(reader.end_overload())
           return (Value) std_array_exclude_not(global, data, from, nullopt, targ);
 
-        reader.load_state(0);
+        reader.load_state(1);
         reader.optional(len);
         reader.optional(targ);
         if(reader.end_overload())

@@ -9,44 +9,44 @@ namespace asteria {
 
 // `std.array.slice`
 V_array
-std_array_slice(V_array data, V_integer from, optV_integer length);
+std_array_slice(V_array data, optV_integer from, optV_integer length);
 
 // `std.array.replace_slice`
 V_array
-std_array_replace_slice(V_array data, V_integer from, optV_integer length, V_array replacement,
+std_array_replace_slice(V_array data, optV_integer from, optV_integer length, V_array replacement,
                         optV_integer rfrom, optV_integer rlength);
 
 // `std.array.find`
 optV_integer
-std_array_find(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_find(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.find_not`
 optV_integer
-std_array_find_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_find_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.rfind`
 optV_integer
-std_array_rfind(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_rfind(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.rfind`
 optV_integer
-std_array_rfind_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_rfind_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.count`
 V_integer
-std_array_count(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_count(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.count_not`
 V_integer
-std_array_count_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_count_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.exclude`
 V_array
-std_array_exclude(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_exclude(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.exclude_not`
 V_array
-std_array_exclude_not(Global_Context& global, V_array data, V_integer from, optV_integer length, Value target);
+std_array_exclude_not(Global_Context& global, V_array data, optV_integer from, optV_integer length, Value target);
 
 // `std.array.is_sorted`
 V_boolean
