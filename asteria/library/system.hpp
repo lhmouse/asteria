@@ -47,6 +47,10 @@ std_system_get_euid();
 V_integer
 std_system_call(V_string cmd, optV_array argv, optV_array envp);
 
+// `std.system.pipe`
+optV_string
+std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string input);
+
 // `std.system.daemonize`
 void
 std_system_daemonize();

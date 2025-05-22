@@ -33,6 +33,19 @@ int main()
         assert std.system.call('bash',
           [ '-c', 'test $VAR == yes' ], [ 'VAR=no' ]) != 0;
 
+        assert std.system.pipe('true') == '';
+        assert std.system.pipe('false') == null;
+
+        try {
+          // note this may or may not throw
+          var out = std.system.pipe('./nonexistent-command');
+          assert out == null;
+        }
+        catch(e)
+          assert std.string.find(e, "assertion failure") == null;
+
+        assert std.system.pipe('printf', [ '%s %d', 'hello', '123' ]) == "hello 123\n";
+
         var o = std.system.load_conf(std.string.pcre_replace(__file, '/[^/]*$', '/sample.conf'));
         assert o.key == "value";
         assert o["keys may be quoted"] == "equals signs are allowed";
