@@ -123,7 +123,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Returns the effective user ID as an integer.
 
-### `std.system.call(cmd, [argv], [envp])`
+### `std.system.call(cmd, [argv, [envp]])`
 
 * Launches the program denoted by `cmd`, awaits its termination, and returns
   its exit status. If `argv` is provided, it shall be an array of strings,

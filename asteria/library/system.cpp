@@ -387,42 +387,39 @@ std_system_get_euid()
 V_integer
 std_system_call(V_string cmd, optV_array argv, optV_array envp)
   {
-    // Append arguments.
-    cow_vector<const char*> ptrs = { cmd.safe_c_str() };
-    if(argv) {
-      ::rocket::for_each(*argv,
-          [&](const Value& arg) { ptrs.emplace_back(arg.as_string().safe_c_str());  });
-    }
-    auto eoff = ptrs.ssize();  // beginning of environment variables
-    ptrs.emplace_back(nullptr);
+    // Append arguments and environment variables.
+    cow_vector<const char*> cstrings;
+    cstrings.reserve(16);
+    cstrings.push_back(cmd.safe_c_str());
+    if(argv)
+      for(const auto& arg : *argv)
+        cstrings.push_back(arg.as_string().safe_c_str());
+    cstrings.push_back(nullptr);
 
-    // Append environment variables.
-    if(envp) {
-      eoff = ptrs.ssize();
-      ::rocket::for_each(*envp,
-         [&](const Value& env) { ptrs.emplace_back(env.as_string().safe_c_str());  });
-      ptrs.emplace_back(nullptr);
-    }
-    auto argv_pp = const_cast<char**>(ptrs.data());
-    auto envp_pp = const_cast<char**>(ptrs.data() + eoff);
+    ptrdiff_t env_start = cstrings.ssize();
+    if(envp)
+      for(const auto& env : *envp)
+        cstrings.push_back(env.as_string().safe_c_str());
+    cstrings.push_back(nullptr);
 
     // Launch the program.
     ::pid_t pid;
-    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr, argv_pp, envp_pp) != 0)
+    if(::posix_spawnp(&pid, cmd.c_str(), nullptr, nullptr,
+                      const_cast<char**>(cstrings.data()),
+                      const_cast<char**>(cstrings.data() + env_start)) != 0)
       ASTERIA_THROW((
-          "Could not spawn process '$1'",
+          "Could not spawn process `$1` with $2",
           "[`posix_spawnp()` failed: ${errno:full}]"),
-          cmd);
+          cmd, argv);
 
     for(;;) {
-      // Await its termination.
-      // Note: `waitpid()` may return if the child has been stopped or continued.
+      // Await its termination. `waitpid()` may return if the child has been
+      // stopped or continued, so this has to be a loop.
       int wstat;
       if(::waitpid(pid, &wstat, 0) == -1)
         ASTERIA_THROW((
-            "Error awaiting child process '$1'",
-            "[`waitpid()` failed: ${errno:full}]"),
-            pid);
+            "Error awaiting child process",
+            "[`waitpid()` failed: ${errno:full}]"));
 
       if(WIFEXITED(wstat))
         return WEXITSTATUS(wstat);  // exited
@@ -665,7 +662,7 @@ create_bindings_system(V_object& result, API_Version /*version*/)
 
     result.insert_or_assign(&"call",
       ASTERIA_BINDING(
-        "std.system.call", "cmd, [argv], [envp]",
+        "std.system.call", "cmd, [argv, [envp]]",
         Argument_Reader&& reader)
       {
         V_string cmd;
