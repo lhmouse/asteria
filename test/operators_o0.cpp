@@ -233,6 +233,8 @@ int main()
         assert 17.0 / r == 2.0;
         assert r / 17 == 0.5;
         assert 17 / 8.5 == 2.0;
+        assert s / 'bc' == 'a/bc';
+        assert 'bc' / s == 'bc/a';
 
         assert i % 7 == 5;
         assert 23 % i == 11;

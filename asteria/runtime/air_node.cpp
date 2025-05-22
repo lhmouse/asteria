@@ -3388,6 +3388,12 @@ solidify(AVM_Rod& rod) const
                       V_real& val = lhs.mut_real();
                       val /= rhs.as_real();
                     }
+                    else if(lhs.is_string() && rhs.is_string()) {
+                      // string / string ; path concatenation
+                      V_string& val = lhs.mut_string();
+                      val += '/';
+                      val += rhs.as_string();
+                    }
                     else throw Runtime_Error(xtc_format,
                             "Division not applicable (operands were `$1` and `$2`)", lhs, rhs);
 
