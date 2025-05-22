@@ -429,6 +429,144 @@ std_system_call(V_string cmd, optV_array argv, optV_array envp)
     }
   }
 
+optV_string
+std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string input)
+  {
+    // Initialize input and output actions for the new process.
+    ::posix_spawn_file_actions_t st_actions;
+    if(::posix_spawn_file_actions_init(&st_actions) != 0)
+      ASTERIA_THROW((
+          "Could not initialize file actions",
+          "[`posix_spawn_file_actions_init()` failed: ${errno:full}]"));
+
+    ::rocket::unique_ptr<::posix_spawn_file_actions_t,
+                int (::posix_spawn_file_actions_t*)> actions(
+                         &st_actions, ::posix_spawn_file_actions_destroy);
+
+    ::rocket::unique_posix_fd out_r, out_w, in_r, in_w;
+    int pipe_fds[2];
+
+    if(::pipe(pipe_fds) != 0)
+      ASTERIA_THROW((
+          "Could not create output pipe",
+          "[`pipe()` failed: ${errno:full}]"));
+
+    out_r.reset(pipe_fds[0]);
+    out_w.reset(pipe_fds[1]);
+
+    if(::posix_spawn_file_actions_addclose(actions, out_r) != 0)
+      ASTERIA_THROW((
+          "Could not set output file action",
+          "[`posix_spawn_file_actions_addclose()` failed: ${errno:full}]"));
+
+    if(::posix_spawn_file_actions_adddup2(actions, out_w, STDOUT_FILENO) != 0)
+      ASTERIA_THROW((
+          "Could not set output file action",
+          "[`posix_spawn_file_actions_adddup2()` failed: ${errno:full}]"));
+
+    if(::pipe(pipe_fds) != 0)
+      ASTERIA_THROW((
+          "Could not create input pipe",
+          "[`pipe()` failed: ${errno:full}]"));
+
+    in_r.reset(pipe_fds[0]);
+    in_w.reset(pipe_fds[1]);
+
+    if(::posix_spawn_file_actions_adddup2(actions, in_r, STDIN_FILENO) != 0)
+      ASTERIA_THROW((
+          "Could not set input file action",
+          "[`posix_spawn_file_actions_adddup2()` failed: ${errno:full}]"));
+
+    if(::posix_spawn_file_actions_addclose(actions, in_w) != 0)
+      ASTERIA_THROW((
+          "Could not set input file action",
+          "[`posix_spawn_file_actions_addclose()` failed: ${errno:full}]"));
+
+    // Append arguments and environment variables.
+    cow_vector<const char*> cstrings;
+    cstrings.reserve(16);
+    cstrings.push_back(cmd.safe_c_str());
+    if(argv)
+      for(const auto& arg : *argv)
+        cstrings.push_back(arg.as_string().safe_c_str());
+    cstrings.push_back(nullptr);
+
+    ptrdiff_t env_start = cstrings.ssize();
+    if(envp)
+      for(const auto& env : *envp)
+        cstrings.push_back(env.as_string().safe_c_str());
+    cstrings.push_back(nullptr);
+
+    // Launch the program.
+    ::pid_t pid;
+    if(::posix_spawnp(&pid, cmd.c_str(), actions, nullptr,
+                      const_cast<char**>(cstrings.data()),
+                      const_cast<char**>(cstrings.data() + env_start)) != 0)
+      ASTERIA_THROW((
+          "Could not spawn process `$1` with $2",
+          "[`posix_spawnp()` failed: ${errno:full}]"),
+          cmd, argv);
+
+    out_w.reset();
+    in_r.reset();
+
+    size_t in_total = 0;
+    optV_string output = V_string();
+    ::ssize_t io_n;
+
+    if(input)
+      for(;;) {
+        if(in_total >= input->size())
+          break;
+
+        io_n = ::write(in_w, input->data() + in_total, input->size() - in_total);
+        if(io_n < 0)
+          ASTERIA_THROW((
+              "Could not send input data to process `$1` with $2",
+              "[`write()` failed: ${errno:full}]"),
+              cmd, argv);
+
+        in_total += static_cast<size_t>(io_n);
+      }
+
+    in_w.reset();
+
+    for(;;) {
+      constexpr size_t batch = 1048576;
+      output->append(batch, '/');
+
+      io_n = ::read(out_r, output->mut_data() + output->size() - batch, batch);
+      if(io_n < 0)
+        ASTERIA_THROW((
+            "Could not read output data from process `$1` with $2",
+            "[`read()` failed: ${errno:full}]"),
+            cmd, argv);
+
+      output->pop_back(batch - static_cast<size_t>(io_n));
+      if(io_n == 0)
+        break;
+    }
+
+    for(;;) {
+      // Await its termination. `waitpid()` may return if the child has been
+      // stopped or continued, so this has to be a loop.
+      int wstat;
+      if(::waitpid(pid, &wstat, 0) == -1)
+        ASTERIA_THROW((
+            "Error awaiting child process",
+            "[`waitpid()` failed: ${errno:full}]"));
+
+      if(WIFEXITED(wstat) && (WEXITSTATUS(wstat) != 0))
+        output.reset();
+
+      if(WIFEXITED(wstat))
+        return output;  // exited
+
+      if(WIFSIGNALED(wstat))
+        return nullopt;  // killed by a signal
+    }
+  }
+
 void
 std_system_daemonize()
   {
@@ -674,6 +812,38 @@ create_bindings_system(V_object& result, API_Version /*version*/)
         reader.optional(envp);
         if(reader.end_overload())
           return (Value) std_system_call(cmd, argv, envp);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(&"pipe",
+      ASTERIA_BINDING(
+        "std.system.pipe", "cmd, [argv, [envp]], [input]",
+        Argument_Reader&& reader)
+      {
+        V_string cmd;
+        optV_array argv, envp;
+        optV_string input;
+
+        reader.start_overload();
+        reader.required(cmd);
+        reader.save_state(0);
+        reader.optional(input);
+        if(reader.end_overload())
+          return (Value) std_system_pipe(cmd, nullopt, nullopt, input);
+
+        reader.load_state(0);
+        reader.optional(argv);
+        reader.save_state(1);
+        reader.optional(input);
+        if(reader.end_overload())
+          return (Value) std_system_pipe(cmd, argv, nullopt, input);
+
+        reader.load_state(1);
+        reader.optional(envp);
+        reader.optional(input);
+        if(reader.end_overload())
+          return (Value) std_system_pipe(cmd, argv, envp, input);
 
         reader.throw_no_matching_function_call();
       });

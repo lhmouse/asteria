@@ -138,6 +138,21 @@ variable. Individual components are categorized into sub-objects.
 * Throws an exception if the program could not be launched or its exit status
   could not be retrieved.
 
+### `std.system.pipe(cmd, [argv, [envp]], [input])`
+
+* Launches the program denoted by `cmd`, sends `input` to its standard input,
+  awaits its termination, and returns its standard output. If `argv` is
+  provided, it shall be an array of strings, which specifies additional
+  arguments to pass to the program. If `envp` is given, it shall also be an
+  array of strings, which specifies environment variables to the program. If
+  `input` is null, the standard input of the new process will be closed.
+
+* Returns the standard output of the new process as a string. If the process
+  does not exit successfully, `null` is returned.
+
+* Throws an exception if the program could not be launched or its exit status
+  could not be retrieved.
+
 ### `std.system.daemonize()`
 
 * Detaches the current process from its controlling terminal and continues
