@@ -321,19 +321,22 @@ int main()
 
         var m = std.string.pcre_named_match("a11b2c333d4e555", '(?:\w\d+)*');
         assert typeof m == "object";
-        assert countof m == 0;
+        assert countof m == 1;
+        assert m.'&' == 'a11b2c333d4e555';
 
         assert std.string.pcre_named_match("a11b2c333d4e555", '\d{34}\w') == null;
 
         m = std.string.pcre_named_match("a11b2c333d4e555", '(\w\d*)(?<xx>\w\d+)(\w\d*\w\d+)(?<yy>\w\d+)');
         assert typeof m == "object";
-        assert countof m == 2;
+        assert countof m == 3;
+        assert m.'&' == 'a11b2c333d4e555';
         assert m.xx == "b2";
         assert m.yy == "e555";
 
         m = std.string.pcre_named_match("a11b2c333d4e555", '(?<xx>\d+\w)(?<yy>22)?(?<zz>\d+\w)');
         assert typeof m == "object";
-        assert countof m == 3;
+        assert countof m == 4;
+        assert m.'&' == '11b2c';
         assert m.xx == "11b";
         assert m.yy == null;
         assert m.zz == "2c";
@@ -350,7 +353,8 @@ int main()
         var M_nn = std.string.PCRE('(?<xx>\d+\w)(?<yy>22)?(?<zz>\d+\w)');
         m = M_nn.named_match("a11b2c333d4e555");
         assert typeof m == "object";
-        assert countof m == 3;
+        assert countof m == 4;
+        assert m.'&' == '11b2c';
         assert m.xx == "11b";
         assert m.yy == null;
         assert m.zz == "2c";

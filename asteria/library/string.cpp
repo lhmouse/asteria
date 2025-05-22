@@ -466,8 +466,8 @@ class PCRE2_Matcher
         if(!sub_off)
           return nullopt;
 
-        // Retrieve information about named groups.
         if(this->m_name_count == UINT32_MAX) {
+          // Retrieve information about named groups.
           ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMETABLE, &(this->m_name_table));
           ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMEENTRYSIZE, &(this->m_name_size));
           ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMECOUNT, &(this->m_name_count));
@@ -477,7 +477,7 @@ class PCRE2_Matcher
         // Compose the match result object.
         const size_t* ovec = ::pcre2_get_ovector_pointer(this->m_match);
         V_object matches;
-        matches.reserve(this->m_name_count);
+        matches.reserve(this->m_name_count + 1);
         for(size_t k = 0;  k != this->m_name_count;  ++k) {
           const uint8_t* entry = this->m_name_table + this->m_name_size * k;
           auto ins = matches.try_emplace(cow_string(reinterpret_cast<const char*>(entry + 2)));
@@ -489,6 +489,11 @@ class PCRE2_Matcher
           size_t off = *sub_off + opair[0];
           size_t len = ::rocket::max(opair[0], opair[1]) - opair[0];
           ins.first->second = cow_string(text, off, len);
+        }
+        if(ovec[0] != PCRE2_UNSET) {
+          size_t off = *sub_off + ovec[0];
+          size_t len = ::rocket::max(ovec[0], ovec[1]) - ovec[0];
+          matches.try_emplace(&"&", cow_string(text, off, len));
         }
         return move(matches);
       }

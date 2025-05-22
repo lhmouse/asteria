@@ -673,9 +673,9 @@ variable. Individual components are categorized into sub-objects.
   `slice(text, from, length)`. `options` specifies options to pass to
   `PCRE(pattern, options)`.
 
-* Returns an array of strings. The first element is a copy of the substring
-  that matches `pattern`, and the remaining elements are substrings that
-  match positional capturing groups. If a group fails to match, its
+* Returns an array of strings. The first element is a copy of the entire
+  substring that matches `pattern`, and the remaining elements are substrings
+  that match positional capturing groups. If a group fails to match, its
   corresponding element is `null`. If `text` does not match `pattern`, `null`
   is returned.
 
@@ -689,7 +689,8 @@ variable. Individual components are categorized into sub-objects.
   `PCRE(pattern, options)`.
 
 * Returns an object of all named groups. Each key is the name of a group and
-  its value is the matched substring, if any. If there is no named group in
+  its value is the matched substring, if any. The special key `&` denotes the
+  the entire substring that matches `pattern`. If there is no named group in
   `pattern`, an empty object is returned. If a group fails to match, its
   corresponding value is `null`. If `text` does not match `pattern`, `null`
   is returned.
