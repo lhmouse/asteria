@@ -687,13 +687,13 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         "std.filesystem.move", "path_new, path_old",
         Argument_Reader&& reader)
       {
-        V_string to, from;
+        V_string path_new, path_old;
 
         reader.start_overload();
-        reader.required(to);
-        reader.required(from);
+        reader.required(path_new);
+        reader.required(path_old);
         if(reader.end_overload())
-          return (void) std_filesystem_move(to, from);
+          return (void) std_filesystem_move(path_new, path_old);
 
         reader.throw_no_matching_function_call();
       });
@@ -858,13 +858,13 @@ create_bindings_filesystem(V_object& result, API_Version /*version*/)
         "std.filesystem.copy_file", "path_new, path_old",
         Argument_Reader&& reader)
       {
-        V_string to, from;
+        V_string path_new, path_old;
 
         reader.start_overload();
-        reader.required(to);
-        reader.required(from);
+        reader.required(path_new);
+        reader.required(path_old);
         if(reader.end_overload())
-          return (void) std_filesystem_copy_file(to, from);
+          return (void) std_filesystem_copy_file(path_new, path_old);
 
         reader.throw_no_matching_function_call();
       });
