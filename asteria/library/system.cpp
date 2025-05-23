@@ -511,6 +511,9 @@ std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string inpu
     out_w.reset();
     in_r.reset();
 
+    if(!input || input->empty())
+      in_w.reset();
+
     optV_string output = V_string();
     constexpr size_t out_batch = 65536;
     size_t in_written = 0;
@@ -549,16 +552,15 @@ std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string inpu
 
       if(fds[1].revents & POLLOUT) {
         // Write standard input.
-        if(input && (input->size() > in_written)) {
-          ::ssize_t io_n = ::write(in_w, input->data() + in_written, input->size() - in_written);
-          if(io_n < 0)
-            ASTERIA_THROW((
-                "Could not send input data to process `$1` with $2",
-                "[`write()` failed: ${errno:full}]"),
-                cmd, argv);
+        ::ssize_t io_n = ::write(in_w, input->data() + in_written, input->size() - in_written);
+        if(io_n < 0)
+          ASTERIA_THROW((
+              "Could not send input data to process `$1` with $2",
+              "[`write()` failed: ${errno:full}]"),
+              cmd, argv);
 
-          in_written += static_cast<size_t>(io_n);
-        } else
+        in_written += static_cast<size_t>(io_n);
+        if(in_written >= input->size())
           in_w.reset();
       }
       else if(fds[1].revents & (POLLHUP | POLLERR))
