@@ -12,6 +12,7 @@
 #include "../compiler/enums.hpp"
 #include "../utils.hpp"
 #include <spawn.h>  // ::posix_spawnp()
+#include <poll.h>  // ::poll()
 #include <sys/wait.h>  // ::waitpid()
 #include <sys/utsname.h>  // ::uname()
 #include <sys/socket.h>  // ::socket()
@@ -510,40 +511,60 @@ std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string inpu
     out_w.reset();
     in_r.reset();
 
-    size_t in_total = 0;
     optV_string output = V_string();
-    ::ssize_t io_n;
-
-    if(input)
-      for(;;) {
-        if(in_total >= input->size())
-          break;
-
-        io_n = ::write(in_w, input->data() + in_total, input->size() - in_total);
-        if(io_n < 0)
-          ASTERIA_THROW((
-              "Could not send input data to process `$1` with $2",
-              "[`write()` failed: ${errno:full}]"),
-              cmd, argv);
-
-        in_total += static_cast<size_t>(io_n);
-      }
-
-    in_w.reset();
+    constexpr size_t out_batch = 65536;
+    size_t in_written = 0;
 
     for(;;) {
-      constexpr size_t batch = 1048576;
-      output->append(batch, '/');
-
-      io_n = ::read(out_r, output->mut_data() + output->size() - batch, batch);
-      if(io_n < 0)
+      // Check whether there's something to do.
+      ::pollfd fds[2];
+      fds[0].fd = out_r;
+      fds[0].events = POLLIN;
+      fds[0].revents = 0;
+      fds[1].fd = in_w;
+      fds[1].events = POLLOUT;
+      fds[1].revents = 0;
+      if(::poll(fds, 2, 60000) < 0)
         ASTERIA_THROW((
-            "Could not read output data from process `$1` with $2",
-            "[`read()` failed: ${errno:full}]"),
+            "Could not wait for data from process `$1` with $2",
+            "[`poll()` failed: ${errno:full}]"),
             cmd, argv);
 
-      output->pop_back(batch - static_cast<size_t>(io_n));
-      if(io_n == 0)
+      if(fds[0].revents & (POLLHUP | POLLERR))
+        out_r.reset();
+      else if(fds[0].revents & POLLIN) {
+        // Read standard output.
+        output->append(out_batch, '/');
+        ::ssize_t io_n = ::read(out_r, output->mut_data() + output->size() - out_batch, out_batch);
+        if(io_n < 0)
+          ASTERIA_THROW((
+              "Could not receive output data from process `$1` with $2",
+              "[`read()` failed: ${errno:full}]"),
+              cmd, argv);
+
+        output->pop_back(out_batch - static_cast<size_t>(io_n));
+        if(io_n == 0)
+          out_r.reset();
+      }
+
+      if(fds[1].revents & (POLLHUP | POLLERR))
+        in_w.reset();
+      else if(fds[1].revents & POLLOUT) {
+        // Write standard input.
+        if(input && (input->size() > in_written)) {
+          ::ssize_t io_n = ::write(in_w, input->data() + in_written, input->size() - in_written);
+          if(io_n < 0)
+            ASTERIA_THROW((
+                "Could not send input data to process `$1` with $2",
+                "[`write()` failed: ${errno:full}]"),
+                cmd, argv);
+
+          in_written += static_cast<size_t>(io_n);
+        } else
+          in_w.reset();
+      }
+
+      if(!out_r && !in_w)
         break;
     }
 
