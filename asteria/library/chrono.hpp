@@ -13,7 +13,11 @@ std_chrono_now();
 
 // `std.chrono.format`
 V_string
-std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_offset);
+std_chrono_format(V_integer time_point, optV_integer utc_offset);
+
+// `std.chrono.format_ms`
+V_string
+std_chrono_format_ms(V_integer time_point, optV_integer utc_offset);
 
 // `std.chrono.parse`
 V_integer

@@ -213,7 +213,7 @@ variable. Individual components are categorized into sub-objects.
 * Returns the number of milliseconds since `1970-01-01 00:00:00 UTC`,
   represented as an integer.
 
-### `std.chrono.format(time_point, [with_ms], [utc_offset])`
+### `std.chrono.format(time_point, [utc_offset])`
 
 * Converts `time_point`, which shall be an integer representing the number
   of milliseconds since `1970-01-01 00:00:00 UTC`, to a string in the
@@ -223,10 +223,24 @@ variable. Individual components are categorized into sub-objects.
   * a space between time and time zone
   * no colon between hours and minutes of the timezone
 
-  If `with_ms` is set to `true`, the string will have a 3-digit decimal part
-  for milliseconds. `utc_offset` specifies the number of minutes of local
-  time ahead of UTC time, as an integer. If it is absent, it is obtained from
-  the local system.
+  `utc_offset` specifies the number of minutes of local time ahead of UTC
+  time, as an integer. If it is absent, it is obtained from the local system.
+
+* Returns a string representing the time point.
+
+### `std.chrono.format_ms(time_point, [utc_offset])`
+
+* Converts `time_point`, which shall be an integer representing the number
+  of milliseconds since `1970-01-01 00:00:00.000 UTC`, to a string in the
+  modified ISO 8601 format, which uses
+
+  * a space instead of the T date/time delimiter
+  * a space between time and time zone
+  * no colon between hours and minutes of the timezone
+  * a decimal point and three digits for the millisecond part
+
+  `utc_offset` specifies the number of minutes of local time ahead of UTC
+  time, as an integer. If it is absent, it is obtained from the local system.
 
 * Returns a string representing the time point.
 

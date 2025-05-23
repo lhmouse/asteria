@@ -24,61 +24,8 @@ constexpr char s_2digit[100][2] =
     '9','0','9','1','9','2','9','3','9','4','9','5','9','6','9','7','9','8','9','9',
   };
 
-inline
-bool
-do_match(const char*& rptr_out, const char* cstr, size_t len)
-  {
-    // If a previous match has failed, don't do anything.
-    if(rptr_out == nullptr)
-      return false;
-
-    if(::memcmp(rptr_out, cstr, len) == 0) {
-      // A match has been found, so move the read pointer past it.
-      rptr_out += len;
-      return true;
-    }
-
-    // No match has been found, so mark this as a failure.
-    rptr_out = nullptr;
-    return false;
-  }
-
-template<uint32_t N, uint32_t S>
-inline
-bool
-do_match(const char*& rptr_out, uint32_t& add_to_value, const char (&cstrs)[N][S], int limit)
-  {
-    // If a previous match has failed, don't do anything.
-    if(rptr_out == nullptr)
-      return false;
-
-    for(uint32_t k = 0;  k != N;  ++k) {
-      size_t len = (limit >= 0) ? (uint32_t) limit : ::strlen(cstrs[k]);
-      if(::memcmp(rptr_out, cstrs[k], len) == 0) {
-        // A match has been found, so move the read pointer past it.
-        rptr_out += len;
-        add_to_value += k;
-        return true;
-      }
-    }
-
-    // No match has been found, so mark this as a failure.
-    rptr_out = nullptr;
-    return false;
-  }
-
-}  // namespace
-
-V_integer
-std_chrono_now()
-  {
-    ::timespec ts;
-    ::clock_gettime(CLOCK_REALTIME, &ts);
-    return (int64_t) ts.tv_sec * 1000 + (uint32_t) ts.tv_nsec / 1000000;
-  }
-
 V_string
-std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_offset)
+do_format_with_ms(V_integer time_point, optV_integer utc_offset, bool with_ms)
   {
     uint32_t year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0, ms = 0;
     int gmtoff_sign = 0;
@@ -146,7 +93,7 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
     ::rocket::xmemrpcpy(wptr, ":", 1);
     ::rocket::xmemrpcpy(wptr, s_2digit[sec], 2);
 
-    if(with_ms == true) {
+    if(with_ms) {
       // Output four digits, then overwrite the first one with
       // a decimal point.
       ::rocket::xmemrpcpy(wptr, s_2digit[ms / 100], 2);
@@ -166,6 +113,71 @@ std_chrono_format(V_integer time_point, optV_boolean with_ms, optV_integer utc_o
     }
 
     return cow_string(time_str, wptr);
+  }
+
+inline
+bool
+do_match(const char*& rptr_out, const char* cstr, size_t len)
+  {
+    // If a previous match has failed, don't do anything.
+    if(rptr_out == nullptr)
+      return false;
+
+    if(::memcmp(rptr_out, cstr, len) == 0) {
+      // A match has been found, so move the read pointer past it.
+      rptr_out += len;
+      return true;
+    }
+
+    // No match has been found, so mark this as a failure.
+    rptr_out = nullptr;
+    return false;
+  }
+
+template<uint32_t N, uint32_t S>
+inline
+bool
+do_match(const char*& rptr_out, uint32_t& add_to_value, const char (&cstrs)[N][S], int limit)
+  {
+    // If a previous match has failed, don't do anything.
+    if(rptr_out == nullptr)
+      return false;
+
+    for(uint32_t k = 0;  k != N;  ++k) {
+      size_t len = (limit >= 0) ? (uint32_t) limit : ::strlen(cstrs[k]);
+      if(::memcmp(rptr_out, cstrs[k], len) == 0) {
+        // A match has been found, so move the read pointer past it.
+        rptr_out += len;
+        add_to_value += k;
+        return true;
+      }
+    }
+
+    // No match has been found, so mark this as a failure.
+    rptr_out = nullptr;
+    return false;
+  }
+
+}  // namespace
+
+V_integer
+std_chrono_now()
+  {
+    ::timespec ts;
+    ::clock_gettime(CLOCK_REALTIME, &ts);
+    return (int64_t) ts.tv_sec * 1000 + (uint32_t) ts.tv_nsec / 1000000;
+  }
+
+V_string
+std_chrono_format(V_integer time_point, optV_integer utc_offset)
+  {
+    return do_format_with_ms(time_point, utc_offset, false);
+  }
+
+V_string
+std_chrono_format_ms(V_integer time_point, optV_integer utc_offset)
+  {
+    return do_format_with_ms(time_point, utc_offset, true);
   }
 
 V_integer
@@ -306,15 +318,30 @@ create_bindings_chrono(V_object& result, API_Version /*version*/)
         Argument_Reader&& reader)
       {
         V_integer time_point;
-        optV_boolean with_ms;
         optV_integer utc_offset;
 
         reader.start_overload();
         reader.required(time_point);
-        reader.optional(with_ms);
         reader.optional(utc_offset);
         if(reader.end_overload())
-          return (Value) std_chrono_format(time_point, with_ms, utc_offset);
+          return (Value) std_chrono_format(time_point, utc_offset);
+
+        reader.throw_no_matching_function_call();
+      });
+
+    result.insert_or_assign(&"format_ms",
+      ASTERIA_BINDING(
+        "std.chrono.format_ms", "time_point, [with_ms], [utc_offset]",
+        Argument_Reader&& reader)
+      {
+        V_integer time_point;
+        optV_integer utc_offset;
+
+        reader.start_overload();
+        reader.required(time_point);
+        reader.optional(utc_offset);
+        if(reader.end_overload())
+          return (Value) std_chrono_format_ms(time_point, utc_offset);
 
         reader.throw_no_matching_function_call();
       });
