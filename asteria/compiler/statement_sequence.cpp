@@ -1590,12 +1590,13 @@ struct Prefix_Punctuator_Xop
   }
 constexpr s_prefix_punctuator_xop[] =
   {
-    { punctuator_add,   xop_pos   },
-    { punctuator_sub,   xop_neg   },
-    { punctuator_notb,  xop_notb  },
-    { punctuator_notl,  xop_notl  },
-    { punctuator_inc,   xop_inc   },
-    { punctuator_dec,   xop_dec   },
+    { punctuator_add,   xop_pos      },
+    { punctuator_sub,   xop_neg      },
+    { punctuator_notb,  xop_notb     },
+    { punctuator_notl,  xop_notl     },
+    { punctuator_inc,   xop_inc      },
+    { punctuator_dec,   xop_dec      },
+    { punctuator_hash,  xop_countof  },
   };
 
 constexpr

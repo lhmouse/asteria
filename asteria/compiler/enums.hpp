@@ -70,6 +70,7 @@ enum Punctuator : uint8_t
     punctuator_scope       = 58,  // ::
     punctuator_random      = 59,  // [?]
     punctuator_cmp_un      = 60,  // </>
+    punctuator_hash        = 61,  // #
   };
 
 enum Keyword : uint8_t

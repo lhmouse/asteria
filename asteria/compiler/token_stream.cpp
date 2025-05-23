@@ -393,6 +393,7 @@ constexpr s_punctuators[] =
   {
     { "!",     punctuator_notl        },
     { "!=",    punctuator_cmp_ne      },
+    { "#",     punctuator_hash        },
     { "%",     punctuator_mod         },
     { "%=",    punctuator_mod_eq      },
     { "&",     punctuator_andb        },
