@@ -269,6 +269,7 @@ is_terminator() const noexcept
       case index_coalesce_expression:
       case index_member_access:
       case index_apply_operator_bi32:
+      case index_check_null:
         return false;
 
       case index_throw_statement:
@@ -347,6 +348,7 @@ rebind_opt(Abstract_Context& ctx) const
       case index_member_access:
       case index_apply_operator_bi32:
       case index_return_statement_bi32:
+      case index_check_null:
         return nullopt;
 
       case index_execute_block:
@@ -631,6 +633,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
       case index_member_access:
       case index_apply_operator_bi32:
       case index_return_statement_bi32:
+      case index_check_null:
         return;
 
       case index_execute_block:
@@ -5821,6 +5824,36 @@ solidify(AVM_Rod& rod) const
 
                 ctx.global().call_hook(&Abstract_Hooks::on_return, sloc, ptc_aware_none);
                 ctx.status() = air_status_return;
+              }
+
+            // Uparam
+            , up2
+            , 0, nullptr, nullptr, nullptr
+            , nullptr
+
+            // Symbols
+            , &(altr.sloc)
+          );
+          return;
+        }
+
+      case index_check_null:
+        {
+          const auto& altr = this->m_stor.as<S_check_null>();
+
+          AVM_Rod::Uparam up2;
+          up2.b0 = altr.negative;
+
+          rod.push_function(
+            +[](Executive_Context& ctx, const AVM_Rod::Header* head)
+              __attribute__((__hot__, __flatten__))
+              {
+                const bool negative = head->uparam.b0;
+                Reference& top = ctx.stack().mut_top();
+
+                // Set the result as a temporary value.
+                bool value = top.dereference_readonly().is_null() != negative;
+                top.set_temporary(value);
               }
 
             // Uparam

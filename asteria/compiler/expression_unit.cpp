@@ -253,6 +253,13 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
               if((altr.xop == xop_pos) && !altr.assign)
                 return;
 
+              if(qrhs->is_null() && ::rocket::is_any_of(altr.xop, { xop_cmp_eq, xop_cmp_ne })) {
+                // Encode comparison with null.
+                AIR_Node::S_check_null xnode = { altr.sloc, altr.xop == xop_cmp_ne };
+                code.mut_back() = move(xnode);
+                return;
+              }
+
               if(qrhs->is_string() && (altr.xop == xop_index)) {
                 // Encode a pre-hashed object key.
                 AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(qrhs->as_string()) };
