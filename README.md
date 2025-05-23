@@ -1,10 +1,5 @@
 # The Asteria Programming Language
 
-|Compiler     |Category                   |
-|:------------|:--------------------------|
-|**GCC 7**    |:1st_place_medal:Primary   |
-|**Clang 11** |:2nd_place_medal:Secondary |
-
 ![asteria](asteria.png)
 
 **Asteria** (/asˈtɪərɪə/, _as-TEAR-ee-uh_) is a procedural, dynamically typed
