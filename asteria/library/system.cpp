@@ -530,9 +530,7 @@ std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string inpu
             "[`poll()` failed: ${errno:full}]"),
             cmd, argv);
 
-      if(fds[0].revents & (POLLHUP | POLLERR))
-        out_r.reset();
-      else if(fds[0].revents & POLLIN) {
+      if(fds[0].revents & POLLIN) {
         // Read standard output.
         output->append(out_batch, '/');
         ::ssize_t io_n = ::read(out_r, output->mut_data() + output->size() - out_batch, out_batch);
@@ -546,10 +544,10 @@ std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string inpu
         if(io_n == 0)
           out_r.reset();
       }
+      else if(fds[0].revents & (POLLHUP | POLLERR))
+        out_r.reset();
 
-      if(fds[1].revents & (POLLHUP | POLLERR))
-        in_w.reset();
-      else if(fds[1].revents & POLLOUT) {
+      if(fds[1].revents & POLLOUT) {
         // Write standard input.
         if(input && (input->size() > in_written)) {
           ::ssize_t io_n = ::write(in_w, input->data() + in_written, input->size() - in_written);
@@ -563,6 +561,8 @@ std_system_pipe(V_string cmd, optV_array argv, optV_array envp, optV_string inpu
         } else
           in_w.reset();
       }
+      else if(fds[1].revents & (POLLHUP | POLLERR))
+        in_w.reset();
 
       if(!out_r && !in_w)
         break;
