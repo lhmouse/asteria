@@ -80,14 +80,22 @@ do_construct_CRC32(V_object& result)
         "std.checksum.CRC32::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_CRC32_update(hasher, data);
+          return (void) std_checksum_CRC32_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -97,12 +105,19 @@ do_construct_CRC32(V_object& result)
         "std.checksum.CRC32::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_CRC32_finish(hasher);
+          return (Value) std_checksum_CRC32_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -112,12 +127,19 @@ do_construct_CRC32(V_object& result)
         "std.checksum.CRC32::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_CRC32_clear(hasher);
+          return (void) std_checksum_CRC32_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -188,14 +210,22 @@ do_construct_Adler32(V_object& result)
         "std.checksum.Adler32::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_Adler32_update(hasher, data);
+          return (void) std_checksum_Adler32_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -205,12 +235,19 @@ do_construct_Adler32(V_object& result)
         "std.checksum.Adler32::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_Adler32_finish(hasher);
+          return (Value) std_checksum_Adler32_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -220,12 +257,19 @@ do_construct_Adler32(V_object& result)
         "std.checksum.Adler32::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_Adler32_clear(hasher);
+          return (void) std_checksum_Adler32_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -299,14 +343,22 @@ do_construct_FNV1a32(V_object& result)
         "std.checksum.FNV1a32::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_FNV1a32_update(hasher, data);
+          return (void) std_checksum_FNV1a32_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -316,12 +368,19 @@ do_construct_FNV1a32(V_object& result)
         "std.checksum.FNV1a32::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_FNV1a32_finish(hasher);
+          return (Value) std_checksum_FNV1a32_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -331,12 +390,19 @@ do_construct_FNV1a32(V_object& result)
         "std.checksum.FNV1a32::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_FNV1a32_clear(hasher);
+          return (void) std_checksum_FNV1a32_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -424,14 +490,21 @@ do_construct_MD5(V_object& result)
         "std.checksum.MD5::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_MD5_update(hasher, data);
+          return (void) std_checksum_MD5_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -441,12 +514,19 @@ do_construct_MD5(V_object& result)
         "std.checksum.MD5::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_MD5_finish(hasher);
+          return (Value) std_checksum_MD5_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -456,12 +536,19 @@ do_construct_MD5(V_object& result)
         "std.checksum.MD5::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_MD5_clear(hasher);
+          return (void) std_checksum_MD5_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -533,14 +620,21 @@ do_construct_SHA1(V_object& result)
         "std.checksum.SHA1::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_SHA1_update(hasher, data);
+          return (void) std_checksum_SHA1_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -550,12 +644,19 @@ do_construct_SHA1(V_object& result)
         "std.checksum.SHA1::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_SHA1_finish(hasher);
+          return (Value) std_checksum_SHA1_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -565,12 +666,19 @@ do_construct_SHA1(V_object& result)
         "std.checksum.SHA1::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_SHA1_clear(hasher);
+          return (void) std_checksum_SHA1_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -642,14 +750,21 @@ do_construct_SHA224(V_object& result)
         "std.checksum.SHA224::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_SHA224_update(hasher, data);
+          return (void) std_checksum_SHA224_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -659,12 +774,19 @@ do_construct_SHA224(V_object& result)
         "std.checksum.SHA224::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_SHA224_finish(hasher);
+          return (Value) std_checksum_SHA224_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -674,12 +796,19 @@ do_construct_SHA224(V_object& result)
         "std.checksum.SHA224::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_SHA224_clear(hasher);
+          return (void) std_checksum_SHA224_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -751,14 +880,21 @@ do_construct_SHA256(V_object& result)
         "std.checksum.SHA256::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_SHA256_update(hasher, data);
+          return (void) std_checksum_SHA256_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -768,12 +904,19 @@ do_construct_SHA256(V_object& result)
         "std.checksum.SHA256::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_SHA256_finish(hasher);
+          return (Value) std_checksum_SHA256_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -783,12 +926,19 @@ do_construct_SHA256(V_object& result)
         "std.checksum.SHA256::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_SHA256_clear(hasher);
+          return (void) std_checksum_SHA256_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -860,14 +1010,21 @@ do_construct_SHA384(V_object& result)
         "std.checksum.SHA384::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_SHA384_update(hasher, data);
+          return (void) std_checksum_SHA384_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -877,12 +1034,19 @@ do_construct_SHA384(V_object& result)
         "std.checksum.SHA384::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_SHA384_finish(hasher);
+          return (Value) std_checksum_SHA384_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -892,12 +1056,19 @@ do_construct_SHA384(V_object& result)
         "std.checksum.SHA384::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_SHA384_clear(hasher);
+          return (void) std_checksum_SHA384_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -969,14 +1140,21 @@ do_construct_SHA512(V_object& result)
         "std.checksum.SHA512::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_checksum_SHA512_update(hasher, data);
+          return (void) std_checksum_SHA512_update(*hasher, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -986,12 +1164,19 @@ do_construct_SHA512(V_object& result)
         "std.checksum.SHA512::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_checksum_SHA512_finish(hasher);
+          return (Value) std_checksum_SHA512_finish(*hasher);
 
         reader.throw_no_matching_function_call();
       });
@@ -1001,12 +1186,19 @@ do_construct_SHA512(V_object& result)
         "std.checksum.SHA512::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& hasher = self_obj.mut(s_private_uuid).mut_opaque();
+        V_opaque* hasher = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              hasher = &(pval->mut_opaque());
+
+        if(!hasher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_checksum_SHA512_clear(hasher);
+          return (void) std_checksum_SHA512_clear(*hasher);
 
         reader.throw_no_matching_function_call();
       });

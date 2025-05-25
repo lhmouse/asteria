@@ -159,15 +159,23 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(&"output").mut_string();
+        V_opaque* defl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              defl = &(pval->mut_opaque());
+
+        if(!defl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
+        V_string& output = self_val.mut_object().mut(&"output").mut_string();
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_zlib_Deflator_update(defl, output, data);
+          return (void) std_zlib_Deflator_update(*defl, output, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -177,13 +185,21 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::flush", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(&"output").mut_string();
+        V_opaque* defl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              defl = &(pval->mut_opaque());
+
+        if(!defl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
+        V_string& output = self_val.mut_object().mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_zlib_Deflator_flush(defl, output);
+          return (void) std_zlib_Deflator_flush(*defl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -193,13 +209,21 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& defl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(&"output").mut_string();
+        V_opaque* defl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              defl = &(pval->mut_opaque());
+
+        if(!defl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
+        V_string& output = self_val.mut_object().mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_zlib_Deflator_finish(defl, output);
+          return (Value) std_zlib_Deflator_finish(*defl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -209,11 +233,19 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         "std.zlib.Deflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& defl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
+        V_opaque* defl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              defl = &(pval->mut_opaque());
+
+        if(!defl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_zlib_Deflator_clear(defl);
+          return (void) std_zlib_Deflator_clear(*defl);
 
         reader.throw_no_matching_function_call();
       });
@@ -354,15 +386,23 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::update", "data",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(&"output").mut_string();
+        V_opaque* infl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              infl = &(pval->mut_opaque());
+
+        if(!infl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
+        V_string& output = self_val.mut_object().mut(&"output").mut_string();
         V_string data;
 
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (void) std_zlib_Inflator_update(infl, output, data);
+          return (void) std_zlib_Inflator_update(*infl, output, data);
 
         reader.throw_no_matching_function_call();
       });
@@ -372,13 +412,21 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::flush", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(&"output").mut_string();
+        V_opaque* infl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              infl = &(pval->mut_opaque());
+
+        if(!infl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
+        V_string& output = self_val.mut_object().mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_zlib_Inflator_flush(infl, output);
+          return (void) std_zlib_Inflator_flush(*infl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -388,13 +436,21 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::finish", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& infl = self_obj.mut(s_private_uuid).mut_opaque();
-        auto& output = self_obj.mut(&"output").mut_string();
+        V_opaque* infl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              infl = &(pval->mut_opaque());
+
+        if(!infl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
+        V_string& output = self_val.mut_object().mut(&"output").mut_string();
 
         reader.start_overload();
         if(reader.end_overload())
-          return (Value) std_zlib_Inflator_finish(infl, output);
+          return (Value) std_zlib_Inflator_finish(*infl, output);
 
         reader.throw_no_matching_function_call();
       });
@@ -404,11 +460,19 @@ do_construct_Inflator(V_object& result, V_string format)
         "std.zlib.Inflator::clear", "",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& infl = self.dereference_mutable().mut_object().mut(s_private_uuid).mut_opaque();
+        V_opaque* infl = nullptr;
+        Value& self_val = self.dereference_mutable();
+        if(self_val.is_object())
+          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+            if(pval->is_opaque())
+              infl = &(pval->mut_opaque());
+
+        if(!infl)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
 
         reader.start_overload();
         if(reader.end_overload())
-          return (void) std_zlib_Inflator_clear(infl);
+          return (void) std_zlib_Inflator_clear(*infl);
 
         reader.throw_no_matching_function_call();
       });

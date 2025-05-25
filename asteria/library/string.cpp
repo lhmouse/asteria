@@ -304,11 +304,11 @@ class PCRE2_Matcher
     cow_string m_patt;
     uint32_t m_opts;
     unique_ptr<::pcre2_code, void (::pcre2_code*)> m_code;
-    unique_ptr<::pcre2_match_data, void (::pcre2_match_data*)> m_match;
 
+    uint32_t m_name_count = 0;
+    uint32_t m_name_size = 0;
     const uint8_t* m_name_table = nullptr;
-    uint32_t m_name_size = UINT32_MAX;
-    uint32_t m_name_count = UINT32_MAX;  // unknown yet
+    unique_ptr<::pcre2_match_data, void (::pcre2_match_data*)> m_match;
 
   public:
     PCRE2_Matcher(const V_string& patt, const optV_array& opts)
@@ -336,12 +336,14 @@ class PCRE2_Matcher
         int err;
         size_t off;
         if(!this->m_code.reset(::pcre2_compile(
-              reinterpret_cast<const uint8_t*>(this->m_patt.data()),
-              this->m_patt.size(), this->m_opts, &err, &off, nullptr)))
+                                   reinterpret_cast<const uint8_t*>(this->m_patt.data()),
+                                   this->m_patt.size(), this->m_opts, &err, &off, nullptr)))
           ASTERIA_THROW((
               "Invalid regular expression: $1",
               "[`pcre2_compile()` failed at offset `$2`: $3]"),
               this->m_patt, off, PCRE2_Error(err));
+
+        this->do_initialize_match_data();
       }
 
     PCRE2_Matcher(const PCRE2_Matcher& other, int)
@@ -354,14 +356,19 @@ class PCRE2_Matcher
           ASTERIA_THROW((
               "Could not copy regular expression",
               "[`pcre2_code_copy()` failed]"));
+
+        this->do_initialize_match_data();
       }
 
   private:
     void
     do_initialize_match_data()
       {
-        if(this->m_match)
-          return;
+        ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMECOUNT, &(this->m_name_count));
+        if(this->m_name_count != 0) {
+          ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMEENTRYSIZE, &(this->m_name_size));
+          ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMETABLE, &(this->m_name_table));
+        }
 
         if(!this->m_match.reset(::pcre2_match_data_create_from_pattern(this->m_code, nullptr)))
           ASTERIA_THROW((
@@ -370,27 +377,26 @@ class PCRE2_Matcher
       }
 
     opt<size_t>
-    do_pcre2_match_opt(const V_string& text, optV_integer from, optV_integer length)
+    do_pcre2_match_opt(const V_string& text, optV_integer from, optV_integer length) const
       {
+        opt<size_t> result;
         auto range = do_slice(text, from, length);
         auto sub_off = static_cast<size_t>(range.first - text.begin());
         auto sub_ptr = reinterpret_cast<const uint8_t*>(text.data()) + sub_off;
         auto sub_len = static_cast<size_t>(range.second - range.first);
 
         // Try matching.
-        this->do_initialize_match_data();
         int err = ::pcre2_match(this->m_code, sub_ptr, sub_len, 0, 0, this->m_match, nullptr);
-
-        if(err == PCRE2_ERROR_NOMATCH)
-          return nullopt;
-
-        if(err < 0)
+        if((err < 0) && (err != PCRE2_ERROR_NOMATCH))
           ASTERIA_THROW((
               "Regular expression match failure",
               "[`pcre2_match()` failed: $1]"),
               PCRE2_Error(err));
 
-        return sub_off;
+        if(err != PCRE2_ERROR_NOMATCH)
+          result.emplace(sub_off);
+
+        return result;
       }
 
   public:
@@ -414,7 +420,7 @@ class PCRE2_Matcher
       }
 
     opt<pair<V_integer, V_integer>>
-    find(const V_string& text, optV_integer from, optV_integer length)
+    find(const V_string& text, optV_integer from, optV_integer length) const
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -433,7 +439,7 @@ class PCRE2_Matcher
       }
 
     optV_array
-    match(const V_string& text, optV_integer from, optV_integer length)
+    match(const V_string& text, optV_integer from, optV_integer length) const
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -460,19 +466,11 @@ class PCRE2_Matcher
       }
 
     optV_object
-    named_match(const V_string& text, optV_integer from, optV_integer length)
+    named_match(const V_string& text, optV_integer from, optV_integer length) const
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
           return nullopt;
-
-        if(this->m_name_count == UINT32_MAX) {
-          // Retrieve information about named groups.
-          ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMETABLE, &(this->m_name_table));
-          ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMEENTRYSIZE, &(this->m_name_size));
-          ::pcre2_pattern_info(this->m_code, PCRE2_INFO_NAMECOUNT, &(this->m_name_count));
-          ROCKET_ASSERT(this->m_name_count != UINT32_MAX);
-        }
 
         // Compose the match result object.
         const size_t* ovec = ::pcre2_get_ovector_pointer(this->m_match);
@@ -499,7 +497,7 @@ class PCRE2_Matcher
       }
 
     V_string
-    replace(const V_string& text, optV_integer from, optV_integer length, const V_string& rep)
+    replace(const V_string& text, optV_integer from, optV_integer length, const V_string& rep) const
       {
         auto range = do_slice(text, from, length);
         auto sub_off = static_cast<size_t>(range.first - text.begin());
@@ -511,7 +509,6 @@ class PCRE2_Matcher
         V_string out_str(out_len, '*');
 
         // Try substitution.
-        this->do_initialize_match_data();
         int err = ::pcre2_substitute(this->m_code, sub_ptr, sub_len, 0,
                         this->m_opts | PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL
                                      | PCRE2_SUBSTITUTE_OVERFLOW_LENGTH,
@@ -556,8 +553,16 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::find", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
+        const V_opaque* matcher = nullptr;
+        const Value& self_val = self.dereference_readonly();
+        if(self_val.is_object())
+          if(auto pval = self_val.as_object().ptr(s_private_uuid))
+            if(pval->is_opaque())
+              matcher = &(pval->as_opaque());
+
+        if(!matcher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string text;
         optV_integer from, len;
         optV_array opts;
@@ -566,18 +571,18 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.required(text);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_find(m, text, 0, nullopt);
+          return (Value) std_string_PCRE_find(*matcher, text, 0, nullopt);
 
         reader.load_state(0);
         reader.optional(from);
         reader.save_state(1);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_find(m, text, from, nullopt);
+          return (Value) std_string_PCRE_find(*matcher, text, from, nullopt);
 
         reader.load_state(1);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_find(m, text, from, len);
+          return (Value) std_string_PCRE_find(*matcher, text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -587,8 +592,16 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::match", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
+        const V_opaque* matcher = nullptr;
+        const Value& self_val = self.dereference_readonly();
+        if(self_val.is_object())
+          if(auto pval = self_val.as_object().ptr(s_private_uuid))
+            if(pval->is_opaque())
+              matcher = &(pval->as_opaque());
+
+        if(!matcher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string text;
         optV_integer from, len;
         optV_array opts;
@@ -597,18 +610,18 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.required(text);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_match(m, text, 0, nullopt);
+          return (Value) std_string_PCRE_match(*matcher, text, 0, nullopt);
 
         reader.load_state(0);
         reader.optional(from);
         reader.save_state(1);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_match(m, text, from, nullopt);
+          return (Value) std_string_PCRE_match(*matcher, text, from, nullopt);
 
         reader.load_state(1);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_match(m, text, from, len);
+          return (Value) std_string_PCRE_match(*matcher, text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -618,8 +631,16 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::named_match", "text, [from, [length]]",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
+        const V_opaque* matcher = nullptr;
+        const Value& self_val = self.dereference_readonly();
+        if(self_val.is_object())
+          if(auto pval = self_val.as_object().ptr(s_private_uuid))
+            if(pval->is_opaque())
+              matcher = &(pval->as_opaque());
+
+        if(!matcher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string text;
         optV_integer from, len;
         optV_array opts;
@@ -628,18 +649,18 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.required(text);
         reader.save_state(0);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_named_match(m, text, 0, nullopt);
+          return (Value) std_string_PCRE_named_match(*matcher, text, 0, nullopt);
 
         reader.load_state(0);
         reader.optional(from);
         reader.save_state(1);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_named_match(m, text, from, nullopt);
+          return (Value) std_string_PCRE_named_match(*matcher, text, from, nullopt);
 
         reader.load_state(1);
         reader.optional(len);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_named_match(m, text, from, len);
+          return (Value) std_string_PCRE_named_match(*matcher, text, from, len);
 
         reader.throw_no_matching_function_call();
       });
@@ -649,8 +670,16 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         "std.string.PCRE::replace", "text, [from, [length]], replacement",
         Reference&& self, Argument_Reader&& reader)
       {
-        auto& self_obj = self.dereference_mutable().mut_object();
-        auto& m = self_obj.mut(s_private_uuid).mut_opaque();
+        const V_opaque* matcher = nullptr;
+        const Value& self_val = self.dereference_readonly();
+        if(self_val.is_object())
+          if(auto pval = self_val.as_object().ptr(s_private_uuid))
+            if(pval->is_opaque())
+              matcher = &(pval->as_opaque());
+
+        if(!matcher)
+          ASTERIA_THROW(("Invalid member function: type validation failure"));
+
         V_string text, rep;
         optV_integer from, len;
         optV_array opts;
@@ -660,20 +689,20 @@ do_construct_PCRE(V_object& result, V_string pattern, optV_array options)
         reader.save_state(0);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_replace(m, text, 0, nullopt, rep);
+          return (Value) std_string_PCRE_replace(*matcher, text, 0, nullopt, rep);
 
         reader.load_state(0);
         reader.optional(from);
         reader.save_state(1);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_replace(m, text, from, nullopt, rep);
+          return (Value) std_string_PCRE_replace(*matcher, text, from, nullopt, rep);
 
         reader.load_state(1);
         reader.optional(len);
         reader.required(rep);
         if(reader.end_overload())
-          return (Value) std_string_PCRE_replace(m, text, from, len, rep);
+          return (Value) std_string_PCRE_replace(*matcher, text, from, len, rep);
 
         reader.throw_no_matching_function_call();
       });
@@ -1652,28 +1681,28 @@ std_string_PCRE_private(V_string pattern, optV_array options)
   }
 
 opt<pair<V_integer, V_integer>>
-std_string_PCRE_find(V_opaque& m, V_string text, optV_integer from, optV_integer length)
+std_string_PCRE_find(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length)
   {
-    return m.open<PCRE2_Matcher>().find(text, from, length);
+    return pcre.get<PCRE2_Matcher>().find(text, from, length);
   }
 
 optV_array
-std_string_PCRE_match(V_opaque& m, V_string text, optV_integer from, optV_integer length)
+std_string_PCRE_match(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length)
   {
-    return m.open<PCRE2_Matcher>().match(text, from, length);
+    return pcre.get<PCRE2_Matcher>().match(text, from, length);
   }
 
 optV_object
-std_string_PCRE_named_match(V_opaque& m, V_string text, optV_integer from, optV_integer length)
+std_string_PCRE_named_match(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length)
   {
-    return m.open<PCRE2_Matcher>().named_match(text, from, length);
+    return pcre.get<PCRE2_Matcher>().named_match(text, from, length);
   }
 
 V_string
-std_string_PCRE_replace(V_opaque& m, V_string text, optV_integer from, optV_integer length,
+std_string_PCRE_replace(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length,
                         V_string replacement)
   {
-    return m.open<PCRE2_Matcher>().replace(text, from, length, replacement);
+    return pcre.get<PCRE2_Matcher>().replace(text, from, length, replacement);
   }
 
 opt<pair<V_integer, V_integer>>

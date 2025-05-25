@@ -169,16 +169,16 @@ V_opaque
 std_string_PCRE_private(V_string pattern, optV_array options);
 
 opt<pair<V_integer, V_integer>>
-std_string_PCRE_find(V_opaque& m, V_string text, optV_integer from, optV_integer length);
+std_string_PCRE_find(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length);
 
 optV_array
-std_string_PCRE_match(V_opaque& m, V_string text, optV_integer from, optV_integer length);
+std_string_PCRE_match(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length);
 
 optV_object
-std_string_PCRE_named_match(V_opaque& m, V_string text, optV_integer from, optV_integer length);
+std_string_PCRE_named_match(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length);
 
 V_string
-std_string_PCRE_replace(V_opaque& m, V_string text, optV_integer from, optV_integer length,
+std_string_PCRE_replace(const V_opaque& pcre, V_string text, optV_integer from, optV_integer length,
                         V_string replacement);
 
 // `std.string.pcre_find`.
