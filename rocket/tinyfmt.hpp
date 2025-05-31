@@ -359,11 +359,10 @@ inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
   {
-    size_t len;
-    char* name = ::abi::__cxa_demangle(tinfo.name(), nullptr, &len, nullptr);
-    ::std::unique_ptr<char, decltype(::free)&> uptr(name, ::free);
-    return name
-      ? fmt.putn_latin1(name, len)
+    char* s = ::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr);
+    ::std::unique_ptr<char, decltype(::free)&> uptr(s, ::free);
+    return s
+      ? fmt.putn_latin1(s, ::strlen(s))
       : fmt.putn_latin1("(bad type)", 10);
   }
 
