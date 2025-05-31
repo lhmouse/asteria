@@ -6,17 +6,26 @@
 #endif
 namespace details_tinyfmt {
 
+template<typename charT, typename valueT>
+basic_tinyfmt<charT>&
+do_format_number(basic_tinyfmt<charT>& fmt, const valueT& value)
+  {
+    ascii_numput nump;
+    nump.put(value);
+    return fmt.putn_latin1(nump.data(), nump.size());
+  }
+
 template<typename charT>
-void
+basic_tinyfmt<charT>&
 do_format_errno(basic_tinyfmt<charT>& fmt)
   {
     ascii_numput nump;
     nump.put_DI(errno);
-    fmt.putn_latin1(nump.data(), nump.size());
+    return fmt.putn_latin1(nump.data(), nump.size());
   }
 
 template<typename charT>
-void
+basic_tinyfmt<charT>&
 do_format_strerror_errno(basic_tinyfmt<charT>& fmt)
   {
     char str_stor[128];
@@ -26,11 +35,11 @@ do_format_strerror_errno(basic_tinyfmt<charT>& fmt)
 #else
     ::strerror_r(errno, str_stor, sizeof(str_stor));
 #endif
-    fmt.putn_latin1(str, ::strlen(str));
+    return fmt.putn_latin1(str, ::strlen(str));
   }
 
 template<typename charT>
-void
+basic_tinyfmt<charT>&
 do_format_time_iso(basic_tinyfmt<charT>& fmt, const ::tm& tm, long nsec)
   {
     char stemp[] = "2014-09-26 00:58:26.123456789";
@@ -60,8 +69,7 @@ do_format_time_iso(basic_tinyfmt<charT>& fmt, const ::tm& tm, long nsec)
 
     nump.put_DU((uint32_t) nsec, 9);
     ::memcpy(stemp + 20, nump.data(), 9);
-
-    fmt.putn_latin1(stemp, 29);
+    return fmt.putn_latin1(stemp, 29);
   }
 
 }  // namespace details_tinyfmt
