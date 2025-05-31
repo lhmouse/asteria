@@ -183,37 +183,53 @@ template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, charT c)
-  { return fmt.putc(c);  }
+  {
+    return fmt.putc(c);
+  }
 
 template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const charT* s)
-  { return !s ? fmt.putn_latin1("(nullptr)", 9) : fmt.putn(s, noadl::xstrlen(s));  }
+  {
+    return s
+      ? fmt.putn(s, noadl::xstrlen(s))
+      : fmt.putn_latin1("(nullptr)", 9);
+  }
 
 template<typename charT, typename allocT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string<charT, allocT>& str)
-  { return fmt.putn(str.data(), str.size());  }
+  {
+    return fmt.putn(str.data(), str.size());
+  }
 
 #ifdef __cpp_lib_string_view
 template<typename charT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::basic_string_view<charT>& str)
-  { return fmt.putn(str.data(), str.size());  }
+  {
+    return fmt.putn(str.data(), str.size());
+  }
 #endif  // __cpp_lib_string_view
 
 template<typename charT>
 inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ascii_numput& nump)
-  { return fmt << nump.c_str();  }
+  {
+    return fmt.putn_latin1(nump.data(), nump.size());
+  }
 
 template<typename charT, typename valueT>
 inline
 basic_tinyfmt<charT>&&
 operator<<(basic_tinyfmt<charT>&& fmt, const valueT& value)
-  { return move(fmt << value);  }
+  {
+    return move(fmt << value);
+  }
 
 // delegating inserters
 template<typename charT, typename valueT,
@@ -248,30 +264,42 @@ operator<<(basic_tinyfmt<charT>& fmt, valueT* value)
   }
 
 template<typename charT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
   {
-    using dname_uptr = ::std::unique_ptr<char, decltype(::free)&>;
-    dname_uptr uptr(::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr), ::free);
-    const char* dname = !uptr ? "(bad type)" : uptr.get();
-    return fmt.putn_latin1(dname, ::strlen(dname));
+    size_t len;
+    char* name = ::abi::__cxa_demangle(tinfo.name(), nullptr, &len, nullptr);
+    ::std::unique_ptr<char, decltype(::free)&> uptr(name, ::free);
+    return name
+      ? fmt.putn_latin1(name, len)
+      : fmt.putn_latin1("(bad type)", 10);
   }
 
 template<typename charT, typename elementT, typename deleteT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::unique_ptr<elementT, deleteT>& ptr)
-  { return fmt << ptr.get();  }
+  {
+    return fmt << ptr.get();
+  }
 
 template<typename charT, typename elementT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
-  { return fmt << ptr.get();  }
+  {
+    return fmt << ptr.get();
+  }
 
 template<typename charT, typename valueT,
 ROCKET_ENABLE_IF(is_base_of<exception, typename remove_reference<valueT>::type>::value)>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const valueT& value)
-  { return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";  }
+  {
+    return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";
+  }
 
 // ... stupid English, stupid inflection.
 #define ROCKET_TINYFMT_NOUN_IRREGULAR(num, sing, pl)   ((((num) > 0) && ((num) <= 1)) ? (" " sing) : (" " pl))
@@ -279,44 +307,68 @@ operator<<(basic_tinyfmt<charT>& fmt, const valueT& value)
 #define ROCKET_TINYFMT_NOUN_SAME_PLURAL(num, sing)     (" " sing)
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "nanosecond");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "nanosecond");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "microsecond");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "microsecond");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "millisecond");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "millisecond");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "second");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "second");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "minute");  }
+  {
+   return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "minute");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "hour");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "hour");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<86400>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "day");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "day");
+  }
 
 template<typename charT, typename repT>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<604800>>& dur)
-  { return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "week");  }
+  {
+    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "week");
+  }
 
 using tinyfmt     = basic_tinyfmt<char>;
 using wtinyfmt    = basic_tinyfmt<wchar_t>;
