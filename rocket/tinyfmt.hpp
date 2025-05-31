@@ -232,35 +232,126 @@ operator<<(basic_tinyfmt<charT>&& fmt, const valueT& value)
   }
 
 // delegating inserters
-template<typename charT, typename valueT,
-ROCKET_ENABLE_IF(is_arithmetic<valueT>::value && !is_same<valueT, charT>::value)>
+template<typename charT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, valueT value)
+operator<<(basic_tinyfmt<charT>& fmt, bool value)
   {
-    ascii_numput nump;
-    nump.put(value);
-    return fmt << nump;
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, signed char value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned char value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, short value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned short value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, int value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned int value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, long long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, unsigned long long value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, float value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, double value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const volatile void* value)
+  {
+    return details_tinyfmt::do_format_number(fmt, value);
   }
 
 template<typename charT, typename valueT,
 ROCKET_ENABLE_IF(is_enum<valueT>::value)>
+inline
 basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, valueT value)
   {
-    ascii_numput nump;
-    nump.put(static_cast<typename underlying_type<valueT>::type>(value));
-    return fmt << nump;
-  }
-
-template<typename charT, typename valueT,
-ROCKET_DISABLE_IF(is_convertible<valueT*, const charT*>::value || is_convertible<valueT*, const char*>::value)>
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, valueT* value)
-  {
-    ascii_numput nump;
-    nump.put(reinterpret_cast<const void*>(value));
-    return fmt << nump;
+    using int_type = typename underlying_type<valueT>::type;
+    return details_tinyfmt::do_format_number(fmt, static_cast<int_type>(value));
   }
 
 template<typename charT>
@@ -455,15 +546,10 @@ extern template wtinyfmt& operator<<(wtinyfmt&, double);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, double);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, double);
 
-extern template tinyfmt& operator<<(tinyfmt&, const void*);
-extern template wtinyfmt& operator<<(wtinyfmt&, const void*);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const void*);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const void*);
-
-extern template tinyfmt& operator<<(tinyfmt&, void*);
-extern template wtinyfmt& operator<<(wtinyfmt&, void*);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, void*);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, void*);
+extern template tinyfmt& operator<<(tinyfmt&, const volatile void*);
+extern template wtinyfmt& operator<<(wtinyfmt&, const volatile void*);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const volatile void*);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const volatile void*);
 
 extern template tinyfmt& operator<<(tinyfmt&, const type_info&);
 extern template wtinyfmt& operator<<(wtinyfmt&, const type_info&);

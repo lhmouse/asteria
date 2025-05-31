@@ -179,15 +179,10 @@ template wtinyfmt& operator<<(wtinyfmt&, double);
 template u16tinyfmt& operator<<(u16tinyfmt&, double);
 template u32tinyfmt& operator<<(u32tinyfmt&, double);
 
-template tinyfmt& operator<<(tinyfmt&, const void*);
-template wtinyfmt& operator<<(wtinyfmt&, const void*);
-template u16tinyfmt& operator<<(u16tinyfmt&, const void*);
-template u32tinyfmt& operator<<(u32tinyfmt&, const void*);
-
-template tinyfmt& operator<<(tinyfmt&, void*);
-template wtinyfmt& operator<<(wtinyfmt&, void*);
-template u16tinyfmt& operator<<(u16tinyfmt&, void*);
-template u32tinyfmt& operator<<(u32tinyfmt&, void*);
+template tinyfmt& operator<<(tinyfmt&, const volatile void*);
+template wtinyfmt& operator<<(wtinyfmt&, const volatile void*);
+template u16tinyfmt& operator<<(u16tinyfmt&, const volatile void*);
+template u32tinyfmt& operator<<(u32tinyfmt&, const volatile void*);
 
 template tinyfmt& operator<<(tinyfmt&, const type_info&);
 template wtinyfmt& operator<<(wtinyfmt&, const type_info&);
