@@ -344,16 +344,6 @@ operator<<(basic_tinyfmt<charT>& fmt, const volatile void* value)
     return details_tinyfmt::do_format_number(fmt, value);
   }
 
-template<typename charT, typename valueT,
-ROCKET_ENABLE_IF(is_enum<valueT>::value)>
-inline
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, valueT value)
-  {
-    using int_type = typename underlying_type<valueT>::type;
-    return details_tinyfmt::do_format_number(fmt, static_cast<int_type>(value));
-  }
-
 template<typename charT>
 inline
 basic_tinyfmt<charT>&
@@ -364,6 +354,24 @@ operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
     return s
       ? fmt.putn_latin1(s, ::strlen(s))
       : fmt.putn_latin1("(bad type)", 10);
+  }
+
+template<typename charT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const exception& ex)
+  {
+    return fmt << ex.what() << "\n[exception class `" << typeid(ex) << "`]";
+  }
+
+template<typename charT, typename valueT,
+ROCKET_ENABLE_IF(is_enum<valueT>::value)>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, valueT value)
+  {
+    using int_type = typename underlying_type<valueT>::type;
+    return details_tinyfmt::do_format_number(fmt, static_cast<int_type>(value));
   }
 
 template<typename charT, typename elementT, typename deleteT>
@@ -380,15 +388,6 @@ basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
   {
     return fmt << ptr.get();
-  }
-
-template<typename charT, typename valueT,
-ROCKET_ENABLE_IF(is_base_of<exception, typename remove_reference<valueT>::type>::value)>
-inline
-basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const valueT& value)
-  {
-    return fmt << value.what() << "\n[exception class `" << typeid(value) << "`]";
   }
 
 // ... stupid English, stupid inflection.
