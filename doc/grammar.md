@@ -312,7 +312,7 @@
   - `||=`
   - `or`
 
-* _infix-logical-coalescence_ ::=
+* _infix-coalescence_ ::=
   - `??`
   - `??=`
 
