@@ -10,9 +10,9 @@ namespace asteria {
 Garbage_Collector::
 Garbage_Collector() noexcept
   {
-    // Set default threshold values.
-    this->m_thres.fill(100);
-    this->m_thres.at(gMax) = 500;
+    static constexpr uint32_t default_threshold = 100;
+    this->m_thres.fill(default_threshold);
+    this->m_thres.mut(gMax) = default_threshold * 5;
   }
 
 Garbage_Collector::
@@ -29,16 +29,16 @@ do_collect_generation(uint32_t gen)
       return 0;
 
     this->m_recur ++;
-    const auto recur_guard = ::rocket::make_unique_handle(this,
-             [](Garbage_Collector* self) { self->m_recur --;  });
+    const ::rocket::unique_ptr<int, void (int*)> recur_guard(
+              &(this->m_recur), *[](int* recur) { (*recur) --;  });
 
     // This algorithm is described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     size_t nvars = 0;
     refcnt_ptr<Variable> var;
-    auto& tracked = this->m_tracked.at(gMax - gen);
-    const auto next_opt = (gen >= gMax) ? nullptr : &(this->m_tracked.at(gMax - gen - 1));
-    const auto count_opt = (gen >= gMax) ? nullptr : &(this->m_counts.at(gMax - gen - 1));
+    auto& tracked = this->m_tracked.mut(gMax - gen);
+    auto next_opt = this->m_tracked.mut_ptr(gMax - gen - 1);
+    auto count_opt = this->m_counts.mut_ptr(gMax - gen - 1);
 
     this->m_staged.clear();
     this->m_temp_1.clear();
@@ -128,11 +128,10 @@ do_collect_generation(uint32_t gen)
       }
     }
 
-    this->m_unreach.clear();
-
     // Reset the GC counter to zero only if the operation completes
     // normally i.e. don't reset it if an exception is thrown.
-    this->m_counts[gMax-gen] = 0;
+    this->m_unreach.clear();
+    this->m_counts.mut(gMax-gen) = 0;
 
     // Return the number of variables that have been collected.
     return nvars;
@@ -155,8 +154,8 @@ create_variable(GC_Generation gen_hint)
 
     // Track it.
     size_t gen = gMax - gen_hint;
-    this->m_tracked.at(gen).insert(var.get(), var);
-    this->m_counts[gen] += 1;
+    this->m_tracked.mut(gen).insert(var.get(), var);
+    this->m_counts.mut(gen) += 1;
     return var;
   }
 
@@ -197,7 +196,7 @@ finalize() noexcept
     // Wipe out all tracked variables. Indirect ones may be foreign so they
     // must not be wiped.
     for(size_t gen = 0;  gen <= gMax;  ++gen)
-      while(this->m_tracked.at(gMax-gen).extract_variable(var))
+      while(this->m_tracked.mut(gMax-gen).extract_variable(var))
         var->uninitialize();
 
     // Clear cached variables.
