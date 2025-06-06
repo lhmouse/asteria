@@ -49,7 +49,7 @@ class Reference_Dictionary
     do_clear(bool free_storage) noexcept;
 
     Reference*
-    do_xfind_opt(phsh_stringR key) const noexcept;
+    do_xfind_opt(const phcow_string& key) const noexcept;
 
   public:
     ~Reference_Dictionary()
@@ -72,22 +72,22 @@ class Reference_Dictionary
       }
 
     const Reference*
-    find_opt(phsh_stringR key) const noexcept
+    find_opt(const phcow_string& key) const noexcept
       {
         return this->do_xfind_opt(key);
       }
 
     Reference*
-    mut_find_opt(phsh_stringR key) noexcept
+    mut_find_opt(const phcow_string& key) noexcept
       {
         return this->do_xfind_opt(key);
       }
 
     Reference&
-    insert(phsh_stringR key, bool* newly_opt);
+    insert(const phcow_string& key, bool* newly_opt);
 
     bool
-    erase(phsh_stringR key, Reference* refp_opt) noexcept;
+    erase(const phcow_string& key, Reference* refp_opt) noexcept;
   };
 
 inline

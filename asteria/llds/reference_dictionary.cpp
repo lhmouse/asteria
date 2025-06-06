@@ -88,7 +88,7 @@ do_clear(bool free_storage) noexcept
 
 Reference*
 Reference_Dictionary::
-do_xfind_opt(phsh_stringR key) const noexcept
+do_xfind_opt(const phcow_string& key) const noexcept
   {
     if(this->m_nbkt == 0)
       return nullptr;
@@ -113,7 +113,7 @@ do_xfind_opt(phsh_stringR key) const noexcept
 
 Reference&
 Reference_Dictionary::
-insert(phsh_stringR key, bool* newly_opt)
+insert(const phcow_string& key, bool* newly_opt)
   {
 #ifdef ROCKET_DEBUG
     this->do_reallocate(this->m_size * 2 + 2);
@@ -143,7 +143,7 @@ insert(phsh_stringR key, bool* newly_opt)
 
 bool
 Reference_Dictionary::
-erase(phsh_stringR key, Reference* refp_opt) noexcept
+erase(const phcow_string& key, Reference* refp_opt) noexcept
   {
     if(this->m_size == 0)
       return false;

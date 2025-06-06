@@ -41,7 +41,7 @@ class Runtime_Error
         this->do_insert_frame(frame_type_throw, &xsloc, this->m_value);
       }
 
-    Runtime_Error(Uxtc_assert, const Source_Location& xsloc, cow_stringR msg)
+    Runtime_Error(Uxtc_assert, const Source_Location& xsloc, const cow_string& msg)
       :
         m_value("assertion failure: " + msg)
       {
@@ -108,13 +108,13 @@ class Runtime_Error
       }
 
     void
-    push_frame_plain(const Source_Location& sloc, cow_stringR remarks = cow_string())
+    push_frame_plain(const Source_Location& sloc, const cow_string& remarks = cow_string())
       {
         this->do_insert_frame(frame_type_plain, &sloc, remarks);
       }
 
     void
-    push_frame_function(const Source_Location& sloc, cow_stringR name)
+    push_frame_function(const Source_Location& sloc, const cow_string& name)
       {
         this->do_insert_frame(frame_type_func, &sloc, name);
       }

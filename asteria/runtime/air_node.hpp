@@ -25,7 +25,7 @@ class AIR_Node
     struct S_declare_variable
       {
         Source_Location sloc;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_initialize_variable
@@ -48,7 +48,7 @@ class AIR_Node
         bool upper_closed;
         cow_vector<AIR_Node> code_labels;
         cow_vector<AIR_Node> code_body;
-        cow_vector<phsh_string> names_added;
+        cow_vector<phcow_string> names_added;
       };
 
     struct S_switch_statement
@@ -72,8 +72,8 @@ class AIR_Node
 
     struct S_for_each_statement
       {
-        phsh_string name_key;
-        phsh_string name_mapped;
+        phcow_string name_key;
+        phcow_string name_mapped;
         Source_Location sloc_init;
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
@@ -92,7 +92,7 @@ class AIR_Node
         Source_Location sloc_try;
         cow_vector<AIR_Node> code_try;
         Source_Location sloc_catch;
-        phsh_string name_except;
+        phcow_string name_except;
         cow_vector<AIR_Node> code_catch;
       };
 
@@ -121,14 +121,14 @@ class AIR_Node
     struct S_push_global_reference
       {
         Source_Location sloc;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_push_local_reference
       {
         Source_Location sloc;
         uint16_t depth;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_push_bound_reference
@@ -141,7 +141,7 @@ class AIR_Node
         Compiler_Options opts;
         Source_Location sloc;
         cow_string func;
-        cow_vector<phsh_string> params;
+        cow_vector<phcow_string> params;
         cow_vector<AIR_Node> code_body;
       };
 
@@ -169,7 +169,7 @@ class AIR_Node
     struct S_push_unnamed_object
       {
         Source_Location sloc;
-        cow_vector<phsh_string> keys;
+        cow_vector<phcow_string> keys;
       };
 
     struct S_apply_operator
@@ -190,14 +190,14 @@ class AIR_Node
       {
         Source_Location sloc;
         bool immutable;
-        cow_vector<phsh_string> keys;
+        cow_vector<phcow_string> keys;
       };
 
     struct S_define_null_variable
       {
         Source_Location sloc;
         bool immutable;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_single_step_trap
@@ -226,13 +226,13 @@ class AIR_Node
 
     struct S_declare_reference
       {
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_initialize_reference
       {
         Source_Location sloc;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_catch_expression
@@ -272,7 +272,7 @@ class AIR_Node
     struct S_member_access
       {
         Source_Location sloc;
-        phsh_string key;
+        phcow_string key;
       };
 
     struct S_apply_operator_bi32

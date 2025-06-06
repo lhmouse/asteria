@@ -215,7 +215,7 @@ bool
 utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
 
 bool
-utf8_decode(char32_t& cp, cow_stringR text, size_t& offset);
+utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
 // UTF-16 conversion functions
 bool
@@ -235,17 +235,17 @@ tinyfmt&
 c_quote(tinyfmt& fmt, const char* data, size_t size);
 
 tinyfmt&
-c_quote(tinyfmt& fmt, cow_stringR data);
+c_quote(tinyfmt& fmt, const cow_string& data);
 
 cow_string&
 c_quote(cow_string& str, const char* data, size_t size);
 
 cow_string&
-c_quote(cow_string& str, cow_stringR data);
+c_quote(cow_string& str, const cow_string& data);
 
 // Path resolution
 cow_string
-get_real_path(cow_stringR path);
+get_real_path(const cow_string& path);
 
 }  // namespace asteria
 #endif

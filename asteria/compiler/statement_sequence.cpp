@@ -208,7 +208,7 @@ do_accept_negation_opt(Token_Stream& tstrm)
     return nullopt;
   }
 
-opt<cow_vector<phsh_string>>
+opt<cow_vector<phcow_string>>
 do_accept_variable_declarator_opt(Token_Stream& tstrm)
   {
     // variable-declarator ::=
@@ -217,7 +217,7 @@ do_accept_variable_declarator_opt(Token_Stream& tstrm)
     //   { identifier-list }
     // identifier-list ::=
     //   identifier ( `,` identifier )* `,` ?
-    cow_vector<phsh_string> names;
+    cow_vector<phcow_string> names;
     auto op_sloc = tstrm.next_sloc();
     auto qname = do_accept_identifier_opt(tstrm, true);
     if(qname) {
@@ -607,7 +607,7 @@ do_accept_function_definition_opt(Token_Stream& tstrm)
       throw Compiler_Error(xtc_status,
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    cow_vector<phsh_string> params;
+    cow_vector<phcow_string> params;
     Compiler_Status status_if_unmatched = compiler_status_closing_parenthesis_or_parameter_expected;
 
     for(;;) {
@@ -1735,7 +1735,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
       throw Compiler_Error(xtc_status,
                 compiler_status_open_parenthesis_expected, tstrm.next_sloc());
 
-    cow_vector<phsh_string> params;
+    cow_vector<phcow_string> params;
     Compiler_Status status_if_unmatched = compiler_status_closing_parenthesis_or_parameter_expected;
 
     for(;;) {
@@ -1866,7 +1866,7 @@ do_accept_unnamed_object(cow_vector<Expression_Unit>& units, Token_Stream& tstrm
     if(!kpunct)
       return false;
 
-    cow_vector<phsh_string> keys;
+    cow_vector<phcow_string> keys;
     Compiler_Status status_if_unmatched = compiler_status_closing_brace_or_json5_key_expected;
 
     for(;;) {

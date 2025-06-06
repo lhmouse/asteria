@@ -20,14 +20,14 @@ class Expression_Unit
     struct S_local_reference
       {
         Source_Location sloc;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_closure_function
       {
         Source_Location sloc;
         cow_string unique_name;
-        cow_vector<phsh_string> params;
+        cow_vector<phcow_string> params;
         cow_vector<Statement> body;
       };
 
@@ -78,13 +78,13 @@ class Expression_Unit
     struct S_unnamed_object
       {
         Source_Location sloc;
-        cow_vector<phsh_string> keys;
+        cow_vector<phcow_string> keys;
       };
 
     struct S_global_reference
       {
         Source_Location sloc;
-        phsh_string name;
+        phcow_string name;
       };
 
     struct S_variadic_call

@@ -23,7 +23,7 @@ class Abstract_Context
   protected:
     virtual
     Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const;
+    do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name) const;
 
     // Retrieve properties of the final context.
     virtual
@@ -37,7 +37,7 @@ class Abstract_Context
     // This function is called by `do_create_lazy_reference_opt()` to avoid
     // infinite recursion.
     Reference&
-    do_mut_named_reference(Reference* hint_opt, phsh_stringR name) const
+    do_mut_named_reference(Reference* hint_opt, const phcow_string& name) const
       {
         return hint_opt ? *hint_opt : this->m_named_refs.insert(name, nullptr);
       }
@@ -58,7 +58,7 @@ class Abstract_Context
       { return this->do_get_parent_opt();  }
 
     const Reference*
-    get_named_reference_opt(phsh_stringR name) const
+    get_named_reference_opt(const phcow_string& name) const
       {
         auto qref = this->m_named_refs.find_opt(name);
         if(!qref && name.rdstr().starts_with("__")) {
@@ -70,7 +70,7 @@ class Abstract_Context
       }
 
     Reference*
-    mut_named_reference_opt(phsh_stringR name)
+    mut_named_reference_opt(const phcow_string& name)
       {
         auto qref = this->m_named_refs.mut_find_opt(name);
         if(!qref && name.rdstr().starts_with("__")) {
@@ -82,7 +82,7 @@ class Abstract_Context
       }
 
     Reference&
-    insert_named_reference(phsh_stringR name)
+    insert_named_reference(const phcow_string& name)
       {
         bool newly = false;
         auto& ref = this->m_named_refs.insert(name, &newly);
@@ -97,7 +97,7 @@ class Abstract_Context
       }
 
     bool
-    erase_named_reference(phsh_stringR name, Reference* refp_opt) noexcept
+    erase_named_reference(const phcow_string& name, Reference* refp_opt) noexcept
       {
         return this->m_named_refs.erase(name, refp_opt);
       }

@@ -69,7 +69,7 @@ class IOF_Sentry
   };
 
 size_t
-do_write_utf8_common(const IOF_Sentry& sentry, cow_stringR text)
+do_write_utf8_common(const IOF_Sentry& sentry, const cow_string& text)
   {
     size_t ncps = 0;
     size_t off = 0;

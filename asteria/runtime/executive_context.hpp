@@ -56,7 +56,7 @@ class Executive_Context
 
   protected:
     Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const override;
+    do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name) const override;
 
     bool
     do_is_analytic() const noexcept override

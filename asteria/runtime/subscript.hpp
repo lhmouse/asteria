@@ -17,7 +17,7 @@ class Subscript
 
     struct S_object_key
       {
-        phsh_string key;
+        phcow_string key;
       };
 
     struct S_array_head
@@ -92,7 +92,7 @@ class Subscript
     is_object_key() const noexcept
       { return this->m_stor.index() == index_object_key;  }
 
-    const phsh_string&
+    const phcow_string&
     as_object_key() const
       { return this->m_stor.as<S_object_key>().key; }
 

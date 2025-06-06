@@ -25,7 +25,7 @@ class Text_Reader
     cow_dictionary<bool> m_interned_strings;
 
   public:
-    Text_Reader(tinybuf& xcbuf, cow_stringR xfile, int xline)
+    Text_Reader(tinybuf& xcbuf, const cow_string& xfile, int xline)
       :
         m_cbuf(xcbuf), m_file(xfile), m_line(xline)
       {
@@ -96,7 +96,7 @@ class Text_Reader
         this->m_off = 0;
       }
 
-    const phsh_string&
+    const phcow_string&
     intern_string(cow_string&& val)
       {
         auto it = this->m_interned_strings.find(val);
@@ -743,7 +743,7 @@ Token_Stream::
 
 void
 Token_Stream::
-reload(cow_stringR file, int start_line, tinybuf&& cbuf)
+reload(const cow_string& file, int start_line, tinybuf&& cbuf)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if

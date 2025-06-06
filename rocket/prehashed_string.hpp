@@ -330,8 +330,7 @@ operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT, eqT>&
 template<typename stringT, typename hashT, typename eqT>
 inline
 void
-swap(basic_prehashed_string<stringT, hashT, eqT>& lhs,
-     basic_prehashed_string<stringT, hashT, eqT>& rhs)
+swap(basic_prehashed_string<stringT, hashT, eqT>& lhs, basic_prehashed_string<stringT, hashT, eqT>& rhs)
   noexcept(noexcept(lhs.swap(rhs)))
   { lhs.swap(rhs);  }
 
@@ -342,10 +341,10 @@ operator<<(basic_tinyfmt<charT>& fmt, const basic_prehashed_string<stringT, hash
   { return fmt << str.rdstr();  }
 
 // aliases
-using prehashed_string     = basic_prehashed_string<cow_string,    cow_string::hash>;
-using prehashed_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::hash>;
-using prehashed_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hash>;
-using prehashed_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
+using phcow_string     = basic_prehashed_string<cow_string,    cow_string::hash>;
+using phcow_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::hash>;
+using phcow_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hash>;
+using phcow_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
 extern template class basic_prehashed_string<cow_string, cow_string::hash>;
 extern template class basic_prehashed_string<cow_wstring, cow_wstring::hash>;

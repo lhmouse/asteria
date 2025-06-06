@@ -15,7 +15,7 @@ namespace asteria {
 
 refcnt_ptr<Variable>
 Simple_Script::
-get_global_variable_opt(phsh_stringR name) const noexcept
+get_global_variable_opt(const phcow_string& name) const noexcept
   {
     auto gref = this->m_global.get_named_reference_opt(name);
     if(!gref)
@@ -27,7 +27,7 @@ get_global_variable_opt(phsh_stringR name) const noexcept
 
 refcnt_ptr<Variable>
 Simple_Script::
-open_global_variable(phsh_stringR name)
+open_global_variable(const phcow_string& name)
   {
     auto& ref = this->m_global.insert_named_reference(name);
     auto var = ref.unphase_variable_opt();
@@ -42,14 +42,14 @@ open_global_variable(phsh_stringR name)
 
 bool
 Simple_Script::
-erase_global_variable(phsh_stringR name) noexcept
+erase_global_variable(const phcow_string& name) noexcept
   {
     return this->m_global.erase_named_reference(name, nullptr);
   }
 
 void
 Simple_Script::
-reload(cow_stringR name, int start_line, tinybuf&& cbuf)
+reload(const cow_string& name, int start_line, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, start_line, move(cbuf));
@@ -57,7 +57,7 @@ reload(cow_stringR name, int start_line, tinybuf&& cbuf)
     stmtq.reload(move(tstrm));
 
     AIR_Optimizer optmz(this->m_opts);
-    cow_vector<phsh_string> script_params;
+    cow_vector<phcow_string> script_params;
     script_params.emplace_back(&"...");
     optmz.reload(nullptr, script_params, this->m_global, stmtq.get_statements());
 
@@ -67,7 +67,7 @@ reload(cow_stringR name, int start_line, tinybuf&& cbuf)
 
 void
 Simple_Script::
-reload_oneline(cow_stringR name, tinybuf&& cbuf)
+reload_oneline(const cow_string& name, tinybuf&& cbuf)
   {
     Token_Stream tstrm(this->m_opts);
     tstrm.reload(name, 1, move(cbuf));
@@ -75,7 +75,7 @@ reload_oneline(cow_stringR name, tinybuf&& cbuf)
     stmtq.reload_oneline(move(tstrm));
 
     AIR_Optimizer optmz(this->m_opts);
-    cow_vector<phsh_string> script_params;
+    cow_vector<phcow_string> script_params;
     script_params.emplace_back(&"...");
     optmz.reload(nullptr, script_params, this->m_global, stmtq.get_statements());
 
@@ -85,7 +85,7 @@ reload_oneline(cow_stringR name, tinybuf&& cbuf)
 
 void
 Simple_Script::
-reload_string(cow_stringR name, int start_line, cow_stringR code)
+reload_string(const cow_string& name, int start_line, const cow_string& code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
@@ -94,14 +94,14 @@ reload_string(cow_stringR name, int start_line, cow_stringR code)
 
 void
 Simple_Script::
-reload_string(cow_stringR name, cow_stringR code)
+reload_string(const cow_string& name, const cow_string& code)
   {
     this->reload_string(name, 1, code);
   }
 
 void
 Simple_Script::
-reload_oneline(cow_stringR name, cow_stringR code)
+reload_oneline(const cow_string& name, const cow_string& code)
   {
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
@@ -126,7 +126,7 @@ reload_stdin()
 
 void
 Simple_Script::
-reload_file(cow_stringR path)
+reload_file(const cow_string& path)
   {
     ::rocket::tinybuf_file cbuf;
     cow_string abs_path = get_real_path(path);

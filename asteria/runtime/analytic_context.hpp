@@ -27,7 +27,7 @@ class Analytic_Context
     // Names found in ancestor contexts will be bound into the
     // instantiated function object.
     Analytic_Context(Uxtc_function, const Abstract_Context* parent_opt,
-                     const cow_vector<phsh_string>& params);
+                     const cow_vector<phcow_string>& params);
 
   protected:
     bool

@@ -283,7 +283,7 @@ utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
   }
 
 bool
-utf8_decode(char32_t& cp, cow_stringR text, size_t& offset)
+utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   {
     if(offset >= text.size())
       return false;
@@ -388,7 +388,7 @@ c_quote(tinyfmt& fmt, const char* data, size_t size)
   }
 
 tinyfmt&
-c_quote(tinyfmt& fmt, cow_stringR data)
+c_quote(tinyfmt& fmt, const cow_string& data)
   {
     return c_quote(fmt, data.data(), data.size());
   }
@@ -410,13 +410,13 @@ c_quote(cow_string& str, const char* data, size_t size)
   }
 
 cow_string&
-c_quote(cow_string& str, cow_stringR data)
+c_quote(cow_string& str, const cow_string& data)
   {
     return c_quote(str, data.data(), data.size());
   }
 
 cow_string
-get_real_path(cow_stringR path)
+get_real_path(const cow_string& path)
   {
     char* str = ::realpath(path.safe_c_str(), nullptr);
     if(!str)

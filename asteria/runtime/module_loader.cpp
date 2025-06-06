@@ -22,7 +22,7 @@ Module_Loader::
 
 Module_Loader::locked_pair*
 Module_Loader::
-do_lock_stream(cow_stringR path)
+do_lock_stream(const cow_string& path)
   {
     // Open the file first.
     ::rocket::unique_posix_file file(::fopen(path.safe_c_str(), "rb"));

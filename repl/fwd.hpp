@@ -81,13 +81,13 @@ bool
 libedit_gets(cow_string& line);
 
 void
-libedit_puts(cow_stringR text);
+libedit_puts(const cow_string& text);
 
 void
 libedit_reset();
 
 void
-libedit_add_history(cow_stringR text);
+libedit_add_history(const cow_string& text);
 
 }  // namespace asteria
 #endif

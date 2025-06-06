@@ -262,7 +262,7 @@ generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
 
               if(qrhs->is_string() && (altr.xop == xop_index)) {
                 // Encode a pre-hashed object key.
-                AIR_Node::S_member_access xnode = { altr.sloc, phsh_string(qrhs->as_string()) };
+                AIR_Node::S_member_access xnode = { altr.sloc, qrhs->as_string() };
                 code.mut_back() = move(xnode);
                 return;
               }

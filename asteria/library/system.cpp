@@ -48,7 +48,7 @@ struct Xparse_array
 struct Xparse_object
   {
     V_object obj;
-    phsh_string key;
+    phcow_string key;
     Source_Location key_sloc;
   };
 

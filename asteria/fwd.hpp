@@ -67,11 +67,9 @@ using ::std::exception_ptr;
 
 using ::rocket::nullopt_t;
 using ::rocket::cow_string;
-using cow_stringR = const ::rocket::cow_string&;
 using ::rocket::cow_u16string;
 using ::rocket::cow_u32string;
-using phsh_string = ::rocket::prehashed_string;
-using phsh_stringR = const ::rocket::prehashed_string&;
+using ::rocket::phcow_string;
 using ::rocket::tinybuf;
 using ::rocket::tinyfmt;
 
@@ -112,7 +110,7 @@ using ::rocket::atomic_acq_rel;
 using ::rocket::atomic_seq_cst;
 
 template<typename E>
-using cow_dictionary = cow_hashmap<phsh_string, E, phsh_string::hash>;
+using cow_dictionary = cow_hashmap<phcow_string, E, phcow_string::hash>;
 
 template<typename T, typename U>
 using cow_bivector = cow_vector<pair<T, U>>;

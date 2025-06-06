@@ -9,7 +9,7 @@ namespace asteria {
 
 Reference*
 Abstract_Context::
-do_create_lazy_reference_opt(Reference* hint_opt, phsh_stringR name) const
+do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name) const
   {
     return nullptr;
   }

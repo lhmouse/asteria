@@ -72,7 +72,7 @@ struct Indenter_string : Indenter
     cow_string add;
     cow_string cur;
 
-    explicit Indenter_string(cow_stringR xadd)
+    explicit Indenter_string(const cow_string& xadd)
       {
         this->add = xadd;
         this->cur = &"\n";
@@ -161,7 +161,7 @@ struct Indenter_spaces : Indenter
   };
 
 void
-do_quote_string(tinyfmt& fmt, cow_stringR str)
+do_quote_string(tinyfmt& fmt, const cow_string& str)
   {
     // Although JavaScript uses UCS-2 rather than UTF-16, the JSON
     // specification adopts UTF-16.
@@ -235,7 +235,7 @@ do_quote_string(tinyfmt& fmt, cow_stringR str)
   }
 
 void
-do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, cow_stringR name)
+do_format_object_key(tinyfmt& fmt, bool json5, const Indenter& indent, const cow_string& name)
   {
     // Write the key.
     if(json5 && name.size() && is_cmask(name[0], cmask_namei)
@@ -439,7 +439,7 @@ struct Xparse_array
 struct Xparse_object
   {
     V_object obj;
-    phsh_string key;
+    phcow_string key;
     Source_Location key_sloc;
   };
 

@@ -13,7 +13,7 @@ struct Bucket
     Bucket* next;
     void* padding_1;
     void* padding_2;
-    union { phsh_string key;  };
+    union { phcow_string key;  };
     union { Reference ref;  };
 
     Bucket() noexcept { }

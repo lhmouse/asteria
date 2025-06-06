@@ -14,7 +14,7 @@ namespace asteria {
 namespace {
 
 void
-do_user_declare(Analytic_Context& ctx, cow_vector<phsh_string>* names_opt, phsh_stringR name)
+do_user_declare(Analytic_Context& ctx, cow_vector<phcow_string>* names_opt, const phcow_string& name)
   {
     if(name.empty())
       return;
@@ -75,7 +75,7 @@ do_generate_expression(const Compiler_Options& opts, const Global_Context& globa
 
 void
 do_generate_statement_list(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
-                           cow_vector<phsh_string>* names_opt, const Global_Context& global,
+                           cow_vector<phcow_string>* names_opt, const Global_Context& global,
                            const Compiler_Options& opts, PTC_Aware ptc,
                            const cow_vector<Statement>& stmts)
   {
@@ -87,7 +87,7 @@ do_generate_statement_list(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
   }
 
 cow_vector<AIR_Node>
-do_generate_statement_list(Analytic_Context& ctx, cow_vector<phsh_string>* names_opt,
+do_generate_statement_list(Analytic_Context& ctx, cow_vector<phcow_string>* names_opt,
                            const Global_Context& global, const Compiler_Options& opts,
                            PTC_Aware ptc, const cow_vector<Statement>& stmts)
   {
@@ -111,7 +111,7 @@ do_generate_block(const Compiler_Options& opts, const Global_Context& global,
 void
 Statement::
 generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
-              cow_vector<phsh_string>* names_opt, const Global_Context& global,
+              cow_vector<phcow_string>* names_opt, const Global_Context& global,
               const Compiler_Options& opts, PTC_Aware ptc) const
   {
     if(!code.empty() && code.back().is_terminator())

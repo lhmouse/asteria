@@ -870,7 +870,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name;
+              phcow_string name;
             };
 
           Sparam sp2;
@@ -1007,7 +1007,7 @@ solidify(AVM_Rod& rod) const
               Compare cmp2_upper;
               AVM_Rod rod_labels;
               AVM_Rod rod_body;
-              cow_vector<phsh_string> names_added;
+              cow_vector<phcow_string> names_added;
             };
 
           using Sparam = cow_vector<Sparam_switch_clause>;
@@ -1243,8 +1243,8 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name_key;
-              phsh_string name_mapped;
+              phcow_string name_key;
+              phcow_string name_mapped;
               Source_Location sloc_init;
               AVM_Rod rod_init;
               AVM_Rod rod_body;
@@ -1467,7 +1467,7 @@ solidify(AVM_Rod& rod) const
             {
               AVM_Rod rod_try;
               Source_Location sloc_catch;
-              phsh_string name_except;
+              phcow_string name_except;
               AVM_Rod rod_catch;
             };
 
@@ -1696,7 +1696,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name;
+              phcow_string name;
             };
 
           Sparam sp2;
@@ -1746,7 +1746,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name;
+              phcow_string name;
             };
 
           Sparam sp2;
@@ -1842,7 +1842,7 @@ solidify(AVM_Rod& rod) const
             {
               Compiler_Options opts;
               cow_string func;
-              cow_vector<phsh_string> params;
+              cow_vector<phcow_string> params;
               cow_vector<AIR_Node> code_body;
             };
 
@@ -2019,7 +2019,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              cow_vector<phsh_string> keys;
+              cow_vector<phcow_string> keys;
             };
 
           Sparam sp2;
@@ -4108,7 +4108,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              cow_vector<phsh_string> keys;
+              cow_vector<phcow_string> keys;
             };
 
           Sparam sp2;
@@ -4169,7 +4169,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name;
+              phcow_string name;
             };
 
           Sparam sp2;
@@ -4444,7 +4444,7 @@ solidify(AVM_Rod& rod) const
 
                 // Instantiate the script as a variadic function.
                 AIR_Optimizer optmz(sp.opts);
-                cow_vector<phsh_string> script_params;
+                cow_vector<phcow_string> script_params;
                 script_params.emplace_back(&"...");
                 optmz.reload(nullptr, script_params, ctx.global(), stmtq.get_statements());
 
@@ -4476,7 +4476,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name;
+              phcow_string name;
             };
 
           Sparam sp2;
@@ -4513,7 +4513,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string name;
+              phcow_string name;
             };
 
           Sparam sp2;
@@ -4799,7 +4799,7 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              phsh_string key;
+              phcow_string key;
             };
 
           Sparam sp2;

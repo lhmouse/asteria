@@ -14,7 +14,7 @@ constexpr char s_comment[]  = ";#";
 constexpr char s_space[]    = " \t";
 
 tinyfmt&
-do_format_key(tinyfmt& fmt, cow_stringR key)
+do_format_key(tinyfmt& fmt, const cow_string& key)
   {
     if(key.empty())
       ASTERIA_THROW(("Empty key is not allowed"));

@@ -25,7 +25,7 @@ class Statement
     struct variable_declaration
       {
         Source_Location sloc;
-        cow_vector<phsh_string> names;
+        cow_vector<phcow_string> names;
         S_expression init;
       };
 
@@ -38,8 +38,8 @@ class Statement
     struct S_function
       {
         Source_Location sloc;
-        phsh_string name;
-        cow_vector<phsh_string> params;
+        phcow_string name;
+        cow_vector<phcow_string> params;
         cow_vector<Statement> body;
       };
 
@@ -83,8 +83,8 @@ class Statement
 
     struct S_for_each
       {
-        phsh_string name_key;
-        phsh_string name_mapped;
+        phcow_string name_key;
+        phcow_string name_mapped;
         Source_Location sloc_init;
         S_expression init;
         S_block body;
@@ -103,7 +103,7 @@ class Statement
         Source_Location sloc_try;
         S_block body_try;
         Source_Location sloc_catch;
-        phsh_string name_except;
+        phcow_string name_except;
         S_block body_catch;
       };
 
@@ -148,7 +148,7 @@ class Statement
     struct reference_declaration
       {
         Source_Location sloc;
-        phsh_string name;
+        phcow_string name;
         S_expression init;
       };
 
@@ -252,7 +252,7 @@ class Statement
     // to `*names_opt`.
     void
     generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
-                  cow_vector<phsh_string>* names_opt, const Global_Context& global,
+                  cow_vector<phcow_string>* names_opt, const Global_Context& global,
                   const Compiler_Options& opts, PTC_Aware ptc) const;
   };
 

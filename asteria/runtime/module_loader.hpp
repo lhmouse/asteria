@@ -17,7 +17,7 @@ class Module_Loader
 
   private:
     cow_dictionary<::rocket::tinybuf_file> m_strms;
-    using locked_pair = pair<const phsh_string, ::rocket::tinybuf_file>;
+    using locked_pair = pair<const phcow_string, ::rocket::tinybuf_file>;
 
   public:
     // Creates an empty module loader.
@@ -25,7 +25,7 @@ class Module_Loader
 
   private:
     locked_pair*
-    do_lock_stream(cow_stringR path);
+    do_lock_stream(const cow_string& path);
 
     void
     do_unlock_stream(locked_pair* qstrm) noexcept;
@@ -45,7 +45,7 @@ class Module_Loader::Unique_Stream
   public:
     constexpr Unique_Stream() noexcept = default;
 
-    Unique_Stream(const refcnt_ptr<Module_Loader>& loader, cow_stringR path)
+    Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const cow_string& path)
       {
         this->reset(loader, path);
       }
@@ -107,7 +107,7 @@ class Module_Loader::Unique_Stream
       }
 
     Unique_Stream&
-    reset(const refcnt_ptr<Module_Loader>& loader, cow_stringR path)
+    reset(const refcnt_ptr<Module_Loader>& loader, const cow_string& path)
       {
         // If an exception is thrown, there shall be no effect.
         locked_pair* strm = nullptr;

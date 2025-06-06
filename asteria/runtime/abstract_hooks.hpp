@@ -23,7 +23,7 @@ struct Abstract_Hooks
     // its initializer is evaluated.
     virtual
     void
-    on_declare(const Source_Location& sloc, const phsh_string& name);
+    on_declare(const Source_Location& sloc, const phcow_string& name);
 
     // This hook is called before every function call, be it native or not.
     virtual

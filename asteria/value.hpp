@@ -399,6 +399,6 @@ operator<<(tinyfmt& fmt, const Value& value)
 extern template class ::rocket::variant<ASTERIA_TYPES_AIXE9XIG_(::asteria::V)>;
 extern template class ::rocket::optional<::asteria::Value>;
 extern template class ::rocket::cow_vector<::asteria::Value>;
-extern template class ::rocket::cow_hashmap<::asteria::phsh_string,
-  ::asteria::Value, ::asteria::phsh_string::hash>;
+extern template class ::rocket::cow_hashmap<::asteria::phcow_string,
+  ::asteria::Value, ::asteria::phcow_string::hash>;
 #endif

@@ -21,7 +21,7 @@ on_call(const Source_Location& sloc, const cow_function& target)
 
 void
 Abstract_Hooks::
-on_declare(const Source_Location& sloc, const phsh_string& name)
+on_declare(const Source_Location& sloc, const phcow_string& name)
   {
   }
 

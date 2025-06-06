@@ -16,7 +16,7 @@ namespace asteria {
 
 Instantiated_Function::
 Instantiated_Function(const Source_Location& xsloc, const cow_string& xfunc,
-                      const cow_vector<phsh_string>& xparams, const cow_vector<AIR_Node>& code)
+                      const cow_vector<phcow_string>& xparams, const cow_vector<AIR_Node>& code)
   :
     m_sloc(xsloc), m_func(xfunc), m_params(xparams)
   {

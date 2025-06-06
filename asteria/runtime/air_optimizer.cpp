@@ -26,7 +26,7 @@ clear() noexcept
 
 void
 AIR_Optimizer::
-reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+reload(const Abstract_Context* ctx_opt, const cow_vector<phcow_string>& params,
        const Global_Context& global, const cow_vector<Statement>& stmts)
   {
     this->m_code.clear();
@@ -51,7 +51,7 @@ reload(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
 void
 AIR_Optimizer::
-rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
+rebind(const Abstract_Context* ctx_opt, const cow_vector<phcow_string>& params,
        const cow_vector<AIR_Node>& code)
   {
     this->m_code = code;
@@ -70,7 +70,7 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params,
 
 cow_function
 AIR_Optimizer::
-create_function(const Source_Location& sloc, cow_stringR name)
+create_function(const Source_Location& sloc, const cow_string& name)
   {
     cow_string func = name;
     if(is_cmask(func.front(), cmask_namei) && is_cmask(func.back(), cmask_name)) {

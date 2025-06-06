@@ -52,30 +52,30 @@ class Simple_Script
 
     // Manage global variables in the bundled context.
     refcnt_ptr<Variable>
-    get_global_variable_opt(phsh_stringR name) const noexcept;
+    get_global_variable_opt(const phcow_string& name) const noexcept;
 
     refcnt_ptr<Variable>
-    open_global_variable(phsh_stringR name);
+    open_global_variable(const phcow_string& name);
 
     bool
-    erase_global_variable(phsh_stringR name) noexcept;
+    erase_global_variable(const phcow_string& name) noexcept;
 
     // Load a script, which may be either a sequence of statements or a
     // single expression.
     void
-    reload(cow_stringR name, int start_line, tinybuf&& cbuf);
+    reload(const cow_string& name, int start_line, tinybuf&& cbuf);
 
     void
-    reload_oneline(cow_stringR name, tinybuf&& cbuf);
+    reload_oneline(const cow_string& name, tinybuf&& cbuf);
 
     void
-    reload_string(cow_stringR name, int start_line, cow_stringR code);
+    reload_string(const cow_string& name, int start_line, const cow_string& code);
 
     void
-    reload_string(cow_stringR name, cow_stringR code);
+    reload_string(const cow_string& name, const cow_string& code);
 
     void
-    reload_oneline(cow_stringR name, cow_stringR code);
+    reload_oneline(const cow_string& name, const cow_string& code);
 
     void
     reload_stdin(int start_line);
@@ -84,7 +84,7 @@ class Simple_Script
     reload_stdin();
 
     void
-    reload_file(cow_stringR path);
+    reload_file(const cow_string& path);
 
     // Execute the script that has been loaded.
     Reference

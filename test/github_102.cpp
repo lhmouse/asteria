@@ -48,7 +48,7 @@ int main()
     Analytic_Context ctx(xtc_plain, global);
 
     cow_vector<AIR_Node> code;
-    cow_vector<phsh_string> names;
+    cow_vector<phcow_string> names;
     stmts.at(0).generate_code(code, ctx, &names, global, opts, ptc_aware_none);
     ASTERIA_TEST_CHECK(code.size() == 4);  // clear, declare, 1.5, initialize
     ASTERIA_TEST_CHECK(names.size() == 1);  // "a"
