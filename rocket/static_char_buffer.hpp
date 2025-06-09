@@ -53,15 +53,16 @@ class static_char_buffer
     constexpr operator const char*() const noexcept
       { return this->m_data;  }
 
-    operator char*() noexcept
-      { return this->m_data;  }
-
     const char*
     c_str() const noexcept
       { return this->m_data;  }
 
+    const char*
+    data() noexcept
+      { return this->m_data;  }
+
     char*
-    c_str() noexcept
+    mut_data() noexcept
       { return this->m_data;  }
 
     void
