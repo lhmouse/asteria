@@ -58,7 +58,7 @@ class static_char_buffer
       { return this->m_data;  }
 
     const char*
-    data() noexcept
+    data() const noexcept
       { return this->m_data;  }
 
     char*
