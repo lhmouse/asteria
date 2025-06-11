@@ -14,64 +14,40 @@ constexpr
 array<const char*, sizeof...(xLiteral)>
 make_string_template(const xLiteral&... templs)
   {
-    return { templs... };
+    array<const char*, sizeof...(xLiteral)> templs = { templs... };
+    return templs;
   }
 
 template<size_t N, typename... xParams>
-ROCKET_NEVER_INLINE ROCKET_FLATTEN
+tinyfmt&
+format(tinyfmt& fmt, const array<const char*, N>& templs, const xParams&... params)
+  {
+    for(size_t k = 0;  k != N;  ++k) {
+      if(k != 0)
+        fmt.putc('\n');
+      format(fmt, templs[k], params...);
+    }
+    return fmt;
+  }
+
+template<size_t N, typename... xParams>
 cow_string&
 format(cow_string& str, const array<const char*, N>& templs, const xParams&... params)
   {
-    // Reuse the storage of `str` to create a formatter.
     ::rocket::tinyfmt_str fmt;
-    str.clear();
-    fmt.set_string(move(str), ::rocket::tinybuf::open_write);
-
-    if(N > 0)
-      format(fmt, templs[0], params...);
-
-    for(size_t k = 1;  k < N;  ++k)
-      fmt << '\n',
-        format(fmt, templs[k], params...);
-
+    fmt.set_string(move(str), ::rocket::tinybuf::open_append);
+    format(fmt, templs, params...);
     str = fmt.extract_string();
     return str;
   }
 
-template<typename... xParams>
-ROCKET_NEVER_INLINE ROCKET_FLATTEN
-cow_string&
-format(cow_string& str, const char* templ, const xParams&... params)
+template<typename xTempls, typename... xParams>
+cow_string
+format_string(const xTempls& templs, const xParams&... params)
   {
-    // Reuse the storage of `str` to create a formatter.
     ::rocket::tinyfmt_str fmt;
-    str.clear();
-    fmt.set_string(move(str), ::rocket::tinybuf::open_write);
-
-    format(fmt, templ, params...);
-
-    str = fmt.extract_string();
-    return str;
-  }
-
-template<size_t N, typename... xParams>
-ROCKET_NEVER_INLINE ROCKET_FLATTEN
-cow_string
-format_string(const array<const char*, N>& templs, const xParams&... params)
-  {
-    cow_string str;
-    format(str, templs, params...);
-    return str;
-  }
-
-template<typename... xParams>
-ROCKET_NEVER_INLINE ROCKET_FLATTEN
-cow_string
-format_string(const char* templ, const xParams&... params)
-  {
-    cow_string str;
-    format(str, templ, params...);
-    return str;
+    format(fmt, templs, params...);
+    return fmt.extract_string();
   }
 
 // Error handling
