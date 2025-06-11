@@ -9,12 +9,12 @@
 namespace asteria {
 
 // Formatting
-template<typename... xLiteral>
+template<typename... xParams>
 constexpr
-array<const char*, sizeof...(xLiteral)>
-make_string_template(const xLiteral&... templs)
+array<const char*, sizeof...(xParams)>
+make_string_template(const xParams&... params)
   {
-    array<const char*, sizeof...(xLiteral)> templs = { templs... };
+    array<const char*, sizeof...(xParams)> templs = { params... };
     return templs;
   }
 
