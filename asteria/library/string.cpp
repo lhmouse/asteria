@@ -1662,7 +1662,7 @@ std_string_format(V_string templ, cow_vector<Value> values)
 
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
-    vformat(fmt, templ.safe_c_str(), insts.data(), insts.size());
+    formatv(fmt, templ.safe_c_str(), insts.data(), insts.size());
     return fmt.extract_string();
   }
 

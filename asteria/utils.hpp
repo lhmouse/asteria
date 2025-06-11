@@ -43,7 +43,7 @@ format(cow_string& str, const array<const char*, N>& templs, const xParams&... p
 
 template<typename xTempls, typename... xParams>
 cow_string
-format_string(const xTempls& templs, const xParams&... params)
+sformat(const xTempls& templs, const xParams&... params)
   {
     ::rocket::tinyfmt_str fmt;
     format(fmt, templs, params...);
@@ -60,7 +60,7 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
 
 #define ASTERIA_TERMINATE(TEMPLATE, ...)  \
     ((void) ::asteria::write_log_to_stderr(__FILE__, __LINE__, __FUNCTION__,  \
-       ::asteria::format_string((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
+       ::asteria::sformat((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
      ::std::terminate())
 
 [[noreturn]]
@@ -69,7 +69,7 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
 
 #define ASTERIA_THROW(TEMPLATE, ...)  \
     ((void) ::asteria::throw_runtime_error(__FILE__, __LINE__, __FUNCTION__,  \
-       ::asteria::format_string((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
+       ::asteria::sformat((::asteria::make_string_template TEMPLATE), ##__VA_ARGS__)),  \
      ROCKET_UNREACHABLE())
 
 // Raw memory management

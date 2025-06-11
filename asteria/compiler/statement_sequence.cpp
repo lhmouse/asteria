@@ -1799,7 +1799,7 @@ do_accept_closure_function(cow_vector<Expression_Unit>& units, Token_Stream& tst
       throw Compiler_Error(xtc_status,
                 compiler_status_open_brace_or_initializer_expected, tstrm.next_sloc());
 
-    auto unique_name = format_string("__closure:$1:$2", sloc.line(), sloc.column());
+    auto unique_name = sformat("__closure:$1:$2", sloc.line(), sloc.column());
 
     Expression_Unit::S_closure_function xunit = { move(sloc), move(unique_name), move(params),
                                                   move(qblock->stmts) };

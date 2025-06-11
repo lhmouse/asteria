@@ -38,7 +38,7 @@ do_lock_stream(const cow_string& path)
                "Could not get properties of script file '$1': ${errno:full}", path);
 
     // Mark the stream locked.
-    auto skey = format_string("dev:$1/ino:$2", info.st_dev, info.st_ino);
+    auto skey = sformat("dev:$1/ino:$2", info.st_dev, info.st_ino);
     auto result = this->m_strms.try_emplace(move(skey), move(file));
     if(!result.second)
       throw Runtime_Error(xtc_format,

@@ -673,7 +673,7 @@ make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value) noexcep
 
 template<typename charT>
 basic_tinyfmt<charT>&
-vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<charT>* pinsts, size_t ninsts)
+formatv(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<charT>* pinsts, size_t ninsts)
   {
     const charT* base = stempl;
     const charT* next = stempl;
@@ -701,7 +701,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
         {
         case charT():
           noadl::sprintf_and_throw<invalid_argument>(
-              "vformat: dangling `$` at end of template string");
+              "formatv: dangling `$` at end of template string");
 
         case charT('$'):
           // literal `$`
@@ -748,7 +748,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
 
             if(*next == charT())
               noadl::sprintf_and_throw<invalid_argument>(
-                  "vformat: no matching `}` in template string");
+                  "formatv: no matching `}` in template string");
 
             // Check for built-in placeholders.
             static constexpr charT errno_str[] = { 'e','r','r','n','o',':','s','t','r' };
@@ -836,7 +836,7 @@ vformat(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
 
         default:
           noadl::sprintf_and_throw<invalid_argument>(
-              "vformat: unknown placeholder `$%c` in template string",
+              "formatv: unknown placeholder `$%c` in template string",
               static_cast<int>(*next));
         }
 
@@ -853,7 +853,7 @@ format(basic_tinyfmt<charT>& fmt, const charT* stempl, const paramsT&... params)
   {
     using formatter = basic_formatter<charT>;
     formatter insts[] = { noadl::make_default_formatter(fmt, params)..., formatter() };
-    return noadl::vformat(fmt, stempl, insts, sizeof...(params));
+    return noadl::formatv(fmt, stempl, insts, sizeof...(params));
   }
 
 using formatter     = basic_formatter<char>;
@@ -861,10 +861,10 @@ using wformatter    = basic_formatter<wchar_t>;
 using u16formatter  = basic_formatter<char16_t>;
 using u32formatter  = basic_formatter<char32_t>;
 
-extern template tinyfmt& vformat(tinyfmt&, const char*, const formatter*, size_t);
-extern template wtinyfmt& vformat(wtinyfmt&, const wchar_t*, const wformatter*, size_t);
-extern template u16tinyfmt& vformat(u16tinyfmt&, const char16_t*, const u16formatter*, size_t);
-extern template u32tinyfmt& vformat(u32tinyfmt&, const char32_t*, const u32formatter*, size_t);
+extern template tinyfmt& formatv(tinyfmt&, const char*, const formatter*, size_t);
+extern template wtinyfmt& formatv(wtinyfmt&, const wchar_t*, const wformatter*, size_t);
+extern template u16tinyfmt& formatv(u16tinyfmt&, const char16_t*, const u16formatter*, size_t);
+extern template u32tinyfmt& formatv(u32tinyfmt&, const char32_t*, const u32formatter*, size_t);
 
 }  // namespace rocket
 #endif

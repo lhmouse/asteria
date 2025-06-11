@@ -1347,7 +1347,7 @@ solidify(AVM_Rod& rod) const
                   }
                   else if(!range.is_null())
                     throw Runtime_Error(xtc_assert, sp.sloc_init,
-                              format_string("Range value not iterable (value `$1`)", range));
+                              sformate value not iterable (value `$1`)", range));
                 }
                 catch(Runtime_Error& except) {
                   ctx_for.on_scope_exit_exceptional(except);

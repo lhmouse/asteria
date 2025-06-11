@@ -114,7 +114,7 @@ do_format_write_utf8_common(const IOF_Sentry& sentry, const V_string& templ, con
 
     // Compose the string into a stream and write it.
     ::rocket::tinyfmt_str fmt;
-    vformat(fmt, templ.safe_c_str(), insts.data(), insts.size());
+    formatv(fmt, templ.safe_c_str(), insts.data(), insts.size());
     return do_write_utf8_common(sentry, fmt.get_string());
   }
 
