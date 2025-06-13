@@ -217,10 +217,7 @@ class basic_tinybuf_ln
           noadl::sprintf_and_throw<invalid_argument>(
               "tinybuf_ln: stream not readable");
 
-        if(this->m_ln.empty())
-          return -1;
-
-        return noadl::int_from(*(this->m_ln.data()));
+        return this->m_ln.getc();
       }
 
     // Puts some characters into the stream.
