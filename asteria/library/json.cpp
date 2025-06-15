@@ -450,24 +450,21 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Compiler_Error(xtc_status,
-                compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
+      ASTERIA_THROW(("`}` or key expected at '$1'"), tstrm.next_sloc());
 
     if(qtok->is_identifier())
       ctxo.key = qtok->as_identifier();
     else if(qtok->is_string_literal())
       ctxo.key = qtok->as_string_literal();
     else
-      throw Compiler_Error(xtc_status,
-                compiler_status_closing_brace_or_json5_key_expected, tstrm.next_sloc());
+      ASTERIA_THROW(("`}` or key expected at '$1'"), tstrm.next_sloc());
 
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();
 
     auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
     if(!kpunct)
-      throw Compiler_Error(xtc_status,
-                compiler_status_colon_expected, tstrm.next_sloc());
+      ASTERIA_THROW(("`:` expected at '$1'"), tstrm.next_sloc());
   }
 
 Value
@@ -479,11 +476,12 @@ do_parse_nonrecursive(Token_Stream& tstrm)
 
     // Accept a value. No other things such as closed brackets are allowed.
   parse_next:
+    if(stack.size() > 32)
+      ASTERIA_THROW(("Nesting limit exceeded at '$1'"), tstrm.next_sloc());
+
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Compiler_Error(xtc_format,
-                compiler_status_expression_expected, tstrm.next_sloc(),
-                "Value expected");
+      ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
 
     if(qtok->is_punctuator()) {
       // Accept an `[` or `{`.
@@ -513,9 +511,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
         value = V_object();
       }
       else
-        throw Compiler_Error(xtc_format,
-                  compiler_status_expression_expected, tstrm.next_sloc(),
-                  "Value expected");
+        ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
     }
     else if(qtok->is_identifier()) {
       // Accept a literal.
@@ -540,9 +536,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
         value = ::std::numeric_limits<double>::quiet_NaN();
       }
       else
-        throw Compiler_Error(xtc_format,
-                  compiler_status_expression_expected, tstrm.next_sloc(),
-                  "Value expected");
+        ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
     }
     else if(qtok->is_real_literal()) {
       // Accept a number.
@@ -555,9 +549,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
       tstrm.shift();
     }
     else
-      throw Compiler_Error(xtc_format,
-                compiler_status_expression_expected, tstrm.next_sloc(),
-                "Value expected");
+      ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
 
     while(stack.size()) {
       // Advance to the next element.
@@ -572,8 +564,7 @@ do_parse_nonrecursive(Token_Stream& tstrm)
             // Look for the next element.
             auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
             if(!kpunct)
-              throw Compiler_Error(xtc_status,
-                        compiler_status_closing_bracket_or_comma_expected, tstrm.next_sloc());
+              ASTERIA_THROW(("`]` or `,` expected at '$1'"), tstrm.next_sloc());
 
             if(*kpunct == punctuator_comma) {
               // A closing bracket may still follow.
@@ -592,14 +583,12 @@ do_parse_nonrecursive(Token_Stream& tstrm)
             auto& ctxo = ctx.mut<Xparse_object>();
             auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
             if(!pair.second)
-              throw Compiler_Error(xtc_status,
-                        compiler_status_duplicate_key_in_object, ctxo.key_sloc);
+              ASTERIA_THROW(("Duplicate key encountered at '$1'"), tstrm.next_sloc());
 
             // Look for the next element.
             auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
             if(!kpunct)
-              throw Compiler_Error(xtc_status,
-                        compiler_status_closing_brace_or_comma_expected, tstrm.next_sloc());
+              ASTERIA_THROW(("`}` or `,` expected at '$1'"), tstrm.next_sloc());
 
             if(*kpunct == punctuator_comma) {
               // A closing brace may still follow.
@@ -636,7 +625,13 @@ do_parse(tinybuf& cbuf)
     opts.integers_as_reals = true;
 
     Token_Stream tstrm(opts);
-    tstrm.reload(&"[JSON text]", 1, move(cbuf));
+    try {
+      tstrm.reload(&"[JSON text]", 1, move(cbuf));
+    }
+    catch(Compiler_Error& error) {
+      ASTERIA_THROW(("Invalid token at '$1'"), error.sloc());
+    }
+
     if(tstrm.empty())
       ASTERIA_THROW(("Empty JSON string"));
 
