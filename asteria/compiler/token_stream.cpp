@@ -184,7 +184,7 @@ do_accept_numeric_literal(cow_vector<Token>& tokens, Text_Reader& reader,
     //   ``[+-]?infinity``
     //   ``[+-]?Infinity``
     //   ``[+-]?0[bB][01`]+(\.[01`]+)?[pP][+-]?[0-9`]+``
-    //   ``[+-]?[0-9][0-9`]*(\.[0-9`]+)?[eEpP][+-]?[0-9`]+``
+    //   ``[+-]?[0-9][0-9`]*(\.[0-9`]+)?[eE][+-]?[0-9`]+``
     //   ``[+-]?0[xX][0-9a-fA-F`]+(\.[0-9a-fA-F`]+)?[pP][+-]?[0-9`]+``
     cow_string tstr;
     size_t tlen = 0;
