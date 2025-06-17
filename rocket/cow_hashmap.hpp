@@ -598,6 +598,13 @@ class cow_hashmap
         return this->try_emplace(forward<ykeyT>(ykey)).first->second;
       }
 
+    template<typename ykeyT>
+    mapped_type&
+    open(ykeyT&& ykey)
+      {
+        return this->try_emplace(forward<ykeyT>(ykey)).first->second;
+      }
+
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.
     template<typename ykeyT,
