@@ -394,7 +394,7 @@ class cow_hashmap
         if(!this->m_sth.unique())
           return this->do_deallocate();
 
-        this->m_sth.erase_range_unchecked(0, this->size());
+        this->m_sth.erase_range_unchecked(0, this->m_sth.bucket_count());
         return *this;
       }
 
