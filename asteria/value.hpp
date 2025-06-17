@@ -129,7 +129,7 @@ class Value
       }
 
     V_boolean&
-    mut_boolean() noexcept
+    open_boolean() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.mut<V_boolean>();
@@ -151,7 +151,7 @@ class Value
       }
 
     V_integer&
-    mut_integer() noexcept
+    open_integer() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.mut<V_integer>();
@@ -176,7 +176,7 @@ class Value
       }
 
     V_real&
-    mut_real() noexcept
+    open_real() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.mut<V_real>();
@@ -201,7 +201,7 @@ class Value
       }
 
     V_string&
-    mut_string() noexcept
+    open_string() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.mut<V_string>();
@@ -223,7 +223,7 @@ class Value
       }
 
     V_function&
-    mut_function() noexcept
+    open_function() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.mut<V_function>();
@@ -245,7 +245,7 @@ class Value
       }
 
     V_opaque&
-    mut_opaque() noexcept
+    open_opaque() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.mut<V_opaque>();
@@ -267,7 +267,7 @@ class Value
       }
 
     V_array&
-    mut_array() noexcept
+    open_array() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.mut<V_array>();
@@ -289,7 +289,7 @@ class Value
       }
 
     V_object&
-    mut_object() noexcept
+    open_object() noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.mut<V_object>();

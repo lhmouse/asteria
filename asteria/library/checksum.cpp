@@ -83,9 +83,9 @@ do_construct_CRC32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -108,9 +108,9 @@ do_construct_CRC32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -130,9 +130,9 @@ do_construct_CRC32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -213,9 +213,9 @@ do_construct_Adler32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -238,9 +238,9 @@ do_construct_Adler32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -260,9 +260,9 @@ do_construct_Adler32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -346,9 +346,9 @@ do_construct_FNV1a32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -371,9 +371,9 @@ do_construct_FNV1a32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -393,9 +393,9 @@ do_construct_FNV1a32(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -493,9 +493,9 @@ do_construct_MD5(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -517,9 +517,9 @@ do_construct_MD5(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -539,9 +539,9 @@ do_construct_MD5(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -623,9 +623,9 @@ do_construct_SHA1(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -647,9 +647,9 @@ do_construct_SHA1(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -669,9 +669,9 @@ do_construct_SHA1(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -753,9 +753,9 @@ do_construct_SHA224(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -777,9 +777,9 @@ do_construct_SHA224(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -799,9 +799,9 @@ do_construct_SHA224(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -883,9 +883,9 @@ do_construct_SHA256(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -907,9 +907,9 @@ do_construct_SHA256(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -929,9 +929,9 @@ do_construct_SHA256(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -1013,9 +1013,9 @@ do_construct_SHA384(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -1037,9 +1037,9 @@ do_construct_SHA384(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -1059,9 +1059,9 @@ do_construct_SHA384(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -1143,9 +1143,9 @@ do_construct_SHA512(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -1167,9 +1167,9 @@ do_construct_SHA512(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -1189,9 +1189,9 @@ do_construct_SHA512(V_object& result)
         V_opaque* hasher = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              hasher = &(pval->mut_opaque());
+              hasher = &(pval->open_opaque());
 
         if(!hasher)
           ASTERIA_THROW(("Invalid member function: type validation failure"));

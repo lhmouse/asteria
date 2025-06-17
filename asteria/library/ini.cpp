@@ -128,7 +128,7 @@ do_ini_parse(tinybuf& buf)
         // Insert a new section.
         auto& sub = root.try_emplace(move(key), V_object()).first->second;
         ROCKET_ASSERT(sub.is_object());
-        sink = &(sub.mut_object());
+        sink = &(sub.open_object());
         continue;
       }
 

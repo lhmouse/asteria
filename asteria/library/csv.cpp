@@ -39,12 +39,12 @@ do_csv_parse(tinybuf& buf)
       size_t offset = 0;
       while(offset < line.size()) {
         if(quote_at_line == 0) {
-          auto& row = root.mut_back().mut_array();
+          auto& row = root.mut_back().open_array();
 
           if(row.empty()) {
             // We are not in quotation mode, so any character must start a value.
             row.emplace_back(V_string());
-            cell = &(row.mut_back().mut_string());
+            cell = &(row.mut_back().open_string());
           }
 
           if(quote_allowed && (line[offset] == '\"')) {
@@ -70,7 +70,7 @@ do_csv_parse(tinybuf& buf)
 
           // Create a new cell after the current one.
           row.emplace_back(V_string());
-          cell = &(row.mut_back().mut_string());
+          cell = &(row.mut_back().open_string());
           continue;
         }
 

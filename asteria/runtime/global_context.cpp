@@ -94,7 +94,7 @@ Global_Context(API_Version api_version_req)
         auto r = ostd.try_emplace(::rocket::sref(mod.name));
         if(r.second)
           r.first->second = V_object();
-        mod.init(r.first->second.mut_object(), eptr[-1].api_version);
+        mod.init(r.first->second.open_object(), eptr[-1].api_version);
       });
 
     this->do_mut_named_reference(nullptr, &"std").set_temporary(move(ostd));

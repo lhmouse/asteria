@@ -2079,7 +2079,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // ++ integer ; may overflow
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       V_integer result;
                       if(ROCKET_ADD_OVERFLOW(val, 1, &result))
                         throw Runtime_Error(xtc_format,
@@ -2090,7 +2090,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(rhs.is_real()) {
                       // ++ real ; can't overflow
-                      V_real& val = rhs.mut_real();
+                      V_real& val = rhs.open_real();
                       V_real result = val + 1;
                       if(postfix)
                         top.set_temporary(val);
@@ -2121,7 +2121,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // -- integer ; may overflow
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       V_integer result;
                       if(ROCKET_SUB_OVERFLOW(val, 1, &result))
                         throw Runtime_Error(xtc_format,
@@ -2132,7 +2132,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(rhs.is_real()) {
                       // -- real ; can't overflow
-                      V_real& val = rhs.mut_real();
+                      V_real& val = rhs.open_real();
                       V_real result = val - 1;
                       if(postfix)
                         top.set_temporary(val);
@@ -2298,7 +2298,7 @@ solidify(AVM_Rod& rod) const
                       do_push_subscript_and_check(top, move(xsub));
                     }
                     else if(rhs.is_string()) {
-                      Subscript::S_object_key xsub = { move(rhs.mut_string()) };
+                      Subscript::S_object_key xsub = { move(rhs.open_string()) };
                       do_push_subscript_and_check(top, move(xsub));
                     }
                     else throw Runtime_Error(xtc_format,
@@ -2351,7 +2351,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // - integer ; may overflow
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       V_integer result;
                       if(ROCKET_SUB_OVERFLOW(0, val, &result))
                         throw Runtime_Error(xtc_format,
@@ -2360,7 +2360,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(rhs.is_real()) {
                       // - real ; can't overflow
-                      V_real& val = rhs.mut_real();
+                      V_real& val = rhs.open_real();
                       val = -val;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -2388,17 +2388,17 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // ~ integer
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       val = ~val;
                     }
                     else if(rhs.is_boolean()) {
                       // ~ boolean ; same as !
-                      V_boolean& val = rhs.mut_boolean();
+                      V_boolean& val = rhs.open_boolean();
                       val = !val;
                     }
                     else if(rhs.is_string()) {
                       // ~ string ; bitwise
-                      V_string& val = rhs.mut_string();
+                      V_string& val = rhs.open_string();
                       for(auto it = val.mut_begin();  it != val.end();  ++it)
                         *it = static_cast<char>(~*it);
                     }
@@ -2597,7 +2597,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // __abs integer ; may overflow
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       V_integer negv;
                       if(ROCKET_SUB_OVERFLOW(0, val, &negv))
                         throw Runtime_Error(xtc_format,
@@ -2606,7 +2606,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(rhs.is_real()) {
                       // __abs real
-                      V_real& val = rhs.mut_real();
+                      V_real& val = rhs.open_real();
                       val = ::std::fabs(val);
                     }
                     else throw Runtime_Error(xtc_format,
@@ -2913,7 +2913,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // __lzcnt integer
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       val = ROCKET_LZCNT64(static_cast<uint64_t>(val));
                     }
                     else throw Runtime_Error(xtc_format,
@@ -2941,7 +2941,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // __tzcnt integer
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       val = ROCKET_TZCNT64(static_cast<uint64_t>(val));
                     }
                     else throw Runtime_Error(xtc_format,
@@ -2969,7 +2969,7 @@ solidify(AVM_Rod& rod) const
 
                     if(rhs.is_integer()) {
                       // __popcnt integer
-                      V_integer& val = rhs.mut_integer();
+                      V_integer& val = rhs.open_integer();
                       val = ROCKET_POPCNT64(static_cast<uint64_t>(val));
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3217,7 +3217,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer + integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
                         throw Runtime_Error(xtc_format,
@@ -3226,17 +3226,17 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real + real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val += rhs.as_real();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean + boolean ; same as |
-                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean& val = lhs.open_boolean();
                       val |= rhs.as_boolean();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string + string
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       val += rhs.as_string();
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3267,7 +3267,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer - integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
                         throw Runtime_Error(xtc_format,
@@ -3276,12 +3276,12 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real - real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val -= rhs.as_real();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean - boolean ; same as ^
-                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean& val = lhs.open_boolean();
                       val ^= rhs.as_boolean();
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3312,7 +3312,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer * integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
                         throw Runtime_Error(xtc_format,
@@ -3321,22 +3321,22 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real * real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val *= rhs.as_real();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean * boolean ; same as &
-                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean& val = lhs.open_boolean();
                       val &= rhs.as_boolean();
                     }
                     else if(lhs.is_string() && rhs.is_integer()) {
                       // string * integer
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       val = do_duplicate_sequence(val, rhs.as_integer());
                     }
                     else if(lhs.is_array() && rhs.is_integer()) {
                       // array * integer
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       val = do_duplicate_sequence(val, rhs.as_integer());
                     }
                     else if(lhs.is_integer() && rhs.is_string()) {
@@ -3377,7 +3377,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer / integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       if(rhs.as_integer() == 0)
                         throw Runtime_Error(xtc_format,
                            "Integer division by zero (operands were `$1` and `$2`)", val, rhs.as_integer());
@@ -3388,12 +3388,12 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real / real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val /= rhs.as_real();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string / string ; path concatenation
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       val += '/';
                       val += rhs.as_string();
                     }
@@ -3425,7 +3425,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer % integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       if(rhs.as_integer() == 0)
                         throw Runtime_Error(xtc_format,
                            "Integer division by zero (operands were `$1` and `$2`)", val, rhs.as_integer());
@@ -3436,7 +3436,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real() && rhs.is_real()) {
                       // real % real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val = ::std::fmod(val, rhs.as_real());
                     }
                     else throw Runtime_Error(xtc_format,
@@ -3467,17 +3467,17 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer & integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       val &= rhs.as_integer();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean & boolean
-                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean& val = lhs.open_boolean();
                       val &= rhs.as_boolean();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string & string ; bitwise truncation
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       const V_string& mask = rhs.as_string();
                       if(val.size() > mask.size())
                         val.erase(mask.size());
@@ -3513,17 +3513,17 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer | integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       val |= rhs.as_integer();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean & boolean
-                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean& val = lhs.open_boolean();
                       val |= rhs.as_boolean();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string | string ; bitwise extension
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       const V_string& mask = rhs.as_string();
                       if(val.size() < mask.size())
                         val.append(mask.size() - val.size(), 0);
@@ -3559,17 +3559,17 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // integer ^ integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       val ^= rhs.as_integer();
                     }
                     else if(lhs.is_boolean() && rhs.is_boolean()) {
                       // boolean ^ boolean
-                      V_boolean& val = lhs.mut_boolean();
+                      V_boolean& val = lhs.open_boolean();
                       val ^= rhs.as_boolean();
                     }
                     else if(lhs.is_string() && rhs.is_string()) {
                       // string ^ string ; bitwise flipping
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       const V_string& mask = rhs.as_string();
                       if(val.size() < mask.size())
                         val.append(mask.size() - val.size(), 0);
@@ -3605,7 +3605,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __addm integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result);
                       val = result;
@@ -3638,7 +3638,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __subm integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result);
                       val = result;
@@ -3671,7 +3671,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __mulm integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result);
                       val = result;
@@ -3704,7 +3704,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __adds integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_ADD_OVERFLOW(val, rhs.as_integer(), &result))
                         result = (val >> 63) ^ INT64_MAX;
@@ -3738,7 +3738,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __subs integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_SUB_OVERFLOW(val, rhs.as_integer(), &result))
                         result = (val >> 63) ^ INT64_MAX;
@@ -3772,7 +3772,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer() && rhs.is_integer()) {
                       // __muls integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_MUL_OVERFLOW(val, rhs.as_integer(), &result))
                         result = (val >> 63) ^ (rhs.as_integer() >> 63) ^ INT64_MAX;
@@ -3814,21 +3814,21 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, fixed-width
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = rhs.as_integer();
                       reinterpret_cast<uint64_t&>(val) <<= n;
                       reinterpret_cast<uint64_t&>(val) <<= n != rhs.as_integer();
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, fixed-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.erase(0, n);
                       val.append(n, '\0');
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, fixed-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.erase(0, n);
                       val.append(n);
@@ -3869,21 +3869,21 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer >>> ; bitwise, fixed-width
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = ::rocket::min(rhs.as_integer(), 63);
                       reinterpret_cast<uint64_t&>(val) >>= n;
                       reinterpret_cast<uint64_t&>(val) >>= n != rhs.as_integer();
                     }
                     else if(lhs.is_string()) {
                       // string >>> ; bytewise, fixed-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                       val.insert(0, n, '\0');
                     }
                     else if(lhs.is_array()) {
                       // array >>> ; element-wise, fixed-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                       val.insert(0, n);
@@ -3924,7 +3924,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, variable-width, may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = ::rocket::min(rhs.as_integer(), 63);
                       if((val != 0) && ((n != rhs.as_integer()) || (val >> (63 - n) != val >> 63)))
                         throw Runtime_Error(xtc_format,
@@ -3933,13 +3933,13 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, variable-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.append(n, '\0');
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, variable-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, PTRDIFF_MAX);
                       val.append(n);
                     }
@@ -3979,19 +3979,19 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, variable-width, may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = ::rocket::min(rhs.as_integer(), 63);
                       val >>= n;
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, variable-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, variable-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(rhs.as_integer(), 0, val.ssize());
                       val.pop_back(n);
                     }
@@ -4025,7 +4025,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_real() && mid.is_real() && rhs.is_real()) {
                       // __fma ; always real
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val = ::std::fma(val, mid.as_real(), rhs.as_real());
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5132,7 +5132,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer + integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_ADD_OVERFLOW(val, irhs, &result))
                         throw Runtime_Error(xtc_format,
@@ -5141,7 +5141,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real()) {
                       // real + real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val += static_cast<V_real>(irhs);
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5170,7 +5170,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer - integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_SUB_OVERFLOW(val, irhs, &result))
                         throw Runtime_Error(xtc_format,
@@ -5179,7 +5179,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real()) {
                       // real - real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val -= static_cast<V_real>(irhs);
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5208,7 +5208,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer * integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_MUL_OVERFLOW(val, irhs, &result))
                         throw Runtime_Error(xtc_format,
@@ -5217,17 +5217,17 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real()) {
                       // real * real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val *= static_cast<V_real>(irhs);
                     }
                     else if(lhs.is_string()) {
                       // string * integer
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       val = do_duplicate_sequence(val, irhs);
                     }
                     else if(lhs.is_array()) {
                       // array * integer
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       val = do_duplicate_sequence(val, irhs);
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5256,7 +5256,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer / integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       if(irhs == 0)
                         throw Runtime_Error(xtc_format,
                            "Integer division by zero (operands were `$1` and `$2`)", val, irhs);
@@ -5267,7 +5267,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real()) {
                       // real / real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val /= static_cast<V_real>(irhs);;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5296,7 +5296,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer % integer ; may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       if(irhs == 0)
                         throw Runtime_Error(xtc_format,
                            "Integer division by zero (operands were `$1` and `$2`)", val, irhs);
@@ -5307,7 +5307,7 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_real()) {
                       // real % real ; can't overflow
-                      V_real& val = lhs.mut_real();
+                      V_real& val = lhs.open_real();
                       val = ::std::fmod(val, static_cast<V_real>(irhs));
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5336,7 +5336,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer & integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       val &= irhs;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5365,7 +5365,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer | integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       val |= irhs;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5394,7 +5394,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer ^ integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       val ^= irhs;
                     }
                     else throw Runtime_Error(xtc_format,
@@ -5423,7 +5423,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // __addm integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       ROCKET_ADD_OVERFLOW(val, irhs, &result);
                       val = result;
@@ -5454,7 +5454,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // __subm integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       ROCKET_SUB_OVERFLOW(val, irhs, &result);
                       val = result;
@@ -5485,7 +5485,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // __mulm integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       ROCKET_MUL_OVERFLOW(val, irhs, &result);
                       val = result;
@@ -5516,7 +5516,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // __adds integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_ADD_OVERFLOW(val, irhs, &result))
                         result = (val >> 63) ^ INT64_MAX;
@@ -5548,7 +5548,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // __subs integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_SUB_OVERFLOW(val, irhs, &result))
                         result = (val >> 63) ^ INT64_MAX;
@@ -5580,7 +5580,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // __muls integer
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       V_integer result;
                       if(ROCKET_MUL_OVERFLOW(val, irhs, &result))
                         result = (val >> 63) ^ (irhs >> 63) ^ INT64_MAX;
@@ -5616,21 +5616,21 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, fixed-width
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = irhs;
                       reinterpret_cast<uint64_t&>(val) <<= n;
                       reinterpret_cast<uint64_t&>(val) <<= n != irhs;
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, fixed-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.erase(0, n);
                       val.append(n, '\0');
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, fixed-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.erase(0, n);
                       val.append(n);
@@ -5665,21 +5665,21 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer >>> ; bitwise, fixed-width
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = ::rocket::min(irhs, 63);
                       reinterpret_cast<uint64_t&>(val) >>= n;
                       reinterpret_cast<uint64_t&>(val) >>= n != irhs;
                     }
                     else if(lhs.is_string()) {
                       // string >>> ; bytewise, fixed-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.pop_back(n);
                       val.insert(0, n, '\0');
                     }
                     else if(lhs.is_array()) {
                       // array >>> ; element-wise, fixed-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.pop_back(n);
                       val.insert(0, n);
@@ -5714,7 +5714,7 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, variable-width, may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = ::rocket::min(irhs, 63);
                       if((val != 0) && ((n != irhs) || (val >> (63 - n) != val >> 63)))
                         throw Runtime_Error(xtc_format,
@@ -5723,13 +5723,13 @@ solidify(AVM_Rod& rod) const
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, variable-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.append(n, '\0');
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, variable-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, PTRDIFF_MAX);
                       val.append(n);
                     }
@@ -5763,19 +5763,19 @@ solidify(AVM_Rod& rod) const
 
                     if(lhs.is_integer()) {
                       // integer <<< ; bitwise, variable-width, may overflow
-                      V_integer& val = lhs.mut_integer();
+                      V_integer& val = lhs.open_integer();
                       int64_t n = ::rocket::min(irhs, 63);
                       val >>= n;
                     }
                     else if(lhs.is_string()) {
                       // string <<< ; bytewise, variable-width
-                      V_string& val = lhs.mut_string();
+                      V_string& val = lhs.open_string();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.pop_back(n);
                     }
                     else if(lhs.is_array()) {
                       // array <<< ; element-wise, variable-width
-                      V_array& val = lhs.mut_array();
+                      V_array& val = lhs.open_array();
                       size_t n = ::rocket::clamp_cast<size_t>(irhs, 0, val.ssize());
                       val.pop_back(n);
                     }

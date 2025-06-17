@@ -162,14 +162,14 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         V_opaque* defl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              defl = &(pval->mut_opaque());
+              defl = &(pval->open_opaque());
 
         if(!defl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
 
-        V_string& output = self_val.mut_object().mut(&"output").mut_string();
+        V_string& output = self_val.open_object().mut(&"output").open_string();
         V_string data;
 
         reader.start_overload();
@@ -188,14 +188,14 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         V_opaque* defl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              defl = &(pval->mut_opaque());
+              defl = &(pval->open_opaque());
 
         if(!defl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
 
-        V_string& output = self_val.mut_object().mut(&"output").mut_string();
+        V_string& output = self_val.open_object().mut(&"output").open_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -212,14 +212,14 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         V_opaque* defl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              defl = &(pval->mut_opaque());
+              defl = &(pval->open_opaque());
 
         if(!defl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
 
-        V_string& output = self_val.mut_object().mut(&"output").mut_string();
+        V_string& output = self_val.open_object().mut(&"output").open_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -236,9 +236,9 @@ do_construct_Deflator(V_object& result, V_string format, optV_integer level)
         V_opaque* defl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              defl = &(pval->mut_opaque());
+              defl = &(pval->open_opaque());
 
         if(!defl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
@@ -389,14 +389,14 @@ do_construct_Inflator(V_object& result, V_string format)
         V_opaque* infl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              infl = &(pval->mut_opaque());
+              infl = &(pval->open_opaque());
 
         if(!infl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
 
-        V_string& output = self_val.mut_object().mut(&"output").mut_string();
+        V_string& output = self_val.open_object().mut(&"output").open_string();
         V_string data;
 
         reader.start_overload();
@@ -415,14 +415,14 @@ do_construct_Inflator(V_object& result, V_string format)
         V_opaque* infl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              infl = &(pval->mut_opaque());
+              infl = &(pval->open_opaque());
 
         if(!infl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
 
-        V_string& output = self_val.mut_object().mut(&"output").mut_string();
+        V_string& output = self_val.open_object().mut(&"output").open_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -439,14 +439,14 @@ do_construct_Inflator(V_object& result, V_string format)
         V_opaque* infl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              infl = &(pval->mut_opaque());
+              infl = &(pval->open_opaque());
 
         if(!infl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
 
-        V_string& output = self_val.mut_object().mut(&"output").mut_string();
+        V_string& output = self_val.open_object().mut(&"output").open_string();
 
         reader.start_overload();
         if(reader.end_overload())
@@ -463,9 +463,9 @@ do_construct_Inflator(V_object& result, V_string format)
         V_opaque* infl = nullptr;
         Value& self_val = self.dereference_mutable();
         if(self_val.is_object())
-          if(auto pval = self_val.mut_object().mut_ptr(s_private_uuid))
+          if(auto pval = self_val.open_object().mut_ptr(s_private_uuid))
             if(pval->is_opaque())
-              infl = &(pval->mut_opaque());
+              infl = &(pval->open_opaque());
 
         if(!infl)
           ASTERIA_THROW(("Invalid member function: type validation failure"));
