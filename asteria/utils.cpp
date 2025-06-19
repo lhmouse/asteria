@@ -418,13 +418,12 @@ c_quote(cow_string& str, const cow_string& data)
 cow_string
 get_real_path(const cow_string& path)
   {
-    char* str = ::realpath(path.safe_c_str(), nullptr);
+    unique_ptr<char, void (void*)> str(::realpath(path.safe_c_str(), nullptr), ::free);
     if(!str)
       ::rocket::sprintf_and_throw<::std::runtime_error>(
           "get_real_path: could not resolve `%s`: %m", path.c_str());
 
-    const auto guard = ::rocket::make_unique_handle(str, ::free);
-    return cow_string(str);
+    return cow_string(str.get(), ::strlen(str));
   }
 
 }  // namespace asteria
