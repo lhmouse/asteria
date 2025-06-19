@@ -75,7 +75,7 @@ asteria_include = [
   'asteria/library/array.hpp', 'asteria/library/numeric.hpp', 'asteria/library/math.hpp',
   'asteria/library/filesystem.hpp', 'asteria/library/checksum.hpp',
   'asteria/library/json.hpp', 'asteria/library/io.hpp', 'asteria/library/zlib.hpp',
-  'asteria/library/ini.hpp', 'asteria/library/csv.hpp' ]
+  'asteria/library/ini.hpp', 'asteria/library/csv.hpp', 'asteria/library/rsa.hpp' ]
 
 rocket_src = [
   'rocket/xassert.cpp', 'rocket/xthrow.cpp', 'rocket/xuchar.cpp', 'rocket/xmemory.cpp',
@@ -108,7 +108,7 @@ asteria_src = [
   'asteria/library/array.cpp', 'asteria/library/numeric.cpp', 'asteria/library/math.cpp',
   'asteria/library/filesystem.cpp', 'asteria/library/checksum.cpp',
   'asteria/library/json.cpp', 'asteria/library/io.cpp', 'asteria/library/zlib.cpp',
-  'asteria/library/ini.cpp', 'asteria/library/csv.cpp' ]
+  'asteria/library/ini.cpp', 'asteria/library/csv.cpp', 'asteria/library/rsa.cpp' ]
 
 repl_src = [
   'repl/fwd.hpp', 'repl/globals.cpp', 'repl/single.cpp', 'repl/interact.cpp',
@@ -122,7 +122,7 @@ test_src = [
   'test/simple_script.cpp', 'test/gc.cpp', 'test/gc2.cpp', 'test/gc_loop.cpp',
   'test/varg.cpp', 'test/vcall.cpp', 'test/operators_o0.cpp', 'test/operators_o1.cpp',
   'test/operators_o2.cpp', 'test/proper_tail_call.cpp', 'test/stack_overflow.cpp',
-  'test/structured_binding.cpp', 'test/global_identifier.cpp',
+  'test/structured_binding.cpp', 'test/global_identifier.cpp', 'test/rsa.cpp',
   'test/variadic_function_call.cpp', 'test/defer.cpp', 'test/defer_ptc.cpp',
   'test/trailing_commas.cpp', 'test/system.cpp', 'test/chrono.cpp', 'test/string.cpp',
   'test/array.cpp', 'test/numeric.cpp', 'test/math.cpp', 'test/filesystem.cpp',
