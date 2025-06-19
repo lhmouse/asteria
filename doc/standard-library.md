@@ -634,7 +634,7 @@ variable. Individual components are categorized into sub-objects.
 
   * `$$` is replaced with a literal `$`.
   * `${NNN}`, where `NNN` is at most three decimal numerals, is replaced
-       with the NNN-th argument. If `NNN` is  zero, it is replaced with
+       with the NNN-th argument. If `NNN` is zero, it is replaced with
        `templ` itself.
   * `$N`, where `N` is a single decimal numeral, is the same as `${N}`.
   * All the other characters are copied verbatim.
@@ -2274,7 +2274,7 @@ variable. Individual components are categorized into sub-objects.
   integer, it is clamped between `1` and `10` inclusively and this function
   behaves as if a string of this number of spaces was set. If `indent` is an
   empty string or zero, or is absent, no indention or line break will be
-  inserted.  If `json5` is set to `true`, the [JSON5](https://json5.org/)
+  inserted. If `json5` is set to `true`, the [JSON5](https://json5.org/)
   alternative format is used.
 
 * Returns the formatted text as a string.
@@ -2537,7 +2537,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Creates a data decompressor which uses the deflate algorithm according to
   [RFC 1951](https://www.rfc-editor.org/rfc/rfc1951.html). `format` must be
-  one of `"deflate"`, `"gzip"`,  or `"raw"`.
+  one of `"deflate"`, `"gzip"`, or `"raw"`.
 
 * Returns a decompressor as an object consisting of the following members:
 
