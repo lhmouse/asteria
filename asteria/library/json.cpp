@@ -457,7 +457,7 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
     else if(qtok->is_string_literal())
       ctxo.key = qtok->as_string_literal();
     else
-      ASTERIA_THROW(("`}` or key expected at '$1'"), tstrm.next_sloc());
+      ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
 
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();

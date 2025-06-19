@@ -59,16 +59,14 @@ do_accept_object_key(Xparse_object& ctxo, Token_Stream& tstrm)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Compiler_Error(xtc_status,
-                compiler_status_identifier_expected, tstrm.next_sloc());
+      ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
 
     if(qtok->is_identifier())
       ctxo.key = qtok->as_identifier();
     else if(qtok->is_string_literal())
       ctxo.key = qtok->as_string_literal();
     else
-      throw Compiler_Error(xtc_status,
-                compiler_status_identifier_expected, tstrm.next_sloc());
+      ASTERIA_THROW(("identifier or string expected at '$1'"), tstrm.next_sloc());
 
     ctxo.key_sloc = qtok->sloc();
     tstrm.shift();
@@ -88,9 +86,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
   parse_next:
     auto qtok = tstrm.peek_opt();
     if(!qtok)
-      throw Compiler_Error(xtc_format,
-                compiler_status_expression_expected, tstrm.next_sloc(),
-                "Value expected");
+      ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
 
     if(qtok->is_punctuator()) {
       // Accept an `[` or `{`.
@@ -120,9 +116,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
         value = V_object();
       }
       else
-        throw Compiler_Error(xtc_format,
-                  compiler_status_expression_expected, tstrm.next_sloc(),
-                  "Value expected");
+        ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
     }
     else if(qtok->is_identifier()) {
       // Accept a literal.
@@ -147,9 +141,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
         value = ::std::numeric_limits<double>::quiet_NaN();
       }
       else
-        throw Compiler_Error(xtc_format,
-                  compiler_status_expression_expected, tstrm.next_sloc(),
-                  "Value expected");
+        ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
     }
     else if(qtok->is_integer_literal()) {
       // Accept an integer.
@@ -167,9 +159,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
       tstrm.shift();
     }
     else
-      throw Compiler_Error(xtc_format,
-                compiler_status_expression_expected, tstrm.next_sloc(),
-                "Value expected");
+      ASTERIA_THROW(("Value expected at '$1'"), tstrm.next_sloc());
 
     while(stack.size()) {
       // Advance to the next element.
@@ -199,8 +189,7 @@ do_conf_parse_value_nonrecursive(Token_Stream& tstrm)
             auto& ctxo = ctx.mut<Xparse_object>();
             auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
             if(!pair.second)
-              throw Compiler_Error(xtc_status,
-                        compiler_status_duplicate_key_in_object, ctxo.key_sloc);
+              ASTERIA_THROW(("Duplicate key encountered at '$1'"), tstrm.next_sloc());
 
             // A comma or semicolon may follow, but it has no meaning whatsoever.
             do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
@@ -696,8 +685,7 @@ std_system_load_conf(V_string path)
 
       auto pair = ctxo.obj.try_emplace(move(ctxo.key), move(value));
       if(!pair.second)
-        throw Compiler_Error(xtc_status,
-                  compiler_status_duplicate_key_in_object, ctxo.key_sloc);
+        ASTERIA_THROW(("Duplicate key encountered at '$1'"), tstrm.next_sloc());
 
       // A comma or semicolon may follow, but it has no meaning whatsoever.
       do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
