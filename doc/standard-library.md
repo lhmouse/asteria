@@ -2591,4 +2591,72 @@ variable. Individual components are categorized into sub-objects.
 
 ## `std.rsa`
 
-### `std.
+### `std.rsa.md5WithRSAEncryption_sign(private_key_path, data)`
+
+* Signs a string with _md5WithRSAEncryption_. `private_key_path` shall
+  denote a PEM file, which contains the RSA private key to use, enclosed by
+  `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`. `data` is a
+  byte string to sign.
+
+* Returns a base64-encoded signature as a string.
+
+* Throws an exception if the private key is invalid.
+
+### `std.rsa.md5WithRSAEncryption_verify(public_key_path, data, sig)`
+
+* Verifies the signature of a string with _md5WithRSAEncryption_.
+  `public_key_path` shall denote a PEM file, which contains the RSA public
+  key to use, enclosed by `-----BEGIN PUBLIC KEY-----` and
+  `-----END PUBLIC KEY-----`. `data` is the byte string that has been signed.
+  `sig` is the signature to verify.
+
+* Returns `true` if the signature is valid, and `false` otherwise.
+
+* Throws an exception if the public key is invalid.
+
+### `std.rsa.sha1WithRSAEncryption_sign(private_key_path, data)`
+
+* Signs a string with _sha1WithRSAEncryption_. `private_key_path` shall
+  denote a PEM file, which contains the RSA private key to use, enclosed by
+  `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`. `data` is a
+  byte string to sign.
+
+* Returns a base64-encoded signature as a string.
+
+* Throws an exception if the private key is invalid.
+
+### `std.rsa.sha1WithRSAEncryption_verify(public_key_path, data, sig)`
+
+* Verifies the signature of a string with _sha1WithRSAEncryption_.
+  `public_key_path` shall denote a PEM file, which contains the RSA public
+  key to use, enclosed by `-----BEGIN PUBLIC KEY-----` and
+  `-----END PUBLIC KEY-----`. `data` is the byte string that has been signed.
+  `sig` is the signature to verify.
+
+* Returns `true` if the signature is valid, and `false` otherwise.
+
+* Throws an exception if the public key is invalid.
+
+### `std.rsa.sha256WithRSAEncryption_sign(private_key_path, data)`
+
+* Signs a string with _sha256WithRSAEncryption_. `private_key_path` shall
+  denote a PEM file, which contains the RSA private key to use, enclosed by
+  `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`. `data` is a
+  byte string to sign.
+
+* Returns a base64-encoded signature as a string.
+
+* Throws an exception if the private key is invalid.
+
+### `std.rsa.sha256WithRSAEncryption_verify(public_key_path, data, sig)`
+
+* Verifies the signature of a string with _sha256WithRSAEncryption_.
+  `public_key_path` shall denote a PEM file, which contains the RSA public
+  key to use, enclosed by `-----BEGIN PUBLIC KEY-----` and
+  `-----END PUBLIC KEY-----`. `data` is the byte string that has been signed.
+  `sig` is the signature to verify.
+
+* Returns `true` if the signature is valid, and `false` otherwise.
+
+* Throws an exception if the public key is invalid.
+
