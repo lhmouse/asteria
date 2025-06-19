@@ -14,6 +14,7 @@
 #include "../llds/reference_stack.hpp"
 #include "../llds/variable_hashmap.hpp"
 #include "../utils.hpp"
+template class ::rocket::variant<ASTERIA_EINUD0SU_(::asteria::Reference::St)>;
 namespace asteria {
 
 ROCKET_FLATTEN

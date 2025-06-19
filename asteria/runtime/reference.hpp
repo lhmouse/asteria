@@ -28,7 +28,8 @@ class Reference
         cow_vector<Subscript> subs;
       };
 
-    using variant_type = ::rocket::variant<St_bad, St_void, St_temp, St_var, St_ptc>;
+#define ASTERIA_EINUD0SU_(U)  U##_bad, U##_void, U##_temp, U##_var, U##_ptc
+    using variant_type = ::rocket::variant<ASTERIA_EINUD0SU_(St)>;
     using bytes_type = ::std::aligned_storage<sizeof(variant_type), 16>::type;
 
     union {
@@ -267,4 +268,5 @@ swap(Reference& lhs, Reference& rhs) noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
+extern template class ::rocket::variant<ASTERIA_EINUD0SU_(::asteria::Reference::St)>;
 #endif
