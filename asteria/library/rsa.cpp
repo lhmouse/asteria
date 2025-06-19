@@ -50,8 +50,7 @@ do_rsa_sign(const V_string& private_key_path, int type, const uint8_t* m, unsign
     if(!key_file)
       ASTERIA_THROW(("Could not open private key file '$1'"), private_key_path);
 
-    using unique_RSA = unique_ptr<::RSA, void (::RSA*)>;
-    unique_RSA rsa(::PEM_read_RSAPrivateKey(key_file, nullptr, nullptr, nullptr), ::RSA_free);
+    unique_ptr<::RSA, void (::RSA*)> rsa(::PEM_read_RSAPrivateKey(key_file, nullptr, nullptr, nullptr), ::RSA_free);
     if(!rsa)
       ASTERIA_THROW(("Could not read private key file '$1'"), private_key_path);
 
@@ -75,8 +74,7 @@ do_rsa_verify(const V_string& public_key_path, int type, const uint8_t* m, unsig
     if(!key_file)
       ASTERIA_THROW(("Could not open public key file '$1'"), public_key_path);
 
-    using unique_RSA = unique_ptr<::RSA, void (::RSA*)>;
-    unique_RSA rsa(::PEM_read_RSA_PUBKEY(key_file, nullptr, nullptr, nullptr), ::RSA_free);
+    unique_ptr<::RSA, void (::RSA*)> rsa(::PEM_read_RSA_PUBKEY(key_file, nullptr, nullptr, nullptr), ::RSA_free);
     if(!rsa)
       ASTERIA_THROW(("Could not read public key file '$1'"), public_key_path);
 
@@ -93,7 +91,7 @@ do_rsa_verify(const V_string& public_key_path, int type, const uint8_t* m, unsig
 }  // namespace
 
 V_string
-std_rsa_md5WithRSAEncryption_sign(V_string private_key_path, V_string data)
+std_rsa_sign_md5(V_string private_key_path, V_string data)
   {
     uint8_t m[64];
     do_md5(m, data);
@@ -101,7 +99,7 @@ std_rsa_md5WithRSAEncryption_sign(V_string private_key_path, V_string data)
   }
 
 V_boolean
-std_rsa_md5WithRSAEncryption_verify(V_string public_key_path, V_string data, V_string sig)
+std_rsa_verify_md5(V_string public_key_path, V_string data, V_string sig)
   {
     uint8_t m[64];
     do_md5(m, data);
@@ -109,7 +107,7 @@ std_rsa_md5WithRSAEncryption_verify(V_string public_key_path, V_string data, V_s
   }
 
 V_string
-std_rsa_sha1WithRSAEncryption_sign(V_string private_key_path, V_string data)
+std_rsa_sign_sha1(V_string private_key_path, V_string data)
   {
     uint8_t m[64];
     do_sha1(m, data);
@@ -117,7 +115,7 @@ std_rsa_sha1WithRSAEncryption_sign(V_string private_key_path, V_string data)
   }
 
 V_boolean
-std_rsa_sha1WithRSAEncryption_verify(V_string public_key_path, V_string data, V_string sig)
+std_rsa_verify_sha1(V_string public_key_path, V_string data, V_string sig)
   {
     uint8_t m[64];
     do_sha1(m, data);
@@ -125,7 +123,7 @@ std_rsa_sha1WithRSAEncryption_verify(V_string public_key_path, V_string data, V_
   }
 
 V_string
-std_rsa_sha256WithRSAEncryption_sign(V_string private_key_path, V_string data)
+std_rsa_sign_sha256(V_string private_key_path, V_string data)
   {
     uint8_t m[64];
     do_sha256(m, data);
@@ -133,7 +131,7 @@ std_rsa_sha256WithRSAEncryption_sign(V_string private_key_path, V_string data)
   }
 
 V_boolean
-std_rsa_sha256WithRSAEncryption_verify(V_string public_key_path, V_string data, V_string sig)
+std_rsa_verify_sha256(V_string public_key_path, V_string data, V_string sig)
   {
     uint8_t m[64];
     do_sha256(m, data);
@@ -143,9 +141,9 @@ std_rsa_sha256WithRSAEncryption_verify(V_string public_key_path, V_string data, 
 void
 create_bindings_rsa(V_object& result, API_Version /*version*/)
   {
-    result.insert_or_assign(&"md5WithRSAEncryption_sign",
+    result.insert_or_assign(&"sign_md5",
       ASTERIA_BINDING(
-        "std.rsa.md5WithRSAEncryption_sign", "",
+        "std.rsa.sign_md5", "",
         Argument_Reader&& reader)
       {
         V_string private_key_path, data;
@@ -154,14 +152,14 @@ create_bindings_rsa(V_object& result, API_Version /*version*/)
         reader.required(private_key_path);
         reader.required(data);
         if(reader.end_overload())
-          return (Value) std_rsa_md5WithRSAEncryption_sign(private_key_path, data);
+          return (Value) std_rsa_sign_md5(private_key_path, data);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"md5WithRSAEncryption_verify",
+    result.insert_or_assign(&"verify_md5",
       ASTERIA_BINDING(
-        "std.rsa.rsa_md5WithRSAEncryption_verify", "",
+        "std.rsa.verify_md5", "",
         Argument_Reader&& reader)
       {
         V_string public_key_path, data, sig;
@@ -171,14 +169,14 @@ create_bindings_rsa(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.required(sig);
         if(reader.end_overload())
-          return (Value) std_rsa_md5WithRSAEncryption_verify(public_key_path, data, sig);
+          return (Value) std_rsa_verify_md5(public_key_path, data, sig);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"sha1WithRSAEncryption_sign",
+    result.insert_or_assign(&"sign_sha1",
       ASTERIA_BINDING(
-        "std.rsa.sha1WithRSAEncryption_sign", "",
+        "std.rsa.sign_sha1", "",
         Argument_Reader&& reader)
       {
         V_string private_key_path, data;
@@ -187,14 +185,14 @@ create_bindings_rsa(V_object& result, API_Version /*version*/)
         reader.required(private_key_path);
         reader.required(data);
         if(reader.end_overload())
-          return (Value) std_rsa_sha1WithRSAEncryption_sign(private_key_path, data);
+          return (Value) std_rsa_sign_sha1(private_key_path, data);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"sha1WithRSAEncryption_verify",
+    result.insert_or_assign(&"verify_sha1",
       ASTERIA_BINDING(
-        "std.rsa.rsa_sha1WithRSAEncryption_verify", "",
+        "std.rsa.verify_sha1", "",
         Argument_Reader&& reader)
       {
         V_string public_key_path, data, sig;
@@ -204,14 +202,14 @@ create_bindings_rsa(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.required(sig);
         if(reader.end_overload())
-          return (Value) std_rsa_sha1WithRSAEncryption_verify(public_key_path, data, sig);
+          return (Value) std_rsa_verify_sha1(public_key_path, data, sig);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"sha256WithRSAEncryption_sign",
+    result.insert_or_assign(&"sign_sha256",
       ASTERIA_BINDING(
-        "std.rsa.sha256WithRSAEncryption_sign", "",
+        "std.rsa.sign_sha256", "",
         Argument_Reader&& reader)
       {
         V_string private_key_path, data;
@@ -220,14 +218,14 @@ create_bindings_rsa(V_object& result, API_Version /*version*/)
         reader.required(private_key_path);
         reader.required(data);
         if(reader.end_overload())
-          return (Value) std_rsa_sha256WithRSAEncryption_sign(private_key_path, data);
+          return (Value) std_rsa_sign_sha256(private_key_path, data);
 
         reader.throw_no_matching_function_call();
       });
 
-    result.insert_or_assign(&"sha256WithRSAEncryption_verify",
+    result.insert_or_assign(&"verify_sha256",
       ASTERIA_BINDING(
-        "std.rsa.rsa_sha256WithRSAEncryption_verify", "",
+        "std.rsa.verify_sha256", "",
         Argument_Reader&& reader)
       {
         V_string public_key_path, data, sig;
@@ -237,7 +235,7 @@ create_bindings_rsa(V_object& result, API_Version /*version*/)
         reader.required(data);
         reader.required(sig);
         if(reader.end_overload())
-          return (Value) std_rsa_sha256WithRSAEncryption_verify(public_key_path, data, sig);
+          return (Value) std_rsa_verify_sha256(public_key_path, data, sig);
 
         reader.throw_no_matching_function_call();
       });

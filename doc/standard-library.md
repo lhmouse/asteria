@@ -2591,7 +2591,7 @@ variable. Individual components are categorized into sub-objects.
 
 ## `std.rsa`
 
-### `std.rsa.md5WithRSAEncryption_sign(private_key_path, data)`
+### `std.rsa.sign_md5(private_key_path, data)`
 
 * Signs a string with _md5WithRSAEncryption_. `private_key_path` shall
   denote a PEM file, which contains the RSA private key to use, enclosed by
@@ -2602,7 +2602,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if the private key is invalid.
 
-### `std.rsa.md5WithRSAEncryption_verify(public_key_path, data, sig)`
+### `std.rsa.verify_md5(public_key_path, data, sig)`
 
 * Verifies the signature of a string with _md5WithRSAEncryption_.
   `public_key_path` shall denote a PEM file, which contains the RSA public
@@ -2614,7 +2614,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if the public key is invalid.
 
-### `std.rsa.sha1WithRSAEncryption_sign(private_key_path, data)`
+### `std.rsa.sign_sha1(private_key_path, data)`
 
 * Signs a string with _sha1WithRSAEncryption_. `private_key_path` shall
   denote a PEM file, which contains the RSA private key to use, enclosed by
@@ -2625,7 +2625,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if the private key is invalid.
 
-### `std.rsa.sha1WithRSAEncryption_verify(public_key_path, data, sig)`
+### `std.rsa.verify_sha1(public_key_path, data, sig)`
 
 * Verifies the signature of a string with _sha1WithRSAEncryption_.
   `public_key_path` shall denote a PEM file, which contains the RSA public
@@ -2637,7 +2637,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if the public key is invalid.
 
-### `std.rsa.sha256WithRSAEncryption_sign(private_key_path, data)`
+### `std.rsa.sign_sha256(private_key_path, data)`
 
 * Signs a string with _sha256WithRSAEncryption_. `private_key_path` shall
   denote a PEM file, which contains the RSA private key to use, enclosed by
@@ -2648,7 +2648,7 @@ variable. Individual components are categorized into sub-objects.
 
 * Throws an exception if the private key is invalid.
 
-### `std.rsa.sha256WithRSAEncryption_verify(public_key_path, data, sig)`
+### `std.rsa.verify_sha256(public_key_path, data, sig)`
 
 * Verifies the signature of a string with _sha256WithRSAEncryption_.
   `public_key_path` shall denote a PEM file, which contains the RSA public

@@ -17,8 +17,8 @@ int main()
     var data1 = std.filesystem.read(data_dir / 'data1');
     var sig1 = std.filesystem.read(data_dir / 'data1.sig');
 
-    assert std.rsa.sha256WithRSAEncryption_sign(data_dir / 'private_key.pem', data1) == sig1;
-    assert std.rsa.sha256WithRSAEncryption_verify(data_dir / 'public_key.pem', data1, sig1) == true;
+    assert std.rsa.sign_sha256(data_dir / 'private_key.pem', data1) == sig1;
+    assert std.rsa.verify_sha256(data_dir / 'public_key.pem', data1, sig1) == true;
 
 ///////////////////////////////////////////////////////////////////////////////
       )__");

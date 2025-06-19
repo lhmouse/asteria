@@ -7,29 +7,29 @@
 #include "../fwd.hpp"
 namespace asteria {
 
-// `std.rsa.md5WithRSAEncryption_sign`
+// `std.rsa.sign_md5`
 V_string
-std_rsa_md5WithRSAEncryption_sign(V_string private_key_path, V_string data);
+std_rsa_sign_md5(V_string private_key_path, V_string data);
 
-// `std.rsa.md5WithRSAEncryption_verify`
+// `std.rsa.verify_md5`
 V_boolean
-std_rsa_md5WithRSAEncryption_verify(V_string public_key_path, V_string data, V_string sig);
+std_rsa_verify_md5(V_string public_key_path, V_string data, V_string sig);
 
-// `std.rsa.sha1WithRSAEncryption_sign`
+// `std.rsa.sign_sha1`
 V_string
-std_rsa_sha1WithRSAEncryption_sign(V_string private_key_path, V_string data);
+std_rsa_sign_sha1(V_string private_key_path, V_string data);
 
-// `std.rsa.sha1WithRSAEncryption_verify`
+// `std.rsa.verify_sha1`
 V_boolean
-std_rsa_sha1WithRSAEncryption_verify(V_string public_key_path, V_string data, V_string sig);
+std_rsa_verify_sha1(V_string public_key_path, V_string data, V_string sig);
 
-// `std.rsa.sha256WithRSAEncryption_sign`
+// `std.rsa.sign_sha256`
 V_string
-std_rsa_sha256WithRSAEncryption_sign(V_string private_key_path, V_string data);
+std_rsa_sign_sha256(V_string private_key_path, V_string data);
 
-// `std.rsa.sha256WithRSAEncryption_verify`
+// `std.rsa.verify_sha256`
 V_boolean
-std_rsa_sha256WithRSAEncryption_verify(V_string public_key_path, V_string data, V_string sig);
+std_rsa_verify_sha256(V_string public_key_path, V_string data, V_string sig);
 
 // Initialize an object that is to be referenced as `std.rsa`.
 void
