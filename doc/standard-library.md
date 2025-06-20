@@ -2598,7 +2598,7 @@ variable. Individual components are categorized into sub-objects.
   `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`. `data` is a
   byte string to sign.
 
-* Returns a base64-encoded signature as a string.
+* Returns the signature as a byte string.
 
 * Throws an exception if the private key is invalid.
 
@@ -2621,7 +2621,7 @@ variable. Individual components are categorized into sub-objects.
   `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`. `data` is a
   byte string to sign.
 
-* Returns a base64-encoded signature as a string.
+* Returns the signature as a byte string.
 
 * Throws an exception if the private key is invalid.
 
@@ -2644,7 +2644,7 @@ variable. Individual components are categorized into sub-objects.
   `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`. `data` is a
   byte string to sign.
 
-* Returns a base64-encoded signature as a string.
+* Returns the signature as a byte string.
 
 * Throws an exception if the private key is invalid.
 

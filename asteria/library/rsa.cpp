@@ -12,7 +12,6 @@
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include <openssl/rsa.h>
-#include <openssl/evp.h>
 namespace asteria {
 namespace {
 
@@ -54,21 +53,18 @@ do_rsa_sign(const V_string& private_key_path, int type, const uint8_t* m, unsign
     if(!rsa)
       ASTERIA_THROW(("Could not read private key file '$1'"), private_key_path);
 
-    ::rocket::cow_bstring sbytes((uint32_t) ::RSA_size(rsa), '/');
-    unsigned sblen;
-    if(!::RSA_sign(type, m, mlen, sbytes.mut_data(), &sblen, rsa))
+    V_string sig;
+    sig.append((uint32_t) ::RSA_size(rsa), '/');
+    unsigned siglen;
+    if(!::RSA_sign(type, m, mlen, (uint8_t*) sig.mut_data(), &siglen, rsa))
       ASTERIA_THROW(("Could not sign data with private key file '$1'"), private_key_path);
 
-    V_string sig;
-    sig.resize((sblen + 2) / 3 * 4);
-    int slen = ::EVP_EncodeBlock((uint8_t*) sig.mut_data(), sbytes.data(), (int) sblen);
-    sig.erase((uint32_t) slen);
+    sig.erase(siglen);
     return sig;
   }
 
 bool
-do_rsa_verify(const V_string& public_key_path, int type, const uint8_t* m, unsigned mlen,
-              const V_string& sig)
+do_rsa_verify(const V_string& public_key_path, int type, const uint8_t* m, unsigned mlen, const V_string& sig)
   {
     ::rocket::unique_posix_file key_file(::fopen(public_key_path.safe_c_str(), "rb"));
     if(!key_file)
@@ -78,14 +74,8 @@ do_rsa_verify(const V_string& public_key_path, int type, const uint8_t* m, unsig
     if(!rsa)
       ASTERIA_THROW(("Could not read public key file '$1'"), public_key_path);
 
-    ::rocket::cow_bstring sbytes(sig.size(), '*');
-    int sblen = ::EVP_DecodeBlock(sbytes.mut_data(), (const uint8_t*) sig.data(), (int) sig.size());
-    if(sblen < 1)
-      ASTERIA_THROW(("Could not decode signature `$1`"), sig);
-
-    sblen -= (int) ::std::count(sig.rbegin(), sig.rbegin() + 2, '=');
-    int r = ::RSA_verify(type, m, mlen, sbytes.data(), (uint32_t) sblen, rsa);
-    return r == 1;
+    int result = ::RSA_verify(type, m, mlen, (const uint8_t*) sig.data(), (unsigned) sig.size(), rsa);
+    return result == 1;
   }
 
 }  // namespace
