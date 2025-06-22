@@ -89,11 +89,7 @@ class const_func_table
 
     template<typename... argsT>
     constexpr
-#ifdef __cpp_lib_is_invocable
     typename ::std::invoke_result<targetT*, argsT&&...>::type
-#else
-    typename ::std::result_of<targetT* (argsT&&...)>::type
-#endif
     operator()(size_t k, argsT&&... args) const
       {
         return this->m_ptrs[k] (forward<argsT>(args)...);
