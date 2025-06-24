@@ -1774,8 +1774,29 @@ std_string_iconv(V_string to_encoding, V_string text, optV_string from_encoding)
     return output;
   }
 
+V_integer
+std_string_visual_width(V_string text)
+  {
+    V_integer width = 0;
+
+    size_t offset = 0;
+    while(offset < text.size()) {
+      // Try decoding a code point.
+      char32_t cp;
+      if(!utf8_decode(cp, text, offset))
+        ASTERIA_THROW(("Invalid UTF-8 string"));
+
+      int w = ::wcwidth(static_cast<wchar_t>(cp));
+      if(w < 0)
+        ASTERIA_THROW(("Non-printable character encountered"));
+
+      width += w;
+    }
+    return width;
+  }
+
 void
-create_bindings_string(V_object& result, API_Version /*version*/)
+create_bindings_string(V_object& result, API_Version version)
   {
     result.insert_or_assign(&"slice",
       ASTERIA_BINDING(
@@ -2698,6 +2719,22 @@ create_bindings_string(V_object& result, API_Version /*version*/)
 
         reader.throw_no_matching_function_call();
       });
+
+    if(version >= api_version_0002_0000)
+      result.insert_or_assign(&"visual_length",
+        ASTERIA_BINDING(
+          "visual_length", "text",
+          Argument_Reader&& reader)
+        {
+          V_string text;
+
+          reader.start_overload();
+          reader.required(text);
+          if(reader.end_overload())
+            return (Value) std_string_visual_width(text);
+
+          reader.throw_no_matching_function_call();
+        });
   }
 
 }  // namespace asteria

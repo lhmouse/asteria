@@ -735,6 +735,15 @@ variable. Individual components are categorized into sub-objects.
 * Throws an exception in case of an invalid encoding or an invalid input
   string.
 
+### `std.string.visual_length(text)`
+
+* Calculates the visual width of `text` which shall be a UTF-8 string.
+
+* Returns the visual width in columns.
+
+* Throws an exception if `text` is not a valid UTF-8 string, or contains
+  non-printable characters.
+
 ## `std.array`
 
 ### `std.array.slice(data, from, [length])`
