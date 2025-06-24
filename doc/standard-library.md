@@ -737,9 +737,9 @@ variable. Individual components are categorized into sub-objects.
 
 ### `std.string.visual_length(text)`
 
-* Calculates the visual width of `text` which shall be a UTF-8 string.
+* Calculates the visual length of `text` which shall be a UTF-8 string.
 
-* Returns the visual width in columns.
+* Returns the visual length in columns.
 
 * Throws an exception if `text` is not a valid UTF-8 string, or contains
   non-printable characters.
