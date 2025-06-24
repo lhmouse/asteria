@@ -113,7 +113,7 @@ Simple_Script::
 reload_stdin(int start_line)
   {
     ::rocket::tinybuf_file cbuf;
-    cbuf.reset(stdin, nullptr);
+    cbuf.reset(stdin);
     this->reload(&"[stdin]", start_line, move(cbuf));
   }
 

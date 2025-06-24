@@ -42,9 +42,9 @@ class basic_tinybuf_file
         m_file(move(file))
       { }
 
-    basic_tinybuf_file(handle_type fp, const closer_type& cl) noexcept
+    explicit basic_tinybuf_file(handle_type fp) noexcept
       :
-        m_file(fp, cl)
+        m_file(fp)
       { }
 
     basic_tinybuf_file(const char* path, open_mode mode)
@@ -90,15 +90,6 @@ class basic_tinybuf_file
     get_handle() const noexcept
       { return this->m_file.get();  }
 
-    // Gets the file closer function.
-    const closer_type&
-    get_closer() const noexcept
-      { return this->m_file.get_closer();  }
-
-    closer_type&
-    get_closer() noexcept
-      { return this->m_file.get_closer();  }
-
     // Takes ownership of an existent file.
     basic_tinybuf_file&
     reset(file_type&& file) noexcept
@@ -110,9 +101,9 @@ class basic_tinybuf_file
       }
 
     basic_tinybuf_file&
-    reset(handle_type fp, const closer_type& cl) noexcept
+    reset(handle_type fp) noexcept
       {
-        this->m_file.reset(fp, cl);
+        this->m_file.reset(fp);
         this->m_mbst_g = ::mbstate_t();
         this->m_mbst_p = ::mbstate_t();
         return *this;
@@ -176,13 +167,13 @@ class basic_tinybuf_file
         }
 
         // Open the file.
-        unique_posix_fd fd(::open(path, flags, 0666), ::close);
+        unique_posix_fd fd(::open(path, flags, 0666));
         if(!fd)
           noadl::sprintf_and_throw<runtime_error>(
               "basic_tinybuf_file: `open()` failed (path `%s`, flags `%u`, errno `%d`)",
               path, mode, errno);
 
-        file_type file(::fdopen(fd, mstr), ::fclose);
+        file_type file(::fdopen(fd, mstr));
         if(!file)
           noadl::sprintf_and_throw<runtime_error>(
               "basic_tinybuf_file: `open()` failed (path `%s`, modes `%s`, errno `%d`)",

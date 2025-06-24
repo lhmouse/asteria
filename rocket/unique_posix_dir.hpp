@@ -8,27 +8,10 @@
 #include <dirent.h>  // ::DIR, ::closedir()
 namespace rocket {
 
-class posix_dir_closer
+struct posix_dir_closer
   {
-  public:
-    using handle_type  = ::DIR*;
-    using closer_type  = int (*)(::DIR*);  // ::closedir()
+    using handle_type = ::DIR*;
 
-  private:
-    closer_type m_cl;
-
-  public:
-    constexpr posix_dir_closer() noexcept
-      :
-        m_cl(::closedir)
-      { }
-
-    constexpr posix_dir_closer(closer_type cl) noexcept
-      :
-        m_cl(cl)
-      { }
-
-  public:
     constexpr
     bool
     is_null(handle_type dp) const noexcept
@@ -39,9 +22,12 @@ class posix_dir_closer
     null() const noexcept
       { return nullptr;  }
 
-    int
+    void
     close(handle_type dp) const noexcept
-      { return this->m_cl ? this->m_cl(dp) : 0;  }
+      {
+        if(dp)
+          ::closedir(dp);
+      }
   };
 
 using unique_posix_dir  = unique_handle<::DIR*, posix_dir_closer>;

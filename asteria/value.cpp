@@ -529,7 +529,7 @@ bool
 Value::
 print_to_stderr() const
   {
-    ::rocket::tinyfmt_file fmt(stderr, nullptr);
+    ::rocket::tinyfmt_file fmt(stderr);
     this->print_to(fmt);
     return ::ferror(fmt.get_handle());
   }
@@ -670,7 +670,7 @@ bool
 Value::
 dump_to_stderr(size_t indent, size_t hanging) const
   {
-    ::rocket::tinyfmt_file fmt(stderr, nullptr);
+    ::rocket::tinyfmt_file fmt(stderr);
     this->dump(fmt, indent, hanging);
     return ::ferror(fmt.get_handle());
   }

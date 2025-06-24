@@ -39,9 +39,9 @@ class basic_tinyfmt_file
         m_buf(move(file))
       { }
 
-    basic_tinyfmt_file(handle_type fp, const closer_type& cl) noexcept
+    explicit basic_tinyfmt_file(handle_type fp) noexcept
       :
-        m_buf(fp, cl)
+        m_buf(fp)
       { }
 
     basic_tinyfmt_file&
@@ -69,15 +69,6 @@ class basic_tinyfmt_file
     get_handle() const noexcept
       { return this->m_buf.get_handle();  }
 
-    // Gets the file closer function.
-    const closer_type&
-    get_closer() const noexcept
-      { return this->m_buf.get_closer();  }
-
-    closer_type&
-    get_closer() noexcept
-      { return this->m_buf.get_closer();  }
-
     // Takes ownership of an existent file.
     basic_tinyfmt_file&
     reset(file_type&& file) noexcept
@@ -87,9 +78,9 @@ class basic_tinyfmt_file
       }
 
     basic_tinyfmt_file&
-    reset(handle_type fp, closer_type cl) noexcept
+    reset(handle_type fp) noexcept
       {
-        this->m_buf.reset(fp, cl);
+        this->m_buf.reset(fp);
         return *this;
       }
 

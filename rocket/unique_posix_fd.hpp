@@ -8,27 +8,10 @@
 #include <unistd.h>  // ::close()
 namespace rocket {
 
-class posix_fd_closer
+struct posix_fd_closer
   {
-  public:
-    using handle_type  = int;
-    using closer_type  = int (*)(int);  // ::close()
+    using handle_type = int;
 
-  private:
-    closer_type m_cl;
-
-  public:
-    constexpr posix_fd_closer() noexcept
-      :
-        m_cl(::close)
-      { }
-
-    constexpr posix_fd_closer(closer_type cl) noexcept
-      :
-        m_cl(cl)
-      { }
-
-  public:
     constexpr
     bool
     is_null(handle_type fd) const noexcept
@@ -39,9 +22,12 @@ class posix_fd_closer
     null() const noexcept
       { return -1;  }
 
-    int
+    void
     close(handle_type fd) const noexcept
-      { return this->m_cl ? this->m_cl(fd) : 0;  }
+      {
+        if(fd > STDERR_FILENO)
+          ::close(fd);
+      }
   };
 
 using unique_posix_fd  = unique_handle<int, posix_fd_closer>;
