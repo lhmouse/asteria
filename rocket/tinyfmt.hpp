@@ -459,6 +459,19 @@ operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<604800>>
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "week");
   }
 
+template<typename charT, typename durationT>
+inline
+basic_tinyfmt<charT>&
+operator<<(basic_tinyfmt<charT>& fmt, const time_point<system_clock, durationT>& tp)
+  {
+    uint64_t ns = static_cast<uint64_t>(time_point_cast<nanoseconds>(tp).time_since_epoch().count());
+    struct timespec tv;
+    tv.tv_sec = static_cast<::time_t>((ns + 9223372036000000000) / 1000000000) - 9223372036;
+    tv.tv_nsec = static_cast<long>(ns % 1000000000);
+    struct tm tm;
+    ::localtime_r(&(tv.tv_sec), &tm);
+    return details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
+  }
 
 using tinyfmt     = basic_tinyfmt<char>;
 using wtinyfmt    = basic_tinyfmt<wchar_t>;

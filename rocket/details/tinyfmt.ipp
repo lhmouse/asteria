@@ -42,7 +42,7 @@ template<typename charT>
 basic_tinyfmt<charT>&
 do_format_time_iso(basic_tinyfmt<charT>& fmt, const struct tm& tm, long nsec)
   {
-    char stemp[] = "2014-09-26 00:58:26.123456789";
+    char stemp[] = "2014-09-26 00:58:26.123456789 +0000";
     uint64_t date;
     ascii_numput nump;
 
@@ -69,7 +69,15 @@ do_format_time_iso(basic_tinyfmt<charT>& fmt, const struct tm& tm, long nsec)
 
     nump.put_DU((uint32_t) nsec, 9);
     ::memcpy(stemp + 20, nump.data(), 9);
-    return fmt.putn_latin1(stemp, 29);
+
+    if(tm.tm_gmtoff == 0)
+      ::memcpy(stemp + 30, "UTC", 4);
+    else {
+      nump.put_DI(tm.tm_gmtoff / 3600 * 100 + tm.tm_gmtoff / 60 % 60, 4);
+      ::memcpy(stemp + 35 - nump.size(), nump.data(), nump.size());
+    }
+
+    return fmt.putn_latin1(stemp, 35);
   }
 
 }  // namespace details_tinyfmt
