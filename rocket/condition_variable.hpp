@@ -49,7 +49,7 @@ class condition_variable
         double secs = (double) ts.tv_sec + (double) ts.tv_nsec * 0.000000001;
 
         using ::std::chrono::duration_cast;
-        secs += duration_cast<::std::chrono::duration<double>>(timeout).count();
+        secs += duration_cast<duration<double>>(timeout).count();
         if(secs >= 0x7FFFFFFFFFFFFC00) {
           ts.tv_sec = 0x7FFFFFFFFFFFFC00;
           ts.tv_nsec = 0;

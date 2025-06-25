@@ -398,7 +398,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::shared_ptr<elementT>& ptr)
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000000>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1, 1000000000>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "nanosecond");
   }
@@ -406,7 +406,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000000>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1, 1000000>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "microsecond");
   }
@@ -414,7 +414,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1, 1000>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1, 1000>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "millisecond");
   }
@@ -422,7 +422,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<1>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<1>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "second");
   }
@@ -430,7 +430,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<60>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<60>>& dur)
   {
    return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "minute");
   }
@@ -438,7 +438,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<3600>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<3600>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "hour");
   }
@@ -446,7 +446,7 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<86400>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<86400>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "day");
   }
@@ -454,10 +454,11 @@ operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std:
 template<typename charT, typename repT>
 inline
 basic_tinyfmt<charT>&
-operator<<(basic_tinyfmt<charT>& fmt, const ::std::chrono::duration<repT, ::std::ratio<604800>>& dur)
+operator<<(basic_tinyfmt<charT>& fmt, const duration<repT, ::std::ratio<604800>>& dur)
   {
     return fmt << dur.count() << ROCKET_TINYFMT_NOUN_REGULAR(dur.count(), "week");
   }
+
 
 using tinyfmt     = basic_tinyfmt<char>;
 using wtinyfmt    = basic_tinyfmt<wchar_t>;
@@ -559,85 +560,85 @@ extern template wtinyfmt& operator<<(wtinyfmt&, const exception&);
 extern template u16tinyfmt& operator<<(u16tinyfmt&, const exception&);
 extern template u32tinyfmt& operator<<(u32tinyfmt&, const exception&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000000>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000000>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000000>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000000>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000000>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1, 1000>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<1>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<1>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<60>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<60>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<60>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<60>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<60>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<3600>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<3600>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<3600>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<3600>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<3600>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<86400>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<86400>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<86400>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<86400>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<86400>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<604800>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<604800>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<604800>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<int64_t, ::std::ratio<604800>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<int64_t, ::std::ratio<604800>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1, 1000000000>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1, 1000000>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1, 1000>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1, 1000>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<1>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<1>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<1>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<1>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<1>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<60>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<60>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<60>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<60>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<60>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<3600>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<3600>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<3600>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<3600>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<3600>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<86400>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<86400>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<86400>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<86400>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<86400>>&);
 
-extern template tinyfmt& operator<<(tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
-extern template wtinyfmt& operator<<(wtinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
-extern template u16tinyfmt& operator<<(u16tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
-extern template u32tinyfmt& operator<<(u32tinyfmt&, const ::std::chrono::duration<double, ::std::ratio<604800>>&);
+extern template tinyfmt& operator<<(tinyfmt&, const duration<double, ::std::ratio<604800>>&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const duration<double, ::std::ratio<604800>>&);
+extern template u16tinyfmt& operator<<(u16tinyfmt&, const duration<double, ::std::ratio<604800>>&);
+extern template u32tinyfmt& operator<<(u32tinyfmt&, const duration<double, ::std::ratio<604800>>&);
 
 template<typename charT>
 struct basic_formatter

@@ -15,6 +15,7 @@
 #include <limits>  // std::numeric_limits<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
+#include <chrono>  // std::chrono
 #include <cstring>  // std::memset()
 #include <cwchar>  // std::wcslen()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
@@ -153,6 +154,9 @@ using ::std::memory_order_acquire;
 using ::std::memory_order_release;
 using ::std::memory_order_acq_rel;
 using ::std::memory_order_seq_cst;
+
+using namespace ::std::chrono;
+using namespace ::std::literals;
 
 // Utility macros
 #define ROCKET_CAR(x, ...)   x
