@@ -1226,7 +1226,7 @@ do_hash_file(const V_string& path)
           path);
 
     // Get the file mode and preferred I/O block size.
-    struct ::stat stb;
+    struct stat stb;
     if(::fstat(fd, &stb) != 0)
       ASTERIA_THROW((
           "Could not get information about source file '$1'",

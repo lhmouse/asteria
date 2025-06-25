@@ -45,7 +45,7 @@ do_format_with_ms(V_integer time_point, optV_integer utc_offset, bool with_ms)
     }
     else {
       // Break the time point down.
-      ::tm tr;
+      struct tm tr;
 
       if(!utc_offset) {
         // Obtain GMT offset from the system.
@@ -163,7 +163,7 @@ do_match(const char*& rptr_out, uint32_t& add_to_value, const char (&cstrs)[N][S
 V_integer
 std_chrono_now()
   {
-    ::timespec ts;
+    struct timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     return (int64_t) ts.tv_sec * 1000 + (uint32_t) ts.tv_nsec / 1000000;
   }
@@ -249,7 +249,7 @@ std_chrono_parse(V_string time_str)
     // Assembly parts.
     int64_t time_point = ms;
 
-    ::tm tr;
+    struct tm tr;
     tr.tm_year = (int) year - 1900;
     tr.tm_mon = (int) mon - 1;
     tr.tm_mday = (int) day;
@@ -280,7 +280,7 @@ std_chrono_parse(V_string time_str)
 V_real
 std_chrono_hires_now()
   {
-    ::timespec ts;
+    struct timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
     return (double) ts.tv_sec * 1000 + (double) ts.tv_nsec * 0.000001 + 123456789;
   }
@@ -288,7 +288,7 @@ std_chrono_hires_now()
 V_integer
 std_chrono_steady_now()
   {
-    ::timespec ts;
+    struct timespec ts;
 #ifdef CLOCK_MONOTONIC_COARSE
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
 #else

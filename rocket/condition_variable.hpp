@@ -44,7 +44,7 @@ class condition_variable
         ROCKET_ASSERT(lock.m_mtx);
 
         // Convert the duration to a time point.
-        ::timespec ts;
+        struct timespec ts;
         ::clock_gettime(CLOCK_REALTIME, &ts);
         double secs = (double) ts.tv_sec + (double) ts.tv_nsec * 0.000000001;
 

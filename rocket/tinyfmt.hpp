@@ -779,9 +779,9 @@ formatv(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
 
             if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 4)) {
               // `time`: current date and time in local time zone
-              ::timespec tv;
+              struct timespec tv;
               ::clock_gettime(CLOCK_REALTIME, &tv);
-              ::tm tm;
+              struct tm tm;
               ::localtime_r(&(tv.tv_sec), &tm);
               details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
               break;
@@ -789,9 +789,9 @@ formatv(basic_tinyfmt<charT>& fmt, const charT* stempl, const basic_formatter<ch
 
             if(noadl::xmemeq(base, (size_t) (next - base), time_utc, 8)) {
               // `time:utc`: current date and time in UTC
-              ::timespec tv;
+              struct timespec tv;
               ::clock_gettime(CLOCK_REALTIME, &tv);
-              ::tm tm;
+              struct tm tm;
               ::gmtime_r(&(tv.tv_sec), &tm);
               details_tinyfmt::do_format_time_iso(fmt, tm, tv.tv_nsec);
               break;

@@ -200,7 +200,7 @@ main(int argc, char** argv)
     if(repl_verbose || repl_interactive) {
       install_verbose_hooks();
 
-      struct ::sigaction sigact = { };
+      struct sigaction sigact = { };
       sigact.sa_handler = +[](int sig) { repl_signal.store(sig);  };
       ::sigaction(SIGINT, &sigact, nullptr);
       ::sigaction(SIGWINCH, &sigact, nullptr);

@@ -40,7 +40,7 @@ do_format_strerror_errno(basic_tinyfmt<charT>& fmt)
 
 template<typename charT>
 basic_tinyfmt<charT>&
-do_format_time_iso(basic_tinyfmt<charT>& fmt, const ::tm& tm, long nsec)
+do_format_time_iso(basic_tinyfmt<charT>& fmt, const struct tm& tm, long nsec)
   {
     char stemp[] = "2014-09-26 00:58:26.123456789";
     uint64_t date;

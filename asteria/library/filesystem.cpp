@@ -59,7 +59,7 @@ std_filesystem_get_real_path(V_string path)
 optV_object
 std_filesystem_get_properties(V_string path)
   {
-    struct ::stat stb;
+    struct stat stb;
     if(::lstat(path.safe_c_str(), &stb) != 0)
       ASTERIA_THROW((
           "Could not get properties of file '$1'",
@@ -241,7 +241,7 @@ std_filesystem_remove_recursive(V_string path)
   #endif
               {
                 // If the file type is unknown, ask for it.
-                struct ::stat stb;
+                struct stat stb;
                 if(::lstat(enext.path.c_str(), &stb) != 0)
                   ASTERIA_THROW((
                       "Could not get information about '$1'",
@@ -325,7 +325,7 @@ std_filesystem_list(V_string path)
 #endif
       {
         // If the file type is unknown, ask for it.
-        struct ::stat stb;
+        struct stat stb;
         if(::lstat(child.c_str(), &stb) != 0)
           ASTERIA_THROW((
               "Could not get information about '$1'",
@@ -367,7 +367,7 @@ std_filesystem_create_directory(V_string path)
       return 1;
 
     if(errno == EEXIST) {
-      struct ::stat stb;
+      struct stat stb;
       if((::stat(path.c_str(), &stb) == 0) && S_ISDIR(stb.st_mode))
         return 0;
     }
@@ -599,7 +599,7 @@ std_filesystem_copy_file(V_string path_new, V_string path_old)
           path_new);
 
     // Get the file mode and preferred I/O block size.
-    struct ::stat stb_old;
+    struct stat stb_old;
     if(::fstat(fd_old, &stb_old) != 0)
       ASTERIA_THROW((
           "Could not get information about source file '$1'",

@@ -32,7 +32,7 @@ do_lock_stream(const cow_string& path)
 
     // Make the unique identifier of this file from its device ID and inode number.
     int fd = ::fileno(file);
-    struct ::stat info;
+    struct stat info;
     if(::fstat(fd, &info))
       throw Runtime_Error(xtc_format,
                "Could not get properties of script file '$1': ${errno:full}", path);

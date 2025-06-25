@@ -55,9 +55,9 @@ write_log_to_stderr(const char* file, long line, const char* func, cow_string&& 
     data.reserve(2047);
 
     // Write the timestamp and tag for sorting.
-    ::timespec ts;
+    struct timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
-    ::tm tr;
+    struct tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
 
     ::rocket::ascii_numput nump;

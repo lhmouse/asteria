@@ -642,7 +642,7 @@ std_system_sleep(V_real duration)
       return 0;
 
     V_real secs = duration * 0.001;
-    ::timespec ts, rem;
+    struct timespec ts, rem;
 
     if(secs > 0x7FFFFFFFFFFFFC00) {
       ts.tv_sec = 0x7FFFFFFFFFFFFC00;
