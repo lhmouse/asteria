@@ -25,6 +25,7 @@
 #include "../library/csv.hpp"
 #include "../library/rsa.hpp"
 #include "../utils.hpp"
+#include <algorithm>
 namespace asteria {
 namespace {
 

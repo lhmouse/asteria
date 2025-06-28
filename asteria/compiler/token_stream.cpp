@@ -7,6 +7,7 @@
 #include "token.hpp"
 #include "compiler_error.hpp"
 #include "../utils.hpp"
+#include <algorithm>
 namespace asteria {
 namespace {
 

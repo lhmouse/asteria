@@ -7,6 +7,8 @@
 #include "../runtime/binding_generator.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utils.hpp"
+#include <array>
+#include <algorithm>
 #include <sys/stat.h>
 #define OPENSSL_API_COMPAT  0x10100000L
 #include <openssl/md5.h>
