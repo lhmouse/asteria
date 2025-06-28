@@ -50,21 +50,36 @@ do_write_loop(int fd, const void* data, size_t size, const V_string& path)
 
 }  // namespace
 
-V_string
+optV_string
 std_filesystem_get_real_path(V_string path)
   {
-    return get_real_path(path);
+    unique_ptr<char, void (void*)> str(::realpath(path.safe_c_str(), nullptr), ::free);
+    if(!str) {
+      if(errno == ENOENT)
+        return nullopt;
+
+      ASTERIA_THROW((
+          "Could not resolve path '$1'",
+          "[`realpath()` failed: ${errno:full}]"),
+          path);
+    }
+
+    return V_string(str, ::strlen(str));
   }
 
 optV_object
 std_filesystem_get_properties(V_string path)
   {
     struct stat stb;
-    if(::lstat(path.safe_c_str(), &stb) != 0)
+    if(::lstat(path.safe_c_str(), &stb) != 0) {
+      if(errno == ENOENT)
+        return nullopt;
+
       ASTERIA_THROW((
           "Could not get properties of file '$1'",
           "[`lstat()` failed: ${errno:full}]"),
           path);
+    }
 
     // Convert the result to an `object`.
     V_object stat;
@@ -289,16 +304,20 @@ std_filesystem_glob(V_string pattern)
     return paths;
   }
 
-V_object
+optV_object
 std_filesystem_list(V_string path)
   {
     // Try opening the directory.
     ::rocket::unique_posix_dir dp(::opendir(path.safe_c_str()));
-    if(!dp)
+    if(!dp) {
+      if(errno == ENOENT)
+        return nullopt;
+
       ASTERIA_THROW((
           "Could not open directory '$1'",
           "[`opendir()` failed: ${errno:full}]"),
           path);
+    }
 
     // Append all entries.
     V_object entries;

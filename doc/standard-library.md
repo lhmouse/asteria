@@ -1678,7 +1678,8 @@ variable. Individual components are categorized into sub-objects.
 * Resolves `path` to an absolute one. The result is a canonical path that
   contains no symbolic links. The path must be accessible.
 
-* Returns the absolute path as a string.
+* Returns the absolute path as a string. If the path does not exist, `null`
+  is returned.
 
 * Throws an exception if `path` is invalid or inaccessible.
 
@@ -1697,6 +1698,8 @@ variable. Individual components are categorized into sub-objects.
   * `size_on_disk`   integer: size of storage on disk in bytes
   * `time_accessed`  integer: timestamp of last access
   * `time_modified`  integer: timestamp of last modification
+
+  If the path does not exist, `null` is returned.
 
 * Throws an exception in case of an error.
 
@@ -1737,6 +1740,8 @@ variable. Individual components are categorized into sub-objects.
   * `inode`          integer: unique file ID on this device
   * `is_directory`   boolean: whether this is a directory
   * `is_symbolic`    boolean: whether this is a symbolic link
+
+  If the path does not exist, `null` is returned.
 
 * Throws an exception if `path` does not designate a directory, or some other
   errors occur.

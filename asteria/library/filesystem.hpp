@@ -8,7 +8,7 @@
 namespace asteria {
 
 // `std.filesystem.get_real_path`
-V_string
+optV_string
 std_filesystem_get_real_path(V_string path);
 
 // `std.filesystem.get_properties`
@@ -28,7 +28,7 @@ V_array
 std_filesystem_glob(V_string pattern);
 
 // `std.filesystem.directory_list`
-V_object
+optV_object
 std_filesystem_list(V_string path);
 
 // `std.filesystem.directory_create`
