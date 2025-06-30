@@ -40,7 +40,7 @@ as other scripting languages. However there are some fundamental differences:
 12. [Calling C++ Functions from Asteria](#calling-c-functions-from-asteria)
 13. [Calling Asteria Functions from C++](#calling-asteria-functions-from-c)
 
-## Course 101
+# Course 101
 
 In the first class of every programming language, we are taught to output the
 magical string `"hello world!"`. This is achieved by calling the `putln()`
@@ -133,7 +133,7 @@ my number was 30. have a nice day.
 
 [back to table of contents](#table-of-contents)
 
-## Literals, Not To Be Confused with Constants
+# Literals, Not To Be Confused with Constants
 
 A literal, such as the numeric literal `-42.5`, produces a single value. Some
 people reference a literal as a 'constant', some people also consider an
@@ -229,7 +229,7 @@ values that they 'literally' look like:
 
 [back to table of contents](#table-of-contents)
 
-## Variables and Functions
+# Variables and Functions
 
 By definition, a _variable_ is a named container that is capable of storing a
 value. Usually we declare variables with `var`, however that's not the only
@@ -288,7 +288,7 @@ left scope; `a` now denotes 42
 
 [back to table of contents](#table-of-contents)
 
-## Lambdas
+# Lambdas
 
 Lambdas are anonymous functions. The most common scenario where lambdas are
 useful is probably sorting and searching. For example, in order to sort an
@@ -382,7 +382,7 @@ without `{ return ref` or `; }`.
 
 [back to table of contents](#table-of-contents)
 
-## Object-oriented Programming and the `this` Parameter
+# Object-oriented Programming and the `this` Parameter
 
 In many other programming languages, there is a concept about non-static
 member functions. A non-static member function receives an implicit `this`
@@ -427,7 +427,7 @@ error.
 
 [back to table of contents](#table-of-contents)
 
-## Ordering of Values
+# Ordering of Values
 
 Values can be compared and form a _partial order_. Ordering of two values is
 specified in the following table, where the first column denotes the type of
@@ -470,7 +470,7 @@ c) < d`.
 
 [back to table of contents](#table-of-contents)
 
-## Structured Bindings
+# Structured Bindings
 
 Sometimes it makes sense for a function to return multiple values, such as
 `std.numeric.frexp()`. Although it is impossible to have multiple expressions
@@ -518,7 +518,7 @@ no elements are initialized to `null`.
 
 [back to table of contents](#table-of-contents)
 
-## Arguments and Results by Reference
+# Arguments and Results by Reference
 
 Some people consider passing by reference to be a source of issues about
 maintainability, and in addition, in many languages there is absolutely no
@@ -558,7 +558,7 @@ and shall not be specified arbitrarily elsewhere.
 
 [back to table of contents](#table-of-contents)
 
-## Throwing and Catching Exceptions
+# Throwing and Catching Exceptions
 
 Exceptions are used extensively in the runtime and the standard library for
 error handling, as in
@@ -664,7 +664,7 @@ evaluated, leaving the value of `i` intact.
 
 [back to table of contents](#table-of-contents)
 
-## Integer Overflows
+# Integer Overflows
 
 The integer type is 64-bit and signed, capable of representing values from
 `-9223372036854775808` to `+9223372036854775807`. The elementary arithmetic
@@ -791,7 +791,7 @@ These are not infix operators, but look like function calls, as in
 
 [back to table of contents](#table-of-contents)
 
-## Bit-wise Operators on Strings
+# Bit-wise Operators on Strings
 
 The shift and bitwise operators also apply to strings, where they perform
 byte-wise operations.
@@ -864,7 +864,7 @@ string of the same length as the longer one:
 
 [back to table of contents](#table-of-contents)
 
-## Calling C++ Functions from Asteria
+# Calling C++ Functions from Asteria
 
 Functions are reference-counting pointers, and can be passed like any other
 values. The simplest but still powerful way to create a function value is to
@@ -997,7 +997,7 @@ my.sub(123, 654) = -531
 
 [back to table of contents](#table-of-contents)
 
-## Calling Asteria Functions from C++
+# Calling Asteria Functions from C++
 
 Calling an Asteria function from C++ is a bit complex. First, we pass a
 function value to C++, either via a static variable or a return value. Then,
