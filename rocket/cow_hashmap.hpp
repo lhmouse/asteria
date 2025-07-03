@@ -699,7 +699,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
           return false;
-        result = this->do_buckets()[tpos];
+        result = this->do_buckets()[tpos]->second;
         return true;
       }
 
@@ -711,7 +711,7 @@ class cow_hashmap
         size_type tpos;
         if(!this->m_sth.find(tpos, ykey))
           return false;
-        result = move(this->do_mut_buckets()[tpos]);
+        result = move(this->do_mut_buckets()[tpos]->second);
         this->do_erase_unchecked(tpos, 1);
         return true;
       }
