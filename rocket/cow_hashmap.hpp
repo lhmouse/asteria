@@ -691,6 +691,31 @@ class cow_hashmap
         return move(this->do_mut_buckets()[tpos]->second);
       }
 
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT>
+    bool
+    find_and_copy(mapped_type& result, const ykeyT& ykey) const
+      {
+        size_type tpos;
+        if(!this->m_sth.find(tpos, ykey))
+          return false;
+        result = this->do_mut_buckets()[tpos];
+        return true;
+      }
+
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT>
+    bool
+    find_and_erase(mapped_type& result, const ykeyT& ykey)
+      {
+        size_type tpos;
+        if(!this->m_sth.find(tpos, ykey))
+          return false;
+        result = move(this->do_mut_buckets()[tpos]);
+        this->do_erase_unchecked(tpos, 1);
+        return true;
+      }
+
     // 26.5.4.3, element access
     template<typename ykeyT>
     const mapped_type&
