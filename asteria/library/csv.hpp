@@ -11,6 +11,10 @@ namespace asteria {
 V_string
 std_csv_format(V_array value);
 
+// `std.csv.format_to_file`
+void
+std_csv_format_to_file(V_string path, V_array value);
+
 // `std.csv.parse`
 V_array
 std_csv_parse(V_string text);

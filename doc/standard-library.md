@@ -2378,6 +2378,16 @@ variable. Individual components are categorized into sub-objects.
 
 * Returns the formatted text as a string.
 
+### `std.csv.format_to_file(path, array)`
+
+* Writes `array` to the file that is denoted by `path` in the CSV format. The
+  CSV format is too primitive to support complex structures, which limits the
+  domain of representable values. `array` shall be an array of arrays, where
+  up to two nesting levels are allowed. Boolean, integer, real and string
+  values are written in their string forms; the others are ignored silently.
+
+* Throws an exception if a write error occurs.
+
 ### `std.csv.parse(text)`
 
 * Parses a string containing data encoded in the CSV format and converts it

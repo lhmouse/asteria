@@ -9,6 +9,45 @@
 namespace asteria {
 namespace {
 
+void
+do_csv_format(::rocket::tinyfmt& fmt, const V_array& value)
+  {
+    for(auto rowp = value.begin();  rowp != value.end();  ++rowp) {
+      const auto& row = rowp->as_array();
+
+      // Write columns, separated by commas.
+      for(auto cellp = row.begin();  cellp != row.end();  ++cellp) {
+        if(cellp != row.begin())
+          fmt << ",";
+
+        if(cellp->type() >= type_opaque)  // XXX: Not convertible to string?
+          continue;
+
+        if(cellp->is_string()) {
+          // Check whether we need to escape special characters.
+          const auto& str = cellp->as_string();
+          if(str.find_of(",\n\"") != cow_string::npos) {
+            fmt << "\"";
+
+            for(char c : str)
+              if(c == '\"')
+                fmt << "\"\"";
+              else
+                fmt << c;
+
+            fmt << "\"";
+            continue;
+          }
+        }
+
+        // Write the value as is.
+        fmt << *cellp;
+      }
+
+      fmt << "\r\n";
+    }
+  }
+
 V_array
 do_csv_parse(tinybuf& buf)
   {
@@ -112,49 +151,22 @@ V_string
 std_csv_format(V_array value)
   {
     ::rocket::tinyfmt_str fmt;
-
-    for(auto rowp = value.begin();  rowp != value.end();  ++rowp) {
-      const auto& row = rowp->as_array();
-
-      // Write columns, separated by commas.
-      for(auto cellp = row.begin();  cellp != row.end();  ++cellp) {
-        if(cellp != row.begin())
-          fmt << ",";
-
-        if(cellp->type() >= type_opaque)  // XXX: Not convertible to string?
-          continue;
-
-        if(cellp->is_string()) {
-          // Check whether we need to escape special characters.
-          const auto& str = cellp->as_string();
-          if(str.find_of(",\n\"") != cow_string::npos) {
-            fmt << "\"";
-
-            for(char c : str)
-              if(c == '\"')
-                fmt << "\"\"";
-              else
-                fmt << c;
-
-            fmt << "\"";
-            continue;
-          }
-        }
-
-        // Write the value as is.
-        fmt << *cellp;
-      }
-
-      fmt << "\r\n";
-    }
-
+    do_csv_format(fmt, value);
     return fmt.extract_string();
+  }
+
+void
+std_csv_format_to_file(V_string path, V_array value)
+  {
+    ::rocket::tinyfmt_file fmt;
+    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    do_csv_format(fmt, value);
+    fmt.flush();
   }
 
 V_array
 std_csv_parse(V_string text)
   {
-    // Parse characters from the string.
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(text, tinybuf::open_read);
     return do_csv_parse(cbuf);
@@ -163,25 +175,17 @@ std_csv_parse(V_string text)
 V_array
 std_csv_parse_file(V_string path)
   {
-    // Try opening the file.
-    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
-    if(!fp)
-      ASTERIA_THROW((
-          "Could not open file '$1'",
-          "[`fopen()` failed: ${errno:full}]"),
-          path);
-
-    // Parse characters from the file.
-    ::rocket::tinybuf_file cbuf(move(fp));
+    ::rocket::tinybuf_file cbuf;
+    cbuf.open(path.safe_c_str(), tinybuf::open_read);
     return do_csv_parse(cbuf);
   }
 
 void
-create_bindings_csv(V_object& result, API_Version /*version*/)
+create_bindings_csv(V_object& result, API_Version version)
   {
     result.insert_or_assign(&"format",
       ASTERIA_BINDING(
-        "std.csv.format", "[array]",
+        "std.csv.format", "array",
         Argument_Reader&& reader)
       {
         V_array array;
@@ -193,6 +197,24 @@ create_bindings_csv(V_object& result, API_Version /*version*/)
 
         reader.throw_no_matching_function_call();
       });
+
+    if(version >= api_version_0002_0000)
+      result.insert_or_assign(&"format_to_file",
+        ASTERIA_BINDING(
+          "std.csv.format_to_file", "array",
+          Argument_Reader&& reader)
+        {
+          V_string path;
+          V_array array;
+
+          reader.start_overload();
+          reader.required(path);
+          reader.required(array);
+          if(reader.end_overload())
+            return (void) std_csv_format_to_file(path, array);
+
+          reader.throw_no_matching_function_call();
+        });
 
     result.insert_or_assign(&"parse",
       ASTERIA_BINDING(
