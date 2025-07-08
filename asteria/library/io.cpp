@@ -277,7 +277,7 @@ std_io_read(optV_integer limit)
     return move(data);
   }
 
-V_integer
+void
 std_io_write(V_string data)
   {
     const IOF_Sentry sentry(stdout, iof_mode_output_narrow);
@@ -286,8 +286,6 @@ std_io_write(V_string data)
       ASTERIA_THROW((
           "Error writing standard output",
           "[`fwrite()` failed: ${errno:full}]"));
-
-    return (int64_t) data.size();
   }
 
 void
@@ -419,7 +417,7 @@ create_bindings_io(V_object& result, API_Version /*version*/)
         reader.start_overload();
         reader.required(data);
         if(reader.end_overload())
-          return (Value) std_io_write(data);
+          return (void) std_io_write(data);
 
         reader.throw_no_matching_function_call();
       });

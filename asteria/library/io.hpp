@@ -39,7 +39,7 @@ optV_string
 std_io_read(optV_integer limit);
 
 // `std.io.write`
-V_integer
+void
 std_io_write(V_string data);
 
 // `std.io.flush`

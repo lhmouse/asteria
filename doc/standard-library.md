@@ -2474,8 +2474,6 @@ variable. Individual components are categorized into sub-objects.
 
 * Writes a series of bytes to standard output. `data` shall be a byte string.
 
-* Returns the number of bytes that have been written.
-
 * Throws an exception if standard output is text-oriented, or if a write
   error occurs.
 
