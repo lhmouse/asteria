@@ -71,7 +71,56 @@ do_format_check_scalar(const Value& value)
 
       default:
         ASTERIA_TERMINATE(("Corrupted enumeration `$1`"), value.type());
-    }
+      }
+  }
+
+void
+do_format(::rocket::tinyfmt& fmt, const V_object& value)
+  {
+    size_t nlines = 0;
+
+    for(const auto& r : value)
+      if(do_format_check_scalar(r.second)) {
+        // Write a top-level property.
+        do_format_key(fmt, r.first);
+        fmt << "=";
+
+        if(r.second.is_string())
+          fmt << r.second.as_string();
+        else
+          r.second.print_to(fmt);
+
+        fmt << "\r\n";
+        nlines ++;
+      }
+
+    for(const auto& ro : value)
+      if(ro.second.is_object()) {
+        if(nlines != 0)
+          fmt << "\r\n";
+
+        // Write a section header.
+        fmt << "[";
+        do_format_key(fmt, ro.first);
+        fmt << "]\r\n";
+        nlines ++;
+
+        // Write all properties in this section.
+        for(const auto& r : ro.second.as_object())
+          if(do_format_check_scalar(r.second)) {
+            // Write a key-value pair.
+            do_format_key(fmt, r.first);
+            fmt << "=";
+
+            if(r.second.is_string())
+              fmt << r.second.as_string();
+            else
+              r.second.print_to(fmt);
+
+            fmt << "\r\n";
+            nlines ++;
+          }
+      }
   }
 
 V_object
@@ -161,64 +210,22 @@ V_string
 std_ini_format(V_object value)
   {
     ::rocket::tinyfmt_str fmt;
-    size_t nlines = 0;
-
-    for(const auto& r : value) {
-      if(!do_format_check_scalar(r.second))
-        continue;
-
-      // Write a top-level property.
-      do_format_key(fmt, r.first);
-      fmt << "=";
-
-      if(r.second.is_string())
-        fmt << r.second.as_string();
-      else
-        r.second.print_to(fmt);
-
-      fmt << "\r\n";
-      nlines ++;
-    }
-
-    for(const auto& ro : value) {
-      if(!ro.second.is_object())
-        continue;
-
-      if(nlines != 0)
-        fmt << "\r\n";
-
-      // Write a section header.
-      fmt << "[";
-      do_format_key(fmt, ro.first);
-      fmt << "]\r\n";
-      nlines ++;
-
-      // Write all properties in this section.
-      for(const auto& r : ro.second.as_object()) {
-        if(!do_format_check_scalar(r.second))
-          continue;
-
-        // Write a key-value pair.
-        do_format_key(fmt, r.first);
-        fmt << "=";
-
-        if(r.second.is_string())
-          fmt << r.second.as_string();
-        else
-          r.second.print_to(fmt);
-
-        fmt << "\r\n";
-        nlines ++;
-      }
-    }
-
+    do_format(fmt, value);
     return fmt.extract_string();
+  }
+
+void
+std_ini_format_to_file(V_string path, V_object value)
+  {
+    ::rocket::tinyfmt_file fmt;
+    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    do_format(fmt, value);
+    fmt.flush();
   }
 
 V_object
 std_ini_parse(V_string text)
   {
-    // Parse characters from the string.
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(text, tinybuf::open_read);
     return do_ini_parse(cbuf);
@@ -227,25 +234,17 @@ std_ini_parse(V_string text)
 V_object
 std_ini_parse_file(V_string path)
   {
-    // Try opening the file.
-    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
-    if(!fp)
-      ASTERIA_THROW((
-          "Could not open file '$1'",
-          "[`fopen()` failed: ${errno:full}]"),
-          path);
-
-    // Parse characters from the file.
-    ::rocket::tinybuf_file cbuf(move(fp));
+    ::rocket::tinybuf_file cbuf;
+    cbuf.open(path.safe_c_str(), tinybuf::open_read);
     return do_ini_parse(cbuf);
   }
 
 void
-create_bindings_ini(V_object& result, API_Version /*version*/)
+create_bindings_ini(V_object& result, API_Version version)
   {
     result.insert_or_assign(&"format",
       ASTERIA_BINDING(
-        "std.ini.format", "[object]",
+        "std.ini.format", "object",
         Argument_Reader&& reader)
       {
         V_object object;
@@ -257,6 +256,24 @@ create_bindings_ini(V_object& result, API_Version /*version*/)
 
         reader.throw_no_matching_function_call();
       });
+
+    if(version >= api_version_0002_0000)
+      result.insert_or_assign(&"format_to_file",
+        ASTERIA_BINDING(
+          "std.ini.format_to_file", "path, object",
+          Argument_Reader&& reader)
+        {
+          V_string path;
+          V_object object;
+
+          reader.start_overload();
+          reader.required(path);
+          reader.required(object);
+          if(reader.end_overload())
+            return (void) std_ini_format_to_file(path, object);
+
+          reader.throw_no_matching_function_call();
+        });
 
     result.insert_or_assign(&"parse",
       ASTERIA_BINDING(

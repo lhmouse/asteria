@@ -11,6 +11,10 @@ namespace asteria {
 V_string
 std_ini_format(V_object value);
 
+// `std.ini.format_to_file`
+void
+std_ini_format_to_file(V_string path, V_object value);
+
 // `std.ini.parse`
 V_object
 std_ini_parse(V_string text);
