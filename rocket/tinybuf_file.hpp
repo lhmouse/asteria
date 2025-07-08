@@ -117,7 +117,8 @@ class basic_tinybuf_file
         char mstr[8] = "";
         size_t ml = 0;
 
-        switch(static_cast<uint32_t>(mode & tinybuf_base::open_read_write)) {
+        switch(static_cast<uint32_t>(mode & tinybuf_base::open_read_write))
+          {
           case tinybuf_base::open_read:
             flags = O_RDONLY;
             mstr[ml++] = 'r';
@@ -138,7 +139,7 @@ class basic_tinybuf_file
             noadl::sprintf_and_throw<invalid_argument>(
                 "basic_tinybuf_file: no access specified (path `%s`, mode `%u`)",
                 path, mode);
-        }
+          }
 
         if(mode & tinybuf_base::open_binary) {
 #ifdef _O_BINARY
@@ -209,7 +210,12 @@ class basic_tinybuf_file
         if(!this->m_file)
           return *this;
 
-        ::fflush(this->m_file);
+        int r = ::fflush(this->m_file);
+        if(r == EOF)
+          noadl::sprintf_and_throw<runtime_error>(
+              "basic_tinybuf_file: `fflush()` failed (fileno `%d`, errno `%d`)",
+              ::fileno(this->m_file), errno);
+
         return *this;
       }
 
