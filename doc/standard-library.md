@@ -2293,6 +2293,22 @@ variable. Individual components are categorized into sub-objects.
 
 * Returns the formatted text as a string.
 
+### `std.json.format_to_file(path, [value], [indent], [json5])`
+
+* Writes a value to the file denoted by `path` in the JSON format, according
+  to [RFC 7159](https://www.rfc-editor.org/rfc/rfc7159.html). This function
+  generates text that conforms to JSON strictly; values whose types cannot be
+  represented in JSON are replaced with `null` in arrays, and are discarded
+  elsewhere. If `indent` is specified as a non-empty string, it is used for
+  each level of indention following a line break; if `indent` is specified as
+  a positive integer, it is clamped between `1` and `10` inclusively and this
+  function behaves as if a string of this number of spaces was set. If
+  `indent` is an empty string or zero, or is absent, no indention or line
+  break will be inserted. If `json5` is set to `true`, the
+  [JSON5](https://json5.org/) alternative format is used.
+
+* Throws an exception if a write error occurs.
+
 ### `std.json.parse(text)`
 
 * Parses a string containing data encoded in the JSON format. This function

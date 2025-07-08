@@ -281,11 +281,10 @@ struct Xformat_object
 
 using Xformat = ::rocket::variant<Xformat_array, Xformat_object>;
 
-V_string
-do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
+void
+do_format_nonrecursive(::rocket::tinyfmt& fmt, const Value& value, bool json5, Indenter&& indent)
   {
     // Transform recursion to iteration using a handwritten stack.
-    ::rocket::tinyfmt_str fmt;
     auto qval = &value;
     cow_vector<Xformat> stack;
 
@@ -404,14 +403,6 @@ do_format_nonrecursive(const Value& value, bool json5, Indenter& indent)
 
       stack.pop_back();
     }
-
-    return fmt.extract_string();
-  }
-
-V_string
-do_format_nonrecursive(const Value& value, bool json5, Indenter&& indent)
-  {
-    return do_format_nonrecursive(value, json5, indent);
   }
 
 opt<Punctuator>
@@ -649,25 +640,52 @@ do_parse(tinybuf& cbuf)
 V_string
 std_json_format(Value value, optV_string indent, optV_boolean json5)
   {
-    // No line break is inserted if `indent` is null or empty.
-    return (!indent || indent->empty())
-        ? do_format_nonrecursive(value, json5 == true, Indenter_none())
-        : do_format_nonrecursive(value, json5 == true, Indenter_string(*indent));
+    ::rocket::tinyfmt_str fmt;
+    if(indent && (indent->length() != 0))
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_string(*indent));
+    else
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+    return fmt.extract_string();
   }
 
 V_string
 std_json_format(Value value, V_integer indent, optV_boolean json5)
   {
-    // No line break is inserted if `indent` is non-positive.
-    return (indent <= 0)
-        ? do_format_nonrecursive(value, json5 == true, Indenter_none())
-        : do_format_nonrecursive(value, json5 == true, Indenter_spaces(indent));
+    ::rocket::tinyfmt_str fmt;
+    if(indent > 0)
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_spaces(indent));
+    else
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+    return fmt.extract_string();
+  }
+
+void
+std_json_format_to_file(V_string path, Value value, optV_string indent, optV_boolean json5)
+  {
+    ::rocket::tinyfmt_file fmt;
+    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    if(indent && (indent->length() != 0))
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_string(*indent));
+    else
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+    fmt.flush();
+  }
+
+void
+std_json_format_to_file(V_string path, Value value, V_integer indent, optV_boolean json5)
+  {
+    ::rocket::tinyfmt_file fmt;
+    fmt.open(path.safe_c_str(), tinybuf::open_write);
+    if(indent > 0)
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_spaces(indent));
+    else
+      do_format_nonrecursive(fmt, value, json5 == true, Indenter_none());
+    fmt.flush();
   }
 
 Value
 std_json_parse(V_string text)
   {
-    // Parse characters from the string.
     ::rocket::tinybuf_str cbuf;
     cbuf.set_string(text, tinybuf::open_read);
     return do_parse(cbuf);
@@ -676,21 +694,13 @@ std_json_parse(V_string text)
 Value
 std_json_parse_file(V_string path)
   {
-    // Try opening the file.
-    ::rocket::unique_posix_file fp(::fopen(path.safe_c_str(), "rb"));
-    if(!fp)
-      ASTERIA_THROW((
-          "Could not open file '$1'",
-          "[`fopen()` failed: ${errno:full}]"),
-          path);
-
-    // Parse characters from the file.
-    ::rocket::tinybuf_file cbuf(move(fp));
+    ::rocket::tinybuf_file cbuf;
+    cbuf.open(path.safe_c_str(), tinybuf::open_read);
     return do_parse(cbuf);
   }
 
 void
-create_bindings_json(V_object& result, API_Version /*version*/)
+create_bindings_json(V_object& result, API_Version version)
   {
     result.insert_or_assign(&"format",
       ASTERIA_BINDING(
@@ -718,6 +728,36 @@ create_bindings_json(V_object& result, API_Version /*version*/)
 
         reader.throw_no_matching_function_call();
       });
+
+    if(version >= api_version_0002_0000)
+      result.insert_or_assign(&"format_to_file",
+        ASTERIA_BINDING(
+          "std.json.format_to_file", "path, [value], [indent]",
+          Argument_Reader&& reader)
+        {
+          V_string path;
+          Value value;
+          optV_string sind;
+          V_integer iind;
+          optV_boolean json5;
+
+          reader.start_overload();
+          reader.required(path);
+          reader.optional(value);
+          reader.save_state(0);
+          reader.optional(sind);
+          reader.optional(json5);
+          if(reader.end_overload())
+            return (void) std_json_format_to_file(path, value, sind, json5);
+
+          reader.load_state(0);
+          reader.required(iind);
+          reader.optional(json5);
+          if(reader.end_overload())
+            return (void) std_json_format_to_file(path, value, iind, json5);
+
+          reader.throw_no_matching_function_call();
+        });
 
     result.insert_or_assign(&"parse",
       ASTERIA_BINDING(
