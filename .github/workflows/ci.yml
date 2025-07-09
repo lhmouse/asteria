@@ -75,7 +75,7 @@ jobs:
       run: { shell: 'msys2 {0}' }
 
     steps:
-      - run: git config --global core.autocrlf false
+      - { shell: 'cmd', run: 'git config --global core.autocrlf false' }
       - uses: actions/checkout@v4
 
       - uses: msys2/setup-msys2@v2
