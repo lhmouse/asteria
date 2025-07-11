@@ -355,11 +355,10 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_execute_block>();
 
-          // Rebind the body in a nested scope.
           bool dirty = false;
           auto bound = altr;
-
           Analytic_Context ctx_empty(xtc_plain, ctx);
+
           do_rebind_nodes(dirty, bound.code_body, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
@@ -369,11 +368,10 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_if_statement>();
 
-          // Rebind both branches in a nested scope.
           bool dirty = false;
           auto bound = altr;
-
           Analytic_Context ctx_empty(xtc_plain, ctx);
+
           do_rebind_nodes(dirty, bound.code_true, ctx_empty);
           do_rebind_nodes(dirty, bound.code_false, ctx_empty);
 
@@ -384,11 +382,10 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_switch_statement>();
 
-          // Rebind all labels and clauses.
           bool dirty = false;
           auto bound = altr;
-
           Analytic_Context ctx_empty(xtc_plain, ctx);
+
           for(size_t k = 0;  k < bound.clauses.size();  ++k) {
             // Labels are to be evaluated in the same scope as the condition
             // expression, and are not parts of the body.
@@ -408,12 +405,11 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_do_while_statement>();
 
-          // Rebind the body and the condition expression.
           bool dirty = false;
           auto bound = altr;
+          Analytic_Context ctx_empty(xtc_plain, ctx);
 
           // The condition expression is not a part of the body.
-          Analytic_Context ctx_empty(xtc_plain, ctx);
           do_rebind_nodes(dirty, bound.code_body, ctx_empty);
           do_rebind_nodes(dirty, bound.code_cond, ctx);
 
@@ -424,12 +420,11 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_while_statement>();
 
-          // Rebind the condition expression and the body.
           bool dirty = false;
           auto bound = altr;
+          Analytic_Context ctx_empty(xtc_plain, ctx);
 
           // The condition expression is not a part of the body.
-          Analytic_Context ctx_empty(xtc_plain, ctx);
           do_rebind_nodes(dirty, bound.code_cond, ctx);
           do_rebind_nodes(dirty, bound.code_body, ctx_empty);
 
@@ -440,18 +435,14 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_for_each_statement>();
 
-          // Rebind the range initializer and the body.
           bool dirty = false;
           auto bound = altr;
+          Analytic_Context ctx_for(xtc_plain, ctx);
+          Analytic_Context ctx_body(xtc_plain, ctx_for);
 
           // The range key and mapped references are declared in a dedicated scope
           // where the initializer is to be evaluated. The body is to be executed
           // in an inner scope, created and destroyed for each iteration.
-          Analytic_Context ctx_for(xtc_plain, ctx);
-          Analytic_Context ctx_body(xtc_plain, ctx_for);
-          if(!altr.name_key.empty())
-            ctx_for.insert_named_reference(altr.name_key);
-          ctx_for.insert_named_reference(altr.name_mapped);
           do_rebind_nodes(dirty, bound.code_init, ctx_for);
           do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
@@ -462,15 +453,14 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_for_statement>();
 
-          // Rebind the initializer, condition expression and step expression.
           bool dirty = false;
           auto bound = altr;
+          Analytic_Context ctx_for(xtc_plain, ctx);
+          Analytic_Context ctx_body(xtc_plain, ctx_for);
 
           // All these are declared in a dedicated scope where the initializer is
           // to be evaluated. The body is to be executed in an inner scope,
           // created and destroyed for each iteration.
-          Analytic_Context ctx_for(xtc_plain, ctx);
-          Analytic_Context ctx_body(xtc_plain, ctx_for);
           do_rebind_nodes(dirty, bound.code_init, ctx_for);
           do_rebind_nodes(dirty, bound.code_cond, ctx_for);
           do_rebind_nodes(dirty, bound.code_step, ctx_for);
@@ -483,11 +473,10 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_try_statement>();
 
-          // Rebind the `try` and `catch` clauses.
           bool dirty = false;
           auto bound = altr;
-
           Analytic_Context ctx_empty(xtc_plain, ctx);
+
           do_rebind_nodes(dirty, bound.code_try, ctx_empty);
           do_rebind_nodes(dirty, bound.code_catch, ctx_empty);
 
@@ -523,14 +512,13 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_define_function>();
 
-          // Rebind the function body.
-          // This is the only scenario where names in the outer scope are visible
-          // to the body of a function.
           bool dirty = false;
           auto bound = altr;
+          Analytic_Context ctx_empty(xtc_plain, ctx);
 
-          Analytic_Context fctx(xtc_function, &ctx, altr.params);
-          do_rebind_nodes(dirty, bound.code_body, fctx);
+          // This is the only scenario where names in the outer scope are visible
+          // to the body of a function.
+          do_rebind_nodes(dirty, bound.code_body, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -539,7 +527,6 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_branch_expression>();
 
-          // Rebind both branches.
           bool dirty = false;
           auto bound = altr;
 
@@ -553,7 +540,6 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_defer_expression>();
 
-          // Rebind the expression.
           bool dirty = false;
           auto bound = altr;
 
@@ -566,7 +552,6 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_catch_expression>();
 
-          // Rebind the expression.
           bool dirty = false;
           auto bound = altr;
 
@@ -579,7 +564,6 @@ rebind_opt(const Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_coalesce_expression>();
 
-          // Rebind the null branch.
           bool dirty = false;
           auto bound = altr;
 
