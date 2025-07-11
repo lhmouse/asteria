@@ -8,7 +8,7 @@ comment "//"
 color green "\<(var|const|ref|func|each)\>"
 
 # Statements
-color brightyellow "\<(if|else|switch|case|default|do|while|for|try|catch)\>"
+color brightyellow "\<(if|else|switch|case|default|do|while|for|try|catch|__ifcomplete)\>"
 color brightmagenta "\<(break|continue|throw|return)\>"
 color brightred "\<(assert|defer)\>"
 
