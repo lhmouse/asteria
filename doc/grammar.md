@@ -102,10 +102,12 @@
   - `each` ( `[` | `(` ) _expression_ `,` _expression_ ( `]` | `)` ) `:` ( _statement_ )\*
 
 * _do-while-statement_ ::=
-  - `do` _nondeclarative-statement_ `while` ( _negation_ )? `(` _expression_ `)` `;`
+  - `do` _nondeclarative-statement_ `while` ( _negation_ )? `(` _expression_ `)`
+    ( `__ifcomplete` _nondeclarative-statement_ | `;` )
 
 * _while-statement_ ::=
   - `while` ( _negation_ )? `(` _expression_ `)` _nondeclarative-statement_
+    ( `__ifcomplete` _nondeclarative-statement_ )?
 
 * _for-statement_ ::=
   - `for` `(` _for-complement_
@@ -116,11 +118,11 @@
 
 * _for-complement-range_ ::=
   - `each` _identifier_ ( ( `,` | `:` | `=` ) _identifier_ )? _arrow-initializer_ `)`
-    _nondeclarative-statement_
+    _nondeclarative-statement_ ( `__ifcomplete` _nondeclarative-statement_ )?
 
 * _for-complement-triplet_ ::=
   - _for-initializer_ ( _expression_ )? `;` ( _expression_ )? `)`
-    _nondeclarative-statement_
+    _nondeclarative-statement_ ( `__ifcomplete` _nondeclarative-statement_ )?
 
 * _for-initializer_ ::=
   - _variable-definition_
