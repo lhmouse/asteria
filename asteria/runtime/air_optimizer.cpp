@@ -37,7 +37,6 @@ reload(const Abstract_Context* ctx_opt, const cow_vector<phcow_string>& params,
 
     // Generate code for the function body.
     Analytic_Context fctx(xtc_function, ctx_opt, this->m_params);
-
     for(size_t i = 0;  i < stmts.size();  ++i)
       stmts.at(i).generate_code(this->m_code, fctx, nullptr, global, this->m_opts,
                     ((i != stmts.size() - 1) && !stmts.at(i + 1).is_empty_return())
@@ -62,7 +61,6 @@ rebind(const Abstract_Context* ctx_opt, const cow_vector<phcow_string>& params,
 
     // Rebind all nodes recursively.
     Analytic_Context fctx(xtc_function, ctx_opt, this->m_params);
-
     for(size_t k = 0;  k < code.size();  ++k)
       if(auto qnode = code.at(k).rebind_opt(fctx))
         this->m_code.mut(k) = move(*qnode);

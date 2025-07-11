@@ -32,7 +32,7 @@ do_set_rebound(bool& dirty, AIR_Node& res, AIR_Node&& bound)
   }
 
 void
-do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, Abstract_Context& ctx)
+do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
   {
     for(size_t i = 0;  i < code.size();  ++i)
       if(auto qnode = code.at(i).rebind_opt(ctx))
@@ -316,7 +316,7 @@ is_terminator() const noexcept
 
 opt<AIR_Node>
 AIR_Node::
-rebind_opt(Abstract_Context& ctx) const
+rebind_opt(const Abstract_Context& ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -359,8 +359,8 @@ rebind_opt(Abstract_Context& ctx) const
           bool dirty = false;
           auto bound = altr;
 
-          Analytic_Context ctx_body(xtc_plain, ctx);
-          do_rebind_nodes(dirty, bound.code_body, ctx_body);
+          Analytic_Context ctx_empty(xtc_plain, ctx);
+          do_rebind_nodes(dirty, bound.code_body, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -373,9 +373,9 @@ rebind_opt(Abstract_Context& ctx) const
           bool dirty = false;
           auto bound = altr;
 
-          Analytic_Context ctx_body(xtc_plain, ctx);
-          do_rebind_nodes(dirty, bound.code_true, ctx_body);
-          do_rebind_nodes(dirty, bound.code_false, ctx_body);
+          Analytic_Context ctx_empty(xtc_plain, ctx);
+          do_rebind_nodes(dirty, bound.code_true, ctx_empty);
+          do_rebind_nodes(dirty, bound.code_false, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -388,7 +388,7 @@ rebind_opt(Abstract_Context& ctx) const
           bool dirty = false;
           auto bound = altr;
 
-          Analytic_Context ctx_body(xtc_plain, ctx);
+          Analytic_Context ctx_empty(xtc_plain, ctx);
           for(size_t k = 0;  k < bound.clauses.size();  ++k) {
             // Labels are to be evaluated in the same scope as the condition
             // expression, and are not parts of the body.
@@ -397,7 +397,7 @@ rebind_opt(Abstract_Context& ctx) const
                 do_set_rebound(dirty, bound.clauses.mut(k).code_labels.mut(i), move(*qnode));
 
             for(size_t i = 0;  i < bound.clauses.at(k).code_body.size();  ++i)
-              if(auto qnode = bound.clauses.at(k).code_body.at(i).rebind_opt(ctx_body))
+              if(auto qnode = bound.clauses.at(k).code_body.at(i).rebind_opt(ctx_empty))
                 do_set_rebound(dirty, bound.clauses.mut(k).code_body.mut(i), move(*qnode));
           }
 
@@ -409,13 +409,12 @@ rebind_opt(Abstract_Context& ctx) const
           const auto& altr = this->m_stor.as<S_do_while_statement>();
 
           // Rebind the body and the condition expression.
-          // The condition expression is not a part of the body.
           bool dirty = false;
           auto bound = altr;
 
-          Analytic_Context ctx_body(xtc_plain, ctx);
-          do_rebind_nodes(dirty, bound.code_body, ctx_body);
-
+          // The condition expression is not a part of the body.
+          Analytic_Context ctx_empty(xtc_plain, ctx);
+          do_rebind_nodes(dirty, bound.code_body, ctx_empty);
           do_rebind_nodes(dirty, bound.code_cond, ctx);
 
           return do_return_rebound_opt(dirty, move(bound));
@@ -426,14 +425,13 @@ rebind_opt(Abstract_Context& ctx) const
           const auto& altr = this->m_stor.as<S_while_statement>();
 
           // Rebind the condition expression and the body.
-          // The condition expression is not a part of the body.
           bool dirty = false;
           auto bound = altr;
 
+          // The condition expression is not a part of the body.
+          Analytic_Context ctx_empty(xtc_plain, ctx);
           do_rebind_nodes(dirty, bound.code_cond, ctx);
-
-          Analytic_Context ctx_body(xtc_plain, ctx);
-          do_rebind_nodes(dirty, bound.code_body, ctx_body);
+          do_rebind_nodes(dirty, bound.code_body, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -443,19 +441,18 @@ rebind_opt(Abstract_Context& ctx) const
           const auto& altr = this->m_stor.as<S_for_each_statement>();
 
           // Rebind the range initializer and the body.
-          // The range key and mapped references are declared in a dedicated scope
-          // where the initializer is to be evaluated. The body is to be executed
-          // in an inner scope, created and destroyed for each iteration.
           bool dirty = false;
           auto bound = altr;
 
+          // The range key and mapped references are declared in a dedicated scope
+          // where the initializer is to be evaluated. The body is to be executed
+          // in an inner scope, created and destroyed for each iteration.
           Analytic_Context ctx_for(xtc_plain, ctx);
+          Analytic_Context ctx_body(xtc_plain, ctx_for);
           if(!altr.name_key.empty())
             ctx_for.insert_named_reference(altr.name_key);
           ctx_for.insert_named_reference(altr.name_mapped);
           do_rebind_nodes(dirty, bound.code_init, ctx_for);
-
-          Analytic_Context ctx_body(xtc_plain, ctx_for);
           do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
           return do_return_rebound_opt(dirty, move(bound));
@@ -465,19 +462,18 @@ rebind_opt(Abstract_Context& ctx) const
         {
           const auto& altr = this->m_stor.as<S_for_statement>();
 
-          // Rebind the initializer, condition expression and step expression. All
-          // these are declared in a dedicated scope where the initializer is to be
-          // evaluated. The body is to be executed in an inner scope, created and
-          // destroyed for each iteration.
+          // Rebind the initializer, condition expression and step expression.
           bool dirty = false;
           auto bound = altr;
 
+          // All these are declared in a dedicated scope where the initializer is
+          // to be evaluated. The body is to be executed in an inner scope,
+          // created and destroyed for each iteration.
           Analytic_Context ctx_for(xtc_plain, ctx);
+          Analytic_Context ctx_body(xtc_plain, ctx_for);
           do_rebind_nodes(dirty, bound.code_init, ctx_for);
           do_rebind_nodes(dirty, bound.code_cond, ctx_for);
           do_rebind_nodes(dirty, bound.code_step, ctx_for);
-
-          Analytic_Context ctx_body(xtc_plain, ctx_for);
           do_rebind_nodes(dirty, bound.code_body, ctx_body);
 
           return do_return_rebound_opt(dirty, move(bound));
@@ -491,12 +487,9 @@ rebind_opt(Abstract_Context& ctx) const
           bool dirty = false;
           auto bound = altr;
 
-          Analytic_Context ctx_try(xtc_plain, ctx);
-          do_rebind_nodes(dirty, bound.code_try, ctx_try);
-
-          Analytic_Context ctx_catch(xtc_plain, ctx);
-          ctx_catch.insert_named_reference(altr.name_except);
-          do_rebind_nodes(dirty, bound.code_catch, ctx_catch);
+          Analytic_Context ctx_empty(xtc_plain, ctx);
+          do_rebind_nodes(dirty, bound.code_try, ctx_empty);
+          do_rebind_nodes(dirty, bound.code_catch, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }

@@ -431,7 +431,7 @@ class AIR_Node
     // If this node denotes a local reference which is allocated in an executive
     // context, replace it with a copy of the reference.
     opt<AIR_Node>
-    rebind_opt(Abstract_Context& ctx) const;
+    rebind_opt(const Abstract_Context& ctx) const;
 
     // This is necessary because the body of a closure shall not have been
     // solidified.
