@@ -133,7 +133,7 @@ test_src = [
   'test/c_stack_overflow.cpp', 'test/var_mod.cpp', 'test/ini.cpp', 'test/csv.cpp',
   'test/binding_variable.cpp', 'test/ptc_hooks_throw.cpp', 'test/ptc_hooks_return.cpp',
   'test/switch_defer.cpp', 'test/for_each.cpp', 'test/github_102.cpp',
-  'test/github_308.cpp', 'test/github_312.cpp' ]
+  'test/github_308.cpp', 'test/github_312.cpp', 'test/github_321.cpp' ]
 
 #===========================================================
 # Global configuration

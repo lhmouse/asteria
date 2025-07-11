@@ -61,6 +61,7 @@ class AIR_Node
         cow_vector<AIR_Node> code_body;
         bool negative;
         cow_vector<AIR_Node> code_cond;
+        cow_vector<AIR_Node> code_complete;
       };
 
     struct S_while_statement
@@ -68,6 +69,7 @@ class AIR_Node
         bool negative;
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_body;
+        cow_vector<AIR_Node> code_complete;
       };
 
     struct S_for_each_statement
@@ -77,6 +79,7 @@ class AIR_Node
         Source_Location sloc_init;
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
+        cow_vector<AIR_Node> code_complete;
       };
 
     struct S_for_statement
@@ -85,6 +88,7 @@ class AIR_Node
         cow_vector<AIR_Node> code_cond;
         cow_vector<AIR_Node> code_step;
         cow_vector<AIR_Node> code_body;
+        cow_vector<AIR_Node> code_complete;
       };
 
     struct S_try_statement
