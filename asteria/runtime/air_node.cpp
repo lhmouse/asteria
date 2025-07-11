@@ -1103,13 +1103,13 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              AVM_Rod rods_body;
-              AVM_Rod rods_cond;
+              AVM_Rod rod_body;
+              AVM_Rod rod_cond;
             };
 
           Sparam sp2;
-          do_solidify_nodes(sp2.rods_body, altr.code_body);
-          do_solidify_nodes(sp2.rods_cond, altr.code_cond);
+          do_solidify_nodes(sp2.rod_body, altr.code_body);
+          do_solidify_nodes(sp2.rod_cond, altr.code_cond);
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
@@ -1122,12 +1122,12 @@ solidify(AVM_Rod& rod) const
                 // A `break while` statement shall terminate the loop and return
                 // `air_status_next` to resume execution after the loop body.
                 for(;;) {
-                  do_execute_block(sp.rods_body, ctx);
+                  do_execute_block(sp.rod_body, ctx);
                   if(do_break_or_continue(ctx, { air_status_break, air_status_break_while },
                                           { air_status_continue, air_status_continue_while }))
                     break;
 
-                  sp.rods_cond.execute(ctx);
+                  sp.rod_cond.execute(ctx);
                   ROCKET_ASSERT(ctx.status() == air_status_next);
                   if(ctx.stack().top().dereference_readonly().test() == negative)
                     break;
@@ -1144,8 +1144,8 @@ solidify(AVM_Rod& rod) const
             , +[](Variable_HashMap& staged, Variable_HashMap& temp, const AVM_Rod::Header* head)
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                sp.rods_body.collect_variables(staged, temp);
-                sp.rods_cond.collect_variables(staged, temp);
+                sp.rod_body.collect_variables(staged, temp);
+                sp.rod_cond.collect_variables(staged, temp);
               }
 
             // Symbols
@@ -1163,13 +1163,13 @@ solidify(AVM_Rod& rod) const
 
           struct Sparam
             {
-              AVM_Rod rods_cond;
-              AVM_Rod rods_body;
+              AVM_Rod rod_cond;
+              AVM_Rod rod_body;
             };
 
           Sparam sp2;
-          do_solidify_nodes(sp2.rods_cond, altr.code_cond);
-          do_solidify_nodes(sp2.rods_body, altr.code_body);
+          do_solidify_nodes(sp2.rod_cond, altr.code_cond);
+          do_solidify_nodes(sp2.rod_body, altr.code_body);
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
@@ -1182,12 +1182,12 @@ solidify(AVM_Rod& rod) const
                 // `break while` statement shall terminate the loop and return
                 // `air_status_next` to resume execution after the loop body.
                 for(;;) {
-                  sp.rods_cond.execute(ctx);
+                  sp.rod_cond.execute(ctx);
                   ROCKET_ASSERT(ctx.status() == air_status_next);
                   if(ctx.stack().top().dereference_readonly().test() == negative)
                     break;
 
-                  do_execute_block(sp.rods_body, ctx);
+                  do_execute_block(sp.rod_body, ctx);
                   if(do_break_or_continue(ctx, { air_status_break, air_status_break_while },
                                           { air_status_continue, air_status_continue_while }))
                     break;
@@ -1204,8 +1204,8 @@ solidify(AVM_Rod& rod) const
             , +[](Variable_HashMap& staged, Variable_HashMap& temp, const AVM_Rod::Header* head)
               {
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
-                sp.rods_cond.collect_variables(staged, temp);
-                sp.rods_body.collect_variables(staged, temp);
+                sp.rod_cond.collect_variables(staged, temp);
+                sp.rod_body.collect_variables(staged, temp);
               }
 
             // Symbols
