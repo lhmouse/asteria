@@ -344,7 +344,11 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           ROCKET_ASSERT(!altr.cond.units.empty());
           auto code_cond = do_generate_expression(opts, global, ctx, ptc_aware_none, altr.cond);
 
-          AIR_Node::S_do_while_statement xnode = { move(code_body), altr.negative, move(code_cond) };
+          // Generate code for the `__ifcomplete` block. This can be PTC'd.
+          auto code_complete = do_generate_block(opts, global, ctx, ptc, altr.branch_complete);
+
+          AIR_Node::S_do_while_statement xnode = { move(code_body), altr.negative, move(code_cond),
+                                                   move(code_complete) };
           code.emplace_back(move(xnode));
           return;
         }
@@ -360,7 +364,11 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx, ptc_aware_none, altr.body);
 
-          AIR_Node::S_while_statement xnode = { altr.negative, move(code_cond), move(code_body) };
+          // Generate code for the `__ifcomplete` block. This can be PTC'd.
+          auto code_complete = do_generate_block(opts, global, ctx, ptc, altr.branch_complete);
+
+          AIR_Node::S_while_statement xnode = { altr.negative, move(code_cond), move(code_body),
+                                                move(code_complete) };
           code.emplace_back(move(xnode));
           return;
         }
@@ -382,8 +390,11 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
+          // Generate code for the `__ifcomplete` block. This can be PTC'd.
+          auto code_complete = do_generate_block(opts, global, ctx, ptc, altr.branch_complete);
+
           AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, altr.sloc_init,
-                                                   move(code_init), move(code_body) };
+                                                   move(code_init), move(code_body), move(code_complete) };
           code.emplace_back(move(xnode));
           return;
         }
@@ -404,8 +415,11 @@ generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
           // Generate code for the body. Loop statements cannot be PTC'd.
           auto code_body = do_generate_block(opts, global, ctx_for, ptc_aware_none, altr.body);
 
+          // Generate code for the `__ifcomplete` block. This can be PTC'd.
+          auto code_complete = do_generate_block(opts, global, ctx, ptc, altr.branch_complete);
+
           AIR_Node::S_for_statement xnode = { move(code_init), move(code_cond), move(code_step),
-                                              move(code_body) };
+                                              move(code_body), move(code_complete) };
           code.emplace_back(move(xnode));
           return;
         }

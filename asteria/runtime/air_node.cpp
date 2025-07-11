@@ -400,6 +400,7 @@ rebind_opt(const Abstract_Context& ctx) const
           // The condition expression is not a part of the body.
           do_rebind_nodes(dirty, bound.code_body, ctx_empty);
           do_rebind_nodes(dirty, bound.code_cond, ctx);
+          do_rebind_nodes(dirty, bound.code_complete, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -415,6 +416,7 @@ rebind_opt(const Abstract_Context& ctx) const
           // The condition expression is not a part of the body.
           do_rebind_nodes(dirty, bound.code_cond, ctx);
           do_rebind_nodes(dirty, bound.code_body, ctx_empty);
+          do_rebind_nodes(dirty, bound.code_complete, ctx_empty);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -433,6 +435,7 @@ rebind_opt(const Abstract_Context& ctx) const
           // in an inner scope, created and destroyed for each iteration.
           do_rebind_nodes(dirty, bound.code_init, ctx_for);
           do_rebind_nodes(dirty, bound.code_body, ctx_body);
+          do_rebind_nodes(dirty, bound.code_complete, ctx_for);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -453,6 +456,7 @@ rebind_opt(const Abstract_Context& ctx) const
           do_rebind_nodes(dirty, bound.code_cond, ctx_for);
           do_rebind_nodes(dirty, bound.code_step, ctx_for);
           do_rebind_nodes(dirty, bound.code_body, ctx_body);
+          do_rebind_nodes(dirty, bound.code_complete, ctx_for);
 
           return do_return_rebound_opt(dirty, move(bound));
         }
@@ -639,6 +643,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
           // Collect variables from the body and the condition expression.
           do_collect_variables_for_each(staged, temp, altr.code_body);
           do_collect_variables_for_each(staged, temp, altr.code_cond);
+          do_collect_variables_for_each(staged, temp, altr.code_complete);
           return;
         }
 
@@ -649,6 +654,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
           // Collect variables from the condition expression and the body.
           do_collect_variables_for_each(staged, temp, altr.code_cond);
           do_collect_variables_for_each(staged, temp, altr.code_body);
+          do_collect_variables_for_each(staged, temp, altr.code_complete);
           return;
         }
 
@@ -659,6 +665,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
           // Collect variables from the range initializer and the body.
           do_collect_variables_for_each(staged, temp, altr.code_init);
           do_collect_variables_for_each(staged, temp, altr.code_body);
+          do_collect_variables_for_each(staged, temp, altr.code_complete);
           return;
         }
 
@@ -671,6 +678,7 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
           do_collect_variables_for_each(staged, temp, altr.code_init);
           do_collect_variables_for_each(staged, temp, altr.code_cond);
           do_collect_variables_for_each(staged, temp, altr.code_step);
+          do_collect_variables_for_each(staged, temp, altr.code_complete);
           return;
         }
 
@@ -1025,7 +1033,7 @@ solidify(AVM_Rod& rod) const
                     auto cmp_lo = cond.compare_partial(ctx.stack().top(1).dereference_readonly());
                     auto cmp_up = cond.compare_partial(ctx.stack().top(0).dereference_readonly());
                     if(::rocket::is_none_of(cmp_lo, { compare_greater, sp.at(k).cmp2_lower })
-                       || ::rocket::is_none_of(cmp_up, { compare_less, sp.at(k).cmp2_upper }))
+                        || ::rocket::is_none_of(cmp_up, { compare_less, sp.at(k).cmp2_upper }))
                       continue;
 
                     target_index = k;
@@ -1095,11 +1103,13 @@ solidify(AVM_Rod& rod) const
             {
               AVM_Rod rod_body;
               AVM_Rod rod_cond;
+              AVM_Rod rod_complete;
             };
 
           Sparam sp2;
           do_solidify_nodes(sp2.rod_body, altr.code_body);
           do_solidify_nodes(sp2.rod_cond, altr.code_cond);
+          do_solidify_nodes(sp2.rod_complete, altr.code_complete);
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
@@ -1123,8 +1133,10 @@ solidify(AVM_Rod& rod) const
 
                   sp.rod_cond.execute(ctx);
                   ROCKET_ASSERT(ctx.status() == air_status_next);
-                  if(ctx.stack().top().dereference_readonly().test() == negative)
+                  if(ctx.stack().top().dereference_readonly().test() == negative) {
+                    do_execute_block(sp.rod_complete, ctx);
                     break;
+                  }
                 }
               }
 
@@ -1140,6 +1152,7 @@ solidify(AVM_Rod& rod) const
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 sp.rod_body.collect_variables(staged, temp);
                 sp.rod_cond.collect_variables(staged, temp);
+                sp.rod_complete.collect_variables(staged, temp);
               }
 
             // Symbols
@@ -1159,11 +1172,13 @@ solidify(AVM_Rod& rod) const
             {
               AVM_Rod rod_cond;
               AVM_Rod rod_body;
+              AVM_Rod rod_complete;
             };
 
           Sparam sp2;
           do_solidify_nodes(sp2.rod_cond, altr.code_cond);
           do_solidify_nodes(sp2.rod_body, altr.code_body);
+          do_solidify_nodes(sp2.rod_complete, altr.code_complete);
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
@@ -1178,8 +1193,10 @@ solidify(AVM_Rod& rod) const
                 for(;;) {
                   sp.rod_cond.execute(ctx);
                   ROCKET_ASSERT(ctx.status() == air_status_next);
-                  if(ctx.stack().top().dereference_readonly().test() == negative)
+                  if(ctx.stack().top().dereference_readonly().test() == negative) {
+                    do_execute_block(sp.rod_complete, ctx);
                     break;
+                  }
 
                   do_execute_block(sp.rod_body, ctx);
                   if(::rocket::is_any_of(ctx.status(), { air_status_continue, air_status_continue_while }))
@@ -1204,6 +1221,7 @@ solidify(AVM_Rod& rod) const
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 sp.rod_cond.collect_variables(staged, temp);
                 sp.rod_body.collect_variables(staged, temp);
+                sp.rod_complete.collect_variables(staged, temp);
               }
 
             // Symbols
@@ -1223,6 +1241,7 @@ solidify(AVM_Rod& rod) const
               Source_Location sloc_init;
               AVM_Rod rod_init;
               AVM_Rod rod_body;
+              AVM_Rod rod_complete;
             };
 
           Sparam sp2;
@@ -1231,6 +1250,7 @@ solidify(AVM_Rod& rod) const
           sp2.sloc_init = altr.sloc_init;
           do_solidify_nodes(sp2.rod_init, altr.code_init);
           do_solidify_nodes(sp2.rod_body, altr.code_body);
+          do_solidify_nodes(sp2.rod_complete, altr.code_complete);
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
@@ -1267,7 +1287,13 @@ solidify(AVM_Rod& rod) const
                   if(range.is_array()) {
                     const auto& arr = range.as_array();
                     mapped_ref->push_subscript(Subscript::S_array_head());  // placeholder
-                    for(int64_t i = 0;  i < arr.ssize();  ++i) {
+                    int64_t index = 0;
+                    for(;;) {
+                      if(index >= arr.ssize()) {
+                        do_execute_block(sp.rod_complete, ctx);
+                        break;
+                      }
+
                       // Set the key variable which is the subscript of the mapped
                       // element in the array.
                       if(qkey_ref) {
@@ -1276,14 +1302,15 @@ solidify(AVM_Rod& rod) const
                           key_var = ctx.global().garbage_collector()->create_variable();
                           qkey_ref->set_variable(key_var);
                         }
-                        key_var->initialize(i);
+                        key_var->initialize(index);
                         key_var->set_immutable();
                       }
 
                       // Set the mapped reference.
                       mapped_ref->pop_subscript();
-                      Subscript::S_array_index xsub = { i };
+                      Subscript::S_array_index xsub = { index };
                       do_push_subscript_and_check(*mapped_ref, move(xsub));
+                      ++ index;
 
                       // Execute the loop body.
                       do_execute_block(sp.rod_body, ctx_for);
@@ -1299,7 +1326,13 @@ solidify(AVM_Rod& rod) const
                   else if(range.is_object()) {
                     const auto& obj = range.as_object();
                     mapped_ref->push_subscript(Subscript::S_array_head());  // placeholder
-                    for(auto it = obj.begin();  it != obj.end();  ++it) {
+                    auto cur_it = obj.begin();
+                    for(;;) {
+                      if(cur_it == obj.end()) {
+                        do_execute_block(sp.rod_complete, ctx);
+                        break;
+                      }
+
                       // Set the key variable which is the name of the mapped element
                       // in the object.
                       if(qkey_ref) {
@@ -1308,14 +1341,15 @@ solidify(AVM_Rod& rod) const
                           key_var = ctx.global().garbage_collector()->create_variable();
                           qkey_ref->set_variable(key_var);
                         }
-                        key_var->initialize(it->first.rdstr());
+                        key_var->initialize(cur_it->first.rdstr());
                         key_var->set_immutable();
                       }
 
                       // Set the mapped reference.
                       mapped_ref->pop_subscript();
-                      Subscript::S_object_key xsub = { it->first };
+                      Subscript::S_object_key xsub = { cur_it->first };
                       do_push_subscript_and_check(*mapped_ref, move(xsub));
+                      ++ cur_it;
 
                       // Execute the loop body.
                       do_execute_block(sp.rod_body, ctx_for);
@@ -1351,6 +1385,7 @@ solidify(AVM_Rod& rod) const
                 const auto& sp = *reinterpret_cast<const Sparam*>(head->sparam);
                 sp.rod_init.collect_variables(staged, temp);
                 sp.rod_body.collect_variables(staged, temp);
+                sp.rod_complete.collect_variables(staged, temp);
               }
 
             // Symbols
@@ -1369,6 +1404,7 @@ solidify(AVM_Rod& rod) const
               AVM_Rod rod_cond;
               AVM_Rod rod_step;
               AVM_Rod rod_body;
+              AVM_Rod rod_complete;
             };
 
           Sparam sp2;
@@ -1376,6 +1412,7 @@ solidify(AVM_Rod& rod) const
           do_solidify_nodes(sp2.rod_cond, altr.code_cond);
           do_solidify_nodes(sp2.rod_step, altr.code_step);
           do_solidify_nodes(sp2.rod_body, altr.code_body);
+          do_solidify_nodes(sp2.rod_complete, altr.code_complete);
 
           rod.push_function(
             +[](Executive_Context& ctx, const AVM_Rod::Header* head)
@@ -1400,8 +1437,10 @@ solidify(AVM_Rod& rod) const
                     // always true, and the loop is infinite.
                     sp.rod_cond.execute(ctx_for);
                     ROCKET_ASSERT(ctx_for.status() == air_status_next);
-                    if(ctx_for.stack().size() && !ctx_for.stack().top().dereference_readonly().test())
+                    if(ctx_for.stack().size() && !ctx_for.stack().top().dereference_readonly().test()) {
+                      do_execute_block(sp.rod_complete, ctx);
                       break;
+                    }
 
                     do_execute_block(sp.rod_body, ctx_for);
                     if(::rocket::is_any_of(ctx.status(), { air_status_continue, air_status_continue_for }))
@@ -1438,6 +1477,7 @@ solidify(AVM_Rod& rod) const
                 sp.rod_cond.collect_variables(staged, temp);
                 sp.rod_step.collect_variables(staged, temp);
                 sp.rod_body.collect_variables(staged, temp);
+                sp.rod_complete.collect_variables(staged, temp);
               }
 
             // Symbols
