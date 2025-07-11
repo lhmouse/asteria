@@ -733,12 +733,12 @@ do_accept_if_statement_opt(Token_Stream& tstrm, scope_flags scope)
 
     decltype(qbtrue) qbfalse;
     qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
-    if(qkwrd)
+    if(qkwrd) {
       qbfalse = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
-
-    if(qkwrd && !qbfalse)
-      throw Compiler_Error(xtc_status,
-                compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
+      if(!qbfalse)
+        throw Compiler_Error(xtc_status,
+                  compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
+    }
 
     if(!qbfalse)
       qbfalse.emplace();  // empty `else` block
