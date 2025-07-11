@@ -877,7 +877,8 @@ opt<Statement>
 do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // do-while-statement ::=
-    //   `do` nondeclarative-statement `while` ( negation )? `(` expression `)` `;`
+    //   `do` nondeclarative-statement `while` ( negation )? `(` expression `)`
+    //       ( `__ifcomplete` nondeclarative-statement | `;` )
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_do });
     if(!qkwrd)
       return nullopt;
@@ -913,12 +914,25 @@ do_accept_do_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
                 compiler_status_closing_parenthesis_expected, tstrm.next_sloc(),
                 "[unmatched `(` at '$1']", op_sloc);
 
-    kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
-    if(!kpunct)
-      throw Compiler_Error(xtc_status,
-                compiler_status_semicolon_expected, tstrm.next_sloc());
+    opt<Statement::S_block> qbifcomplete;
+    qkwrd = do_accept_keyword_opt(tstrm, { keyword_ifcomplete });
+    if(qkwrd) {
+      qbifcomplete = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
+      if(!qbifcomplete)
+        throw Compiler_Error(xtc_status,
+                  compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
+    }
 
-    Statement::S_do_while xstmt = { move(*qblock), *kneg, move(*qcond) };
+    if(!qbifcomplete) {
+      qbifcomplete.emplace();  // empty `__ifcomplete` block
+
+      kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
+      if(!kpunct)
+        throw Compiler_Error(xtc_status,
+                  compiler_status_semicolon_expected, tstrm.next_sloc());
+    }
+
+    Statement::S_do_while xstmt = { move(*qblock), *kneg, move(*qcond), move(*qbifcomplete) };
     return move(xstmt);
   }
 
@@ -927,6 +941,7 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
   {
     // while-statement ::=
     //   `while` ( negation )? `(` expression `)` nondeclarative-statement
+    //       ( `__ifcomplete` nondeclarative-statement )?
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
     if(!qkwrd)
       return nullopt;
@@ -957,7 +972,19 @@ do_accept_while_statement_opt(Token_Stream& tstrm, scope_flags scope)
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
-    Statement::S_while xstmt = { *kneg, move(*qcond), move(*qblock) };
+    opt<Statement::S_block> qbifcomplete;
+    qkwrd = do_accept_keyword_opt(tstrm, { keyword_ifcomplete });
+    if(qkwrd) {
+      qbifcomplete = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
+      if(!qbifcomplete)
+        throw Compiler_Error(xtc_status,
+                  compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
+    }
+
+    if(!qbifcomplete)
+      qbifcomplete.emplace();  // empty `__ifcomplete` block
+
+    Statement::S_while xstmt = { *kneg, move(*qcond), move(*qblock), move(*qbifcomplete) };
     return move(xstmt);
   }
 
@@ -967,7 +994,7 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
   {
     // for-complement-range ::=
     //   `each` identifier ( [ `,` `:` `=` ] identifier )? arrow-initializer `)`
-    //       nondeclarative-statement
+    //       nondeclarative-statement ( `__ifcomplete` nondeclarative-statement )?
     auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
     if(!qkwrd)
       return nullopt;
@@ -1012,8 +1039,20 @@ do_accept_for_complement_range_opt(Token_Stream& tstrm, const Source_Location& o
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
+    opt<Statement::S_block> qbifcomplete;
+    qkwrd = do_accept_keyword_opt(tstrm, { keyword_ifcomplete });
+    if(qkwrd) {
+      qbifcomplete = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
+      if(!qbifcomplete)
+        throw Compiler_Error(xtc_status,
+                  compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
+    }
+
+    if(!qbifcomplete)
+      qbifcomplete.emplace();  // empty `__ifcomplete` block
+
     Statement::S_for_each xstmt = { move(key), move(*qmapped), move(sloc_init), move(*qinit),
-                                    move(*qblock) };
+                                    move(*qblock), move(*qbifcomplete) };
     return move(xstmt);
   }
 
@@ -1050,7 +1089,7 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
   {
     // for-complement-triplet ::=
     //   for-initializer ( expression )? `;` ( expression )? `)`
-    //       nondeclarative-statement
+    //       nondeclarative-statement ( `__ifcomplete` nondeclarative-statement )?
     auto qstmt = do_accept_for_initializer_opt(tstrm);
     if(!qstmt)
       return nullopt;
@@ -1082,7 +1121,19 @@ do_accept_for_complement_triplet_opt(Token_Stream& tstrm, const Source_Location&
       throw Compiler_Error(xtc_status,
                 compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
 
-    Statement::S_for xstmt = { move(init), move(cond), move(step), move(*qblock) };
+    opt<Statement::S_block> qbifcomplete;
+    auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_ifcomplete });
+    if(qkwrd) {
+      qbifcomplete = do_accept_nondeclarative_statement_as_block_opt(tstrm, scope);
+      if(!qbifcomplete)
+        throw Compiler_Error(xtc_status,
+                  compiler_status_nondeclarative_statement_expected, tstrm.next_sloc());
+    }
+
+    if(!qbifcomplete)
+      qbifcomplete.emplace();  // empty `__ifcomplete` block
+
+    Statement::S_for xstmt = { move(init), move(cond), move(step), move(*qblock), move(*qbifcomplete) };
     return move(xstmt);
   }
 

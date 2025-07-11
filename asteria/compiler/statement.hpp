@@ -72,6 +72,7 @@ class Statement
         S_block body;
         bool negative;
         S_expression cond;
+        S_block branch_complete;
       };
 
     struct S_while
@@ -79,6 +80,7 @@ class Statement
         bool negative;
         S_expression cond;
         S_block body;
+        S_block branch_complete;
       };
 
     struct S_for_each
@@ -88,6 +90,7 @@ class Statement
         Source_Location sloc_init;
         S_expression init;
         S_block body;
+        S_block branch_complete;
       };
 
     struct S_for
@@ -96,6 +99,7 @@ class Statement
         S_expression cond;
         S_expression step;
         S_block body;
+        S_block branch_complete;
       };
 
     struct S_try
