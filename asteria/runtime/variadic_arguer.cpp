@@ -9,14 +9,16 @@ namespace asteria {
 
 tinyfmt&
 Variadic_Arguer::
-describe(tinyfmt& fmt) const
+describe(tinyfmt& fmt)
+  const
   {
     return fmt << "`__varg([index])` at '" << this->m_sloc << "'";
   }
 
 void
 Variadic_Arguer::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+  const
   {
     for(const auto& arg : this->m_vargs)
       arg.collect_variables(staged, temp);
@@ -24,7 +26,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
 void
 Variadic_Arguer::
-invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const
+invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+  const
   {
     Argument_Reader reader(&"__varg", move(stack));
 

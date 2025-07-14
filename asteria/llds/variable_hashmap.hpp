@@ -18,22 +18,27 @@ class Variable_HashMap
     uint32_t m_nbkt = 0;
 
   public:
-    constexpr Variable_HashMap() noexcept = default;
+    constexpr
+    Variable_HashMap()
+      noexcept = default;
 
-    Variable_HashMap(Variable_HashMap&& other) noexcept
+    Variable_HashMap(Variable_HashMap&& other)
+      noexcept
       {
         this->swap(other);
       }
 
     Variable_HashMap&
-    operator=(Variable_HashMap&& other) & noexcept
+    operator=(Variable_HashMap&& other)
+      & noexcept
       {
         this->swap(other);
         return *this;
       }
 
     Variable_HashMap&
-    swap(Variable_HashMap& other) noexcept
+    swap(Variable_HashMap& other)
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_size, other.m_size);
@@ -46,7 +51,8 @@ class Variable_HashMap
     do_reallocate(uint32_t nbkt);
 
     void
-    do_clear(bool free_storage) noexcept;
+    do_clear(bool free_storage)
+      noexcept;
 
   public:
     ~Variable_HashMap()
@@ -56,13 +62,15 @@ class Variable_HashMap
       }
 
     uint32_t
-    size() const noexcept
+    size()
+      const noexcept
       {
         return this->m_size;
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         if(this->m_size != 0)
           this->do_clear(false);
@@ -72,18 +80,22 @@ class Variable_HashMap
     insert(const void* key, const refcnt_ptr<Variable>& var_opt);
 
     bool
-    erase(const void* key, refcnt_ptr<Variable>* varp_opt = nullptr) noexcept;
+    erase(const void* key, refcnt_ptr<Variable>* varp_opt = nullptr)
+      noexcept;
 
     void
-    merge_into(Variable_HashMap& other) const;
+    merge_into(Variable_HashMap& other)
+      const;
 
     bool
-    extract_variable(refcnt_ptr<Variable>& var) noexcept;
+    extract_variable(refcnt_ptr<Variable>& var)
+      noexcept;
   };
 
 inline
 void
-swap(Variable_HashMap& lhs, Variable_HashMap& rhs) noexcept
+swap(Variable_HashMap& lhs, Variable_HashMap& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

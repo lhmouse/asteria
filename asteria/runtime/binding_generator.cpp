@@ -10,7 +10,8 @@ namespace asteria {
 
 cow_function
 Binding_Generator::
-operator->*(target_R_gsa& target) const
+operator->*(target_R_gsa& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -28,18 +29,21 @@ operator->*(target_R_gsa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             self = (* this->m_target) (global, move(self), move(reader));
@@ -51,7 +55,8 @@ operator->*(target_R_gsa& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_R_ga& target) const
+operator->*(target_R_ga& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -69,18 +74,21 @@ operator->*(target_R_ga& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             self = (* this->m_target) (global, move(reader));
@@ -92,7 +100,8 @@ operator->*(target_R_ga& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_R_sa& target) const
+operator->*(target_R_sa& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -110,18 +119,21 @@ operator->*(target_R_sa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             self = (* this->m_target) (move(self), move(reader));
@@ -133,7 +145,8 @@ operator->*(target_R_sa& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_R_a& target) const
+operator->*(target_R_a& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -151,18 +164,21 @@ operator->*(target_R_a& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             self = (* this->m_target) (move(reader));
@@ -174,7 +190,8 @@ operator->*(target_R_a& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_V_gsa& target) const
+operator->*(target_V_gsa& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -192,18 +209,21 @@ operator->*(target_V_gsa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             auto val = (* this->m_target) (global, move(self), move(reader));
@@ -216,7 +236,8 @@ operator->*(target_V_gsa& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_V_ga& target) const
+operator->*(target_V_ga& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -234,18 +255,21 @@ operator->*(target_V_ga& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             auto val = (* this->m_target) (global, move(reader));
@@ -258,7 +282,8 @@ operator->*(target_V_ga& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_V_sa& target) const
+operator->*(target_V_sa& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -276,18 +301,21 @@ operator->*(target_V_sa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             auto val = (* this->m_target) (move(self), move(reader));
@@ -300,7 +328,8 @@ operator->*(target_V_sa& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_V_a& target) const
+operator->*(target_V_a& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -318,18 +347,21 @@ operator->*(target_V_a& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             auto val = (* this->m_target) (move(reader));
@@ -342,7 +374,8 @@ operator->*(target_V_a& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_Z_gsa& target) const
+operator->*(target_Z_gsa& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -360,18 +393,21 @@ operator->*(target_Z_gsa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             (* this->m_target) (global, move(self), move(reader));
@@ -384,7 +420,8 @@ operator->*(target_Z_gsa& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_Z_ga& target) const
+operator->*(target_Z_ga& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -402,18 +439,21 @@ operator->*(target_Z_ga& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             (* this->m_target) (global, move(reader));
@@ -426,7 +466,8 @@ operator->*(target_Z_ga& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_Z_sa& target) const
+operator->*(target_Z_sa& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -444,18 +485,21 @@ operator->*(target_Z_sa& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             (* this->m_target) (move(self), move(reader));
@@ -468,7 +512,8 @@ operator->*(target_Z_sa& target) const
 
 cow_function
 Binding_Generator::
-operator->*(target_Z_a& target) const
+operator->*(target_Z_a& target)
+  const
   {
     struct Thunk : Abstract_Function
       {
@@ -486,18 +531,21 @@ operator->*(target_Z_a& target) const
           }
 
         tinyfmt&
-        describe(tinyfmt& fmt) const override
+        describe(tinyfmt& fmt)
+          const override
           {
             return format(fmt, "`$1` at '$2:$3'", this->m_func, this->m_file, this->m_line);
           }
 
         void
-        collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+        collect_variables(Variable_HashMap&, Variable_HashMap&)
+          const override
           {
           }
 
         void
-        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack) const override
+        invoke_ptc_aware(Reference& self, Global_Context& /*global*/, Reference_Stack&& stack)
+          const override
           {
             Argument_Reader reader(this->m_name, move(stack));
             (* this->m_target) (move(reader));

@@ -19,7 +19,8 @@ AIR_Optimizer::
 
 void
 AIR_Optimizer::
-clear() noexcept
+clear()
+  noexcept
   {
     this->m_code.clear();
   }

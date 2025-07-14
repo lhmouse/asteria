@@ -14,7 +14,9 @@ class Statement_Sequence
     cow_vector<Statement> m_stmts;
 
   public:
-    explicit constexpr Statement_Sequence(const Compiler_Options& opts) noexcept
+    explicit constexpr
+    Statement_Sequence(const Compiler_Options& opts)
+      noexcept
       :
         m_opts(opts)
       { }
@@ -28,31 +30,38 @@ class Statement_Sequence
 
     // accessors
     const Compiler_Options&
-    get_options() const noexcept
+    get_options()
+      const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
-    mut_options() noexcept
+    mut_options()
+      noexcept
       { return this->m_opts;  }
 
     void
-    set_options(const Compiler_Options& opts) noexcept
+    set_options(const Compiler_Options& opts)
+      noexcept
       { this->m_opts = opts;  }
 
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_stmts.empty();  }
 
     const cow_vector<Statement>&
-    get_statements() const noexcept
+    get_statements()
+      const noexcept
       { return this->m_stmts;  }
 
     cow_vector<Statement>&
-    mut_statements() noexcept
+    mut_statements()
+      noexcept
       { return this->m_stmts;  }
 
     void
-    clear() noexcept;
+    clear()
+      noexcept;
 
     // This function parses tokens from the input stream and fills
     // statements into `*this`. The contents of `*this` are destroyed.

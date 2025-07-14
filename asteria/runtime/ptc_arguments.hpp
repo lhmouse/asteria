@@ -43,47 +43,58 @@ class PTC_Arguments
 
     // accessors
     const Source_Location&
-    sloc() const noexcept
+    sloc()
+      const noexcept
       { return this->m_sloc;  }
 
     PTC_Aware
-    ptc_aware() const noexcept
+    ptc_aware()
+      const noexcept
       { return this->m_ptc;  }
 
     const cow_function&
-    target() const noexcept
+    target()
+      const noexcept
       { return this->m_target;  }
 
     const Reference_Stack&
-    stack() const noexcept
+    stack()
+      const noexcept
       { return this->m_stack;  }
 
     Reference_Stack&
-    mut_stack() noexcept
+    mut_stack()
+      noexcept
       { return this->m_stack;  }
 
     const Reference&
-    self() const noexcept
+    self()
+      const noexcept
       { return this->m_self;  }
 
     Reference&
-    mut_self() noexcept
+    mut_self()
+      noexcept
       { return this->m_self;  }
 
     refcnt_ptr<const Instantiated_Function>
-    caller_opt() const noexcept
+    caller_opt()
+      const noexcept
       { return this->m_caller_opt;  }
 
     void
-    set_caller(const refcnt_ptr<const Instantiated_Function>& caller) noexcept
+    set_caller(const refcnt_ptr<const Instantiated_Function>& caller)
+      noexcept
       { this->m_caller_opt = caller;  }
 
     const cow_bivector<Source_Location, AVM_Rod>&
-    defer() const noexcept
+    defer()
+      const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVM_Rod>&
-    mut_defer() noexcept
+    mut_defer()
+      noexcept
       { return this->m_defer;  }
   };
 

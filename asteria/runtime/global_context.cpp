@@ -60,15 +60,18 @@ constexpr s_modules[] =
 struct Module_Comparator
   {
     bool
-    operator()(const Module& lhs, const Module& rhs) const noexcept
+    operator()(const Module& lhs, const Module& rhs)
+      const noexcept
       { return lhs.api_version < rhs.api_version;  }
 
     bool
-    operator()(API_Version lhs, const Module& rhs) const noexcept
+    operator()(API_Version lhs, const Module& rhs)
+      const noexcept
       { return lhs < rhs.api_version;  }
 
     bool
-    operator()(const Module& lhs, API_Version rhs) const noexcept
+    operator()(const Module& lhs, API_Version rhs)
+      const noexcept
       { return lhs.api_version < rhs;  }
   };
 
@@ -114,7 +117,8 @@ Global_Context::
 
 API_Version
 Global_Context::
-max_api_version() const noexcept
+max_api_version()
+  const noexcept
   {
     return end(s_modules)[-1].api_version;
   }

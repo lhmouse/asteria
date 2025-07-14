@@ -28,25 +28,31 @@ class Instantiated_Function
     ~Instantiated_Function();
 
     const Source_Location&
-    sloc() const noexcept
+    sloc()
+      const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
-    func() const noexcept
+    func()
+      const noexcept
       { return this->m_func;  }
 
     const cow_vector<phcow_string>&
-    params() const noexcept
+    params()
+      const noexcept
       { return this->m_params;  }
 
     tinyfmt&
-    describe(tinyfmt& fmt) const override;
+    describe(tinyfmt& fmt)
+      const override;
 
     void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const override;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+      const override;
 
     void
-    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override;
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+      const override;
   };
 
 }  // namespace asteria

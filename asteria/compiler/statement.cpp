@@ -112,7 +112,8 @@ void
 Statement::
 generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
               cow_vector<phcow_string>* names_opt, const Global_Context& global,
-              const Compiler_Options& opts, PTC_Aware ptc) const
+              const Compiler_Options& opts, PTC_Aware ptc)
+  const
   {
     if(!code.empty() && code.back().is_terminator())
       return;

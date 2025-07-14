@@ -39,11 +39,13 @@ class Random_Engine
   public:
     // Creates a PRNG from some external entropy source. It is not necessary
     // to seed this generator explicitly.
-    Random_Engine() noexcept;
+    Random_Engine()
+      noexcept;
 
   private:
     void
-    do_isaac() noexcept;
+    do_isaac()
+      noexcept;
 
   public:
     Random_Engine(const Random_Engine&) = delete;
@@ -52,7 +54,8 @@ class Random_Engine
 
     // Gets a random 32-bit number.
     uint32_t
-    bump() noexcept
+    bump()
+      noexcept
       {
         if(ROCKET_UNEXPECT(this->m_ctx.randcnt == 0)) {
           // Fill in the next round of numbers.
@@ -68,16 +71,19 @@ class Random_Engine
     // This class is a UniformRandomBitGenerator.
     static constexpr
     result_type
-    min() noexcept
+    min()
+      noexcept
       { return 0; }
 
     static constexpr
     result_type
-    max() noexcept
+    max()
+      noexcept
       { return UINT32_MAX;  }
 
     result_type
-    operator()() noexcept
+    operator()()
+      noexcept
       { return this->bump();  }
   };
 

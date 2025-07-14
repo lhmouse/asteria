@@ -87,7 +87,8 @@ class BMH_Searcher
   private:
     static
     uintptr_t
-    do_xload_word(cow_string::const_iterator tcur) noexcept
+    do_xload_word(cow_string::const_iterator tcur)
+      noexcept
       {
         uintptr_t btext;
         ::memcpy(&btext, &*tcur, sizeof(btext));
@@ -96,7 +97,8 @@ class BMH_Searcher
 
     static
     uintptr_t
-    do_xload_word(cow_string::const_reverse_iterator tcur) noexcept
+    do_xload_word(cow_string::const_reverse_iterator tcur)
+      noexcept
       {
         uintptr_t btext;
         ::memcpy(&btext, &*tcur + 1 - sizeof(btext), sizeof(btext));
@@ -105,7 +107,8 @@ class BMH_Searcher
 
   public:
     opt<xIter>
-    search_opt(xIter tbegin, xIter tend) const
+    search_opt(xIter tbegin, xIter tend)
+      const
       {
         const ptrdiff_t plen = this->m_pend - this->m_pbegin;
         ROCKET_ASSERT(plen != 0);
@@ -262,7 +265,8 @@ constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
 constexpr char s_spaces[] = " \f\n\r\t\v";
 
 const char*
-do_xstrchr(const char* str, char c) noexcept
+do_xstrchr(const char* str, char c)
+  noexcept
   {
     // If `c == 0`, this function returns a null pointer.
     for(auto p = str;  *p != 0;  ++p)
@@ -278,14 +282,17 @@ class PCRE2_Error
     char m_buf[480];
 
   public:
-    explicit PCRE2_Error(int err) noexcept
+    explicit
+    PCRE2_Error(int err)
+      noexcept
       {
         ::pcre2_get_error_message(err, (uint8_t*) this->m_buf, sizeof(m_buf));
       }
 
   public:
     const char*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_buf;  }
   };
 
@@ -377,7 +384,8 @@ class PCRE2_Matcher
       }
 
     opt<size_t>
-    do_pcre2_match_opt(const V_string& text, optV_integer from, optV_integer length) const
+    do_pcre2_match_opt(const V_string& text, optV_integer from, optV_integer length)
+      const
       {
         opt<size_t> result;
         auto range = do_slice(text, from, length);
@@ -401,18 +409,21 @@ class PCRE2_Matcher
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.string.PCRE` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     PCRE2_Matcher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new PCRE2_Matcher(*this, 42);
         out.reset(ptr);
@@ -420,7 +431,8 @@ class PCRE2_Matcher
       }
 
     opt<pair<V_integer, V_integer>>
-    find(const V_string& text, optV_integer from, optV_integer length) const
+    find(const V_string& text, optV_integer from, optV_integer length)
+      const
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -439,7 +451,8 @@ class PCRE2_Matcher
       }
 
     optV_array
-    match(const V_string& text, optV_integer from, optV_integer length) const
+    match(const V_string& text, optV_integer from, optV_integer length)
+      const
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -466,7 +479,8 @@ class PCRE2_Matcher
       }
 
     optV_object
-    named_match(const V_string& text, optV_integer from, optV_integer length) const
+    named_match(const V_string& text, optV_integer from, optV_integer length)
+      const
       {
         auto sub_off = this->do_pcre2_match_opt(text, from, length);
         if(!sub_off)
@@ -497,7 +511,8 @@ class PCRE2_Matcher
       }
 
     V_string
-    replace(const V_string& text, optV_integer from, optV_integer length, const V_string& rep) const
+    replace(const V_string& text, optV_integer from, optV_integer length, const V_string& rep)
+      const
       {
         auto range = do_slice(text, from, length);
         auto sub_off = static_cast<size_t>(range.first - text.begin());
@@ -714,15 +729,18 @@ struct iconv_closer
     using closer_type  = decltype(::iconv_close)*;
 
     handle_type
-    null() const noexcept
+    null()
+      const noexcept
       { return (::iconv_t)-1;  }
 
     bool
-    is_null(handle_type cd) const noexcept
+    is_null(handle_type cd)
+      const noexcept
       { return cd == (::iconv_t)-1;  }
 
     int
-    close(handle_type cd) const noexcept
+    close(handle_type cd)
+      const noexcept
       { return ::iconv_close(cd);  }
   };
 

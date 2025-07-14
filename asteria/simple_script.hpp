@@ -25,40 +25,50 @@ class Simple_Script
 
   public:
     const Compiler_Options&
-    options() const noexcept
+    options()
+      const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
-    mut_options() noexcept
+    mut_options()
+      noexcept
       { return this->m_opts;  }
 
     const Global_Context&
-    global() const noexcept
+    global()
+      const noexcept
       { return this->m_global;  }
 
     Global_Context&
-    mut_global() noexcept
+    mut_global()
+      noexcept
       { return this->m_global;  }
 
-    explicit operator bool() const noexcept
+    explicit
+    operator bool()
+      const noexcept
       { return static_cast<bool>(this->m_func);  }
 
-    operator const cow_function&() const noexcept
+    operator const cow_function&()
+      const noexcept
       { return this->m_func;  }
 
     void
-    reset() noexcept
+    reset()
+      noexcept
       { this->m_func.reset();  }
 
     // Manage global variables in the bundled context.
     refcnt_ptr<Variable>
-    get_global_variable_opt(const phcow_string& name) const noexcept;
+    get_global_variable_opt(const phcow_string& name)
+      const noexcept;
 
     refcnt_ptr<Variable>
     open_global_variable(const phcow_string& name);
 
     bool
-    erase_global_variable(const phcow_string& name) noexcept;
+    erase_global_variable(const phcow_string& name)
+      noexcept;
 
     // Load a script, which may be either a sequence of statements or a
     // single expression.

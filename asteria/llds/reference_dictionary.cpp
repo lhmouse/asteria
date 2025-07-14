@@ -62,7 +62,8 @@ do_reallocate(uint32_t nbkt)
 ROCKET_FLATTEN
 void
 Reference_Dictionary::
-do_clear(bool free_storage) noexcept
+do_clear(bool free_storage)
+  noexcept
   {
     auto eptr = this->m_bptr + this->m_nbkt;
     while(eptr->next != eptr) {
@@ -88,7 +89,8 @@ do_clear(bool free_storage) noexcept
 
 Reference*
 Reference_Dictionary::
-do_xfind_opt(const phcow_string& key) const noexcept
+do_xfind_opt(const phcow_string& key)
+  const noexcept
   {
     if(this->m_nbkt == 0)
       return nullptr;
@@ -143,7 +145,8 @@ insert(const phcow_string& key, bool* newly_opt)
 
 bool
 Reference_Dictionary::
-erase(const phcow_string& key, Reference* refp_opt) noexcept
+erase(const phcow_string& key, Reference* refp_opt)
+  noexcept
   {
     if(this->m_size == 0)
       return false;

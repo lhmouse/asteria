@@ -27,11 +27,13 @@ class Global_Context
 
   protected:
     bool
-    do_is_analytic() const noexcept override
+    do_is_analytic()
+      const noexcept override
       { return false;  }
 
     const Abstract_Context*
-    do_get_parent_opt() const noexcept override
+    do_get_parent_opt()
+      const noexcept override
       { return nullptr;  }
 
   public:
@@ -41,27 +43,32 @@ class Global_Context
 
     // This provides stack overflow protection.
     Recursion_Sentry
-    copy_recursion_sentry() const
+    copy_recursion_sentry()
+      const
       { return this->m_sentry;  }
 
     const void*
-    get_recursion_base() const noexcept
+    get_recursion_base()
+      const noexcept
       { return this->m_sentry.get_base();  }
 
     void
-    set_recursion_base(const void* base) noexcept
+    set_recursion_base(const void* base)
+      noexcept
       { this->m_sentry.set_base(base);  }
 
     // Get the maximum API version that is supported when this library is built.
     // N.B. This function must not be inlined for this reason.
     ROCKET_CONST
     API_Version
-    max_api_version() const noexcept;
+    max_api_version()
+      const noexcept;
 
     // This helps debugging and profiling.
     ASTERIA_INCOMPLET(Abstract_Hooks)
     refcnt_ptr<Abstract_Hooks>
-    get_hooks_opt() const noexcept
+    get_hooks_opt()
+      const noexcept
       { return unerase_pointer_cast<Abstract_Hooks>(this->m_qhooks);  }
 
     template<typename xHooks, typename xMemfn, typename... xArgs>
@@ -75,23 +82,27 @@ class Global_Context
 
     ASTERIA_INCOMPLET(Abstract_Hooks)
     void
-    set_hooks(refcnt_ptr<Abstract_Hooks> hooks_opt) noexcept
+    set_hooks(refcnt_ptr<Abstract_Hooks> hooks_opt)
+      noexcept
       { this->m_qhooks = move(hooks_opt);  }
 
     // These are interfaces for individual global components.
     ASTERIA_INCOMPLET(Garbage_Collector)
     refcnt_ptr<Garbage_Collector>
-    garbage_collector() const noexcept
+    garbage_collector()
+      const noexcept
       { return unerase_pointer_cast<Garbage_Collector>(this->m_gcoll);  }
 
     ASTERIA_INCOMPLET(Random_Engine)
     refcnt_ptr<Random_Engine>
-    random_engine() const noexcept
+    random_engine()
+      const noexcept
       { return unerase_pointer_cast<Random_Engine>(this->m_prng);  }
 
     ASTERIA_INCOMPLET(Module_Loader)
     refcnt_ptr<Module_Loader>
-    module_loader() const noexcept
+    module_loader()
+      const noexcept
       { return unerase_pointer_cast<Module_Loader>(this->m_ldrlk);  }
   };
 

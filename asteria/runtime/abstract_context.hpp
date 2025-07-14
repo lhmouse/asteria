@@ -18,47 +18,56 @@ class Abstract_Context
     mutable Reference_Dictionary m_named_refs;
 
   protected:
-    Abstract_Context() noexcept = default;
+    Abstract_Context()
+      noexcept = default;
 
   protected:
     virtual
     Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name) const;
+    do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name)
+      const;
 
     // Retrieve properties of the final context.
     virtual
     bool
-    do_is_analytic() const noexcept = 0;
+    do_is_analytic()
+      const noexcept = 0;
 
     virtual
     const Abstract_Context*
-    do_get_parent_opt() const noexcept = 0;
+    do_get_parent_opt()
+      const noexcept = 0;
 
     // This function is called by `do_create_lazy_reference_opt()` to avoid
     // infinite recursion.
     Reference&
-    do_mut_named_reference(Reference* hint_opt, const phcow_string& name) const
+    do_mut_named_reference(Reference* hint_opt, const phcow_string& name)
+      const
       {
         return hint_opt ? *hint_opt : this->m_named_refs.insert(name, nullptr);
       }
 
     void
-    do_clear_named_references() noexcept
+    do_clear_named_references()
+      noexcept
       {
         this->m_named_refs.clear();
       }
 
   public:
     bool
-    is_analytic() const noexcept
+    is_analytic()
+      const noexcept
       { return this->do_is_analytic();  }
 
     const Abstract_Context*
-    get_parent_opt() const noexcept
+    get_parent_opt()
+      const noexcept
       { return this->do_get_parent_opt();  }
 
     const Reference*
-    get_named_reference_opt(const phcow_string& name) const
+    get_named_reference_opt(const phcow_string& name)
+      const
       {
         auto qref = this->m_named_refs.find_opt(name);
         if(!qref && name.rdstr().starts_with("__")) {
@@ -97,7 +106,8 @@ class Abstract_Context
       }
 
     bool
-    erase_named_reference(const phcow_string& name, Reference* refp_opt) noexcept
+    erase_named_reference(const phcow_string& name, Reference* refp_opt)
+      noexcept
       {
         return this->m_named_refs.erase(name, refp_opt);
       }

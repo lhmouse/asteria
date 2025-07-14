@@ -8,7 +8,8 @@ namespace asteria {
 
 void
 Recursion_Sentry::
-do_throw_overflow(ptrdiff_t usage, int limit) const
+do_throw_overflow(ptrdiff_t usage, int limit)
+  const
   {
      ::rocket::sprintf_and_throw<::std::invalid_argument>(
            "do_throw_overflow: stack overflow averted (`%td` > `%d`)",

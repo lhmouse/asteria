@@ -408,15 +408,16 @@ class AIR_Node
     template<typename xNode,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xNode&&>::value)>
     AIR_Node&
-    operator=(xNode&& xnode) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xNode&&>::value)
+    operator=(xNode&& xnode)
+      & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xNode&&>::value)
       {
         this->m_stor = forward<xNode>(xnode);
         return *this;
       }
 
     AIR_Node&
-    swap(AIR_Node& other) noexcept
+    swap(AIR_Node& other)
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -425,31 +426,37 @@ class AIR_Node
   public:
     // Gets the constant value, if any.
     opt<Value>
-    get_constant_opt() const noexcept;
+    get_constant_opt()
+      const noexcept;
 
     // Checks whether this node terminates the control flow, which renders all
     // subsequent nodes unreachable.
     bool
-    is_terminator() const noexcept;
+    is_terminator()
+      const noexcept;
 
     // If this node denotes a local reference which is allocated in an executive
     // context, replace it with a copy of the reference.
     opt<AIR_Node>
-    rebind_opt(const Abstract_Context& ctx) const;
+    rebind_opt(const Abstract_Context& ctx)
+      const;
 
     // This is necessary because the body of a closure shall not have been
     // solidified.
     void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+      const;
 
     // Compress this IR node into `rod` for execution.
     void
-    solidify(AVM_Rod& rod) const;
+    solidify(AVM_Rod& rod)
+      const;
   };
 
 inline
 void
-swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
+swap(AIR_Node& lhs, AIR_Node& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

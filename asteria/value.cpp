@@ -54,7 +54,8 @@ using Rbr_Element = ::rocket::variant<Rbr_array, Rbr_object>;
 ROCKET_FLATTEN
 void
 Value::
-do_destroy_variant_slow() noexcept
+do_destroy_variant_slow()
+  noexcept
   try {
 #ifdef ROCKET_DEBUG
     // Attempt to run out of stack in a rather stupid way.
@@ -143,7 +144,8 @@ do_destroy_variant_slow() noexcept
 
 void
 Value::
-do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const
+do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp)
+  const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -221,7 +223,8 @@ do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) cons
 
 void
 Value::
-do_throw_type_mismatch(const char* expecting) const
+do_throw_type_mismatch(const char* expecting)
+  const
   {
     ::rocket::sprintf_and_throw<::std::invalid_argument>(
           "asteria::Value: type mismatch (expecting %s, got `%s`)",
@@ -230,7 +233,8 @@ do_throw_type_mismatch(const char* expecting) const
 
 void
 Value::
-do_throw_uncomparable_with(const Value& other) const
+do_throw_uncomparable_with(const Value& other)
+  const
   {
     ::rocket::sprintf_and_throw<::std::invalid_argument>(
           "asteria::Value: `%s` and `%s` are not comparable",
@@ -239,7 +243,8 @@ do_throw_uncomparable_with(const Value& other) const
 
 Compare
 Value::
-compare_numeric_partial(V_integer other) const noexcept
+compare_numeric_partial(V_integer other)
+  const noexcept
   {
     if(this->m_stor.index() == type_integer) {
       // total
@@ -281,7 +286,8 @@ compare_numeric_partial(V_integer other) const noexcept
 
 Compare
 Value::
-compare_numeric_partial(V_real other) const noexcept
+compare_numeric_partial(V_real other)
+  const noexcept
   {
     if(this->m_stor.index() == type_integer) {
       // partial
@@ -325,7 +331,8 @@ compare_numeric_partial(V_real other) const noexcept
 
 Compare
 Value::
-compare_partial(const Value& other) const
+compare_partial(const Value& other)
+  const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -412,7 +419,8 @@ compare_partial(const Value& other) const
 
 tinyfmt&
 Value::
-print_to(tinyfmt& fmt) const
+print_to(tinyfmt& fmt)
+  const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -527,7 +535,8 @@ print_to(tinyfmt& fmt) const
 
 bool
 Value::
-print_to_stderr() const
+print_to_stderr()
+  const
   {
     ::rocket::tinyfmt_file fmt(stderr);
     this->print_to(fmt);
@@ -536,7 +545,8 @@ print_to_stderr() const
 
 tinyfmt&
 Value::
-dump(tinyfmt& fmt, size_t indent, size_t hanging) const
+dump(tinyfmt& fmt, size_t indent, size_t hanging)
+  const
   {
     // Expand recursion by hand with a stack.
     auto qval = this;
@@ -668,7 +678,8 @@ dump(tinyfmt& fmt, size_t indent, size_t hanging) const
 
 bool
 Value::
-dump_to_stderr(size_t indent, size_t hanging) const
+dump_to_stderr(size_t indent, size_t hanging)
+  const
   {
     ::rocket::tinyfmt_file fmt(stderr);
     this->dump(fmt, indent, hanging);

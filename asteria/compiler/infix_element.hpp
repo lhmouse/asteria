@@ -87,15 +87,16 @@ class Infix_Element
     template<typename xElement,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xElement&&>::value)>
     Infix_Element&
-    operator=(xElement&& xelem) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xElement&&>::value)
+    operator=(xElement&& xelem)
+      & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xElement&&>::value)
       {
         this->m_stor = forward<xElement>(xelem);
         return *this;
       }
 
     Infix_Element&
-    swap(Infix_Element& other) noexcept
+    swap(Infix_Element& other)
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -104,7 +105,8 @@ class Infix_Element
   public:
     // Returns the precedence of this element.
     Precedence
-    tell_precedence() const noexcept;
+    tell_precedence()
+      const noexcept;
 
     // Moves all units into `units`.
     void
@@ -112,12 +114,14 @@ class Infix_Element
 
     // Returns a reference where new units will be appended.
     cow_vector<Expression_Unit>&
-    mut_junction() noexcept;
+    mut_junction()
+      noexcept;
   };
 
 inline
 void
-swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
+swap(Infix_Element& lhs, Infix_Element& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

@@ -219,15 +219,16 @@ class Statement
     template<typename xStatement,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xStatement&&>::value)>
     Statement&
-    operator=(xStatement&& xstmt) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xStatement&&>::value)
+    operator=(xStatement&& xstmt)
+      & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xStatement&&>::value)
       {
         this->m_stor = forward<xStatement>(xstmt);
         return *this;
       }
 
     Statement&
-    swap(Statement& other) noexcept
+    swap(Statement& other)
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -237,7 +238,8 @@ class Statement
     // Checks whether this is `return;`, which terminates the control flow with
     // a void reference.
     bool
-    is_empty_return() const noexcept
+    is_empty_return()
+      const noexcept
       {
         return (this->m_stor.index() == index_return)
                && this->m_stor.as<S_return>().expr.units.empty();
@@ -245,7 +247,8 @@ class Statement
 
     // Checks whether this statement does not modify the current context.
     bool
-    is_scopeless() const noexcept
+    is_scopeless()
+      const noexcept
       {
         return ::rocket::is_none_of(this->m_stor.index(),
             { index_variables, index_references, index_function, index_defer });
@@ -257,12 +260,14 @@ class Statement
     void
     generate_code(cow_vector<AIR_Node>& code, Analytic_Context& ctx,
                   cow_vector<phcow_string>* names_opt, const Global_Context& global,
-                  const Compiler_Options& opts, PTC_Aware ptc) const;
+                  const Compiler_Options& opts, PTC_Aware ptc)
+      const;
   };
 
 inline
 void
-swap(Statement& lhs, Statement& rhs) noexcept
+swap(Statement& lhs, Statement& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

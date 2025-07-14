@@ -34,19 +34,23 @@ class Text_Reader
 
   public:
     const cow_string&
-    file() const noexcept
+    file()
+      const noexcept
       { return this->m_file;  }
 
     int
-    line() const noexcept
+    line()
+      const noexcept
       { return this->m_line - 1;  }
 
     int
-    column() const noexcept
+    column()
+      const noexcept
       { return static_cast<int>(this->m_off) + 1;  }
 
     Source_Location
-    tell() const noexcept
+    tell()
+      const noexcept
       {
         return { this->file(), this->line(), this->column() };
       }
@@ -61,38 +65,44 @@ class Text_Reader
       }
 
     size_t
-    navail() const noexcept
+    navail()
+      const noexcept
       {
         return this->m_str.size() - this->m_off;
       }
 
     const char*
-    data(size_t nadd = 0) const noexcept
+    data(size_t nadd = 0)
+      const noexcept
       {
         return (nadd <= this->navail()) ? (this->m_str.data() + this->m_off + nadd) : "";
       }
 
     char
-    peek(size_t nadd = 0) const noexcept
+    peek(size_t nadd = 0)
+      const noexcept
       {
          return *(this->data(nadd));
       }
 
     bool
-    starts_with(const char* str, size_t len) const noexcept
+    starts_with(const char* str, size_t len)
+      const noexcept
       {
         return (this->navail() >= len) && (::memcmp(this->data(), str, len) == 0);
       }
 
     void
-    consume(size_t nadd) noexcept
+    consume(size_t nadd)
+      noexcept
       {
         ROCKET_ASSERT(nadd <= this->navail());
         this->m_off += nadd;
       }
 
     void
-    rewind() noexcept
+    rewind()
+      noexcept
       {
         this->m_off = 0;
       }
@@ -360,17 +370,20 @@ struct Prefix_Comparator
   {
     template<typename xElement>
     bool
-    operator()(const xElement& lhs, const xElement& rhs) const noexcept
+    operator()(const xElement& lhs, const xElement& rhs)
+      const noexcept
       { return ::memcmp(lhs.str, rhs.str, sizeof(lhs.str)) < 0;  }
 
     template<typename xElement>
     bool
-    operator()(char lhs, const xElement& rhs) const noexcept
+    operator()(char lhs, const xElement& rhs)
+      const noexcept
       { return (uint8_t) lhs < (uint8_t) rhs.str[0];  }
 
     template<typename xElement>
     bool
-    operator()(const xElement& lhs, char rhs) const noexcept
+    operator()(const xElement& lhs, char rhs)
+      const noexcept
       { return (uint8_t) lhs.str[0] < (uint8_t) rhs;  }
   };
 

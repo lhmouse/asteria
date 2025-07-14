@@ -20,14 +20,16 @@ namespace asteria {
 ROCKET_FLATTEN
 void
 Reference::
-do_destroy_variant_slow() noexcept
+do_destroy_variant_slow()
+  noexcept
   {
     this->m_stor.~variant_type();
   }
 
 void
 Reference::
-do_throw_not_dereferenceable() const
+do_throw_not_dereferenceable()
+  const
   {
     if(this->m_stor.ptr<St_bad>())
       throw Runtime_Error(xtc_format,
@@ -46,7 +48,8 @@ do_throw_not_dereferenceable() const
 
 void
 Reference::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+  const
   {
     if(auto st1 = this->m_stor.ptr<St_temp>())
       st1->val.collect_variables(staged, temp);
@@ -62,7 +65,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 ROCKET_FLATTEN
 const Value&
 Reference::
-do_dereference_readonly_slow() const
+do_dereference_readonly_slow()
+  const
   {
     if(auto st1 = this->m_stor.ptr<St_temp>()) {
       // Read this temporary value.
@@ -172,7 +176,8 @@ do_dereference_copy_slow()
 ROCKET_FLATTEN
 Value&
 Reference::
-dereference_mutable() const
+dereference_mutable()
+  const
   {
     if(this->m_stor.ptr<St_temp>()) {
       // The user is attempting to modify a temporary value. Unlike
@@ -208,7 +213,8 @@ dereference_mutable() const
 ROCKET_FLATTEN
 Value
 Reference::
-dereference_unset() const
+dereference_unset()
+  const
   {
     if(this->m_stor.ptr<St_temp>()) {
       // The user is attempting to modify a temporary value. Unlike

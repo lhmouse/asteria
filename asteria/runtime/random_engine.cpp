@@ -9,7 +9,8 @@
 namespace asteria {
 
 Random_Engine::
-Random_Engine() noexcept
+Random_Engine()
+  noexcept
   {
     if(::RAND_bytes(this->m_ctx_init, sizeof(this->m_ctx_init)) != 1)
       ::rocket::sprintf_and_throw<::std::runtime_error>(
@@ -26,7 +27,8 @@ Random_Engine::
 
 void
 Random_Engine::
-do_isaac() noexcept
+do_isaac()
+  noexcept
   {
     // https://www.burtleburtle.net/bob/c/rand.c
 #define ctx  (&(this->m_ctx))

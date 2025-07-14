@@ -10,7 +10,8 @@ namespace asteria {
 
 const Value*
 Subscript::
-apply_read_opt(const Value& parent) const
+apply_read_opt(const Value& parent)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -113,7 +114,8 @@ apply_read_opt(const Value& parent) const
 
 Value*
 Subscript::
-apply_write_opt(Value& parent) const
+apply_write_opt(Value& parent)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -216,7 +218,8 @@ apply_write_opt(Value& parent) const
 
 Value&
 Subscript::
-apply_open(Value& parent) const
+apply_open(Value& parent)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -327,7 +330,8 @@ apply_open(Value& parent) const
 
 Value
 Subscript::
-apply_unset(Value& parent) const
+apply_unset(Value& parent)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {

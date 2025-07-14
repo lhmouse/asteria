@@ -62,7 +62,8 @@ do_reallocate(uint32_t nbkt)
 ROCKET_FLATTEN
 void
 Variable_HashMap::
-do_clear(bool free_storage) noexcept
+do_clear(bool free_storage)
+  noexcept
   {
     auto eptr = this->m_bptr + this->m_nbkt;
     while(eptr->next != eptr) {
@@ -114,7 +115,8 @@ insert(const void* key, const refcnt_ptr<Variable>& var_opt)
 
 bool
 Variable_HashMap::
-erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
+erase(const void* key, refcnt_ptr<Variable>* varp_opt)
+  noexcept
   {
     if(this->m_size == 0)
       return false;
@@ -164,7 +166,8 @@ erase(const void* key, refcnt_ptr<Variable>* varp_opt) noexcept
 
 void
 Variable_HashMap::
-merge_into(Variable_HashMap& other) const
+merge_into(Variable_HashMap& other)
+  const
   {
     if(this == &other)
       return;
@@ -180,7 +183,8 @@ merge_into(Variable_HashMap& other) const
 
 bool
 Variable_HashMap::
-extract_variable(refcnt_ptr<Variable>& var) noexcept
+extract_variable(refcnt_ptr<Variable>& var)
+  noexcept
   {
     for(;;) {
       if(this->m_size == 0)

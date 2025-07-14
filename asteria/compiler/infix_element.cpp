@@ -12,7 +12,8 @@ namespace asteria {
 
 Precedence
 Infix_Element::
-tell_precedence() const noexcept
+tell_precedence()
+  const noexcept
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -207,7 +208,8 @@ extract(cow_vector<Expression_Unit>& units)
 
 cow_vector<Expression_Unit>&
 Infix_Element::
-mut_junction() noexcept
+mut_junction()
+  noexcept
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {

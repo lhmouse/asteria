@@ -11,7 +11,8 @@
 namespace asteria {
 
 Module_Loader::
-Module_Loader() noexcept
+Module_Loader()
+  noexcept
   {
   }
 
@@ -56,7 +57,8 @@ do_lock_stream(const cow_string& path)
 
 void
 Module_Loader::
-do_unlock_stream(locked_pair* qstrm) noexcept
+do_unlock_stream(locked_pair* qstrm)
+  noexcept
   {
     ROCKET_ASSERT(qstrm);
     this->m_strms.erase(qstrm->first);

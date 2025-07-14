@@ -21,14 +21,16 @@ class Module_Loader
 
   public:
     // Creates an empty module loader.
-    Module_Loader() noexcept;
+    Module_Loader()
+      noexcept;
 
   private:
     locked_pair*
     do_lock_stream(const cow_string& path);
 
     void
-    do_unlock_stream(locked_pair* qstrm) noexcept;
+    do_unlock_stream(locked_pair* qstrm)
+      noexcept;
 
   public:
     Module_Loader(const Module_Loader&) = delete;
@@ -43,27 +45,32 @@ class Module_Loader::Unique_Stream
     locked_pair* m_strm = nullptr;
 
   public:
-    constexpr Unique_Stream() noexcept = default;
+    constexpr
+    Unique_Stream()
+      noexcept = default;
 
     Unique_Stream(const refcnt_ptr<Module_Loader>& loader, const cow_string& path)
       {
         this->reset(loader, path);
       }
 
-    Unique_Stream(Unique_Stream&& other) noexcept
+    Unique_Stream(Unique_Stream&& other)
+      noexcept
       {
         this->swap(other);
       }
 
     Unique_Stream&
-    operator=(Unique_Stream&& other) & noexcept
+    operator=(Unique_Stream&& other)
+      & noexcept
       {
         this->swap(other);
         return *this;
       }
 
     Unique_Stream&
-    swap(Unique_Stream& other) noexcept
+    swap(Unique_Stream& other)
+      noexcept
       {
         this->m_loader.swap(other.m_loader);
         ::std::swap(this->m_strm, other.m_strm);
@@ -77,25 +84,29 @@ class Module_Loader::Unique_Stream
       }
 
     explicit
-    operator bool() const noexcept
+    operator bool()
+      const noexcept
       { return this->m_strm != nullptr;  }
 
     const cow_string&
-    path() const noexcept
+    path()
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_strm, "no stream");
         return this->m_strm->first.rdstr();
       }
 
     ::rocket::tinybuf_file&
-    file() const noexcept
+    file()
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_strm, "no stream");
         return this->m_strm->second;
       }
 
     Unique_Stream&
-    reset() noexcept
+    reset()
+      noexcept
       {
         if(this->m_strm == nullptr)
           return *this;
@@ -129,7 +140,8 @@ class Module_Loader::Unique_Stream
 
 inline
 void
-swap(Module_Loader::Unique_Stream& lhs, Module_Loader::Unique_Stream& rhs) noexcept
+swap(Module_Loader::Unique_Stream& lhs, Module_Loader::Unique_Stream& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

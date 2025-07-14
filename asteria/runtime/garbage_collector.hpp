@@ -28,7 +28,8 @@ class Garbage_Collector
 
   public:
     // Creates an empty garbage collector.
-    Garbage_Collector() noexcept;
+    Garbage_Collector()
+      noexcept;
 
   private:
     inline
@@ -42,7 +43,8 @@ class Garbage_Collector
 
     // accessors
     size_t
-    get_threshold(GC_Generation gen) const
+    get_threshold(GC_Generation gen)
+      const
       { return this->m_thres.at(gMax-gen);  }
 
     void
@@ -50,15 +52,18 @@ class Garbage_Collector
       { this->m_thres.mut(gMax-gen) = thres;  }
 
     size_t
-    count_tracked_variables(GC_Generation gen) const
+    count_tracked_variables(GC_Generation gen)
+      const
       { return this->m_tracked.at(gMax-gen).size();  }
 
     size_t
-    count_pooled_variables() const noexcept
+    count_pooled_variables()
+      const noexcept
       { return this->m_pool.size();  }
 
     void
-    clear_pooled_variables() noexcept
+    clear_pooled_variables()
+      noexcept
       { this->m_pool.clear();  }
 
     // These functions manage dynamic memory by managing variables. Variables
@@ -71,7 +76,8 @@ class Garbage_Collector
     collect_variables(GC_Generation gen_limit = gc_generation_oldest);
 
     size_t
-    finalize() noexcept;
+    finalize()
+      noexcept;
   };
 
 }  // namespace asteria

@@ -13,13 +13,15 @@ namespace asteria {
 
 void
 Rcbase::
-vtable_key_function_sLBHstEX() noexcept
+vtable_key_function_sLBHstEX()
+  noexcept
   {
   }
 
 tinyfmt&
 cow_opaque::
-describe(tinyfmt& fmt) const
+describe(tinyfmt& fmt)
+  const
   {
     if(this->m_sptr)
       return this->m_sptr->describe(fmt);
@@ -29,7 +31,8 @@ describe(tinyfmt& fmt) const
 
 tinyfmt&
 cow_function::
-describe(tinyfmt& fmt) const
+describe(tinyfmt& fmt)
+  const
   {
     if(this->m_fptr)
       return fmt << "native function " << this->m_desc;  // static
@@ -42,7 +45,8 @@ describe(tinyfmt& fmt) const
 
 void
 cow_function::
-invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
+invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+  const
   {
     try {
       if(this->m_fptr) {
@@ -68,14 +72,16 @@ invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stac
 
 void
 cow_function::
-invoke(Reference& self, Global_Context& global, Reference_Stack&& stack) const
+invoke(Reference& self, Global_Context& global, Reference_Stack&& stack)
+  const
   {
     this->invoke_ptc_aware(self, global, move(stack));
     self.check_function_result(global, move(stack));
   }
 
 const char*
-describe_type(Type type) noexcept
+describe_type(Type type)
+  noexcept
   {
     switch(type)
       {
@@ -112,7 +118,8 @@ describe_type(Type type) noexcept
   }
 
 const char*
-describe_frame_type(Frame_Type type) noexcept
+describe_frame_type(Frame_Type type)
+  noexcept
   {
     switch(type)
       {
@@ -146,7 +153,8 @@ describe_frame_type(Frame_Type type) noexcept
   }
 
 const char*
-describe_compiler_status(Compiler_Status status) noexcept
+describe_compiler_status(Compiler_Status status)
+  noexcept
   {
     switch(status)
       {

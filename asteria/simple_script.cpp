@@ -15,7 +15,8 @@ namespace asteria {
 
 refcnt_ptr<Variable>
 Simple_Script::
-get_global_variable_opt(const phcow_string& name) const noexcept
+get_global_variable_opt(const phcow_string& name)
+  const noexcept
   {
     auto gref = this->m_global.get_named_reference_opt(name);
     if(!gref)
@@ -42,7 +43,8 @@ open_global_variable(const phcow_string& name)
 
 bool
 Simple_Script::
-erase_global_variable(const phcow_string& name) noexcept
+erase_global_variable(const phcow_string& name)
+  noexcept
   {
     return this->m_global.erase_named_reference(name, nullptr);
   }

@@ -198,7 +198,8 @@ safe_double_to_int64(double val)
   }
 
 bool
-utf8_encode(char*& pos, char32_t cp) noexcept
+utf8_encode(char*& pos, char32_t cp)
+  noexcept
   {
     if(ROCKET_EXPECT(cp < 0x80U)) {
       // This character takes only one byte.
@@ -246,7 +247,8 @@ utf8_encode(cow_string& text, char32_t cp)
   }
 
 bool
-utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept
+utf8_decode(char32_t& cp, const char*& pos, size_t avail)
+  noexcept
   {
     if(avail == 0)
       return false;
@@ -299,7 +301,8 @@ utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   }
 
 bool
-utf16_encode(char16_t*& pos, char32_t cp) noexcept
+utf16_encode(char16_t*& pos, char32_t cp)
+  noexcept
   {
     if(((cp >= 0xD800U) && (cp < 0xE000U)) || (cp >= 0x110000U))
       return false;
@@ -330,7 +333,8 @@ utf16_encode(cow_u16string& text, char32_t cp)
   }
 
 bool
-utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
+  noexcept
   {
     if(avail == 0)
       return false;

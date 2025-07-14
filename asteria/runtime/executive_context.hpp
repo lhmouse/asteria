@@ -56,14 +56,17 @@ class Executive_Context
 
   protected:
     Reference*
-    do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name) const override;
+    do_create_lazy_reference_opt(Reference* hint_opt, const phcow_string& name)
+      const override;
 
     bool
-    do_is_analytic() const noexcept override
+    do_is_analytic()
+      const noexcept override
       { return false;  }
 
     const Abstract_Context*
-    do_get_parent_opt() const noexcept override
+    do_get_parent_opt()
+      const noexcept override
       { return this->m_parent_opt;  }
 
     void
@@ -78,36 +81,44 @@ class Executive_Context
     ~Executive_Context();
 
     const Executive_Context*
-    get_parent_opt() const noexcept
+    get_parent_opt()
+      const noexcept
       { return this->m_parent_opt;  }
 
     Global_Context&
-    global() const noexcept
+    global()
+      const noexcept
       { return *(this->m_global);  }
 
     AIR_Status&
-    status() const noexcept
+    status()
+      const noexcept
       { return *(this->m_status);  }
 
     Reference_Stack&
-    stack() const noexcept
+    stack()
+      const noexcept
       { return *(this->m_stack);  }
 
     Reference_Stack&
-    alt_stack() const noexcept
+    alt_stack()
+      const noexcept
       { return *(this->m_alt_stack);  }
 
     void
-    swap_stacks() noexcept
+    swap_stacks()
+      noexcept
       { ::std::swap(this->m_stack, this->m_alt_stack);  }
 
     // Get the defer expression list.
     const cow_bivector<Source_Location, AVM_Rod>&
-    defer() const noexcept
+    defer()
+      const noexcept
       { return this->m_defer;  }
 
     cow_bivector<Source_Location, AVM_Rod>&
-    mut_defer() noexcept
+    mut_defer()
+      noexcept
       { return this->m_defer;  }
 
     // These functions must be called before exiting a scope.

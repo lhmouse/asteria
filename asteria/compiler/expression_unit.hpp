@@ -158,15 +158,16 @@ class Expression_Unit
     template<typename xUnit,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xUnit&&>::value)>
     Expression_Unit&
-    operator=(xUnit&& xunit) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xUnit&&>::value)
+    operator=(xUnit&& xunit)
+      & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xUnit&&>::value)
       {
         this->m_stor = forward<xUnit>(xunit);
         return *this;
       }
 
     Expression_Unit&
-    swap(Expression_Unit& other) noexcept
+    swap(Expression_Unit& other)
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -175,22 +176,26 @@ class Expression_Unit
   public:
     // Checks whether this expression unit may use `alt_stack`.
     bool
-    clobbers_alt_stack() const noexcept;
+    clobbers_alt_stack()
+      const noexcept;
 
     // Checks whether this operation may produce a void reference.
     bool
-    may_be_void() const noexcept;
+    may_be_void()
+      const noexcept;
 
     // Generate IR nodes into `code`.
     void
     generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                   const Global_Context& global, const Analytic_Context& ctx,
-                  PTC_Aware ptc) const;
+                  PTC_Aware ptc)
+      const;
   };
 
 inline
 void
-swap(Expression_Unit& lhs, Expression_Unit& rhs) noexcept
+swap(Expression_Unit& lhs, Expression_Unit& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

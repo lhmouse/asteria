@@ -28,33 +28,41 @@ class Variadic_Arguer
 
   public:
     const Source_Location&
-    sloc() const noexcept
+    sloc()
+      const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
-    func() const noexcept
+    func()
+      const noexcept
       { return this->m_func;  }
 
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_vargs.empty();  }
 
     size_t
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_vargs.size();  }
 
     const Reference&
-    arg(size_t index) const
+    arg(size_t index)
+      const
       { return this->m_vargs.at(index);  }
 
     tinyfmt&
-    describe(tinyfmt& fmt) const override;
+    describe(tinyfmt& fmt)
+      const override;
 
     void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const override;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+      const override;
 
     void
-    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const override;
+    invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+      const override;
   };
 
 }  // namespace asteria

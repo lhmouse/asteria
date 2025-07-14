@@ -78,19 +78,23 @@ class Runtime_Error
 
     // accessors
     const char*
-    what() const noexcept override
+    what()
+      const noexcept override
       { return this->m_fmt.c_str();  }
 
     const Value&
-    value() const noexcept
+    value()
+      const noexcept
       { return this->m_value;  }
 
     size_t
-    count_frames() const noexcept
+    count_frames()
+      const noexcept
       { return this->m_frames.size();  }
 
     const Frame&
-    frame(size_t index) const
+    frame(size_t index)
+      const
       { return this->m_frames.at(index);  }
 
     void

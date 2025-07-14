@@ -8,7 +8,8 @@
 namespace asteria {
 
 Garbage_Collector::
-Garbage_Collector() noexcept
+Garbage_Collector()
+  noexcept
   {
     static constexpr uint32_t default_threshold = 100;
     this->m_thres.fill(default_threshold);
@@ -176,7 +177,8 @@ collect_variables(GC_Generation gen_limit)
 
 size_t
 Garbage_Collector::
-finalize() noexcept
+finalize()
+  noexcept
   {
     // Ensure no garbage collection is in progress.
     if(this->m_recur > 0)

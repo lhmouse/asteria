@@ -32,8 +32,10 @@ class Binding_Generator
     int m_line;
 
   public:
-    constexpr Binding_Generator(cow_string::shallow_type name, const char* func,
-                                const char* file, int line) noexcept
+    constexpr
+    Binding_Generator(cow_string::shallow_type name, const char* func,
+                      const char* file, int line)
+      noexcept
       :
         m_name(name), m_func(func), m_file(file), m_line(line)
       { }
@@ -41,40 +43,52 @@ class Binding_Generator
   public:
     // These functions are invoked by `ASTERIA_BINDING()`.
     cow_function
-    operator->*(target_R_gsa& target) const;
+    operator->*(target_R_gsa& target)
+      const;
 
     cow_function
-    operator->*(target_R_ga& target) const;
+    operator->*(target_R_ga& target)
+      const;
 
     cow_function
-    operator->*(target_R_sa& target) const;
+    operator->*(target_R_sa& target)
+      const;
 
     cow_function
-    operator->*(target_R_a& target) const;
+    operator->*(target_R_a& target)
+      const;
 
     cow_function
-    operator->*(target_V_gsa& target) const;
+    operator->*(target_V_gsa& target)
+      const;
 
     cow_function
-    operator->*(target_V_ga& target) const;
+    operator->*(target_V_ga& target)
+      const;
 
     cow_function
-    operator->*(target_V_sa& target) const;
+    operator->*(target_V_sa& target)
+      const;
 
     cow_function
-    operator->*(target_V_a& target) const;
+    operator->*(target_V_a& target)
+      const;
 
     cow_function
-    operator->*(target_Z_gsa& target) const;
+    operator->*(target_Z_gsa& target)
+      const;
 
     cow_function
-    operator->*(target_Z_ga& target) const;
+    operator->*(target_Z_ga& target)
+      const;
 
     cow_function
-    operator->*(target_Z_sa& target) const;
+    operator->*(target_Z_sa& target)
+      const;
 
     cow_function
-    operator->*(target_Z_a& target) const;
+    operator->*(target_Z_a& target)
+      const;
   };
 
 // See 'library/string.cpp' for examples about how to use this macro.

@@ -65,15 +65,16 @@ class Subscript
     template<typename xSubscript,
     ROCKET_ENABLE_IF(::std::is_assignable<decltype(m_stor)&, xSubscript&&>::value)>
     Subscript&
-    operator=(xSubscript&& xsub) &
-      noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xSubscript&&>::value)
+    operator=(xSubscript&& xsub)
+      & noexcept(::std::is_nothrow_assignable<decltype(m_stor)&, xSubscript&&>::value)
       {
         this->m_stor = forward<xSubscript>(xsub);
         return *this;
       }
 
     Subscript&
-    swap(Subscript& other) noexcept
+    swap(Subscript& other)
+      noexcept
       {
         this->m_stor.swap(other.m_stor);
         return *this;
@@ -81,50 +82,62 @@ class Subscript
 
   public:
     bool
-    is_array_index() const noexcept
+    is_array_index()
+      const noexcept
       { return this->m_stor.index() == index_array_index;  }
 
     int64_t
-    as_array_index() const
+    as_array_index()
+      const
       { return this->m_stor.as<S_array_index>().index; }
 
     bool
-    is_object_key() const noexcept
+    is_object_key()
+      const noexcept
       { return this->m_stor.index() == index_object_key;  }
 
     const phcow_string&
-    as_object_key() const
+    as_object_key()
+      const
       { return this->m_stor.as<S_object_key>().key; }
 
     bool
-    is_array_head() const noexcept
+    is_array_head()
+      const noexcept
       { return this->m_stor.index() == index_array_head;  }
 
     bool
-    is_array_tail() const noexcept
+    is_array_tail()
+      const noexcept
       { return this->m_stor.index() == index_array_tail;  }
 
     bool
-    is_array_random() const noexcept
+    is_array_random()
+      const noexcept
       { return this->m_stor.index() == index_array_random;  }
 
     // Apply this subscript on a value.
     const Value*
-    apply_read_opt(const Value& parent) const;
+    apply_read_opt(const Value& parent)
+      const;
 
     Value*
-    apply_write_opt(Value& parent) const;
+    apply_write_opt(Value& parent)
+      const;
 
     Value&
-    apply_open(Value& parent) const;
+    apply_open(Value& parent)
+      const;
 
     Value
-    apply_unset(Value& parent) const;
+    apply_unset(Value& parent)
+      const;
   };
 
 inline
 void
-swap(Subscript& lhs, Subscript& rhs) noexcept
+swap(Subscript& lhs, Subscript& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

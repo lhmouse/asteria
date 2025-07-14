@@ -13,12 +13,16 @@ class Recursion_Sentry
     const void* m_base;
 
   public:
-    constexpr Recursion_Sentry() noexcept
+    constexpr
+    Recursion_Sentry()
+      noexcept
       :
         m_base(this)
       { }
 
-    explicit constexpr Recursion_Sentry(const void* base) noexcept
+    explicit constexpr
+    Recursion_Sentry(const void* base)
+      noexcept
       :
         m_base(base)
       { }
@@ -39,10 +43,12 @@ class Recursion_Sentry
   private:
     [[noreturn]]
     void
-    do_throw_overflow(ptrdiff_t usage, int limit) const;
+    do_throw_overflow(ptrdiff_t usage, int limit)
+      const;
 
     void
-    do_validate_stack_usage() const
+    do_validate_stack_usage()
+      const
       {
         ptrdiff_t usage = (char*) this->m_base - (char*) this;
         constexpr int nbits_limit = 20;  // 1 MiB
@@ -60,13 +66,15 @@ class Recursion_Sentry
       }
 
     const void*
-    get_base() const noexcept
+    get_base()
+      const noexcept
       {
         return this->m_base;
       }
 
     Recursion_Sentry&
-    set_base(const void* base) noexcept
+    set_base(const void* base)
+      noexcept
       {
         this->m_base = base;
         return *this;

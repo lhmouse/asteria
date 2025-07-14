@@ -19,7 +19,8 @@ class Variable
     int m_gc_ref;  // uninitialized by default
 
   public:
-    Variable() noexcept
+    Variable()
+      noexcept
       { }
 
   public:
@@ -29,11 +30,13 @@ class Variable
 
     // accessors
     bool
-    is_initialized() const noexcept
+    is_initialized()
+      const noexcept
       { return this->m_init;  }
 
     const Value&
-    get_value() const noexcept
+    get_value()
+      const noexcept
       { return this->m_value;  }
 
     Value&
@@ -50,27 +53,32 @@ class Variable
       }
 
     void
-    uninitialize() noexcept
+    uninitialize()
+      noexcept
       {
         this->m_value = &"[[`destroyed variable`]]";
         this->m_init = false;
       }
 
     bool
-    is_immutable() const noexcept
+    is_immutable()
+      const noexcept
       { return this->m_immut;  }
 
     void
-    set_immutable(bool immut = true) noexcept
+    set_immutable(bool immut = true)
+      noexcept
       { this->m_immut = immut;  }
 
     // GC interfaces
     int
-    get_gc_ref() const noexcept
+    get_gc_ref()
+      const noexcept
       { return this->m_gc_ref;  }
 
     void
-    set_gc_ref(int ref) noexcept
+    set_gc_ref(int ref)
+      noexcept
       { this->m_gc_ref = ref;  }
   };
 

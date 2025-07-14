@@ -72,27 +72,33 @@ class Compiler_Error
 
     // accessors
     const char*
-    what() const noexcept override
+    what()
+      const noexcept override
       { return this->m_fmt.c_str();  }
 
     Compiler_Status
-    status() const noexcept
+    status()
+      const noexcept
       { return this->m_status;  }
 
     const Source_Location&
-    sloc() const noexcept
+    sloc()
+      const noexcept
       { return this->m_sloc;  }
 
     const cow_string&
-    file() const noexcept
+    file()
+      const noexcept
       { return this->m_sloc.file();  }
 
     int
-    line() const noexcept
+    line()
+      const noexcept
       { return this->m_sloc.line();  }
 
     int
-    column() const noexcept
+    column()
+      const noexcept
       { return this->m_sloc.column();  }
   };
 

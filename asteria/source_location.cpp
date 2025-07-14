@@ -7,7 +7,8 @@ namespace asteria {
 
 tinyfmt&
 Source_Location::
-print_to(tinyfmt& fmt) const
+print_to(tinyfmt& fmt)
+  const
   {
     fmt << this->m_file << ':' << this->m_line << ':' << this->m_column;
     return fmt;

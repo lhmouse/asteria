@@ -15,7 +15,8 @@ namespace asteria {
 
 bool
 Expression_Unit::
-clobbers_alt_stack() const noexcept
+clobbers_alt_stack()
+  const noexcept
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -49,7 +50,8 @@ clobbers_alt_stack() const noexcept
 
 bool
 Expression_Unit::
-may_be_void() const noexcept
+may_be_void()
+  const noexcept
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -84,7 +86,8 @@ void
 Expression_Unit::
 generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
               const Global_Context& global, const Analytic_Context& ctx,
-              PTC_Aware ptc) const
+              PTC_Aware ptc)
+  const
   {
     if(!code.empty() && code.back().is_terminator())
       return;

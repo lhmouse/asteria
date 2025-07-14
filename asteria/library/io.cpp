@@ -61,7 +61,8 @@ class IOF_Sentry
         ::funlockfile(this->m_fp);
       }
 
-    operator ::FILE*() const noexcept
+    operator ::FILE*()
+      const noexcept
       { return this->m_fp;  }
 
     IOF_Sentry(const IOF_Sentry&) = delete;

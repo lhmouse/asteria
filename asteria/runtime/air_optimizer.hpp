@@ -15,7 +15,9 @@ class AIR_Optimizer
     cow_vector<AIR_Node> m_code;
 
   public:
-    explicit constexpr AIR_Optimizer(const Compiler_Options& opts) noexcept
+    explicit constexpr
+    AIR_Optimizer(const Compiler_Options& opts)
+      noexcept
       :
         m_opts(opts)
       { }
@@ -27,32 +29,39 @@ class AIR_Optimizer
 
     // These are accessors and modifiers of options for optimizing.
     const Compiler_Options&
-    get_options() const noexcept
+    get_options()
+      const noexcept
       { return this->m_opts;  }
 
     Compiler_Options&
-    mut_options() noexcept
+    mut_options()
+      noexcept
       { return this->m_opts;  }
 
     void
-    set_options(const Compiler_Options& opts) noexcept
+    set_options(const Compiler_Options& opts)
+      noexcept
       { this->m_opts = opts;  }
 
     // These are accessors and modifiers of tokens in this stream.
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_code.empty();  }
 
     const cow_vector<AIR_Node>&
-    get_code() const noexcept
+    get_code()
+      const noexcept
       { return this->m_code;  }
 
     cow_vector<AIR_Node>&
-    mut_code() noexcept
+    mut_code()
+      noexcept
       { return this->m_code;  }
 
     void
-    clear() noexcept;
+    clear()
+      noexcept;
 
     // This function performs code generation.
     // `ctx_opt` is the parent context of this closure.

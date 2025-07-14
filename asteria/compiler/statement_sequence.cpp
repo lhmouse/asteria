@@ -325,12 +325,14 @@ enum scope_flags : uint32_t
 
 constexpr
 scope_flags
-operator&(scope_flags x, scope_flags y) noexcept
+operator&(scope_flags x, scope_flags y)
+  noexcept
   { return (scope_flags) ((uint32_t) x & (uint32_t) y);  }
 
 constexpr
 scope_flags
-operator|(scope_flags x, scope_flags y) noexcept
+operator|(scope_flags x, scope_flags y)
+  noexcept
   { return (scope_flags) ((uint32_t) x | (uint32_t) y);  }
 
 opt<Statement>
@@ -1629,7 +1631,8 @@ constexpr s_prefix_keyword_xop[] =
 
 constexpr
 bool
-operator==(const Prefix_Keyword_Xop& lhs, Keyword rhs) noexcept
+operator==(const Prefix_Keyword_Xop& lhs, Keyword rhs)
+  noexcept
   {
     return lhs.kwrd == rhs;
   }
@@ -1652,7 +1655,8 @@ constexpr s_prefix_punctuator_xop[] =
 
 constexpr
 bool
-operator==(const Prefix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
+operator==(const Prefix_Punctuator_Xop& lhs, Punctuator rhs)
+  noexcept
   {
     return lhs.punct == rhs;
   }
@@ -2311,7 +2315,8 @@ constexpr s_postfix_punctuator_xop[] =
 
 constexpr
 bool
-operator==(const Postfix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
+operator==(const Postfix_Punctuator_Xop& lhs, Punctuator rhs)
+  noexcept
   {
     return lhs.punct == rhs;
   }
@@ -2624,7 +2629,8 @@ constexpr s_infix_punctuator_xop[] =
 
 constexpr
 bool
-operator==(const Infix_Punctuator_Xop& lhs, Punctuator rhs) noexcept
+operator==(const Infix_Punctuator_Xop& lhs, Punctuator rhs)
+  noexcept
   {
     return lhs.punct == rhs;
   }
@@ -2735,7 +2741,8 @@ Statement_Sequence::
 
 void
 Statement_Sequence::
-clear() noexcept
+clear()
+  noexcept
   {
     this->m_stmts.clear();
   }

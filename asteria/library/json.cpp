@@ -20,19 +20,23 @@ struct Indenter
 
     virtual
     void
-    break_line(tinyfmt& fmt) const = 0;
+    break_line(tinyfmt& fmt)
+      const = 0;
 
     virtual
     void
-    increment_level() = 0;
+    increment_level()
+      = 0;
 
     virtual
     void
-    decrement_level() = 0;
+    decrement_level()
+      = 0;
 
     virtual
     bool
-    has_indention() const noexcept = 0;
+    has_indention()
+      const noexcept = 0;
   };
 
 Indenter::
@@ -47,22 +51,26 @@ struct Indenter_none : Indenter
       }
 
     void
-    break_line(tinyfmt& /*fmt*/) const override
+    break_line(tinyfmt& /*fmt*/)
+      const override
       {
       }
 
     void
-    increment_level() override
+    increment_level()
+      override
       {
       }
 
     void
-    decrement_level() override
+    decrement_level()
+      override
       {
       }
 
     bool
-    has_indention() const noexcept override
+    has_indention()
+      const noexcept override
       {
         return false;
       }
@@ -80,25 +88,29 @@ struct Indenter_string : Indenter
       }
 
     void
-    break_line(tinyfmt& fmt) const override
+    break_line(tinyfmt& fmt)
+      const override
       {
         fmt << this->cur;
       }
 
     void
-    increment_level() override
+    increment_level()
+      override
       {
         this->cur.append(this->add);
       }
 
     void
-    decrement_level() override
+    decrement_level()
+      override
       {
         this->cur.pop_back(this->add.size());
       }
 
     bool
-    has_indention() const noexcept override
+    has_indention()
+      const noexcept override
       {
         return this->add.size() != 0;
       }
@@ -116,7 +128,8 @@ struct Indenter_spaces : Indenter
       }
 
     void
-    break_line(tinyfmt& fmt) const override
+    break_line(tinyfmt& fmt)
+      const override
       {
         static constexpr char s_spaces[] =
           {
@@ -143,19 +156,22 @@ struct Indenter_spaces : Indenter
       }
 
     void
-    increment_level() override
+    increment_level()
+      override
       {
         this->cur += this->add;
       }
 
     void
-    decrement_level() override
+    decrement_level()
+      override
       {
         this->cur -= this->add;
       }
 
     bool
-    has_indention() const noexcept override
+    has_indention()
+      const noexcept override
       {
         return this->add != 0;
       }

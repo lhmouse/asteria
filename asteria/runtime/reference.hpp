@@ -39,37 +39,43 @@ class Reference
 
   public:
     // Constructors and assignment operators
-    Reference() noexcept
+    Reference()
+      noexcept
       :
         m_stor(St_bad())
       { }
 
-    Reference(const Reference& other) noexcept
+    Reference(const Reference& other)
+      noexcept
       :
         m_stor(other.m_stor)
       { }
 
     Reference&
-    operator=(const Reference& other) & noexcept
+    operator=(const Reference& other)
+      & noexcept
       {
         this->m_stor = other.m_stor;
         return *this;
       }
 
-    Reference(Reference&& other) noexcept
+    Reference(Reference&& other)
+      noexcept
       :
         m_bytes(::rocket::exchange(other.m_bytes))  // HACK
       { }
 
     Reference&
-    operator=(Reference&& other) & noexcept
+    operator=(Reference&& other)
+      & noexcept
       {
         ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
       }
 
     Reference&
-    swap(Reference& other) noexcept
+    swap(Reference& other)
+      noexcept
       {
         ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
@@ -77,14 +83,17 @@ class Reference
 
   private:
     void
-    do_destroy_variant_slow() noexcept;
+    do_destroy_variant_slow()
+      noexcept;
 
     [[noreturn]]
     void
-    do_throw_not_dereferenceable() const;
+    do_throw_not_dereferenceable()
+      const;
 
     const Value&
-    do_dereference_readonly_slow() const;
+    do_dereference_readonly_slow()
+      const;
 
     Value&
     do_dereference_copy_slow();
@@ -101,29 +110,34 @@ class Reference
 
     // Accessors
     bool
-    is_invalid() const noexcept
+    is_invalid()
+      const noexcept
       { return this->m_stor.ptr<St_bad>() != nullptr;  }
 
     Reference&
-    clear() noexcept
+    clear()
+      noexcept
       {
         this->m_stor.emplace<St_bad>();
         return *this;
       }
 
     bool
-    is_void() const noexcept
+    is_void()
+      const noexcept
       { return this->m_stor.ptr<St_void>() != nullptr;  }
 
     Reference&
-    set_void() noexcept
+    set_void()
+      noexcept
       {
         this->m_stor.emplace<St_void>();
         return *this;
       }
 
     bool
-    is_temporary() const noexcept
+    is_temporary()
+      const noexcept
       { return this->m_stor.ptr<St_temp>() != nullptr;  }
 
     template<typename xValue,
@@ -137,7 +151,8 @@ class Reference
       }
 
     bool
-    is_variable() const noexcept
+    is_variable()
+      const noexcept
       { return this->m_stor.ptr<St_var>() != nullptr;  }
 
     ASTERIA_INCOMPLET(Variable)
@@ -151,7 +166,8 @@ class Reference
       }
 
     bool
-    is_ptc() const noexcept
+    is_ptc()
+      const noexcept
       { return this->m_stor.ptr<St_ptc>() != nullptr;  }
 
     ASTERIA_INCOMPLET(PTC_Arguments)
@@ -181,7 +197,8 @@ class Reference
       }
 
     Reference&
-    pop_subscript(size_t count = 1) noexcept
+    pop_subscript(size_t count = 1)
+      noexcept
       {
         cow_vector<Subscript>* subs;
         if(auto st1 = this->m_stor.mut_ptr<St_temp>())
@@ -203,7 +220,8 @@ class Reference
     // access the value, `dereference_*()` functions shall be called instead.
     ASTERIA_INCOMPLET(Variable)
     refcnt_ptr<Variable>
-    unphase_variable_opt() const noexcept
+    unphase_variable_opt()
+      const noexcept
       {
         auto st = this->m_stor.ptr<St_var>();
         if(!st)
@@ -213,7 +231,8 @@ class Reference
 
     ASTERIA_INCOMPLET(PTC_Arguments)
     refcnt_ptr<PTC_Arguments>
-    unphase_ptc_opt() const noexcept
+    unphase_ptc_opt()
+      const noexcept
       {
         auto st = this->m_stor.ptr<St_ptc>();
         if(!st)
@@ -222,11 +241,13 @@ class Reference
       }
 
     void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+      const;
 
     // Get the target value.
     const Value&
-    dereference_readonly() const
+    dereference_readonly()
+      const
       {
         auto st = this->m_stor.ptr<St_temp>();
         if(st && st->subs.empty())
@@ -235,7 +256,8 @@ class Reference
       }
 
     Value&
-    dereference_mutable() const;
+    dereference_mutable()
+      const;
 
     Value&
     dereference_copy()
@@ -247,7 +269,8 @@ class Reference
       }
 
     Value
-    dereference_unset() const;
+    dereference_unset()
+      const;
 
     void
     check_function_result(Global_Context& global, Reference_Stack&& stack)
@@ -264,7 +287,8 @@ class Reference
 
 inline
 void
-swap(Reference& lhs, Reference& rhs) noexcept
+swap(Reference& lhs, Reference& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

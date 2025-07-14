@@ -76,7 +76,8 @@ throw_runtime_error(const char* file, long line, const char* func, cow_string&& 
 template<typename objectT, typename sourceT>
 ROCKET_ALWAYS_INLINE
 void
-bcopy(objectT& __restrict dst, const sourceT& __restrict src) noexcept
+bcopy(objectT& __restrict dst, const sourceT& __restrict src)
+  noexcept
   {
     static_assert(sizeof(objectT) == sizeof(sourceT), "size mismatch");
     using bytes = char [sizeof(objectT)];
@@ -87,7 +88,8 @@ bcopy(objectT& __restrict dst, const sourceT& __restrict src) noexcept
 template<typename objectT>
 ROCKET_ALWAYS_INLINE
 void
-bfill(objectT& dst, unsigned char value) noexcept
+bfill(objectT& dst, unsigned char value)
+  noexcept
   {
     using bytes = char [sizeof(objectT)];
     ::memset(reinterpret_cast<bytes&>(dst), value, sizeof(objectT));
@@ -128,14 +130,16 @@ constexpr uint8_t cmask_table[128] =
 
 constexpr
 uint8_t
-get_cmask(char ch) noexcept
+get_cmask(char ch)
+  noexcept
   {
     return ((ch & 0x7F) == ch) ? cmask_table[(uint8_t) ch] : 0;
   }
 
 constexpr
 bool
-is_cmask(char ch, uint8_t mask) noexcept
+is_cmask(char ch, uint8_t mask)
+  noexcept
   {
     return noadl::get_cmask(ch) & mask;
   }
@@ -149,7 +153,9 @@ struct Wrapped_Index
     size_t rindex;  // wrapped index, within range if and only if
                     // both `nappend` and `nprepend` are zeroes
 
-    constexpr Wrapped_Index(ptrdiff_t ssize, int64_t sindex) noexcept
+    constexpr
+    Wrapped_Index(ptrdiff_t ssize, int64_t sindex)
+      noexcept
       :
         nappend(0), nprepend(0),
         rindex(0)
@@ -171,7 +177,8 @@ struct Wrapped_Index
 
 constexpr
 Wrapped_Index
-wrap_array_index(ptrdiff_t ssize, int64_t sindex) noexcept
+wrap_array_index(ptrdiff_t ssize, int64_t sindex)
+  noexcept
   {
     return Wrapped_Index(ssize, sindex);
   }
@@ -182,26 +189,30 @@ safe_double_to_int64(double val);
 
 // UTF-8 conversion functions
 bool
-utf8_encode(char*& pos, char32_t cp) noexcept;
+utf8_encode(char*& pos, char32_t cp)
+  noexcept;
 
 bool
 utf8_encode(cow_string& text, char32_t cp);
 
 bool
-utf8_decode(char32_t& cp, const char*& pos, size_t avail) noexcept;
+utf8_decode(char32_t& cp, const char*& pos, size_t avail)
+  noexcept;
 
 bool
 utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
 // UTF-16 conversion functions
 bool
-utf16_encode(char16_t*& pos, char32_t cp) noexcept;
+utf16_encode(char16_t*& pos, char32_t cp)
+  noexcept;
 
 bool
 utf16_encode(cow_u16string& text, char32_t cp);
 
 bool
-utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail) noexcept;
+utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
+  noexcept;
 
 bool
 utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);

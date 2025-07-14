@@ -198,7 +198,8 @@ do_duplicate_sequence(const xContainer& src, int64_t count)
 
 opt<Value>
 AIR_Node::
-get_constant_opt() const noexcept
+get_constant_opt()
+  const noexcept
   {
     switch(this->m_stor.index())
       {
@@ -221,7 +222,8 @@ get_constant_opt() const noexcept
 
 bool
 AIR_Node::
-is_terminator() const noexcept
+is_terminator()
+  const noexcept
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -304,7 +306,8 @@ is_terminator() const noexcept
 
 opt<AIR_Node>
 AIR_Node::
-rebind_opt(const Abstract_Context& ctx) const
+rebind_opt(const Abstract_Context& ctx)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -571,7 +574,8 @@ rebind_opt(const Abstract_Context& ctx) const
 
 void
 AIR_Node::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {
@@ -763,7 +767,8 @@ collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
 
 void
 AIR_Node::
-solidify(AVM_Rod& rod) const
+solidify(AVM_Rod& rod)
+  const
   {
     switch(static_cast<Index>(this->m_stor.index()))
       {

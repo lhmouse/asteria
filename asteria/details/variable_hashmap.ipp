@@ -20,7 +20,8 @@ struct Bucket
     Bucket& operator=(const Bucket&) = delete;
 
     void
-    attach(Bucket& after) noexcept
+    attach(Bucket& after)
+      noexcept
       {
         this->prev = &after;
         this->next = after.next;
@@ -29,7 +30,8 @@ struct Bucket
       }
 
     void
-    detach() noexcept
+    detach()
+      noexcept
       {
         this->prev->next = this->next;
         this->next->prev = this->prev;
@@ -37,7 +39,9 @@ struct Bucket
         this->next = nullptr;
       }
 
-    explicit operator bool() const noexcept
+    explicit
+    operator bool()
+      const noexcept
       { return this->next != nullptr;  }
   };
 

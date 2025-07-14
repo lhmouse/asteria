@@ -31,11 +31,13 @@ class Analytic_Context
 
   protected:
     bool
-    do_is_analytic() const noexcept override
+    do_is_analytic()
+      const noexcept override
       { return true;  }
 
     const Abstract_Context*
-    do_get_parent_opt() const noexcept override
+    do_get_parent_opt()
+      const noexcept override
       { return this->m_parent_opt;  }
 
   public:
@@ -44,7 +46,8 @@ class Analytic_Context
     ~Analytic_Context();
 
     const Abstract_Context*
-    get_parent_opt() const noexcept
+    get_parent_opt()
+      const noexcept
       { return this->m_parent_opt;  }
   };
 

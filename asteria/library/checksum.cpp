@@ -25,25 +25,29 @@ class CRC32_Hasher
     ::uLong m_reg;
 
   public:
-    CRC32_Hasher() noexcept
+    CRC32_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.CRC32` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     CRC32_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -51,19 +55,22 @@ class CRC32_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         this->m_reg = 0;
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         this->m_reg = ::crc32_z(this->m_reg, static_cast<const ::Byte*>(data), size);
       }
 
     V_integer
-    finish() noexcept
+    finish()
+      noexcept
       {
         uint32_t val = static_cast<uint32_t>(this->m_reg);
         this->clear();
@@ -155,25 +162,29 @@ class Adler32_Hasher
     ::uLong m_reg;
 
   public:
-    Adler32_Hasher() noexcept
+    Adler32_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.Adler32` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     Adler32_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -181,19 +192,22 @@ class Adler32_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         this->m_reg = 1;
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         this->m_reg = ::adler32_z(this->m_reg, static_cast<const ::Byte*>(data), size);
       }
 
     V_integer
-    finish() noexcept
+    finish()
+      noexcept
       {
         uint32_t val = static_cast<uint32_t>(this->m_reg);
         this->clear();
@@ -285,25 +299,29 @@ class FNV1a32_Hasher
     uint32_t m_reg;
 
   public:
-    FNV1a32_Hasher() noexcept
+    FNV1a32_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.FNV1a32` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     FNV1a32_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -311,13 +329,15 @@ class FNV1a32_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         this->m_reg = 2166136261;
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         auto bptr = static_cast<const uint8_t*>(data);
         auto eptr = bptr + size;
@@ -326,7 +346,8 @@ class FNV1a32_Hasher
       }
 
     V_integer
-    finish() noexcept
+    finish()
+      noexcept
       {
         uint32_t val = static_cast<uint32_t>(this->m_reg);
         this->clear();
@@ -434,25 +455,29 @@ class MD5_Hasher
     ::MD5_CTX m_reg[1];
 
   public:
-    MD5_Hasher() noexcept
+    MD5_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.MD5` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     MD5_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -460,19 +485,22 @@ class MD5_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         ::MD5_Init(this->m_reg);
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         ::MD5_Update(this->m_reg, data, size);
       }
 
     V_string
-    finish() noexcept
+    finish()
+      noexcept
       {
         ::std::array<unsigned char, MD5_DIGEST_LENGTH> val;
         ::MD5_Final(val.data(), this->m_reg);
@@ -564,25 +592,29 @@ class SHA1_Hasher
     ::SHA_CTX m_reg[1];
 
   public:
-    SHA1_Hasher() noexcept
+    SHA1_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.SHA1` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     SHA1_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -590,19 +622,22 @@ class SHA1_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         ::SHA1_Init(this->m_reg);
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         ::SHA1_Update(this->m_reg, data, size);
       }
 
     V_string
-    finish() noexcept
+    finish()
+      noexcept
       {
         ::std::array<unsigned char, SHA_DIGEST_LENGTH> val;
         ::SHA1_Final(val.data(), this->m_reg);
@@ -694,25 +729,29 @@ class SHA224_Hasher
     ::SHA256_CTX m_reg[1];
 
   public:
-    SHA224_Hasher() noexcept
+    SHA224_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.SHA224` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     SHA224_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -720,19 +759,22 @@ class SHA224_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         ::SHA224_Init(this->m_reg);
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         ::SHA224_Update(this->m_reg, data, size);
       }
 
     V_string
-    finish() noexcept
+    finish()
+      noexcept
       {
         ::std::array<unsigned char, SHA224_DIGEST_LENGTH> val;
         ::SHA224_Final(val.data(), this->m_reg);
@@ -824,25 +866,29 @@ class SHA256_Hasher
     ::SHA256_CTX m_reg[1];
 
   public:
-    SHA256_Hasher() noexcept
+    SHA256_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.SHA256` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     SHA256_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -850,19 +896,22 @@ class SHA256_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         ::SHA256_Init(this->m_reg);
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         ::SHA256_Update(this->m_reg, data, size);
       }
 
     V_string
-    finish() noexcept
+    finish()
+      noexcept
       {
         ::std::array<unsigned char, SHA256_DIGEST_LENGTH> val;
         ::SHA256_Final(val.data(), this->m_reg);
@@ -954,25 +1003,29 @@ class SHA384_Hasher
     ::SHA512_CTX m_reg[1];
 
   public:
-    SHA384_Hasher() noexcept
+    SHA384_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.SHA384` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     SHA384_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -980,19 +1033,22 @@ class SHA384_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         ::SHA384_Init(this->m_reg);
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         ::SHA384_Update(this->m_reg, data, size);
       }
 
     V_string
-    finish() noexcept
+    finish()
+      noexcept
       {
         ::std::array<unsigned char, SHA384_DIGEST_LENGTH> val;
         ::SHA384_Final(val.data(), this->m_reg);
@@ -1084,25 +1140,29 @@ class SHA512_Hasher
     ::SHA512_CTX m_reg[1];
 
   public:
-    SHA512_Hasher() noexcept
+    SHA512_Hasher()
+      noexcept
       {
         this->clear();
       }
 
   public:
     tinyfmt&
-    describe(tinyfmt& fmt) const override
+    describe(tinyfmt& fmt)
+      const override
       {
         return format(fmt, "instance of `std.checksum.SHA512` at `$1`", this);
       }
 
     void
-    collect_variables(Variable_HashMap&, Variable_HashMap&) const override
+    collect_variables(Variable_HashMap&, Variable_HashMap&)
+      const override
       {
       }
 
     SHA512_Hasher*
-    clone_opt(refcnt_ptr<Abstract_Opaque>& out) const override
+    clone_opt(refcnt_ptr<Abstract_Opaque>& out)
+      const override
       {
         auto ptr = new auto(*this);
         out.reset(ptr);
@@ -1110,19 +1170,22 @@ class SHA512_Hasher
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         ::SHA512_Init(this->m_reg);
       }
 
     void
-    update(const void* data, size_t size) noexcept
+    update(const void* data, size_t size)
+      noexcept
       {
         ::SHA512_Update(this->m_reg, data, size);
       }
 
     V_string
-    finish() noexcept
+    finish()
+      noexcept
       {
         ::std::array<unsigned char, SHA512_DIGEST_LENGTH> val;
         ::SHA512_Final(val.data(), this->m_reg);

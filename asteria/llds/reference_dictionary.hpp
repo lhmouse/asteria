@@ -18,22 +18,27 @@ class Reference_Dictionary
     uint32_t m_size = 0;
 
   public:
-    constexpr Reference_Dictionary() noexcept = default;
+    constexpr
+    Reference_Dictionary()
+      noexcept = default;
 
-    Reference_Dictionary(Reference_Dictionary&& other) noexcept
+    Reference_Dictionary(Reference_Dictionary&& other)
+      noexcept
       {
         this->swap(other);
       }
 
     Reference_Dictionary&
-    operator=(Reference_Dictionary&& other) & noexcept
+    operator=(Reference_Dictionary&& other)
+      & noexcept
       {
         this->swap(other);
         return *this;
       }
 
     Reference_Dictionary&
-    swap(Reference_Dictionary& other) noexcept
+    swap(Reference_Dictionary& other)
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_nbkt, other.m_nbkt);
@@ -46,10 +51,12 @@ class Reference_Dictionary
     do_reallocate(uint32_t nbkt);
 
     void
-    do_clear(bool free_storage) noexcept;
+    do_clear(bool free_storage)
+      noexcept;
 
     Reference*
-    do_xfind_opt(const phcow_string& key) const noexcept;
+    do_xfind_opt(const phcow_string& key)
+      const noexcept;
 
   public:
     ~Reference_Dictionary()
@@ -59,26 +66,30 @@ class Reference_Dictionary
       }
 
     uint32_t
-    size() const noexcept
+    size()
+      const noexcept
       {
         return this->m_size;
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         if(this->m_size != 0)
           this->do_clear(false);
       }
 
     const Reference*
-    find_opt(const phcow_string& key) const noexcept
+    find_opt(const phcow_string& key)
+      const noexcept
       {
         return this->do_xfind_opt(key);
       }
 
     Reference*
-    mut_find_opt(const phcow_string& key) noexcept
+    mut_find_opt(const phcow_string& key)
+      noexcept
       {
         return this->do_xfind_opt(key);
       }
@@ -87,12 +98,14 @@ class Reference_Dictionary
     insert(const phcow_string& key, bool* newly_opt);
 
     bool
-    erase(const phcow_string& key, Reference* refp_opt) noexcept;
+    erase(const phcow_string& key, Reference* refp_opt)
+      noexcept;
   };
 
 inline
 void
-swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
+swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

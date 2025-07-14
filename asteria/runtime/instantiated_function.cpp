@@ -32,21 +32,24 @@ Instantiated_Function::
 
 tinyfmt&
 Instantiated_Function::
-describe(tinyfmt& fmt) const
+describe(tinyfmt& fmt)
+  const
   {
     return format(fmt, "`$1` at '$2'", this->m_func, this->m_sloc);
   }
 
 void
 Instantiated_Function::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+  const
   {
     this->m_rod.collect_variables(staged, temp);
   }
 
 void
 Instantiated_Function::
-invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack) const
+invoke_ptc_aware(Reference& self, Global_Context& global, Reference_Stack&& stack)
+  const
   {
     // Create the stack and context for this function.
     AIR_Status status = air_status_next;

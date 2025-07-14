@@ -42,7 +42,8 @@ do_reallocate(uint32_t estor)
 ROCKET_FLATTEN
 void
 AVM_Rod::
-do_deallocate() noexcept
+do_deallocate()
+  noexcept
   {
     this->clear();
 
@@ -58,7 +59,8 @@ do_deallocate() noexcept
 
 void
 AVM_Rod::
-clear() noexcept
+clear()
+  noexcept
   {
     const auto eptr = this->m_bptr + this->m_einit;
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {
@@ -143,7 +145,8 @@ finalize()
 
 void
 AVM_Rod::
-execute(Executive_Context& ctx) const
+execute(Executive_Context& ctx)
+  const
   {
     ctx.status() = air_status_next;
     const auto eptr = this->m_bptr + this->m_einit;
@@ -175,7 +178,8 @@ execute(Executive_Context& ctx) const
 
 void
 AVM_Rod::
-collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+  const
   {
     const auto eptr = this->m_bptr + this->m_einit;
     for(auto head = this->m_bptr;  head != eptr;  head += 1U + head->nheaders) {

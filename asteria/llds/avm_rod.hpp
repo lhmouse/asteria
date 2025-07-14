@@ -95,22 +95,27 @@ class AVM_Rod
     uint32_t m_estor = 0;
 
   public:
-    constexpr AVM_Rod() noexcept = default;
+    constexpr
+    AVM_Rod()
+      noexcept = default;
 
-    AVM_Rod(AVM_Rod&& other) noexcept
+    AVM_Rod(AVM_Rod&& other)
+      noexcept
       {
         this->swap(other);
       }
 
     AVM_Rod&
-    operator=(AVM_Rod&& other) & noexcept
+    operator=(AVM_Rod&& other)
+      & noexcept
       {
         this->swap(other);
         return *this;
       }
 
     AVM_Rod&
-    swap(AVM_Rod& other) noexcept
+    swap(AVM_Rod& other)
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_einit, other.m_einit);
@@ -123,7 +128,8 @@ class AVM_Rod
     do_reallocate(uint32_t estor);
 
     void
-    do_deallocate() noexcept;
+    do_deallocate()
+      noexcept;
 
   public:
     ~AVM_Rod()
@@ -133,11 +139,13 @@ class AVM_Rod
       }
 
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_einit == 0;  }
 
     void
-    clear() noexcept;
+    clear()
+      noexcept;
 
     // Append a new node to the end. `size` is the size of `sparam` to initialize.
     // If `ctor_opt` is specified, it is called to initialize `sparam`. Otherwise,
@@ -156,15 +164,18 @@ class AVM_Rod
 
     // These are internal interfaces that are called by the runtime.
     void
-    execute(Executive_Context& ctx) const;
+    execute(Executive_Context& ctx)
+      const;
 
     void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const;
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+      const;
   };
 
 inline
 void
-swap(AVM_Rod& lhs, AVM_Rod& rhs) noexcept
+swap(AVM_Rod& lhs, AVM_Rod& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria

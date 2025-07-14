@@ -29,14 +29,16 @@ class Value
   public:
     // Constructors and assignment operators
     constexpr
-    Value(nullopt_t = nullopt) noexcept
+    Value(nullopt_t = nullopt)
+      noexcept
       :
         m_bytes()
       { }
 
     template<typename xValue,
     ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
-    Value(xValue&& xval) noexcept(my_Valuable<xValue>::is_noexcept)
+    Value(xValue&& xval)
+      noexcept(my_Valuable<xValue>::is_noexcept)
       :
         m_bytes()
       {
@@ -47,38 +49,44 @@ class Value
     template<typename xValue,
     ROCKET_ENABLE_IF(my_Valuable<xValue>::is_enabled)>
     Value&
-    operator=(xValue&& xval) & noexcept(my_Valuable<xValue>::is_noexcept)
+    operator=(xValue&& xval)
+      & noexcept(my_Valuable<xValue>::is_noexcept)
       {
         my_Valuable<xValue>::assign(this->m_stor, forward<xValue>(xval));
         return *this;
       }
 
-    Value(const Value& other) noexcept
+    Value(const Value& other)
+      noexcept
       :
         m_stor(other.m_stor)
       { }
 
     Value&
-    operator=(const Value& other) & noexcept
+    operator=(const Value& other)
+      & noexcept
       {
         this->m_stor = other.m_stor;
         return *this;
       }
 
-    Value(Value&& other) noexcept
+    Value(Value&& other)
+      noexcept
       :
         m_bytes(::rocket::exchange(other.m_bytes))  // HACK
       { }
 
     Value&
-    operator=(Value&& other) & noexcept
+    operator=(Value&& other)
+      & noexcept
       {
         ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
       }
 
     Value&
-    swap(Value& other) noexcept
+    swap(Value& other)
+      noexcept
       {
         ::std::swap(this->m_bytes, other.m_bytes);  // HACK
         return *this;
@@ -86,18 +94,22 @@ class Value
 
   private:
     void
-    do_destroy_variant_slow() noexcept;
+    do_destroy_variant_slow()
+      noexcept;
 
     void
-    do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp) const;
-
-    [[noreturn]]
-    void
-    do_throw_type_mismatch(const char* expecting) const;
+    do_collect_variables_slow(Variable_HashMap& staged, Variable_HashMap& temp)
+      const;
 
     [[noreturn]]
     void
-    do_throw_uncomparable_with(const Value& other) const;
+    do_throw_type_mismatch(const char* expecting)
+      const;
+
+    [[noreturn]]
+    void
+    do_throw_uncomparable_with(const Value& other)
+      const;
 
   public:
     ~Value()
@@ -108,19 +120,23 @@ class Value
 
     // Accessors
     Type
-    type() const noexcept
+    type()
+      const noexcept
       { return static_cast<Type>(this->m_stor.index());  }
 
     bool
-    is_null() const noexcept
+    is_null()
+      const noexcept
       { return this->m_stor.index() == type_null;  }
 
     bool
-    is_boolean() const noexcept
+    is_boolean()
+      const noexcept
       { return this->m_stor.index() == type_boolean;  }
 
     V_boolean
-    as_boolean() const
+    as_boolean()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.as<V_boolean>();
@@ -129,7 +145,8 @@ class Value
       }
 
     V_boolean&
-    open_boolean() noexcept
+    open_boolean()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_boolean))
           return this->m_stor.mut<V_boolean>();
@@ -138,11 +155,13 @@ class Value
       }
 
     bool
-    is_integer() const noexcept
+    is_integer()
+      const noexcept
       { return this->m_stor.index() == type_integer;  }
 
     V_integer
-    as_integer() const
+    as_integer()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.as<V_integer>();
@@ -151,7 +170,8 @@ class Value
       }
 
     V_integer&
-    open_integer() noexcept
+    open_integer()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_integer))
           return this->m_stor.mut<V_integer>();
@@ -160,11 +180,13 @@ class Value
       }
 
     bool
-    is_real() const noexcept
+    is_real()
+      const noexcept
       { return (this->type() >= type_integer) && (this->type() <= type_real);  }
 
     V_real
-    as_real() const
+    as_real()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.as<V_real>();
@@ -176,7 +198,8 @@ class Value
       }
 
     V_real&
-    open_real() noexcept
+    open_real()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_real))
           return this->m_stor.mut<V_real>();
@@ -188,11 +211,13 @@ class Value
       }
 
     bool
-    is_string() const noexcept
+    is_string()
+      const noexcept
       { return this->m_stor.index() == type_string;  }
 
     const V_string&
-    as_string() const
+    as_string()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.as<V_string>();
@@ -201,7 +226,8 @@ class Value
       }
 
     V_string&
-    open_string() noexcept
+    open_string()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_string))
           return this->m_stor.mut<V_string>();
@@ -210,11 +236,13 @@ class Value
       }
 
     bool
-    is_function() const noexcept
+    is_function()
+      const noexcept
       { return this->m_stor.index() == type_function;  }
 
     const V_function&
-    as_function() const
+    as_function()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.as<V_function>();
@@ -223,7 +251,8 @@ class Value
       }
 
     V_function&
-    open_function() noexcept
+    open_function()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_function))
           return this->m_stor.mut<V_function>();
@@ -232,11 +261,13 @@ class Value
       }
 
     bool
-    is_opaque() const noexcept
+    is_opaque()
+      const noexcept
       { return this->m_stor.index() == type_opaque;  }
 
     const V_opaque&
-    as_opaque() const
+    as_opaque()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.as<V_opaque>();
@@ -245,7 +276,8 @@ class Value
       }
 
     V_opaque&
-    open_opaque() noexcept
+    open_opaque()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_opaque))
           return this->m_stor.mut<V_opaque>();
@@ -254,11 +286,13 @@ class Value
       }
 
     bool
-    is_array() const noexcept
+    is_array()
+      const noexcept
       { return this->m_stor.index() == type_array;  }
 
     const V_array&
-    as_array() const
+    as_array()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.as<V_array>();
@@ -267,7 +301,8 @@ class Value
       }
 
     V_array&
-    open_array() noexcept
+    open_array()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_array))
           return this->m_stor.mut<V_array>();
@@ -276,11 +311,13 @@ class Value
       }
 
     bool
-    is_object() const noexcept
+    is_object()
+      const noexcept
       { return this->m_stor.index() == type_object;  }
 
     const V_object&
-    as_object() const
+    as_object()
+      const
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.as<V_object>();
@@ -289,7 +326,8 @@ class Value
       }
 
     V_object&
-    open_object() noexcept
+    open_object()
+      noexcept
       {
         if(ROCKET_EXPECT(this->m_stor.index() == type_object))
           return this->m_stor.mut<V_object>();
@@ -299,7 +337,8 @@ class Value
 
     // This is used by garbage collection.
     void
-    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp) const
+    collect_variables(Variable_HashMap& staged, Variable_HashMap& temp)
+      const
       {
         if(this->type() >= type_opaque)
           this->do_collect_variables_slow(staged, temp);
@@ -307,7 +346,8 @@ class Value
 
     // This performs the builtin conversion to boolean values.
     bool
-    test() const noexcept
+    test()
+      const noexcept
       {
         switch(this->m_stor.index())
           {
@@ -336,10 +376,12 @@ class Value
 
     // These perform the builtin comparison.
     Compare
-    compare_numeric_partial(V_integer other) const noexcept;
+    compare_numeric_partial(V_integer other)
+      const noexcept;
 
     Compare
-    compare_numeric_total(V_integer other) const
+    compare_numeric_total(V_integer other)
+      const
       {
         auto cmp = this->compare_numeric_partial(other);
         if(cmp == compare_unordered)
@@ -348,10 +390,12 @@ class Value
       }
 
     Compare
-    compare_numeric_partial(V_real other) const noexcept;
+    compare_numeric_partial(V_real other)
+      const noexcept;
 
     Compare
-    compare_numeric_total(V_real other) const
+    compare_numeric_total(V_real other)
+      const
       {
         auto cmp = this->compare_numeric_partial(other);
         if(cmp == compare_unordered)
@@ -360,10 +404,12 @@ class Value
       }
 
     Compare
-    compare_partial(const Value& other) const;
+    compare_partial(const Value& other)
+      const;
 
     Compare
-    compare_total(const Value& other) const
+    compare_total(const Value& other)
+      const
       {
         auto cmp = this->compare_partial(other);
         if(cmp == compare_unordered)
@@ -373,21 +419,26 @@ class Value
 
     // These are miscellaneous interfaces for debugging.
     tinyfmt&
-    print_to(tinyfmt& fmt) const;
+    print_to(tinyfmt& fmt)
+      const;
 
     bool
-    print_to_stderr() const;
+    print_to_stderr()
+      const;
 
     tinyfmt&
-    dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0) const;
+    dump(tinyfmt& fmt, size_t indent = 2, size_t hanging = 0)
+      const;
 
     bool
-    dump_to_stderr(size_t indent = 2, size_t hanging = 0) const;
+    dump_to_stderr(size_t indent = 2, size_t hanging = 0)
+      const;
   };
 
 inline
 void
-swap(Value& lhs, Value& rhs) noexcept
+swap(Value& lhs, Value& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 inline

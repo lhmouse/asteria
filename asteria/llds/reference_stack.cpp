@@ -39,7 +39,8 @@ do_reallocate(uint32_t estor)
 ROCKET_FLATTEN
 void
 Reference_Stack::
-do_clear(bool free_storage) noexcept
+do_clear(bool free_storage)
+  noexcept
   {
     while(this->m_size != 0) {
       this->m_size --;

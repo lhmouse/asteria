@@ -16,22 +16,27 @@ class Reference_Stack
     uint32_t m_estor = 0;
 
   public:
-    constexpr Reference_Stack() noexcept = default;
+    constexpr
+    Reference_Stack()
+      noexcept = default;
 
-    Reference_Stack(Reference_Stack&& other) noexcept
+    Reference_Stack(Reference_Stack&& other)
+      noexcept
       {
         this->swap(other);
       }
 
     Reference_Stack&
-    operator=(Reference_Stack&& other) & noexcept
+    operator=(Reference_Stack&& other)
+      & noexcept
       {
         this->swap(other);
         return *this;
       }
 
     Reference_Stack&
-    swap(Reference_Stack& other) noexcept
+    swap(Reference_Stack& other)
+      noexcept
       {
         ::std::swap(this->m_bptr, other.m_bptr);
         ::std::swap(this->m_size, other.m_size);
@@ -44,7 +49,8 @@ class Reference_Stack
     do_reallocate(uint32_t estor);
 
     void
-    do_clear(bool free_storage) noexcept;
+    do_clear(bool free_storage)
+      noexcept;
 
   public:
     ~Reference_Stack()
@@ -54,20 +60,23 @@ class Reference_Stack
       }
 
     uint32_t
-    size() const noexcept
+    size()
+      const noexcept
       {
         return this->m_size;
       }
 
     void
-    clear() noexcept
+    clear()
+      noexcept
       {
         if(this->m_size != 0)
           this->do_clear(false);
       }
 
     const Reference&
-    top(uint32_t index = 0) const noexcept
+    top(uint32_t index = 0)
+      const noexcept
       {
         ROCKET_ASSERT(index < this->m_size);
         return *(this->m_bptr + this->m_size - 1 - index);
@@ -81,7 +90,8 @@ class Reference_Stack
       }
 
     const Reference&
-    bottom(uint32_t index = 0) const noexcept
+    bottom(uint32_t index = 0)
+      const noexcept
       {
         ROCKET_ASSERT(index < this->m_size);
         return *(this->m_bptr + index);
@@ -112,7 +122,8 @@ class Reference_Stack
       }
 
     void
-    pop(uint32_t count = 1) noexcept
+    pop(uint32_t count = 1)
+      noexcept
       {
         ROCKET_ASSERT(count <= this->m_size);
         uint32_t target_size = this->m_size - count;
@@ -126,7 +137,8 @@ class Reference_Stack
 
 inline
 void
-swap(Reference_Stack& lhs, Reference_Stack& rhs) noexcept
+swap(Reference_Stack& lhs, Reference_Stack& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace asteria
