@@ -41,14 +41,17 @@ class once_flag
     Guard m_guard = { 0 };
 
   public:
-    constexpr once_flag() noexcept = default;
+    constexpr
+    once_flag()
+      noexcept = default;
 
     once_flag(const once_flag&) = delete;
     once_flag& operator=(const once_flag&) = delete;
 
   public:
     bool
-    test() const noexcept
+    test()
+      const noexcept
       {
         return __atomic_load_n(&(this->m_guard.b), __ATOMIC_RELAXED);
       }

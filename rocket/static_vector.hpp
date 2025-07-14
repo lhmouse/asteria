@@ -51,12 +51,16 @@ class static_vector
 
   public:
     // 26.3.11.2, construct/copy/destroy
-    ROCKET_CONSTEXPR_INLINE static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
+    ROCKET_CONSTEXPR_INLINE
+    static_vector()
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_sth()
       { }
 
-    explicit static_vector(const allocator_type& alloc) noexcept
+    explicit
+    static_vector(const allocator_type& alloc)
+      noexcept
       :
         m_sth(alloc)
       { }
@@ -118,9 +122,9 @@ class static_vector
       { this->append(init.begin(), init.end());  }
 
     static_vector&
-    operator=(const static_vector& other) &
-      noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
-                           is_nothrow_copy_constructible<value_type>>::value)
+    operator=(const static_vector& other)
+      & noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+                             is_nothrow_copy_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.copy_from(other.m_sth);
@@ -128,9 +132,9 @@ class static_vector
       }
 
     static_vector&
-    operator=(static_vector&& other) &
-      noexcept(conjunction<is_nothrow_move_assignable<value_type>,
-                           is_nothrow_move_constructible<value_type>>::value)
+    operator=(static_vector&& other)
+      & noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+                             is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.move_from(move(other.m_sth));
@@ -138,7 +142,8 @@ class static_vector
       }
 
     static_vector&
-    operator=(initializer_list<value_type> init) &
+    operator=(initializer_list<value_type> init)
+      &
       {
         return this->assign(init.begin(), init.end());
       }
@@ -156,7 +161,8 @@ class static_vector
   private:
     [[noreturn]] ROCKET_NEVER_INLINE
     void
-    do_throw_subscript_out_of_range(size_type pos, unsigned char rel) const
+    do_throw_subscript_out_of_range(size_type pos, unsigned char rel)
+      const
       {
         static constexpr char opstr[6][3] = { "==", "<", "<=", ">", ">=", "!=" };
         unsigned int inv = 5U - rel;
@@ -175,7 +181,8 @@ class static_vector
     // within range and returns the number of elements that start there.
     constexpr
     size_type
-    do_clamp_subvec(size_type tpos, size_type tn) const
+    do_clamp_subvec(size_type tpos, size_type tn)
+      const
       {
         ROCKET_STATIC_VECTOR_VALIDATE_SUBSCRIPT_(tpos, <=);
         return noadl::min(this->size() - tpos, tn);
@@ -205,19 +212,23 @@ class static_vector
   public:
     // iterators
     const_iterator
-    begin() const noexcept
+    begin()
+      const noexcept
       { return const_iterator(this->data(), 0, this->size());  }
 
     const_iterator
-    end() const noexcept
+    end()
+      const noexcept
       { return const_iterator(this->data(), this->size(), this->size());  }
 
     const_reverse_iterator
-    rbegin() const noexcept
+    rbegin()
+      const noexcept
       { return const_reverse_iterator(this->end());  }
 
     const_reverse_iterator
-    rend() const noexcept
+    rend()
+      const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This is a non-standard extension.
@@ -263,23 +274,27 @@ class static_vector
     // 26.3.11.3, capacity
     constexpr
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_sth.size() == 0;  }
 
     constexpr
     size_type
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_sth.size();  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
-    ssize() const noexcept
+    ssize()
+      const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       { return this->m_sth.max_size();  }
 
     // N.B. The return type and the parameter pack are non-standard extensions.
@@ -294,7 +309,8 @@ class static_vector
 
     static constexpr
     size_type
-    capacity() noexcept
+    capacity()
+      noexcept
       { return storage_handle::capacity();  }
 
     // N.B. The return type is a non-standard extension.
@@ -307,12 +323,14 @@ class static_vector
 
     // N.B. The return type is a non-standard extension.
     static_vector&
-    shrink_to_fit() noexcept
+    shrink_to_fit()
+      noexcept
       { return *this;  }
 
     // N.B. The return type is a non-standard extension.
     static_vector&
-    clear() noexcept
+    clear()
+      noexcept
       {
         this->m_sth.pop_n_unchecked(this->size());
         return *this;
@@ -320,7 +338,8 @@ class static_vector
 
     // element access
     const_reference
-    at(size_type pos) const
+    at(size_type pos)
+      const
       {
         ROCKET_STATIC_VECTOR_VALIDATE_SUBSCRIPT_(pos, <);
         return this->data()[pos];
@@ -328,28 +347,32 @@ class static_vector
 
     // N.B. This is a non-standard extension.
     const value_type*
-    ptr(size_type pos) const noexcept
+    ptr(size_type pos)
+      const noexcept
       {
         return (pos < this->size())
                  ? (this->data() + pos) : nullptr;
       }
 
     const_reference
-    operator[](size_type pos) const noexcept
+    operator[](size_type pos)
+      const noexcept
       {
         ROCKET_ASSERT(pos < this->size());
         return this->data()[pos];
       }
 
     const_reference
-    front() const noexcept
+    front()
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
       }
 
     const_reference
-    back() const noexcept
+    back()
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[this->size() - 1];
@@ -599,7 +622,8 @@ class static_vector
 
     // N.B. This is a non-standard extension.
     static_vector
-    subvec(size_type tpos, size_type tn = size_type(-1)) const
+    subvec(size_type tpos, size_type tn = size_type(-1))
+      const
       {
         size_type tlen = this->do_clamp_subvec(tpos, tn);
         static_vector res(this->m_sth.as_allocator());
@@ -633,7 +657,8 @@ class static_vector
 
     // 26.3.11.4, data access
     const value_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_sth.data();  }
 
     // Get a pointer to mutable data.
@@ -645,11 +670,13 @@ class static_vector
     // N.B. The return type differs from `std::vector`.
     constexpr
     const allocator_type&
-    get_allocator() const noexcept
+    get_allocator()
+      const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&
-    get_allocator() noexcept
+    get_allocator()
+      noexcept
       { return this->m_sth.as_allocator();  }
   };
 

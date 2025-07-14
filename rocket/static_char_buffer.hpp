@@ -21,7 +21,9 @@ class static_char_buffer
     };
 
   public:
-    constexpr static_char_buffer() noexcept
+    constexpr
+    static_char_buffer()
+      noexcept
       : m_init()
       { }
 
@@ -30,39 +32,47 @@ class static_char_buffer
         this->assign(str);
       }
 
-    static_char_buffer(const static_char_buffer& other) noexcept
+    static_char_buffer(const static_char_buffer& other)
+      noexcept
       {
         ::strcpy(this->m_data, other.m_data);
       }
 
     static_char_buffer&
-    operator=(const char* str) &
+    operator=(const char* str)
+      &
       {
         this->assign(str);
         return *this;
       }
 
     static_char_buffer&
-    operator=(const static_char_buffer& other) & noexcept
+    operator=(const static_char_buffer& other)
+      & noexcept
       {
         ::strcpy(this->m_data, other.m_data);
         return *this;
       }
 
   public:
-    constexpr operator const char*() const noexcept
+    constexpr operator
+    const char*()
+      const noexcept
       { return this->m_data;  }
 
     const char*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_data;  }
 
     const char*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_data;  }
 
     char*
-    mut_data() noexcept
+    mut_data()
+      noexcept
       { return this->m_data;  }
 
     void
@@ -82,109 +92,127 @@ class static_char_buffer
 template<size_t M, size_t N>
 constexpr
 bool
-operator==(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs) noexcept
+operator==(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs.c_str()) == 0;  }
 
 template<size_t M>
 constexpr
 bool
-operator==(const static_char_buffer<M>& lhs, const char* rhs) noexcept
+operator==(const static_char_buffer<M>& lhs, const char* rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs) == 0;  }
 
 template<size_t N>
 constexpr
 bool
-operator==(const char* lhs, const static_char_buffer<N>& rhs) noexcept
+operator==(const char* lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs, rhs.c_str()) == 0;  }
 
 template<size_t M, size_t N>
 constexpr
 bool
-operator!=(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs) noexcept
+operator!=(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs.c_str()) != 0;  }
 
 template<size_t M>
 constexpr
 bool
-operator!=(const static_char_buffer<M>& lhs, const char* rhs) noexcept
+operator!=(const static_char_buffer<M>& lhs, const char* rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs) != 0;  }
 
 template<size_t N>
 constexpr
 bool
-operator!=(const char* lhs, const static_char_buffer<N>& rhs) noexcept
+operator!=(const char* lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs, rhs.c_str()) != 0;  }
 
 template<size_t M, size_t N>
 constexpr
 bool
-operator<(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs) noexcept
+operator<(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs.c_str()) < 0;  }
 
 template<size_t M>
 constexpr
 bool
-operator<(const static_char_buffer<M>& lhs, const char* rhs) noexcept
+operator<(const static_char_buffer<M>& lhs, const char* rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs) < 0;  }
 
 template<size_t N>
 constexpr
 bool
-operator<(const char* lhs, const static_char_buffer<N>& rhs) noexcept
+operator<(const char* lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs, rhs.c_str()) < 0;  }
 
 template<size_t M, size_t N>
 constexpr
 bool
-operator>(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs) noexcept
+operator>(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs.c_str()) > 0;  }
 
 template<size_t M>
 constexpr
 bool
-operator>(const static_char_buffer<M>& lhs, const char* rhs) noexcept
+operator>(const static_char_buffer<M>& lhs, const char* rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs) > 0;  }
 
 template<size_t N>
 constexpr
 bool
-operator>(const char* lhs, const static_char_buffer<N>& rhs) noexcept
+operator>(const char* lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs, rhs.c_str()) > 0;  }
 
 template<size_t M, size_t N>
 constexpr
 bool
-operator<=(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs) noexcept
+operator<=(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs.c_str()) <= 0;  }
 
 template<size_t M>
 constexpr
 bool
-operator<=(const static_char_buffer<M>& lhs, const char* rhs) noexcept
+operator<=(const static_char_buffer<M>& lhs, const char* rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs) <= 0;  }
 
 template<size_t N>
 constexpr
 bool
-operator<=(const char* lhs, const static_char_buffer<N>& rhs) noexcept
+operator<=(const char* lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs, rhs.c_str()) <= 0;  }
 
 template<size_t M, size_t N>
 constexpr
 bool
-operator>=(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs) noexcept
+operator>=(const static_char_buffer<M>& lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs.c_str()) >= 0;  }
 
 template<size_t M>
 constexpr
 bool
-operator>=(const static_char_buffer<M>& lhs, const char* rhs) noexcept
+operator>=(const static_char_buffer<M>& lhs, const char* rhs)
+  noexcept
   { return ::strcmp(lhs.c_str(), rhs) >= 0;  }
 
 template<size_t N>
 constexpr
 bool
-operator>=(const char* lhs, const static_char_buffer<N>& rhs) noexcept
+operator>=(const char* lhs, const static_char_buffer<N>& rhs)
+  noexcept
   { return ::strcmp(lhs, rhs.c_str()) >= 0;  }
 
 }  // namespace rocket

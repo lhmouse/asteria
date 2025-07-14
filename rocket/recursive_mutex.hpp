@@ -33,22 +33,27 @@ class recursive_mutex
         ::pthread_mutex_t* m_mtx = nullptr;
 
       public:
-        constexpr unique_lock() noexcept = default;
+        constexpr
+        unique_lock()
+          noexcept = default;
 
-        unique_lock(recursive_mutex& m) noexcept
+        unique_lock(recursive_mutex& m)
+          noexcept
           {
             ::pthread_mutex_lock(m.m_std_mtx.native_handle());
             this->m_mtx = m.m_std_mtx.native_handle();
           }
 
-        unique_lock(unique_lock&& other) noexcept
+        unique_lock(unique_lock&& other)
+          noexcept
           {
             this->m_mtx = other.m_mtx;
             other.m_mtx = nullptr;
           }
 
         unique_lock&
-        operator=(unique_lock&& other) & noexcept
+        operator=(unique_lock&& other)
+          & noexcept
           {
             if(this->m_mtx == other.m_mtx)
               return *this;
@@ -60,13 +65,16 @@ class recursive_mutex
           }
 
         unique_lock&
-        swap(unique_lock& other) noexcept
+        swap(unique_lock& other)
+          noexcept
           {
             ::std::swap(this->m_mtx, other.m_mtx);
             return *this;
           }
 
-        explicit constexpr operator bool() const noexcept
+        explicit constexpr
+        operator bool()
+          const noexcept
           { return this->m_mtx != nullptr;  }
 
         ~unique_lock()
@@ -76,7 +84,8 @@ class recursive_mutex
 
       public:
         void
-        lock(recursive_mutex& m) noexcept
+        lock(recursive_mutex& m)
+          noexcept
           {
             if(this->m_mtx == m.m_std_mtx.native_handle())
               return;
@@ -87,7 +96,8 @@ class recursive_mutex
           }
 
         void
-        unlock() noexcept
+        unlock()
+          noexcept
           {
             if(this->m_mtx == nullptr)
               return;
@@ -100,7 +110,8 @@ class recursive_mutex
 
 inline
 void
-swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs) noexcept
+swap(recursive_mutex::unique_lock& lhs, recursive_mutex::unique_lock& rhs)
+  noexcept
   { lhs.swap(rhs);  }
 
 }  // namespace rocket

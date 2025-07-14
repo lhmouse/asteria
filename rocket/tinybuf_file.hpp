@@ -35,14 +35,20 @@ class basic_tinybuf_file
     ::mbstate_t m_mbst_p = ::mbstate_t();
 
   public:
-    constexpr basic_tinybuf_file() noexcept = default;
+    constexpr
+    basic_tinybuf_file()
+      noexcept = default;
 
-    explicit basic_tinybuf_file(file_type&& file) noexcept
+    explicit
+    basic_tinybuf_file(file_type&& file)
+      noexcept
       :
         m_file(move(file))
       { }
 
-    explicit basic_tinybuf_file(handle_type fp) noexcept
+    explicit
+    basic_tinybuf_file(handle_type fp)
+      noexcept
       :
         m_file(fp)
       { }
@@ -63,8 +69,8 @@ class basic_tinybuf_file
       { }
 
     basic_tinybuf_file&
-    operator=(basic_tinybuf_file&& other) &
-      noexcept(is_nothrow_move_assignable<file_type>::value)
+    operator=(basic_tinybuf_file&& other)
+      & noexcept(is_nothrow_move_assignable<file_type>::value)
       {
         this->m_file = move(other.m_file);
         this->m_mbst_g = noadl::exchange(other.m_mbst_g);
@@ -87,12 +93,14 @@ class basic_tinybuf_file
 
     // Gets the file pointer.
     handle_type
-    get_handle() const noexcept
+    get_handle()
+      const noexcept
       { return this->m_file.get();  }
 
     // Takes ownership of an existent file.
     basic_tinybuf_file&
-    reset(file_type&& file) noexcept
+    reset(file_type&& file)
+      noexcept
       {
         this->m_file = move(file);
         this->m_mbst_g = ::mbstate_t();
@@ -101,7 +109,8 @@ class basic_tinybuf_file
       }
 
     basic_tinybuf_file&
-    reset(handle_type fp) noexcept
+    reset(handle_type fp)
+      noexcept
       {
         this->m_file.reset(fp);
         this->m_mbst_g = ::mbstate_t();
@@ -193,7 +202,8 @@ class basic_tinybuf_file
 
     // Closes the current file, if any.
     basic_tinybuf_file&
-    close() noexcept
+    close()
+      noexcept
       {
         this->m_file.reset();
         this->m_mbst_g = ::mbstate_t();
@@ -205,7 +215,8 @@ class basic_tinybuf_file
     // If no file has been opened, nothing happens.
     virtual
     basic_tinybuf_file&
-    flush() override
+    flush()
+      override
       {
         if(!this->m_file)
           return *this;
@@ -223,7 +234,8 @@ class basic_tinybuf_file
     // If no file has been opened, or the file is not seekable, `-1` is returned.
     virtual
     int64_t
-    tell() const override
+    tell()
+      const override
       {
         if(!this->m_file)
           return -1;
@@ -237,7 +249,8 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     basic_tinybuf_file&
-    seek(int64_t off, seek_dir dir) override
+    seek(int64_t off, seek_dir dir)
+      override
       {
         if(!this->m_file)
           noadl::sprintf_and_throw<invalid_argument>(
@@ -261,7 +274,8 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     size_t
-    getn(char_type* s, size_t n) override
+    getn(char_type* s, size_t n)
+      override
       {
         if(!this->m_file)
           noadl::sprintf_and_throw<invalid_argument>(
@@ -277,7 +291,8 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     int
-    getc() override
+    getc()
+      override
       {
         if(!this->m_file)
           noadl::sprintf_and_throw<invalid_argument>(
@@ -293,7 +308,8 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     basic_tinybuf_file&
-    putn(const char_type* s, size_t n) override
+    putn(const char_type* s, size_t n)
+      override
       {
         if(!this->m_file)
           noadl::sprintf_and_throw<invalid_argument>(
@@ -308,7 +324,8 @@ class basic_tinybuf_file
     // unspecified state.
     virtual
     basic_tinybuf_file&
-    putc(char_type c) override
+    putc(char_type c)
+      override
       {
         if(!this->m_file)
           noadl::sprintf_and_throw<invalid_argument>(

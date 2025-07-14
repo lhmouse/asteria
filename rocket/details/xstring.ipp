@@ -11,7 +11,8 @@ inline namespace maybe_constexpr
     template<typename charT>
     constexpr
     size_t
-    ystrlen(charT* str) noexcept
+    ystrlen(charT* str)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -24,21 +25,24 @@ inline namespace maybe_constexpr
 
 inline
 size_t
-ystrlen(const char* str) noexcept
+ystrlen(const char* str)
+  noexcept
   {
     return ::strlen(str);
   }
 
 inline
 size_t
-ystrlen(const unsigned char* str) noexcept
+ystrlen(const unsigned char* str)
+  noexcept
   {
     return ::strlen((const char*) str);
   }
 
 inline
 size_t
-ystrlen(const wchar_t* str) noexcept
+ystrlen(const wchar_t* str)
+  noexcept
   {
     return ::std::wcslen(str);
   }
@@ -48,7 +52,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     charT*
-    ystrchr(charT* str,  ycharT target) noexcept
+    ystrchr(charT* str,  ycharT target)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -63,21 +68,24 @@ inline namespace maybe_constexpr
 
 inline
 char*
-ystrchr(const char* str, char target) noexcept
+ystrchr(const char* str, char target)
+  noexcept
   {
     return (char*) ::strchr(str, (unsigned char) target);
   }
 
 inline
 unsigned char*
-ystrchr(const unsigned char* str, unsigned char target) noexcept
+ystrchr(const unsigned char* str, unsigned char target)
+  noexcept
   {
     return (unsigned char*) ::strchr((const char*) str, target);
   }
 
 inline
 wchar_t*
-ystrchr(const wchar_t* str, wchar_t target) noexcept
+ystrchr(const wchar_t* str, wchar_t target)
+  noexcept
   {
     return (wchar_t*) ::std::wcschr(str, target);
   }
@@ -87,7 +95,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     charT*
-    ymemchr(charT* str, ycharT target, size_t len) noexcept
+    ymemchr(charT* str, ycharT target, size_t len)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -102,21 +111,24 @@ inline namespace maybe_constexpr
 
 inline
 char*
-ymemchr(const char* str, char target, size_t len) noexcept
+ymemchr(const char* str, char target, size_t len)
+  noexcept
   {
     return (char*) ::memchr(str, (unsigned char) target, len);
   }
 
 inline
 unsigned char*
-ymemchr(const unsigned char* str, unsigned char target, size_t len) noexcept
+ymemchr(const unsigned char* str, unsigned char target, size_t len)
+  noexcept
   {
     return (unsigned char*) ::memchr(str, target, len);
   }
 
 inline
 wchar_t*
-ymemchr(const wchar_t* str, wchar_t target, size_t len) noexcept
+ymemchr(const wchar_t* str, wchar_t target, size_t len)
+  noexcept
   {
     return (wchar_t*) ::wmemchr(str, target, len);
   }
@@ -126,7 +138,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     int
-    ystrcmp(const charT* lhs, const ycharT* rhs) noexcept
+    ystrcmp(const charT* lhs, const ycharT* rhs)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -141,21 +154,24 @@ inline namespace maybe_constexpr
 
 inline
 int
-ystrcmp(const char* lhs, const char* rhs) noexcept
+ystrcmp(const char* lhs, const char* rhs)
+  noexcept
   {
     return ::strcmp(lhs, rhs);
   }
 
 inline
 int
-ystrcmp(const unsigned char* lhs, const unsigned char* rhs) noexcept
+ystrcmp(const unsigned char* lhs, const unsigned char* rhs)
+  noexcept
   {
     return ::strcmp((const char*) lhs, (const char*) rhs);
   }
 
 inline
 int
-ystrcmp(const wchar_t* lhs, const wchar_t* rhs) noexcept
+ystrcmp(const wchar_t* lhs, const wchar_t* rhs)
+  noexcept
   {
     return ::std::wcscmp(lhs, rhs);
   }
@@ -165,7 +181,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     int
-    ymemcmp(const charT* lhs, const ycharT* rhs, size_t len) noexcept
+    ymemcmp(const charT* lhs, const ycharT* rhs, size_t len)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -180,21 +197,24 @@ inline namespace maybe_constexpr
 
 inline
 int
-ymemcmp(const char* lhs, const char* rhs, size_t len) noexcept
+ymemcmp(const char* lhs, const char* rhs, size_t len)
+  noexcept
   {
     return ::memcmp(lhs, rhs, len);
   }
 
 inline
 int
-ymemcmp(const unsigned char* lhs, const unsigned char* rhs, size_t len) noexcept
+ymemcmp(const unsigned char* lhs, const unsigned char* rhs, size_t len)
+  noexcept
   {
     return ::memcmp(lhs, rhs, len);
   }
 
 inline
 int
-ymemcmp(const wchar_t* lhs, const wchar_t* rhs, size_t len) noexcept
+ymemcmp(const wchar_t* lhs, const wchar_t* rhs, size_t len)
+  noexcept
   {
     return ::wmemcmp(lhs, rhs, len);
   }
@@ -204,7 +224,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     charT*
-    ymempset(charT* out, ycharT elem, size_t len) noexcept
+    ymempset(charT* out, ycharT elem, size_t len)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -217,21 +238,24 @@ inline namespace maybe_constexpr
 
 inline
 char*
-ymempset(char* out, char elem, size_t len) noexcept
+ymempset(char* out, char elem, size_t len)
+  noexcept
   {
     return (char*) ::memset(out, (unsigned char) elem, len) + len;
   }
 
 inline
 unsigned char*
-ymempset(unsigned char* out, unsigned char elem, size_t len) noexcept
+ymempset(unsigned char* out, unsigned char elem, size_t len)
+  noexcept
   {
     return (unsigned char*) ::memset(out, elem, len) + len;
   }
 
 inline
 wchar_t*
-ymempset(wchar_t* out, wchar_t elem, size_t len) noexcept
+ymempset(wchar_t* out, wchar_t elem, size_t len)
+  noexcept
   {
     return ::wmemset(out, elem, len) + len;
   }
@@ -241,7 +265,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     charT*
-    ystrpcpy(charT* out, const ycharT* str) noexcept
+    ystrpcpy(charT* out, const ycharT* str)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -254,21 +279,24 @@ inline namespace maybe_constexpr
 
 inline
 char*
-ystrpcpy(char* out, const char* str) noexcept
+ystrpcpy(char* out, const char* str)
+  noexcept
   {
     return ::stpcpy(out, str);
   }
 
 inline
 unsigned char*
-ystrpcpy(unsigned char* out, const unsigned char* str) noexcept
+ystrpcpy(unsigned char* out, const unsigned char* str)
+  noexcept
   {
     return (unsigned char*) ::stpcpy((char*) out, (const char*) str);
   }
 
 inline
 wchar_t*
-ystrpcpy(wchar_t* out, const wchar_t* str) noexcept
+ystrpcpy(wchar_t* out, const wchar_t* str)
+  noexcept
   {
     return ::wcpcpy(out, str);
   }
@@ -278,7 +306,8 @@ inline namespace maybe_constexpr
     template<typename charT, typename ycharT>
     constexpr
     charT*
-    ymempcpy(charT* out, const ycharT* str, size_t len) noexcept
+    ymempcpy(charT* out, const ycharT* str, size_t len)
+      noexcept
       {
         size_t ki = 0;
         for(;;)
@@ -291,21 +320,24 @@ inline namespace maybe_constexpr
 
 inline
 char*
-ymempcpy(char* out, const char* str, size_t len) noexcept
+ymempcpy(char* out, const char* str, size_t len)
+  noexcept
   {
     return (char*) ::memcpy(out, str, len) + len;
   }
 
 inline
 unsigned char*
-ymempcpy(unsigned char* out, const unsigned char* str, size_t len) noexcept
+ymempcpy(unsigned char* out, const unsigned char* str, size_t len)
+  noexcept
   {
     return (unsigned char*) ::memcpy(out, str, len) + len;
   }
 
 inline
 wchar_t*
-ymempcpy(wchar_t* out, const wchar_t* str, size_t len) noexcept
+ymempcpy(wchar_t* out, const wchar_t* str, size_t len)
+  noexcept
   {
     return (wchar_t*) ::memcpy(out, str, len * sizeof(wchar_t)) + len;
   }

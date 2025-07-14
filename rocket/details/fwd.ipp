@@ -128,7 +128,8 @@ struct binder_eq
     template<typename xvalueT>
     constexpr
     bool
-    operator()(const xvalueT& other) const
+    operator()(const xvalueT& other)
+      const
       { return this->m_val == other;  }
   };
 
@@ -148,7 +149,8 @@ struct binder_ne
     template<typename xvalueT>
     constexpr
     bool
-    operator()(const xvalueT& other) const
+    operator()(const xvalueT& other)
+      const
       { return this->m_val != other;  }
   };
 

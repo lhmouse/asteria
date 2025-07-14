@@ -55,7 +55,9 @@ class const_bitset
     uint32_t m_words[(sizeof...(bitsT) + 31) / 32] = { };
 
   public:
-    constexpr const_bitset() noexcept
+    constexpr
+    const_bitset()
+      noexcept
       {
         constexpr bool bits[] = { bitsT... };
         for(size_t k = 0;  k != sizeof...(bitsT);  ++k)
@@ -67,7 +69,8 @@ class const_bitset
 
     constexpr
     bool
-    operator[](size_t k) const noexcept
+    operator[](size_t k)
+      const noexcept
       {
         if(this->m_popcnt == 0)
           return false;
@@ -85,12 +88,15 @@ class const_func_table
     targetT* m_ptrs[sizeof...(ptrsT)] = { ptrsT... };
 
   public:
-    constexpr const_func_table() noexcept = default;
+    constexpr
+    const_func_table()
+      noexcept = default;
 
     template<typename... argsT>
     constexpr
     typename ::std::invoke_result<targetT*, argsT&&...>::type
-    operator()(size_t k, argsT&&... args) const
+    operator()(size_t k, argsT&&... args)
+      const
       {
         return this->m_ptrs[k] (forward<argsT>(args)...);
       }

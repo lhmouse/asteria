@@ -21,12 +21,15 @@ class atomic
     ::std::atomic<value_type> m_val;
 
   public:
-    atomic() noexcept
+    atomic()
+      noexcept
       :
         m_val(value_type())
       { }
 
-    explicit atomic(value_type val) noexcept
+    explicit
+    atomic(value_type val)
+      noexcept
       :
         m_val(val)
       { }
@@ -37,7 +40,8 @@ class atomic
   private:
     static constexpr
     memory_order
-    do_order_acquire() noexcept
+    do_order_acquire()
+      noexcept
       {
         switch(static_cast<unsigned>(memorderT)) {
           case memory_order_consume:
@@ -55,7 +59,8 @@ class atomic
 
     static constexpr
     memory_order
-    do_order_release() noexcept
+    do_order_release()
+      noexcept
       {
         switch(static_cast<unsigned>(memorderT)) {
           case memory_order_consume:
@@ -71,7 +76,8 @@ class atomic
 
     static constexpr
     memory_order
-    do_order_acq_rel() noexcept
+    do_order_acq_rel()
+      noexcept
       {
         switch(static_cast<unsigned>(memorderT)) {
           case memory_order_consume:
@@ -87,46 +93,53 @@ class atomic
 
   public:
     value_type
-    load() const noexcept
+    load()
+      const noexcept
       {
         return this->m_val.load(this->do_order_acquire());
       }
 
     value_type
-    store(value_type val) noexcept
+    store(value_type val)
+      noexcept
       {
         this->m_val.store(val, this->do_order_release());
         return val;
       }
 
     value_type
-    xchg(value_type val) noexcept
+    xchg(value_type val)
+      noexcept
       {
         return this->m_val.exchange(val, this->do_order_acq_rel());
       }
 
     bool
-    cmpxchg_weak(value_type& cmp, value_type xchg) noexcept
+    cmpxchg_weak(value_type& cmp, value_type xchg)
+      noexcept
       {
         return this->m_val.compare_exchange_weak(cmp, xchg, this->do_order_acq_rel());
       }
 
     bool
-    cmpxchg(value_type& cmp, value_type xchg) noexcept
+    cmpxchg(value_type& cmp, value_type xchg)
+      noexcept
       {
         return this->m_val.compare_exchange_strong(cmp, xchg, this->do_order_acq_rel());
       }
 
     template<typename otherT>
     value_type
-    xadd(otherT&& other) noexcept
+    xadd(otherT&& other)
+      noexcept
       {
         return this->m_val.fetch_add(other, this->do_order_acq_rel());
       }
 
     template<typename otherT>
     value_type
-    xsub(otherT&& other) noexcept
+    xsub(otherT&& other)
+      noexcept
       {
         return this->m_val.fetch_sub(other, this->do_order_acq_rel());
       }

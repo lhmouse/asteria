@@ -34,16 +34,19 @@ xmemalloc(xmeminfo& info, xmemopt opt = xmemopt_use_cache);
 // to `xmemalloc()`. After this function returns, `data` will be set to a
 // null pointer and `count` will be set to zero.
 void
-xmemfree(xmeminfo& info, xmemopt opt = xmemopt_use_cache) noexcept;
+xmemfree(xmeminfo& info, xmemopt opt = xmemopt_use_cache)
+  noexcept;
 
 // Clears the global cache.
 void
-xmemclean() noexcept;
+xmemclean()
+  noexcept;
 
 // Copies a block into another, with some checking.
 inline
 void
-xmemcopy(xmeminfo& info, const xmeminfo& src) noexcept
+xmemcopy(xmeminfo& info, const xmeminfo& src)
+  noexcept
   {
     ROCKET_ASSERT(info.element_size * info.count >= src.element_size * src.count);
     ROCKET_ASSERT(info.data != src.data);
@@ -55,7 +58,8 @@ xmemcopy(xmeminfo& info, const xmeminfo& src) noexcept
 // Zero-initializes a block.
 inline
 void
-xmemzero(xmeminfo& info) noexcept
+xmemzero(xmeminfo& info)
+  noexcept
   {
     if(info.count != 0)
       ::std::memset(info.data, 0, info.element_size * info.count);

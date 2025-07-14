@@ -73,13 +73,15 @@ class condition_variable
       }
 
     void
-    notify_one() noexcept
+    notify_one()
+      noexcept
       {
         ::pthread_cond_signal(this->m_std_cond.native_handle());
       }
 
     void
-    notify_all() noexcept
+    notify_all()
+      noexcept
       {
         ::pthread_cond_broadcast(this->m_std_cond.native_handle());
       }

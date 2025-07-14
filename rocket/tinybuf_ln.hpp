@@ -27,25 +27,32 @@ class basic_tinybuf_ln
     open_mode m_mode = tinybuf_base::open_read_write;
 
   public:
-    constexpr basic_tinybuf_ln() noexcept(is_nothrow_default_constructible<buffer_type>::value)
+    constexpr
+    basic_tinybuf_ln()
+      noexcept(is_nothrow_default_constructible<buffer_type>::value)
       :
         m_ln()
       { }
 
-    explicit constexpr basic_tinybuf_ln(const allocator_type& alloc) noexcept
+    explicit constexpr
+    basic_tinybuf_ln(const allocator_type& alloc)
+      noexcept
       :
         m_ln(alloc)
       { }
 
-    explicit basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
+    explicit
+    basic_tinybuf_ln(open_mode mode, const allocator_type& alloc = allocator_type())
+      noexcept
       :
         m_ln(alloc), m_mode(mode)
       { }
 
     template<typename xlnT,
     ROCKET_ENABLE_IF(is_constructible<buffer_type, xlnT&&, const allocator_type&>::value)>
-    constexpr basic_tinybuf_ln(xlnT&& xln, open_mode mode = tinybuf_base::open_read_write,
-                               const allocator_type& alloc = allocator_type())
+    constexpr
+    basic_tinybuf_ln(xlnT&& xln, open_mode mode = tinybuf_base::open_read_write,
+                     const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<buffer_type, xlnT&&, const allocator_type>::value)
       :
         m_ln(forward<xlnT>(xln), alloc), m_mode(mode)
@@ -59,14 +66,15 @@ class basic_tinybuf_ln
         tinybuf_type(), m_ln(other.m_ln), m_mode(other.m_mode)
       { }
 
-    basic_tinybuf_ln(const basic_tinybuf_ln& other, const allocator_type& alloc) noexcept
+    basic_tinybuf_ln(const basic_tinybuf_ln& other, const allocator_type& alloc)
+      noexcept
       :
         m_ln(other.m_ln, alloc), m_mode(other.m_mode)
       { }
 
     basic_tinybuf_ln&
-    operator=(const basic_tinybuf_ln& other) &
-      noexcept(is_nothrow_copy_assignable<buffer_type>::value)
+    operator=(const basic_tinybuf_ln& other)
+      & noexcept(is_nothrow_copy_assignable<buffer_type>::value)
       {
         this->m_ln = other.m_ln;
         this->m_mode = other.m_mode;
@@ -79,7 +87,8 @@ class basic_tinybuf_ln
         tinybuf_type(), m_ln(move(other.m_ln)), m_mode(noadl::exchange(other.m_mode))
       { }
 
-    basic_tinybuf_ln(basic_tinybuf_ln&& other, const allocator_type& alloc) noexcept
+    basic_tinybuf_ln(basic_tinybuf_ln&& other, const allocator_type& alloc)
+      noexcept
       :
         m_ln(move(other.m_ln), alloc), m_mode(noadl::exchange(other.m_mode))
       { }
@@ -107,27 +116,33 @@ class basic_tinybuf_ln
 
     // Gets the internal buffer.
     const buffer_type&
-    get_buffer() const noexcept
+    get_buffer()
+      const noexcept
       { return this->m_ln;  }
 
     const char_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_ln.data();  }
 
     size_t
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_ln.size();  }
 
     ptrdiff_t
-    ssize() const noexcept
+    ssize()
+      const noexcept
       { return this->m_ln.ssize();  }
 
     const char_type*
-    begin() const noexcept
+    begin()
+      const noexcept
       { return this->m_ln.begin();  }
 
     const char_type*
-    end() const noexcept
+    end()
+      const noexcept
       { return this->m_ln.end();  }
 
     // Replaces the internal buffer.
@@ -166,7 +181,8 @@ class basic_tinybuf_ln
     // Does nothing. Buffers need not be flushed.
     virtual
     basic_tinybuf_ln&
-    flush() override
+    flush()
+      override
       {
         return *this;
       }
@@ -175,7 +191,8 @@ class basic_tinybuf_ln
     // This function always fails.
     virtual
     int64_t
-    tell() const override
+    tell()
+      const override
       {
         return -1;
       }
@@ -184,7 +201,8 @@ class basic_tinybuf_ln
     // This function always fails.
     virtual
     basic_tinybuf_ln&
-    seek(int64_t /*off*/, seek_dir /*dir*/) override
+    seek(int64_t /*off*/, seek_dir /*dir*/)
+      override
       {
         noadl::sprintf_and_throw<invalid_argument>(
             "basic_tinybuf_ln: linear buffer not seekable");
@@ -196,7 +214,8 @@ class basic_tinybuf_ln
     // unspecified state.
     virtual
     size_t
-    getn(char_type* s, size_t n) override
+    getn(char_type* s, size_t n)
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_read))
           noadl::sprintf_and_throw<invalid_argument>(
@@ -211,7 +230,8 @@ class basic_tinybuf_ln
     // unspecified state.
     virtual
     int
-    getc() override
+    getc()
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_read))
           noadl::sprintf_and_throw<invalid_argument>(
@@ -225,7 +245,8 @@ class basic_tinybuf_ln
     // unspecified state.
     virtual
     basic_tinybuf_ln&
-    putn(const char_type* s, size_t n) override
+    putn(const char_type* s, size_t n)
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_write))
           noadl::sprintf_and_throw<invalid_argument>(
@@ -240,7 +261,8 @@ class basic_tinybuf_ln
     // unspecified state.
     virtual
     basic_tinybuf_ln&
-    putc(char_type c) override
+    putc(char_type c)
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_write))
           noadl::sprintf_and_throw<invalid_argument>(

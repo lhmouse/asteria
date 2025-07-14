@@ -28,25 +28,32 @@ class basic_tinybuf_str
     open_mode m_mode = tinybuf_base::open_read_write;
 
   public:
-    constexpr basic_tinybuf_str() noexcept(is_nothrow_default_constructible<string_type>::value)
+    constexpr
+    basic_tinybuf_str()
+      noexcept(is_nothrow_default_constructible<string_type>::value)
       :
         m_str()
       { }
 
-    explicit constexpr basic_tinybuf_str(const allocator_type& alloc) noexcept
+    explicit constexpr
+      basic_tinybuf_str(const allocator_type& alloc)
+      noexcept
       :
         m_str(alloc)
       { }
 
-    explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
+    explicit
+    basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type())
+      noexcept
       :
         m_str(alloc), m_mode(mode)
       { }
 
     template<typename xstrT,
     ROCKET_ENABLE_IF(is_constructible<string_type, xstrT&&, const allocator_type&>::value)>
-    constexpr basic_tinybuf_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_read_write,
-                                const allocator_type& alloc = allocator_type())
+    constexpr
+    basic_tinybuf_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_read_write,
+                      const allocator_type& alloc = allocator_type())
       noexcept(is_nothrow_constructible<string_type, xstrT&&, const allocator_type>::value)
       :
         m_str(forward<xstrT>(xstr), alloc), m_mode(mode)
@@ -60,14 +67,15 @@ class basic_tinybuf_str
         tinybuf_type(), m_str(other.m_str), m_off(other.m_off), m_mode(other.m_mode)
       { }
 
-    basic_tinybuf_str(const basic_tinybuf_str& other, const allocator_type& alloc) noexcept
+    basic_tinybuf_str(const basic_tinybuf_str& other, const allocator_type& alloc)
+      noexcept
       :
         m_str(other.m_str, alloc), m_off(other.m_off), m_mode(other.m_mode)
       { }
 
     basic_tinybuf_str&
-    operator=(const basic_tinybuf_str& other) &
-      noexcept(is_nothrow_copy_assignable<string_type>::value)
+    operator=(const basic_tinybuf_str& other)
+      & noexcept(is_nothrow_copy_assignable<string_type>::value)
       {
         this->m_str = other.m_str;
         this->m_off = other.m_off;
@@ -82,7 +90,8 @@ class basic_tinybuf_str
         m_mode(noadl::exchange(other.m_mode))
       { }
 
-    basic_tinybuf_str(basic_tinybuf_str&& other, const allocator_type& alloc) noexcept
+    basic_tinybuf_str(basic_tinybuf_str&& other, const allocator_type& alloc)
+      noexcept
       :
         m_str(move(other.m_str), alloc), m_off(noadl::exchange(other.m_off)),
         m_mode(noadl::exchange(other.m_mode))
@@ -113,31 +122,38 @@ class basic_tinybuf_str
 
     // Gets the internal string.
     const string_type&
-    get_string() const noexcept
+    get_string()
+      const noexcept
       { return this->m_str;  }
 
     const char_type*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_str.c_str();  }
 
     size_t
-    length() const noexcept
+    length()
+      const noexcept
       { return this->m_str.length();  }
 
     const char_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_str.data();  }
 
     size_t
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_str.size();  }
 
     ptrdiff_t
-    ssize() const noexcept
+    ssize()
+      const noexcept
       { return this->m_str.ssize();  }
 
     size_t
-    capacity() const noexcept
+    capacity()
+      const noexcept
       { return this->m_str.capacity();  }
 
     basic_tinybuf_str&
@@ -185,7 +201,8 @@ class basic_tinybuf_str
     // Does nothing. Strings need not be flushed.
     virtual
     basic_tinybuf_str&
-    flush() override
+    flush()
+      override
       {
         return *this;
       }
@@ -194,7 +211,8 @@ class basic_tinybuf_str
     // This cannot fail for strings.
     virtual
     int64_t
-    tell() const override
+    tell()
+      const override
       {
         return this->m_off;
       }
@@ -206,7 +224,8 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     basic_tinybuf_str&
-    seek(int64_t off, seek_dir dir) override
+    seek(int64_t off, seek_dir dir)
+      override
       {
         int64_t orig, targ;
 
@@ -251,7 +270,8 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     size_t
-    getn(char_type* s, size_t n) override
+    getn(char_type* s, size_t n)
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_read))
           noadl::sprintf_and_throw<invalid_argument>(
@@ -274,7 +294,8 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     int
-    getc() override
+    getc()
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_read))
           noadl::sprintf_and_throw<invalid_argument>(
@@ -294,7 +315,8 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     basic_tinybuf_str&
-    putn(const char_type* s, size_t n) override
+    putn(const char_type* s, size_t n)
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_write))
           noadl::sprintf_and_throw<invalid_argument>(
@@ -328,7 +350,8 @@ class basic_tinybuf_str
     // unspecified state.
     virtual
     basic_tinybuf_str&
-    putc(char_type c) override
+    putc(char_type c)
+      override
       {
         if(!(this->m_mode & tinybuf_base::open_write))
           noadl::sprintf_and_throw<invalid_argument>(

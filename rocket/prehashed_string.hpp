@@ -103,30 +103,32 @@ class basic_prehashed_string
       { this->m_sth.exchange_with(other.m_sth);  }
 
     basic_prehashed_string&
-    operator=(initializer_list<value_type> init) &
+    operator=(initializer_list<value_type> init)
+      &
       {
         this->m_sth.set_string(init);
         return *this;
       }
 
     basic_prehashed_string&
-    operator=(const basic_prehashed_string& other) &
-      noexcept(is_nothrow_copy_assignable<string_type>::value)
+    operator=(const basic_prehashed_string& other)
+      & noexcept(is_nothrow_copy_assignable<string_type>::value)
       {
         this->m_sth.share_with(other.m_sth);
         return *this;
       }
 
     basic_prehashed_string&
-    operator=(basic_prehashed_string&& other) &
-      noexcept(is_nothrow_move_assignable<string_type>::value)
+    operator=(basic_prehashed_string&& other)
+      & noexcept(is_nothrow_move_assignable<string_type>::value)
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
       }
 
     basic_prehashed_string&
-    swap(basic_prehashed_string& other) noexcept(is_nothrow_swappable<string_type>::value)
+    swap(basic_prehashed_string& other)
+      noexcept(is_nothrow_swappable<string_type>::value)
       {
         this->m_sth.exchange_with(other.m_sth);
         return *this;
@@ -136,20 +138,25 @@ class basic_prehashed_string
     // getters
     constexpr
     const string_type&
-    rdstr() const noexcept
+    rdstr()
+      const noexcept
       { return this->m_sth.str();  }
 
-    operator const string_type&() const noexcept
+    operator
+    const string_type&()
+      const noexcept
       { return this->m_sth.str();  }
 
     constexpr
     size_t
-    rdhash() const noexcept
+    rdhash()
+      const noexcept
       { return this->m_sth.hval();  }
 
     constexpr
     bool
-    equals(const basic_prehashed_string& other) const
+    equals(const basic_prehashed_string& other)
+      const
       noexcept(noexcept(declval<const key_equal&>()(
             declval<const string_type&>(), declval<const string_type&>())))
       {
@@ -161,7 +168,8 @@ class basic_prehashed_string
     template<typename otherT>
     constexpr
     bool
-    equals(const otherT& other) const
+    equals(const otherT& other)
+      const
       noexcept(noexcept(declval<const key_equal&>()(
             declval<const string_type&>(), declval<const otherT&>())))
       {
@@ -170,50 +178,60 @@ class basic_prehashed_string
 
     // 24.3.2.3, iterators
     const_iterator
-    begin() const noexcept
+    begin()
+      const noexcept
       { return this->m_sth.str().begin();  }
 
     const_iterator
-    end() const noexcept
+    end()
+      const noexcept
       { return this->m_sth.str().end();  }
 
     const_reverse_iterator
-    rbegin() const noexcept
+    rbegin()
+      const noexcept
       { return this->m_sth.str().rbegin();  }
 
     const_reverse_iterator
-    rend() const noexcept
+    rend()
+      const noexcept
       { return this->m_sth.str().rend();  }
 
     // 24.3.2.4, capacity
     constexpr
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_sth.str().empty();  }
 
     constexpr
     size_type
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_sth.str().size();  }
 
     constexpr
     size_type
-    length() const noexcept
+    length()
+      const noexcept
       { return this->m_sth.str().length();  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
-    ssize() const noexcept
+    ssize()
+      const noexcept
       { return static_cast<difference_type>(this->m_sth.str().size());  }
 
     constexpr
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       { return this->m_sth.str().max_size();  }
 
     basic_prehashed_string&
-    clear() noexcept(noexcept(declval<string_type&>().clear()))
+    clear()
+      noexcept(noexcept(declval<string_type&>().clear()))
       {
         this->m_sth.clear();
         return *this;
@@ -221,19 +239,23 @@ class basic_prehashed_string
 
     // 24.3.2.5, element access
     const_reference
-    at(size_type pos) const
+    at(size_type pos)
+      const
       { return this->m_sth.str().at(pos);  }
 
     const_reference
-    operator[](size_type pos) const noexcept
+    operator[](size_type pos)
+      const noexcept
       { return this->m_sth.str()[pos];  }
 
     const_reference
-    front() const noexcept
+    front()
+      const noexcept
       { return this->m_sth.str().front();  }
 
     const_reference
-    back() const noexcept
+    back()
+      const noexcept
       { return this->m_sth.str().back();  }
 
     template<typename... paramsT>
@@ -245,22 +267,26 @@ class basic_prehashed_string
       }
 
     size_type
-    copy(size_type tpos, value_type* s, size_type tn) const
+    copy(size_type tpos, value_type* s, size_type tn)
+      const
       { return this->m_sth.str().copy(tpos, s, tn);  }
 
     size_type
-    copy(value_type* s, size_type tn) const
+    copy(value_type* s, size_type tn)
+      const
       { return this->m_sth.str().copy(s, tn);  }
 
     // 24.3.2.7, string operations
     constexpr
     const value_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_sth.str().data();  }
 
     constexpr
     const value_type*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_sth.str().c_str();  }
   };
 
@@ -272,14 +298,15 @@ struct basic_prehashed_string<stringT, hashT, eqT>::hash
 
     constexpr
     result_type
-    operator()(const basic_prehashed_string& str) const noexcept
+    operator()(const basic_prehashed_string& str)
+      const noexcept
       { return str.rdhash();  }
 
     template<typename otherT>
     constexpr
     result_type
-    operator()(const otherT& other) const
-      noexcept(noexcept(declval<hasher&&>() (declval<const otherT&>())))
+    operator()(const otherT& other)
+      const noexcept(noexcept(declval<hasher&&>() (declval<const otherT&>())))
       { return hasher() (other);  }
   };
 

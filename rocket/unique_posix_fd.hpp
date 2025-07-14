@@ -14,16 +14,19 @@ struct posix_fd_closer
 
     constexpr
     bool
-    is_null(handle_type fd) const noexcept
+    is_null(handle_type fd)
+      const noexcept
       { return fd == -1;  }
 
     constexpr
     handle_type
-    null() const noexcept
+    null()
+      const noexcept
       { return -1;  }
 
     void
-    close(handle_type fd) const noexcept
+    close(handle_type fd)
+      const noexcept
       {
         if(fd > STDERR_FILENO)
           ::close(fd);

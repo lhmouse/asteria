@@ -12,7 +12,8 @@ namespace rocket {
 template<typename charT>
 ROCKET_PURE constexpr
 size_t
-xstrlen(charT* str) noexcept
+xstrlen(charT* str)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrlen(str))
                            ? details_xstring::maybe_constexpr::ystrlen(str)
@@ -22,7 +23,8 @@ xstrlen(charT* str) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 charT*
-xstrchr(charT* str, ROCKET_UNDEDUCED(charT) target) noexcept
+xstrchr(charT* str, ROCKET_UNDEDUCED(charT) target)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrchr(str, target) == str)
                            ? details_xstring::maybe_constexpr::ystrchr(str, target)
@@ -32,7 +34,8 @@ xstrchr(charT* str, ROCKET_UNDEDUCED(charT) target) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 charT*
-xmemchr(charT* str, ROCKET_UNDEDUCED(charT) target, size_t len) noexcept
+xmemchr(charT* str, ROCKET_UNDEDUCED(charT) target, size_t len)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemchr(str, target, len) == str)
                            ? details_xstring::maybe_constexpr::ymemchr(str, target, len)
@@ -42,7 +45,8 @@ xmemchr(charT* str, ROCKET_UNDEDUCED(charT) target, size_t len) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 int
-xstrcmp(const charT* lhs, const charT* rhs) noexcept
+xstrcmp(const charT* lhs, const charT* rhs)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrcmp(lhs, rhs))
                            ? details_xstring::maybe_constexpr::ystrcmp(lhs, rhs)
@@ -52,7 +56,8 @@ xstrcmp(const charT* lhs, const charT* rhs) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 bool
-xstreq(const charT* lhs, const charT* rhs) noexcept
+xstreq(const charT* lhs, const charT* rhs)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrcmp(lhs, rhs))
                           ? (details_xstring::maybe_constexpr::ystrcmp(lhs, rhs) == 0)
@@ -62,7 +67,8 @@ xstreq(const charT* lhs, const charT* rhs) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 int
-xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
+xmemcmp(const charT* lhs, const charT* rhs, size_t len)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len))
                            ? details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len)
@@ -72,7 +78,8 @@ xmemcmp(const charT* lhs, const charT* rhs, size_t len) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 int
-xmemcmp(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
+xmemcmp(const charT* lhs, size_t llen, const charT* rhs, size_t rlen)
+  noexcept
   {
     return (llen < rlen) ? ((noadl::xmemcmp(rhs, lhs, llen) < 0) ? 1 : -1)
          : (llen > rlen) ? ((noadl::xmemcmp(lhs, rhs, rlen) < 0) ? -1 : 1)
@@ -82,7 +89,8 @@ xmemcmp(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 bool
-xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
+xmemeq(const charT* lhs, const charT* rhs, size_t len)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len))
                           ? (details_xstring::maybe_constexpr::ymemcmp(lhs, rhs, len) == 0)
@@ -92,7 +100,8 @@ xmemeq(const charT* lhs, const charT* rhs, size_t len) noexcept
 template<typename charT>
 ROCKET_PURE constexpr
 bool
-xmemeq(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
+xmemeq(const charT* lhs, size_t llen, const charT* rhs, size_t rlen)
+  noexcept
   {
     return (llen == rlen) && noadl::xmemeq(lhs, rhs, llen);
   }
@@ -100,7 +109,8 @@ xmemeq(const charT* lhs, size_t llen, const charT* rhs, size_t rlen) noexcept
 template<typename charT>
 constexpr
 charT*
-xmempset(charT* out, ROCKET_UNDEDUCED(charT) elem, size_t len) noexcept
+xmempset(charT* out, ROCKET_UNDEDUCED(charT) elem, size_t len)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymempset(out, elem, len) == out)
                            ? details_xstring::maybe_constexpr::ymempset(out, elem, len)
@@ -110,7 +120,8 @@ xmempset(charT* out, ROCKET_UNDEDUCED(charT) elem, size_t len) noexcept
 template<typename charT>
 inline
 charT*
-xmemrpset(charT*& out, ROCKET_UNDEDUCED(charT) elem, size_t len) noexcept
+xmemrpset(charT*& out, ROCKET_UNDEDUCED(charT) elem, size_t len)
+  noexcept
   {
     return out = noadl::xmempset(out, elem, len);
   }
@@ -118,7 +129,8 @@ xmemrpset(charT*& out, ROCKET_UNDEDUCED(charT) elem, size_t len) noexcept
 template<typename charT>
 constexpr
 charT*
-xstrpcpy(charT* out, const ROCKET_UNDEDUCED(charT)* str) noexcept
+xstrpcpy(charT* out, const ROCKET_UNDEDUCED(charT)* str)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ystrpcpy(out, str) == out)
                            ? details_xstring::maybe_constexpr::ystrpcpy(out, str)
@@ -128,7 +140,8 @@ xstrpcpy(charT* out, const ROCKET_UNDEDUCED(charT)* str) noexcept
 template<typename charT>
 inline
 charT*
-xstrrpcpy(charT*& out, const ROCKET_UNDEDUCED(charT)* str) noexcept
+xstrrpcpy(charT*& out, const ROCKET_UNDEDUCED(charT)* str)
+  noexcept
   {
     return out = noadl::xstrpcpy(out, str);
   }
@@ -136,7 +149,8 @@ xstrrpcpy(charT*& out, const ROCKET_UNDEDUCED(charT)* str) noexcept
 template<typename charT>
 constexpr
 charT*
-xmempcpy(charT* out, const ROCKET_UNDEDUCED(charT)* str, size_t len) noexcept
+xmempcpy(charT* out, const ROCKET_UNDEDUCED(charT)* str, size_t len)
+  noexcept
   {
     return ROCKET_CONSTANT_P(details_xstring::maybe_constexpr::ymempcpy(out, str, len) == out)
                            ? details_xstring::maybe_constexpr::ymempcpy(out, str, len)
@@ -146,7 +160,8 @@ xmempcpy(charT* out, const ROCKET_UNDEDUCED(charT)* str, size_t len) noexcept
 template<typename charT>
 inline
 charT*
-xmemrpcpy(charT*& out, const ROCKET_UNDEDUCED(charT)* str, size_t len) noexcept
+xmemrpcpy(charT*& out, const ROCKET_UNDEDUCED(charT)* str, size_t len)
+  noexcept
   {
     return out = noadl::xmempcpy(out, str, len);
   }

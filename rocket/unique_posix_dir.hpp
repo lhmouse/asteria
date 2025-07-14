@@ -14,16 +14,19 @@ struct posix_dir_closer
 
     constexpr
     bool
-    is_null(handle_type dp) const noexcept
+    is_null(handle_type dp)
+      const noexcept
       { return dp == nullptr;  }
 
     constexpr
     handle_type
-    null() const noexcept
+    null()
+      const noexcept
       { return nullptr;  }
 
     void
-    close(handle_type dp) const noexcept
+    close(handle_type dp)
+      const noexcept
       {
         if(dp)
           ::closedir(dp);

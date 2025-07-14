@@ -21,7 +21,8 @@ struct allocator_wrapper_base_for
 
 template<typename allocT>
 void
-propagate_allocator_on_copy(allocT& lhs, const allocT& rhs) noexcept
+propagate_allocator_on_copy(allocT& lhs, const allocT& rhs)
+  noexcept
   {
     details_xallocator::propagate<allocT>(
         typename conditional<
@@ -33,7 +34,8 @@ propagate_allocator_on_copy(allocT& lhs, const allocT& rhs) noexcept
 
 template<typename allocT>
 void
-propagate_allocator_on_move(allocT& lhs, allocT& rhs) noexcept
+propagate_allocator_on_move(allocT& lhs, allocT& rhs)
+  noexcept
   {
     details_xallocator::propagate<allocT>(
         typename conditional<
@@ -45,7 +47,8 @@ propagate_allocator_on_move(allocT& lhs, allocT& rhs) noexcept
 
 template<typename allocT>
 void
-propagate_allocator_on_swap(allocT& lhs, allocT& rhs) noexcept
+propagate_allocator_on_swap(allocT& lhs, allocT& rhs)
+  noexcept
   {
     details_xallocator::propagate<allocT>(
         typename conditional<

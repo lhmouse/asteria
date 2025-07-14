@@ -20,10 +20,14 @@ class final_wrapper
         m_alloc(forward<paramsT>(params)...)
       { }
 
-    constexpr operator const allocT&() const noexcept
+    constexpr
+    operator const allocT&()
+      const noexcept
       { return this->m_alloc;  }
 
-    operator allocT&() noexcept
+    operator
+    allocT&()
+      noexcept
       { return this->m_alloc;  }
   };
 
@@ -35,7 +39,8 @@ struct propagate_none_tag
 
 template<typename allocT>
 void
-propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/) noexcept
+propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/)
+  noexcept
   {
   }
 
@@ -47,7 +52,8 @@ struct propagate_copy_tag
 
 template<typename allocT>
 void
-propagate(propagate_copy_tag, allocT& lhs, const allocT& rhs) noexcept
+propagate(propagate_copy_tag, allocT& lhs, const allocT& rhs)
+  noexcept
   {
     lhs = rhs;
   }
@@ -60,7 +66,8 @@ struct propagate_move_tag
 
 template<typename allocT>
 void
-propagate(propagate_move_tag, allocT& lhs, allocT& rhs) noexcept
+propagate(propagate_move_tag, allocT& lhs, allocT& rhs)
+  noexcept
   {
     lhs = move(rhs);
   }
@@ -73,7 +80,8 @@ struct propagate_swap_tag
 
 template<typename allocT>
 void
-propagate(propagate_swap_tag, allocT& lhs, allocT& rhs) noexcept
+propagate(propagate_swap_tag, allocT& lhs, allocT& rhs)
+  noexcept
   {
     noadl::xswap(lhs, rhs);
   }

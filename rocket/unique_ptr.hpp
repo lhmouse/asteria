@@ -35,24 +35,30 @@ class unique_ptr
 
   public:
     // 23.11.1.2.1, constructors
-    ROCKET_CONSTEXPR_INLINE unique_ptr(nullptr_t = nullptr)
+    ROCKET_CONSTEXPR_INLINE
+    unique_ptr(nullptr_t = nullptr)
       noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth()
       { }
 
-    explicit constexpr unique_ptr(const deleter_type& del) noexcept
+    explicit constexpr
+    unique_ptr(const deleter_type& del)
+      noexcept
       :
         m_sth(nullptr, del)
       { }
 
-    explicit constexpr unique_ptr(pointer ptr)
+    explicit constexpr
+    unique_ptr(pointer ptr)
       noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth(ptr)
       { }
 
-    constexpr unique_ptr(pointer ptr, const deleter_type& del) noexcept
+    constexpr
+    unique_ptr(pointer ptr, const deleter_type& del)
+      noexcept
       :
         m_sth(ptr, del)
       { }
@@ -62,24 +68,28 @@ class unique_ptr
                                      ydeleterT>::pointer, pointer>::value),
     ROCKET_ENABLE_IF(is_constructible<deleter_type,
              typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
-    unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
+    unique_ptr(unique_ptr<yelementT, ydeleterT>&& other)
+      noexcept
       :
         m_sth(other.m_sth.release(), move(other.m_sth.as_deleter()))
       { }
 
-    unique_ptr(unique_ptr&& other) noexcept
+    unique_ptr(unique_ptr&& other)
+      noexcept
       :
         m_sth(other.m_sth.release(), move(other.m_sth.as_deleter()))
       { }
 
-    unique_ptr(unique_ptr&& other, const deleter_type& del) noexcept
+    unique_ptr(unique_ptr&& other, const deleter_type& del)
+      noexcept
       :
         m_sth(other.m_sth.release(), del)
       { }
 
     // 23.11.1.2.3, assignment
     unique_ptr&
-    operator=(unique_ptr&& other) & noexcept
+    operator=(unique_ptr&& other)
+      & noexcept
       {
         this->m_sth.as_deleter() = move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
@@ -92,7 +102,8 @@ class unique_ptr
     ROCKET_ENABLE_IF(is_assignable<deleter_type&,
              typename unique_ptr<yelementT, ydeleterT>::deleter_type&&>::value)>
     unique_ptr&
-    operator=(unique_ptr<yelementT, ydeleterT>&& other) & noexcept
+    operator=(unique_ptr<yelementT, ydeleterT>&& other)
+      & noexcept
       {
         this->m_sth.as_deleter() = move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
@@ -100,7 +111,8 @@ class unique_ptr
       }
 
     unique_ptr&
-    swap(unique_ptr& other) noexcept
+    swap(unique_ptr& other)
+      noexcept
       {
         noadl::xswap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
         this->m_sth.exchange_with(other.m_sth);
@@ -111,12 +123,14 @@ class unique_ptr
     // 23.11.1.2.4, observers
     ROCKET_PURE constexpr
     pointer
-    get() const noexcept
+    get()
+      const noexcept
       { return this->m_sth.get();  }
 
     ROCKET_PURE
     typename add_lvalue_reference<element_type>::type
-    operator*() const
+    operator*()
+      const
       {
         auto ptr = this->get();
         ROCKET_ASSERT(ptr);
@@ -125,38 +139,45 @@ class unique_ptr
 
     ROCKET_PURE
     pointer
-    operator->() const noexcept
+    operator->()
+      const noexcept
       {
         auto ptr = this->get();
         ROCKET_ASSERT(ptr);
         return ptr;
       }
 
-    ROCKET_PURE constexpr
-    explicit operator bool() const noexcept
+    ROCKET_PURE explicit constexpr
+    operator bool()
+      const noexcept
       { return static_cast<bool>(this->get());  }
 
     ROCKET_PURE constexpr
-    operator pointer() const noexcept
+    operator pointer()
+      const noexcept
       { return this->get();  }
 
     constexpr
     const deleter_type&
-    get_deleter() const noexcept
+    get_deleter()
+      const noexcept
       { return this->m_sth.as_deleter();  }
 
     deleter_type&
-    get_deleter() noexcept
+    get_deleter()
+      noexcept
       { return this->m_sth.as_deleter();  }
 
     // 23.11.1.2.5, modifiers
     pointer
-    release() noexcept
+    release()
+      noexcept
       { return this->m_sth.release();  }
 
     // N.B. The return type differs from `std::unique_ptr`.
     unique_ptr&
-    reset(pointer ptr_new = nullptr) noexcept
+    reset(pointer ptr_new = nullptr)
+      noexcept
       {
         this->m_sth.reset(move(ptr_new));
         return *this;
@@ -166,13 +187,15 @@ class unique_ptr
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator==(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs) noexcept
+operator==(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
+  noexcept
   { return lhs.get() == rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
 constexpr
 bool
-operator!=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs) noexcept
+operator!=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>& rhs)
+  noexcept
   { return lhs.get() != rhs.get();  }
 
 template<typename xelemT, typename xdelT, typename yelemT, typename ydelT>
@@ -202,25 +225,29 @@ operator>=(const unique_ptr<xelemT, xdelT>& lhs, const unique_ptr<yelemT, ydelT>
 template<typename elemT, typename delT>
 constexpr
 bool
-operator==(const unique_ptr<elemT, delT>& lhs, nullptr_t) noexcept
+operator==(const unique_ptr<elemT, delT>& lhs, nullptr_t)
+  noexcept
   { return !lhs;  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
-operator!=(const unique_ptr<elemT, delT>& lhs, nullptr_t) noexcept
+operator!=(const unique_ptr<elemT, delT>& lhs, nullptr_t)
+  noexcept
   { return !!lhs;  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
-operator==(nullptr_t, const unique_ptr<elemT, delT>& rhs) noexcept
+operator==(nullptr_t, const unique_ptr<elemT, delT>& rhs)
+  noexcept
   { return !rhs;  }
 
 template<typename elemT, typename delT>
 constexpr
 bool
-operator!=(nullptr_t, const unique_ptr<elemT, delT>& rhs) noexcept
+operator!=(nullptr_t, const unique_ptr<elemT, delT>& rhs)
+  noexcept
   { return !!rhs;  }
 
 template<typename elemT, typename delT>
@@ -245,7 +272,8 @@ make_unique(paramsT&&... params)
 template<typename targetT, typename sourceT>
 ROCKET_ALWAYS_INLINE
 unique_ptr<targetT>
-static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+static_pointer_cast(unique_ptr<sourceT>&& sptr)
+  noexcept
   {
     unique_ptr<targetT> dptr(static_cast<targetT*>(sptr.get()));
     if(dptr)
@@ -256,7 +284,8 @@ static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
 template<typename targetT, typename sourceT>
 ROCKET_ALWAYS_INLINE
 unique_ptr<targetT>
-dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+dynamic_pointer_cast(unique_ptr<sourceT>&& sptr)
+  noexcept
   {
     unique_ptr<targetT> dptr(dynamic_cast<targetT*>(sptr.get()));
     if(dptr)
@@ -267,7 +296,8 @@ dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
 template<typename targetT, typename sourceT>
 ROCKET_ALWAYS_INLINE
 unique_ptr<targetT>
-const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+const_pointer_cast(unique_ptr<sourceT>&& sptr)
+  noexcept
   {
     unique_ptr<targetT> dptr(const_cast<targetT*>(sptr.get()));
     if(dptr)

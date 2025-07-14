@@ -191,7 +191,8 @@ using namespace ::std::literals;
 #define ROCKET_DEFINE_ENUM_OPERATORS(enumT)  \
   constexpr  \
   enumT  \
-  operator&(enumT lhs, enumT rhs) noexcept  \
+  operator&(enumT lhs, enumT rhs)  \
+    noexcept  \
     {  \
       return static_cast<enumT>(  \
           static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
@@ -200,7 +201,8 @@ using namespace ::std::literals;
   \
   constexpr  \
   enumT&  \
-  operator&=(enumT& lhs, enumT rhs) noexcept  \
+  operator&=(enumT& lhs, enumT rhs)  \
+    noexcept  \
     {  \
       return lhs = static_cast<enumT>(  \
           static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
@@ -209,7 +211,8 @@ using namespace ::std::literals;
   \
   constexpr  \
   enumT  \
-  operator|(enumT lhs, enumT rhs) noexcept  \
+  operator|(enumT lhs, enumT rhs)  \
+    noexcept  \
     {  \
       return static_cast<enumT>(  \
           static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
@@ -218,7 +221,8 @@ using namespace ::std::literals;
   \
   constexpr  \
   enumT&  \
-  operator|=(enumT& lhs, enumT rhs) noexcept  \
+  operator|=(enumT& lhs, enumT rhs)  \
+    noexcept  \
     {  \
       return lhs = static_cast<enumT>(  \
           static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
@@ -227,7 +231,8 @@ using namespace ::std::literals;
   \
   constexpr  \
   enumT  \
-  operator^(enumT lhs, enumT rhs) noexcept  \
+  operator^(enumT lhs, enumT rhs)  \
+    noexcept  \
     {  \
       return static_cast<enumT>(  \
           static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
@@ -236,7 +241,8 @@ using namespace ::std::literals;
   \
   constexpr  \
   enumT&  \
-  operator^=(enumT& lhs, enumT rhs) noexcept  \
+  operator^=(enumT& lhs, enumT rhs)  \
+    noexcept  \
     {  \
       return lhs = static_cast<enumT>(  \
           static_cast<typename ::std::underlying_type<enumT>::type>(lhs)  \
@@ -245,7 +251,8 @@ using namespace ::std::literals;
   \
   constexpr  \
   enumT  \
-  operator~(enumT rhs) noexcept  \
+  operator~(enumT rhs)  \
+    noexcept  \
     {  \
       return static_cast<enumT>(  \
           ~ static_cast<typename ::std::underlying_type<enumT>::type>(rhs));  \
@@ -294,25 +301,29 @@ struct copy_cv<targetT, const volatile sourceT>
 template<typename containerT>
 constexpr
 decltype(declval<const containerT&>().size())
-size(const containerT& cont) noexcept(noexcept(cont.size()))
+size(const containerT& cont)
+  noexcept(noexcept(cont.size()))
   { return cont.size();  }
 
 template<typename elementT, size_t countT>
 constexpr
 size_t
-size(const elementT (&)[countT]) noexcept
+size(const elementT (&)[countT])
+  noexcept
   { return countT;  }
 
 template<typename containerT>
 constexpr
 decltype(static_cast<ptrdiff_t>(declval<const containerT&>().size()))
-ssize(const containerT& cont) noexcept(noexcept(static_cast<ptrdiff_t>(cont.size())))
+ssize(const containerT& cont)
+  noexcept(noexcept(static_cast<ptrdiff_t>(cont.size())))
   { return static_cast<ptrdiff_t>(cont.size());  }
 
 template<typename elementT, size_t countT>
 constexpr
 ptrdiff_t
-ssize(const elementT (&)[countT]) noexcept
+ssize(const elementT (&)[countT])
+  noexcept
   { return static_cast<ptrdiff_t>(countT);  }
 
 template<typename valueT, typename withT>
@@ -340,7 +351,8 @@ exchange(valueT& ref, withT&&... with)
 template<typename typeT>
 inline
 void
-xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
+xswap(typeT& lhs, typeT& rhs)  \
+  noexcept(noexcept(swap(lhs, rhs)))
   { swap(lhs, rhs);  }
 
 template<typename firstT, typename secondT, typename... restT>
@@ -355,37 +367,53 @@ template<typename lhsT, typename rhsT>
 constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 min(lhsT&& lhs, rhsT&& rhs)
-  { return (rhs < lhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);  }
+  {
+    return (rhs < lhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);
+  }
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
 typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 min(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
-  { return noadl::min(noadl::min(forward<lhsT>(lhs), forward<rhsT>(rhs)), forward<restT>(rest)...);  }
+  {
+    return noadl::min(noadl::min(forward<lhsT>(lhs), forward<rhsT>(rhs)), forward<restT>(rest)...);
+  }
 
 template<typename lhsT, typename rhsT>
 constexpr
 typename select_type<lhsT&&, rhsT&&>::type
 max(lhsT&& lhs, rhsT&& rhs)
-  { return (lhs < rhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);  }
+  {
+    return (lhs < rhs) ? forward<rhsT>(rhs) : forward<lhsT>(lhs);
+  }
 
 template<typename lhsT, typename rhsT, typename... restT>
 constexpr
 typename select_type<lhsT&&, rhsT&&, restT&&...>::type
 max(lhsT&& lhs, rhsT&& rhs, restT&&... rest)
-  { return noadl::max(noadl::max(forward<lhsT>(lhs), forward<rhsT>(rhs)), forward<restT>(rest)...);  }
+  {
+    return noadl::max(noadl::max(forward<lhsT>(lhs), forward<rhsT>(rhs)), forward<restT>(rest)...);
+  }
 
 template<typename xvT, typename loT, typename upT>
 constexpr
 typename select_type<xvT&&, loT&&, upT&&>::type
 clamp(xvT&& xv, loT&& lo, upT&& up)
-  { return (xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv);  }
+  {
+    return (xv < lo) ? forward<loT>(lo)
+           : (up < xv) ? forward<upT>(up)
+           : forward<xvT>(xv);
+  }
 
 template<typename resultT, typename xvT, typename loT, typename upT>
 constexpr
 resultT
 clamp_cast(xvT&& xv, loT&& lo, upT&& up)
-  { return static_cast<resultT>((xv < lo) ? forward<loT>(lo) : (up < xv) ? forward<upT>(up) : forward<xvT>(xv));  }
+  {
+    return static_cast<resultT>((xv < lo) ? forward<loT>(lo)
+                                : (up < xv) ? forward<upT>(up)
+                                : forward<xvT>(xv));
+  }
 
 template<typename iteratorT>
 struct is_input_iterator
@@ -434,7 +462,8 @@ estimate_distance(iteratorT first, iteratorT last)
 template<typename elementT, typename... paramsT>
 ROCKET_ALWAYS_INLINE
 elementT*
-construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
+construct(elementT* ptr, paramsT&&... params)
+  noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)ptr, 0xAA, sizeof(elementT));
@@ -445,7 +474,8 @@ construct(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<
 template<typename elementT>
 ROCKET_ALWAYS_INLINE
 elementT*
-default_construct(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
+default_construct(elementT* ptr)
+  noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset((void*)ptr, 0xBE, sizeof(elementT));
@@ -456,7 +486,8 @@ default_construct(elementT* ptr) noexcept(is_nothrow_default_constructible<eleme
 template<typename elementT>
 ROCKET_ALWAYS_INLINE
 void
-destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
+destroy(elementT* ptr)
+  noexcept(is_nothrow_destructible<elementT>::value)
   {
     // The C++ standard says the lifetime of a trivial object does not end.
     if(is_trivially_destructible<elementT>::value)
@@ -471,7 +502,8 @@ destroy(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
 template<typename elementT, typename... paramsT>
 ROCKET_ALWAYS_INLINE
 elementT*
-reconstruct(elementT* ptr, paramsT&&... params) noexcept
+reconstruct(elementT* ptr, paramsT&&... params)
+  noexcept
   {
     // This has to be noexcept, as there is no way to recover the destroyed
     // object if a new one can't be constructed.
@@ -488,7 +520,8 @@ struct equal
     template<typename lhsT, typename rhsT>
     constexpr
     bool
-    operator()(lhsT&& lhs, rhsT&& rhs) const
+    operator()(lhsT&& lhs, rhsT&& rhs)
+      const
       noexcept(noexcept(::std::declval<lhsT>() == ::std::declval<rhsT>()))
       { return forward<lhsT>(lhs) == forward<rhsT>(rhs);  }
   };
@@ -498,7 +531,8 @@ struct unequal
     template<typename lhsT, typename rhsT>
     constexpr
     bool
-    operator()(lhsT&& lhs, rhsT&& rhs) const
+    operator()(lhsT&& lhs, rhsT&& rhs)
+      const
       noexcept(noexcept(::std::declval<lhsT>() != ::std::declval<rhsT>()))
       { return forward<lhsT>(lhs) != forward<rhsT>(rhs);  }
   };
@@ -508,7 +542,8 @@ struct less
     template<typename lhsT, typename rhsT>
     constexpr
     bool
-    operator()(lhsT&& lhs, rhsT&& rhs) const
+    operator()(lhsT&& lhs, rhsT&& rhs)
+      const
       noexcept(noexcept(::std::declval<lhsT>() < ::std::declval<rhsT>()))
       { return forward<lhsT>(lhs) < forward<rhsT>(rhs);  }
   };
@@ -518,7 +553,8 @@ struct greater
     template<typename lhsT, typename rhsT>
     constexpr
     bool
-    operator()(lhsT&& lhs, rhsT&& rhs) const
+    operator()(lhsT&& lhs, rhsT&& rhs)
+      const
       noexcept(noexcept(::std::declval<lhsT>() > ::std::declval<rhsT>()))
       { return forward<lhsT>(lhs) > forward<rhsT>(rhs);  }
   };
@@ -528,7 +564,8 @@ struct less_equal
     template<typename lhsT, typename rhsT>
     constexpr
     bool
-    operator()(lhsT&& lhs, rhsT&& rhs) const
+    operator()(lhsT&& lhs, rhsT&& rhs)
+      const
       noexcept(noexcept(::std::declval<lhsT>() <= ::std::declval<rhsT>()))
       { return forward<lhsT>(lhs) <= forward<rhsT>(rhs);  }
   };
@@ -538,7 +575,8 @@ struct greater_equal
     template<typename lhsT, typename rhsT>
     constexpr
     bool
-    operator()(lhsT&& lhs, rhsT&& rhs) const
+    operator()(lhsT&& lhs, rhsT&& rhs)
+      const
       noexcept(noexcept(::std::declval<lhsT>() >= ::std::declval<rhsT>()))
       { return forward<lhsT>(lhs) >= forward<rhsT>(rhs);  }
   };
@@ -871,14 +909,16 @@ arent(xvalueT&& xval)
 template<typename charT>
 ROCKET_PURE constexpr
 int
-int_from(charT c) noexcept
+int_from(charT c)
+  noexcept
   {
     return static_cast<int>(c);
   }
 
 ROCKET_PURE constexpr
 int
-int_from(char c) noexcept
+int_from(char c)
+  noexcept
   {
     return static_cast<unsigned char>(c);
   }
@@ -928,7 +968,8 @@ static_or_dynamic_cast(sourceT&& src)
 
 ROCKET_ALWAYS_INLINE
 uint64_t
-mulh128(uint64_t x, uint64_t y, uint64_t* lo = nullptr) noexcept
+mulh128(uint64_t x, uint64_t y, uint64_t* lo = nullptr)
+  noexcept
   {
 #ifdef __SIZEOF_INT128__
     __extension__ using my_uint128_t = unsigned __int128;

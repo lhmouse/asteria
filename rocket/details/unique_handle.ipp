@@ -22,7 +22,9 @@ class stored_handle
     handle_type m_hv;
 
   public:
-    explicit constexpr stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
+    explicit constexpr
+    stored_handle()
+      noexcept(is_nothrow_constructible<closer_type>::value)
       :
         closer_base(), m_hv(this->as_closer().null())
       { }
@@ -42,20 +44,24 @@ class stored_handle
 
   public:
     const closer_type&
-    as_closer() const noexcept
+    as_closer()
+      const noexcept
       { return static_cast<const closer_base&>(*this);  }
 
     closer_type&
-    as_closer() noexcept
+    as_closer()
+      noexcept
       { return static_cast<closer_base&>(*this);  }
 
     constexpr
     const handle_type&
-    get() const noexcept
+    get()
+      const noexcept
       { return this->m_hv;  }
 
     handle_type
-    release() noexcept
+    release()
+      noexcept
       {
         if(this->as_closer().is_null(this->m_hv))
           return this->m_hv;
@@ -65,7 +71,8 @@ class stored_handle
       }
 
     void
-    reset(handle_type hv_new) noexcept
+    reset(handle_type hv_new)
+      noexcept
       {
         if(this->as_closer().is_null(this->m_hv) && this->as_closer().is_null(hv_new))
           return;
@@ -76,7 +83,8 @@ class stored_handle
       }
 
     void
-    exchange_with(stored_handle& other) noexcept
+    exchange_with(stored_handle& other)
+      noexcept
       { ::std::swap(this->m_hv, other.m_hv);  }
   };
 
@@ -93,17 +101,20 @@ class closer_wrapper
   public:
     constexpr
     handleT
-    null() const noexcept
+    null()
+      const noexcept
       { return handleT();  }
 
     constexpr
     bool
-    is_null(handleT hv) const noexcept
+    is_null(handleT hv)
+      const noexcept
       { return static_cast<bool>(hv) == false;  }
 
     constexpr
     void
-    close(handleT hv) noexcept
+    close(handleT hv)
+      noexcept
       { this->m_cl(hv);  }
   };
 

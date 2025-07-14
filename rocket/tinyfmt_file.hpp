@@ -34,12 +34,16 @@ class basic_tinyfmt_file
       noexcept(is_nothrow_default_constructible<tinybuf_type>::value)
       { }
 
-    explicit basic_tinyfmt_file(file_type&& file) noexcept
+    explicit
+    basic_tinyfmt_file(file_type&& file)
+      noexcept
       :
         m_buf(move(file))
       { }
 
-    explicit basic_tinyfmt_file(handle_type fp) noexcept
+    explicit
+    basic_tinyfmt_file(handle_type fp)
+      noexcept
       :
         m_buf(fp)
       { }
@@ -56,7 +60,8 @@ class basic_tinyfmt_file
     // Gets the associated buffer.
     ROCKET_PURE virtual
     tinybuf_type&
-    do_get_tinybuf_nonconst() const override
+    do_get_tinybuf_nonconst()
+      const override
       {
         return const_cast<tinybuf_type&>(this->m_buf);
       }
@@ -66,19 +71,22 @@ class basic_tinyfmt_file
 
     // Gets the file pointer.
     handle_type
-    get_handle() const noexcept
+    get_handle()
+      const noexcept
       { return this->m_buf.get_handle();  }
 
     // Takes ownership of an existent file.
     basic_tinyfmt_file&
-    reset(file_type&& file) noexcept
+    reset(file_type&& file)
+      noexcept
       {
         this->m_buf.reset(move(file));
         return *this;
       }
 
     basic_tinyfmt_file&
-    reset(handle_type fp) noexcept
+    reset(handle_type fp)
+      noexcept
       {
         this->m_buf.reset(fp);
         return *this;
@@ -94,7 +102,8 @@ class basic_tinyfmt_file
 
     // Closes the current file, if any.
     basic_tinyfmt_file&
-    close() noexcept
+    close()
+      noexcept
       {
         this->m_buf.close();
         return *this;

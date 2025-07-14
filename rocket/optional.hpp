@@ -34,7 +34,12 @@ class optional
 
   public:
     // 19.6.3.1, constructors
-    constexpr optional(nullopt_t = nullopt) noexcept { }
+    constexpr
+    optional(nullopt_t = nullopt)
+      noexcept
+      :
+        m_stor()
+      { }
 
     optional(const value_type& value)
       noexcept(is_nothrow_copy_constructible<value_type>::value)
@@ -81,9 +86,9 @@ class optional
       }
 
     optional&
-    operator=(const value_type& value) &
-      noexcept(conjunction<is_nothrow_copy_constructible<value_type>,
-                           is_nothrow_copy_assignable<value_type>>::value)
+    operator=(const value_type& value)
+      & noexcept(conjunction<is_nothrow_copy_constructible<value_type>,
+                             is_nothrow_copy_assignable<value_type>>::value)
       {
         if(!this->m_stor.empty())
           this->m_stor.mut_front() = value;
@@ -93,9 +98,9 @@ class optional
       }
 
     optional&
-    operator=(value_type&& value) &
-      noexcept(conjunction<is_nothrow_move_constructible<value_type>,
-                           is_nothrow_move_assignable<value_type>>::value)
+    operator=(value_type&& value)
+      & noexcept(conjunction<is_nothrow_move_constructible<value_type>,
+                             is_nothrow_move_assignable<value_type>>::value)
       {
         if(!this->m_stor.empty())
           this->m_stor.mut_front() = move(value);
@@ -107,9 +112,9 @@ class optional
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_assignable<value_type&, yvalueT&&>::value)>
     optional&
-    operator=(yvalueT&& yvalue) &
-      noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>,
-                           is_nothrow_assignable<value_type&, yvalueT&&>>::value)
+    operator=(yvalueT&& yvalue)
+      & noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>,
+                             is_nothrow_assignable<value_type&, yvalueT&&>>::value)
       {
         if(!this->m_stor.empty())
           this->m_stor.mut_front() = forward<yvalueT>(yvalue);
@@ -122,11 +127,11 @@ class optional
     ROCKET_ENABLE_IF(is_assignable<value_type&,
                           const typename optional<yvalueT>::value_type&>::value)>
     optional&
-    operator=(const optional<yvalueT>& other) &
-      noexcept(conjunction<is_nothrow_constructible<value_type,
-                                 const typename optional<yvalueT>::value_type&>,
-                           is_nothrow_assignable<value_type&,
-                                 const typename optional<yvalueT>::value_type&>>::value)
+    operator=(const optional<yvalueT>& other)
+      & noexcept(conjunction<is_nothrow_constructible<value_type,
+                                   const typename optional<yvalueT>::value_type&>,
+                             is_nothrow_assignable<value_type&,
+                                   const typename optional<yvalueT>::value_type&>>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.clear();
@@ -141,11 +146,11 @@ class optional
     ROCKET_ENABLE_IF(is_assignable<value_type&,
                          typename optional<yvalueT>::value_type&&>::value)>
     optional&
-    operator=(optional<yvalueT>&& other) &
-      noexcept(conjunction<is_nothrow_constructible<value_type,
-                                typename optional<yvalueT>::value_type&&>,
-                           is_nothrow_assignable<value_type&,
-                                typename optional<yvalueT>::value_type&&>>::value)
+    operator=(optional<yvalueT>&& other)
+      & noexcept(conjunction<is_nothrow_constructible<value_type,
+                                  typename optional<yvalueT>::value_type&&>,
+                             is_nothrow_assignable<value_type&,
+                                  typename optional<yvalueT>::value_type&&>>::value)
       {
         if(other.m_stor.empty())
           this->m_stor.clear();
@@ -167,13 +172,16 @@ class optional
         return *this;
       }
 
-    explicit constexpr operator bool() const noexcept
+    explicit constexpr
+    operator bool()
+      const noexcept
       { return this->m_stor.size() != 0;  }
 
   private:
     [[noreturn]] ROCKET_NEVER_INLINE
     reference
-    do_throw_valueless() const
+    do_throw_valueless()
+      const
       {
         noadl::sprintf_and_throw<length_error>("variant: no value set");
       }
@@ -182,11 +190,13 @@ class optional
     // 19.6.3.5, observers
     constexpr
     bool
-    has_value() const noexcept
+    has_value()
+      const noexcept
       { return this->m_stor.size() != 0;  }
 
     const_reference
-    value() const
+    value()
+      const
       {
         return this->m_stor.empty()
                  ? this->do_throw_valueless()
@@ -203,7 +213,8 @@ class optional
 
     // N.B. This is a non-standard extension.
     const value_type*
-    value_ptr() const
+    value_ptr()
+      const
       {
         return this->m_stor.empty()
                  ? nullptr
@@ -222,7 +233,8 @@ class optional
     // N.B. The return type differs from `std::variant`.
     template<typename defvalT>
     typename select_type<const_reference, defvalT&&>::type
-    value_or(defvalT&& defval) const
+    value_or(defvalT&& defval)
+      const
       {
         return this->m_stor.empty()
                  ? forward<defvalT>(defval)
@@ -251,7 +263,8 @@ class optional
 
     constexpr
     const_reference
-    operator*() const
+    operator*()
+      const
       { return this->m_stor.front();  }
 
     constexpr
@@ -261,7 +274,8 @@ class optional
 
     constexpr
     const value_type*
-    operator->() const
+    operator->()
+      const
       { return ::std::addressof(this->m_stor.front());  }
 
     constexpr
@@ -271,7 +285,8 @@ class optional
 
     // 19.6.3.6, modifiers
     optional&
-    reset() noexcept
+    reset()
+      noexcept
       {
         this->m_stor.clear();
         return *this;
@@ -319,25 +334,29 @@ operator!=(const optional<valueT>& lhs, const optional<valueT>& rhs)
 template<typename valueT>
 constexpr
 bool
-operator==(const optional<valueT>& lhs, nullopt_t) noexcept
+operator==(const optional<valueT>& lhs, nullopt_t)
+  noexcept
   { return !lhs;  }
 
 template<typename valueT>
 constexpr
 bool
-operator!=(const optional<valueT>& lhs, nullopt_t) noexcept
+operator!=(const optional<valueT>& lhs, nullopt_t)
+  noexcept
   { return !!lhs;  }
 
 template<typename valueT>
 constexpr
 bool
-operator==(nullopt_t, const optional<valueT>& rhs) noexcept
+operator==(nullopt_t, const optional<valueT>& rhs)
+  noexcept
   { return !rhs;  }
 
 template<typename valueT>
 constexpr
 bool
-operator!=(nullopt_t, const optional<valueT>& rhs) noexcept
+operator!=(nullopt_t, const optional<valueT>& rhs)
+  noexcept
   { return !!rhs;  }
 
 template<typename valueT>

@@ -41,12 +41,16 @@ class storage_handle
     };
 
   public:
-    constexpr storage_handle() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr
+    storage_handle()
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         allocator_base(), m_init_nelem(0)
       { }
 
-    explicit storage_handle(const allocator_type& alloc) noexcept
+    explicit
+    storage_handle(const allocator_type& alloc)
+      noexcept
       :
         allocator_base(alloc), m_init_nelem(0)
       {
@@ -55,7 +59,9 @@ class storage_handle
 #endif
       }
 
-    explicit storage_handle(allocator_type&& alloc) noexcept
+    explicit
+    storage_handle(allocator_type&& alloc)
+      noexcept
       :
         allocator_base(move(alloc)), m_init_nelem(0)
       {
@@ -86,25 +92,30 @@ class storage_handle
   public:
     constexpr
     const allocator_type&
-    as_allocator() const noexcept
+    as_allocator()
+      const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
-    as_allocator() noexcept
+    as_allocator()
+      noexcept
       { return static_cast<allocator_base&>(*this);  }
 
     ROCKET_CONST static constexpr
     size_type
-    capacity() noexcept
+    capacity()
+      noexcept
       { return capacityT;  }
 
     constexpr
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       { return this->capacity();  }
 
     size_type
-    check_size_add(size_type base, size_type add) const
+    check_size_add(size_type base, size_type add)
+      const
       {
         size_type res;
 
@@ -124,16 +135,19 @@ class storage_handle
 
     ROCKET_PURE constexpr
     const value_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_data;  }
 
     value_type*
-    mut_data() noexcept
+    mut_data()
+      noexcept
       { return this->m_data;  }
 
     ROCKET_PURE constexpr
     size_type
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_nelem;  }
 
     template<typename... paramsT>
@@ -149,7 +163,8 @@ class storage_handle
       }
 
     void
-    pop_back_unchecked() noexcept
+    pop_back_unchecked()
+      noexcept
       {
         ROCKET_ASSERT_MSG(this->m_nelem > 0, "no element to pop");
 
@@ -175,7 +190,8 @@ class storage_handle
       }
 
     void
-    pop_n_unchecked(size_t total) noexcept
+    pop_n_unchecked(size_t total)
+      noexcept
       {
         for(size_t k = 0;  k != total;  ++k)
           this->pop_back_unchecked();
@@ -283,20 +299,26 @@ class iterator
 
   private:
     // This constructor is called by the container.
-    constexpr iterator(valueT* begin, size_t ncur, size_t nend) noexcept
+    constexpr
+    iterator(valueT* begin, size_t ncur, size_t nend)
+      noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
-    constexpr iterator() noexcept
+    constexpr
+    iterator()
+      noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
 
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
-    constexpr iterator(const iterator<vectorT, yvalueT>& other) noexcept
+    constexpr
+    iterator(const iterator<vectorT, yvalueT>& other)
+      noexcept
       :
         m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
@@ -304,7 +326,8 @@ class iterator
     template<typename yvalueT,
     ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
     iterator&
-    operator=(const iterator<vectorT, yvalueT>& other) & noexcept
+    operator=(const iterator<vectorT, yvalueT>& other)
+      & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -314,7 +337,8 @@ class iterator
 
   private:
     valueT*
-    do_validate(valueT* cur, bool deref) const noexcept
+    do_validate(valueT* cur, bool deref)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "iterator out of range");
@@ -324,33 +348,39 @@ class iterator
 
   public:
     reference
-    operator*() const noexcept
+    operator*()
+      const noexcept
       { return *(this->do_validate(this->m_cur, true));  }
 
     reference
-    operator[](difference_type off) const noexcept
+    operator[](difference_type off)
+      const noexcept
       { return *(this->do_validate(this->m_cur + off, true));  }
 
     pointer
-    operator->() const noexcept
+    operator->()
+      const noexcept
       { return ::std::addressof(**this);  }
 
     iterator&
-    operator+=(difference_type off) & noexcept
+    operator+=(difference_type off)
+      & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
       }
 
     iterator&
-    operator-=(difference_type off) & noexcept
+    operator-=(difference_type off)
+      & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
       }
 
     iterator
-    operator+(difference_type off) const noexcept
+    operator+(difference_type off)
+      const noexcept
       {
         auto res = *this;
         res += off;
@@ -358,7 +388,8 @@ class iterator
       }
 
     iterator
-    operator-(difference_type off) const noexcept
+    operator-(difference_type off)
+      const noexcept
       {
         auto res = *this;
         res -= off;
@@ -366,29 +397,35 @@ class iterator
       }
 
     iterator&
-    operator++() noexcept
+    operator++()
+      noexcept
       { return *this += 1;  }
 
     iterator&
-    operator--() noexcept
+    operator--()
+      noexcept
       { return *this -= 1;  }
 
     iterator
-    operator++(int) noexcept
+    operator++(int)
+      noexcept
       { return noadl::exchange(*this, *this + 1);  }
 
     iterator
-    operator--(int) noexcept
+    operator--(int)
+      noexcept
       { return noadl::exchange(*this, *this - 1);  }
 
     friend
     iterator
-    operator+(difference_type off, const iterator& other) noexcept
+    operator+(difference_type off, const iterator& other)
+      noexcept
       { return other + off;  }
 
     template<typename yvalueT>
     difference_type
-    operator-(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator-(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
@@ -399,33 +436,39 @@ class iterator
     template<typename yvalueT>
     constexpr
     bool
-    operator==(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator==(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename yvalueT>
     constexpr
     bool
-    operator!=(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator!=(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       { return this->m_cur != other.m_cur;  }
 
     template<typename yvalueT>
     bool
-    operator<(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator<(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       { return *this - other < 0;  }
 
     template<typename yvalueT>
     bool
-    operator>(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator>(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       { return *this - other > 0;  }
 
     template<typename yvalueT>
     bool
-    operator<=(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator<=(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       { return *this - other <= 0;  }
 
     template<typename yvalueT>
     bool
-    operator>=(const iterator<vectorT, yvalueT>& other) const noexcept
+    operator>=(const iterator<vectorT, yvalueT>& other)
+      const noexcept
       { return *this - other >= 0;  }
   };
 

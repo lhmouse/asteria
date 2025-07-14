@@ -14,16 +14,19 @@ struct posix_file_closer
 
     constexpr
     bool
-    is_null(handle_type fp) const noexcept
+    is_null(handle_type fp)
+      const noexcept
       { return fp == nullptr;  }
 
     constexpr
     handle_type
-    null() const noexcept
+    null()
+      const noexcept
       { return nullptr;  }
 
     void
-    close(handle_type fp) const noexcept
+    close(handle_type fp)
+      const noexcept
       {
         if((fp != stdin) && (fp != stdout) && (fp != stderr))
           ::fclose(fp);

@@ -24,7 +24,8 @@ struct basic_storage
     size_type nblk;
     union { value_type data[1];  };
 
-    basic_storage(const allocator_type& xalloc, size_type xnblk) noexcept
+    basic_storage(const allocator_type& xalloc, size_type xnblk)
+      noexcept
       :
         allocator_wrapper_base_for<allocT>::type(xalloc),
         nblk(xnblk)
@@ -48,7 +49,8 @@ struct basic_storage
 
     static constexpr
     size_type
-    min_nblk_for_nchar(size_t nchar) noexcept
+    min_nblk_for_nchar(size_t nchar)
+      noexcept
       {
         // Note this is correct even when `nchar` is zero, as long as
         // `basic_storage` is larger than `value_type`. The `data` field
@@ -59,7 +61,8 @@ struct basic_storage
 
     static constexpr
     size_t
-    max_nchar_for_nblk(size_type nblk) noexcept
+    max_nchar_for_nblk(size_type nblk)
+      noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);  }
   };
 
@@ -83,17 +86,23 @@ class storage_handle
     storage_pointer m_qstor = nullptr;
 
   public:
-    constexpr storage_handle() noexcept
+    constexpr
+    storage_handle()
+      noexcept
       :
         allocator_base()
       { }
 
-    explicit constexpr storage_handle(const allocator_type& alloc) noexcept
+    explicit constexpr
+    storage_handle(const allocator_type& alloc)
+      noexcept
       :
         allocator_base(alloc)
       { }
 
-    explicit constexpr storage_handle(allocator_type&& alloc) noexcept
+    explicit constexpr
+    storage_handle(allocator_type&& alloc)
+      noexcept
       :
         allocator_base(move(alloc))
       { }
@@ -112,7 +121,8 @@ class storage_handle
     constexpr
 #endif
     void
-    do_reset(storage_pointer qstor_new) noexcept
+    do_reset(storage_pointer qstor_new)
+      noexcept
       {
         // Decrement the reference count with acquire-release semantics to prevent
         // races on `*qstor`.
@@ -126,7 +136,8 @@ class storage_handle
 
     ROCKET_NEVER_INLINE static
     void
-    do_destroy_storage(storage_pointer qstor) noexcept
+    do_destroy_storage(storage_pointer qstor)
+      noexcept
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
@@ -137,16 +148,19 @@ class storage_handle
   public:
     constexpr
     const allocator_type&
-    as_allocator() const noexcept
+    as_allocator()
+      const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
-    as_allocator() noexcept
+    as_allocator()
+      noexcept
       { return static_cast<allocator_base&>(*this);  }
 
     ROCKET_PURE
     bool
-    unique() const noexcept
+    unique()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -155,7 +169,8 @@ class storage_handle
       }
 
     int
-    use_count() const noexcept
+    use_count()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -165,7 +180,8 @@ class storage_handle
 
     ROCKET_PURE
     size_type
-    capacity() const noexcept
+    capacity()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -174,7 +190,8 @@ class storage_handle
       }
 
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       {
         storage_allocator st_alloc(this->as_allocator());
         auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
@@ -182,7 +199,8 @@ class storage_handle
       }
 
     size_type
-    check_size_add(size_type base, size_type add) const
+    check_size_add(size_type base, size_type add)
+      const
       {
         size_type res;
 
@@ -201,7 +219,8 @@ class storage_handle
       }
 
     size_type
-    round_up_capacity(size_type res_arg) const
+    round_up_capacity(size_type res_arg)
+      const
       {
         size_type cap = this->check_size_add(0, res_arg);
         auto nblk = storage::min_nblk_for_nchar(cap);
@@ -210,7 +229,8 @@ class storage_handle
 
     ROCKET_PURE
     const value_type*
-    data_opt() const noexcept
+    data_opt()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -219,7 +239,8 @@ class storage_handle
       }
 
     value_type*
-    mut_data_opt() noexcept
+    mut_data_opt()
+      noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -258,13 +279,15 @@ class storage_handle
       }
 
     void
-    deallocate() noexcept
+    deallocate()
+      noexcept
       {
         this->do_reset(nullptr);
       }
 
     void
-    share_with(const storage_handle& other) noexcept
+    share_with(const storage_handle& other)
+      noexcept
       {
         auto qstor = other.m_qstor;
         if(qstor)
@@ -273,7 +296,8 @@ class storage_handle
       }
 
     void
-    exchange_with(storage_handle& other) noexcept
+    exchange_with(storage_handle& other)
+      noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }
   };
 
@@ -297,20 +321,25 @@ class iterator
 
   private:
     // This constructor is called by the container.
-    constexpr iterator(charT* begin, size_t ncur, size_t nend) noexcept
+    constexpr
+    iterator(charT* begin, size_t ncur, size_t nend)
+      noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       { }
 
   public:
-    constexpr iterator() noexcept
+    constexpr
+    iterator()
+      noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
 
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
-    constexpr iterator(const iterator<stringT, ycharT>& other) noexcept
+    constexpr iterator(const iterator<stringT, ycharT>& other)
+      noexcept
       :
         m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
@@ -318,7 +347,8 @@ class iterator
     template<typename ycharT,
     ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
     iterator&
-    operator=(const iterator<stringT, ycharT>& other) & noexcept
+    operator=(const iterator<stringT, ycharT>& other)
+      & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -328,7 +358,8 @@ class iterator
 
   private:
     charT*
-    do_validate(charT* cur, bool deref) const noexcept
+    do_validate(charT* cur, bool deref)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "iterator out of range");
@@ -338,33 +369,39 @@ class iterator
 
   public:
     reference
-    operator*() const noexcept
+    operator*()
+      const noexcept
       { return *(this->do_validate(this->m_cur, true));  }
 
     reference
-    operator[](difference_type off) const noexcept
+    operator[](difference_type off)
+      const noexcept
       { return *(this->do_validate(this->m_cur + off, true));  }
 
     pointer
-    operator->() const noexcept
+    operator->()
+      const noexcept
       { return ::std::addressof(**this);  }
 
     iterator&
-    operator+=(difference_type off) & noexcept
+    operator+=(difference_type off)
+      & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur + off, false);
         return *this;
       }
 
     iterator&
-    operator-=(difference_type off) & noexcept
+    operator-=(difference_type off)
+      & noexcept
       {
         this->m_cur = this->do_validate(this->m_cur - off, false);
         return *this;
       }
 
     iterator
-    operator+(difference_type off) const noexcept
+    operator+(difference_type off)
+      const noexcept
       {
         auto res = *this;
         res += off;
@@ -372,7 +409,8 @@ class iterator
       }
 
     iterator
-    operator-(difference_type off) const noexcept
+    operator-(difference_type off)
+      const noexcept
       {
         auto res = *this;
         res -= off;
@@ -380,29 +418,35 @@ class iterator
       }
 
     iterator&
-    operator++() noexcept
+    operator++()
+      noexcept
       { return *this += 1;  }
 
     iterator&
-    operator--() noexcept
+    operator--()
+      noexcept
       { return *this -= 1;  }
 
     iterator
-    operator++(int) noexcept
+    operator++(int)
+      noexcept
       { return noadl::exchange(*this, *this + 1);  }
 
     iterator
-    operator--(int) noexcept
+    operator--(int)
+      noexcept
       { return noadl::exchange(*this, *this - 1);  }
 
     friend
     iterator
-    operator+(difference_type off, const iterator& other) noexcept
+    operator+(difference_type off, const iterator& other)
+      noexcept
       { return other + off;  }
 
     template<typename ycharT>
     difference_type
-    operator-(const iterator<stringT, ycharT>& other) const noexcept
+    operator-(const iterator<stringT, ycharT>& other)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
@@ -413,33 +457,39 @@ class iterator
     template<typename ycharT>
     constexpr
     bool
-    operator==(const iterator<stringT, ycharT>& other) const noexcept
+    operator==(const iterator<stringT, ycharT>& other)
+      const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ycharT>
     constexpr
     bool
-    operator!=(const iterator<stringT, ycharT>& other) const noexcept
+    operator!=(const iterator<stringT, ycharT>& other)
+      const noexcept
       { return this->m_cur != other.m_cur;  }
 
     template<typename ycharT>
     bool
-    operator<(const iterator<stringT, ycharT>& other) const noexcept
+    operator<(const iterator<stringT, ycharT>& other)
+      const noexcept
       { return *this - other < 0;  }
 
     template<typename ycharT>
     bool
-    operator>(const iterator<stringT, ycharT>& other) const noexcept
+    operator>(const iterator<stringT, ycharT>& other)
+      const noexcept
       { return *this - other > 0;  }
 
     template<typename ycharT>
     bool
-    operator<=(const iterator<stringT, ycharT>& other) const noexcept
+    operator<=(const iterator<stringT, ycharT>& other)
+      const noexcept
       { return *this - other <= 0;  }
 
     template<typename ycharT>
     bool
-    operator>=(const iterator<stringT, ycharT>& other) const noexcept
+    operator>=(const iterator<stringT, ycharT>& other)
+      const noexcept
       { return *this - other >= 0;  }
   };
 

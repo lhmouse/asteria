@@ -27,65 +27,79 @@ class reference_wrapper
     // construct/copy/destroy
     template<typename otherT,
     ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-    explicit constexpr reference_wrapper(otherT& other) noexcept
+    explicit constexpr
+    reference_wrapper(otherT& other)
+      noexcept
       :
         m_ptr(::std::addressof(other))
       { }
 
     template<typename otherT,
     ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-    constexpr reference_wrapper(const reference_wrapper<otherT>& other) noexcept
+    constexpr
+    reference_wrapper(const reference_wrapper<otherT>& other)
+      noexcept
       :
         m_ptr(other.m_ptr)
       { }
 
-    constexpr operator reference() const noexcept
+    constexpr
+    operator reference()
+      const noexcept
       { return this->get();  }
 
     constexpr
     reference
-    get() const noexcept
+    get()
+      const noexcept
       { return *(this->m_ptr);  }
 
     constexpr
     pointer
-    ptr() const noexcept
+    ptr()
+      const noexcept
       { return this->m_ptr;  }
   };
 
 template<typename valueT>
 constexpr
 reference_wrapper<const valueT>
-cref(valueT& value) noexcept
+cref(valueT& value)
+  noexcept
   { return reference_wrapper<const valueT>(value);  }
 
 template<typename valueT>
 constexpr
 reference_wrapper<const valueT>
-cref(reference_wrapper<valueT> value) noexcept
+cref(reference_wrapper<valueT> value)
+  noexcept
   { return reference_wrapper<const valueT>(value);  }
 
 template<typename valueT>
 constexpr
 reference_wrapper<const valueT>
-cref(valueT&& value) = delete;
+cref(valueT&& value)
+  noexcept = delete;
 
 template<typename valueT>
 constexpr
 reference_wrapper<valueT>
-ref(valueT& value) noexcept
+ref(valueT& value)
+  noexcept
   { return reference_wrapper<valueT>(value);  }
 
 template<typename valueT>
 constexpr
 reference_wrapper<valueT>
-ref(reference_wrapper<valueT> value) noexcept
+ref(reference_wrapper<valueT> value)
+  noexcept
   { return reference_wrapper<valueT>(value);  }
 
 template<typename valueT>
 constexpr
 reference_wrapper<valueT>
-ref(valueT&& value) = delete;
+ref(valueT&& value)
+  noexcept = delete;
 
 }  // namespace rocket
 #endif

@@ -57,7 +57,8 @@ class basic_tinyfmt_ln
     // Gets the associated buffer.
     ROCKET_PURE virtual
     tinybuf_type&
-    do_get_tinybuf_nonconst() const override
+    do_get_tinybuf_nonconst()
+      const override
       {
         return const_cast<tinybuf_type&>(this->m_buf);
       }
@@ -67,27 +68,33 @@ class basic_tinyfmt_ln
 
     // Gets the internal buffer.
     const buffer_type&
-    get_buffer() const noexcept
+    get_buffer()
+      const noexcept
       { return this->m_buf.get_buffer();  }
 
     const char_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_buf.data();  }
 
     size_t
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_buf.size();  }
 
     ptrdiff_t
-    ssize() const noexcept
+    ssize()
+      const noexcept
       { return this->m_buf.ssize();  }
 
     const char_type*
-    begin() const noexcept
+    begin()
+      const noexcept
       { return this->m_buf.begin();  }
 
     const char_type*
-    end() const noexcept
+    end()
+      const noexcept
       { return this->m_buf.end();  }
 
     // Replaces the internal buffer.

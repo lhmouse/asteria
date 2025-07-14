@@ -25,17 +25,23 @@ class basic_storage
     size_type m_cap = 0;  // size of allocated storage
 
   public:
-    constexpr basic_storage() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr
+    basic_storage()
+      noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         allocator_base()
       { }
 
-    explicit constexpr basic_storage(const allocator_type& alloc) noexcept
+    explicit constexpr
+    basic_storage(const allocator_type& alloc)
+      noexcept
       :
         allocator_base(alloc)
       { }
 
-    explicit constexpr basic_storage(allocator_type&& alloc) noexcept
+    explicit constexpr
+    basic_storage(allocator_type&& alloc)
+      noexcept
       :
         allocator_base(move(alloc))
       { }
@@ -48,27 +54,33 @@ class basic_storage
 
   public:
     const allocator_type&
-    as_allocator() const noexcept
+    as_allocator()
+      const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
-    as_allocator() noexcept
+    as_allocator()
+      noexcept
       { return static_cast<allocator_base&>(*this);  }
 
     const value_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return noadl::unfancy(this->m_ptr);  }
 
     value_type*
-    mut_data() noexcept
+    mut_data()
+      noexcept
       { return noadl::unfancy(this->m_ptr);  }
 
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       { return allocator_traits<allocator_type>::max_size(*this);  }
 
     size_type
-    capacity() const noexcept
+    capacity()
+      const noexcept
       { return this->m_cap;  }
 
     ROCKET_NEVER_INLINE
@@ -126,7 +138,8 @@ class basic_storage
       }
 
     void
-    deallocate() noexcept
+    deallocate()
+      noexcept
       {
         // If the pointer is null we assume the capacity is zero.
         auto ptr = noadl::exchange(this->m_ptr);
@@ -139,7 +152,8 @@ class basic_storage
       }
 
     void
-    exchange_with(basic_storage& other) noexcept
+    exchange_with(basic_storage& other)
+      noexcept
       {
         ::std::swap(this->m_ptr, other.m_ptr);
         ::std::swap(this->m_cap, other.m_cap);

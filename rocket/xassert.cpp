@@ -7,7 +7,8 @@
 namespace rocket {
 
 void
-assert_fail(const char* expr, const char* file, long line, const char* msg_opt) noexcept
+assert_fail(const char* expr, const char* file, long line, const char* msg_opt)
+  noexcept
   {
     ::fprintf(stderr,
         "FATAL: Assertion `%s` at '%s:%ld' failed: %s\n"

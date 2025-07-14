@@ -22,7 +22,7 @@ template<size_t indexT>
 struct ebo_placeholder
   {
     template<typename noopT>
-    constexpr ebo_placeholder(noopT&&) noexcept { }
+    constexpr ebo_placeholder(noopT&&) noexcept  { }
   };
 
 template<typename baseT, size_t indexT, typename... othersT>
@@ -54,31 +54,38 @@ class basic_bucket
     pointer m_qval = nullptr;
 
   public:
-    constexpr basic_bucket() noexcept = default;
-
-    explicit constexpr operator bool() const noexcept
-      { return static_cast<bool>(this->m_qval);  }
+    constexpr
+    basic_bucket()
+      noexcept = default;
 
     basic_bucket(const basic_bucket&) = delete;
     basic_bucket& operator=(const basic_bucket&) = delete;
 
-  public:
     constexpr
     const_pointer
-    get() const noexcept
+    get()
+      const noexcept
       { return this->m_qval;  }
 
     pointer
-    get() noexcept
+    get()
+      noexcept
       { return this->m_qval;  }
 
     pointer
-    exchange(pointer qval) noexcept
+    exchange(pointer qval)
+      noexcept
       { return noadl::exchange(this->m_qval, qval);  }
+
+    explicit constexpr
+    operator bool()
+      const noexcept
+      { return static_cast<bool>(this->m_qval);  }
 
     constexpr
     const value_type&
-    operator*() const
+    operator*()
+      const
       { return *(this->m_qval);  }
 
     value_type&
@@ -87,11 +94,13 @@ class basic_bucket
 
     constexpr
     const value_type*
-    operator->() const noexcept
+    operator->()
+      const noexcept
       { return noadl::unfancy(this->m_qval);  }
 
     value_type*
-    operator->() noexcept
+    operator->()
+      noexcept
       { return noadl::unfancy(this->m_qval);  }
   };
 
@@ -112,7 +121,8 @@ struct basic_storage
     union { bucket_type bkts[1];  };
 
     basic_storage(unknown_function* xdtor, const allocator_type& xalloc,
-                  const hasher& hf, size_type xnblk) noexcept
+                  const hasher& hf, size_type xnblk)
+      noexcept
       :
         allocator_wrapper_base_for<allocT>::type(xalloc),
         ebo_select<hashT, allocT>(hf),
@@ -150,7 +160,8 @@ struct basic_storage
 
     static constexpr
     size_type
-    min_nblk_for_nbkt(size_t nbkt) noexcept
+    min_nblk_for_nbkt(size_t nbkt)
+      noexcept
       {
         // Note this is correct even when `nbkt` is zero, as long as
         // `basic_storage` is larger than `bucket_type`.
@@ -160,16 +171,19 @@ struct basic_storage
 
     static constexpr
     size_t
-    max_nbkt_for_nblk(size_type nblk) noexcept
+    max_nbkt_for_nblk(size_type nblk)
+      noexcept
       { return (nblk - 1) * sizeof(basic_storage) / sizeof(bucket_type) + 1;  }
 
     constexpr
     bool
-    compatible(const basic_storage& other) const noexcept
+    compatible(const basic_storage& other)
+      const noexcept
       { return static_cast<const allocator_type&>(*this) == static_cast<const allocator_type&>(other);  }
 
     size_t
-    bucket_count() const noexcept
+    bucket_count()
+      const noexcept
       { return this->max_nbkt_for_nblk(this->nblk);  }
 
     template<typename... paramsT>
@@ -189,7 +203,8 @@ struct basic_storage
       }
 
     void
-    free_value(pointer qval) noexcept
+    free_value(pointer qval)
+      noexcept
       {
         using traits_type = allocator_traits<allocator_type>;
         ROCKET_ASSERT(qval);
@@ -200,12 +215,14 @@ struct basic_storage
     template<typename ykeyT>
     constexpr
     size_t
-    hash(const ykeyT& ykey) const noexcept
+    hash(const ykeyT& ykey)
+      const noexcept
       { return static_cast<const hasher&>(*this) (ykey);  }
 
     // This function does not check for duplicate keys.
     bucket_type*
-    adopt_value_unchecked(pointer qval) noexcept
+    adopt_value_unchecked(pointer qval)
+      noexcept
       {
         ROCKET_ASSERT(qval);
         ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
@@ -223,7 +240,8 @@ struct basic_storage
     // This function does not check for duplicate keys.
     // The bucket must be empty prior to this call.
     bucket_type*
-    adopt_value_unchecked(size_t k, pointer qval) noexcept
+    adopt_value_unchecked(size_t k, pointer qval)
+      noexcept
       {
         ROCKET_ASSERT(!this->bkts[k]);
         ROCKET_ASSERT(qval);
@@ -237,7 +255,8 @@ struct basic_storage
 
     // This function does not relocate elements and may corrupt the table.
     pointer
-    extract_value_opt(size_t k) noexcept
+    extract_value_opt(size_t k)
+      noexcept
       {
         ROCKET_ASSERT_MSG(this->nref.unique(), "shared storage shall not be modified");
 
@@ -393,7 +412,8 @@ class storage_handle
     constexpr
 #endif
     void
-    do_reset(storage_pointer qstor_new) noexcept
+    do_reset(storage_pointer qstor_new)
+      noexcept
       {
         // Decrement the reference count with acquire-release semantics to prevent
         // races on `*qstor`.
@@ -408,7 +428,8 @@ class storage_handle
 
     ROCKET_NEVER_INLINE static
     void
-    do_destroy_storage(storage_pointer qstor) noexcept
+    do_destroy_storage(storage_pointer qstor)
+      noexcept
       {
         auto nblk = qstor->nblk;
         storage_allocator st_alloc(*qstor);
@@ -419,34 +440,41 @@ class storage_handle
   public:
     constexpr
     const hasher&
-    as_hasher() const noexcept
+    as_hasher()
+      const noexcept
       { return static_cast<const hasher_base&>(*this);  }
 
     hasher&
-    as_hasher() noexcept
+    as_hasher()
+      noexcept
       { return static_cast<hasher_base&>(*this);  }
 
     constexpr
     const key_equal&
-    as_key_equal() const noexcept
+    as_key_equal()
+      const noexcept
       { return static_cast<const key_equal_base&>(*this);  }
 
     key_equal&
-    as_key_equal() noexcept
+    as_key_equal()
+      noexcept
       { return static_cast<key_equal_base&>(*this);  }
 
     constexpr
     const allocator_type&
-    as_allocator() const noexcept
+    as_allocator()
+      const noexcept
       { return static_cast<const allocator_base&>(*this);  }
 
     allocator_type&
-    as_allocator() noexcept
+    as_allocator()
+      noexcept
       { return static_cast<allocator_base&>(*this);  }
 
     ROCKET_PURE
     bool
-    unique() const noexcept
+    unique()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -455,7 +483,8 @@ class storage_handle
       }
 
     int
-    use_count() const noexcept
+    use_count()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -465,7 +494,8 @@ class storage_handle
 
     ROCKET_PURE
     size_type
-    bucket_count() const noexcept
+    bucket_count()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -475,11 +505,13 @@ class storage_handle
 
     ROCKET_PURE
     size_type
-    capacity() const noexcept
+    capacity()
+      const noexcept
       { return this->bucket_count() / max_load_factor_reciprocal;  }
 
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       {
         storage_allocator st_alloc(this->as_allocator());
         auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
@@ -487,7 +519,8 @@ class storage_handle
       }
 
     size_type
-    check_size_add(size_type base, size_type add) const
+    check_size_add(size_type base, size_type add)
+      const
       {
         size_type res;
 
@@ -506,7 +539,8 @@ class storage_handle
       }
 
     size_type
-    round_up_capacity(size_type res_arg) const
+    round_up_capacity(size_type res_arg)
+      const
       {
         size_type cap = this->check_size_add(0, res_arg);
         auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
@@ -515,7 +549,8 @@ class storage_handle
 
     ROCKET_PURE
     const bucket_type*
-    buckets() const noexcept
+    buckets()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -524,7 +559,8 @@ class storage_handle
       }
 
     bucket_type*
-    mut_buckets_opt() noexcept
+    mut_buckets_opt()
+      noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -536,7 +572,8 @@ class storage_handle
 
     ROCKET_PURE
     size_type
-    size() const noexcept
+    size()
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -546,7 +583,8 @@ class storage_handle
 
     template<typename ykeyT>
     const bucket_type*
-    find(size_type& tpos, const ykeyT& ykey) const noexcept
+    find(size_type& tpos, const ykeyT& ykey)
+      const noexcept
       {
         auto qstor = this->m_qstor;
         if(!qstor)
@@ -590,7 +628,8 @@ class storage_handle
       }
 
     void
-    erase_range_unchecked(size_type tpos, size_type tlen) noexcept
+    erase_range_unchecked(size_type tpos, size_type tlen)
+      noexcept
       {
         auto qstor = this->m_qstor;
         ROCKET_ASSERT_MSG(qstor, "no storage allocated");
@@ -704,13 +743,15 @@ class storage_handle
       }
 
     void
-    deallocate() noexcept
+    deallocate()
+      noexcept
       {
         this->do_reset(nullptr);
       }
 
     void
-    share_with(const storage_handle& other) noexcept
+    share_with(const storage_handle& other)
+      noexcept
       {
         auto qstor = other.m_qstor;
         if(qstor)
@@ -719,7 +760,8 @@ class storage_handle
       }
 
     void
-    exchange_with(storage_handle& other) noexcept
+    exchange_with(storage_handle& other)
+      noexcept
       { ::std::swap(this->m_qstor, other.m_qstor);  }
   };
 
@@ -730,56 +772,71 @@ class stringified_key
 
   public:
     // Hacks...
-    stringified_key(bool val) noexcept
+    stringified_key(bool val)
+      noexcept
       { ::std::memcpy(this->m_temp, "false\0__true\0__" + val * 8U, 4U);  }
 
-    stringified_key(signed char val) noexcept
+    stringified_key(signed char val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%d", val);  }
 
-    stringified_key(unsigned char val) noexcept
+    stringified_key(unsigned char val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%u", val);  }
 
-    stringified_key(signed short val) noexcept
+    stringified_key(signed short val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%d", val);  }
 
-    stringified_key(unsigned short val) noexcept
+    stringified_key(unsigned short val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%u", val);  }
 
-    stringified_key(signed val) noexcept
+    stringified_key(signed val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%d", val);  }
 
-    stringified_key(unsigned val) noexcept
+    stringified_key(unsigned val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%u", val);  }
 
-    stringified_key(signed long val) noexcept
+    stringified_key(signed long val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%ld", val);  }
 
-    stringified_key(unsigned long val) noexcept
+    stringified_key(unsigned long val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%lu", val);  }
 
-    stringified_key(signed long long val) noexcept
+    stringified_key(signed long long val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%lld", val);  }
 
-    stringified_key(unsigned long long val) noexcept
+    stringified_key(unsigned long long val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%llu", val);  }
 
     template<typename valueT,
     ROCKET_ENABLE_IF(is_enum<valueT>::value)>
-    stringified_key(valueT val) noexcept
+    stringified_key(valueT val)
+      noexcept
       { ::std::sprintf(this->m_temp, "%lld", static_cast<long long>(val));  }
 
     template<typename somethingT>
-    stringified_key(somethingT* ptr) noexcept
+    stringified_key(somethingT* ptr)
+      noexcept
       { ::std::sprintf(this->m_temp, "%p", reinterpret_cast<const volatile void*>(ptr));  }
 
     template<typename valueT,
     ROCKET_DISABLE_IF(is_scalar<valueT>::value)>
-    stringified_key(const valueT& /*val*/) noexcept
+    stringified_key(const valueT& /*val*/)
+      noexcept
       { ::std::strcpy(this->m_temp, "[not printable]");  }
 
   public:
     const char*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_temp;  }
   };
 
@@ -807,7 +864,8 @@ class iterator
 
   private:
     // This constructor is called by the container.
-    iterator(bucketT* begin, size_t ncur, size_t nend) noexcept
+    iterator(bucketT* begin, size_t ncur, size_t nend)
+      noexcept
       :
         m_begin(begin), m_cur(begin + ncur), m_end(begin + nend)
       {
@@ -817,14 +875,18 @@ class iterator
       }
 
   public:
-    constexpr iterator() noexcept
+    constexpr
+    iterator()
+      noexcept
       :
         m_begin(), m_cur(), m_end()
       { }
 
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
-    constexpr iterator(const iterator<hashmapT, yvalueT, ybucketT>& other) noexcept
+    constexpr
+    iterator(const iterator<hashmapT, yvalueT, ybucketT>& other)
+      noexcept
       :
         m_begin(other.m_begin), m_cur(other.m_cur), m_end(other.m_end)
       { }
@@ -832,7 +894,8 @@ class iterator
     template<typename yvalueT, typename ybucketT,
     ROCKET_ENABLE_IF(is_convertible<ybucketT*, bucketT*>::value)>
     iterator&
-    operator=(const iterator<hashmapT, yvalueT, ybucketT>& other) & noexcept
+    operator=(const iterator<hashmapT, yvalueT, ybucketT>& other)
+      & noexcept
       {
         this->m_begin = other.m_begin;
         this->m_cur = other.m_cur;
@@ -842,7 +905,8 @@ class iterator
 
   private:
     bucketT*
-    do_validate(bucketT* cur, bool deref) const noexcept
+    do_validate(bucketT* cur, bool deref)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG((this->m_begin <= cur) && (cur <= this->m_end), "iterator out of range");
@@ -852,7 +916,8 @@ class iterator
       }
 
     difference_type
-    do_this_pos(const bucketT* begin) const noexcept
+    do_this_pos(const bucketT* begin)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == begin, "iterator not compatible");
@@ -860,7 +925,8 @@ class iterator
       }
 
     difference_type
-    do_this_len(const iterator& other) const noexcept
+    do_this_len(const iterator& other)
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         ROCKET_ASSERT_MSG(this->m_begin == other.m_begin, "iterator not compatible");
@@ -869,7 +935,8 @@ class iterator
       }
 
     iterator
-    do_next() const noexcept
+    do_next()
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         auto res = *this;
@@ -882,7 +949,8 @@ class iterator
       }
 
     iterator
-    do_prev() const noexcept
+    do_prev()
+      const noexcept
       {
         ROCKET_ASSERT_MSG(this->m_begin, "iterator not initialized");
         auto res = *this;
@@ -896,39 +964,47 @@ class iterator
 
   public:
     reference
-    operator*() const noexcept
+    operator*()
+      const noexcept
       { return **(this->do_validate(this->m_cur, true));  }
 
     pointer
-    operator->() const noexcept
+    operator->()
+      const noexcept
       { return ::std::addressof(**this);  }
 
     iterator&
-    operator++() noexcept
+    operator++()
+      noexcept
       { return *this = this->do_next();  }
 
     iterator&
-    operator--() noexcept
+    operator--()
+      noexcept
       { return *this = this->do_prev();  }
 
     iterator
-    operator++(int) noexcept
+    operator++(int)
+      noexcept
       { return noadl::exchange(*this, this->do_next());  }
 
     iterator
-    operator--(int) noexcept
+    operator--(int)
+      noexcept
       { return noadl::exchange(*this, this->do_prev());  }
 
     template<typename ybucketT>
     constexpr
     bool
-    operator==(const iterator<hashmapT, ybucketT>& other) const noexcept
+    operator==(const iterator<hashmapT, ybucketT>& other)
+      const noexcept
       { return this->m_cur == other.m_cur;  }
 
     template<typename ybucketT>
     constexpr
     bool
-    operator!=(const iterator<hashmapT, ybucketT>& other) const noexcept
+    operator!=(const iterator<hashmapT, ybucketT>& other)
+      const noexcept
       { return this->m_cur != other.m_cur;  }
   };
 

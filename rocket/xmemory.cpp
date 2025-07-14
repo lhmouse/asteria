@@ -41,7 +41,8 @@ do_get_pool_for_size(size_t& size)
   }
 
 void
-do_deallocate_list(free_block* head) noexcept
+do_deallocate_list(free_block* head)
+  noexcept
   {
     free_block* next;
     for(free_block* p = head;  p != nullptr;  p = next) {
@@ -91,7 +92,8 @@ xmemalloc(xmeminfo& info, xmemopt opt)
   }
 
 void
-xmemfree(xmeminfo& info, xmemopt opt) noexcept
+xmemfree(xmeminfo& info, xmemopt opt)
+  noexcept
   {
     free_block* b = (free_block*) info.data;
     if(b == nullptr)
@@ -126,7 +128,8 @@ xmemfree(xmeminfo& info, xmemopt opt) noexcept
   }
 
 void
-xmemclean() noexcept
+xmemclean()
+  noexcept
   {
     for(auto& p : s_pools) {
       // Extract all blocks and return them to the system.

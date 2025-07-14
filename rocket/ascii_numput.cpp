@@ -1377,7 +1377,8 @@ do_write_exp(char*& wptr, int exp)
 
 void
 ascii_numput::
-put_TB(bool value) noexcept
+put_TB(bool value)
+  noexcept
   {
     this->m_data = "false\0true" + 6U * value;
     this->m_size = 5U - value;
@@ -1385,7 +1386,8 @@ put_TB(bool value) noexcept
 
 void
 ascii_numput::
-put_XP(const volatile void* value) noexcept
+put_XP(const volatile void* value)
+  noexcept
   {
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
@@ -1401,7 +1403,8 @@ put_XP(const volatile void* value) noexcept
 
 void
 ascii_numput::
-put_BU(uint64_t value, uint32_t precision) noexcept
+put_BU(uint64_t value, uint32_t precision)
+  noexcept
   {
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
@@ -1417,7 +1420,8 @@ put_BU(uint64_t value, uint32_t precision) noexcept
 
 void
 ascii_numput::
-put_XU(uint64_t value, uint32_t precision) noexcept
+put_XU(uint64_t value, uint32_t precision)
+  noexcept
   {
     char* wptr = ::std::end(this->m_stor);
     *--wptr = 0;
@@ -1433,7 +1437,8 @@ put_XU(uint64_t value, uint32_t precision) noexcept
 
 void
 ascii_numput::
-put_DU(uint64_t value, uint32_t precision) noexcept
+put_DU(uint64_t value, uint32_t precision)
+  noexcept
   {
     if((precision == 1) && (value < ::std::size(s_small_decimals))) {
       // Get the static string.
@@ -1452,7 +1457,8 @@ put_DU(uint64_t value, uint32_t precision) noexcept
 
 void
 ascii_numput::
-put_BI(int64_t value, uint32_t precision) noexcept
+put_BI(int64_t value, uint32_t precision)
+  noexcept
   {
     if(value >= 0)
       return this->put_BU((uint64_t) value, precision);
@@ -1471,7 +1477,8 @@ put_BI(int64_t value, uint32_t precision) noexcept
 
 void
 ascii_numput::
-put_XI(int64_t value, uint32_t precision) noexcept
+put_XI(int64_t value, uint32_t precision)
+  noexcept
   {
     if(value >= 0)
       return this->put_XU((uint64_t) value, precision);
@@ -1490,7 +1497,8 @@ put_XI(int64_t value, uint32_t precision) noexcept
 
 void
 ascii_numput::
-put_DI(int64_t value, uint32_t precision) noexcept
+put_DI(int64_t value, uint32_t precision)
+  noexcept
   {
     if(value >= 0)
       return this->put_DU((uint64_t) value, precision);
@@ -1517,7 +1525,8 @@ put_DI(int64_t value, uint32_t precision) noexcept
 
 void
 ascii_numput::
-put_BF(float value) noexcept
+put_BF(float value)
+  noexcept
   {
     frexp frx = do_frexp2_23(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1561,7 +1570,8 @@ put_BF(float value) noexcept
 
 void
 ascii_numput::
-put_BEF(float value) noexcept
+put_BEF(float value)
+  noexcept
   {
     frexp frx = do_frexp2_23(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1589,7 +1599,8 @@ put_BEF(float value) noexcept
 
 void
 ascii_numput::
-put_XF(float value) noexcept
+put_XF(float value)
+  noexcept
   {
     frexp frx = do_frexp2_23(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1635,7 +1646,8 @@ put_XF(float value) noexcept
 
 void
 ascii_numput::
-put_XEF(float value) noexcept
+put_XEF(float value)
+  noexcept
   {
     frexp frx = do_frexp2_23(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1665,7 +1677,8 @@ put_XEF(float value) noexcept
 
 void
 ascii_numput::
-put_DF(float value) noexcept
+put_DF(float value)
+  noexcept
   {
     frexp frx = do_frexp10_8(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1709,7 +1722,8 @@ put_DF(float value) noexcept
 
 void
 ascii_numput::
-put_DEF(float value) noexcept
+put_DEF(float value)
+  noexcept
   {
     frexp frx = do_frexp10_8(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1737,7 +1751,8 @@ put_DEF(float value) noexcept
 
 void
 ascii_numput::
-put_BD(double value) noexcept
+put_BD(double value)
+  noexcept
   {
     frexp frx = do_frexp2_52(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1781,7 +1796,8 @@ put_BD(double value) noexcept
 
 void
 ascii_numput::
-put_BED(double value) noexcept
+put_BED(double value)
+  noexcept
   {
     frexp frx = do_frexp2_52(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1809,7 +1825,8 @@ put_BED(double value) noexcept
 
 void
 ascii_numput::
-put_XD(double value) noexcept
+put_XD(double value)
+  noexcept
   {
     frexp frx = do_frexp2_52(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1855,7 +1872,8 @@ put_XD(double value) noexcept
 
 void
 ascii_numput::
-put_XED(double value) noexcept
+put_XED(double value)
+  noexcept
   {
     frexp frx = do_frexp2_52(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1885,7 +1903,8 @@ put_XED(double value) noexcept
 
 void
 ascii_numput::
-put_DD(double value) noexcept
+put_DD(double value)
+  noexcept
   {
     frexp frx = do_frexp10_17(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))
@@ -1929,7 +1948,8 @@ put_DD(double value) noexcept
 
 void
 ascii_numput::
-put_DED(double value) noexcept
+put_DED(double value)
+  noexcept
   {
     frexp frx = do_frexp10_17(value);
     if(do_is_special_class(this->m_data, this->m_size, frx))

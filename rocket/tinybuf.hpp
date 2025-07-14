@@ -19,30 +19,38 @@ class basic_tinybuf
     using open_mode  = tinybuf_base::open_mode;
 
   protected:
-    basic_tinybuf() noexcept = default;
+    basic_tinybuf()
+      noexcept = default;
 
-    basic_tinybuf(const basic_tinybuf&) noexcept = delete;
-    basic_tinybuf& operator=(const basic_tinybuf&) & noexcept = delete;
+    virtual
+    void
+    vtable_key_function_uGhoogh0();
+
+    basic_tinybuf(const basic_tinybuf&) = delete;
+    basic_tinybuf& operator=(const basic_tinybuf&) & = delete;
 
   public:
-    virtual ~basic_tinybuf();
+    virtual ~basic_tinybuf() = default;
 
     // Flushes a stream, like `fflush()`.
     virtual
     basic_tinybuf&
-    flush() = 0;
+    flush()
+      = 0;
 
     // Gets the current stream pointer.
     // If the stream is non-seekable, `-1` shall be returned.
     virtual
     int64_t
-    tell() const = 0;
+    tell()
+      const = 0;
 
     // Adjusts the current stream pointer.
     // If an exception is thrown, the stream is left in an unspecified state.
     virtual
     basic_tinybuf&
-    seek(int64_t off, seek_dir dir) = 0;
+    seek(int64_t off, seek_dir dir)
+      = 0;
 
     // Reads some characters from the stream.
     // Upon success, the number of characters that have been read successfully
@@ -51,7 +59,8 @@ class basic_tinybuf
     // state.
     virtual
     size_t
-    getn(char_type* s, size_t n) = 0;
+    getn(char_type* s, size_t n)
+      = 0;
 
     // Reads a single character from the stream.
     // Upon success, the character that has been read shall be zero-extended to
@@ -60,7 +69,8 @@ class basic_tinybuf
     // state.
     virtual
     int
-    getc() = 0;
+    getc()
+      = 0;
 
     // Puts some characters into the stream.
     // This function shall return only after all characters have been written
@@ -68,7 +78,8 @@ class basic_tinybuf
     // unspecified state.
     virtual
     basic_tinybuf&
-    putn(const char_type* s, size_t n) = 0;
+    putn(const char_type* s, size_t n)
+      = 0;
 
     // Puts a single character into the stream.
     // This function shall return only after the character has been written
@@ -76,12 +87,14 @@ class basic_tinybuf
     // unspecified state.
     virtual
     basic_tinybuf&
-    putc(char_type c) = 0;
+    putc(char_type c)
+      = 0;
   };
 
 template<typename charT>
+void
 basic_tinybuf<charT>::
-~basic_tinybuf()
+vtable_key_function_uGhoogh0()
   {
   }
 

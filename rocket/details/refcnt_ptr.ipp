@@ -13,26 +13,31 @@ class refcnt_cJveMKH5bI7L
 
   public:
     bool
-    unique() const noexcept
+    unique()
+      const noexcept
       { return this->m_nref.unique();  }
 
     int
-    use_count() const noexcept
+    use_count()
+      const noexcept
       { return this->m_nref.get();  }
 
     int
-    add_reference() const noexcept
+    add_reference()
+      const noexcept
       { return this->m_nref.increment();  }
 
     int
-    drop_reference() const noexcept
+    drop_reference()
+      const noexcept
       { return this->m_nref.decrement();  }
   };
 
 template<typename elementT, typename deleterT>
 constexpr
 deleterT
-move_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
+move_deleter(const refcnt_base<elementT, deleterT>& base)
+  noexcept
   {
     return base.as_deleter();
   }
@@ -40,7 +45,8 @@ move_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
 template<typename elementT, typename deleterT>
 constexpr
 deleterT
-move_deleter(refcnt_base<elementT, deleterT>& base) noexcept
+move_deleter(refcnt_base<elementT, deleterT>& base)
+  noexcept
   {
     return move(base.as_deleter());
   }
@@ -56,12 +62,16 @@ class stored_pointer
     pointer m_ptr;
 
   public:
-    constexpr stored_pointer() noexcept
+    constexpr
+    stored_pointer()
+      noexcept
       :
         m_ptr()
       { }
 
-    explicit constexpr stored_pointer(pointer ptr) noexcept
+    explicit constexpr
+    stored_pointer(pointer ptr)
+      noexcept
       :
         m_ptr(move(ptr))
       { }
@@ -74,20 +84,24 @@ class stored_pointer
 
   public:
     bool
-    unique() const noexcept
+    unique()
+      const noexcept
       { return this->m_ptr && this->m_ptr->refcnt_cJveMKH5bI7L::unique();  }
 
     int
-    use_count() const noexcept
+    use_count()
+      const noexcept
       { return this->m_ptr ? this->m_ptr->refcnt_cJveMKH5bI7L::use_count() : 0;  }
 
     constexpr
     pointer
-    get() const noexcept
+    get()
+      const noexcept
       { return this->m_ptr;  }
 
     pointer
-    release() noexcept
+    release()
+      noexcept
       {
         if(this->m_ptr == nullptr)
           return nullptr;
@@ -97,7 +111,8 @@ class stored_pointer
       }
 
     pointer
-    fork() const noexcept
+    fork()
+      const noexcept
       {
         if(this->m_ptr == nullptr)
           return nullptr;
@@ -107,7 +122,8 @@ class stored_pointer
       }
 
     void
-    reset(pointer ptr_new) noexcept
+    reset(pointer ptr_new)
+      noexcept
       {
         if((this->m_ptr == nullptr) && (ptr_new == nullptr))
           return;
@@ -118,7 +134,8 @@ class stored_pointer
       }
 
     void
-    exchange_with(stored_pointer& other) noexcept
+    exchange_with(stored_pointer& other)
+      noexcept
       { ::std::swap(this->m_ptr, other.m_ptr);  }
   };
 

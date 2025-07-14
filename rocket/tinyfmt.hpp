@@ -27,7 +27,8 @@ struct basic_formatter;
 template<typename charT, typename valueT>
 constexpr
 basic_formatter<charT>
-make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value) noexcept;
+make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value)
+  noexcept;
 
 #include "details/tinyfmt.ipp"
 
@@ -41,10 +42,15 @@ class basic_tinyfmt
     using tinybuf_type  = basic_tinybuf<charT>;
 
   protected:
-    basic_tinyfmt() noexcept = default;
+    basic_tinyfmt()
+      noexcept = default;
 
-    basic_tinyfmt(const basic_tinyfmt&) noexcept = default;
-    basic_tinyfmt& operator=(const basic_tinyfmt&) & noexcept = default;
+    virtual
+    void
+    vtable_key_function_ahpooM5i();
+
+    basic_tinyfmt(const basic_tinyfmt&) = default;
+    basic_tinyfmt& operator=(const basic_tinyfmt&) & = default;
 
   protected:
     // Gets the associated buffer.
@@ -53,14 +59,16 @@ class basic_tinyfmt
     // `basic_tinyfmt` object shall return references to the same buffer.
     ROCKET_PURE virtual
     tinybuf_type&
-    do_get_tinybuf_nonconst() const = 0;
+    do_get_tinybuf_nonconst()
+      const = 0;
 
   public:
-    virtual ~basic_tinyfmt();
+    virtual ~basic_tinyfmt() = default;
 
     // These are wrappers for the buffer.
     const tinybuf_type&
-    buf() const
+    buf()
+      const
       {
         return this->do_get_tinybuf_nonconst();
       }
@@ -80,7 +88,8 @@ class basic_tinyfmt
       }
 
     int64_t
-    tell() const
+    tell()
+      const
       {
         int64_t off = this->buf().tell();
         return off;
@@ -129,8 +138,9 @@ class basic_tinyfmt
   };
 
 template<typename charT>
+void
 basic_tinyfmt<charT>::
-~basic_tinyfmt()
+vtable_key_function_ahpooM5i()
   {
   }
 
@@ -668,17 +678,22 @@ struct basic_formatter
     default_callback(tinyfmt_type& fmt, const void* ptr)
       { fmt << *static_cast<const valueT*>(ptr);  }
 
-    constexpr basic_formatter() noexcept
+    constexpr
+    basic_formatter()
+      noexcept
       : ifunc(nullptr), param(nullptr)  { }
 
-    constexpr basic_formatter(callback_type* xifunc, const void* xparam) noexcept
+    constexpr
+    basic_formatter(callback_type* xifunc, const void* xparam)
+      noexcept
       : ifunc(xifunc), param(xparam)  { }
   };
 
 template<typename charT, typename valueT>
 constexpr
 basic_formatter<charT>
-make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value) noexcept
+make_default_formatter(const basic_tinyfmt<charT>&, const valueT& value)
+  noexcept
   {
     using formatter = basic_formatter<charT>;
     constexpr auto callback = formatter::template default_callback<valueT>;

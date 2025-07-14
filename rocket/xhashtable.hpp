@@ -10,7 +10,8 @@ namespace rocket {
 
 constexpr
 size_t
-probe_origin(size_t size, size_t hval) noexcept
+probe_origin(size_t size, size_t hval)
+  noexcept
   {
     // Make a fixed-point value in the interval [0,1), and then multiply
     // `size` by it to get an index in the middle.

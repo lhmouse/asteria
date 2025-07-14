@@ -935,7 +935,8 @@ const uint64_t sd_qnan [2] = { 0b0'11111111111'1ULL << 51, 0b1'11111111111'1ULL 
 
 size_t
 ascii_numget::
-parse_TB(const char* str, size_t len) noexcept
+parse_TB(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -963,7 +964,8 @@ parse_TB(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_BU(const char* str, size_t len) noexcept
+parse_BU(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -990,7 +992,8 @@ parse_BU(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_XU(const char* str, size_t len) noexcept
+parse_XU(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1017,7 +1020,8 @@ parse_XU(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_DU(const char* str, size_t len) noexcept
+parse_DU(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1042,7 +1046,8 @@ parse_DU(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_BI(const char* str, size_t len) noexcept
+parse_BI(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1069,7 +1074,8 @@ parse_BI(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_XI(const char* str, size_t len) noexcept
+parse_XI(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1096,7 +1102,8 @@ parse_XI(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_DI(const char* str, size_t len) noexcept
+parse_DI(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1121,7 +1128,8 @@ parse_DI(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_BD(const char* str, size_t len) noexcept
+parse_BD(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1151,7 +1159,8 @@ parse_BD(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_XD(const char* str, size_t len) noexcept
+parse_XD(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1181,7 +1190,8 @@ parse_XD(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_DD(const char* str, size_t len) noexcept
+parse_DD(const char* str, size_t len)
+  noexcept
   {
     const char* const eptr = str + len;
     const char* rptr = str;
@@ -1209,7 +1219,8 @@ parse_DD(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_U(const char* str, size_t len) noexcept
+parse_U(const char* str, size_t len)
+  noexcept
   {
     if((len >= 2) && (str[0] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
@@ -1227,7 +1238,8 @@ parse_U(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_I(const char* str, size_t len) noexcept
+parse_I(const char* str, size_t len)
+  noexcept
   {
     if((len >= 2) && (str[0] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
@@ -1255,7 +1267,8 @@ parse_I(const char* str, size_t len) noexcept
 
 size_t
 ascii_numget::
-parse_D(const char* str, size_t len) noexcept
+parse_D(const char* str, size_t len)
+  noexcept
   {
     if((len >= 2) && (str[0] == '0')) {
       // Check the literal prefix. `0b` denotes binary and `0x` denotes
@@ -1283,7 +1296,8 @@ parse_D(const char* str, size_t len) noexcept
 
 void
 ascii_numget::
-cast_U(uint64_t& value, uint64_t min, uint64_t max) noexcept
+cast_U(uint64_t& value, uint64_t min, uint64_t max)
+  noexcept
   {
     switch(this->m_cls) {
       case value_class_empty:
@@ -1386,7 +1400,8 @@ cast_U(uint64_t& value, uint64_t min, uint64_t max) noexcept
 
 void
 ascii_numget::
-cast_I(int64_t& value, int64_t min, int64_t max) noexcept
+cast_I(int64_t& value, int64_t min, int64_t max)
+  noexcept
   {
     switch(this->m_cls) {
       case value_class_empty:
@@ -1492,7 +1507,8 @@ cast_I(int64_t& value, int64_t min, int64_t max) noexcept
 
 void
 ascii_numget::
-cast_F(float& value, float min, float max) noexcept
+cast_F(float& value, float min, float max)
+  noexcept
   {
     switch(this->m_cls) {
       case value_class_empty:
@@ -1673,7 +1689,8 @@ cast_F(float& value, float min, float max) noexcept
 
 void
 ascii_numget::
-cast_D(double& value, double min, double max) noexcept
+cast_D(double& value, double min, double max)
+  noexcept
   {
     switch(this->m_cls) {
       case value_class_empty:

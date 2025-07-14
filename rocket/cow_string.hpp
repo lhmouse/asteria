@@ -53,13 +53,17 @@ class basic_shallow_string
     size_t m_len;
 
   public:
-    ROCKET_CONSTEXPR_INLINE basic_shallow_string(const charT* ptr) noexcept
+    ROCKET_CONSTEXPR_INLINE
+    basic_shallow_string(const charT* ptr)
+      noexcept
       :
         m_ptr(ptr), m_len(details_xstring::maybe_constexpr::ystrlen(ptr))
       { }
 
     template<size_t N>
-    ROCKET_CONSTEXPR_INLINE basic_shallow_string(const charT (*ps)[N]) noexcept
+    ROCKET_CONSTEXPR_INLINE
+    basic_shallow_string(const charT (*ps)[N])
+      noexcept
       :
         m_ptr(*ps), m_len((ROCKET_ASSERT(*(*ps + N - 1) == charT()), N - 1))
       { }
@@ -67,32 +71,38 @@ class basic_shallow_string
   public:
     constexpr
     const charT*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_ptr;  }
 
     constexpr
     size_t
-    length() const noexcept
+    length()
+      const noexcept
       { return this->m_len;  }
 
     constexpr
     const charT*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_ptr;  }
 
     constexpr
     size_t
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_len;  }
 
     constexpr
     const charT*
-    begin() const noexcept
+    begin()
+      const noexcept
       { return this->m_ptr;  }
 
     constexpr
     const charT*
-    end() const noexcept
+    end()
+      const noexcept
       { return this->m_ptr + this->m_len;  }
   };
 
@@ -105,7 +115,8 @@ operator<<(basic_tinyfmt<charT>& fmt, basic_shallow_string<ROCKET_UNDEDUCED(char
 template<typename charT>
 constexpr
 basic_shallow_string<charT>
-sref(const charT* ptr) noexcept
+sref(const charT* ptr)
+  noexcept
   { return basic_shallow_string<charT>(ptr);  }
 
 template<typename charT, typename allocT>
@@ -146,59 +157,72 @@ class basic_cow_string
 
   public:
     // 24.3.2.2, construct/copy/destroy
-    constexpr basic_cow_string()
+    constexpr
+    basic_cow_string()
       noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(s_zstr), m_sth()
       { }
 
-    explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
+    explicit constexpr
+    basic_cow_string(const allocator_type& alloc)
+      noexcept
       :
         m_ref(s_zstr), m_sth(alloc)
       { }
 
-    constexpr basic_cow_string(shallow_type sh)
+    constexpr
+    basic_cow_string(shallow_type sh)
       noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(sh), m_sth()
       { }
 
-    constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc) noexcept
+    constexpr
+    basic_cow_string(shallow_type sh, const allocator_type& alloc)
+      noexcept
       :
         m_ref(sh), m_sth(alloc)
       { }
 
     template<size_t N>
-    constexpr basic_cow_string(const charT (*ps)[N])
+    constexpr
+    basic_cow_string(const charT (*ps)[N])
       noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         m_ref(ps), m_sth()
       { }
 
     template<size_t N>
-    constexpr basic_cow_string(const charT (*ps)[N], const allocator_type& alloc) noexcept
+    constexpr
+    basic_cow_string(const charT (*ps)[N], const allocator_type& alloc)
+      noexcept
       :
         m_ref(ps), m_sth(alloc)
       { }
 
-    basic_cow_string(const basic_cow_string& other) noexcept
+    basic_cow_string(const basic_cow_string& other)
+      noexcept
       :
         m_ref(other.m_ref),
         m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(
                                                     other.m_sth.as_allocator()))
       { this->m_sth.share_with(other.m_sth);  }
 
-    basic_cow_string(const basic_cow_string& other, const allocator_type& alloc) noexcept
+    basic_cow_string(const basic_cow_string& other, const allocator_type& alloc)
+      noexcept
       :
         m_ref(other.m_ref), m_sth(alloc)
       { this->m_sth.share_with(other.m_sth);  }
 
-    basic_cow_string(basic_cow_string&& other) noexcept
+    basic_cow_string(basic_cow_string&& other)
+      noexcept
       :
         m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(move(other.m_sth.as_allocator()))
       { this->m_sth.exchange_with(other.m_sth);  }
 
-    basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
+    basic_cow_string(basic_cow_string&& other, const allocator_type& alloc)
+      noexcept
       :
         m_ref(noadl::exchange(other.m_ref, s_zstr)), m_sth(alloc)
       { this->m_sth.exchange_with(other.m_sth);  }
@@ -238,7 +262,8 @@ class basic_cow_string
       { this->append(move(first), move(last));  }
 
     basic_cow_string&
-    operator=(shallow_type sh) & noexcept
+    operator=(shallow_type sh)
+      & noexcept
       {
         this->m_ref = sh;
         return *this;
@@ -246,14 +271,16 @@ class basic_cow_string
 
     template<size_t N>
     basic_cow_string&
-    operator=(const charT (*ps)[N]) & noexcept
+    operator=(const charT (*ps)[N])
+      & noexcept
       {
         this->m_ref = shallow_type(ps);
         return *this;
       }
 
     basic_cow_string&
-    operator=(const basic_cow_string& other) & noexcept
+    operator=(const basic_cow_string& other)
+      & noexcept
       {
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
@@ -262,7 +289,8 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    operator=(basic_cow_string&& other) & noexcept
+    operator=(basic_cow_string&& other)
+      & noexcept
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
@@ -271,7 +299,8 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    operator=(initializer_list<value_type> init) &
+    operator=(initializer_list<value_type> init)
+      &
       {
         this->clear();
         this->append(init);
@@ -279,7 +308,8 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    swap(basic_cow_string& other) noexcept
+    swap(basic_cow_string& other)
+      noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
@@ -290,7 +320,8 @@ class basic_cow_string
 
   private:
     basic_cow_string&
-    do_deallocate() noexcept
+    do_deallocate()
+      noexcept
       {
         this->m_sth.deallocate();
         this->m_ref = s_zstr;
@@ -298,7 +329,8 @@ class basic_cow_string
       }
 
     void
-    do_set_data_and_size(value_type* ptr, size_type n) noexcept
+    do_set_data_and_size(value_type* ptr, size_type n)
+      noexcept
       {
         ptr[n] = value_type();
         this->m_ref.m_ptr = ptr;
@@ -307,7 +339,8 @@ class basic_cow_string
 
     [[noreturn]] ROCKET_NEVER_INLINE
     void
-    do_throw_subscript_out_of_range(size_type pos, unsigned char rel) const
+    do_throw_subscript_out_of_range(size_type pos, unsigned char rel)
+      const
       {
         static constexpr char opstr[6][3] = { "==", "<", "<=", ">", ">=", "!=" };
         unsigned int inv = 5U - rel;
@@ -326,7 +359,8 @@ class basic_cow_string
     // elements that start there.
     constexpr
     size_type
-    do_clamp_substr(size_type tpos, size_type tn) const
+    do_clamp_substr(size_type tpos, size_type tn)
+      const
       {
         ROCKET_COW_STRING_VALIDATE_SUBSCRIPT_(tpos, <=);
         return noadl::min(this->size() - tpos, tn);
@@ -348,19 +382,23 @@ class basic_cow_string
   public:
     // 24.3.2.3, iterators
     const_iterator
-    begin() const noexcept
+    begin()
+      const noexcept
       { return const_iterator(this->data(), 0, this->size());  }
 
     const_iterator
-    end() const noexcept
+    end()
+      const noexcept
       { return const_iterator(this->data(), this->size(), this->size());  }
 
     const_reverse_iterator
-    rbegin() const noexcept
+    rbegin()
+      const noexcept
       { return const_reverse_iterator(this->end());  }
 
     const_reverse_iterator
-    rend() const noexcept
+    rend()
+      const noexcept
       { return const_reverse_iterator(this->begin());  }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -414,28 +452,33 @@ class basic_cow_string
     // 24.3.2.4, capacity
     constexpr
     bool
-    empty() const noexcept
+    empty()
+      const noexcept
       { return this->m_ref.m_len == 0;  }
 
     constexpr
     size_type
-    size() const noexcept
+    size()
+      const noexcept
       { return this->m_ref.m_len;  }
 
     constexpr
     size_type
-    length() const noexcept
+    length()
+      const noexcept
       { return this->m_ref.m_len;  }
 
     // N.B. This is a non-standard extension.
     constexpr
     difference_type
-    ssize() const noexcept
+    ssize()
+      const noexcept
       { return static_cast<difference_type>(this->size());  }
 
     constexpr
     size_type
-    max_size() const noexcept
+    max_size()
+      const noexcept
       { return this->m_sth.max_size();  }
 
     // N.B. The return type is a non-standard extension.
@@ -449,7 +492,8 @@ class basic_cow_string
 
     constexpr
     size_type
-    capacity() const noexcept
+    capacity()
+      const noexcept
       { return this->m_sth.capacity();  }
 
     // N.B. The return type is a non-standard extension.
@@ -498,7 +542,8 @@ class basic_cow_string
 
     // N.B. The return type is a non-standard extension.
     basic_cow_string&
-    clear() noexcept
+    clear()
+      noexcept
       {
         this->m_ref = s_zstr;
         return *this;
@@ -506,17 +551,20 @@ class basic_cow_string
 
     // N.B. This is a non-standard extension.
     bool
-    unique() const noexcept
+    unique()
+      const noexcept
       { return this->m_sth.unique();  }
 
     // N.B. This is a non-standard extension.
     int
-    use_count() const noexcept
+    use_count()
+      const noexcept
       { return this->m_sth.use_count();  }
 
     // 24.3.2.5, element access
     const_reference
-    at(size_type pos) const
+    at(size_type pos)
+      const
       {
         ROCKET_COW_STRING_VALIDATE_SUBSCRIPT_(pos, <);
         return this->data()[pos];
@@ -524,7 +572,8 @@ class basic_cow_string
 
     // N.B. This is a non-standard extension.
     const value_type*
-    ptr(size_type pos) const noexcept
+    ptr(size_type pos)
+      const noexcept
       {
         return (pos <= this->size())
                  ? (this->data() + pos) : nullptr;
@@ -532,7 +581,8 @@ class basic_cow_string
 
     constexpr
     const_reference
-    operator[](size_type pos) const noexcept
+    operator[](size_type pos)
+      const noexcept
       {
         // Note reading from the character at `size()` is permitted.
         ROCKET_ASSERT(pos <= this->size());
@@ -541,7 +591,8 @@ class basic_cow_string
 
     constexpr
     const_reference
-    front() const noexcept
+    front()
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[0];
@@ -549,7 +600,8 @@ class basic_cow_string
 
     constexpr
     const_reference
-    back() const noexcept
+    back()
+      const noexcept
       {
         ROCKET_ASSERT(!this->empty());
         return this->data()[this->size() - 1];
@@ -716,67 +768,78 @@ class basic_cow_string
       }
 
     basic_cow_string&
-    operator+=(const basic_cow_string& other) &
+    operator+=(const basic_cow_string& other)
+      &
       {
         return this->append(other);
       }
 
     basic_cow_string&
-    operator+=(const value_type* s) &
+    operator+=(const value_type* s)
+      &
       {
         return this->append(s);
       }
 
     basic_cow_string&
-    operator+=(value_type c) &
+    operator+=(value_type c)
+      &
       {
         return this->push_back(c);
       }
 
     basic_cow_string&
-    operator<<(const basic_cow_string& other) &
+    operator<<(const basic_cow_string& other)
+      &
       {
         return this->append(other);
       }
 
     basic_cow_string&
-    operator<<(const value_type* s) &
+    operator<<(const value_type* s)
+      &
       {
         return this->append(s);
       }
 
     basic_cow_string&
-    operator<<(value_type c) &
+    operator<<(value_type c)
+      &
       {
         return this->push_back(c);
       }
 
     basic_cow_string&&
-    operator<<(const basic_cow_string& other) &&
+    operator<<(const basic_cow_string& other)
+      &&
       {
         return move(this->append(other));
       }
 
     basic_cow_string&&
-    operator<<(const value_type* s) &&
+    operator<<(const value_type* s)
+      &&
       {
         return move(this->append(s));
       }
 
     basic_cow_string&&
-    operator<<(value_type c) &&
+    operator<<(value_type c)
+      &&
       {
         return move(this->push_back(c));
       }
 
     basic_cow_string&
-    operator>>(size_type n) &
+    operator>>(size_type n)
+      &
       {
         return this->pop_back(n);
       }
 
     basic_cow_string&&
-    operator>>(size_type n) &&
+    operator>>(size_type n)
+      &&
       {
         return move(this->pop_back(n));
       }
@@ -1014,7 +1077,8 @@ class basic_cow_string
 
     // N.B. There is no default argument for `tpos`.
     basic_cow_string
-    substr(size_type tpos, size_type tn = npos) const
+    substr(size_type tpos, size_type tn = npos)
+      const
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
         basic_cow_string res(this->m_sth.as_allocator());
@@ -1036,7 +1100,8 @@ class basic_cow_string
 
     // N.B. This is a non-standard extension.
     size_type
-    copy(size_type tpos, value_type* s, size_type tn) const
+    copy(size_type tpos, value_type* s, size_type tn)
+      const
       {
         size_type tlen = this->do_clamp_substr(tpos, tn);
         ::memmove(s, this->data() + tpos, tlen * sizeof(value_type));
@@ -1044,7 +1109,8 @@ class basic_cow_string
       }
 
     size_type
-    copy(value_type* s, size_type tn) const
+    copy(value_type* s, size_type tn)
+      const
       {
         return this->copy(size_type(0), s, tn);
       }
@@ -1089,17 +1155,20 @@ class basic_cow_string
     // 24.3.2.7, string operations
     constexpr
     const value_type*
-    data() const noexcept
+    data()
+      const noexcept
       { return this->m_ref.m_ptr;  }
 
     constexpr
     const value_type*
-    c_str() const noexcept
+    c_str()
+      const noexcept
       { return this->m_ref.m_ptr;  }
 
     // N.B. This is a non-standard extension.
     const value_type*
-    safe_c_str() const
+    safe_c_str()
+      const
       {
         size_type clen = noadl::xstrlen(this->m_ref.m_ptr);
         if(clen != this->m_ref.m_len)
@@ -1127,59 +1196,68 @@ class basic_cow_string
     // N.B. The return type differs from `std::basic_string`.
     constexpr
     const allocator_type&
-    get_allocator() const noexcept
+    get_allocator()
+      const noexcept
       { return this->m_sth.as_allocator();  }
 
     allocator_type&
-    get_allocator() noexcept
+    get_allocator()
+      noexcept
       { return this->m_sth.as_allocator();  }
 
     // searching functions
     constexpr
     size_type
-    find(size_type from, const basic_cow_string& other) const noexcept
+    find(size_type from, const basic_cow_string& other)
+      const noexcept
       {
         return this->find(from, other.data(), other.size());
       }
 
     constexpr
     size_type
-    find(const basic_cow_string& other) const noexcept
+    find(const basic_cow_string& other)
+      const noexcept
       {
         return this->find(size_type(0), other);
       }
 
     constexpr
     size_type
-    find(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos) const
+    find(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->find(from, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     size_type
-    find(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    find(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->find(size_type(0), other, pos, n);
       }
 
     constexpr
     size_type
-    find(size_type from, const value_type* s) const noexcept
+    find(size_type from, const value_type* s)
+      const noexcept
       {
         return this->find(from, s, noadl::xstrlen(s));
       }
 
     constexpr
     size_type
-    find(const value_type* s) const noexcept
+    find(const value_type* s)
+      const noexcept
       {
         return this->find(size_type(0), s);
       }
 
     constexpr
     size_type
-    find(size_type from, const value_type* s, size_type n) const noexcept
+    find(size_type from, const value_type* s, size_type n)
+      const noexcept
       {
         if(from > this->size())
           return npos;
@@ -1208,70 +1286,80 @@ class basic_cow_string
 
     constexpr
     size_type
-    find(const value_type* s, size_type n) const noexcept
+    find(const value_type* s, size_type n)
+      const noexcept
       {
         return this->find(size_type(0), s, n);
       }
 
     constexpr
     size_type
-    find(size_type from, value_type c) const noexcept
+    find(size_type from, value_type c)
+      const noexcept
       {
         return this->find_of(from, c);
       }
 
     constexpr
     size_type
-    find(value_type c) const noexcept
+    find(value_type c)
+      const noexcept
       {
         return this->find(size_type(0), c);
       }
 
     constexpr
     size_type
-    rfind(size_type to, const basic_cow_string& other) const noexcept
+    rfind(size_type to, const basic_cow_string& other)
+      const noexcept
       {
         return this->rfind(to, other.data(), other.size());
       }
 
     constexpr
     size_type
-    rfind(const basic_cow_string& other) const noexcept
+    rfind(const basic_cow_string& other)
+      const noexcept
       {
         return this->rfind(npos, other);
       }
 
     constexpr
     size_type
-    rfind(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos) const
+    rfind(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->rfind(to, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     size_type
-    rfind(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    rfind(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->rfind(npos, other, pos, n);
       }
 
     constexpr
     size_type
-    rfind(size_type to, const value_type* s) const noexcept
+    rfind(size_type to, const value_type* s)
+      const noexcept
       {
         return this->rfind(to, s, noadl::xstrlen(s));
       }
 
     constexpr
     size_type
-    rfind(const value_type* s) const noexcept
+    rfind(const value_type* s)
+      const noexcept
       {
         return this->rfind(npos, s);
       }
 
     constexpr
     size_type
-    rfind(size_type to, const value_type* s, size_type n) const noexcept
+    rfind(size_type to, const value_type* s, size_type n)
+      const noexcept
       {
         if(this->size() < n)
           return npos;
@@ -1298,70 +1386,80 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind(const value_type* s, size_type n) const noexcept
+    rfind(const value_type* s, size_type n)
+      const noexcept
       {
         return this->rfind(npos, s, n);
       }
 
     constexpr
     size_type
-    rfind(size_type to, value_type c) const noexcept
+    rfind(size_type to, value_type c)
+      const noexcept
       {
         return this->rfind_of(to, c);
       }
 
     constexpr
     size_type
-    rfind(value_type c) const noexcept
+    rfind(value_type c)
+      const noexcept
       {
         return this->rfind(npos, c);
       }
 
     constexpr
     size_type
-    find_of(size_type from, const basic_cow_string& other) const noexcept
+    find_of(size_type from, const basic_cow_string& other)
+      const noexcept
       {
         return this->find_of(from, other.data(), other.size());
       }
 
     constexpr
     size_type
-    find_of(const basic_cow_string& other) const noexcept
+    find_of(const basic_cow_string& other)
+      const noexcept
       {
         return this->find_of(size_type(0), other);
       }
 
     constexpr
     size_type
-    find_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos) const
+    find_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->find_of(from, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     size_type
-    find_of(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    find_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->find_of(size_type(0), other, pos, n);
       }
 
     constexpr
     size_type
-    find_of(size_type from, const value_type* s) const noexcept
+    find_of(size_type from, const value_type* s)
+      const noexcept
       {
         return this->find_of(from, s, noadl::xstrlen(s));
       }
 
     constexpr
     size_type
-    find_of(const value_type* s) const noexcept
+    find_of(const value_type* s)
+      const noexcept
       {
         return this->find_of(size_type(0), s);
       }
 
     constexpr
     size_type
-    find_of(size_type from, const value_type* s, size_type n) const noexcept
+    find_of(size_type from, const value_type* s, size_type n)
+      const noexcept
       {
         if(from >= this->size())
           return npos;
@@ -1394,14 +1492,16 @@ class basic_cow_string
 
     constexpr
     size_type
-    find_of(const value_type* s, size_type n) const noexcept
+    find_of(const value_type* s, size_type n)
+      const noexcept
       {
         return this->find_of(size_type(0), s, n);
       }
 
     constexpr
     size_type
-    find_of(size_type from, value_type c) const noexcept
+    find_of(size_type from, value_type c)
+      const noexcept
       {
         if(from >= this->size())
           return npos;
@@ -1417,56 +1517,64 @@ class basic_cow_string
 
     constexpr
     size_type
-    find_of(value_type c) const noexcept
+    find_of(value_type c)
+      const noexcept
       {
         return this->find_of(size_type(0), c);
       }
 
     constexpr
     size_type
-    rfind_of(size_type to, const basic_cow_string& other) const noexcept
+    rfind_of(size_type to, const basic_cow_string& other)
+      const noexcept
       {
         return this->rfind_of(to, other.data(), other.size());
       }
 
     constexpr
     size_type
-    rfind_of(const basic_cow_string& other) const noexcept
+    rfind_of(const basic_cow_string& other)
+      const noexcept
       {
         return this->rfind_of(npos, other);
       }
 
     constexpr
     size_type
-    rfind_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos) const
+    rfind_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->rfind_of(to, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     size_type
-    rfind_of(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    rfind_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->rfind_of(npos, other, pos, n);
       }
 
     constexpr
     size_type
-    rfind_of(size_type to, const value_type* s) const noexcept
+    rfind_of(size_type to, const value_type* s)
+      const noexcept
       {
         return this->rfind_of(to, s, noadl::xstrlen(s));
       }
 
     constexpr
     size_type
-    rfind_of(const value_type* s) const noexcept
+    rfind_of(const value_type* s)
+      const noexcept
       {
         return this->rfind_of(npos, s);
       }
 
     constexpr
     size_type
-    rfind_of(size_type to, const value_type* s, size_type n) const noexcept
+    rfind_of(size_type to, const value_type* s, size_type n)
+      const noexcept
       {
         if(this->empty())
           return npos;
@@ -1499,14 +1607,16 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind_of(const value_type* s, size_type n) const noexcept
+    rfind_of(const value_type* s, size_type n)
+      const noexcept
       {
         return this->rfind_of(npos, s, n);
       }
 
     constexpr
     size_type
-    rfind_of(size_type to, value_type c) const noexcept
+    rfind_of(size_type to, value_type c)
+      const noexcept
       {
         if(this->empty())
           return npos;
@@ -1520,56 +1630,64 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind_of(value_type c) const noexcept
+    rfind_of(value_type c)
+      const noexcept
       {
         return this->rfind_of(npos, c);
       }
 
     constexpr
     size_type
-    find_not_of(size_type from, const basic_cow_string& other) const noexcept
+    find_not_of(size_type from, const basic_cow_string& other)
+      const noexcept
       {
         return this->find_not_of(from, other.data(), other.size());
       }
 
     constexpr
     size_type
-    find_not_of(const basic_cow_string& other) const noexcept
+    find_not_of(const basic_cow_string& other)
+      const noexcept
       {
         return this->find_not_of(size_type(0), other);
       }
 
     constexpr
     size_type
-    find_not_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos) const
+    find_not_of(size_type from, const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->find_not_of(from, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     size_type
-    find_not_of(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    find_not_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->find_not_of(size_type(0), other, pos, n);
       }
 
     constexpr
     size_type
-    find_not_of(size_type from, const value_type* s) const noexcept
+    find_not_of(size_type from, const value_type* s)
+      const noexcept
       {
         return this->find_not_of(from, s, noadl::xstrlen(s));
       }
 
     constexpr
     size_type
-    find_not_of(const value_type* s) const noexcept
+    find_not_of(const value_type* s)
+      const noexcept
       {
         return this->find_not_of(size_type(0), s);
       }
 
     constexpr
     size_type
-    find_not_of(size_type from, const value_type* s, size_type n) const noexcept
+    find_not_of(size_type from, const value_type* s, size_type n)
+      const noexcept
       {
         if(from >= this->size())
           return npos;
@@ -1602,14 +1720,16 @@ class basic_cow_string
 
     constexpr
     size_type
-    find_not_of(const value_type* s, size_type n) const noexcept
+    find_not_of(const value_type* s, size_type n)
+      const noexcept
       {
         return this->find_not_of(size_type(0), s, n);
       }
 
     constexpr
     size_type
-    find_not_of(size_type from, value_type c) const noexcept
+    find_not_of(size_type from, value_type c)
+      const noexcept
       {
         if(this->empty())
           return npos;
@@ -1623,56 +1743,64 @@ class basic_cow_string
 
     constexpr
     size_type
-    find_not_of(value_type c) const noexcept
+    find_not_of(value_type c)
+      const noexcept
       {
         return this->find_not_of(size_type(0), c);
       }
 
     constexpr
     size_type
-    rfind_not_of(size_type to, const basic_cow_string& other) const noexcept
+    rfind_not_of(size_type to, const basic_cow_string& other)
+      const noexcept
       {
         return this->rfind_not_of(to, other.data(), other.size());
       }
 
     constexpr
     size_type
-    rfind_not_of(const basic_cow_string& other) const noexcept
+    rfind_not_of(const basic_cow_string& other)
+      const noexcept
       {
         return this->rfind_not_of(npos, other);
       }
 
     constexpr
     size_type
-    rfind_not_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos) const
+    rfind_not_of(size_type to, const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->rfind_not_of(to, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     size_type
-    rfind_not_of(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    rfind_not_of(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->rfind_not_of(npos, other, pos, n);
       }
 
     constexpr
     size_type
-    rfind_not_of(size_type to, const value_type* s) const noexcept
+    rfind_not_of(size_type to, const value_type* s)
+      const noexcept
       {
         return this->rfind_not_of(to, s, noadl::xstrlen(s));
       }
 
     constexpr
     size_type
-    rfind_not_of(const value_type* s) const noexcept
+    rfind_not_of(const value_type* s)
+      const noexcept
       {
         return this->rfind_not_of(npos, s);
       }
 
     constexpr
     size_type
-    rfind_not_of(size_type to, const value_type* s, size_type n) const noexcept
+    rfind_not_of(size_type to, const value_type* s, size_type n)
+      const noexcept
       {
         if(this->empty())
           return npos;
@@ -1705,14 +1833,16 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind_not_of(const value_type* s, size_type n) const noexcept
+    rfind_not_of(const value_type* s, size_type n)
+      const noexcept
       {
         return this->rfind_not_of(npos, s, n);
       }
 
     constexpr
     size_type
-    rfind_not_of(size_type to, value_type c) const noexcept
+    rfind_not_of(size_type to, value_type c)
+      const noexcept
       {
         if(this->empty())
           return npos;
@@ -1726,147 +1856,168 @@ class basic_cow_string
 
     constexpr
     size_type
-    rfind_not_of(value_type c) const noexcept
+    rfind_not_of(value_type c)
+      const noexcept
       {
         return this->rfind_not_of(npos, c);
       }
 
     constexpr
     bool
-    equals(const basic_cow_string& other) const noexcept
+    equals(const basic_cow_string& other)
+      const noexcept
       {
         return this->equals(other.data(), other.size());
       }
 
     constexpr
     bool
-    equals(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    equals(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->equals(other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     bool
-    equals(const value_type* s) const noexcept
+    equals(const value_type* s)
+      const noexcept
       {
         return this->equals(s, noadl::xstrlen(s));
       }
 
     constexpr
     bool
-    equals(const value_type* s, size_type n) const noexcept
+    equals(const value_type* s, size_type n)
+      const noexcept
       {
         return (this->size() == n) && noadl::xmemeq(this->data(), s, n);
       }
 
     constexpr
     bool
-    substr_equals(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos) const
+    substr_equals(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
+      const
       {
         return this->substr_equals(tpos, tn, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     bool
-    substr_equals(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos) const
+    substr_equals(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
+      const
       {
         return this->substr_equals(tpos, npos, other, pos, n);
       }
 
     constexpr
     bool
-    substr_equals(size_type tpos, size_type tn, const value_type* s) const
+    substr_equals(size_type tpos, size_type tn, const value_type* s)
+      const
       {
         return this->substr_equals(tpos, tn, s, noadl::xstrlen(s));
       }
 
     constexpr
     bool
-    substr_equals(size_type tpos, const value_type* s) const
+    substr_equals(size_type tpos, const value_type* s)
+      const
       {
         return this->substr_equals(tpos, npos, s);
       }
 
     constexpr
     bool
-    substr_equals(size_type tpos, size_type tn, const value_type* s, size_type n) const
+    substr_equals(size_type tpos, size_type tn, const value_type* s, size_type n)
+      const
       {
         return (this->do_clamp_substr(tpos, tn) == n) && noadl::xmemeq(this->data() + tpos, s, n);
       }
 
     constexpr
     bool
-    substr_equals(size_type tpos, const value_type* s, size_type n) const
+    substr_equals(size_type tpos, const value_type* s, size_type n)
+      const
       {
         return this->substr_equals(tpos, npos, s, n);
       }
 
     constexpr
     int
-    compare(const basic_cow_string& other) const noexcept
+    compare(const basic_cow_string& other)
+      const noexcept
       {
         return this->compare(other.data(), other.size());
       }
 
     constexpr
     int
-    compare(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    compare(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->compare(other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     int
-    compare(const value_type* s) const noexcept
+    compare(const value_type* s)
+      const noexcept
       {
         return this->compare(s, noadl::xstrlen(s));
       }
 
     constexpr
     int
-    compare(const value_type* s, size_type n) const noexcept
+    compare(const value_type* s, size_type n)
+      const noexcept
       {
         return noadl::xmemcmp(this->data(), this->size(), s, n);
       }
 
     constexpr
     int
-    substr_compare(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos) const
+    substr_compare(size_type tpos, size_type tn, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
+      const
       {
         return this->substr_compare(tpos, tn, other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     int
-    substr_compare(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos) const
+    substr_compare(size_type tpos, const basic_cow_string& other, size_type pos = 0, size_type n = npos)
+      const
       {
         return this->substr_compare(tpos, npos, other, pos, n);
       }
 
     constexpr
     int
-    substr_compare(size_type tpos, size_type tn, const value_type* s) const
+    substr_compare(size_type tpos, size_type tn, const value_type* s)
+      const
       {
         return this->substr_compare(tpos, tn, s, noadl::xstrlen(s));
       }
 
     constexpr
     int
-    substr_compare(size_type tpos, const value_type* s) const
+    substr_compare(size_type tpos, const value_type* s)
+      const
       {
         return this->substr_compare(tpos, npos, s);
       }
 
     constexpr
     int
-    substr_compare(size_type tpos, size_type tn, const value_type* s, size_type n) const
+    substr_compare(size_type tpos, size_type tn, const value_type* s, size_type n)
+      const
       {
         return noadl::xmemcmp(this->data() + tpos, this->do_clamp_substr(tpos, tn), s, n);
       }
 
     constexpr
     int
-    substr_compare(size_type tpos, const value_type* s, size_type n) const
+    substr_compare(size_type tpos, const value_type* s, size_type n)
+      const
       {
         return this->substr_compare(tpos, npos, s, n);
       }
@@ -1874,56 +2025,64 @@ class basic_cow_string
     // N.B. These are extensions but might be standardized in C++20.
     constexpr
     bool
-    starts_with(const basic_cow_string& other) const noexcept
+    starts_with(const basic_cow_string& other)
+      const noexcept
       {
         return this->starts_with(other.data(), other.size());
       }
 
     constexpr
     bool
-    starts_with(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    starts_with(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->starts_with(other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     bool
-    starts_with(const value_type* s) const noexcept
+    starts_with(const value_type* s)
+      const noexcept
       {
         return this->starts_with(s, noadl::xstrlen(s));
       }
 
     constexpr
     bool
-    starts_with(const value_type* s, size_type n) const noexcept
+    starts_with(const value_type* s, size_type n)
+      const noexcept
       {
         return (this->size() >= n) && noadl::xmemeq(this->data(), s, n);
       }
 
     constexpr
     bool
-    ends_with(const basic_cow_string& other) const noexcept
+    ends_with(const basic_cow_string& other)
+      const noexcept
       {
         return this->ends_with(other.data(), other.size());
       }
 
     constexpr
     bool
-    ends_with(const basic_cow_string& other, size_type pos, size_type n = npos) const
+    ends_with(const basic_cow_string& other, size_type pos, size_type n = npos)
+      const
       {
         return this->ends_with(other.data() + pos, other.do_clamp_substr(pos, n));
       }
 
     constexpr
     bool
-    ends_with(const value_type* s) const noexcept
+    ends_with(const value_type* s)
+      const noexcept
       {
         return this->ends_with(s, noadl::xstrlen(s));
       }
 
     constexpr
     bool
-    ends_with(const value_type* s, size_type n) const noexcept
+    ends_with(const value_type* s, size_type n)
+      const noexcept
       {
         return (this->size() >= n) && noadl::xmemeq(this->data() + this->size() - n, s, n);
       }
@@ -1948,7 +2107,8 @@ struct basic_cow_string<charT, allocT>::hash
 
     ROCKET_CONSTEXPR_INLINE
     uint32_t
-    operator()(const charT* p, size_t n) const noexcept
+    operator()(const charT* p, size_t n)
+      const noexcept
       {
         // https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function#FNV-1a_hash
         const uint8_t* cur = reinterpret_cast<const uint8_t*>(p);
@@ -1960,7 +2120,8 @@ struct basic_cow_string<charT, allocT>::hash
 
     ROCKET_CONSTEXPR_INLINE
     uint32_t
-    operator()(const basic_cow_string& str) const noexcept
+    operator()(const basic_cow_string& str)
+      const noexcept
       { return (*this) (str.m_ref.m_ptr, str.m_ref.m_len);  }
   };
 
@@ -2125,181 +2286,211 @@ operator+(charT lhs, basic_cow_string<charT, allocT>&& rhs)
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator==(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
+operator==(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
+  noexcept
   { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
+operator==(const basic_cow_string<charT, allocT>& lhs, const charT* rhs)
+  noexcept
   { return lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator==(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator==(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator==(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator!=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
+operator!=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
+  noexcept
   { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
+operator!=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs)
+  noexcept
   { return not lhs.equals(rhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator!=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator!=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator!=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return not rhs.equals(lhs);  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
+operator<(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
+  noexcept
   { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
+operator<(const basic_cow_string<charT, allocT>& lhs, const charT* rhs)
+  noexcept
   { return lhs.compare(rhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
+operator<=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
+  noexcept
   { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
+operator<=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs)
+  noexcept
   { return lhs.compare(rhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator<=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator<=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return lhs.compare(rhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
+operator>(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
+  noexcept
   { return lhs.compare(rhs) > 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
+operator>(const basic_cow_string<charT, allocT>& lhs, const charT* rhs)
+  noexcept
   { return lhs.compare(rhs) > 0; }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) < 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>=(const basic_cow_string<charT, allocT>& lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs) noexcept
+operator>=(const basic_cow_string<charT, allocT>& lhs, basic_shallow_string<ROCKET_UNDEDUCED(charT)> rhs)
+  noexcept
   { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs) noexcept
+operator>=(const basic_cow_string<charT, allocT>& lhs, const charT* rhs)
+  noexcept
   { return lhs.compare(rhs) >= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>=(basic_shallow_string<ROCKET_UNDEDUCED(charT)> lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>
 constexpr
 bool
-operator>=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs) noexcept
+operator>=(const charT* lhs, const basic_cow_string<charT, allocT>& rhs)
+  noexcept
   { return rhs.compare(lhs) <= 0;  }
 
 template<typename charT, typename allocT>
