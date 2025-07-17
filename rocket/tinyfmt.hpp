@@ -10,6 +10,7 @@
 #include "xstring.hpp"
 #include "tinybuf.hpp"
 #include "ascii_numput.hpp"
+#include "unique_ptr.hpp"
 #include <chrono>
 #include <cxxabi.h>
 namespace rocket {
@@ -360,7 +361,7 @@ basic_tinyfmt<charT>&
 operator<<(basic_tinyfmt<charT>& fmt, const type_info& tinfo)
   {
     char* s = ::abi::__cxa_demangle(tinfo.name(), nullptr, nullptr, nullptr);
-    ::std::unique_ptr<char, decltype(::free)&> uptr(s, ::free);
+    unique_ptr<char, void (void*)> guard(s, ::free);
     return s
       ? fmt.putn_latin1(s, ::strlen(s))
       : fmt.putn_latin1("(bad type)", 10);
