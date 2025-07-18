@@ -368,15 +368,15 @@ operator<<(basic_tinyfmt<charT>& fmt, const basic_prehashed_string<stringT, hash
   { return fmt << str.rdstr();  }
 
 // aliases
-using phcow_string     = basic_prehashed_string<cow_string,    cow_string::hash>;
-using phcow_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::hash>;
-using phcow_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hash>;
-using phcow_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
+using phcow_string     = basic_prehashed_string<cow_string,    cow_string::hasher>;
+using phcow_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::hasher>;
+using phcow_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hasher>;
+using phcow_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hasher>;
 
-extern template class basic_prehashed_string<cow_string, cow_string::hash>;
-extern template class basic_prehashed_string<cow_wstring, cow_wstring::hash>;
-extern template class basic_prehashed_string<cow_u16string, cow_u16string::hash>;
-extern template class basic_prehashed_string<cow_u32string, cow_u32string::hash>;
+extern template class basic_prehashed_string<cow_string, cow_string::hasher>;
+extern template class basic_prehashed_string<cow_wstring, cow_wstring::hasher>;
+extern template class basic_prehashed_string<cow_u16string, cow_u16string::hasher>;
+extern template class basic_prehashed_string<cow_u32string, cow_u32string::hasher>;
 
 }  // namespace rocket
 #endif

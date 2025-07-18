@@ -143,7 +143,7 @@ class basic_cow_string
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
-    struct hash;
+    struct hasher;
     static constexpr size_type npos = size_type(-1);
 
   private:
@@ -2100,7 +2100,7 @@ const basic_shallow_string<charT> basic_cow_string<charT, allocT>::s_zstr;
 #endif  // __cpp_inline_variables
 
 template<typename charT, typename allocT>
-struct basic_cow_string<charT, allocT>::hash
+struct basic_cow_string<charT, allocT>::hasher
   {
     using result_type    = uint32_t;
     using argument_type  = basic_cow_string;
