@@ -12,9 +12,9 @@
 ## NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 ## CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-option('enable-avx',
+option('enable-avx2',
        type: 'boolean', value: true,
-       description: 'enable AVX instruction set on x86 and x86-64')
+       description: 'enable AVX2 instruction set on x86 and x86-64')
 
 option('enable-debug-checks',
        type: 'boolean', value: false,
