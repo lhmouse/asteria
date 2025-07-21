@@ -6,7 +6,7 @@
 #include "xthrow.hpp"
 #include <limits.h>  // MB_LEN_MAX
 #include <wchar.h>
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
 #  include <uchar.h>
 #endif
 namespace rocket {
@@ -166,7 +166,7 @@ xfgetn(::FILE* fp, ::mbstate_t& mbst, wchar_t* s, size_t n)
 size_t
 xfgetn(::FILE* fp, ::mbstate_t& mbst, char16_t* s, size_t n)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfgetn_common(fp, ::mbrtoc16, mbst, s, n);
     return r;
 #else
@@ -178,7 +178,7 @@ xfgetn(::FILE* fp, ::mbstate_t& mbst, char16_t* s, size_t n)
 size_t
 xfgetn(::FILE* fp, ::mbstate_t& mbst, char32_t* s, size_t n)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfgetn_common(fp, ::mbrtoc32, mbst, s, n);
     return r;
 #else
@@ -210,7 +210,7 @@ xfgetc(::FILE* fp, ::mbstate_t& mbst, wchar_t& c)
 int
 xfgetc(::FILE* fp, ::mbstate_t& mbst, char16_t& c)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfgetn_common(fp, ::mbrtoc16, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
@@ -222,7 +222,7 @@ xfgetc(::FILE* fp, ::mbstate_t& mbst, char16_t& c)
 int
 xfgetc(::FILE* fp, ::mbstate_t& mbst, char32_t& c)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfgetn_common(fp, ::mbrtoc32, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
@@ -253,7 +253,7 @@ xfputn(::FILE* fp, ::mbstate_t& mbst, const wchar_t* s, size_t n)
 size_t
 xfputn(::FILE* fp, ::mbstate_t& mbst, const char16_t* s, size_t n)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfputn_common(fp, ::c16rtomb, mbst, s, n);
     return r;
 #else
@@ -265,7 +265,7 @@ xfputn(::FILE* fp, ::mbstate_t& mbst, const char16_t* s, size_t n)
 size_t
 xfputn(::FILE* fp, ::mbstate_t& mbst, const char32_t* s, size_t n)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfputn_common(fp, ::c32rtomb, mbst, s, n);
     return r;
 #else
@@ -296,7 +296,7 @@ xfputc(::FILE* fp, ::mbstate_t& mbst, wchar_t c)
 int
 xfputc(::FILE* fp, ::mbstate_t& mbst, char16_t c)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfputn_common(fp, ::c16rtomb, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else
@@ -308,7 +308,7 @@ xfputc(::FILE* fp, ::mbstate_t& mbst, char16_t c)
 int
 xfputc(::FILE* fp, ::mbstate_t& mbst, char32_t c)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     size_t r = do_xfputn_common(fp, ::c32rtomb, mbst, &c, 1);
     return (r == 0) ? -1 : static_cast<int>(c);
 #else

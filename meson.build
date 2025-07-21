@@ -176,8 +176,8 @@ if get_option('enable-avx2') and (cxx_is_i386 or cxx_is_amd64)
   add_project_arguments('-mavx2', language: 'cpp')
 endif
 
-if cxx.has_header_symbol('uchar.h', 'mbrtoc16')
-  add_project_arguments('-DHAVE_UCHAR_H', language: 'cpp')
+if not cxx.has_header_symbol('uchar.h', 'mbrtoc16')
+  add_project_arguments('-DASTERIA_NO_UCHAR', language: 'cpp')
 endif
 
 if get_option('enable-debug-checks')

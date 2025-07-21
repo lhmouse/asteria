@@ -5,7 +5,7 @@
 #include "static_vector.hpp"
 #include <limits.h>  // MB_LEN_MAX
 #include <wchar.h>
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
 #  include <uchar.h>
 #endif
 namespace rocket {
@@ -80,7 +80,7 @@ operator<<(basic_tinyfmt<wchar_t>& fmt, const char* s)
 basic_tinyfmt<char16_t>&
 operator<<(basic_tinyfmt<char16_t>& fmt, const char* s)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     do_putmbn_common(fmt.mut_buf(), ::mbrtoc16, s);
     return fmt;
 #else
@@ -91,7 +91,7 @@ operator<<(basic_tinyfmt<char16_t>& fmt, const char* s)
 basic_tinyfmt<char32_t>&
 operator<<(basic_tinyfmt<char32_t>& fmt, const char* s)
   {
-#ifdef HAVE_UCHAR_H
+#if !defined ASTERIA_NO_UCHAR
     do_putmbn_common(fmt.mut_buf(), ::mbrtoc32, s);
     return fmt;
 #else
