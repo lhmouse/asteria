@@ -731,6 +731,18 @@ class cow_hashmap
       }
 
     // N.B. This is a non-standard extension.
+    template<typename ykeyT, typename ymappedT>
+    bool
+    find_and_assign(const ykeyT& ykey, ymappedT&& ymapped)
+      {
+        size_type tpos;
+        if(!this->m_sth.find(tpos, ykey))
+          return false;
+        this->do_mut_buckets()[tpos]->second = forward<ymappedT>(ymapped);
+        return true;
+      }
+
+    // N.B. This is a non-standard extension.
     template<typename ykeyT>
     bool
     find_and_erase(mapped_type& result, const ykeyT& ykey)
