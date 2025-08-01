@@ -594,8 +594,8 @@ std_numeric_unpack_i16be(V_string text)
     V_array values;
     values.reserve(text.size() / 2);
     for(size_t off = 0;  off != text.size();  off += 2) {
-      V_integer value = static_cast<int16_t>(ROCKET_LOAD_BE16(text.data() + off));
-      values.emplace_back(value);
+      uint16_t value = ROCKET_LOAD_BE16(text.data() + off);
+      values.emplace_back(static_cast<int16_t>(value));
     }
     return values;
   }
@@ -630,8 +630,8 @@ std_numeric_unpack_i16le(V_string text)
     V_array values;
     values.reserve(text.size() / 2);
     for(size_t off = 0;  off != text.size();  off += 2) {
-      V_integer value = static_cast<int16_t>(ROCKET_LOAD_LE16(text.data() + off));
-      values.emplace_back(value);
+      uint16_t value = ROCKET_LOAD_LE16(text.data() + off);
+      values.emplace_back(static_cast<int16_t>(value));
     }
     return values;
   }
@@ -666,8 +666,8 @@ std_numeric_unpack_i32be(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      V_integer value = static_cast<int32_t>(ROCKET_LOAD_BE32(text.data() + off));
-      values.emplace_back(value);
+      uint32_t value = ROCKET_LOAD_BE32(text.data() + off);
+      values.emplace_back(static_cast<int32_t>(value));
     }
     return values;
   }
@@ -702,8 +702,8 @@ std_numeric_unpack_i32le(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      V_integer value = static_cast<int32_t>(ROCKET_LOAD_LE32(text.data() + off));
-      values.emplace_back(value);
+      uint32_t value = ROCKET_LOAD_LE32(text.data() + off);
+      values.emplace_back(static_cast<int32_t>(value));
     }
     return values;
   }
@@ -738,8 +738,8 @@ std_numeric_unpack_i64be(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      V_integer value = static_cast<int64_t>(ROCKET_LOAD_BE64(text.data() + off));
-      values.emplace_back(value);
+      uint64_t value = ROCKET_LOAD_BE64(text.data() + off);
+      values.emplace_back(static_cast<int64_t>(value));
     }
     return values;
   }
@@ -774,8 +774,8 @@ std_numeric_unpack_i64le(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      V_integer value = static_cast<int64_t>(ROCKET_LOAD_LE64(text.data() + off));
-      values.emplace_back(value);
+      uint64_t value = ROCKET_LOAD_LE64(text.data() + off);
+      values.emplace_back(static_cast<int64_t>(value));
     }
     return values;
   }
@@ -810,8 +810,8 @@ std_numeric_unpack_f32be(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      V_real value = do_bit_cast<float>(ROCKET_LOAD_BE32(text.data() + off));
-      values.emplace_back(value);
+      float value = do_bit_cast<float>(ROCKET_LOAD_BE32(text.data() + off));
+      values.emplace_back(static_cast<double>(value));
     }
     return values;
   }
@@ -846,8 +846,8 @@ std_numeric_unpack_f32le(V_string text)
     V_array values;
     values.reserve(text.size() / 4);
     for(size_t off = 0;  off != text.size();  off += 4) {
-      V_real value = do_bit_cast<float>(ROCKET_LOAD_LE32(text.data() + off));
-      values.emplace_back(value);
+      float value = do_bit_cast<float>(ROCKET_LOAD_LE32(text.data() + off));
+      values.emplace_back(static_cast<double>(value));
     }
     return values;
   }
@@ -882,8 +882,8 @@ std_numeric_unpack_f64be(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      V_real value = do_bit_cast<double>(ROCKET_LOAD_BE64(text.data() + off));
-      values.emplace_back(value);
+      double value = do_bit_cast<double>(ROCKET_LOAD_BE64(text.data() + off));
+      values.emplace_back(static_cast<double>(value));
     }
     return values;
   }
@@ -918,8 +918,8 @@ std_numeric_unpack_f64le(V_string text)
     V_array values;
     values.reserve(text.size() / 8);
     for(size_t off = 0;  off != text.size();  off += 8) {
-      V_real value = do_bit_cast<double>(ROCKET_LOAD_LE64(text.data() + off));
-      values.emplace_back(value);
+      double value = do_bit_cast<double>(ROCKET_LOAD_LE64(text.data() + off));
+      values.emplace_back(static_cast<double>(value));
     }
     return values;
   }
