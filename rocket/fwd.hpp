@@ -4,7 +4,14 @@
 #ifndef ROCKET_FWD_
 #define ROCKET_FWD_
 
-#include "xcompiler.h"
+#if !defined ROCKET_DEBUG && (defined _LIBCPP_DEBUG || defined _GLIBCXX_DEBUG)
+#  define ROCKET_DEBUG   1
+#endif
+
+#if !defined NDEBUG && !defined ROCKET_DEBUG
+#  define NDEBUG  1
+#endif
+
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()
@@ -168,10 +175,73 @@ using namespace ::std::literals;
 #define ROCKET_STRINGIFY(...)      ROCKET_STRINGIFY_NX(__VA_ARGS__)
 #define ROCKET_SOURCE_LOCATION     __FILE__ ":" ROCKET_STRINGIFY(__LINE__)
 
+#if defined __clang__
+#  define ROCKET_FORMAT_PRINTF(...)   __attribute__((__format__(__printf__, __VA_ARGS__)))
+#else
+#  define ROCKET_FORMAT_PRINTF(...)   __attribute__((__format__(__gnu_printf__, __VA_ARGS__)))
+#endif
+
+#define ROCKET_SELECTANY         __attribute__((__weak__))
+#define ROCKET_SECTION(...)      __attribute__((__section__(__VA_ARGS__)))
+#define ROCKET_NEVER_INLINE      __attribute__((__noinline__))
+#define ROCKET_PURE              __attribute__((__pure__))
+#define ROCKET_CONST             __attribute__((__const__))
+#define ROCKET_ARTIFICIAL        __attribute__((__artificial__, __always_inline__))
+#define ROCKET_FLATTEN           __attribute__((__flatten__))
+#define ROCKET_ALWAYS_INLINE     __attribute__((__always_inline__)) __inline__
+#define ROCKET_COLD              __attribute__((__cold__))
+#define ROCKET_HOT               __attribute__((__hot__))
+
+#define ROCKET_UNREACHABLE()       __builtin_unreachable()
+#define ROCKET_EXPECT(...)         __builtin_expect(!!(__VA_ARGS__), 1)
+#define ROCKET_UNEXPECT(...)       __builtin_expect(!!(__VA_ARGS__), 0)
+#define ROCKET_CONSTANT_P(...)     __builtin_constant_p(__VA_ARGS__)
+#define ROCKET_FUNCSIG             __PRETTY_FUNCTION__
+
+#define ROCKET_ADD_OVERFLOW(x,y,r)         __builtin_add_overflow(x,y,r)
+#define ROCKET_SUB_OVERFLOW(x,y,r)         __builtin_sub_overflow(x,y,r)
+#define ROCKET_MUL_OVERFLOW(x,y,r)         __builtin_mul_overflow(x,y,r)
 #define ROCKET_MUL_ADD_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_ADD_OVERFLOW(*(r),z,r))
 #define ROCKET_ADD_MUL_OVERFLOW(x,y,z,r)   (ROCKET_ADD_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
 #define ROCKET_MUL_SUB_OVERFLOW(x,y,z,r)   (ROCKET_MUL_OVERFLOW(x,y,r) | ROCKET_SUB_OVERFLOW(*(r),z,r))
 #define ROCKET_SUB_MUL_OVERFLOW(x,y,z,r)   (ROCKET_SUB_OVERFLOW(x,y,r) | ROCKET_MUL_OVERFLOW(*(r),z,r))
+
+#define ROCKET_LZCNT32(x)        ((x) ? (unsigned) __builtin_clz(x) & 31U : 32U)
+#define ROCKET_LZCNT64(x)        ((x) ? (unsigned long long) __builtin_clzll(x) & 63ULL : 64ULL)
+#define ROCKET_TZCNT32(x)        ((x) ? (unsigned) __builtin_ctz(x) & 31U : 32U)
+#define ROCKET_TZCNT64(x)        ((x) ? (unsigned long long) __builtin_ctzll(x) & 63ULL : 64ULL)
+#define ROCKET_POPCNT32(x)       ((unsigned) __builtin_popcount(x))
+#define ROCKET_POPCNT64(x)       ((unsigned long long) __builtin_popcountll(x))
+
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#  define ROCKET_LOAD_BE16(p)        (*(const uint16_t*)(const void*) (p))
+#  define ROCKET_LOAD_BE32(p)        (*(const uint32_t*)(const void*) (p))
+#  define ROCKET_LOAD_BE64(p)        (*(const uint64_t*)(const void*) (p))
+#  define ROCKET_STORE_BE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = (x)))
+#  define ROCKET_STORE_BE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = (x)))
+#  define ROCKET_STORE_BE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = (x)))
+#  define ROCKET_LOAD_LE16(p)        (__builtin_bswap16(*(const uint16_t*)(const void*) (p)))
+#  define ROCKET_LOAD_LE32(p)        (__builtin_bswap32(*(const uint32_t*)(const void*) (p)))
+#  define ROCKET_LOAD_LE64(p)        (__builtin_bswap64(*(const uint64_t*)(const void*) (p)))
+#  define ROCKET_STORE_LE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = __builtin_bswap16(x)))
+#  define ROCKET_STORE_LE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = __builtin_bswap32(x)))
+#  define ROCKET_STORE_LE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = __builtin_bswap64(x)))
+#elif __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__
+#  define ROCKET_LOAD_BE16(p)        (__builtin_bswap16(*(const uint16_t*)(const void*) (p)))
+#  define ROCKET_LOAD_BE32(p)        (__builtin_bswap32(*(const uint32_t*)(const void*) (p)))
+#  define ROCKET_LOAD_BE64(p)        (__builtin_bswap64(*(const uint64_t*)(const void*) (p)))
+#  define ROCKET_STORE_BE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = __builtin_bswap16(x)))
+#  define ROCKET_STORE_BE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = __builtin_bswap32(x)))
+#  define ROCKET_STORE_BE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = __builtin_bswap64(x)))
+#  define ROCKET_LOAD_LE16(p)        (*(const uint16_t*)(const void*) (p))
+#  define ROCKET_LOAD_LE32(p)        (*(const uint32_t*)(const void*) (p))
+#  define ROCKET_LOAD_LE64(p)        (*(const uint64_t*)(const void*) (p))
+#  define ROCKET_STORE_LE16(p,x)     ((void) (*(uint16_t*)(void*) (p) = (x)))
+#  define ROCKET_STORE_LE32(p,x)     ((void) (*(uint32_t*)(void*) (p) = (x)))
+#  define ROCKET_STORE_LE64(p,x)     ((void) (*(uint64_t*)(void*) (p) = (x)))
+#else
+#  error Byte order could not be determined.
+#endif
 
 #define ROCKET_UNDEDUCED(...)    typename ::std::enable_if<true, __VA_ARGS__>::type
 #define ROCKET_VOID_T(...)       typename ::std::conditional<true, void, __VA_ARGS__>::type
