@@ -3002,7 +3002,7 @@ solidify(AVM_Rod& rod)
                     if(rhs.is_integer()) {
                       // __popcnt integer
                       V_integer& val = rhs.open_integer();
-                      val = ROCKET_POPCNT64(static_cast<uint64_t>(val));
+                      val = static_cast<V_integer>(ROCKET_POPCNT64(static_cast<uint64_t>(val)));
                     }
                     else throw Runtime_Error(xtc_format,
                              "`__popcnt` not applicable (operand was `$1`)", rhs);
